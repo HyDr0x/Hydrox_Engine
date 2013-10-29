@@ -1,0 +1,80 @@
+template< typename Type, unsigned int Dim> class Vec;
+
+template< typename Type> class Vec<Type, VECTOR_NUM_ARGS>
+{
+  public:
+
+  Vec()	{m_vertexcounter++;}
+  Vec(VECTOR_PARAMS)
+  {
+    VECTOR_INIT
+    m_vertexcounter++;
+  }
+  Vec(const Vec<Type, VECTOR_NUM_ARGS>& v)
+  { 
+    VECTOR_INIT_VEC
+    m_vertexcounter++; 
+  }
+
+  ~Vec(){m_vertexcounter--;};
+
+  unsigned int giveVertexNumber(void);
+
+  inline const Vec& operator = (const Vec  &v) { VECTOR_ASSIGNEMENT_OP return *this; }
+
+	inline Vec operator + (const Vec &v) { return Vec( VECTOR_PLUS_OP ); }
+  inline Vec operator - (const Vec &v) { return Vec( VECTOR_MINUS_OP ); }
+
+  inline Vec operator * (const Vec &v) { return Vec( VECTOR_MULTIPLY_OP ); }
+  inline Vec operator * (const Type &s) { return Vec( VECTOR_MULTIPLY_OP_SCALAR ); }
+
+  inline Vec operator / (const Vec &v) { return Vec( VECTOR_DIVIDE_OP ); }
+	inline Vec operator / (const Type &s) { return Vec( VECTOR_DIVIDE_OP_SCALAR ); }
+
+  inline const Vec& operator += (const Vec &v) { VECTOR_EQ_PLUS_OP return *this; }
+  inline const Vec& operator -= (const Vec &v) { VECTOR_EQ_MINUS_OP return *this; }
+  inline const Vec& operator *= (const Vec &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
+  inline const Vec& operator *= (const Type &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
+  inline const Vec& operator /= (const Vec &v) { VECTOR_EQ_DIVIDE_OP return *this; }
+  inline const Vec& operator /= (const Type &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
+
+  inline bool operator == (const Vec &v) { return VECTOR_COMP_EQ }
+  inline bool operator != (const Vec &v) { return VECTOR_COMP_UQ }
+	inline bool operator >  (const Vec &v) { return VECTOR_COMP_GR }
+  inline bool operator <  (const Vec &v) { return VECTOR_COMP_LS }
+	inline bool operator >= (const Vec &v) { return VECTOR_COMP_EQ_GR }
+  inline bool operator <= (const Vec &v) { return VECTOR_COMP_EQ_LS }
+
+  inline Type& operator [] (unsigned int i) { return m_x[i]; }
+
+  inline double length() 
+  { 
+    double length = 0;
+    for( int i = 0; i != VECTOR_NUM_ARGS; i++)
+      length += m_x[i] * m_x[i];
+    return sqrt( length ); 
+  }
+
+  inline void normalize() 
+  { 
+    double l = 1.f / length();
+    for( int i = 0; i != VECTOR_NUM_ARGS; i++)
+      m_x[i] *= static_cast<float>(l);
+  }
+
+  inline const unsigned int dimension() { return VECTOR_NUM_ARGS; }
+
+  private:
+
+  Type m_x[VECTOR_NUM_ARGS];
+
+  static unsigned int m_vertexcounter;
+};
+
+
+template< typename Type> unsigned int Vec<Type, VECTOR_NUM_ARGS>::m_vertexcounter=0;
+
+template< typename Type> unsigned int Vec<Type, VECTOR_NUM_ARGS>::giveVertexNumber(void)
+{
+    return m_vertexcounter;
+}

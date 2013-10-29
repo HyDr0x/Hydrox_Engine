@@ -1,0 +1,13 @@
+#no binaries
+*.exe
+*.lib
+*.dll
+
+#no project files
+*.suo
+
+#no backup directory
+/backups
+
+#no build directory
+/build

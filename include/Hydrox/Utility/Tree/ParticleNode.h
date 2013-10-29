@@ -1,0 +1,34 @@
+#ifndef PARTICLENODE_H_
+#define PARTICLENODE_H_
+
+#include "Hydrox/DLLExport.h"
+
+#include "Hydrox/Graphics/Mesh.h"
+#include "Hydrox/Utility/Tree/TreeNode.h"
+
+class Traverser;
+
+class GRAPHICAPI ParticleNode : public TreeNode
+{
+public:
+
+  ParticleNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+  ParticleNode& operator=(const ParticleNode& destinationNode);
+  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  virtual ~ParticleNode();
+
+  virtual TreeNode* clone() const;
+
+  virtual bool ascendTraverse(Traverser* traverser);
+  virtual bool preTraverse(Traverser* traverser);
+  virtual void postTraverse(Traverser* traverser);
+
+  Mat<float, 4> getTransformationMatrix() const;
+  void setTransformationMatrix(const Mat<float, 4>& trfMatrix);
+
+private:
+
+  Mat<float,4> m_trfMatrix;//the tranformation Matrix
+};
+
+#endif
