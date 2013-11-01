@@ -62,7 +62,7 @@ template< typename Type> class Mat<Type,4>
     }
   }
 
-  Mat( Type m_11,  Type m_21,  Type m_31,  Type m_41,
+  Mat(  Type m_11,  Type m_21,  Type m_31,  Type m_41,
         Type m_12,  Type m_22,  Type m_32,  Type m_42,
         Type m_13,  Type m_23,  Type m_33,  Type m_43,
         Type m_14,  Type m_24,  Type m_34,  Type m_44)

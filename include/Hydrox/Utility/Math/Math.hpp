@@ -11,77 +11,6 @@ namespace math
   static const float PI_HALF = PI / 2.0f;
   static const float PI_QUARTER = PI_HALF / 2.0f;
 
-#if defined(SSE4)
-  template<typename Type> __forceinline Vec<Type,4> operator * ( Vec<Type,4>& v, Mat<Type,4>& m )//SSE4.1
-  {
-    __m128 a,b,c;
-    Vec<Type,4> vTmp, vErg;
-    b=_mm_loadu_ps(&v[0]);
-
-    a=_mm_loadu_ps(&(m[0][0]));
-    c=_mm_dp_ps(a,b,0xF1);
-    _mm_storeu_ps(&vErg[0],c);
-
-    a=_mm_loadu_ps(&(m[1][0]));
-    c=_mm_dp_ps(a,b,0xF2);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[1] = vTmp[1];
-
-    a=_mm_loadu_ps(&(m[2][0]));
-    c=_mm_dp_ps(a,b,0xF4);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[2] = vTmp[2];
-
-    a=_mm_loadu_ps(&(m[3][0]));
-    c=_mm_dp_ps(a,b,0xF8);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[3] = vTmp[3];
-
-    return vErg;
-  }
-
-  template<typename Type> __forceinline Vec<Type,3> operator * ( Vec<Type,3>& v, Mat<Type,3>& m )//SSE4.1
-  {
-    __m128 a,b,c;
-    Vec<Type,3> vTmp, vErg;
-    b=_mm_loadu_ps(&v[0]);
-
-    a=_mm_loadu_ps(&(m[0][0]));
-    c=_mm_dp_ps(a,b,0xF1);
-    _mm_storeu_ps(&vErg[0],c);
-
-    a=_mm_loadu_ps(&(m[1][0]));
-    c=_mm_dp_ps(a,b,0xF2);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[1] = vTmp[1];
-
-    a=_mm_loadu_ps(&(m[2][0]));
-    c=_mm_dp_ps(a,b,0xF4);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[2] = vTmp[2];
-
-    return vErg;
-  }
-
-  template<typename Type> __forceinline Vec<Type,2> operator * ( Vec<Type,2>& v, Mat<Type,2>& m )//SSE4.1
-  {
-    __m128 a,b,c;
-    Vec<Type,2> vTmp, vErg;
-    b=_mm_loadu_ps(&v[0]);
-
-    a=_mm_loadu_ps(&(m[0][0]));
-    c=_mm_dp_ps(a,b,0xF1);
-    _mm_storeu_ps(&vErg[0],c);
-
-    a=_mm_loadu_ps(&(m[1][0]));
-    c=_mm_dp_ps(a,b,0xF2);
-    _mm_storeu_ps(&vTmp[0],c);
-    vErg[1] = vTmp[1];
-
-    return vErg;
-  }
-#endif
-
   __forceinline float round(float val)
   {
     return (float)static_cast<int>(val + 0.5f);
@@ -266,5 +195,76 @@ namespace math
     position[1] = matrix[3][1] / scale[1];
     position[2] = matrix[3][2] / scale[2];
   }
+
+  #if defined(SSE4)
+  template<typename Type> __forceinline Vec<Type,4> operator * ( Vec<Type,4>& v, Mat<Type,4>& m )//SSE4.1
+  {
+    __m128 a,b,c;
+    Vec<Type,4> vTmp, vErg;
+    b=_mm_loadu_ps(&v[0]);
+
+    a=_mm_loadu_ps(&(m[0][0]));
+    c=_mm_dp_ps(a,b,0xF1);
+    _mm_storeu_ps(&vErg[0],c);
+
+    a=_mm_loadu_ps(&(m[1][0]));
+    c=_mm_dp_ps(a,b,0xF2);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[1] = vTmp[1];
+
+    a=_mm_loadu_ps(&(m[2][0]));
+    c=_mm_dp_ps(a,b,0xF4);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[2] = vTmp[2];
+
+    a=_mm_loadu_ps(&(m[3][0]));
+    c=_mm_dp_ps(a,b,0xF8);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[3] = vTmp[3];
+
+    return vErg;
+  }
+
+  template<typename Type> __forceinline Vec<Type,3> operator * ( Vec<Type,3>& v, Mat<Type,3>& m )//SSE4.1
+  {
+    __m128 a,b,c;
+    Vec<Type,3> vTmp, vErg;
+    b=_mm_loadu_ps(&v[0]);
+
+    a=_mm_loadu_ps(&(m[0][0]));
+    c=_mm_dp_ps(a,b,0xF1);
+    _mm_storeu_ps(&vErg[0],c);
+
+    a=_mm_loadu_ps(&(m[1][0]));
+    c=_mm_dp_ps(a,b,0xF2);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[1] = vTmp[1];
+
+    a=_mm_loadu_ps(&(m[2][0]));
+    c=_mm_dp_ps(a,b,0xF4);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[2] = vTmp[2];
+
+    return vErg;
+  }
+
+  template<typename Type> __forceinline Vec<Type,2> operator * ( Vec<Type,2>& v, Mat<Type,2>& m )//SSE4.1
+  {
+    __m128 a,b,c;
+    Vec<Type,2> vTmp, vErg;
+    b=_mm_loadu_ps(&v[0]);
+
+    a=_mm_loadu_ps(&(m[0][0]));
+    c=_mm_dp_ps(a,b,0xF1);
+    _mm_storeu_ps(&vErg[0],c);
+
+    a=_mm_loadu_ps(&(m[1][0]));
+    c=_mm_dp_ps(a,b,0xF2);
+    _mm_storeu_ps(&vTmp[0],c);
+    vErg[1] = vTmp[1];
+
+    return vErg;
+  }
+#endif
 }
 #endif
