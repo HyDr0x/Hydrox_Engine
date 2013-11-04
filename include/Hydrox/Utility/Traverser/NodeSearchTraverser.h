@@ -9,7 +9,7 @@ class NodeSearchTraverser : public Traverser
 {
 public:
 
-  NodeSearchTraverser(std::string nodeName);
+  NodeSearchTraverser(const std::string& nodeName);
   virtual ~NodeSearchTraverser();
 
   virtual bool preTraverse(TransformNode* treeNode);

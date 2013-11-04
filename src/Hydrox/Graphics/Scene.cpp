@@ -8,6 +8,7 @@
 #include "Hydrox/Utility/Traverser/CullTraverser.h"
 #include "Hydrox/Utility/Traverser/InsertObserverTraverser.h"
 #include "Hydrox/Utility/Traverser/DeleteTraverser.h"
+#include "Hydrox/Utility/Traverser/NodeSearchTraverser.h"
 
 #include "Hydrox/Services/Camera.h"
 
@@ -134,4 +135,13 @@ void Scene::removeSubTree(TreeNode* sceneNode)
                                                                                     SceneCacheManager::LIGHTNODE), Traverser::TRAVERSE_IGNORE_LODS);
 
   Tree::removeSubTree(sceneNode);
+}
+
+TreeNode* Scene::searchNode(const std::string& nodeName)
+{
+  NodeSearchTraverser traverser(nodeName);
+
+  traverser.doTraverse(m_rootNode);
+
+  return traverser.getDiscoveredNode();
 }
