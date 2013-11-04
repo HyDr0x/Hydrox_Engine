@@ -4,9 +4,20 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-TransformNode::TransformNode(Mat<float,4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
+TransformNode::TransformNode(Mat<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
 {
-  math::decomposeMatrix(trfMatrix, m_angle, m_position, m_scale);
+  Vec<float, 3> angles;
+  math::decomposeMatrix(trfMatrix, angles, m_translation, m_scale);
+
+  m_rotation = math::createRotXQuaternion(angles[0]) * math::createRotYQuaternion(angles[1]) * math::createRotZQuaternion(angles[2]);
+}
+
+TransformNode::TransformNode(Vec<float, 3>& translation, Vec<float, 3>& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
+  : GroupNode(nodeName, parent, nextSibling, firstChild),
+  m_translation(translation),
+  m_scale(scale),
+  m_rotation(rotation)
+{
 }
 
 TransformNode& TransformNode::operator=(const TransformNode& destinationNode)
@@ -22,9 +33,9 @@ TreeNode& TransformNode::operator=(const TreeNode& destinationNode)
   const TransformNode& copyNode = static_cast<const TransformNode&>(destinationNode);
   GroupNode::operator=(destinationNode);
 
-  m_position = copyNode.m_position;
+  m_translation = copyNode.m_translation;
   m_scale = copyNode.m_scale;
-  m_angle = copyNode.m_angle;
+  m_rotation = copyNode.m_rotation;
 
   return *this;
 }
@@ -40,9 +51,9 @@ GroupNode* TransformNode::clone() const
   newNode->m_nodeName = m_nodeName;
   newNode->m_dirtyFlag = m_dirtyFlag;
 
-  newNode->m_position = m_position;
+  newNode->m_translation = m_translation;
   newNode->m_scale = m_scale;
-  newNode->m_angle = m_angle;
+  newNode->m_rotation = m_rotation;
 
   return newNode;
 }
@@ -62,48 +73,26 @@ void TransformNode::postTraverse(Traverser* traverser)
   traverser->postTraverse(this);
 }
 
-void TransformNode::calculateTransformation(Mat<float, 4>& trfMatrix)
+void TransformNode::calculateTransformation(Vec<float, 3>& translation, Vec<float, 3>& scale, Quaternion<float>& rotation)
 {
-  Mat<float, 4> tlMatrix, rtxMatrix, rtyMatrix, rtzMatrix, scMatrix;
-
-  tlMatrix = rtxMatrix = rtyMatrix = rtzMatrix = scMatrix = Mat<float, 4>::identity();
-
-  tlMatrix[3][0] = m_position[0];
-  tlMatrix[3][1] = m_position[1];
-  tlMatrix[3][2] = m_position[2];
-
-  rtxMatrix[1][1] = rtxMatrix[2][2] = cos(m_angle[0]);
-  rtxMatrix[2][1] = sin(m_angle[0]);
-  rtxMatrix[1][2] = -rtxMatrix[2][1];
-
-	rtyMatrix[0][0] = rtyMatrix[2][2] = cos(m_angle[1]);
-  rtyMatrix[0][2] = sin(m_angle[1]);
-  rtyMatrix[2][0] = -rtyMatrix[0][2];
-
-	rtzMatrix[0][0] = rtzMatrix[1][1] = cos(m_angle[2]);
-  rtzMatrix[1][0] = sin(m_angle[2]);
-  rtzMatrix[0][1] = -rtzMatrix[1][0];
-
-  scMatrix[0][0] = m_scale[0];
-	scMatrix[1][1] = m_scale[1];
-	scMatrix[2][2] = m_scale[2];
-
-  trfMatrix *= tlMatrix * rtzMatrix * rtyMatrix * rtxMatrix * scMatrix;
+  translation += rotation.apply(scale * m_translation);
+  scale *= m_scale;
+  rotation *= m_rotation;
 }
 
 ///////////////////TRANSFORMATIONS//////////////////////////
 
-Vec<float,3> TransformNode::getPosition()
+Vec<float, 3> TransformNode::getPosition()
 {
-	return m_position;
+	return m_translation;
 }
 
-Vec<float,3> TransformNode::getRotation()
+Quaternion<float> TransformNode::getRotation()
 {
-	return m_angle;
+	return m_rotation;
 }
 
-Vec<float,3> TransformNode::getScale()
+Vec<float, 3> TransformNode::getScale()
 {
 	return m_scale;
 }
@@ -113,17 +102,17 @@ void TransformNode::setPosition(float x, float y, float z)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_position[0] = x;
-	m_position[1] = y;
-	m_position[2] = z;
+	m_translation[0] = x;
+	m_translation[1] = y;
+	m_translation[2] = z;
 }
 
-void TransformNode::setPosition(Vec<float,3> v)
+void TransformNode::setPosition(Vec<float, 3> v)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_position = v;
+	m_translation = v;
 }
 
 void TransformNode::setTranslation(float x, float y, float z)
@@ -131,17 +120,17 @@ void TransformNode::setTranslation(float x, float y, float z)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_position[0] += x;
-	m_position[1] += y;
-	m_position[2] += z;
+	m_translation[0] += x;
+	m_translation[1] += y;
+	m_translation[2] += z;
 }
 
-void TransformNode::setTranslation(Vec<float,3> v)
+void TransformNode::setTranslation(Vec<float, 3> v)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_position += v;
+	m_translation += v;
 }
 
 void TransformNode::setRotationX(float angle)
@@ -149,7 +138,7 @@ void TransformNode::setRotationX(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[0] = angle;
+	m_rotation = math::createRotXQuaternion(angle);
 }
 
 void TransformNode::setTurnX(float angle)
@@ -157,7 +146,7 @@ void TransformNode::setTurnX(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[0] += angle;
+	m_rotation *= math::createRotXQuaternion(angle);
 }
 
 void TransformNode::setRotationY(float angle)
@@ -165,7 +154,7 @@ void TransformNode::setRotationY(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[1] = angle;
+	m_rotation = math::createRotYQuaternion(angle);
 }
 
 void TransformNode::setTurnY(float angle)
@@ -173,7 +162,7 @@ void TransformNode::setTurnY(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[1] += angle;
+	m_rotation *= math::createRotYQuaternion(angle);
 }
 
 void TransformNode::setRotationZ(float angle)
@@ -181,7 +170,7 @@ void TransformNode::setRotationZ(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[2] = angle;
+	m_rotation = math::createRotZQuaternion(angle);
 }
 
 void TransformNode::setTurnZ(float angle)
@@ -189,59 +178,39 @@ void TransformNode::setTurnZ(float angle)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle[2] += angle;
+	m_rotation *= math::createRotZQuaternion(angle);
 }
 
-void TransformNode::setRotationXYZ(Vec<float,3> angle)
+void TransformNode::setRotationXYZ(Vec<float, 3> angle)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle = angle;
+	m_rotation = math::createRotXQuaternion(angle[0]) * math::createRotYQuaternion(angle[1]) * math::createRotZQuaternion(angle[2]);
 }
 
-void TransformNode::setTurnXYZ(Vec<float,3> angle)
+void TransformNode::setTurnXYZ(Vec<float, 3> angle)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_angle += angle;
+	m_rotation *= math::createRotXQuaternion(angle[0]) * math::createRotYQuaternion(angle[1]) * math::createRotZQuaternion(angle[2]);
 }
 
-void TransformNode::setScale(Vec<float,3> s)
+void TransformNode::setRotationAxis(float angle, Vec<float, 3> axis)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_scale = s;
+  m_rotation = math::createRotAxisQuaternion(angle, axis);
 }
 
-void TransformNode::setScale(float a, float b, float c)
+void TransformNode::setTurnAxis(float angle, Vec<float, 3> axis)
 {
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_scale[0] = a;
-	m_scale[1] = b;
-	m_scale[2] = c;
-}
-
-void TransformNode::Scale(Vec<float,3> s)
-{
-  notify(this);
-  addDirtyFlag(TRF_DIRTY);
-
-	m_scale += s;
-}
-
-void TransformNode::Scale(float a, float b, float c)
-{
-  notify(this);
-  addDirtyFlag(TRF_DIRTY);
-
-	m_scale[0] += a;
-	m_scale[1] += b;
-	m_scale[2] += c;
+  m_rotation *= math::createRotAxisQuaternion(angle, axis);
 }
 
 void TransformNode::setScale(float s)

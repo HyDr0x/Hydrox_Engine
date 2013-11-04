@@ -158,28 +158,14 @@ void SceneCacheManager::updateObserver(TransformNode* data)
 
 void SceneCacheManager::updateTransformNodes()
 {
-  TransformTraverser transformTraverser;
   TransformNode *node = nullptr;
-
-  std::stack<Mat<float, 4>> matrixStack;
-  Mat<float, 4> finalTrfMatrix = Mat<float, 4>::identity();
 
   for(std::list<TransformNode*>::iterator tit = m_dirtyTransforms.begin(); tit != m_dirtyTransforms.end(); tit++)
   {
     node = *tit;
    
-    TransformTraverser transformUpTraversal;
-    transformUpTraversal.doAscend(node);
-
-    matrixStack = transformUpTraversal.getMatrixStack();
-
-    while(!matrixStack.empty())
-    {
-      finalTrfMatrix *= matrixStack.top();
-      matrixStack.pop();
-    }
-
-    transformTraverser.insertTransformMatrix(finalTrfMatrix);//insert trf matrix of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+    TransformTraverser transformTraverser;
+    transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
     transformTraverser.doTraverse(node);
   }
 

@@ -51,20 +51,8 @@ TreeNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
 {
   TreeNode *newNode = Tree::addParentNode(destinationNode, sourceNode);
 
-  TransformTraverser transformUpTraversal;
-  transformUpTraversal.doAscend(newNode);
-
-  std::stack<Mat<float, 4>> matrixStack = transformUpTraversal.getMatrixStack();
-  Mat<float, 4> finalTrfMatrix = Mat<float, 4>::identity();
-
-  while(!matrixStack.empty())
-  {
-    finalTrfMatrix *= matrixStack.top();
-    matrixStack.pop();
-  }
-
   TransformTraverser transformTraverser;
-  transformTraverser.insertTransformMatrix(finalTrfMatrix);
+  transformTraverser.doAscend(newNode);
   transformTraverser.doTraverse(newNode);
 
   TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
@@ -85,20 +73,8 @@ TreeNode* Scene::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
 {
   TreeNode *newNode = Tree::addChildNode(destinationNode, sourceNode);
 
-  TransformTraverser transformUpTraversal;
-  transformUpTraversal.doAscend(newNode);
-
-  std::stack<Mat<float, 4>> matrixStack = transformUpTraversal.getMatrixStack();
-  Mat<float, 4> finalTrfMatrix = Mat<float, 4>::identity();
-
-  while(!matrixStack.empty())
-  {
-    finalTrfMatrix *= matrixStack.top();
-    matrixStack.pop();
-  }
-
   TransformTraverser transformTraverser;
-  transformTraverser.insertTransformMatrix(finalTrfMatrix);
+  transformTraverser.doAscend(newNode);
   transformTraverser.doTraverse(newNode);
 
   TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
@@ -132,20 +108,8 @@ GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, std::string nam
 {
   GroupNode* copiedRootNode = Tree::addSubTree(object, sceneNode, namePrefix);
 
-  TransformTraverser transformUpTraversal;
-  transformUpTraversal.doAscend(copiedRootNode);
-
-  std::stack<Mat<float, 4>> matrixStack = transformUpTraversal.getMatrixStack();
-  Mat<float, 4> finalTrfMatrix = Mat<float, 4>::identity();
-
-  while(!matrixStack.empty())
-  {
-    finalTrfMatrix *= matrixStack.top();
-    matrixStack.pop();
-  }
-
   TransformTraverser transformTraverser;
-  transformTraverser.insertTransformMatrix(finalTrfMatrix);
+  transformTraverser.doAscend(copiedRootNode);
   transformTraverser.doTraverse(copiedRootNode);
 
   InsertObserverTraverser insertObserverTraverser(this);

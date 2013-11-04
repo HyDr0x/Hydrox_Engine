@@ -45,13 +45,13 @@ void Sprite::free()
 
 void Sprite::setAnimation(unsigned int number)
 {
-  assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
 	m_animCount = Vec<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
+  assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
 }
 void Sprite::setAnimation(Vec<unsigned int,2> number)
 {
-  assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
 	m_animCount = number;
+  assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
 }
 
 Vec<unsigned int, 2> Sprite::getAnimationNumber()

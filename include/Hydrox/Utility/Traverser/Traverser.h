@@ -33,6 +33,8 @@ public:
 
   virtual void doTraverse(TreeNode* treeNode);//starts with the given treeNode
 
+  virtual void postAscendTraverse();
+
   virtual bool ascendTraverse(TreeNode* treeNode);
   virtual bool preTraverse(TreeNode* treeNode);
   virtual void postTraverse(TreeNode* treeNode);

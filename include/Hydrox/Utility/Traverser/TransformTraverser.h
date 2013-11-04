@@ -15,9 +15,7 @@ public:
   TransformTraverser();
   virtual ~TransformTraverser();
 
-  void insertTransformMatrix(Mat<float, 4>& trfMatrix);
-
-  std::stack<Mat<float, 4>>& getMatrixStack();
+  virtual void postAscendTraverse();
 
   virtual bool ascendTraverse(TransformNode* treeNode);
   virtual bool preTraverse(TransformNode* treeNode);
@@ -41,7 +39,9 @@ public:
 
 protected:
 
-  std::stack<Mat<float, 4>> m_matrixStack;
+  std::stack<Vec<float, 3>> m_scaleStack;
+  std::stack<Vec<float, 3>> m_translateStack;
+  std::stack<Quaternion<float>> m_rotationStack;
 };
 
 #endif
