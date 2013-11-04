@@ -1,6 +1,6 @@
-template< typename Type, unsigned int Dim> class Vec;
+template< typename TYPE, unsigned int DIM> class Vec;
 
-template< typename Type> class Vec<Type, VECTOR_NUM_ARGS>
+template< typename TYPE> class Vec<TYPE, VECTOR_NUM_ARGS>
 {
   public:
 
@@ -10,7 +10,7 @@ template< typename Type> class Vec<Type, VECTOR_NUM_ARGS>
     VECTOR_INIT
     m_vertexcounter++;
   }
-  Vec(const Vec<Type, VECTOR_NUM_ARGS>& v)
+  Vec(const Vec<TYPE, VECTOR_NUM_ARGS>& v)
   { 
     VECTOR_INIT_VEC
     m_vertexcounter++; 
@@ -26,17 +26,17 @@ template< typename Type> class Vec<Type, VECTOR_NUM_ARGS>
   inline Vec operator - (const Vec &v) { return Vec( VECTOR_MINUS_OP ); }
 
   inline Vec operator * (const Vec &v) { return Vec( VECTOR_MULTIPLY_OP ); }
-  inline Vec operator * (const Type &s) { return Vec( VECTOR_MULTIPLY_OP_SCALAR ); }
+  inline Vec operator * (const TYPE &s) { return Vec( VECTOR_MULTIPLY_OP_SCALAR ); }
 
   inline Vec operator / (const Vec &v) { return Vec( VECTOR_DIVIDE_OP ); }
-	inline Vec operator / (const Type &s) { return Vec( VECTOR_DIVIDE_OP_SCALAR ); }
+	inline Vec operator / (const TYPE &s) { return Vec( VECTOR_DIVIDE_OP_SCALAR ); }
 
   inline const Vec& operator += (const Vec &v) { VECTOR_EQ_PLUS_OP return *this; }
   inline const Vec& operator -= (const Vec &v) { VECTOR_EQ_MINUS_OP return *this; }
   inline const Vec& operator *= (const Vec &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
-  inline const Vec& operator *= (const Type &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
+  inline const Vec& operator *= (const TYPE &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
   inline const Vec& operator /= (const Vec &v) { VECTOR_EQ_DIVIDE_OP return *this; }
-  inline const Vec& operator /= (const Type &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
+  inline const Vec& operator /= (const TYPE &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
 
   inline bool operator == (const Vec &v) { return VECTOR_COMP_EQ }
   inline bool operator != (const Vec &v) { return VECTOR_COMP_UQ }
@@ -45,36 +45,59 @@ template< typename Type> class Vec<Type, VECTOR_NUM_ARGS>
 	inline bool operator >= (const Vec &v) { return VECTOR_COMP_EQ_GR }
   inline bool operator <= (const Vec &v) { return VECTOR_COMP_EQ_LS }
 
-  inline Type& operator [] (unsigned int i) { return m_x[i]; }
+  inline TYPE& operator [] (unsigned int i) { return m_x[i]; }
 
   inline double length() 
   { 
     double length = 0;
-    for( int i = 0; i != VECTOR_NUM_ARGS; i++)
+
+    for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
+    {
       length += m_x[i] * m_x[i];
-    return sqrt( length ); 
+    }
+    return sqrt(length); 
   }
 
   inline void normalize() 
   { 
-    double l = 1.f / length();
-    for( int i = 0; i != VECTOR_NUM_ARGS; i++)
+    double l = 1.0 / length();
+
+    for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
+    {
       m_x[i] *= static_cast<float>(l);
+    }
+  }
+
+  inline static TYPE dot(Vec<TYPE, VECTOR_NUM_ARGS> a, Vec<TYPE, VECTOR_NUM_ARGS> b)
+  {
+    TYPE sum = 0;
+
+    for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
+    {
+      sum += a[i] * b[i];
+    }
+
+    return sum;
+  }
+
+  inline static Vec<TYPE, VECTOR_NUM_ARGS> lerp(Vec<TYPE, VECTOR_NUM_ARGS> a, Vec<TYPE, VECTOR_NUM_ARGS> b, TYPE t)
+  {
+    return a * (1.0f - t) + b* t;
   }
 
   inline const unsigned int dimension() { return VECTOR_NUM_ARGS; }
 
   private:
 
-  Type m_x[VECTOR_NUM_ARGS];
+  TYPE m_x[VECTOR_NUM_ARGS];
 
   static unsigned int m_vertexcounter;
 };
 
 
-template< typename Type> unsigned int Vec<Type, VECTOR_NUM_ARGS>::m_vertexcounter=0;
+template< typename TYPE> unsigned int Vec<TYPE, VECTOR_NUM_ARGS>::m_vertexcounter=0;
 
-template< typename Type> unsigned int Vec<Type, VECTOR_NUM_ARGS>::giveVertexNumber(void)
+template< typename TYPE> unsigned int Vec<TYPE, VECTOR_NUM_ARGS>::giveVertexNumber(void)
 {
     return m_vertexcounter;
 }

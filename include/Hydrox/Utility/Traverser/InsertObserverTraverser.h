@@ -1,13 +1,11 @@
 #ifndef INSERTOBSERVERTRAVERSER_H_
 #define INSERTOBSERVERTRAVERSER_H_
 
-#include "Hydrox/DLLExport.h"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
 class Scene;
 
-class GRAPHICAPI InsertObserverTraverser : public Traverser
+class InsertObserverTraverser : public Traverser
 {
 public:
 

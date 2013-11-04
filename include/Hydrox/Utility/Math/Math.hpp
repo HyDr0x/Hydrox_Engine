@@ -223,7 +223,7 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return Quaternion<Type>(cosf(angle), axis[0], axis[1], axis[2]);
   }
 
-  inline Mat<float, 4> createTransformationMatrix(Vec<float, 3> translation, Vec<float, 3> scale, Quaternion<float> rotation)
+  inline Mat<float, 4> createTransformationMatrix(Vec<float, 3> translation, float scale, Quaternion<float> rotation)
   {
     /*Quaternion<float> rotationQuaternion = math::createRotXQuaternion(rotation[0]) * 
                                            math::createRotYQuaternion(rotation[1]) * 
@@ -255,9 +255,9 @@ namespace math//make the functions inline or create a declaration cpp (no double
 
     rotationMatrix = rotation.toMatrix();
 
-    scMatrix[0][0] = scale[0];
-	  scMatrix[1][1] = scale[1];
-	  scMatrix[2][2] = scale[2];
+    scMatrix[0][0] = scale;
+	  scMatrix[1][1] = scale;
+	  scMatrix[2][2] = scale;
 
     return tlMatrix * rotationMatrix * scMatrix;
   }

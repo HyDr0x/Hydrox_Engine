@@ -7,12 +7,16 @@
 TransformNode::TransformNode(Mat<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
 {
   Vec<float, 3> angles;
-  math::decomposeMatrix(trfMatrix, angles, m_translation, m_scale);
+  Vec<float, 3> scale;
+  math::decomposeMatrix(trfMatrix, angles, m_translation, scale);
 
+  assert(scale[0] == scale[1] == scale[2]);
+
+  m_scale = scale[0];
   m_rotation = math::createRotXQuaternion(angles[0]) * math::createRotYQuaternion(angles[1]) * math::createRotZQuaternion(angles[2]);
 }
 
-TransformNode::TransformNode(Vec<float, 3>& translation, Vec<float, 3>& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
+TransformNode::TransformNode(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
   : GroupNode(nodeName, parent, nextSibling, firstChild),
   m_translation(translation),
   m_scale(scale),
@@ -73,9 +77,9 @@ void TransformNode::postTraverse(Traverser* traverser)
   traverser->postTraverse(this);
 }
 
-void TransformNode::calculateTransformation(Vec<float, 3>& translation, Vec<float, 3>& scale, Quaternion<float>& rotation)
+void TransformNode::calculateTransformation(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation)
 {
-  translation += rotation.apply(scale * m_translation);
+  translation += rotation.apply(m_translation * scale);
   scale *= m_scale;
   rotation *= m_rotation;
 }
@@ -92,7 +96,7 @@ Quaternion<float> TransformNode::getRotation()
 	return m_rotation;
 }
 
-Vec<float, 3> TransformNode::getScale()
+float TransformNode::getScale()
 {
 	return m_scale;
 }
@@ -218,9 +222,7 @@ void TransformNode::setScale(float s)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_scale[0] = s;
-	m_scale[1] = s;
-	m_scale[2] = s;
+	m_scale = s;
 }
 
 void TransformNode::Scale(float s)
@@ -228,7 +230,5 @@ void TransformNode::Scale(float s)
   notify(this);
   addDirtyFlag(TRF_DIRTY);
 
-	m_scale[0] += s;
-	m_scale[1] += s;
-	m_scale[2] += s;
+	m_scale += s;
 }

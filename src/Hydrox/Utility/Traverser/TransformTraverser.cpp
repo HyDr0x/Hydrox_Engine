@@ -18,20 +18,20 @@ TransformTraverser::~TransformTraverser()
 void TransformTraverser::postAscendTraverse()
 {
   Vec<float, 3> trfTranslation = Vec<float, 3>(0.0f, 0.0f, 0.0f);
-  Vec<float, 3> trfScale = Vec<float, 3>(1.0f, 1.0f, 1.0f);
+  float trfScale = 1.0f;
   Quaternion<float> trfRotation = Quaternion<float>::identity();
 
   while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
   {
     Vec<float, 3> translation = m_translateStack.top();
-    Vec<float, 3> scale = m_scaleStack.top();
+    float scale = m_scaleStack.top();
     Quaternion<float> rotation = m_rotationStack.top();
 
     m_translateStack.pop();
     m_scaleStack.pop();
     m_rotationStack.pop();
 
-    trfTranslation += trfRotation.apply(trfScale * translation);
+    trfTranslation += trfRotation.apply(translation * trfScale);
     trfScale *= scale;
     trfRotation *= rotation;
   }
@@ -46,7 +46,7 @@ bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
   if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
   {
     Vec<float, 3> translation = treeNode->getPosition();
-    Vec<float, 3> scale = treeNode->getScale();
+    float scale = treeNode->getScale();
     Quaternion<float> rotation = treeNode->getRotation();
 
     m_translateStack.push(translation);
@@ -71,7 +71,7 @@ bool TransformTraverser::preTraverse(TransformNode* treeNode)
   treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
 
   Vec<float, 3> translation;
-  Vec<float, 3> scale;
+  float scale;
   Quaternion<float> rotation;
 
   if(!m_scaleStack.empty())
@@ -83,7 +83,7 @@ bool TransformTraverser::preTraverse(TransformNode* treeNode)
   else
   {
     translation = Vec<float, 3>(0.0f, 0.0f, 0.0f);
-    scale = Vec<float, 3>(1.0f, 1.0f, 1.0f);
+    scale = 1.0f;
     rotation = Quaternion<float>::identity();
   }
 

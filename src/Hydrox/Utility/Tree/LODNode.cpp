@@ -76,7 +76,7 @@ bool LODNode::getLOD(Vec<float, 3> camPos, const std::vector<float>& lodRanges)
 	return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
 }
 
-void LODNode::transformPosition(Vec<float, 3>& translation, Vec<float, 3>& scale, Quaternion<float>& rotation)
+void LODNode::transformPosition(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation)
 {
-  m_transformedPosition = translation + rotation.apply(scale * m_position);
+  m_transformedPosition = translation + rotation.apply(m_position * scale);
 }

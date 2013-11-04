@@ -1,8 +1,6 @@
 #ifndef TRAVERSER_H_
 #define TRAVERSER_H_
 
-#include "Hydrox/DLLExport.h"
-
 class TreeNode;
 class GroupNode;
 class LODNode;
@@ -12,7 +10,7 @@ class BillboardNode;
 class ParticleNode;
 class LightNode;
 
-class GRAPHICAPI Traverser
+class Traverser
 {
 public:
 
@@ -32,8 +30,6 @@ public:
   virtual void doAscend(TreeNode* treeNode);//starts with the parent node of the given treeNode
 
   virtual void doTraverse(TreeNode* treeNode);//starts with the given treeNode
-
-  virtual void postAscendTraverse();
 
   virtual bool ascendTraverse(TreeNode* treeNode);
   virtual bool preTraverse(TreeNode* treeNode);
@@ -68,6 +64,8 @@ public:
   virtual void postTraverse(LightNode* treeNode);
 
 protected:
+
+  virtual void postAscendTraverse();
 
   bool m_stopTraversal;
   unsigned int m_traverserFlags;

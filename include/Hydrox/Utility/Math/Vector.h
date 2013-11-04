@@ -4,7 +4,7 @@
 #define VECTOR_NUM_ARGS 1
 #define VECTOR_INIT m_x[0] = x0;
 #define VECTOR_INIT_VEC m_x[0] = v.m_x[0];
-#define VECTOR_PARAMS Type x0
+#define VECTOR_PARAMS TYPE x0
 #define VECTOR_ARGS m_x[0]
 #define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];
 #define VECTOR_PLUS_OP        m_x[0] + v.m_x[0]
@@ -25,7 +25,7 @@
 #define VECTOR_COMP_LS    m_x[0] <  v.m_x[0];
 #define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0];
 #define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0];
-#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]);
+#define VECTOR_CAST m_x[0] = static_cast<TYPE>(v[0]);
 
 #include "Hydrox/Utility/Math/Vector_Template.hpp"
 
@@ -59,7 +59,7 @@
 #define VECTOR_NUM_ARGS 2
 #define VECTOR_INIT m_x[0] = x0; m_x[1] = x1;
 #define VECTOR_INIT_VEC m_x[0] = v.m_x[0]; m_x[1] = v.m_x[1];
-#define VECTOR_PARAMS Type x0, Type x1
+#define VECTOR_PARAMS TYPE x0, TYPE x1
 #define VECTOR_ARGS m_x[0], m_x[1]
 #define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];  m_x[1] = v.m_x[1];
 #define VECTOR_PLUS_OP        m_x[0] + v.m_x[0],  m_x[1] + v.m_x[1]
@@ -80,7 +80,7 @@
 #define VECTOR_COMP_LS    m_x[0] <  v.m_x[0] && m_x[1] <   v.m_x[1];
 #define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0] && m_x[1] >=  v.m_x[1];
 #define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0] && m_x[1] <=  v.m_x[1];
-#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]); m_x[1] = static_cast<Type>(v[1]);
+#define VECTOR_CAST m_x[0] = static_cast<TYPE>(v[0]); m_x[1] = static_cast<TYPE>(v[1]);
 
 #include "Hydrox/Utility/Math/Vector_Template.hpp"
 
@@ -114,7 +114,7 @@
 #define VECTOR_NUM_ARGS 3
 #define VECTOR_INIT m_x[0] = x0; m_x[1] = x1; m_x[2] = x2;
 #define VECTOR_INIT_VEC m_x[0] = v.m_x[0]; m_x[1] = v.m_x[1]; m_x[2] = v.m_x[2];
-#define VECTOR_PARAMS Type x0, Type x1, Type x2
+#define VECTOR_PARAMS TYPE x0, TYPE x1, TYPE x2
 #define VECTOR_ARGS m_x[0], m_x[1], m_x[2]
 #define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];  m_x[1] = v.m_x[1];  m_x[2] = v.m_x[2];
 #define VECTOR_PLUS_OP        m_x[0] + v.m_x[0],  m_x[1] + v.m_x[1],  m_x[2] + v.m_x[2]
@@ -135,7 +135,7 @@
 #define VECTOR_COMP_LS    m_x[0] <  v.m_x[0] && m_x[1] <  v.m_x[1] && m_x[2] <  v.m_x[2];
 #define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0] && m_x[1] >= v.m_x[1] && m_x[2] >= v.m_x[2];
 #define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0] && m_x[1] <= v.m_x[1] && m_x[2] <= v.m_x[2];
-#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]); m_x[1] = static_cast<Type>(v[1]); m_x[2] = static_cast<Type>(v[2]);
+#define VECTOR_CAST m_x[0] = static_cast<TYPE>(v[0]); m_x[1] = static_cast<TYPE>(v[1]); m_x[2] = static_cast<TYPE>(v[2]);
 
 #include "Hydrox/Utility/Math/Vector_Template.hpp"
 
@@ -169,7 +169,7 @@
 #define VECTOR_NUM_ARGS 4
 #define VECTOR_INIT m_x[0] = x0; m_x[1] = x1; m_x[2] = x2; m_x[3] = x3;
 #define VECTOR_INIT_VEC m_x[0] = v.m_x[0]; m_x[1] = v.m_x[1]; m_x[2] = v.m_x[2]; m_x[3] = v.m_x[3];
-#define VECTOR_PARAMS Type x0, Type x1, Type x2, Type x3
+#define VECTOR_PARAMS TYPE x0, TYPE x1, TYPE x2, TYPE x3
 #define VECTOR_ARGS m_x[0], m_x[1], m_x[2], m_x[3]
 #define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];  m_x[1] = v.m_x[1];  m_x[2] = v.m_x[2];  m_x[3] = v.m_x[3];
 #define VECTOR_PLUS_OP        m_x[0] + v.m_x[0],  m_x[1] + v.m_x[1],  m_x[2] + v.m_x[2],  m_x[3] + v.m_x[3]
@@ -190,7 +190,7 @@
 #define VECTOR_COMP_LS    m_x[0] <  v.m_x[0] && m_x[1] <  v.m_x[1] && m_x[2] <  v.m_x[2] && m_x[3] <  v.m_x[3];
 #define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0] && m_x[1] >= v.m_x[1] && m_x[2] >= v.m_x[2] && m_x[3] >= v.m_x[3];
 #define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0] && m_x[1] <= v.m_x[1] && m_x[2] <= v.m_x[2] && m_x[3] <= v.m_x[3];
-#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]); m_x[1] = static_cast<Type>(v[1]); m_x[2] = static_cast<Type>(v[2]); m_x[3] = static_cast<Type>(v[3]);
+#define VECTOR_CAST m_x[0] = static_cast<TYPE>(v[0]); m_x[1] = static_cast<TYPE>(v[1]); m_x[2] = static_cast<TYPE>(v[2]); m_x[3] = static_cast<TYPE>(v[3]);
 
 #include "Hydrox/Utility/Math/Vector_Template.hpp"
 

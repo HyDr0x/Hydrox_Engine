@@ -71,12 +71,12 @@ public:
 
   inline Quaternion operator + (const Quaternion& q)
   {
-    return Quaternion(m_coord + q);
+    return Quaternion(m_coord + q.m_coord);
   }
 
   inline Quaternion operator - (const Quaternion& q)
   {
-    return Quaternion(m_coord - q);
+    return Quaternion(m_coord - q.m_coord);
   }
 
   inline const Quaternion& operator += (const Quaternion& q)
@@ -194,6 +194,26 @@ public:
     Vec<TYPE, 3> pureQuad = Vec<TYPE, 3>(m_coord[1], m_coord[2], m_coord[3]);
     Vec<TYPE, 3> t = math::cross<TYPE>(v, pureQuad) * 2.0f;
     return v + t * m_coord[0] + math::cross<TYPE>(t, pureQuad);
+  }
+
+  static inline Quaternion<TYPE> slerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)
+  {
+    float alpha = acosf(Vec<TYPE, 3>::dot(Vec<TYPE, 3>(a.m_coord[1], a.m_coord[2], a.m_coord[3]), Vec<TYPE, 3>(b.m_coord[1], b.m_coord[2], b.m_coord[3])));
+
+    float sinAlpha = 1.0f / sinf(alpha);
+
+    Quaternion<float> result = a * (sinf(1.0f - t) * alpha) * sinAlpha + b * (sin(t) * alpha) * sinAlpha;
+    result.normalize();
+
+    return result;
+  }
+
+  static inline Quaternion<TYPE> nlerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)
+  {
+    Quaternion<TYPE> result = (a * (1.0f - t) + b * t);
+    result.normalize();//quaternion needs to be normailzed after linear interpolation
+
+    return result;
   }
 
 private:
