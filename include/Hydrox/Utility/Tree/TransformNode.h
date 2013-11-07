@@ -40,6 +40,9 @@ public:
 	void setTranslation(float x, float y, float z);
 	void setTranslation(Vec<float, 3> v);
 
+  void setRotation(Quaternion<float> q);
+  void turnRotation(Quaternion<float> q);
+
 	void setRotationX(float angle);
 	void setTurnX(float angle);
 	void setRotationY(float angle);

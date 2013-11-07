@@ -40,6 +40,7 @@ private:
 
   AssimpLoader(){}
 
+  void loadAnimations();
   ResourceHandle loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, bool yAxisFlipped);
   void loadMeshesFromAssimp(std::vector<ResourceHandle>& meshes, std::string materialFileName, const aiScene *scene, bool yAxisFlipped);
   ResourceHandle loadMaterialsFromAssimp(std::string materialFileName, const aiScene *model, unsigned int id);

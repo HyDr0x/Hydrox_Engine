@@ -202,8 +202,7 @@ public:
 
     float sinAlpha = 1.0f / sinf(alpha);
 
-    Quaternion<float> result = a * (sinf(1.0f - t) * alpha) * sinAlpha + b * (sin(t) * alpha) * sinAlpha;
-    result.normalize();
+    Quaternion<float> result = a * sinf((1.0f - t) * alpha) * sinAlpha + b * sin(t * alpha) * sinAlpha;
 
     return result;
   }
