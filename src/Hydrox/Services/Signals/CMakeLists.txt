@@ -1,0 +1,6 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/EventManager.cpp 
+	PARENT_SCOPE 
+)

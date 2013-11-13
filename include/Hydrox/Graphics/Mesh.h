@@ -39,9 +39,10 @@ public:
     std::vector<Vec<float, 2>> textureCoords, 
     std::vector<Vec<float, 3>> normals, 
     std::vector<Vec<float, 3>> binormals, 
-    std::vector<Vec<float, 4>> boneIndices, 
+    std::vector<Vec<unsigned int, 4>> boneIndices, 
     std::vector<Vec<float, 4>> boneWeights,
-    std::vector<indexType> indices);
+    std::vector<indexType> indices,
+    GLuint primitiveType = GL_TRIANGLES);
 
   Mesh& operator=(const Mesh& o);
 
@@ -59,9 +60,11 @@ public:
 private:
 
   ResourceHandle m_materialIndex;
+  GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
+  GLuint m_verticesPerPrimitive;
 
 	////////////GEOMETRY////////////
-	unsigned int m_triangleCount;
+	unsigned int m_primitiveCount;
   unsigned int m_vertexCount;
   GLuint m_vertexStride;
   GLuint m_geometryData;

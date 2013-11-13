@@ -1,0 +1,10 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/Math.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Matrix.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Quaternion.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Vector.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Vector_Template.hpp 
+	PARENT_SCOPE 
+)

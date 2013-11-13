@@ -1,0 +1,9 @@
+set(
+	SOURCE 
+	${SOURCE}
+	${CMAKE_CURRENT_SOURCE_DIR}/Buffer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SceneCacheManager.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Timer.cpp 
+	PARENT_SCOPE 
+)

@@ -14,12 +14,11 @@
 #include "Hydrox/Graphics/Scene.h"
 #include "Hydrox/Graphics/Texture.h"
 
-
 AssimpLoader::AssimpLoader(Camera *camera, ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager) : m_camera(camera),
-                                                                                                                                                                          m_modelManager(modelManager),
-                                                                                                                                                                          m_materialManager(materialManager),
-                                                                                                                                                                          m_textureManager(textureManager),
-                                                                                                                                                                          m_shaderManager(shaderManager)
+                                                                                                                                                                         m_modelManager(modelManager),
+                                                                                                                                                                         m_materialManager(materialManager),
+                                                                                                                                                                         m_textureManager(textureManager),
+                                                                                                                                                                         m_shaderManager(shaderManager)
 {
 }
 
@@ -54,20 +53,22 @@ AssimpLoader::~AssimpLoader()
 Scene* AssimpLoader::load(std::string filename, std::string materialFileName, bool yAxisFlipped)
 {
   Assimp::Importer importer;
-	const aiScene *model = importer.ReadFile(m_modelManager->getPath() + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
+	const aiScene *assimpScene = importer.ReadFile(m_modelManager->getPath() + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
 
-	if(!model)
+	if(!assimpScene)
   {
 		printf("%s", importer.GetErrorString());
   }
 
-	assert(model);
+	assert(assimpScene);
 
   std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
 
-  loadMeshesFromAssimp(meshes, materialFileName, model, yAxisFlipped);
+  loadMeshesFromAssimp(meshes, materialFileName, assimpScene, yAxisFlipped);
 
-  GroupNode *rootNode = loadSceneGraphFromAssimp(filename, model->mRootNode, meshes);
+  loadAnimatedSkeleton(assimpScene);
+
+  GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
 
   Scene *scene = new Scene(rootNode, m_camera);
 
@@ -116,7 +117,7 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
   std::vector<Vec<float, 2>> textureCoords;
   std::vector<Vec<float, 3>> normals;
   std::vector<Vec<float, 3>> binormals;
-  std::vector<Vec<float, 4>> boneIndices;
+  std::vector<Vec<unsigned int, 4>> boneIndices;
   std::vector<Vec<float, 4>> boneWeights;
   std::vector<Mesh::indexType> indices;
 
@@ -172,29 +173,36 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
     }
 	}
 
-	if(mesh->HasBones())//TODO ANIMATION
+	if(mesh->HasBones())//TODO SKINNED ANIMATION
 	{
-  //  GLuint lokalStride = posStride + texStride + normalStride + binormalStride;
-  //  for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		//{
-  //    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, boneWeightStride, &Mesh->mBones[i]->mWeights->mWeight);
-  //  }
-
-  //  lokalStride = posStride + texStride + normalStride + binormalStride + boneWeightStride;
-  //  for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		//{
-  //    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, boneIndexStride, &Mesh->mBones[i]->mWeights->mVertexId);
-  //  }
+    boneWeights.resize(mesh->mNumVertices, Vec<float, 4>(0.0f, 0.0f, 0.0f, 0.0f));
+    boneIndices.resize(mesh->mNumVertices, Vec<unsigned int, 4>(~0, ~0, ~0, ~0));
+    for(unsigned int i = 0; i < mesh->mNumBones; i++)
+		{
+      mesh->mBones[i]->mName;
+      for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
+		  {
+        for(unsigned int k = 0; k < 4; k++)
+		    {
+          unsigned int vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+          if(boneIndices[vertexID][k] == ~0)
+          {
+            boneWeights[vertexID][k] = mesh->mBones[i]->mWeights[j].mWeight;
+            boneIndices[vertexID][k] = i;
+            break;
+          }
+        }
+      }
+    }
 	}
 
 	if(mesh->HasFaces())
 	{
-    int index = 0;
 		indices.resize(mesh->mNumFaces * 3);
 
 		for(unsigned int j = 0; j < mesh->mNumFaces; j++)
 		{
-      for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++, index++)
+      for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++)
       {
         assert(mesh->mFaces[j].mNumIndices == 3);
         indices[j * 3 + k] = static_cast<Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
@@ -289,7 +297,7 @@ TreeNode* AssimpLoader::createSceneNodes(const aiNode *node, std::vector<Resourc
   for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
   {
     stream << i;
-    GeoNode *geoNode = new GeoNode(meshes[node->mMeshes[i]], true, std::string(node->mName.C_Str()) + std::string("_") + stream.str(), parentNode, nextSibling);
+    GeoNode *geoNode = new GeoNode(meshes[node->mMeshes[i]], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
     stream.clear();
     nextSibling = geoNode;
   }
@@ -305,4 +313,24 @@ TreeNode* AssimpLoader::createSceneNodes(const aiNode *node, std::vector<Resourc
   }
 
   return transformNode;
+}
+
+void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
+{
+  for(unsigned int i = 0; i < scene->mNumAnimations; i++)
+  {
+    std::string animationName = scene->mAnimations[i]->mName.C_Str();
+
+    m_animationTable[animationName].resize(scene->mAnimations[i]->mNumChannels);
+
+    for(unsigned int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
+    {
+      m_animationTable[animationName][j] = new heAnimation(animationName, scene->mAnimations[i]->mChannels[j]);
+    }
+  }
+}
+
+void AssimpLoader::findAnimatedSkeleton()
+{
+
 }

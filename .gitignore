@@ -13,4 +13,7 @@
 /backups
 
 #no build directory
-/build
+/msc100_64
+
+#no sandbox directory
+/Sandbox

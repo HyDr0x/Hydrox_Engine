@@ -1,0 +1,9 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/Parser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParserMaterial.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParserModel.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParserRenderPass.cpp 
+	PARENT_SCOPE 
+)
