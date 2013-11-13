@@ -28,7 +28,7 @@ public:
   unsigned int getLODLevel();
   bool getLOD(Vec<float, 3> camPos, const std::vector<float>& lodRanges);
 
-  void transformPosition(Mat<float, 4>& trfMatrix);
+  void transformPosition(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
 private:
 

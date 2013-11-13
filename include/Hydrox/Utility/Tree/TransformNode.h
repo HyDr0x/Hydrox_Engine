@@ -16,7 +16,8 @@ class GRAPHICAPI TransformNode : public GroupNode, public Subject<TransformNode*
 {
 public:
 
-  TransformNode(Mat<float,4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+  TransformNode(Mat<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+  TransformNode(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
   TransformNode& operator=(const TransformNode& destinationNode);
   virtual TreeNode& operator=(const TreeNode& destinationNode);
   virtual ~TransformNode();
@@ -27,11 +28,11 @@ public:
   virtual bool preTraverse(Traverser* traverser);
   virtual void postTraverse(Traverser* traverser);
 
-  void calculateTransformation(Mat<float, 4>& trfMatrix);
+  void calculateTransformation(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
-  Vec<float,3> getPosition();
-	Vec<float,3> getRotation();
-	Vec<float,3> getScale();
+  Vec<float, 3> getPosition();
+	Quaternion<float> getRotation();
+	float getScale();
 
   void setPosition(float x, float y, float z);
 	void setPosition(Vec<float, 3> v);
@@ -39,29 +40,28 @@ public:
 	void setTranslation(float x, float y, float z);
 	void setTranslation(Vec<float, 3> v);
 
+  void setRotation(Quaternion<float> q);
+  void turnRotation(Quaternion<float> q);
+
 	void setRotationX(float angle);
 	void setTurnX(float angle);
 	void setRotationY(float angle);
 	void setTurnY(float angle);
 	void setRotationZ(float angle);
 	void setTurnZ(float angle);
-	void setRotationXYZ(Vec<float,3> angle);
-	void setTurnXYZ(Vec<float,3> angle);
-
-	void setScale(Vec<float, 3> s);
-	void setScale(float a, float b, float c);
-
-	void Scale(Vec<float, 3> s);
-	void Scale(float a, float b, float c);
+	void setRotationXYZ(Vec<float, 3> angle);
+	void setTurnXYZ(Vec<float, 3> angle);
+  void setRotationAxis(float angle, Vec<float, 3> axis);
+  void setTurnAxis(float angle, Vec<float, 3> axis);
 
 	void setScale(float s);
 	void Scale(float s);
 
 private:
 
-  Vec<float, 3> m_position;
-  Vec<float, 3> m_scale;
-  Vec<float, 3> m_angle;
+  Quaternion<float> m_rotation;
+  Vec<float, 3> m_translation;
+  float m_scale;
 };
 
 #endif

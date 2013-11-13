@@ -39,6 +39,8 @@ void Traverser::doAscend(TreeNode* treeNode)
 
     parentNode = parentNode->getParent();
   }
+
+  postAscendTraverse();
 }
 
 void Traverser::doTraverse(TreeNode* treeNode)
@@ -59,6 +61,10 @@ void Traverser::doTraverse(TreeNode* treeNode)
 
     treeNode = treeNode->getNextSibling();
   }
+}
+
+void Traverser::postAscendTraverse()
+{
 }
 
 bool Traverser::ascendTraverse(TreeNode* treeNode)

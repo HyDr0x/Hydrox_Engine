@@ -35,7 +35,7 @@ ResourceHandle ILDevilLoader::load(const char* filename, GLenum target)
   {
     std::string texturePath = m_textureManager->getPath();
     texturePath += std::string(filename);
-		ILboolean success = ilLoadImage((const wchar_t*)(texturePath).c_str());
+		ILboolean success = ilLoadImage((const char*)(texturePath).c_str());
 
 		if(!success)
     {

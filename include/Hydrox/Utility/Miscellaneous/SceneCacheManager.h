@@ -4,6 +4,8 @@
 #include <list>
 #include <vector>
 
+#include "Hydrox/DLLExport.h"
+
 #include "Hydrox/Utility/Observer/Observer.hpp"
 
 #include "Hydrox/Utility/Traverser/Traverser.h"

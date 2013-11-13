@@ -3,21 +3,15 @@
 
 #include <stack>
 
-#include "Hydrox/DLLExport.h"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 #include "Hydrox/Utility/Math/Math.hpp"
 
-class GRAPHICAPI TransformTraverser : public Traverser
+class TransformTraverser : public Traverser
 {
 public:
 
   TransformTraverser();
   virtual ~TransformTraverser();
-
-  void insertTransformMatrix(Mat<float, 4>& trfMatrix);
-
-  std::stack<Mat<float, 4>>& getMatrixStack();
 
   virtual bool ascendTraverse(TransformNode* treeNode);
   virtual bool preTraverse(TransformNode* treeNode);
@@ -41,7 +35,11 @@ public:
 
 protected:
 
-  std::stack<Mat<float, 4>> m_matrixStack;
+  virtual void postAscendTraverse();
+
+  std::stack<float> m_scaleStack;
+  std::stack<Vec<float, 3>> m_translateStack;
+  std::stack<Quaternion<float>> m_rotationStack;
 };
 
 #endif

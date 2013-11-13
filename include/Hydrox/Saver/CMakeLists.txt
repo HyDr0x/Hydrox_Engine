@@ -1,0 +1,6 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/HEFSaver.h 
+	PARENT_SCOPE 
+)

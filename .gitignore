@@ -2,6 +2,9 @@
 *.exe
 *.lib
 *.dll
+*.exp
+*.ilk
+*.pdb
 
 #no project files
 *.suo
@@ -10,4 +13,7 @@
 /backups
 
 #no build directory
-/build
+/msc100_64
+
+#no sandbox directory
+/Sandbox

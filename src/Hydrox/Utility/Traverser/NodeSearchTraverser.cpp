@@ -7,7 +7,7 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-NodeSearchTraverser::NodeSearchTraverser(std::string nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
+NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
 {
 }
 

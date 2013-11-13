@@ -3,11 +3,9 @@
 
 #include <string>
 
-#include "Hydrox/DLLExport.h"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-class GRAPHICAPI CopyTraverser : public Traverser
+class CopyTraverser : public Traverser
 {
 public:
 

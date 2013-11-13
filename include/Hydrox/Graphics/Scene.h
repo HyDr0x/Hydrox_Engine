@@ -7,8 +7,6 @@
 
 #include "Hydrox/DLLExport.h"
 
-#include "Hydrox/Utility/Traverser/NodeSearchTraverser.h"
-
 #include "Hydrox/Utility/Math/Math.hpp"
 #include "Hydrox/Utility/Tree/Tree.h"
 
@@ -39,13 +37,9 @@ public:
 	GroupNode* addSubTree(Tree* object, GroupNode* sceneNode, std::string namePrefix = std::string(""));
   void removeSubTree(TreeNode* sceneNode);
 
-  template<class CLASS> CLASS* getNode(std::string nodeName)
+  template<class CLASS> CLASS* getNode(const std::string& nodeName)
   {
-    NodeSearchTraverser traverser(nodeName);
-
-    traverser.doTraverse(m_rootNode);
-
-    return dynamic_cast<CLASS*>(traverser.getDiscoveredNode());
+    return dynamic_cast<CLASS*>(searchNode(nodeName));
   }
 
 protected:
@@ -54,6 +48,8 @@ protected:
 	Scene& operator=(const Scene&){ return *this; }
 
 private:
+
+  TreeNode* searchNode(const std::string& nodeName);
 
 };
 

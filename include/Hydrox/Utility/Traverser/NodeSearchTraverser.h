@@ -3,15 +3,13 @@
 
 #include <string>
 
-#include "Hydrox/DLLExport.h"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-class GRAPHICAPI NodeSearchTraverser : public Traverser
+class NodeSearchTraverser : public Traverser
 {
 public:
 
-  NodeSearchTraverser(std::string nodeName);
+  NodeSearchTraverser(const std::string& nodeName);
   virtual ~NodeSearchTraverser();
 
   virtual bool preTraverse(TransformNode* treeNode);

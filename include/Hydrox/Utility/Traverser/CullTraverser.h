@@ -4,12 +4,10 @@
 #include <list>
 #include <vector>
 
-#include "Hydrox/DLLExport.h"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 #include "Hydrox/Utility/Math/Math.hpp"
 
-class GRAPHICAPI CullTraverser : public Traverser
+class CullTraverser : public Traverser
 {
 public:
 

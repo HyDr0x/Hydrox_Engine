@@ -7,22 +7,12 @@ Mesh::Mesh()
   m_indexData = 0;
 
   m_materialIndex = 0;
-  m_triangleCount = 0;
+  m_primitiveCount = 0;
   m_vertexCount = 0;
   m_vertexStride = 0;
   m_vertexDeclarationFlags = 0;
-}
-
-Mesh::Mesh(const Mesh& o)
-{
-  m_geometryData = o.m_geometryData;
-  m_indexData = o.m_indexData;
-
-  m_materialIndex = o.m_materialIndex;
-  m_triangleCount = o.m_triangleCount;
-  m_vertexCount = o.m_vertexCount;
-  m_vertexStride = o.m_vertexStride;
-  m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
+  m_primitiveType = GL_TRIANGLES;
+  m_verticesPerPrimitive = 3;
 }
 
 Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
@@ -30,11 +20,29 @@ Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex,
             std::vector<Vec<float, 2>> textureCoords, 
             std::vector<Vec<float, 3>> normals, 
             std::vector<Vec<float, 3>> binormals, 
-            std::vector<Vec<float, 4>> boneIndices, 
+            std::vector<Vec<unsigned int, 4>> boneIndices, 
             std::vector<Vec<float, 4>> boneWeights,
-            std::vector<indexType> indices)
+            std::vector<indexType> indices,
+            GLuint primitiveType)
 {
-  m_triangleCount = static_cast<unsigned int>(indices.size()) / 3;
+  m_primitiveType = primitiveType;
+
+  switch(m_primitiveType)
+  {
+  case GL_POINTS:
+    m_verticesPerPrimitive = 1;
+    break;
+  case GL_LINES:
+    m_verticesPerPrimitive = 2;
+    break;
+  case GL_TRIANGLES:
+  default:
+    m_verticesPerPrimitive = 3;
+    break;
+  }
+
+  m_primitiveCount = static_cast<unsigned int>(indices.size()) / m_verticesPerPrimitive;
+
   m_vertexCount = static_cast<unsigned int>(positions.size());
   m_vertexDeclarationFlags = vertexDeclarationFlags;
   m_materialIndex = materialIndex;
@@ -96,17 +104,17 @@ Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex,
 
 	if(boneIndices.size() > 0)//TODO ANIMATION
 	{
-  //  for(int i = 0; i < m_vertexCount; i++)
-		//{
-  //    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, boneWeightStride, &Mesh->mBones[i]->mWeights->mWeight);
-  //  }
-  //  lokalStride += boneWeightStride;
+    for(int i = 0; i < m_vertexCount; i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneWeights[0]), &boneWeights[i]);
+    }
+    lokalStride += boneWeightStride;
 
-  //  for(int i = 0; i < m_vertexCount; i++)
-		//{
-  //    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, boneIndexStride, &Mesh->mBones[i]->mWeights->mVertexId);
-  //  }
-  //  lokalStride += boneIndexStride;
+    for(int i = 0; i < m_vertexCount; i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneIndices[0]), &boneIndices[i]);
+    }
+    lokalStride += boneIndexStride;
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -120,7 +128,7 @@ Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex,
 	}
 	else
   {
-		m_indexData = ~0;
+		m_indexData = 0;
   }
 
 	//const GLenum ErrorValue = glGetError();
@@ -130,11 +138,25 @@ Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex,
 	//tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
 }
 
+Mesh::Mesh(const Mesh& o)
+{
+  m_materialIndex = o.m_materialIndex;
+  m_primitiveType = o.m_primitiveType;
+  m_verticesPerPrimitive = o.m_verticesPerPrimitive;
+	m_primitiveCount = o.m_primitiveCount;
+  m_vertexCount = o.m_vertexCount;
+  m_vertexStride = o.m_vertexStride;
+  m_geometryData = o.m_geometryData;
+  m_indexData = o.m_indexData;
+  m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
+}
+
 Mesh& Mesh::operator=(const Mesh& o)
 {
   m_materialIndex = o.m_materialIndex;
-
-	m_triangleCount = o.m_triangleCount;
+  m_primitiveType = o.m_primitiveType;
+  m_verticesPerPrimitive = o.m_verticesPerPrimitive;
+	m_primitiveCount = o.m_primitiveCount;
   m_vertexCount = o.m_vertexCount;
   m_vertexStride = o.m_vertexStride;
   m_geometryData = o.m_geometryData;
@@ -158,7 +180,7 @@ void Mesh::render(GLuint bindingIndex) const
 {
   glBindVertexBuffer(bindingIndex, m_geometryData, 0, m_vertexStride);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexData);
-	glDrawElements(GL_TRIANGLES, m_triangleCount * 3, GLINDEXTYPE, 0);
+	glDrawElements(m_primitiveType, m_primitiveCount * m_verticesPerPrimitive, GLINDEXTYPE, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
