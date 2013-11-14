@@ -3,8 +3,6 @@
 #include "Hydrox/Utility/Traverser/CullTraverser.h"
 #include "Hydrox/Utility/Traverser/TransformTraverser.h"
 
-#include "Hydrox/Services/Camera.h"
-
 #include "Hydrox/Utility/Tree/TreeNode.h"
 #include "Hydrox/Utility/Tree/GroupNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
@@ -15,11 +13,6 @@
 #include "Hydrox/Utility/Tree/LightNode.h"
 
 SceneCacheManager::SceneCacheManager()
-{
-  m_camera = nullptr;
-}
-
-SceneCacheManager::SceneCacheManager(Camera *camera) : m_camera(camera)
 {
 }
 
@@ -53,102 +46,10 @@ void SceneCacheManager::setLODRanges(std::vector<float> lodRanges)
   m_lodRanges = lodRanges;
 }
 
-void SceneCacheManager::updateCaches()
+void SceneCacheManager::updateCaches(Vec<float, 3>& cameraPosition)
 {
   updateTransformNodes();
-  updateLODNodes();
-}
-
-void SceneCacheManager::addNodeToCaches(TreeNode *newNode, NodeTypes types)
-{
-  if(types & TRANSFORMNODE && addSingleNodeToCacheList<TransformNode>(m_dirtyTransforms, newNode)){}
-  else if(types & LODNODE && addSingleNodeToCacheList<LODNode>(m_activeLODs, newNode)){}
-  else if(types & GEONODE && addSingleNodeToCacheList<GeoNode>(m_activeGeometry, newNode)){}
-  else if(types & BILLBOARDNODE && addSingleNodeToCacheList<BillboardNode>(m_activeBillboards, newNode)){}
-  else if(types & PARTICLENODE && addSingleNodeToCacheList<ParticleNode>(m_activeParticles, newNode)){}
-  else if(types & LIGHTNODE && addSingleNodeToCacheList<LightNode>(m_activeLights, newNode)){}
-}
-
-void SceneCacheManager::removeNodeFromCaches(TreeNode *node, NodeTypes types)
-{
-  if(types & TRANSFORMNODE && removeSingleNodeFromCacheList<TransformNode>(m_dirtyTransforms, node)){}
-  else if(types & LODNODE && removeSingleNodeFromCacheList<LODNode>(m_activeLODs, node)){}
-  else if(types & GEONODE && removeSingleNodeFromCacheList<GeoNode>(m_activeGeometry, node)){}
-  else if(types & BILLBOARDNODE && removeSingleNodeFromCacheList<BillboardNode>(m_activeBillboards, node)){}
-  else if(types & PARTICLENODE && removeSingleNodeFromCacheList<ParticleNode>(m_activeParticles, node)){}
-  else if(types & LIGHTNODE && removeSingleNodeFromCacheList<LightNode>(m_activeLights, node)){}
-}
-
-void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, NodeTypes types, Traverser::TraverserFlags traverserFlag)
-{
-  CullTraverser cullTraverser(m_lodRanges, m_camera->getPosition());
-  cullTraverser.addTraverserFlag(traverserFlag);
-  cullTraverser.doTraverse(rootNode->getFirstChild());
-        
-  if(types & TRANSFORMNODE)
-  {
-    addToCacheList<TransformNode>(cullTraverser.getActiveTransformNodes(), m_dirtyTransforms);
-  }
-
-  if(types & LODNODE)
-  {
-    addToCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
-  }
-  if(types & GEONODE)
-  {
-    addToCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
-  }
-
-  if(types & BILLBOARDNODE)
-  {
-    addToCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
-  }
-
-  if(types & PARTICLENODE)
-  {
-    addToCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);
-  }
-
-  if(types & LIGHTNODE)
-  {
-    addToCacheList<LightNode>(cullTraverser.getActiveLightNodes(), m_activeLights);
-  }
-}
-
-void SceneCacheManager::removeTreeFromCaches(TreeNode *rootNode, NodeTypes types, Traverser::TraverserFlags traverserFlag)
-{
-  CullTraverser cullTraverser(m_lodRanges, m_camera->getPosition());
-  cullTraverser.addTraverserFlag(traverserFlag);
-  cullTraverser.doTraverse(rootNode);
-
-  if(types & TRANSFORMNODE)
-  {
-    deleteFromCacheList<TransformNode>(cullTraverser.getActiveTransformNodes(), m_dirtyTransforms);
-  }
-
-  if(types & LODNODE)
-  {
-    deleteFromCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
-  }
-  if(types & GEONODE)
-  {
-    deleteFromCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
-  }
-
-  if(types & BILLBOARDNODE)
-  {
-    deleteFromCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
-  }
-
-  if(types & PARTICLENODE)
-  {
-    deleteFromCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);
-  }
-
-  if(types & LIGHTNODE)
-  {
-    deleteFromCacheList<LightNode>(cullTraverser.getActiveLightNodes(), m_activeLights);
-  }
+  updateLODNodes(cameraPosition);
 }
 
 void SceneCacheManager::updateObserver(TransformNode* data)
@@ -172,11 +73,11 @@ void SceneCacheManager::updateTransformNodes()
   m_dirtyTransforms.clear();
 }
 
-void SceneCacheManager::updateLODNodes()
+void SceneCacheManager::updateLODNodes(Vec<float, 3>& cameraPosition)
 {
   for(std::list<LODNode*>::iterator lit = m_activeLODs.begin(); lit != m_activeLODs.end(); lit++)
   {
-    bool lodInRange = (*lit)->getLOD(m_camera->getPosition(), m_lodRanges);
+    bool lodInRange = (*lit)->getLOD(cameraPosition, m_lodRanges);
 
     if(lodInRange)
     {
@@ -184,14 +85,60 @@ void SceneCacheManager::updateLODNodes()
       {
         (*lit)->addDirtyFlag(GroupNode::LOD_INRANGE);
 
-        addTreeToCaches((*lit)->getFirstChild(), (NodeTypes)(LODNODE | GEONODE | BILLBOARDNODE | PARTICLENODE | LIGHTNODE), Traverser::TRAVERSE_DEFAULT);
+        addTreeToCaches((*lit)->getFirstChild(), cameraPosition);
       }
     }
     else if((*lit)->getDirtyFlag() & GroupNode::LOD_INRANGE)
     {
       (*lit)->removeDirtyFlag(GroupNode::LOD_INRANGE);
 
-      removeTreeFromCaches((*lit)->getFirstChild(), (NodeTypes)(LODNODE | GEONODE | BILLBOARDNODE | PARTICLENODE | LIGHTNODE), Traverser::TRAVERSE_DEFAULT);
+      removeTreeFromCaches((*lit)->getFirstChild());
     }
   }
+}
+
+void SceneCacheManager::addNodeToCaches(TreeNode *newNode)
+{
+  if(addSingleNodeToCacheList<LODNode>(m_activeLODs, newNode)){}
+  else if(addSingleNodeToCacheList<GeoNode>(m_activeGeometry, newNode)){}
+  else if(addSingleNodeToCacheList<BillboardNode>(m_activeBillboards, newNode)){}
+  else if(addSingleNodeToCacheList<ParticleNode>(m_activeParticles, newNode)){}
+  else if(addSingleNodeToCacheList<LightNode>(m_activeLights, newNode)){}
+}
+
+void SceneCacheManager::removeNodeFromCaches(TreeNode *node)
+{
+  if(removeSingleNodeFromCacheList<TransformNode>(m_dirtyTransforms, node)){}
+  else if(removeSingleNodeFromCacheList<LODNode>(m_activeLODs, node)){}
+  else if(removeSingleNodeFromCacheList<GeoNode>(m_activeGeometry, node)){}
+  else if(removeSingleNodeFromCacheList<BillboardNode>(m_activeBillboards, node)){}
+  else if(removeSingleNodeFromCacheList<ParticleNode>(m_activeParticles, node)){}
+  else if(removeSingleNodeFromCacheList<LightNode>(m_activeLights, node)){}
+}
+
+void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, Vec<float, 3>& cameraPosition)
+{
+  CullTraverser cullTraverser(m_lodRanges, cameraPosition);
+  cullTraverser.addTraverserFlag(Traverser::TRAVERSE_DEFAULT);
+  cullTraverser.doTraverse(rootNode->getFirstChild());
+       
+  addToCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
+  addToCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
+  addToCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
+  addToCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);
+  addToCacheList<LightNode>(cullTraverser.getActiveLightNodes(), m_activeLights);
+}
+
+void SceneCacheManager::removeTreeFromCaches(TreeNode *rootNode)
+{
+  CullTraverser cullTraverser(m_lodRanges, Vec<float, 3>::identity());
+  cullTraverser.addTraverserFlag(Traverser::TRAVERSE_IGNORE_LODS);
+  cullTraverser.doTraverse(rootNode);
+
+  deleteFromCacheList<TransformNode>(cullTraverser.getActiveTransformNodes(), m_dirtyTransforms);
+  deleteFromCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
+  deleteFromCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
+  deleteFromCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
+  deleteFromCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);
+  deleteFromCacheList<LightNode>(cullTraverser.getActiveLightNodes(), m_activeLights);
 }

@@ -3,11 +3,9 @@
 #include "Hydrox/Graphics/Scene.h"
 
 #include "Hydrox/Services/ServiceManager.hpp"
-#include "Hydrox/Services/Camera.h"
 #include "Hydrox/Services/RenderManager.h"
 #include "Hydrox/Services/RasterizerRenderManager.h"
 #include "Hydrox/Services/RaytracingRenderManager.h"
-#include "Hydrox/Services/InputManager.h"
 #include "Hydrox/Services/Signals/EventManager.h"
 
 #include "Hydrox/Utility/Tree/TransformNode.h"
@@ -19,10 +17,8 @@ GraphicEngine::GraphicEngine()
 
   m_scene = nullptr;
 
-  m_camera = nullptr;
 	m_modelManager = nullptr;
 	m_textureManager = nullptr;
-	m_inputManager = nullptr;
 	m_shaderManager = nullptr;
 	m_renderManager = nullptr;
   m_materialManager = nullptr;
@@ -34,10 +30,8 @@ GraphicEngine::~GraphicEngine()
   if(m_initialized)
   {
     delete m_scene;
-    delete m_camera;
 	  delete m_modelManager;
 	  delete m_textureManager;
-	  delete m_inputManager;
 	  delete m_shaderManager;
 	  delete m_renderManager;
     delete m_materialManager;
@@ -64,8 +58,6 @@ void GraphicEngine::setClearColor(Vec<float, 4> color)
 
 void GraphicEngine::registerServices(ServiceManager *serviceManager)
 {
-  serviceManager->addService(m_camera);
-	
 	serviceManager->addService(m_modelManager);
   serviceManager->addService(m_materialManager);
   serviceManager->addService(m_shaderManager);
@@ -74,7 +66,6 @@ void GraphicEngine::registerServices(ServiceManager *serviceManager)
 	serviceManager->addService(m_spriteManager);
 
   serviceManager->addService(m_renderManager);
-	serviceManager->addService(m_inputManager);
 	serviceManager->addService(m_eventManager);
 }
  
@@ -101,9 +92,7 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
 	glClearDepth(0.0f);
 	//glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
-	//create RenderManager
-	m_inputManager = new InputManager;
-  m_camera = new Camera(m_inputManager, Vec<unsigned int, 2>(m_width, m_height), 1.0f, 30000.0f);
+	//create Manager
   m_modelManager = new ModelManager(modelPath);
   m_materialManager = new MaterialManager(materialPath);
   m_shaderManager = new CacheManager<Shader>(vfxPath);
@@ -113,18 +102,15 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
 	m_renderManager = new RasterizerRenderManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
 	m_eventManager = new EventManager();
   
-  m_scene = new Scene(new TransformNode(Mat<float, 4>::identity(), worldRootNodeName), m_camera);
+  m_scene = new Scene(new TransformNode(Mat<float, 4>::identity(), worldRootNodeName), Vec<float, 3>::identity());
 }
 
-void GraphicEngine::update()
+void GraphicEngine::update(Vec<float, 3>& cameraPosition)
 {
-  m_inputManager->update();
-  m_camera->update(60.0f);
-
-  m_scene->updateCaches();
+  m_scene->updateCaches(cameraPosition);
 }
 
-void GraphicEngine::draw()
+void GraphicEngine::draw(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition)
 {
-  m_renderManager->render(m_camera, m_scene);
+  m_renderManager->render(viewMatrix, projectionMatrix, cameraPosition, m_scene);
 }

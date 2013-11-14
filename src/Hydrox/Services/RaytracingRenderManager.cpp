@@ -1,8 +1,6 @@
 #include "Hydrox/Services/RaytracingRenderManager.h"
 
 #include "Hydrox/Graphics/Scene.h"
-#include "Hydrox/Services/Camera.h"
-
 
 RaytracingRenderManager::RaytracingRenderManager(ModelManager *modelManager, 
                 MaterialManager *materialManager, 
@@ -23,6 +21,6 @@ RaytracingRenderManager::~RaytracingRenderManager()
 {
 }
 
-void RaytracingRenderManager::render(Camera *camera, Scene *scene)
+void RaytracingRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition, Scene *scene)
 {
 }

@@ -17,7 +17,7 @@ TransformTraverser::~TransformTraverser()
 
 void TransformTraverser::postAscendTraverse()
 {
-  Vec<float, 3> trfTranslation = Vec<float, 3>(0.0f, 0.0f, 0.0f);
+  Vec<float, 3> trfTranslation = Vec<float, 3>::identity();
   float trfScale = 1.0f;
   Quaternion<float> trfRotation = Quaternion<float>::identity();
 
@@ -82,7 +82,7 @@ bool TransformTraverser::preTraverse(TransformNode* treeNode)
   }
   else
   {
-    translation = Vec<float, 3>(0.0f, 0.0f, 0.0f);
+    translation = Vec<float, 3>::identity();
     scale = 1.0f;
     rotation = Quaternion<float>::identity();
   }

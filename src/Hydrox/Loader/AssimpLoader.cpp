@@ -9,16 +9,13 @@
 
 #include "Hydrox/Loader/ILDevilLoader.h"
 
-#include "Hydrox/Services/Camera.h"
-
 #include "Hydrox/Graphics/Scene.h"
 #include "Hydrox/Graphics/Texture.h"
 
-AssimpLoader::AssimpLoader(Camera *camera, ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager) : m_camera(camera),
-                                                                                                                                                                         m_modelManager(modelManager),
-                                                                                                                                                                         m_materialManager(materialManager),
-                                                                                                                                                                         m_textureManager(textureManager),
-                                                                                                                                                                         m_shaderManager(shaderManager)
+AssimpLoader::AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager) : m_modelManager(modelManager),
+                                                                                                                                                         m_materialManager(materialManager),
+                                                                                                                                                         m_textureManager(textureManager),
+                                                                                                                                                         m_shaderManager(shaderManager)
 {
 }
 
@@ -26,7 +23,6 @@ AssimpLoader::AssimpLoader(const AssimpLoader& o)
 {
   m_modelPath = o.m_modelPath;
 
-  m_camera = o.m_camera;
   m_modelManager = o.m_modelManager;
   m_materialManager = o.m_materialManager;
   m_textureManager = o.m_textureManager;
@@ -37,7 +33,6 @@ AssimpLoader& AssimpLoader::operator=(const AssimpLoader& o)
 {
   m_modelPath = o.m_modelPath;
 
-  m_camera = o.m_camera;
   m_modelManager = o.m_modelManager;
   m_materialManager = o.m_materialManager;
   m_textureManager = o.m_textureManager;
@@ -70,7 +65,7 @@ Scene* AssimpLoader::load(std::string filename, std::string materialFileName, bo
 
   GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
 
-  Scene *scene = new Scene(rootNode, m_camera);
+  Scene *scene = new Scene(rootNode, Vec<float, 3>::identity());
 
 	importer.FreeScene();
 
@@ -175,7 +170,7 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
 
 	if(mesh->HasBones())//TODO SKINNED ANIMATION
 	{
-    boneWeights.resize(mesh->mNumVertices, Vec<float, 4>(0.0f, 0.0f, 0.0f, 0.0f));
+    boneWeights.resize(mesh->mNumVertices, Vec<float, 4>::identity());
     boneIndices.resize(mesh->mNumVertices, Vec<unsigned int, 4>(~0, ~0, ~0, ~0));
     for(unsigned int i = 0; i < mesh->mNumBones; i++)
 		{

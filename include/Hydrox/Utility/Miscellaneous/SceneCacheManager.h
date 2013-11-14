@@ -6,11 +6,11 @@
 
 #include "Hydrox/DLLExport.h"
 
+#include "Hydrox/Utility/Math/Math.hpp"
+
 #include "Hydrox/Utility/Observer/Observer.hpp"
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
-
-class Camera;
 
 class TreeNode;
 class GroupNode;
@@ -25,18 +25,7 @@ class GRAPHICAPI SceneCacheManager : public Observer<TransformNode*>
 {
 public:
 
-  enum NodeTypes
-  {
-    TRANSFORMNODE = 1,
-    LODNODE       = 2,
-    GEONODE       = 4,
-    BILLBOARDNODE = 8,
-    LIGHTNODE     = 16,
-    PARTICLENODE  = 32,
-  };
-
   SceneCacheManager();
-  SceneCacheManager(Camera *camera);
   ~SceneCacheManager();
 
   const std::list<GeoNode*>& getMeshes();
@@ -45,19 +34,16 @@ public:
 
   void setLODRanges(std::vector<float> lodRanges);
 
-  void updateCaches();
+  void updateCaches(Vec<float, 3>& cameraPosition);
 
 protected:
 
-  void addNodeToCaches(TreeNode *newNode, NodeTypes types);
-  void removeNodeFromCaches(TreeNode *node, NodeTypes types);
-
-  void addTreeToCaches(TreeNode *rootNode, NodeTypes types, Traverser::TraverserFlags traverserFlag);
-  void removeTreeFromCaches(TreeNode *rootNode, NodeTypes types, Traverser::TraverserFlags traverserFlag);
+  void addNodeToCaches(TreeNode *newNode);
+  void removeNodeFromCaches(TreeNode *node);
+  void addTreeToCaches(TreeNode *rootNode, Vec<float, 3>& cameraPosition);
+  void removeTreeFromCaches(TreeNode *rootNode);
 
 private:
-
-  SceneCacheManager(const SceneCacheManager&){}
 
   template<class CLASS> bool addSingleNodeToCacheList(std::list<CLASS*>& destinationCacheList, TreeNode* newNode)
   {
@@ -108,19 +94,18 @@ private:
     }
   }
 
+  SceneCacheManager(const SceneCacheManager&){}
+
   void updateObserver(TransformNode* data);
-
   void updateTransformNodes();
-  void updateLODNodes();
-
-  Camera *m_camera;
+  void updateLODNodes(Vec<float, 3>& cameraPosition);
 
   std::vector<float> m_lodRanges;
 
   std::list<TransformNode*> m_dirtyTransforms;
+  std::list<LODNode*> m_activeLODs;
 
   std::list<GeoNode*> m_activeGeometry;
-  std::list<LODNode*> m_activeLODs;
   std::list<BillboardNode*> m_activeBillboards;
   std::list<ParticleNode*> m_activeParticles;
   std::list<LightNode*> m_activeLights;

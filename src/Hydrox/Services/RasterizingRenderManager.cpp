@@ -1,7 +1,6 @@
 #include "Hydrox/Services/RasterizerRenderManager.h"
 
 #include "Hydrox/Graphics/Scene.h"
-#include "Hydrox/Services/Camera.h"
 
 #include "Hydrox/Graphics/Mesh.h"
 #include "Hydrox/Graphics/Material.h"
@@ -65,7 +64,7 @@ RasterizerRenderManager::~RasterizerRenderManager()
   delete m_spriteShader;
 }
 
-void RasterizerRenderManager::render(Camera *camera, Scene *scene)
+void RasterizerRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition, Scene *scene)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -75,6 +74,7 @@ void RasterizerRenderManager::render(Camera *camera, Scene *scene)
   Shader *renderShader;
   Texture *renderTexture;
 
+  Mat<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
   Mat<float, 4> worldViewProjectionMatrix;
 
   const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
@@ -93,7 +93,7 @@ void RasterizerRenderManager::render(Camera *camera, Scene *scene)
 
       renderShader->useShader();
 
-      worldViewProjectionMatrix = camera->getViewProjectionMatrix() * (*geometryIterator)->getTransformationMatrix();
+      worldViewProjectionMatrix = viewProjectionMatrix * (*geometryIterator)->getTransformationMatrix();
       renderShader->setUniform(4, GL_FLOAT_MAT4, &(worldViewProjectionMatrix[0][0]));
 
       /*renderShader->setTexture(0, 0);
@@ -120,9 +120,6 @@ void RasterizerRenderManager::render(Camera *camera, Scene *scene)
   glEnableVertexAttribArray(Shader::SPECIAL0);
  
 	m_billboardShader->useShader();
-
-  Mat<float, 4> projectionMatrix = camera->getProjectionMatrix();
-	Mat<float, 4> viewMatrix = camera->getViewMatrix();
 
   m_billboardShader->setUniform(1, GL_FLOAT_MAT4, &viewMatrix[0][0]);
   m_billboardShader->setUniform(2, GL_FLOAT_MAT4, &projectionMatrix[0][0]);
@@ -165,8 +162,8 @@ void RasterizerRenderManager::render(Camera *camera, Scene *scene)
     renderTexture->setTexture(0);
 		m_spriteShader->setTexture(2, 0);
 		
-		Mat<float,3> worldMatrix = renderSprite->getTransformationMatrix() * Mat<float,3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
-		Mat<float,3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+		Mat<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Mat<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
+		Mat<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
 		m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
 

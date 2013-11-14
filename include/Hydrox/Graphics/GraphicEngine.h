@@ -13,11 +13,9 @@
 class Scene;
 
 class ServiceManager;
-class Camera;
 class RenderManager;
 class RasterizerRenderManager;
 class RaytracingRenderManager;
-class InputManager;
 class EventManager;
 
 #include "Hydrox/Services/CacheManager.hpp"
@@ -39,15 +37,13 @@ public:
   void registerServices(ServiceManager *serviceManager);
 
 	void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio);
-	void update();
-	void draw();
+	void update(Vec<float, 3>& cameraPosition);
+	void draw(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition);
 
 private:
 
   Scene *m_scene;
 
-  Camera *m_camera;
-  InputManager *m_inputManager;
 	RenderManager *m_renderManager;
 	EventManager *m_eventManager;
 	ModelManager    *m_modelManager;

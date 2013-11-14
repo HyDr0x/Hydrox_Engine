@@ -18,6 +18,8 @@ template< typename TYPE> class Vec<TYPE, VECTOR_NUM_ARGS>
 
   ~Vec(){m_vertexcounter--;};
 
+  static Vec identity() { return Vec(VECTOR_IDENTITY); }
+
   unsigned int giveVertexNumber(void);
 
   inline const Vec& operator = (const Vec  &v) { VECTOR_ASSIGNEMENT_OP return *this; }

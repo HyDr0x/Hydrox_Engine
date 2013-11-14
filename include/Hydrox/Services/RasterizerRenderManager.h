@@ -20,7 +20,7 @@ public:
                 SpriteManager *spriteManager, GLfloat aspectRatio);
 	~RasterizerRenderManager();
 
-	void render(Camera *camera, Scene *scene);
+	void render(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition, Scene *scene);
 
 private:
 

@@ -12,7 +12,6 @@
 
 #include "Hydrox/Utility/Miscellaneous/SceneCacheManager.h"
 
-class Camera;
 class TreeNode;
 class GroupNode;
 class LODNode;
@@ -26,7 +25,7 @@ class GRAPHICAPI Scene : public Tree, public SceneCacheManager
 {
 public:
 
-	Scene(GroupNode* rootNode, Camera *camera);
+	Scene(GroupNode* rootNode, Vec<float, 3>& cameraPosition);
   Scene(const Scene& object);
 	~Scene();
 
@@ -34,7 +33,7 @@ public:
   TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
   void removeNode(TreeNode *node);
 
-	GroupNode* addSubTree(Tree* object, GroupNode* sceneNode, std::string namePrefix = std::string(""));
+	GroupNode* addSubTree(Tree* object, GroupNode* sceneNode, Vec<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
   void removeSubTree(TreeNode* sceneNode);
 
   template<class CLASS> CLASS* getNode(const std::string& nodeName)

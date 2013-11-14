@@ -10,8 +10,6 @@
 #include "Hydrox/Utility/Traverser/DeleteTraverser.h"
 #include "Hydrox/Utility/Traverser/NodeSearchTraverser.h"
 
-#include "Hydrox/Services/Camera.h"
-
 #include "Hydrox/Utility/Tree/TreeNode.h"
 #include "Hydrox/Utility/Tree/GroupNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
@@ -21,7 +19,7 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-Scene::Scene(GroupNode* rootNode, Camera *camera) : SceneCacheManager(camera)
+Scene::Scene(GroupNode* rootNode, Vec<float, 3>& cameraPosition)
 {
   m_rootNode = rootNode;
 
@@ -31,11 +29,7 @@ Scene::Scene(GroupNode* rootNode, Camera *camera) : SceneCacheManager(camera)
   InsertObserverTraverser insertObserverTraverser(this);
   insertObserverTraverser.doTraverse(m_rootNode);//insert this scene as an observer to every Transform node
 
-  SceneCacheManager::addTreeToCaches(m_rootNode, (SceneCacheManager::NodeTypes)(SceneCacheManager::LODNODE | 
-                                                                                SceneCacheManager::GEONODE | 
-                                                                                SceneCacheManager::BILLBOARDNODE | 
-                                                                                SceneCacheManager::PARTICLENODE | 
-                                                                                SceneCacheManager::LIGHTNODE), Traverser::TRAVERSE_DEFAULT);
+  SceneCacheManager::addTreeToCaches(m_rootNode, cameraPosition);
 }
 
 Scene::Scene(const Scene&)
@@ -62,11 +56,7 @@ TreeNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
     newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
   }
 
-  SceneCacheManager::addNodeToCaches(newNode, (SceneCacheManager::NodeTypes)(SceneCacheManager::LODNODE | 
-                                                                             SceneCacheManager::GEONODE | 
-                                                                             SceneCacheManager::BILLBOARDNODE | 
-                                                                             SceneCacheManager::PARTICLENODE | 
-                                                                             SceneCacheManager::LIGHTNODE));
+  SceneCacheManager::addNodeToCaches(newNode);
   return newNode;
 }
 
@@ -84,28 +74,18 @@ TreeNode* Scene::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
     newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
   }
 
-  SceneCacheManager::addNodeToCaches(newNode, (SceneCacheManager::NodeTypes)(SceneCacheManager::LODNODE | 
-                                                                             SceneCacheManager::GEONODE | 
-                                                                             SceneCacheManager::BILLBOARDNODE | 
-                                                                             SceneCacheManager::PARTICLENODE | 
-                                                                             SceneCacheManager::LIGHTNODE));
+  SceneCacheManager::addNodeToCaches(newNode);
     return newNode;
 }
 
 void Scene::removeNode(TreeNode *node)
 {
-
-  SceneCacheManager::removeNodeFromCaches(node, (SceneCacheManager::NodeTypes)(SceneCacheManager::TRANSFORMNODE |
-                                                                               SceneCacheManager::LODNODE | 
-                                                                               SceneCacheManager::GEONODE | 
-                                                                               SceneCacheManager::BILLBOARDNODE | 
-                                                                               SceneCacheManager::PARTICLENODE | 
-                                                                               SceneCacheManager::LIGHTNODE));
+  SceneCacheManager::removeNodeFromCaches(node);
 
   Tree::removeNode(node);
 }
 
-GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, std::string namePrefix)
+GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, Vec<float, 3>& cameraPosition, std::string namePrefix)
 {
   GroupNode* copiedRootNode = Tree::addSubTree(object, sceneNode, namePrefix);
 
@@ -116,23 +96,14 @@ GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, std::string nam
   InsertObserverTraverser insertObserverTraverser(this);
   insertObserverTraverser.doTraverse(copiedRootNode);//insert this scene as an observer to every Transform node
 
-  SceneCacheManager::addTreeToCaches(copiedRootNode, (SceneCacheManager::NodeTypes)(SceneCacheManager::LODNODE | 
-                                                                                    SceneCacheManager::GEONODE | 
-                                                                                    SceneCacheManager::BILLBOARDNODE | 
-                                                                                    SceneCacheManager::PARTICLENODE | 
-                                                                                    SceneCacheManager::LIGHTNODE), Traverser::TRAVERSE_DEFAULT);
+  SceneCacheManager::addTreeToCaches(copiedRootNode, cameraPosition);
 
   return copiedRootNode;
 }
 
 void Scene::removeSubTree(TreeNode* sceneNode)
 {
-  SceneCacheManager::removeTreeFromCaches(sceneNode, (SceneCacheManager::NodeTypes)(SceneCacheManager::TRANSFORMNODE |
-                                                                                    SceneCacheManager::LODNODE | 
-                                                                                    SceneCacheManager::GEONODE | 
-                                                                                    SceneCacheManager::BILLBOARDNODE | 
-                                                                                    SceneCacheManager::PARTICLENODE | 
-                                                                                    SceneCacheManager::LIGHTNODE), Traverser::TRAVERSE_IGNORE_LODS);
+  SceneCacheManager::removeTreeFromCaches(sceneNode);
 
   Tree::removeSubTree(sceneNode);
 }

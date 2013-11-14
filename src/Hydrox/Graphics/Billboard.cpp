@@ -6,7 +6,7 @@ Billboard::Billboard(ResourceHandle texID, bool anim, Vec<unsigned int,2> animNu
                                                                                                                                      m_animNumber(animNumber), 
                                                                                                                                      m_texStart(texStart), 
                                                                                                                                      m_texEnd(texEnd),
-                                                                                                                                     m_translate(Vec<float, 3>(0.0f, 0.0f, 0.0f)),
+                                                                                                                                     m_translate(Vec<float, 3>::identity()),
                                                                                                                                      m_scale(Vec<float, 2>(1.0f, 1.0f))
 {}
 

@@ -22,8 +22,6 @@ class ILDevilLoader;
 class GroupNode;
 class TreeNode;
 
-class Camera;
-
 class Scene;
 
 struct heAnimation
@@ -81,7 +79,7 @@ class GRAPHICAPI AssimpLoader
 {
 public:
 
-  AssimpLoader(Camera *camera, ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
+  AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
   AssimpLoader(const AssimpLoader& o);
   AssimpLoader& operator=(const AssimpLoader& o);
   ~AssimpLoader();
@@ -103,7 +101,6 @@ private:
 
 	std::string m_modelPath;
 
-  Camera *m_camera;
   ModelManager *m_modelManager;
   MaterialManager *m_materialManager;
   TextureManager *m_textureManager;

@@ -5,9 +5,7 @@ set(
 	${HEADER}
 	${CMAKE_CURRENT_SOURCE_DIR}/CachedResource.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheManager.hpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/Camera.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DebugLogManager.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/InputManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Io_service.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RasterizerRenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RaytracingRenderManager.h 
