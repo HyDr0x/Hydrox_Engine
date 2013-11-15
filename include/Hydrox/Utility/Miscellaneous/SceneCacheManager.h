@@ -34,13 +34,13 @@ public:
 
   void setLODRanges(std::vector<float> lodRanges);
 
-  void updateCaches(Vec<float, 3>& cameraPosition);
+  void updateCaches(Vector<float, 3>& cameraPosition);
 
 protected:
 
   void addNodeToCaches(TreeNode *newNode);
   void removeNodeFromCaches(TreeNode *node);
-  void addTreeToCaches(TreeNode *rootNode, Vec<float, 3>& cameraPosition);
+  void addTreeToCaches(TreeNode *rootNode, Vector<float, 3>& cameraPosition);
   void removeTreeFromCaches(TreeNode *rootNode);
 
 private:
@@ -98,7 +98,7 @@ private:
 
   void updateObserver(TransformNode* data);
   void updateTransformNodes();
-  void updateLODNodes(Vec<float, 3>& cameraPosition);
+  void updateLODNodes(Vector<float, 3>& cameraPosition);
 
   std::vector<float> m_lodRanges;
 

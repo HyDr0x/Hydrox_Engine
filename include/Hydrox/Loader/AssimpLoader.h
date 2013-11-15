@@ -43,7 +43,7 @@ struct heAnimation
     for(unsigned int k = 0; k < nodeAnimation->mNumPositionKeys; k++)
     {
       aiVector3D pos = nodeAnimation->mPositionKeys[k].mValue;
-       m_positions[k] = Vec<float, 3>(pos[0], pos[1], pos[2]);
+       m_positions[k] = Vector<float, 3>(pos[0], pos[1], pos[2]);
        m_positionsTime[k] = nodeAnimation->mPositionKeys[k].mTime;
     }
 
@@ -57,7 +57,7 @@ struct heAnimation
     for(unsigned int k = 0; k < nodeAnimation->mNumScalingKeys; k++)
     {
       aiVector3D scale = nodeAnimation->mScalingKeys[k].mValue;
-       m_scales[k] = Vec<float, 3>(scale[0], scale[1], scale[2]);
+       m_scales[k] = Vector<float, 3>(scale[0], scale[1], scale[2]);
        m_scalesTime[k] = nodeAnimation->mScalingKeys[k].mTime;
     }
   }
@@ -65,13 +65,13 @@ struct heAnimation
   std::string m_animationName;
   std::string m_nodeName;
 
-  std::vector<Vec<float, 3>>  m_positions;
+  std::vector<Vector<float, 3>>  m_positions;
   std::vector<float>  m_positionsTime;
 
   std::vector<Quaternion<float>>  m_rotations;
   std::vector<float>  m_rotationsTime;
 
-  std::vector<Vec<float, 3>>  m_scales;
+  std::vector<Vector<float, 3>>  m_scales;
   std::vector<float>  m_scalesTime;
 };
 

@@ -65,7 +65,7 @@ Scene* AssimpLoader::load(std::string filename, std::string materialFileName, bo
 
   GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
 
-  Scene *scene = new Scene(rootNode, Vec<float, 3>::identity());
+  Scene *scene = new Scene(rootNode, Vector<float, 3>::identity());
 
 	importer.FreeScene();
 
@@ -108,12 +108,12 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
   vertexDeclarationFlags |= mesh->HasBones()                  ? Mesh::MODEL_BONE_WEIGHTS : 0;
   vertexDeclarationFlags |= mesh->HasBones()                  ? Mesh::MODEL_BONE_INDICES : 0;
 
-  std::vector<Vec<float, 3>> positions;
-  std::vector<Vec<float, 2>> textureCoords;
-  std::vector<Vec<float, 3>> normals;
-  std::vector<Vec<float, 3>> binormals;
-  std::vector<Vec<unsigned int, 4>> boneIndices;
-  std::vector<Vec<float, 4>> boneWeights;
+  std::vector<Vector<float, 3>> positions;
+  std::vector<Vector<float, 2>> textureCoords;
+  std::vector<Vector<float, 3>> normals;
+  std::vector<Vector<float, 3>> binormals;
+  std::vector<Vector<unsigned int, 4>> boneIndices;
+  std::vector<Vector<float, 4>> boneWeights;
   std::vector<Mesh::indexType> indices;
 
 	if(mesh->HasPositions())
@@ -122,7 +122,7 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
 
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-      positions[i] = Vec<float, 3>(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+      positions[i] = Vector<float, 3>(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
     }
 	}
 
@@ -146,7 +146,7 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
         tmpYCoordinates = mesh->mTextureCoords[0][i][1];
       }
 
-      textureCoords[i] = Vec<float, 2>(mesh->mTextureCoords[0][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
+      textureCoords[i] = Vector<float, 2>(mesh->mTextureCoords[0][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
 		}
 	}
 
@@ -155,7 +155,7 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
     normals.resize(mesh->mNumVertices);
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-      normals[i] = Vec<float, 3>(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+      normals[i] = Vector<float, 3>(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
     }
 	}
 
@@ -164,16 +164,17 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
     binormals.resize(mesh->mNumVertices);
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-      binormals[i] = Vec<float, 3>(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+      binormals[i] = Vector<float, 3>(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
     }
 	}
 
 	if(mesh->HasBones())//TODO SKINNED ANIMATION
 	{
-    boneWeights.resize(mesh->mNumVertices, Vec<float, 4>::identity());
-    boneIndices.resize(mesh->mNumVertices, Vec<unsigned int, 4>(~0, ~0, ~0, ~0));
+    boneWeights.resize(mesh->mNumVertices, Vector<float, 4>::identity());
+    boneIndices.resize(mesh->mNumVertices, Vector<unsigned int, 4>(~0, ~0, ~0, ~0));
     for(unsigned int i = 0; i < mesh->mNumBones; i++)
 		{
+      m_boneAnimationTable[std::string(mesh->mName.C_Str())] = mesh->mBones[i];
       mesh->mBones[i]->mName;
       for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 		  {
@@ -271,7 +272,7 @@ ResourceHandle AssimpLoader::loadMaterialsFromAssimp(std::string materialFileNam
 
 GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiNode *rootNode, std::vector<ResourceHandle> meshes)
 {
-  TransformNode *sceneRootNode = new TransformNode(Mat<float, 4>::identity(), filename);
+  TransformNode *sceneRootNode = new TransformNode(Matrix<float, 4>::identity(), filename);
   sceneRootNode->setFirstChild(createSceneNodes(rootNode, meshes, sceneRootNode, nullptr));
 
   return sceneRootNode;
@@ -279,8 +280,8 @@ GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const ai
 
 TreeNode* AssimpLoader::createSceneNodes(const aiNode *node, std::vector<ResourceHandle> meshes, GroupNode *parentNode, TreeNode *nextSibling)
 {
-  Mat<float, 4> tmpTransformationMatrix;
-  memcpy(&(tmpTransformationMatrix[0][0]), &(node->mTransformation[0][0]), sizeof(Mat<float, 4>));
+  Matrix<float, 4> tmpTransformationMatrix;
+  memcpy(&(tmpTransformationMatrix[0][0]), &(node->mTransformation[0][0]), sizeof(Matrix<float, 4>));
   tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
   TransformNode *transformNode = new TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);

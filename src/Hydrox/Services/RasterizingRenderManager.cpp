@@ -40,7 +40,7 @@ RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager,
 
   glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
   glVertexAttribBinding(Shader::POSITION, 1);
-  glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec<float, 3>));
+  glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
   glVertexAttribBinding(Shader::TEXTURE0, 1);
 
   std::string shaderPath = shaderManager->getPath();
@@ -64,7 +64,7 @@ RasterizerRenderManager::~RasterizerRenderManager()
   delete m_spriteShader;
 }
 
-void RasterizerRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition, Scene *scene)
+void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -74,8 +74,8 @@ void RasterizerRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& p
   Shader *renderShader;
   Texture *renderTexture;
 
-  Mat<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-  Mat<float, 4> worldViewProjectionMatrix;
+  Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
+  Matrix<float, 4> worldViewProjectionMatrix;
 
   const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
 
@@ -132,10 +132,10 @@ void RasterizerRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& p
     renderTexture->setTexture(0);
 		m_billboardShader->setTexture(6, 0);
 
-    Mat<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
-		Mat<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
-    Vec<float, 2> scale = renderBillboard->getScale();
-		Vec<float, 3> translate = renderBillboard->getPosition();
+    Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
+		Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
+    Vector<float, 2> scale = renderBillboard->getScale();
+		Vector<float, 3> translate = renderBillboard->getPosition();
     m_billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
 		m_billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
 		m_billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
@@ -162,8 +162,8 @@ void RasterizerRenderManager::render(Mat<float, 4>& viewMatrix, Mat<float, 4>& p
     renderTexture->setTexture(0);
 		m_spriteShader->setTexture(2, 0);
 		
-		Mat<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Mat<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
-		Mat<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+		Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
+		Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
 		m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
 

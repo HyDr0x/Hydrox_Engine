@@ -3,7 +3,7 @@
 #include "Hydrox/Utility/Tree/LODNode.h"
 
 
-CullTraverser::CullTraverser(std::vector<float> lodRanges, Vec<float, 3> camPos) : m_lodRanges(lodRanges), m_camPos(camPos)
+CullTraverser::CullTraverser(std::vector<float> lodRanges, Vector<float, 3> camPos) : m_lodRanges(lodRanges), m_camPos(camPos)
 {
 }
 

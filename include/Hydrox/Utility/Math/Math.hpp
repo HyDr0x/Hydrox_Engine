@@ -27,97 +27,97 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return angle / PI * 180.0f;
   }
 
-	template<typename Type> inline Vec<Type,4> abs(Vec<Type,4>& v1)
+	template<typename Type> inline Vector<Type,4> abs(Vector<Type,4>& v1)
   {
-    return Vec<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));
+    return Vector<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));
   }
 
-  template<typename Type> inline Vec<Type,3> abs(Vec<Type,3>& v1)
+  template<typename Type> inline Vector<Type,3> abs(Vector<Type,3>& v1)
   {
-    return Vec<Type,3>(abs(v1[0]), abs(v1[1]), abs(v1[2]));
+    return Vector<Type,3>(abs(v1[0]), abs(v1[1]), abs(v1[2]));
   }
 
-  template<typename Type> inline Vec<Type,2> abs(Vec<Type,2>& v1)
+  template<typename Type> inline Vector<Type,2> abs(Vector<Type,2>& v1)
   {
-    return Vec<Type,2>(abs(v1[0]),abs(v1[1]));
+    return Vector<Type,2>(abs(v1[0]),abs(v1[1]));
   }
 
-  template<typename Type> inline Vec<Type,1> abs(Vec<Type,1>& v1)
+  template<typename Type> inline Vector<Type,1> abs(Vector<Type,1>& v1)
   {
-    return Vec<Type,1>(abs(v1[0]));
+    return Vector<Type,1>(abs(v1[0]));
   }
 
-  template<typename Type> inline Vec<Type, 3> cross(Vec<Type, 3>& v1, Vec<Type, 3>& v2)
+  template<typename Type> inline Vector<Type, 3> cross(Vector<Type, 3>& v1, Vector<Type, 3>& v2)
   {
-    return Vec<Type,3>(v1[1]*v2[2]-v2[1]*v1[2], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]);
+    return Vector<Type,3>(v1[1]*v2[2]-v2[1]*v1[2], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]);
   }
 
-  template<typename CastType, typename Type> inline Vec<CastType, 4> vector_cast(Vec<Type, 4>& v)
+  template<typename CastType, typename Type> inline Vector<CastType, 4> vector_cast(Vector<Type, 4>& v)
   {
-    return Vec<CastType, 4>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]), static_cast<CastType>(v[3]));
+    return Vector<CastType, 4>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]), static_cast<CastType>(v[3]));
   }
 
-  template<typename CastType, typename Type> inline Vec<CastType, 3> vector_cast(Vec<Type, 3>& v)
+  template<typename CastType, typename Type> inline Vector<CastType, 3> vector_cast(Vector<Type, 3>& v)
   {
-    return Vec<CastType, 3>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]));
+    return Vector<CastType, 3>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]));
   }
 
-  template<typename CastType, typename Type> inline Vec<CastType, 2> vector_cast(Vec<Type, 2>& v)
+  template<typename CastType, typename Type> inline Vector<CastType, 2> vector_cast(Vector<Type, 2>& v)
   {
-    return Vec<CastType, 2>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]));
+    return Vector<CastType, 2>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]));
   }
 
-  template<typename CastType, typename Type> inline Vec<CastType, 1> vector_cast(Vec<Type, 1>& v)
+  template<typename CastType, typename Type> inline Vector<CastType, 1> vector_cast(Vector<Type, 1>& v)
   {
-    return Vec<CastType, 1>(static_cast<CastType>(v[0]));
+    return Vector<CastType, 1>(static_cast<CastType>(v[0]));
   }
 
-  inline Mat<float,4> createPerspective(float left, float right, float bottom, float top, float cnear, float cfar)
+  inline Matrix<float,4> createPerspective(float left, float right, float bottom, float top, float cnear, float cfar)
   {
-    return Mat<float,4>((2.0f * cnear) / (right - left), 0.0f,                           (right + left) / (right - left), 0.0f,
+    return Matrix<float,4>((2.0f * cnear) / (right - left), 0.0f,                           (right + left) / (right - left), 0.0f,
                         0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
                         0.0f,                           0.0f,                           (cfar + cnear) / (cfar - cnear),     (2.0f * cfar * cnear) / (cfar - cnear),
                         0.0f,                           0.0f,                          -1.0f,                            0.0f);
   }
 
-  inline Mat<float,4> createPerspective(float fov, float aspectRatio, float cnear, float cfar)
+  inline Matrix<float,4> createPerspective(float fov, float aspectRatio, float cnear, float cfar)
   {
     float f = 1.0f / tanf(fov / 2.0f);
 
-    return Mat<float,4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
+    return Matrix<float,4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
                         0.0f,                           f,                             0.0f,                               0.0f,
                         0.0f,                           0.0f,                          (cfar + cnear) / (cfar - cnear),       (2.0f * cfar * cnear) / (cfar - cnear),
                         0.0f,                           0.0f,                          -1.0f,                              0.0f);
   }
 
-  //inline Mat<float,4> createPerspective(float fov, float aspectRatio, float near, float far)
+  //inline Matrix<float,4> createPerspective(float fov, float aspectRatio, float near, float far)
   //{
   //  float f = 1.0f / tanf(fov / 2.0f);
 
-  //  return Mat<float,4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
+  //  return Matrix<float,4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
   //                      0.0f,                           f,                             0.0f,                               0.0f,
   //                      0.0f,                           0.0f,                          (far + near) / (near - far),       -1.0f,
   //                      0.0f,                           0.0f,                          (2.0f * far * near) / (near - far), 0.0f);
   //}
 
-  inline Mat<float,4> createOrthographic(float left, float right, float bottom, float top, float cnear, float cfar)
+  inline Matrix<float,4> createOrthographic(float left, float right, float bottom, float top, float cnear, float cfar)
   {
-    return Mat<float,4>(2.0f / (right - left),0.0f,                   0.0f,                -(left + right) / (right - left),
+    return Matrix<float,4>(2.0f / (right - left),0.0f,                   0.0f,                -(left + right) / (right - left),
                         0.0f,                 2.0f / (top - bottom),  0.0f,                -(bottom + top) / (top - bottom),
                         0.0f,                 0.0f,                  -2.0f / (cfar - cnear), -(cnear + cfar)   / (cfar - cnear),
                         0.0f,                 0.0f,                   0.0f,                 1.0f);
   }
 
-  inline Mat<float,4> createLookAt(Vec<float,3> camPos, Vec<float,3> aimPos, Vec<float,3> upVektor)
+  inline Matrix<float,4> createLookAt(Vector<float,3> camPos, Vector<float,3> aimPos, Vector<float,3> upVektor)
   {
-    Vec<float,3> z = aimPos - camPos;
+    Vector<float,3> z = aimPos - camPos;
     z.normalize();
     upVektor.normalize();
-    Vec<float,3> x = cross(z, upVektor);
+    Vector<float,3> x = cross(z, upVektor);
     x.normalize();
-    Vec<float,3> y = cross(x, z);
+    Vector<float,3> y = cross(x, z);
 
-    Mat<float,4> rotMat(x[0], x[1], x[2], 0,
+    Matrix<float,4> rotMat(x[0], x[1], x[2], 0,
                         y[0], y[1], y[2], 0,
                         -z[0],-z[1],-z[2], 0,
                         0.0f, 0.0f, 0.0f, 1.0f);
@@ -128,20 +128,20 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return rotMat;
   }
 
-  template<typename Type> Mat<Type,4> rotAxis(Mat<Type, 4> m, float angle, Vec<Type, 3>& v)
+  template<typename Type> Matrix<Type,4> rotAxis(Matrix<Type, 4> m, float angle, Vector<Type, 3>& v)
   {
     angle = degToRad(angle);
     const float sinAngle = sinf(angle);
     const float cosAngle = cosf(angle);
     v.normalize();
-    Vec<Type,3> vTmp = v * (1.0f - cosAngle);
+    Vector<Type,3> vTmp = v * (1.0f - cosAngle);
 
-    Mat<Type,4> rotMat( cosAngle + vTmp[0] * v[0]                  , 0.0f + vTmp[0] * v[1] + sinAngle * v[2], 0.0f + vTmp[0] * v[2] - sinAngle * v[1], 0.0f,
+    Matrix<Type,4> rotMat( cosAngle + vTmp[0] * v[0]                  , 0.0f + vTmp[0] * v[1] + sinAngle * v[2], 0.0f + vTmp[0] * v[2] - sinAngle * v[1], 0.0f,
                         0.0f     + vTmp[1] * v[0] - sinAngle * v[2], cosAngle + vTmp[1] * v[1]              , 0.0f + vTmp[1] * v[2] + sinAngle * v[0], 0.0f,
                         0.0f     + vTmp[2] * v[0] + sinAngle * v[1], 0.0f + vTmp[2] * v[1] - sinAngle * v[0], cosAngle + vTmp[2] * v[2]              , 0.0f,
                         0.0f                                       , 0.0f                                   , 0.0f                                   , 1.0f);
 
-    Mat<Type,4> result;
+    Matrix<Type,4> result;
     result[0] = rotMat[0] * m[0][0] + rotMat[1] * m[0][1] + rotMat[2] * m[0][2];
     result[1] = rotMat[0] * m[1][0] + rotMat[1] * m[1][1] + rotMat[2] * m[1][2];
     result[2] = rotMat[0] * m[2][0] + rotMat[1] * m[2][1] + rotMat[2] * m[2][2];
@@ -150,7 +150,7 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return result;
   }
 
-  template<typename Type> void decomposeMatrix(Mat<Type,4> matrix, Vec<Type,3>& angle, Vec<Type,3>& position, Vec<Type,3>& scale)
+  template<typename Type> void decomposeMatrix(Matrix<Type,4> matrix, Vector<Type,3>& angle, Vector<Type,3>& position, Vector<Type,3>& scale)
   {
     scale[0] = sqrt(matrix[0][0] * matrix[0][0] + matrix[0][1] * matrix[0][1] + matrix[0][2] * matrix[0][2]);
     scale[1] = sqrt(matrix[1][0] * matrix[1][0] + matrix[1][1] * matrix[1][1] + matrix[1][2] * matrix[1][2]);
@@ -172,8 +172,8 @@ namespace math//make the functions inline or create a declaration cpp (no double
     angle[1] = asin(matrix[0][2]);
     angle[2] = asin(matrix[1][0]);
 
-    Mat<float,4> rtxMatrix, rtyMatrix, rtzMatrix;
-    rtxMatrix = rtyMatrix = rtzMatrix = Mat<float,4>::identity();
+    Matrix<float,4> rtxMatrix, rtyMatrix, rtzMatrix;
+    rtxMatrix = rtyMatrix = rtzMatrix = Matrix<float,4>::identity();
 
     rtxMatrix[1][1] = rtxMatrix[2][2] = cos(angle[0]);
     rtxMatrix[2][1] = sin(angle[0]);
@@ -215,7 +215,7 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return Quaternion<Type>(cosf(angle), 0.0f, 0.0f, sinf(angle));
   }
 
-  template<typename Type> inline Quaternion<Type> createRotAxisQuaternion(Type angle, Vec<Type, 3> axis)
+  template<typename Type> inline Quaternion<Type> createRotAxisQuaternion(Type angle, Vector<Type, 3> axis)
   {
     angle *= 0.5f;
     axis *= sinf(angle);
@@ -223,15 +223,15 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return Quaternion<Type>(cosf(angle), axis[0], axis[1], axis[2]);
   }
 
-  inline Mat<float, 4> createTransformationMatrix(Vec<float, 3> translation, float scale, Quaternion<float> rotation)
+  inline Matrix<float, 4> createTransformationMatrix(Vector<float, 3> translation, float scale, Quaternion<float> rotation)
   {
     /*Quaternion<float> rotationQuaternion = math::createRotXQuaternion(rotation[0]) * 
                                            math::createRotYQuaternion(rotation[1]) * 
                                            math::createRotZQuaternion(rotation[2]);
 
-    Mat<float, 3> rotationMatrix = rotationQuaternion.toMatrix();
+    Matrix<float, 3> rotationMatrix = rotationQuaternion.toMatrix();
 
-    Mat<float, 3> t = Mat<float, 3>::identity();
+    Matrix<float, 3> t = Matrix<float, 3>::identity();
 
     t[0][0] = scale[0];
     t[1][1] = scale[1];
@@ -239,15 +239,15 @@ namespace math//make the functions inline or create a declaration cpp (no double
 
     t *= rotationMatrix;
 
-    return Mat<float, 4>(
+    return Matrix<float, 4>(
       t[0][0], t[1][0], t[2][0], translation[0],
       t[0][1], t[1][1], t[2][1], translation[1],
       t[0][2], t[1][2], t[2][2], translation[2],
          0.0f,    0.0f,    0.0f, 1.0f);*/
 
-    Mat<float, 4> tlMatrix, rotationMatrix, scMatrix;
+    Matrix<float, 4> tlMatrix, rotationMatrix, scMatrix;
 
-    tlMatrix = rotationMatrix = scMatrix = Mat<float, 4>::identity();
+    tlMatrix = rotationMatrix = scMatrix = Matrix<float, 4>::identity();
 
     tlMatrix[3][0] = translation[0];
     tlMatrix[3][1] = translation[1];
@@ -263,10 +263,10 @@ namespace math//make the functions inline or create a declaration cpp (no double
   }
 
   #if defined(SSE4)
-  template<typename Type> inline Vec<Type,4> operator * ( Vec<Type,4>& v, Mat<Type,4>& m )//SSE4.1
+  template<typename Type> inline Vector<Type,4> operator * ( Vector<Type,4>& v, Matrix<Type,4>& m )//SSE4.1
   {
     __m128 a,b,c;
-    Vec<Type,4> vTmp, vErg;
+    Vector<Type,4> vTmp, vErg;
     b=_mm_loadu_ps(&v[0]);
 
     a=_mm_loadu_ps(&(m[0][0]));
@@ -291,10 +291,10 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return vErg;
   }
 
-  template<typename Type> inline Vec<Type,3> operator * ( Vec<Type,3>& v, Mat<Type,3>& m )//SSE4.1
+  template<typename Type> inline Vector<Type,3> operator * ( Vector<Type,3>& v, Matrix<Type,3>& m )//SSE4.1
   {
     __m128 a,b,c;
-    Vec<Type,3> vTmp, vErg;
+    Vector<Type,3> vTmp, vErg;
     b=_mm_loadu_ps(&v[0]);
 
     a=_mm_loadu_ps(&(m[0][0]));
@@ -314,10 +314,10 @@ namespace math//make the functions inline or create a declaration cpp (no double
     return vErg;
   }
 
-  template<typename Type> inline Vec<Type,2> operator * ( Vec<Type,2>& v, Mat<Type,2>& m )//SSE4.1
+  template<typename Type> inline Vector<Type,2> operator * ( Vector<Type,2>& v, Matrix<Type,2>& m )//SSE4.1
   {
     __m128 a,b,c;
-    Vec<Type,2> vTmp, vErg;
+    Vector<Type,2> vTmp, vErg;
     b=_mm_loadu_ps(&v[0]);
 
     a=_mm_loadu_ps(&(m[0][0]));

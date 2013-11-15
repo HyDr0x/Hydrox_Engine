@@ -56,12 +56,12 @@ void ParticleNode::postTraverse(Traverser* traverser)
   traverser->postTraverse(this);
 }
 
-Mat<float,4> ParticleNode::getTransformationMatrix() const
+Matrix<float,4> ParticleNode::getTransformationMatrix() const
 {
   return m_trfMatrix;
 }
 
-void ParticleNode::setTransformationMatrix(const Mat<float,4>& trfMatrix)
+void ParticleNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
 {
   m_trfMatrix = trfMatrix;
 }

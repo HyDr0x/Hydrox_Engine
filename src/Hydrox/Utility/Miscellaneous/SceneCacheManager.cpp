@@ -46,7 +46,7 @@ void SceneCacheManager::setLODRanges(std::vector<float> lodRanges)
   m_lodRanges = lodRanges;
 }
 
-void SceneCacheManager::updateCaches(Vec<float, 3>& cameraPosition)
+void SceneCacheManager::updateCaches(Vector<float, 3>& cameraPosition)
 {
   updateTransformNodes();
   updateLODNodes(cameraPosition);
@@ -73,7 +73,7 @@ void SceneCacheManager::updateTransformNodes()
   m_dirtyTransforms.clear();
 }
 
-void SceneCacheManager::updateLODNodes(Vec<float, 3>& cameraPosition)
+void SceneCacheManager::updateLODNodes(Vector<float, 3>& cameraPosition)
 {
   for(std::list<LODNode*>::iterator lit = m_activeLODs.begin(); lit != m_activeLODs.end(); lit++)
   {
@@ -116,7 +116,7 @@ void SceneCacheManager::removeNodeFromCaches(TreeNode *node)
   else if(removeSingleNodeFromCacheList<LightNode>(m_activeLights, node)){}
 }
 
-void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, Vec<float, 3>& cameraPosition)
+void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, Vector<float, 3>& cameraPosition)
 {
   CullTraverser cullTraverser(m_lodRanges, cameraPosition);
   cullTraverser.addTraverserFlag(Traverser::TRAVERSE_DEFAULT);
@@ -131,7 +131,7 @@ void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, Vec<float, 3>& camer
 
 void SceneCacheManager::removeTreeFromCaches(TreeNode *rootNode)
 {
-  CullTraverser cullTraverser(m_lodRanges, Vec<float, 3>::identity());
+  CullTraverser cullTraverser(m_lodRanges, Vector<float, 3>::identity());
   cullTraverser.addTraverserFlag(Traverser::TRAVERSE_IGNORE_LODS);
   cullTraverser.doTraverse(rootNode);
 

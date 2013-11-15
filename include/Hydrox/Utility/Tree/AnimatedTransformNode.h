@@ -1,6 +1,7 @@
-#ifndef TRANSFORMNODE_H_
-#define TRANSFORMNODE_H_
+#ifndef ANIMATEDTRANSFORMNODE_H_
+#define ANIMATEDTRANSFORMNODE_H_
 
+#include <map>
 #include <vector>
 
 #include "Hydrox/DLLExport.h"
@@ -12,15 +13,30 @@
 
 class Traverser;
 
-class GRAPHICAPI TransformNode : public GroupNode, public Subject<TransformNode*>
+struct AnimationTrack
+{
+  std::string m_animationName;
+  std::string m_nodeName;
+
+  std::vector<Vector<float, 3>>  m_positions;
+  std::vector<float>  m_positionsTime;
+
+  std::vector<Quaternion<float>>  m_rotations;
+  std::vector<float>  m_rotationsTime;
+
+  std::vector<Vector<float, 3>>  m_scales;
+  std::vector<float>  m_scalesTime;
+};
+
+class GRAPHICAPI AnimatedTransformNode : public GroupNode, public Subject<AnimatedTransformNode*>
 {
 public:
 
-  TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  TransformNode& operator=(const TransformNode& destinationNode);
+  AnimatedTransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+  AnimatedTransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+  AnimatedTransformNode& operator=(const AnimatedTransformNode& destinationNode);
   virtual TreeNode& operator=(const TreeNode& destinationNode);
-  virtual ~TransformNode();
+  virtual ~AnimatedTransformNode();
 
   virtual GroupNode* clone() const;
 
@@ -62,6 +78,8 @@ private:
   Quaternion<float> m_rotation;
   Vector<float, 3> m_translation;
   float m_scale;
+
+  std::map<std::string, AnimationTrack> m_animationTracks;
 };
 
 #endif

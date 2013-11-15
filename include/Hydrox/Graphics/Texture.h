@@ -29,7 +29,7 @@ public:
 
 	void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
 
-	Vec<unsigned int, 2> getResolution();
+	Vector<unsigned int, 2> getResolution();
 	GLuint getSlot();
 	GLenum getTarget();
 

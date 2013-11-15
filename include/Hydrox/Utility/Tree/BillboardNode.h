@@ -26,8 +26,8 @@ public:
 
   ResourceHandle getBillboardIndex() const;
 
-  Mat<float, 4> getTransformationMatrix() const;
-  void setTransformationMatrix(const Mat<float, 4>& trfMatrix);
+  Matrix<float, 4> getTransformationMatrix() const;
+  void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
   void setRenderable(bool renderable);
 	bool getRenderable() const;
@@ -37,7 +37,7 @@ public:
 
 private:
 
-  Mat<float,4> m_trfMatrix;//the tranformation Matrix
+  Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 
   ResourceHandle m_billboardIndex;//index which points into the array of the texturemanager
 

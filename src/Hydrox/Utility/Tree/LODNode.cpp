@@ -4,7 +4,7 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-LODNode::LODNode(Vec<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
+LODNode::LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
 GroupNode(nodeName, parent, nextSibling, firstChild),
   m_lodLevel(lodLevel),
   m_position(position)
@@ -69,14 +69,14 @@ unsigned int LODNode::getLODLevel()
   return m_lodLevel;
 }
 
-bool LODNode::getLOD(Vec<float, 3> camPos, const std::vector<float>& lodRanges)
+bool LODNode::getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges)
 {
   float distance = static_cast<float>((m_transformedPosition - camPos).length());
 
 	return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
 }
 
-void LODNode::transformPosition(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation)
+void LODNode::transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
 {
   m_transformedPosition = translation + rotation.apply(m_position * scale);
 }

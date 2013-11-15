@@ -1,10 +1,10 @@
-#include "Hydrox/Utility/Tree/TransformNode.h"
+#include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 
 #include <assert.h>
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-TransformNode::TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
+AnimatedTransformNode::AnimatedTransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
 {
   Vector<float, 3> angles;
   Vector<float, 3> scale;
@@ -16,7 +16,7 @@ TransformNode::TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nod
   m_rotation = math::createRotXQuaternion(angles[0]) * math::createRotYQuaternion(angles[1]) * math::createRotZQuaternion(angles[2]);
 }
 
-TransformNode::TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
+AnimatedTransformNode::AnimatedTransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
   : GroupNode(nodeName, parent, nextSibling, firstChild),
   m_translation(translation),
   m_scale(scale),
@@ -24,17 +24,17 @@ TransformNode::TransformNode(Vector<float, 3>& translation, float& scale, Quater
 {
 }
 
-TransformNode& TransformNode::operator=(const TransformNode& destinationNode)
+AnimatedTransformNode& AnimatedTransformNode::operator=(const AnimatedTransformNode& destinationNode)
 {
   TreeNode::operator=(destinationNode);
   return *this;
 }
 
-TreeNode& TransformNode::operator=(const TreeNode& destinationNode)
+TreeNode& AnimatedTransformNode::operator=(const TreeNode& destinationNode)
 {
   assert(typeid(*this) == typeid(destinationNode));
 
-  const TransformNode& copyNode = static_cast<const TransformNode&>(destinationNode);
+  const AnimatedTransformNode& copyNode = static_cast<const AnimatedTransformNode&>(destinationNode);
   GroupNode::operator=(destinationNode);
 
   m_translation = copyNode.m_translation;
@@ -44,13 +44,13 @@ TreeNode& TransformNode::operator=(const TreeNode& destinationNode)
   return *this;
 }
 
-TransformNode::~TransformNode()
+AnimatedTransformNode::~AnimatedTransformNode()
 {
 }
 
-GroupNode* TransformNode::clone() const
+GroupNode* AnimatedTransformNode::clone() const
 {
-  TransformNode *newNode = new TransformNode(Matrix<float,4>::identity(), m_nodeName);
+  AnimatedTransformNode *newNode = new AnimatedTransformNode(Matrix<float,4>::identity(), m_nodeName);
 
   newNode->m_nodeName = m_nodeName;
   newNode->m_dirtyFlag = m_dirtyFlag;
@@ -62,22 +62,22 @@ GroupNode* TransformNode::clone() const
   return newNode;
 }
 
-bool TransformNode::ascendTraverse(Traverser* traverser)
+bool AnimatedTransformNode::ascendTraverse(Traverser* traverser)
 {
   return traverser->ascendTraverse(this);
 }
 
-bool TransformNode::preTraverse(Traverser* traverser)
+bool AnimatedTransformNode::preTraverse(Traverser* traverser)
 {
   return traverser->preTraverse(this);
 }
 
-void TransformNode::postTraverse(Traverser* traverser)
+void AnimatedTransformNode::postTraverse(Traverser* traverser)
 {
   traverser->postTraverse(this);
 }
 
-void TransformNode::calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
+void AnimatedTransformNode::calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
 {
   translation += rotation.apply(m_translation * scale);
   scale *= m_scale;
@@ -86,22 +86,22 @@ void TransformNode::calculateTransformation(Vector<float, 3>& translation, float
 
 ///////////////////TRANSFORMATIONS//////////////////////////
 
-Vector<float, 3> TransformNode::getPosition()
+Vector<float, 3> AnimatedTransformNode::getPosition()
 {
 	return m_translation;
 }
 
-Quaternion<float> TransformNode::getRotation()
+Quaternion<float> AnimatedTransformNode::getRotation()
 {
 	return m_rotation;
 }
 
-float TransformNode::getScale()
+float AnimatedTransformNode::getScale()
 {
 	return m_scale;
 }
 
-void TransformNode::setPosition(float x, float y, float z)
+void AnimatedTransformNode::setPosition(float x, float y, float z)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -114,7 +114,7 @@ void TransformNode::setPosition(float x, float y, float z)
 	m_translation[2] = z;
 }
 
-void TransformNode::setPosition(Vector<float, 3> v)
+void AnimatedTransformNode::setPosition(Vector<float, 3> v)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -125,7 +125,7 @@ void TransformNode::setPosition(Vector<float, 3> v)
 	m_translation = v;
 }
 
-void TransformNode::setTranslation(float x, float y, float z)
+void AnimatedTransformNode::setTranslation(float x, float y, float z)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -138,7 +138,7 @@ void TransformNode::setTranslation(float x, float y, float z)
 	m_translation[2] += z;
 }
 
-void TransformNode::setTranslation(Vector<float, 3> v)
+void AnimatedTransformNode::setTranslation(Vector<float, 3> v)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -149,7 +149,7 @@ void TransformNode::setTranslation(Vector<float, 3> v)
 	m_translation += v;
 }
 
-void TransformNode::setRotation(Quaternion<float> q)
+void AnimatedTransformNode::setRotation(Quaternion<float> q)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -160,7 +160,7 @@ void TransformNode::setRotation(Quaternion<float> q)
   m_rotation = q;
 }
 
-void TransformNode::turnRotation(Quaternion<float> q)
+void AnimatedTransformNode::turnRotation(Quaternion<float> q)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -171,7 +171,7 @@ void TransformNode::turnRotation(Quaternion<float> q)
   m_rotation *= q;
 }
 
-void TransformNode::setRotationX(float angle)
+void AnimatedTransformNode::setRotationX(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -182,7 +182,7 @@ void TransformNode::setRotationX(float angle)
 	m_rotation = math::createRotXQuaternion(angle);
 }
 
-void TransformNode::setTurnX(float angle)
+void AnimatedTransformNode::setTurnX(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -193,7 +193,7 @@ void TransformNode::setTurnX(float angle)
 	m_rotation *= math::createRotXQuaternion(angle);
 }
 
-void TransformNode::setRotationY(float angle)
+void AnimatedTransformNode::setRotationY(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -204,7 +204,7 @@ void TransformNode::setRotationY(float angle)
 	m_rotation = math::createRotYQuaternion(angle);
 }
 
-void TransformNode::setTurnY(float angle)
+void AnimatedTransformNode::setTurnY(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -215,7 +215,7 @@ void TransformNode::setTurnY(float angle)
 	m_rotation *= math::createRotYQuaternion(angle);
 }
 
-void TransformNode::setRotationZ(float angle)
+void AnimatedTransformNode::setRotationZ(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -226,7 +226,7 @@ void TransformNode::setRotationZ(float angle)
 	m_rotation = math::createRotZQuaternion(angle);
 }
 
-void TransformNode::setTurnZ(float angle)
+void AnimatedTransformNode::setTurnZ(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -237,7 +237,7 @@ void TransformNode::setTurnZ(float angle)
 	m_rotation *= math::createRotZQuaternion(angle);
 }
 
-void TransformNode::setRotationXYZ(Vector<float, 3> angle)
+void AnimatedTransformNode::setRotationXYZ(Vector<float, 3> angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -248,7 +248,7 @@ void TransformNode::setRotationXYZ(Vector<float, 3> angle)
 	m_rotation = math::createRotXQuaternion(angle[0]) * math::createRotYQuaternion(angle[1]) * math::createRotZQuaternion(angle[2]);
 }
 
-void TransformNode::setTurnXYZ(Vector<float, 3> angle)
+void AnimatedTransformNode::setTurnXYZ(Vector<float, 3> angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -259,7 +259,7 @@ void TransformNode::setTurnXYZ(Vector<float, 3> angle)
 	m_rotation *= math::createRotXQuaternion(angle[0]) * math::createRotYQuaternion(angle[1]) * math::createRotZQuaternion(angle[2]);
 }
 
-void TransformNode::setRotationAxis(float angle, Vector<float, 3> axis)
+void AnimatedTransformNode::setRotationAxis(float angle, Vector<float, 3> axis)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -270,7 +270,7 @@ void TransformNode::setRotationAxis(float angle, Vector<float, 3> axis)
   m_rotation = math::createRotAxisQuaternion(angle, axis);
 }
 
-void TransformNode::setTurnAxis(float angle, Vector<float, 3> axis)
+void AnimatedTransformNode::setTurnAxis(float angle, Vector<float, 3> axis)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -281,7 +281,7 @@ void TransformNode::setTurnAxis(float angle, Vector<float, 3> axis)
   m_rotation *= math::createRotAxisQuaternion(angle, axis);
 }
 
-void TransformNode::setScale(float s)
+void AnimatedTransformNode::setScale(float s)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -292,7 +292,7 @@ void TransformNode::setScale(float s)
 	m_scale = s;
 }
 
-void TransformNode::Scale(float s)
+void AnimatedTransformNode::Scale(float s)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {

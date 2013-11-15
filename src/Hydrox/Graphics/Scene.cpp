@@ -19,7 +19,7 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-Scene::Scene(GroupNode* rootNode, Vec<float, 3>& cameraPosition)
+Scene::Scene(GroupNode* rootNode, Vector<float, 3>& cameraPosition)
 {
   m_rootNode = rootNode;
 
@@ -85,7 +85,7 @@ void Scene::removeNode(TreeNode *node)
   Tree::removeNode(node);
 }
 
-GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, Vec<float, 3>& cameraPosition, std::string namePrefix)
+GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, Vector<float, 3>& cameraPosition, std::string namePrefix)
 {
   GroupNode* copiedRootNode = Tree::addSubTree(object, sceneNode, namePrefix);
 

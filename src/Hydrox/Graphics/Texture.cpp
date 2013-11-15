@@ -71,9 +71,9 @@ void Texture::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter
 	glBindTexture(m_target, 0);
 }
 
-Vec<unsigned int,2> Texture::getResolution()
+Vector<unsigned int,2> Texture::getResolution()
 {
-	return Vec<unsigned int,2>(m_width, m_height);
+	return Vector<unsigned int,2>(m_width, m_height);
 }
 
 GLuint Texture::getSlot()

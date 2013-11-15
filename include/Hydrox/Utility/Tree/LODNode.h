@@ -14,7 +14,7 @@ class GRAPHICAPI LODNode : public GroupNode
 {
 public:
 
-  LODNode(Vec<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+  LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
   LODNode& operator=(const LODNode& destinationNode);
   virtual TreeNode& operator=(const TreeNode& destinationNode);
   virtual ~LODNode();
@@ -26,14 +26,14 @@ public:
   virtual void postTraverse(Traverser* traverser);
 
   unsigned int getLODLevel();
-  bool getLOD(Vec<float, 3> camPos, const std::vector<float>& lodRanges);
+  bool getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges);
 
-  void transformPosition(Vec<float, 3>& translation, float& scale, Quaternion<float>& rotation);
+  void transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
 private:
 
-  Vec<float, 3> m_position;
-  Vec<float, 3> m_transformedPosition;
+  Vector<float, 3> m_position;
+  Vector<float, 3> m_transformedPosition;
 
   unsigned int m_lodLevel;
 };

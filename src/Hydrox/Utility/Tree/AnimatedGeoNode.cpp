@@ -1,26 +1,26 @@
-#include "Hydrox/Utility/Tree/GeoNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 
 #include <assert.h>
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-GeoNode::GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
+AnimatedGeoNode::AnimatedGeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                                   m_meshIndex(meshIndex),
                                                                                                                                   m_renderable(renderable)
 {
 }
 
-GeoNode& GeoNode::operator=(const GeoNode& destinationNode)
+AnimatedGeoNode& AnimatedGeoNode::operator=(const AnimatedGeoNode& destinationNode)
 {
   TreeNode::operator=(destinationNode);
   return *this;
 }
 
-TreeNode& GeoNode::operator=(const TreeNode& destinationNode)
+TreeNode& AnimatedGeoNode::operator=(const TreeNode& destinationNode)
 {
   assert(typeid(*this) == typeid(destinationNode));
 
-  const GeoNode& copyNode = static_cast<const GeoNode&>(destinationNode);
+  const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(destinationNode);
   TreeNode::operator=(destinationNode);
 
   m_trfMatrix = copyNode.m_trfMatrix;
@@ -30,13 +30,13 @@ TreeNode& GeoNode::operator=(const TreeNode& destinationNode)
   return *this;
 }
 
-GeoNode::~GeoNode()
+AnimatedGeoNode::~AnimatedGeoNode()
 {
 }
 
-TreeNode* GeoNode::clone() const
+TreeNode* AnimatedGeoNode::clone() const
 {
-  GeoNode *newNode = new GeoNode(~0, true, m_nodeName);
+  AnimatedGeoNode *newNode = new AnimatedGeoNode(~0, true, m_nodeName);
 
   newNode->m_nodeName = m_nodeName;
 
@@ -47,52 +47,52 @@ TreeNode* GeoNode::clone() const
   return newNode;
 }
 
-bool GeoNode::ascendTraverse(Traverser* traverser)
+bool AnimatedGeoNode::ascendTraverse(Traverser* traverser)
 {
   return traverser->ascendTraverse(this);
 }
 
-bool GeoNode::preTraverse(Traverser* traverser)
+bool AnimatedGeoNode::preTraverse(Traverser* traverser)
 {
   return traverser->preTraverse(this);
 }
 
-void GeoNode::postTraverse(Traverser* traverser)
+void AnimatedGeoNode::postTraverse(Traverser* traverser)
 {
   traverser->postTraverse(this);
 }
 
-ResourceHandle GeoNode::getMeshIndex() const
+ResourceHandle AnimatedGeoNode::getMeshIndex() const
 {
   return m_meshIndex;
 }
 
-Matrix<float,4> GeoNode::getTransformationMatrix() const
+Matrix<float,4> AnimatedGeoNode::getTransformationMatrix() const
 {
   return m_trfMatrix;
 }
 
-void GeoNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
+void AnimatedGeoNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
 {
   m_trfMatrix = trfMatrix;
 }
 
-void GeoNode::setRenderable(bool renderable)
+void AnimatedGeoNode::setRenderable(bool renderable)
 {
   m_renderable = renderable;
 }
 
-bool GeoNode::getRenderable() const
+bool AnimatedGeoNode::getRenderable() const
 {
   return m_renderable;
 }
 
-void GeoNode::setDeleteThis(bool deleteThis)
+void AnimatedGeoNode::setDeleteThis(bool deleteThis)
 {
   m_deleteThis = deleteThis;
 }
 
-bool GeoNode::getDeleteThis()
+bool AnimatedGeoNode::getDeleteThis()
 {
   return m_deleteThis;
 }

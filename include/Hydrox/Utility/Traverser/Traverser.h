@@ -3,8 +3,11 @@
 
 class TreeNode;
 class GroupNode;
+
 class LODNode;
+class AnimatedTransformNode;
 class TransformNode;
+class AnimatedGeoNode;
 class GeoNode;
 class BillboardNode;
 class ParticleNode;
@@ -39,6 +42,10 @@ public:
   virtual bool preTraverse(GroupNode* treeNode);
   virtual void postTraverse(GroupNode* treeNode);
 
+  virtual bool ascendTraverse(AnimatedTransformNode* treeNode);
+  virtual bool preTraverse(AnimatedTransformNode* treeNode);
+  virtual void postTraverse(AnimatedTransformNode* treeNode);
+
   virtual bool ascendTraverse(TransformNode* treeNode);
   virtual bool preTraverse(TransformNode* treeNode);
   virtual void postTraverse(TransformNode* treeNode);
@@ -46,6 +53,10 @@ public:
   virtual bool ascendTraverse(LODNode* treeNode);
   virtual bool preTraverse(LODNode* treeNode);
   virtual void postTraverse(LODNode* treeNode);
+
+  virtual bool ascendTraverse(AnimatedGeoNode* treeNode);
+  virtual bool preTraverse(AnimatedGeoNode* treeNode);
+  virtual void postTraverse(AnimatedGeoNode* treeNode);
 
   virtual bool ascendTraverse(GeoNode* treeNode);
   virtual bool preTraverse(GeoNode* treeNode);

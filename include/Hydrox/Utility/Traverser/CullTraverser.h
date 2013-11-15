@@ -11,7 +11,7 @@ class CullTraverser : public Traverser
 {
 public:
 
-  CullTraverser(std::vector<float> lodRanges, Vec<float, 3> camPos);
+  CullTraverser(std::vector<float> lodRanges, Vector<float, 3> camPos);
   virtual ~CullTraverser();
 
   virtual bool preTraverse(TransformNode* treeNode);
@@ -41,7 +41,7 @@ public:
 
 protected:
 
-  Vec<float, 3> m_camPos;
+  Vector<float, 3> m_camPos;
   std::vector<float> m_lodRanges;
 
   std::list<TransformNode*> m_dirtyTransforms;

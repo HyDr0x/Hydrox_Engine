@@ -95,6 +95,20 @@ void Traverser::postTraverse(GroupNode* treeNode)
 {
 }
 
+bool Traverser::ascendTraverse(AnimatedTransformNode* treeNode)
+{
+  return true;
+}
+
+bool Traverser::preTraverse(AnimatedTransformNode* treeNode)
+{
+  return true;
+}
+
+void Traverser::postTraverse(AnimatedTransformNode* treeNode)
+{
+}
+
 bool Traverser::ascendTraverse(TransformNode* treeNode)
 {
   return true;
@@ -120,6 +134,20 @@ bool Traverser::preTraverse(LODNode* treeNode)
 }
 
 void Traverser::postTraverse(LODNode* treeNode)
+{
+}
+
+bool Traverser::ascendTraverse(AnimatedGeoNode* treeNode)
+{
+  return true;
+}
+
+bool Traverser::preTraverse(AnimatedGeoNode* treeNode)
+{
+  return true;
+}
+
+void Traverser::postTraverse(AnimatedGeoNode* treeNode)
 {
 }
 

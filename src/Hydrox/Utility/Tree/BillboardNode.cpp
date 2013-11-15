@@ -67,12 +67,12 @@ ResourceHandle BillboardNode::getBillboardIndex() const
   return m_billboardIndex;
 }
 
-Mat<float,4> BillboardNode::getTransformationMatrix() const
+Matrix<float,4> BillboardNode::getTransformationMatrix() const
 {
   return m_trfMatrix;
 }
 
-void BillboardNode::setTransformationMatrix(const Mat<float,4>& trfMatrix)
+void BillboardNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
 {
   m_trfMatrix = trfMatrix;
 }

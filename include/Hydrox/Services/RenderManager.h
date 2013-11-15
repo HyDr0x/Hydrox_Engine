@@ -28,7 +28,7 @@ public:
 	virtual ~RenderManager();
 
   virtual void addSprite(ResourceHandle spriteID);
-	virtual void render(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition, Scene *scene) = 0;
+	virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
 
 protected:
 

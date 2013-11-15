@@ -56,12 +56,12 @@ void LightNode::postTraverse(Traverser* traverser)
   traverser->postTraverse(this);
 }
 
-Mat<float,4> LightNode::getTransformationMatrix() const
+Matrix<float,4> LightNode::getTransformationMatrix() const
 {
   return m_trfMatrix;
 }
 
-void LightNode::setTransformationMatrix(const Mat<float,4>& trfMatrix)
+void LightNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
 {
   m_trfMatrix = trfMatrix;
 }

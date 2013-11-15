@@ -51,7 +51,7 @@ void GraphicEngine::setRenderOptions(unsigned int width, unsigned int height, fl
   m_aspectRatio = aspectRatio;
 }
 
-void GraphicEngine::setClearColor(Vec<float, 4> color)
+void GraphicEngine::setClearColor(Vector<float, 4> color)
 {
 	glClearColor(color[0], color[1], color[2], color[3]);
 }
@@ -102,15 +102,15 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
 	m_renderManager = new RasterizerRenderManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
 	m_eventManager = new EventManager();
   
-  m_scene = new Scene(new TransformNode(Mat<float, 4>::identity(), worldRootNodeName), Vec<float, 3>::identity());
+  m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 }
 
-void GraphicEngine::update(Vec<float, 3>& cameraPosition)
+void GraphicEngine::update(Vector<float, 3>& cameraPosition)
 {
   m_scene->updateCaches(cameraPosition);
 }
 
-void GraphicEngine::draw(Mat<float, 4>& viewMatrix, Mat<float, 4>& projectionMatrix, Vec<float, 3>& cameraPosition)
+void GraphicEngine::draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition)
 {
   m_renderManager->render(viewMatrix, projectionMatrix, cameraPosition, m_scene);
 }

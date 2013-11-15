@@ -38,7 +38,7 @@ protected:
   virtual void postAscendTraverse();
 
   std::stack<float> m_scaleStack;
-  std::stack<Vec<float, 3>> m_translateStack;
+  std::stack<Vector<float, 3>> m_translateStack;
   std::stack<Quaternion<float>> m_rotationStack;
 };
 

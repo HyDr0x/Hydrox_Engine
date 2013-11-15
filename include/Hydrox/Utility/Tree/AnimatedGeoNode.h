@@ -1,5 +1,7 @@
-#ifndef GEONODE_H_
-#define GEONODE_H_
+#ifndef ANIMATEDGEONODE_H_
+#define ANIMATEDGEONODE_H_
+
+#include <vector>
 
 #include "Hydrox/DLLExport.h"
 
@@ -8,15 +10,14 @@
 
 class Traverser;
 
-
-class GRAPHICAPI GeoNode : public TreeNode
+class GRAPHICAPI AnimatedGeoNode : public TreeNode
 {
 public:
 
-  GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  GeoNode& operator=(const GeoNode& destinationNode);
+  AnimatedGeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+  AnimatedGeoNode& operator=(const AnimatedGeoNode& destinationNode);
   virtual TreeNode& operator=(const TreeNode& destinationNode);
-  virtual ~GeoNode();
+  virtual ~AnimatedGeoNode();
 
   virtual TreeNode* clone() const;
 
@@ -38,6 +39,8 @@ public:
 private:
 
   Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+
+  std::vector<Matrix<float, 4>> m_inverseBindPoseMatrices;
 
   ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
 

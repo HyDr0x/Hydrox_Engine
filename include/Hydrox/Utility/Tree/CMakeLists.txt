@@ -10,5 +10,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Tree.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedGeoNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedTransformNode.h 
 	PARENT_SCOPE 
 )

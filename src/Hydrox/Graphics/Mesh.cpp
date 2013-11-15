@@ -16,12 +16,12 @@ Mesh::Mesh()
 }
 
 Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
-            std::vector<Vec<float, 3>> positions, 
-            std::vector<Vec<float, 2>> textureCoords, 
-            std::vector<Vec<float, 3>> normals, 
-            std::vector<Vec<float, 3>> binormals, 
-            std::vector<Vec<unsigned int, 4>> boneIndices, 
-            std::vector<Vec<float, 4>> boneWeights,
+            std::vector<Vector<float, 3>> positions, 
+            std::vector<Vector<float, 2>> textureCoords, 
+            std::vector<Vector<float, 3>> normals, 
+            std::vector<Vector<float, 3>> binormals, 
+            std::vector<Vector<unsigned int, 4>> boneIndices, 
+            std::vector<Vector<float, 4>> boneWeights,
             std::vector<indexType> indices,
             GLuint primitiveType)
 {

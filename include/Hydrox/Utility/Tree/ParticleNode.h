@@ -23,12 +23,12 @@ public:
   virtual bool preTraverse(Traverser* traverser);
   virtual void postTraverse(Traverser* traverser);
 
-  Mat<float, 4> getTransformationMatrix() const;
-  void setTransformationMatrix(const Mat<float, 4>& trfMatrix);
+  Matrix<float, 4> getTransformationMatrix() const;
+  void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
 private:
 
-  Mat<float,4> m_trfMatrix;//the tranformation Matrix
+  Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 };
 
 #endif

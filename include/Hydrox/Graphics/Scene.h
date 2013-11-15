@@ -25,7 +25,7 @@ class GRAPHICAPI Scene : public Tree, public SceneCacheManager
 {
 public:
 
-	Scene(GroupNode* rootNode, Vec<float, 3>& cameraPosition);
+	Scene(GroupNode* rootNode, Vector<float, 3>& cameraPosition);
   Scene(const Scene& object);
 	~Scene();
 
@@ -33,7 +33,7 @@ public:
   TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
   void removeNode(TreeNode *node);
 
-	GroupNode* addSubTree(Tree* object, GroupNode* sceneNode, Vec<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
+	GroupNode* addSubTree(Tree* object, GroupNode* sceneNode, Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
   void removeSubTree(TreeNode* sceneNode);
 
   template<class CLASS> CLASS* getNode(const std::string& nodeName)
