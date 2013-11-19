@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 
 AnimatedTransformNode::AnimatedTransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
 {

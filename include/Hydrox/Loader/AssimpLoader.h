@@ -106,8 +106,8 @@ private:
   TextureManager *m_textureManager;
   ShaderManager *m_shaderManager;
 
-  std::map<std::string, std::vector<heAnimation*>> m_animationTable;
-  std::map<std::string, aiBone*> m_boneAnimationTable;
+  std::map<std::string, std::vector<heAnimation*>> m_animationTable;//all the animation tracks per animation
+  std::map<std::string, std::vector<aiBone*>> m_boneAnimationTable;//all the bones per mesh
 };
 
 #endif

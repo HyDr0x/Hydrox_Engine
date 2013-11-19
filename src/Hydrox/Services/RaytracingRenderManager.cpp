@@ -21,6 +21,11 @@ RaytracingRenderManager::~RaytracingRenderManager()
 {
 }
 
+void RaytracingRenderManager::initialize()
+{
+
+}
+
 void RaytracingRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)
 {
 }

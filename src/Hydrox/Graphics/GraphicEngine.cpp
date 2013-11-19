@@ -7,6 +7,7 @@
 #include "Hydrox/Services/RasterizerRenderManager.h"
 #include "Hydrox/Services/RaytracingRenderManager.h"
 #include "Hydrox/Services/Signals/EventManager.h"
+#include "Hydrox/Services/DebugLogManager.h"
 
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
@@ -23,6 +24,7 @@ GraphicEngine::GraphicEngine()
 	m_renderManager = nullptr;
   m_materialManager = nullptr;
 	m_eventManager = nullptr;
+  m_debugLogManager = nullptr;
 }
 
 GraphicEngine::~GraphicEngine()
@@ -36,6 +38,7 @@ GraphicEngine::~GraphicEngine()
 	  delete m_renderManager;
     delete m_materialManager;
 	  delete m_eventManager;
+    delete m_debugLogManager;
   }
 }
 
@@ -67,6 +70,7 @@ void GraphicEngine::registerServices(ServiceManager *serviceManager)
 
   serviceManager->addService(m_renderManager);
 	serviceManager->addService(m_eventManager);
+  serviceManager->addService(m_debugLogManager);
 }
  
 void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio)
@@ -95,14 +99,29 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
 	//create Manager
   m_modelManager = new ModelManager(modelPath);
   m_materialManager = new MaterialManager(materialPath);
-  m_shaderManager = new CacheManager<Shader>(vfxPath);
+  m_shaderManager = new ShaderManager(vfxPath);
 	m_textureManager = new TextureManager(texPath);
   m_billboardManager = new BillboardManager(texPath);
   m_spriteManager = new SpriteManager(texPath);
 	m_renderManager = new RasterizerRenderManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
-	m_eventManager = new EventManager();
+	m_eventManager = new EventManager;
+  m_debugLogManager = new DebugLogManager;
   
   m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
+
+  m_debugLogManager->gatherSystemInformation();
+  m_debugLogManager->printSystemInformation();
+
+  if(m_debugLogManager->getMajorOpenGLVersion() < 4 || m_debugLogManager->getMinorOpenGLVersion() < 3)
+  {
+    std::cout << "Error!" << std::endl;
+    std::cout << "OpenGL version too old, version 4.3 or higher needed." << std::endl;
+  }
+
+  assert(m_debugLogManager->getMajorOpenGLVersion() >= 4 && m_debugLogManager->getMinorOpenGLVersion() >= 3);
+
+  //initialize the renderer
+  m_renderManager->initialize();
 }
 
 void GraphicEngine::update(Vector<float, 3>& cameraPosition)

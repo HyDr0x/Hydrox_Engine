@@ -17,6 +17,7 @@ class RenderManager;
 class RasterizerRenderManager;
 class RaytracingRenderManager;
 class EventManager;
+class DebugLogManager;
 
 #include "Hydrox/Services/CacheManager.hpp"
 
@@ -46,13 +47,13 @@ private:
 
 	RenderManager *m_renderManager;
 	EventManager *m_eventManager;
-	ModelManager    *m_modelManager;
+	ModelManager *m_modelManager;
 	MaterialManager *m_materialManager;
-	ShaderManager   *m_shaderManager;
-  TextureManager  *m_textureManager;
+	ShaderManager *m_shaderManager;
+  TextureManager *m_textureManager;
   BillboardManager *m_billboardManager;
-  SpriteManager   *m_spriteManager;
-	
+  SpriteManager *m_spriteManager;
+	DebugLogManager *m_debugLogManager;
 
   float m_aspectRatio;
   unsigned int m_width;

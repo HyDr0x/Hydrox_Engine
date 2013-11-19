@@ -172,9 +172,10 @@ ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle mat
 	{
     boneWeights.resize(mesh->mNumVertices, Vector<float, 4>::identity());
     boneIndices.resize(mesh->mNumVertices, Vector<unsigned int, 4>(~0, ~0, ~0, ~0));
+    m_boneAnimationTable[std::string(mesh->mName.C_Str())].resize(mesh->mNumBones);
     for(unsigned int i = 0; i < mesh->mNumBones; i++)
 		{
-      m_boneAnimationTable[std::string(mesh->mName.C_Str())] = mesh->mBones[i];
+      m_boneAnimationTable[std::string(mesh->mName.C_Str())][i] = mesh->mBones[i];
       mesh->mBones[i]->mName;
       for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 		  {

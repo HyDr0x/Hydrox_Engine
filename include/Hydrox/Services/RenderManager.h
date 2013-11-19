@@ -7,13 +7,13 @@
 
 #include "Hydrox/DLLExport.h"
 
-#include "Hydrox/Services/ServiceManager.hpp"
+#include "Hydrox/Services/Io_service.h"
+
+#include "Hydrox/Services/CacheManager.hpp"
 
 class Sprite;
 class Scene;
 class Camera;
-
-#include "Hydrox/Services/CacheManager.hpp"
 
 class GRAPHICAPI RenderManager : public Io_service
 {
@@ -26,6 +26,8 @@ public:
 	              BillboardManager *billboardManager,
                 SpriteManager *spriteManager, GLfloat aspectRatio);
 	virtual ~RenderManager();
+
+  virtual void initialize() = 0;
 
   virtual void addSprite(ResourceHandle spriteID);
 	virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;

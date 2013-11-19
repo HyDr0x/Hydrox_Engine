@@ -3,7 +3,7 @@
 
 #include "Hydrox/DLLExport.h"
 
-#include "Hydrox/Services/ServiceManager.hpp"
+#include "Hydrox/Services/Io_service.h"
 #include "Hydrox/Services/RenderManager.h"
 
 class GRAPHICAPI RaytracingRenderManager : public RenderManager
@@ -17,6 +17,8 @@ public:
 	              BillboardManager *billboardManager,
                 SpriteManager *spriteManager, GLfloat aspectRatio);
 	~RaytracingRenderManager();
+
+  void initialize();
 
 	void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 

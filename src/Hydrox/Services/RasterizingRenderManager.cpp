@@ -30,6 +30,17 @@ RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager,
                                                                                     spriteManager,
                                                                                     aspectRatio)
 {
+}
+
+RasterizerRenderManager::~RasterizerRenderManager()
+{
+  glDeleteBuffers(1, &m_spriteVBO);
+  delete m_billboardShader;
+  delete m_spriteShader;
+}
+
+void RasterizerRenderManager::initialize()
+{
   float placeholder = 0;
   glGenBuffers(1, &m_spriteVBO);
 
@@ -43,7 +54,7 @@ RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager,
   glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
   glVertexAttribBinding(Shader::TEXTURE0, 1);
 
-  std::string shaderPath = shaderManager->getPath();
+  std::string shaderPath = m_shaderManager->getPath();
 
   std::string billboardVertName = "Shader/billboardShader.vert";
   std::string billboardFragName = "Shader/billboardShader.frag";
@@ -55,13 +66,6 @@ RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager,
 
   m_billboardShader = new Shader((shaderPath + billboardVertName).c_str(), (shaderPath + billboardFragName).c_str(), (shaderPath + billboardGeomName).c_str(), nullptr, nullptr, nullptr);
   m_spriteShader = new Shader((shaderPath + spriteVertName).c_str(), (shaderPath + spriteFragName).c_str(), (shaderPath + spriteGeomName).c_str(), nullptr, nullptr, nullptr);
-}
-
-RasterizerRenderManager::~RasterizerRenderManager()
-{
-  glDeleteBuffers(1, &m_spriteVBO);
-  delete m_billboardShader;
-  delete m_spriteShader;
 }
 
 void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)

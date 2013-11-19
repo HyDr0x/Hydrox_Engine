@@ -12,8 +12,9 @@
 #include "Hydrox/Utility/Tree/GroupNode.h"
 
 class Traverser;
+class AnimatedGeoNode;
 
-struct AnimationTrack
+struct AnimationTrack//an animation track, each track represents all the keys for one animation in one node
 {
   std::string m_animationName;
   std::string m_nodeName;
@@ -79,7 +80,9 @@ private:
   Vector<float, 3> m_translation;
   float m_scale;
 
-  std::map<std::string, AnimationTrack> m_animationTracks;
+  std::map<std::string, AnimationTrack> m_animationTracks;//tha animation tracks for skeletal and skinned animation
+  unsigned int m_boneIndex;//index into the bone vector of the animatedGeoNode
+  AnimatedGeoNode* m_animatedMesh;//the corresponding animatedGeoNode
 };
 
 #endif

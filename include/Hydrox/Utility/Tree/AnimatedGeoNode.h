@@ -41,6 +41,7 @@ private:
   Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 
   std::vector<Matrix<float, 4>> m_inverseBindPoseMatrices;
+  std::vector<Matrix<float, 4>> m_boneTransformMatrices;
 
   ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
 
