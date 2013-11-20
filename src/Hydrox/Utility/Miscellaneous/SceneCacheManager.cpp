@@ -43,6 +43,8 @@ const std::list<LightNode*>& SceneCacheManager::getLights()
 
 void SceneCacheManager::setLODRanges(std::vector<float> lodRanges)
 {
+  assert(lodRanges.size() > 1 && lodRanges[0] <= lodRanges[1]);
+
   m_lodRanges = lodRanges;
 }
 

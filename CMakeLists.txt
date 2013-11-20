@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
 
-
 project(Hydrox_Engine)
 
 set(
@@ -23,12 +22,10 @@ add_library(Hydrox_Engine SHARED ${SOURCE} ${HEADER})
 find_package(GLEW)
 find_package(OPENGL)
 find_package(DEVIL)
-find_package(SFML COMPONENTS window system)
 find_package(ASSIMP)
 
 set(
 	INCLUDES 
-	${SFML_INCLUDE_DIR} 
 	${IL_INCLUDE_DIR} 
 	${GLEW_INCLUDE_PATH} 
 	${ASSIMP_DIR}/../include 
@@ -38,16 +35,12 @@ include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
-	debug ${SFML_SYSTEM_LIBRARY_DEBUG}/sfml-system-d${LIBSUFFIX} 
-	debug ${SFML_WINDOW_LIBRARY_DEBUG}/sfml-window-d${LIBSUFFIX} 
 	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
 	debug ${ASSIMP_DIR}/../lib/x64/Debug/assimpD${LIBSUFFIX} 
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${SFML_SYSTEM_LIBRARY_RELEASE}/sfml-system${LIBSUFFIX} 
-	optimized ${SFML_WINDOW_LIBRARY_RELEASE}/sfml-window${LIBSUFFIX} 
 	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
 	optimized ${ASSIMP_DIR}/../lib/x64/Release/assimp${LIBSUFFIX} 
 )
