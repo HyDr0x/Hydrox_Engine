@@ -27,8 +27,8 @@ find_package(ASSIMP)
 set(
 	INCLUDES 
 	${IL_INCLUDE_DIR} 
-	${GLEW_INCLUDE_PATH} 
-	${ASSIMP_DIR}/../include 
+	${GLEW_INCLUDE_DIRS} 
+	${ASSIMP_DIR}/include 
 )
 
 include_directories(${INCLUDES})
@@ -36,13 +36,13 @@ include_directories(${INCLUDES})
 set(
 	DEBUG_LIBRARIES 
 	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
-	debug ${ASSIMP_DIR}/../lib/x64/Debug/assimpD${LIBSUFFIX} 
+	debug ${ASSIMP_DIR}/lib/x64/Debug/assimpD${LIBSUFFIX} 
 )
 
 set(
 	RELEASE_LIBRARIES 
 	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
-	optimized ${ASSIMP_DIR}/../lib/x64/Release/assimp${LIBSUFFIX} 
+	optimized ${ASSIMP_DIR}/lib/x64/Release/assimp${LIBSUFFIX} 
 )
 
 set(

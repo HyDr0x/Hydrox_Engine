@@ -17,3 +17,6 @@
 
 #no sandbox directory
 /Sandbox
+
+#no cmake module directory
+/CMakeModules
