@@ -101,7 +101,7 @@ float TransformNode::getScale()
 	return m_scale;
 }
 
-void TransformNode::setPosition(float x, float y, float z)
+void TransformNode::setTranslation(float x, float y, float z)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -114,7 +114,7 @@ void TransformNode::setPosition(float x, float y, float z)
 	m_translation[2] = z;
 }
 
-void TransformNode::setPosition(Vector<float, 3> v)
+void TransformNode::setTranslation(Vector<float, 3> v)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -125,7 +125,7 @@ void TransformNode::setPosition(Vector<float, 3> v)
 	m_translation = v;
 }
 
-void TransformNode::setTranslation(float x, float y, float z)
+void TransformNode::addTranslation(float x, float y, float z)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -138,7 +138,7 @@ void TransformNode::setTranslation(float x, float y, float z)
 	m_translation[2] += z;
 }
 
-void TransformNode::setTranslation(Vector<float, 3> v)
+void TransformNode::addTranslation(Vector<float, 3> v)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -160,7 +160,7 @@ void TransformNode::setRotation(Quaternion<float> q)
   m_rotation = q;
 }
 
-void TransformNode::turnRotation(Quaternion<float> q)
+void TransformNode::addRotation(Quaternion<float> q)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -182,7 +182,7 @@ void TransformNode::setRotationX(float angle)
 	m_rotation = math::createRotXQuaternion(angle);
 }
 
-void TransformNode::setTurnX(float angle)
+void TransformNode::addRotationX(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -204,7 +204,7 @@ void TransformNode::setRotationY(float angle)
 	m_rotation = math::createRotYQuaternion(angle);
 }
 
-void TransformNode::setTurnY(float angle)
+void TransformNode::addRotationY(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -226,7 +226,7 @@ void TransformNode::setRotationZ(float angle)
 	m_rotation = math::createRotZQuaternion(angle);
 }
 
-void TransformNode::setTurnZ(float angle)
+void TransformNode::addRotationZ(float angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -248,7 +248,7 @@ void TransformNode::setRotationXYZ(Vector<float, 3> angle)
 	m_rotation = math::createRotXQuaternion(angle[0]) * math::createRotYQuaternion(angle[1]) * math::createRotZQuaternion(angle[2]);
 }
 
-void TransformNode::setTurnXYZ(Vector<float, 3> angle)
+void TransformNode::addRotationXYZ(Vector<float, 3> angle)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -270,7 +270,7 @@ void TransformNode::setRotationAxis(float angle, Vector<float, 3> axis)
   m_rotation = math::createRotAxisQuaternion(angle, axis);
 }
 
-void TransformNode::setTurnAxis(float angle, Vector<float, 3> axis)
+void TransformNode::addRotationAxis(float angle, Vector<float, 3> axis)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {
@@ -292,7 +292,7 @@ void TransformNode::setScale(float s)
 	m_scale = s;
 }
 
-void TransformNode::Scale(float s)
+void TransformNode::addScale(float s)
 {
   if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
   {

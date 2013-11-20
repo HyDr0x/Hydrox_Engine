@@ -34,28 +34,28 @@ public:
 	Quaternion<float> getRotation();
 	float getScale();
 
-  void setPosition(float x, float y, float z);
-	void setPosition(Vector<float, 3> v);
-
-	void setTranslation(float x, float y, float z);
+  void setTranslation(float x, float y, float z);
 	void setTranslation(Vector<float, 3> v);
 
+	void addTranslation(float x, float y, float z);
+	void addTranslation(Vector<float, 3> v);
+
   void setRotation(Quaternion<float> q);
-  void turnRotation(Quaternion<float> q);
+  void addRotation(Quaternion<float> q);
 
 	void setRotationX(float angle);
-	void setTurnX(float angle);
+	void addRotationX(float angle);
 	void setRotationY(float angle);
-	void setTurnY(float angle);
+	void addRotationY(float angle);
 	void setRotationZ(float angle);
-	void setTurnZ(float angle);
+	void addRotationZ(float angle);
 	void setRotationXYZ(Vector<float, 3> angle);
-	void setTurnXYZ(Vector<float, 3> angle);
+	void addRotationXYZ(Vector<float, 3> angle);
   void setRotationAxis(float angle, Vector<float, 3> axis);
-  void setTurnAxis(float angle, Vector<float, 3> axis);
+  void addRotationAxis(float angle, Vector<float, 3> axis);
 
 	void setScale(float s);
-	void Scale(float s);
+	void addScale(float s);
 
 private:
 
