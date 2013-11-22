@@ -27,21 +27,26 @@ public:
 	Vector<unsigned int, 2> getAnimationNumber();
 	Vector<unsigned int, 2> getAnimationCount();
 
-	void setPosition(Vector<float, 2> v);
-
-	void setPosition(float x, float y);//set Position
 	void setTranslation(Vector<float, 2> v);
 	void setTranslation(float x, float y);
 
-	void setScaling(float s);
-	void scale(float s);
+	void addTranslation(Vector<float, 2> v);
+	void addTranslation(float x, float y);
 
-	void setScaling(Vector<float, 2> s);
-	void setScaling(float sx, float sy);
-	void scale(Vector<float, 2> s);
-	void scale(float sx, float sy);
+	void setScale(float s);
+	void addScale(float s);
+
+	void setScale(Vector<float, 2> s);
+	void setScale(float sx, float sy);
+	void addScale(Vector<float, 2> s);
+	void addScale(float sx, float sy);
 
 	void setRotation(float angle);
+  void addRotation(float angle);
+
+  Vector<float, 2> getPosition();
+  float getRotation();
+  Vector<float, 2> getScale();
 
 	Matrix<float, 3> getTransformationMatrix();
 	Matrix<float, 3> getTexTransformationMatrix();

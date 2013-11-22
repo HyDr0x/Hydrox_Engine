@@ -14,8 +14,8 @@ class GRAPHICAPI LightNode : public TreeNode
 public:
 
   LightNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  LightNode& operator=(const LightNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  LightNode& operator=(const LightNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~LightNode();
 
   virtual TreeNode* clone() const;

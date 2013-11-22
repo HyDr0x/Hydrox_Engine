@@ -10,18 +10,18 @@ BillboardNode::BillboardNode(ResourceHandle billboardIndex, bool renderable, con
 {
 }
 
-BillboardNode& BillboardNode::operator=(const BillboardNode& destinationNode)
+BillboardNode& BillboardNode::operator=(const BillboardNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  TreeNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& BillboardNode::operator=(const TreeNode& destinationNode)
+TreeNode& BillboardNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const BillboardNode& copyNode = static_cast<const BillboardNode&>(destinationNode);
-  TreeNode::operator=(destinationNode);
+  const BillboardNode& copyNode = static_cast<const BillboardNode&>(sourceNode);
+  TreeNode::operator=(copyNode);
 
   m_trfMatrix = copyNode.m_trfMatrix;
   m_billboardIndex = copyNode.m_billboardIndex;

@@ -13,8 +13,8 @@ class GRAPHICAPI ParticleNode : public TreeNode
 public:
 
   ParticleNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  ParticleNode& operator=(const ParticleNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  ParticleNode& operator=(const ParticleNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~ParticleNode();
 
   virtual TreeNode* clone() const;

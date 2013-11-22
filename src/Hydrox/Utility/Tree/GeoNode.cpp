@@ -10,18 +10,18 @@ GeoNode::GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& n
 {
 }
 
-GeoNode& GeoNode::operator=(const GeoNode& destinationNode)
+GeoNode& GeoNode::operator=(const GeoNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  TreeNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& GeoNode::operator=(const TreeNode& destinationNode)
+TreeNode& GeoNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const GeoNode& copyNode = static_cast<const GeoNode&>(destinationNode);
-  TreeNode::operator=(destinationNode);
+  const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
+  TreeNode::operator=(copyNode);
 
   m_trfMatrix = copyNode.m_trfMatrix;
   m_meshIndex = copyNode.m_meshIndex;
@@ -85,14 +85,4 @@ void GeoNode::setRenderable(bool renderable)
 bool GeoNode::getRenderable() const
 {
   return m_renderable;
-}
-
-void GeoNode::setDeleteThis(bool deleteThis)
-{
-  m_deleteThis = deleteThis;
-}
-
-bool GeoNode::getDeleteThis()
-{
-  return m_deleteThis;
 }

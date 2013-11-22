@@ -13,18 +13,18 @@ GroupNode(nodeName, parent, nextSibling, firstChild),
   m_transformedPosition = m_position;
 }
 
-LODNode& LODNode::operator=(const LODNode& destinationNode)
+LODNode& LODNode::operator=(const LODNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  GroupNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& LODNode::operator=(const TreeNode& destinationNode)
+TreeNode& LODNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const LODNode& copyNode = static_cast<const LODNode&>(destinationNode);
-  GroupNode::operator=(destinationNode);
+  const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
+  GroupNode::operator=(copyNode);
 
   m_lodLevel = copyNode.m_lodLevel;
   m_position = copyNode.m_position;

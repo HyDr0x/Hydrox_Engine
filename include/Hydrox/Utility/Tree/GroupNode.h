@@ -21,8 +21,8 @@ public:
   };
 
   GroupNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  GroupNode& operator=(const GroupNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  GroupNode& operator=(const GroupNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~GroupNode();
 
   virtual GroupNode* clone() const;

@@ -14,8 +14,8 @@ class GRAPHICAPI GeoNode : public TreeNode
 public:
 
   GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  GeoNode& operator=(const GeoNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  GeoNode& operator=(const GeoNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~GeoNode();
 
   virtual TreeNode* clone() const;
@@ -32,18 +32,13 @@ public:
   void setRenderable(bool renderable);
 	bool getRenderable() const;
 
-  void setDeleteThis(bool deleteThis);
-  bool getDeleteThis();
-
-private:
+protected:
 
   Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 
   ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
 
   bool m_renderable;//boolean which decides if the mesh is being drawn or not
-
-  bool m_deleteThis;
 };
 
 #endif

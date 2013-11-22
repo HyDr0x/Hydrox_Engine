@@ -4,24 +4,22 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-AnimatedGeoNode::AnimatedGeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                                                                                                  m_meshIndex(meshIndex),
-                                                                                                                                  m_renderable(renderable)
+AnimatedGeoNode::AnimatedGeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : GeoNode(meshIndex, renderable, nodeName, parent, nextSibling)
 {
 }
 
-AnimatedGeoNode& AnimatedGeoNode::operator=(const AnimatedGeoNode& destinationNode)
+AnimatedGeoNode& AnimatedGeoNode::operator=(const AnimatedGeoNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  GeoNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& AnimatedGeoNode::operator=(const TreeNode& destinationNode)
+TreeNode& AnimatedGeoNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(destinationNode);
-  TreeNode::operator=(destinationNode);
+  const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(sourceNode);
+  GeoNode::operator=(copyNode);
 
   m_trfMatrix = copyNode.m_trfMatrix;
   m_meshIndex = copyNode.m_meshIndex;
@@ -60,39 +58,4 @@ bool AnimatedGeoNode::preTraverse(Traverser* traverser)
 void AnimatedGeoNode::postTraverse(Traverser* traverser)
 {
   traverser->postTraverse(this);
-}
-
-ResourceHandle AnimatedGeoNode::getMeshIndex() const
-{
-  return m_meshIndex;
-}
-
-Matrix<float,4> AnimatedGeoNode::getTransformationMatrix() const
-{
-  return m_trfMatrix;
-}
-
-void AnimatedGeoNode::setTransformationMatrix(const Matrix<float,4>& trfMatrix)
-{
-  m_trfMatrix = trfMatrix;
-}
-
-void AnimatedGeoNode::setRenderable(bool renderable)
-{
-  m_renderable = renderable;
-}
-
-bool AnimatedGeoNode::getRenderable() const
-{
-  return m_renderable;
-}
-
-void AnimatedGeoNode::setDeleteThis(bool deleteThis)
-{
-  m_deleteThis = deleteThis;
-}
-
-bool AnimatedGeoNode::getDeleteThis()
-{
-  return m_deleteThis;
 }

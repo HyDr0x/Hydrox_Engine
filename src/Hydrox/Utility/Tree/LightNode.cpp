@@ -8,18 +8,18 @@ LightNode::LightNode(const std::string& nodeName, GroupNode* parent, TreeNode* n
 {
 }
 
-LightNode& LightNode::operator=(const LightNode& destinationNode)
+LightNode& LightNode::operator=(const LightNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  TreeNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& LightNode::operator=(const TreeNode& destinationNode)
+TreeNode& LightNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const LightNode& copyNode = static_cast<const LightNode&>(destinationNode);
-  TreeNode::operator=(destinationNode);
+  const LightNode& copyNode = static_cast<const LightNode&>(sourceNode);
+  TreeNode::operator=(copyNode);
 
   m_trfMatrix = copyNode.m_trfMatrix;
 

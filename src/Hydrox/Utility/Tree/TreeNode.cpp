@@ -9,11 +9,11 @@ TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nex
 {
 }
 
-TreeNode& TreeNode::operator=(const TreeNode& destinationNode)
+TreeNode& TreeNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const TreeNode& copyNode = static_cast<const TreeNode&>(destinationNode);
+  const TreeNode& copyNode = static_cast<const TreeNode&>(sourceNode);
 
   m_parent = copyNode.m_parent;
   m_nextSibling = copyNode.m_nextSibling;

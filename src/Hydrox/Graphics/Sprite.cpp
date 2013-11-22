@@ -1,14 +1,14 @@
 #include "Hydrox/Graphics/Sprite.h"
 
 
-Sprite::Sprite(ResourceHandle m_texID, bool m_anim, Vector<unsigned int, 2> m_animNumber, Vector<float, 2> m_texStart, Vector<float, 2> m_texEnd) :  m_texID(m_texID), 
-                                                                                                                                                            m_anim(m_anim), 
-                                                                                                                                                            m_animNumber(m_animNumber), 
-                                                                                                                                                            m_texStart(m_texStart),
-                                                                                                                                                            m_texEnd(m_texEnd),
-                                                                                                                                                            m_rtMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                            m_tlMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                            m_scMatrix(Matrix<float, 3>::identity())
+Sprite::Sprite(ResourceHandle m_texID, bool m_anim, Vector<unsigned int, 2> m_animNumber, Vector<float, 2> m_texStart, Vector<float, 2> m_texEnd) : m_texID(m_texID), 
+                                                                                                                                                    m_anim(m_anim), 
+                                                                                                                                                    m_animNumber(m_animNumber), 
+                                                                                                                                                    m_texStart(m_texStart),
+                                                                                                                                                    m_texEnd(m_texEnd),
+                                                                                                                                                    m_rtMatrix(Matrix<float, 3>::identity()),
+                                                                                                                                                    m_tlMatrix(Matrix<float, 3>::identity()),
+                                                                                                                                                    m_scMatrix(Matrix<float, 3>::identity())
 {
 }
 
@@ -48,7 +48,7 @@ void Sprite::setAnimation(unsigned int number)
 	m_animCount = Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
   assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
 }
-void Sprite::setAnimation(Vector<unsigned int,2> number)
+void Sprite::setAnimation(Vector<unsigned int, 2> number)
 {
 	m_animCount = number;
   assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
@@ -64,72 +64,95 @@ Vector<unsigned int, 2> Sprite::getAnimationCount()
 	return m_animCount;
 }
 
-void Sprite::setPosition(Vector<float, 2> v)
+void Sprite::setTranslation(Vector<float, 2> v)
 {
 	m_tlMatrix[2][0] = v[0];
 	m_tlMatrix[2][1] = v[1];
 }
 
-void Sprite::setPosition(float x, float y)
+void Sprite::setTranslation(float x, float y)
 {
 	m_tlMatrix[2][0] = x;
 	m_tlMatrix[2][1] = y;
 }
 
-void Sprite::setTranslation(Vector<float, 2> v)
+void Sprite::addTranslation(Vector<float, 2> v)
 {
 	m_tlMatrix[2][0] += v[0];
 	m_tlMatrix[2][1] += v[1];
 }
 
-void Sprite::setTranslation(float x, float y)
+void Sprite::addTranslation(float x, float y)
 {
 	m_tlMatrix[2][0] += x;
 	m_tlMatrix[2][1] += y;
 }
 
-void Sprite::setScaling(float s)
+void Sprite::setScale(float s)
 {
 	m_scMatrix[0][0] = s;
 	m_scMatrix[1][1] = s;
 }
 
-void Sprite::scale(float s)
+void Sprite::addScale(float s)
 {
 	m_scMatrix[0][0] += s;
 	m_scMatrix[1][1] += s;
 }
 
-void Sprite::setScaling(Vector<float, 2> s)
+void Sprite::setScale(Vector<float, 2> s)
 {
 	m_scMatrix[0][0] = s[0];
 	m_scMatrix[1][1] = s[1];
 }
 
-void Sprite::setScaling(float sx, float sy)
+void Sprite::setScale(float sx, float sy)
 {
 	m_scMatrix[0][0] = sx;
 	m_scMatrix[1][1] = sy;
 }
 
-void Sprite::scale(Vector<float, 2> s)
+void Sprite::addScale(Vector<float, 2> s)
 {
 	m_scMatrix[0][0] += s[0];
 	m_scMatrix[1][1] += s[1];
 }
 
-void Sprite::scale(float sx, float sy)
+void Sprite::addScale(float sx, float sy)
 {
 	m_scMatrix[0][0] += sx;
 	m_scMatrix[1][1] += sy;
 }
 
-void Sprite::setRotation(float m_angle)
+void Sprite::setRotation(float angle)
 {
-	this->m_angle= m_angle;
-    m_rtMatrix[0][0] = m_rtMatrix[1][1] = cos(this->m_angle);
-    m_rtMatrix[1][0] = sin(this->m_angle);
-    m_rtMatrix[0][1] = -m_rtMatrix[1][0];
+	m_angle = angle;
+  m_rtMatrix[0][0] = m_rtMatrix[1][1] = cos(m_angle);
+  m_rtMatrix[1][0] = sin(m_angle);
+  m_rtMatrix[0][1] = -m_rtMatrix[1][0];
+}
+
+void Sprite::addRotation(float angle)
+{
+	m_angle += angle;
+  m_rtMatrix[0][0] = m_rtMatrix[1][1] = cos(m_angle);
+  m_rtMatrix[1][0] = sin(m_angle);
+  m_rtMatrix[0][1] = -m_rtMatrix[1][0];
+}
+
+Vector<float, 2> Sprite::getPosition()
+{
+  return Vector<float, 2>(m_tlMatrix[2][0], m_tlMatrix[2][1]);
+}
+
+float Sprite::getRotation()
+{
+  return m_angle;
+}
+
+Vector<float, 2> Sprite::getScale()
+{
+  return Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
 }
 
 Matrix<float,3> Sprite::getTransformationMatrix()

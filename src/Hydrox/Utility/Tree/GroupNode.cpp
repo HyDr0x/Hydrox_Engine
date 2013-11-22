@@ -10,17 +10,17 @@ GroupNode::GroupNode(const std::string& nodeName, GroupNode* parent, TreeNode* n
   m_dirtyFlag = DEFAULT;
 }
 
-GroupNode& GroupNode::operator=(const GroupNode& destinationNode)
+GroupNode& GroupNode::operator=(const GroupNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  TreeNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& GroupNode::operator=(const TreeNode& destinationNode)
+TreeNode& GroupNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const GroupNode& copyNode = static_cast<const GroupNode&>(destinationNode);
+  const GroupNode& copyNode = static_cast<const GroupNode&>(sourceNode);
 
   m_firstChild = copyNode.m_firstChild;
 

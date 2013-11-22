@@ -15,8 +15,8 @@ class GRAPHICAPI LODNode : public GroupNode
 public:
 
   LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  LODNode& operator=(const LODNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  LODNode& operator=(const LODNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~LODNode();
 
   virtual GroupNode* clone() const;

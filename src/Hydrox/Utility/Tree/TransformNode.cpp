@@ -24,18 +24,18 @@ TransformNode::TransformNode(Vector<float, 3>& translation, float& scale, Quater
 {
 }
 
-TransformNode& TransformNode::operator=(const TransformNode& destinationNode)
+TransformNode& TransformNode::operator=(const TransformNode& sourceNode)
 {
-  TreeNode::operator=(destinationNode);
+  GroupNode::operator=(sourceNode);
   return *this;
 }
 
-TreeNode& TransformNode::operator=(const TreeNode& destinationNode)
+TreeNode& TransformNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(destinationNode));
+  assert(typeid(*this) == typeid(sourceNode));
 
-  const TransformNode& copyNode = static_cast<const TransformNode&>(destinationNode);
-  GroupNode::operator=(destinationNode);
+  const TransformNode& copyNode = static_cast<const TransformNode&>(sourceNode);
+  GroupNode::operator=(copyNode);
 
   m_translation = copyNode.m_translation;
   m_scale = copyNode.m_scale;

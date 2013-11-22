@@ -27,18 +27,18 @@ public:
 	Vector<unsigned int, 2> getAnimationNumber();
 	Vector<unsigned int, 2> getAnimationCount();
 
-	void setPosition(Vector<float, 3> v);
-	void setPosition(float x, float y, float z);
-	void setTranslation(Vector<float,3> v);
+	void setTranslation(Vector<float, 3> v);
 	void setTranslation(float x, float y, float z);
+	void addTranslation(Vector<float,3> v);
+	void addTranslation(float x, float y, float z);
 	
-	void setScaling(float s);
-	void scale(float s);
+	void setScale(float s);
+	void addScale(float s);
 
-	void setScaling(Vector<float, 2> s);
-	void setScaling(float sx, float sy);
-	void scale(Vector<float, 2> s);
-	void scale(float sx, float sy);
+	void setScale(Vector<float, 2> s);
+	void setScale(float sx, float sy);
+	void addScale(Vector<float, 2> s);
+	void addScale(float sx, float sy);
 
 	Vector<float, 3> getPosition();
 	Vector<float, 2> getScale();

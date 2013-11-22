@@ -14,8 +14,8 @@ class GRAPHICAPI BillboardNode : public TreeNode
 public:
 
   BillboardNode(ResourceHandle billboardIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  BillboardNode& operator=(const BillboardNode& destinationNode);
-  virtual TreeNode& operator=(const TreeNode& destinationNode);
+  BillboardNode& operator=(const BillboardNode& sourceNode);
+  virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~BillboardNode();
 
   virtual TreeNode* clone() const;
