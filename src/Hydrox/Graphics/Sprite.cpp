@@ -1,15 +1,36 @@
 #include "Hydrox/Graphics/Sprite.h"
 
 
-Sprite::Sprite(ResourceHandle m_texID, bool m_anim, Vector<unsigned int, 2> m_animNumber, Vector<float, 2> m_texStart, Vector<float, 2> m_texEnd) : m_texID(m_texID), 
-                                                                                                                                                    m_anim(m_anim), 
-                                                                                                                                                    m_animNumber(m_animNumber), 
-                                                                                                                                                    m_texStart(m_texStart),
-                                                                                                                                                    m_texEnd(m_texEnd),
-                                                                                                                                                    m_rtMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                    m_tlMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                    m_scMatrix(Matrix<float, 3>::identity())
+Sprite::Sprite(ResourceHandle texID, bool renderable, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
+                                                                                                                                                m_renderable(renderable), 
+                                                                                                                                                m_animNumber(animNumber), 
+                                                                                                                                                m_texStart(texStart),
+                                                                                                                                                m_texEnd(texEnd),
+                                                                                                                                                m_rtMatrix(Matrix<float, 3>::identity()),
+                                                                                                                                                m_tlMatrix(Matrix<float, 3>::identity()),
+                                                                                                                                                m_scMatrix(Matrix<float, 3>::identity())
 {
+}
+
+Sprite::Sprite(const Sprite& o)
+{
+  m_texID = o.m_texID;
+
+  m_rtMatrix = o.m_rtMatrix;
+	m_tlMatrix = o.m_tlMatrix;
+	m_scMatrix = o.m_scMatrix;
+	
+	m_animNumber = o.m_animNumber;
+	m_animCount = o.m_animCount;
+	m_texStart = o.m_texStart;
+	m_texEnd = o.m_texEnd;
+
+	m_BoundingBox[0] = o.m_BoundingBox[0];
+  m_BoundingBox[1] = o.m_BoundingBox[1];
+
+  m_angle = o.m_angle;
+
+  m_renderable = o.m_renderable;
 }
 
 Sprite& Sprite::operator=(const Sprite& o)
@@ -30,7 +51,7 @@ Sprite& Sprite::operator=(const Sprite& o)
 
   m_angle = o.m_angle;
 
-  m_anim = o.m_anim;
+  m_renderable = o.m_renderable;
 
   return *this;
 }
@@ -41,6 +62,16 @@ Sprite::~Sprite()
 
 void Sprite::free()
 {
+}
+
+void Sprite::setRenderable(bool renderable)
+{
+  m_renderable = renderable;
+}
+
+bool Sprite::getRenderable() const
+{
+  return m_renderable;
 }
 
 void Sprite::setAnimation(unsigned int number)

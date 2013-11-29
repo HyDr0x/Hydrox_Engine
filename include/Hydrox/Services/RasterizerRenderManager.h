@@ -12,12 +12,13 @@ class GRAPHICAPI RasterizerRenderManager : public RenderManager
 {
 public:
 
-	RasterizerRenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
+  static RenderManager* getManager(ModelManager *modelManager, 
+                                   MaterialManager *materialManager, 
+                                   ShaderManager *shaderManager, 
+                                   TextureManager *textureManager,
+	                                 BillboardManager *billboardManager,
+                                   SpriteManager *spriteManager, GLfloat aspectRatio);
+
 	~RasterizerRenderManager();
 
   void initialize();
@@ -25,6 +26,13 @@ public:
 	void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 
 private:
+
+  RasterizerRenderManager(ModelManager *modelManager, 
+                MaterialManager *materialManager, 
+                ShaderManager *shaderManager, 
+                TextureManager *textureManager,
+	              BillboardManager *billboardManager,
+                SpriteManager *spriteManager, GLfloat aspectRatio);
 
 	RasterizerRenderManager(){}
 	RasterizerRenderManager(const RasterizerRenderManager&){}

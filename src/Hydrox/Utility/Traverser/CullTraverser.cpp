@@ -11,6 +11,17 @@ CullTraverser::~CullTraverser()
 {
 }
 
+bool CullTraverser::preTraverse(AnimatedTransformNode* treeNode)
+{
+  m_dirtyAnimatedTransforms.push_back(treeNode);
+
+  return true;
+}
+
+void CullTraverser::postTraverse(AnimatedTransformNode* treeNode)
+{
+}
+
 bool CullTraverser::preTraverse(TransformNode* treeNode)
 {
   m_dirtyTransforms.push_back(treeNode);
@@ -39,6 +50,18 @@ bool CullTraverser::preTraverse(LODNode* treeNode)
 void CullTraverser::postTraverse(LODNode* treeNode)
 {
 }
+
+bool CullTraverser::preTraverse(AnimatedGeoNode* treeNode)
+{
+  m_activeAnimatedGeometry.push_back(treeNode);
+
+  return true;
+}
+
+void CullTraverser::postTraverse(AnimatedGeoNode* treeNode)
+{
+}
+
 
 bool CullTraverser::preTraverse(GeoNode* treeNode)
 {
@@ -84,6 +107,11 @@ void CullTraverser::postTraverse(LightNode* treeNode)
 {
 }
 
+std::list<AnimatedTransformNode*>& CullTraverser::getActiveAnimatedTransformNodes()
+{
+  return m_dirtyAnimatedTransforms;
+}
+
 std::list<TransformNode*>& CullTraverser::getActiveTransformNodes()
 {
   return m_dirtyTransforms;
@@ -92,6 +120,11 @@ std::list<TransformNode*>& CullTraverser::getActiveTransformNodes()
 std::list<LODNode*>& CullTraverser::getActiveLODNodes()
 {
   return m_activeLod;
+}
+
+std::list<AnimatedGeoNode*>& CullTraverser::getActiveAnimatedGeoNodes()
+{
+  return m_activeAnimatedGeometry;
 }
 
 std::list<GeoNode*>& CullTraverser::getActiveGeoNodes()

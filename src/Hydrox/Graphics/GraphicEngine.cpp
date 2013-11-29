@@ -97,15 +97,15 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
 	//glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
 	//create Manager
-  m_modelManager = new ModelManager(modelPath);
-  m_materialManager = new MaterialManager(materialPath);
-  m_shaderManager = new ShaderManager(vfxPath);
-	m_textureManager = new TextureManager(texPath);
-  m_billboardManager = new BillboardManager(texPath);
-  m_spriteManager = new SpriteManager(texPath);
-	m_renderManager = new RasterizerRenderManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
-	m_eventManager = new EventManager;
-  m_debugLogManager = new DebugLogManager;
+  m_modelManager = ModelManager::getManager(modelPath);
+  m_materialManager = MaterialManager::getManager(materialPath);
+  m_shaderManager = ShaderManager::getManager(vfxPath);
+	m_textureManager = TextureManager::getManager(texPath);
+  m_billboardManager = BillboardManager::getManager(texPath);
+  m_spriteManager = SpriteManager::getManager(texPath);
+	m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
+	m_eventManager = EventManager::getManager();
+  m_debugLogManager = DebugLogManager::getManager();
   
   m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 
@@ -124,9 +124,9 @@ void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::st
   m_renderManager->initialize();
 }
 
-void GraphicEngine::update(Vector<float, 3>& cameraPosition)
+void GraphicEngine::update(Vector<float, 3>& cameraPosition, float currentTime)
 {
-  m_scene->updateCaches(cameraPosition);
+  m_scene->updateCaches(cameraPosition, currentTime);
 }
 
 void GraphicEngine::draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition)

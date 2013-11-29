@@ -11,6 +11,9 @@ LightNode::LightNode(const std::string& nodeName, GroupNode* parent, TreeNode* n
 LightNode& LightNode::operator=(const LightNode& sourceNode)
 {
   TreeNode::operator=(sourceNode);
+
+  m_trfMatrix = sourceNode.m_trfMatrix;
+
   return *this;
 }
 
@@ -19,9 +22,7 @@ TreeNode& LightNode::operator=(const TreeNode& sourceNode)
   assert(typeid(*this) == typeid(sourceNode));
 
   const LightNode& copyNode = static_cast<const LightNode&>(sourceNode);
-  TreeNode::operator=(copyNode);
-
-  m_trfMatrix = copyNode.m_trfMatrix;
+  LightNode::operator=(copyNode);
 
   return *this;
 }

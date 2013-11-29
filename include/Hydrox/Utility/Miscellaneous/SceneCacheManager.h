@@ -7,15 +7,15 @@
 #include "Hydrox/DLLExport.h"
 
 #include "Hydrox/Utility/Math/Math.hpp"
-
 #include "Hydrox/Utility/Observer/Observer.hpp"
-
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
 class TreeNode;
 class GroupNode;
 class LODNode;
+class AnimatedTransformNode;
 class TransformNode;
+class AnimatedGeoNode;
 class GeoNode;
 class BillboardNode;
 class ParticleNode;
@@ -28,13 +28,14 @@ public:
   SceneCacheManager();
   ~SceneCacheManager();
 
+  const std::list<AnimatedGeoNode*>& getAnimatedMeshes();
   const std::list<GeoNode*>& getMeshes();
   const std::list<BillboardNode*>& getBillboards();
   const std::list<LightNode*>& getLights();
 
   void setLODRanges(std::vector<float> lodRanges);
 
-  void updateCaches(Vector<float, 3>& cameraPosition);
+  void updateCaches(Vector<float, 3>& cameraPosition, float currentTime);
 
 protected:
 
@@ -97,6 +98,7 @@ private:
   SceneCacheManager(const SceneCacheManager&){}
 
   void updateObserver(TransformNode* data);
+  void updateAnimatedTransformNodes(float currentTime);
   void updateTransformNodes();
   void updateLODNodes(Vector<float, 3>& cameraPosition);
 
@@ -104,7 +106,9 @@ private:
 
   std::list<TransformNode*> m_dirtyTransforms;
   std::list<LODNode*> m_activeLODs;
-
+  std::list<AnimatedTransformNode*> m_activeAnimatedTransforms;
+  
+  std::list<AnimatedGeoNode*> m_activeAnimatedGeometry;
   std::list<GeoNode*> m_activeGeometry;
   std::list<BillboardNode*> m_activeBillboards;
   std::list<ParticleNode*> m_activeParticles;

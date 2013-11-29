@@ -14,11 +14,17 @@ public:
   CullTraverser(std::vector<float> lodRanges, Vector<float, 3> camPos);
   virtual ~CullTraverser();
 
+  virtual bool preTraverse(AnimatedTransformNode* treeNode);
+  virtual void postTraverse(AnimatedTransformNode* treeNode);
+
   virtual bool preTraverse(TransformNode* treeNode);
   virtual void postTraverse(TransformNode* treeNode);
 
   virtual bool preTraverse(LODNode* treeNode);
   virtual void postTraverse(LODNode* treeNode);
+
+  virtual bool preTraverse(AnimatedGeoNode* treeNode);
+  virtual void postTraverse(AnimatedGeoNode* treeNode);
 
   virtual bool preTraverse(GeoNode* treeNode);
   virtual void postTraverse(GeoNode* treeNode);
@@ -32,8 +38,10 @@ public:
   virtual bool preTraverse(LightNode* treeNode);
   virtual void postTraverse(LightNode* treeNode);
 
+  std::list<AnimatedTransformNode*>& getActiveAnimatedTransformNodes();
   std::list<TransformNode*>& getActiveTransformNodes();
   std::list<LODNode*>& getActiveLODNodes();
+  std::list<AnimatedGeoNode*>& getActiveAnimatedGeoNodes();
   std::list<GeoNode*>& getActiveGeoNodes();
   std::list<BillboardNode*>& getActiveBillboardNodes();
   std::list<ParticleNode*>& getActiveParticleNodes();
@@ -44,8 +52,10 @@ protected:
   Vector<float, 3> m_camPos;
   std::vector<float> m_lodRanges;
 
+  std::list<AnimatedTransformNode*> m_dirtyAnimatedTransforms;
   std::list<TransformNode*> m_dirtyTransforms;
   std::list<LODNode*> m_activeLod;
+  std::list<AnimatedGeoNode*> m_activeAnimatedGeometry;
   std::list<GeoNode*> m_activeGeometry;
   std::list<BillboardNode*> m_activeBillboards;
   std::list<ParticleNode*> m_activeParticles;

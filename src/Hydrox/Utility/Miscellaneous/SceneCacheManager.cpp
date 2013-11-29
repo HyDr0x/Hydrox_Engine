@@ -5,8 +5,10 @@
 
 #include "Hydrox/Utility/Tree/TreeNode.h"
 #include "Hydrox/Utility/Tree/GroupNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
+#include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
 #include "Hydrox/Utility/Tree/BillboardNode.h"
 #include "Hydrox/Utility/Tree/ParticleNode.h"
@@ -20,10 +22,17 @@ SceneCacheManager::~SceneCacheManager()
 {
   m_dirtyTransforms.clear();
   m_activeLODs.clear();
+  m_activeAnimatedTransforms.clear();
+  m_activeAnimatedGeometry.clear();
   m_activeGeometry.clear();
   m_activeBillboards.clear();
   m_activeParticles.clear();
   m_activeLights.clear();
+}
+
+const std::list<AnimatedGeoNode*>& SceneCacheManager::getAnimatedMeshes()
+{
+  return m_activeAnimatedGeometry;
 }
 
 const std::list<GeoNode*>& SceneCacheManager::getMeshes()
@@ -48,8 +57,9 @@ void SceneCacheManager::setLODRanges(std::vector<float> lodRanges)
   m_lodRanges = lodRanges;
 }
 
-void SceneCacheManager::updateCaches(Vector<float, 3>& cameraPosition)
+void SceneCacheManager::updateCaches(Vector<float, 3>& cameraPosition, float currentTime)
 {
+  updateAnimatedTransformNodes(currentTime);
   updateTransformNodes();
   updateLODNodes(cameraPosition);
 }
@@ -57,6 +67,14 @@ void SceneCacheManager::updateCaches(Vector<float, 3>& cameraPosition)
 void SceneCacheManager::updateObserver(TransformNode* data)
 {
   m_dirtyTransforms.push_back(data);
+}
+
+void SceneCacheManager::updateAnimatedTransformNodes(float currentTime)
+{
+  for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
+  {
+    (*tit)->addCurrentTime(currentTime);
+  }
 }
 
 void SceneCacheManager::updateTransformNodes()
@@ -102,6 +120,8 @@ void SceneCacheManager::updateLODNodes(Vector<float, 3>& cameraPosition)
 void SceneCacheManager::addNodeToCaches(TreeNode *newNode)
 {
   if(addSingleNodeToCacheList<LODNode>(m_activeLODs, newNode)){}
+  else if(addSingleNodeToCacheList<AnimatedTransformNode>(m_activeAnimatedTransforms, newNode)){}
+  else if(addSingleNodeToCacheList<AnimatedGeoNode>(m_activeAnimatedGeometry, newNode)){}
   else if(addSingleNodeToCacheList<GeoNode>(m_activeGeometry, newNode)){}
   else if(addSingleNodeToCacheList<BillboardNode>(m_activeBillboards, newNode)){}
   else if(addSingleNodeToCacheList<ParticleNode>(m_activeParticles, newNode)){}
@@ -110,8 +130,10 @@ void SceneCacheManager::addNodeToCaches(TreeNode *newNode)
 
 void SceneCacheManager::removeNodeFromCaches(TreeNode *node)
 {
-  if(removeSingleNodeFromCacheList<TransformNode>(m_dirtyTransforms, node)){}
+  if(removeSingleNodeFromCacheList<AnimatedTransformNode>(m_activeAnimatedTransforms, node)){}
+  else if(removeSingleNodeFromCacheList<TransformNode>(m_dirtyTransforms, node)){}
   else if(removeSingleNodeFromCacheList<LODNode>(m_activeLODs, node)){}
+  else if(removeSingleNodeFromCacheList<AnimatedGeoNode>(m_activeAnimatedGeometry, node)){}
   else if(removeSingleNodeFromCacheList<GeoNode>(m_activeGeometry, node)){}
   else if(removeSingleNodeFromCacheList<BillboardNode>(m_activeBillboards, node)){}
   else if(removeSingleNodeFromCacheList<ParticleNode>(m_activeParticles, node)){}
@@ -125,6 +147,8 @@ void SceneCacheManager::addTreeToCaches(TreeNode *rootNode, Vector<float, 3>& ca
   cullTraverser.doTraverse(rootNode->getFirstChild());
        
   addToCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
+  addToCacheList<AnimatedTransformNode>(cullTraverser.getActiveAnimatedTransformNodes(), m_activeAnimatedTransforms);
+  addToCacheList<AnimatedGeoNode>(cullTraverser.getActiveAnimatedGeoNodes(), m_activeAnimatedGeometry);
   addToCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
   addToCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
   addToCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);
@@ -137,8 +161,10 @@ void SceneCacheManager::removeTreeFromCaches(TreeNode *rootNode)
   cullTraverser.addTraverserFlag(Traverser::TRAVERSE_IGNORE_LODS);
   cullTraverser.doTraverse(rootNode);
 
+  deleteFromCacheList<AnimatedTransformNode>(cullTraverser.getActiveAnimatedTransformNodes(), m_activeAnimatedTransforms);
   deleteFromCacheList<TransformNode>(cullTraverser.getActiveTransformNodes(), m_dirtyTransforms);
   deleteFromCacheList<LODNode>(cullTraverser.getActiveLODNodes(), m_activeLODs);
+  deleteFromCacheList<AnimatedGeoNode>(cullTraverser.getActiveAnimatedGeoNodes(), m_activeAnimatedGeometry);
   deleteFromCacheList<GeoNode>(cullTraverser.getActiveGeoNodes(), m_activeGeometry);
   deleteFromCacheList<BillboardNode>(cullTraverser.getActiveBillboardNodes(), m_activeBillboards);
   deleteFromCacheList<ParticleNode>(cullTraverser.getActiveParticleNodes(), m_activeParticles);

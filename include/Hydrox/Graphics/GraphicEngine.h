@@ -38,7 +38,7 @@ public:
   void registerServices(ServiceManager *serviceManager);
 
 	void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio);
-	void update(Vector<float, 3>& cameraPosition);
+	void update(Vector<float, 3>& cameraPosition, float currentTime);
 	void draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition);
 
 private:

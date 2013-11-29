@@ -28,11 +28,11 @@ public:
   virtual bool preTraverse(Traverser* traverser);
   virtual void postTraverse(Traverser* traverser);
 
-  void calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
+  virtual void calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
-  Vector<float, 3> getPosition();
-	Quaternion<float> getRotation();
-	float getScale();
+  virtual Vector<float, 3> getPosition();
+	virtual Quaternion<float> getRotation();
+	virtual float getScale();
 
   void setTranslation(float x, float y, float z);
 	void setTranslation(Vector<float, 3> v);

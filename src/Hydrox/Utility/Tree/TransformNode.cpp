@@ -27,6 +27,11 @@ TransformNode::TransformNode(Vector<float, 3>& translation, float& scale, Quater
 TransformNode& TransformNode::operator=(const TransformNode& sourceNode)
 {
   GroupNode::operator=(sourceNode);
+
+  m_translation = sourceNode.m_translation;
+  m_scale = sourceNode.m_scale;
+  m_rotation = sourceNode.m_rotation;
+
   return *this;
 }
 
@@ -35,11 +40,7 @@ TreeNode& TransformNode::operator=(const TreeNode& sourceNode)
   assert(typeid(*this) == typeid(sourceNode));
 
   const TransformNode& copyNode = static_cast<const TransformNode&>(sourceNode);
-  GroupNode::operator=(copyNode);
-
-  m_translation = copyNode.m_translation;
-  m_scale = copyNode.m_scale;
-  m_rotation = copyNode.m_rotation;
+  TransformNode::operator=(copyNode);
 
   return *this;
 }
@@ -80,8 +81,8 @@ void TransformNode::postTraverse(Traverser* traverser)
 void TransformNode::calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
 {
   translation += rotation.apply(m_translation * scale);
-  scale *= m_scale;
   rotation *= m_rotation;
+  scale *= m_scale;
 }
 
 ///////////////////TRANSFORMATIONS//////////////////////////

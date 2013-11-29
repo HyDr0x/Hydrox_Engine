@@ -20,7 +20,11 @@ public:
 		OnKeyHit
 	};
 
-	EventManager();
+  static EventManager* EventManager::getManager()
+  {
+    static EventManager* manager = new EventManager();
+    return manager;
+  }
 
 	~EventManager();
 
@@ -66,6 +70,8 @@ public:
 	}
 
 private:
+
+  EventManager();
 
 	std::map<int,signal_save*> m_sigMap;
 };

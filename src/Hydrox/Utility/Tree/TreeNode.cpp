@@ -11,13 +11,9 @@ TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nex
 
 TreeNode& TreeNode::operator=(const TreeNode& sourceNode)
 {
-  assert(typeid(*this) == typeid(sourceNode));
-
-  const TreeNode& copyNode = static_cast<const TreeNode&>(sourceNode);
-
-  m_parent = copyNode.m_parent;
-  m_nextSibling = copyNode.m_nextSibling;
-  m_nodeName = copyNode.m_nodeName;
+  m_parent = sourceNode.m_parent;
+  m_nextSibling = sourceNode.m_nextSibling;
+  m_nodeName = sourceNode.m_nodeName;
 
   return *this;
 }

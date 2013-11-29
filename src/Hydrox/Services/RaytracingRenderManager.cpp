@@ -2,6 +2,17 @@
 
 #include "Hydrox/Graphics/Scene.h"
 
+RenderManager* RaytracingRenderManager::getManager(ModelManager *modelManager, 
+                                   MaterialManager *materialManager, 
+                                   ShaderManager *shaderManager, 
+                                   TextureManager *textureManager,
+	                                 BillboardManager *billboardManager,
+                                   SpriteManager *spriteManager, GLfloat aspectRatio)
+{
+  static RenderManager *manager = new RaytracingRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio);
+  return manager;
+}
+
 RaytracingRenderManager::RaytracingRenderManager(ModelManager *modelManager, 
                 MaterialManager *materialManager, 
                 ShaderManager *shaderManager, 

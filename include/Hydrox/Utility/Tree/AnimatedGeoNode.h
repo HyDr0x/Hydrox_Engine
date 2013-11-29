@@ -14,7 +14,7 @@ class GRAPHICAPI AnimatedGeoNode : public GeoNode
 {
 public:
 
-  AnimatedGeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+  AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
   AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
   virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~AnimatedGeoNode();
@@ -24,6 +24,10 @@ public:
   virtual bool ascendTraverse(Traverser* traverser);
   virtual bool preTraverse(Traverser* traverser);
   virtual void postTraverse(Traverser* traverser);
+
+  void setBoneTransform(const Matrix<float, 4>& boneTransform, unsigned int boneIndex);
+
+  std::vector<Matrix<float, 4>> getSkinningMatrices();
 
 private:
 

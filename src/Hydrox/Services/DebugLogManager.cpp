@@ -4,6 +4,12 @@
 #include <iostream>
 #include <sstream>
 
+DebugLogManager* DebugLogManager::getManager()
+{
+  static DebugLogManager* manager = new DebugLogManager();
+  return manager;
+}
+
 DebugLogManager::DebugLogManager()
 {
 }

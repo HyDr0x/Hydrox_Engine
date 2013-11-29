@@ -14,13 +14,15 @@ class GRAPHICAPI Sprite : public CachedResource
 public:
 
   Sprite(){}
-	Sprite(const Sprite&){}
-
 	Sprite(ResourceHandle texID, bool anim, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd);
+  Sprite(const Sprite& o);
   Sprite& operator=(const Sprite& o);
 	~Sprite();
 
   void free();
+
+  void setRenderable(bool renderable);
+	bool getRenderable() const;
 
 	void setAnimation(unsigned int number);
 	void setAnimation(Vector<unsigned int, 2> number);
@@ -69,7 +71,7 @@ private:
 
   float m_angle;
 
-  bool m_anim;
+  bool m_renderable;//boolean which decides if the sprite is being drawn or not
 };
 
 #endif

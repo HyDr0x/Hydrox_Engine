@@ -11,7 +11,7 @@ class GRAPHICAPI DebugLogManager : public Io_service
 {
 public:
 
-  DebugLogManager();
+  static DebugLogManager* getManager();
   ~DebugLogManager();
 
   void gatherSystemInformation();
@@ -23,6 +23,8 @@ public:
   unsigned int getMinorOpenGLVersion();
 
 private:
+
+  DebugLogManager();
 
   std::string m_vendorName;
   std::string m_graphicCardName;

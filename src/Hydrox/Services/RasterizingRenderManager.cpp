@@ -16,6 +16,16 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
+RenderManager* RasterizerRenderManager::getManager(ModelManager *modelManager, 
+                                   MaterialManager *materialManager, 
+                                   ShaderManager *shaderManager, 
+                                   TextureManager *textureManager,
+	                                 BillboardManager *billboardManager,
+                                   SpriteManager *spriteManager, GLfloat aspectRatio)
+{
+  static RenderManager *manager = new RasterizerRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio);
+  return manager;
+}
 
 RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager, 
                 MaterialManager *materialManager, 
@@ -159,20 +169,23 @@ void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float,
 	m_spriteShader->useShader();
 
 	for(std::list<ResourceHandle>::iterator spriteIDIterator = m_spriteIDs.begin(); spriteIDIterator != m_spriteIDs.end(); spriteIDIterator++)
-	{
+  {
     renderSprite = m_spriteManager->getObject(*spriteIDIterator);
-    renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
+    if(renderSprite->getRenderable())
+    {
+      renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
 
-    renderTexture->setTexture(0);
-		m_spriteShader->setTexture(2, 0);
+      renderTexture->setTexture(0);
+		  m_spriteShader->setTexture(2, 0);
 		
-		Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
-		Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-		m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+		  Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
+		  Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+		  m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		  m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
 
-    glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
-		glDrawArrays(GL_POINTS, 0, 1);
+      glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
+		  glDrawArrays(GL_POINTS, 0, 1);
+    }
 	}
 
   glDisableVertexAttribArray(Shader::SPECIAL0);

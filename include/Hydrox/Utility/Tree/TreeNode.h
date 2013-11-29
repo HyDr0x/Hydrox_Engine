@@ -16,7 +16,7 @@ public:
   TreeNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
   virtual TreeNode& operator=(const TreeNode& sourceNode);
   virtual ~TreeNode() = 0;
-
+  
   virtual TreeNode* clone() const = 0;
 
   virtual bool ascendTraverse(Traverser* traverser) = 0;
@@ -42,7 +42,7 @@ protected:
 
 private:
 
-  TreeNode(const TreeNode&){}
+  TreeNode(const TreeNode&);
 };
 
 #endif

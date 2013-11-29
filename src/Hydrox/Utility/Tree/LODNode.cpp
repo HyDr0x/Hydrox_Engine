@@ -16,6 +16,11 @@ GroupNode(nodeName, parent, nextSibling, firstChild),
 LODNode& LODNode::operator=(const LODNode& sourceNode)
 {
   GroupNode::operator=(sourceNode);
+
+  m_lodLevel = sourceNode.m_lodLevel;
+  m_position = sourceNode.m_position;
+  m_transformedPosition = sourceNode.m_transformedPosition;
+
   return *this;
 }
 
@@ -24,11 +29,7 @@ TreeNode& LODNode::operator=(const TreeNode& sourceNode)
   assert(typeid(*this) == typeid(sourceNode));
 
   const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
-  GroupNode::operator=(copyNode);
-
-  m_lodLevel = copyNode.m_lodLevel;
-  m_position = copyNode.m_position;
-  m_transformedPosition = copyNode.m_transformedPosition;
+  LODNode::operator=(copyNode);
 
   return *this;
 }

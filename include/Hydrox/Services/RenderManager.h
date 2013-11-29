@@ -19,12 +19,6 @@ class GRAPHICAPI RenderManager : public Io_service
 {
 public:
 
-  RenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
 	virtual ~RenderManager();
 
   virtual void initialize() = 0;
@@ -33,6 +27,13 @@ public:
 	virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
 
 protected:
+
+  RenderManager(ModelManager *modelManager, 
+                MaterialManager *materialManager, 
+                ShaderManager *shaderManager, 
+                TextureManager *textureManager,
+	              BillboardManager *billboardManager,
+                SpriteManager *spriteManager, GLfloat aspectRatio);
 
   RenderManager(){}
 	RenderManager(const RenderManager&){}

@@ -20,10 +20,10 @@ template<class CLASS> class GRAPHICAPI CacheManager : public Io_service
 {
 public:
 
-	CacheManager(std::string path)
+  static CacheManager<CLASS>* getManager(std::string path)
   {
-	  m_path = path;
-    m_availableBorder = 0;
+    static CacheManager<CLASS>* manager = new CacheManager<CLASS>(path);
+    return manager;
   }
 
 	~CacheManager()
@@ -70,6 +70,8 @@ public:
 
 	void deleteObject(ResourceHandle objectID)
   {
+    assert(objectID < m_availableBorder);
+
     if(objectID != m_availableBorder - 1)
     {
       m_list.push_front(objectID);
@@ -86,6 +88,12 @@ public:
   }
 
 private:
+
+  CacheManager(std::string path)
+  {
+	  m_path = path;
+    m_availableBorder = 0;
+  }
 
 	CacheManager(){}
 	CacheManager(const CacheManager&){}

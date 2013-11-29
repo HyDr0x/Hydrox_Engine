@@ -10,12 +10,13 @@ class GRAPHICAPI RaytracingRenderManager : public RenderManager
 {
 public:
 
-	RaytracingRenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
+  static RenderManager* getManager(ModelManager *modelManager, 
+                                   MaterialManager *materialManager, 
+                                   ShaderManager *shaderManager, 
+                                   TextureManager *textureManager,
+	                                 BillboardManager *billboardManager,
+                                   SpriteManager *spriteManager, GLfloat aspectRatio);
+
 	~RaytracingRenderManager();
 
   void initialize();
@@ -23,6 +24,13 @@ public:
 	void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 
 private:
+
+  RaytracingRenderManager(ModelManager *modelManager, 
+                MaterialManager *materialManager, 
+                ShaderManager *shaderManager, 
+                TextureManager *textureManager,
+	              BillboardManager *billboardManager,
+                SpriteManager *spriteManager, GLfloat aspectRatio);
 
 	RaytracingRenderManager(){}
 	RaytracingRenderManager(const RaytracingRenderManager&){}

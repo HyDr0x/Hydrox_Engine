@@ -13,6 +13,11 @@ GeoNode::GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& n
 GeoNode& GeoNode::operator=(const GeoNode& sourceNode)
 {
   TreeNode::operator=(sourceNode);
+
+  m_trfMatrix = sourceNode.m_trfMatrix;
+  m_meshIndex = sourceNode.m_meshIndex;
+  m_renderable = sourceNode.m_renderable;
+
   return *this;
 }
 
@@ -21,11 +26,7 @@ TreeNode& GeoNode::operator=(const TreeNode& sourceNode)
   assert(typeid(*this) == typeid(sourceNode));
 
   const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
-  TreeNode::operator=(copyNode);
-
-  m_trfMatrix = copyNode.m_trfMatrix;
-  m_meshIndex = copyNode.m_meshIndex;
-  m_renderable = copyNode.m_renderable;
+  GeoNode::operator=(copyNode);
 
   return *this;
 }

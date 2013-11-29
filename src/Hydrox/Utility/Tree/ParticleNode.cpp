@@ -11,6 +11,9 @@ ParticleNode::ParticleNode(const std::string& nodeName, GroupNode* parent, TreeN
 ParticleNode& ParticleNode::operator=(const ParticleNode& sourceNode)
 {
   TreeNode::operator=(sourceNode);
+
+  m_trfMatrix = sourceNode.m_trfMatrix;
+
   return *this;
 }
 
@@ -19,9 +22,7 @@ TreeNode& ParticleNode::operator=(const TreeNode& sourceNode)
   assert(typeid(*this) == typeid(sourceNode));
 
   const ParticleNode& copyNode = static_cast<const ParticleNode&>(sourceNode);
-  TreeNode::operator=(copyNode);
-
-  m_trfMatrix = copyNode.m_trfMatrix;
+  ParticleNode::operator=(copyNode);
 
   return *this;
 }

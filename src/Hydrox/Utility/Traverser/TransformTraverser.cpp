@@ -45,13 +45,9 @@ bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
 {
   if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
   {
-    Vector<float, 3> translation = treeNode->getPosition();
-    float scale = treeNode->getScale();
-    Quaternion<float> rotation = treeNode->getRotation();
-
-    m_translateStack.push(translation);
-    m_scaleStack.push(scale);
-    m_rotationStack.push(rotation);
+    m_translateStack.push(treeNode->getPosition());
+    m_scaleStack.push(treeNode->getScale());
+    m_rotationStack.push(treeNode->getRotation());
 
     return true;
   }

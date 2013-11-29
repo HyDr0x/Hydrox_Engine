@@ -5,7 +5,6 @@
 #include "Hydrox/Utility/Miscellaneous/SceneCacheManager.h"
 
 #include "Hydrox/Utility/Traverser/TransformTraverser.h"
-#include "Hydrox/Utility/Traverser/CullTraverser.h"
 #include "Hydrox/Utility/Traverser/InsertObserverTraverser.h"
 #include "Hydrox/Utility/Traverser/DeleteTraverser.h"
 #include "Hydrox/Utility/Traverser/NodeSearchTraverser.h"
