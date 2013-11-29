@@ -5,44 +5,46 @@
 
 #include "Hydrox/DLLExport.h"
 
-class Traverser;
-
-class GroupNode;
-
-class GRAPHICAPI TreeNode
+namespace he
 {
-public:
+  class Traverser;
+  class GroupNode;
 
-  TreeNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~TreeNode() = 0;
+  class GRAPHICAPI TreeNode
+  {
+  public:
+
+    TreeNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~TreeNode() = 0;
   
-  virtual TreeNode* clone() const = 0;
+    virtual TreeNode* clone() const = 0;
 
-  virtual bool ascendTraverse(Traverser* traverser) = 0;
-  virtual bool preTraverse(Traverser* traverser) = 0;
-  virtual void postTraverse(Traverser* traverser) = 0;
+    virtual bool ascendTraverse(Traverser* traverser) = 0;
+    virtual bool preTraverse(Traverser* traverser) = 0;
+    virtual void postTraverse(Traverser* traverser) = 0;
 
-  virtual TreeNode* getFirstChild() const;
-  TreeNode* getNextSibling() const;
-  GroupNode* getParent() const;
+    virtual TreeNode* getFirstChild() const;
+    TreeNode* getNextSibling() const;
+    GroupNode* getParent() const;
 
-  void setNextSibling(TreeNode* nextSibling);
-  void setParent(GroupNode* parent);
+    void setNextSibling(TreeNode* nextSibling);
+    void setParent(GroupNode* parent);
 
-  void setNodeName(std::string& nodeName);
-  const std::string& getNodeName();
+    void setNodeName(std::string& nodeName);
+    const std::string& getNodeName();
 
-protected:
+  protected:
 
-  std::string m_nodeName;
+    std::string m_nodeName;
 
-  GroupNode* m_parent;
-  TreeNode* m_nextSibling;
+    GroupNode* m_parent;
+    TreeNode* m_nextSibling;
 
-private:
+  private:
 
-  TreeNode(const TreeNode&);
-};
+    TreeNode(const TreeNode&);
+  };
+}
 
 #endif

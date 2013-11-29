@@ -7,102 +7,53 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-TransformTraverser::TransformTraverser()
+namespace he
 {
-}
-
-TransformTraverser::~TransformTraverser()
-{
-}
-
-void TransformTraverser::postAscendTraverse()
-{
-  Vector<float, 3> trfTranslation = Vector<float, 3>::identity();
-  float trfScale = 1.0f;
-  Quaternion<float> trfRotation = Quaternion<float>::identity();
-
-  while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
+  TransformTraverser::TransformTraverser()
   {
-    Vector<float, 3> translation = m_translateStack.top();
-    float scale = m_scaleStack.top();
-    Quaternion<float> rotation = m_rotationStack.top();
-
-    m_translateStack.pop();
-    m_scaleStack.pop();
-    m_rotationStack.pop();
-
-    trfTranslation += trfRotation.apply(translation * trfScale);
-    trfScale *= scale;
-    trfRotation *= rotation;
   }
 
-  m_translateStack.push(trfTranslation);
-  m_scaleStack.push(trfScale);
-  m_rotationStack.push(trfRotation);
-}
-
-bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
-{
-  if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
+  TransformTraverser::~TransformTraverser()
   {
-    m_translateStack.push(treeNode->getPosition());
-    m_scaleStack.push(treeNode->getScale());
-    m_rotationStack.push(treeNode->getRotation());
-
-    return true;
   }
 
-  while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
+  void TransformTraverser::postAscendTraverse()
   {
-    m_translateStack.pop();
-    m_scaleStack.pop();
-    m_rotationStack.pop();
+    Vector<float, 3> trfTranslation = Vector<float, 3>::identity();
+    float trfScale = 1.0f;
+    Quaternion<float> trfRotation = Quaternion<float>::identity();
+
+    while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
+    {
+      Vector<float, 3> translation = m_translateStack.top();
+      float scale = m_scaleStack.top();
+      Quaternion<float> rotation = m_rotationStack.top();
+
+      m_translateStack.pop();
+      m_scaleStack.pop();
+      m_rotationStack.pop();
+
+      trfTranslation += trfRotation.apply(translation * trfScale);
+      trfScale *= scale;
+      trfRotation *= rotation;
+    }
+
+    m_translateStack.push(trfTranslation);
+    m_scaleStack.push(trfScale);
+    m_rotationStack.push(trfRotation);
   }
 
-  return false;
-}
-
-bool TransformTraverser::preTraverse(TransformNode* treeNode)
-{
-  treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
-
-  Vector<float, 3> translation;
-  float scale;
-  Quaternion<float> rotation;
-
-  if(!m_scaleStack.empty())
+  bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
   {
-    translation = m_translateStack.top();
-    scale = m_scaleStack.top();
-    rotation = m_rotationStack.top();
-  }
-  else
-  {
-    translation = Vector<float, 3>::identity();
-    scale = 1.0f;
-    rotation = Quaternion<float>::identity();
-  }
+    if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
+    {
+      m_translateStack.push(treeNode->getPosition());
+      m_scaleStack.push(treeNode->getScale());
+      m_rotationStack.push(treeNode->getRotation());
 
-  treeNode->calculateTransformation(translation, scale, rotation);
+      return true;
+    }
 
-  m_translateStack.push(translation);
-  m_scaleStack.push(scale);
-  m_rotationStack.push(rotation);
-
-  return true;
-}
-
-void TransformTraverser::postTraverse(TransformNode* treeNode)
-{
-  m_scaleStack.pop();
-  m_translateStack.pop();
-  m_rotationStack.pop();
-}
-
-bool TransformTraverser::ascendTraverse(LODNode* treeNode)
-{
-  if(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
-  {
     while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
     {
       m_translateStack.pop();
@@ -113,65 +64,117 @@ bool TransformTraverser::ascendTraverse(LODNode* treeNode)
     return false;
   }
 
-  return true;
-}
-
-bool TransformTraverser::preTraverse(LODNode* treeNode)
-{
-  treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
-
-  if(!m_scaleStack.empty())
+  bool TransformTraverser::preTraverse(TransformNode* treeNode)
   {
-    treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top());
+    treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
+
+    Vector<float, 3> translation;
+    float scale;
+    Quaternion<float> rotation;
+
+    if(!m_scaleStack.empty())
+    {
+      translation = m_translateStack.top();
+      scale = m_scaleStack.top();
+      rotation = m_rotationStack.top();
+    }
+    else
+    {
+      translation = Vector<float, 3>::identity();
+      scale = 1.0f;
+      rotation = Quaternion<float>::identity();
+    }
+
+    treeNode->calculateTransformation(translation, scale, rotation);
+
+    m_translateStack.push(translation);
+    m_scaleStack.push(scale);
+    m_rotationStack.push(rotation);
+
+    return true;
   }
-  else
+
+  void TransformTraverser::postTraverse(TransformNode* treeNode)
   {
-    treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), Quaternion<float>::identity());
+    m_scaleStack.pop();
+    m_translateStack.pop();
+    m_rotationStack.pop();
   }
 
-  return true;
-}
+  bool TransformTraverser::ascendTraverse(LODNode* treeNode)
+  {
+    if(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
+    {
+      while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
+      {
+        m_translateStack.pop();
+        m_scaleStack.pop();
+        m_rotationStack.pop();
+      }
 
-void TransformTraverser::postTraverse(LODNode* treeNode)
-{
-}
+      return false;
+    }
 
-bool TransformTraverser::preTraverse(GeoNode* treeNode)
-{
-  treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+    return true;
+  }
 
-  return true;
-}
+  bool TransformTraverser::preTraverse(LODNode* treeNode)
+  {
+    treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
 
-void TransformTraverser::postTraverse(GeoNode* treeNode)
-{
-}
+    if(!m_scaleStack.empty())
+    {
+      treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top());
+    }
+    else
+    {
+      treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), Quaternion<float>::identity());
+    }
 
-bool TransformTraverser::preTraverse(BillboardNode* treeNode)
-{
-  treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+    return true;
+  }
 
-  return true;
-}
+  void TransformTraverser::postTraverse(LODNode* treeNode)
+  {
+  }
 
-void TransformTraverser::postTraverse(BillboardNode* treeNode)
-{
-}
+  bool TransformTraverser::preTraverse(GeoNode* treeNode)
+  {
+    treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
 
-bool TransformTraverser::preTraverse(ParticleNode* treeNode)
-{
-  return true;
-}
+    return true;
+  }
 
-void TransformTraverser::postTraverse(ParticleNode* treeNode)
-{
-}
+  void TransformTraverser::postTraverse(GeoNode* treeNode)
+  {
+  }
 
-bool TransformTraverser::preTraverse(LightNode* treeNode)
-{
-  return true;
-}
+  bool TransformTraverser::preTraverse(BillboardNode* treeNode)
+  {
+    treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
 
-void TransformTraverser::postTraverse(LightNode* treeNode)
-{
+    return true;
+  }
+
+  void TransformTraverser::postTraverse(BillboardNode* treeNode)
+  {
+  }
+
+  bool TransformTraverser::preTraverse(ParticleNode* treeNode)
+  {
+    return true;
+  }
+
+  void TransformTraverser::postTraverse(ParticleNode* treeNode)
+  {
+  }
+
+  bool TransformTraverser::preTraverse(LightNode* treeNode)
+  {
+    return true;
+  }
+
+  void TransformTraverser::postTraverse(LightNode* treeNode)
+  {
+  }
 }

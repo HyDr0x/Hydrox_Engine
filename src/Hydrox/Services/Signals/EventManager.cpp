@@ -1,11 +1,13 @@
 #include "Hydrox/Services/Signals/EventManager.h"
 
-EventManager::EventManager()
+namespace he
 {
-}
+  EventManager::EventManager()
+  {
+  }
 
-EventManager::~EventManager()
-{
-	m_sigMap.clear();
+  EventManager::~EventManager()
+  {
+	  m_sigMap.clear();
+  }
 }
-

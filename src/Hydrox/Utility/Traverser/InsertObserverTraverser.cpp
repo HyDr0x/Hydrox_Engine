@@ -4,21 +4,24 @@
 #include "Hydrox/Utility/Observer/Observer.hpp"
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
-InsertObserverTraverser::InsertObserverTraverser(Scene *scene) : m_scene(scene)
+namespace he
 {
-}
+  InsertObserverTraverser::InsertObserverTraverser(Scene *scene) : m_scene(scene)
+  {
+  }
 
-InsertObserverTraverser::~InsertObserverTraverser()
-{
-}
+  InsertObserverTraverser::~InsertObserverTraverser()
+  {
+  }
 
-bool InsertObserverTraverser::preTraverse(TransformNode* treeNode)
-{
-  treeNode->add(m_scene);
+  bool InsertObserverTraverser::preTraverse(TransformNode* treeNode)
+  {
+    treeNode->add(m_scene);
 
-  return true;
-}
+    return true;
+  }
 
-void InsertObserverTraverser::postTraverse(TransformNode* treeNode)
-{
+  void InsertObserverTraverser::postTraverse(TransformNode* treeNode)
+  {
+  }
 }

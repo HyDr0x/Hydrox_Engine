@@ -5,39 +5,42 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-class NodeSearchTraverser : public Traverser
+namespace he
 {
-public:
+  class NodeSearchTraverser : public Traverser
+  {
+  public:
 
-  NodeSearchTraverser(const std::string& nodeName);
-  virtual ~NodeSearchTraverser();
+    NodeSearchTraverser(const std::string& nodeName);
+    virtual ~NodeSearchTraverser();
 
-  virtual bool preTraverse(TransformNode* treeNode);
-  virtual void postTraverse(TransformNode* treeNode);
+    virtual bool preTraverse(TransformNode* treeNode);
+    virtual void postTraverse(TransformNode* treeNode);
 
-  virtual bool preTraverse(LODNode* treeNode);
-  virtual void postTraverse(LODNode* treeNode);
+    virtual bool preTraverse(LODNode* treeNode);
+    virtual void postTraverse(LODNode* treeNode);
 
-  virtual bool preTraverse(GeoNode* treeNode);
-  virtual void postTraverse(GeoNode* treeNode);
+    virtual bool preTraverse(GeoNode* treeNode);
+    virtual void postTraverse(GeoNode* treeNode);
 
-  virtual bool preTraverse(BillboardNode* treeNode);
-  virtual void postTraverse(BillboardNode* treeNode);
+    virtual bool preTraverse(BillboardNode* treeNode);
+    virtual void postTraverse(BillboardNode* treeNode);
 
-  virtual bool preTraverse(ParticleNode* treeNode);
-  virtual void postTraverse(ParticleNode* treeNode);
+    virtual bool preTraverse(ParticleNode* treeNode);
+    virtual void postTraverse(ParticleNode* treeNode);
 
-  virtual bool preTraverse(LightNode* treeNode);
-  virtual void postTraverse(LightNode* treeNode);
+    virtual bool preTraverse(LightNode* treeNode);
+    virtual void postTraverse(LightNode* treeNode);
 
-  TreeNode* getDiscoveredNode() const;
+    TreeNode* getDiscoveredNode() const;
 
-protected:
+  protected:
 
-  bool findNode(TreeNode* treeNode);
+    bool findNode(TreeNode* treeNode);
 
-  TreeNode* m_discoveredNode;
-  std::string m_nodeName;
-};
+    TreeNode* m_discoveredNode;
+    std::string m_nodeName;
+  };
+}
 
 #endif

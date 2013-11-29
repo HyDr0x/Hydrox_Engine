@@ -16,158 +16,160 @@
 #include "Hydrox/Services/Signals/ClassDelegate.h"
 #include "Hydrox/Services/Signals/NonClassDelegate.h"
 
-
-template<
-	typename R SIGNALS_COMMA_IF_ARGUMENTS 
-	SIGNALS_TEMPLATE_PARAMS
-> 
-class SIGNALS_SIGNAL
+namespace he
 {
-public:
+  template<
+	  typename R SIGNALS_COMMA_IF_ARGUMENTS 
+	  SIGNALS_TEMPLATE_PARAMS
+  > 
+  class SIGNALS_SIGNAL
+  {
+  public:
 
-	SIGNALS_SIGNAL()
-	{}
+	  SIGNALS_SIGNAL()
+	  {}
 
-	~SIGNALS_SIGNAL()
-	{
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			delete (*m_dit);
+	  ~SIGNALS_SIGNAL()
+	  {
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  delete (*m_dit);
 
-		m_DList.clear();
-	}
-
-
-	void execute(R* cargo SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_PARAMS)
-	{
-		unsigned int i=0;
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++,i++)
-			cargo[i]=(*m_dit)->invoke(SIGNALS_ARGS);
-	}
-
-private:
-
-	typedef SIGNALS_DELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
-
-	void connect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
-	}
-
-	template<class C> void connect(C& obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
-	}
-
-	void disconnect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			if((*m_dit)==tmpObj)
-			{
-				m_dit=m_DList.erase(m_dit);
-				m_dit--;
-			}
-	}
-
-	template<class C> void disconnect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			if((*m_dit)->operator==(tmpObj))
-			{
-				m_dit=m_DList.erase(m_dit);
-				m_dit--;
-			}
-	}
-
-	unsigned int getSlotNumber() const
-	{
-		return m_DList.size();
-	}
-
-	friend class EventManager;
-
-	typename std::list<Delegate*> m_DList;
-	typename std::list<Delegate*>::iterator m_dit;
-};
+		  m_DList.clear();
+	  }
 
 
-////////////////////////////PARTIAL SPEZIALIZATION FOR VOID RETURN TYPE////////////////////////////////
-#if SIGNALS_NUM_ARGS == 0
-#	define SIGNALS_TYPENAME
-#else
-#	define SIGNALS_TYPENAME typename
-#endif
+	  void execute(R* cargo SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_PARAMS)
+	  {
+		  unsigned int i=0;
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++,i++)
+			  cargo[i]=(*m_dit)->invoke(SIGNALS_ARGS);
+	  }
 
-template< 
-	SIGNALS_TEMPLATE_PARAMS
-> 
-class SIGNALS_SIGNAL<
-	void SIGNALS_COMMA_IF_ARGUMENTS 
-	SIGNALS_TEMPLATE_ARGS
->
-{
-public:
+  private:
 
-	SIGNALS_SIGNAL()
-	{}
+	  typedef SIGNALS_DELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
 
-	~SIGNALS_SIGNAL()
-	{
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			delete (*m_dit);
+	  void connect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
+	  }
 
-		m_DList.clear();
-	}
+	  template<class C> void connect(C& obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
+	  }
+
+	  void disconnect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  if((*m_dit)==tmpObj)
+			  {
+				  m_dit=m_DList.erase(m_dit);
+				  m_dit--;
+			  }
+	  }
+
+	  template<class C> void disconnect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  if((*m_dit)->operator==(tmpObj))
+			  {
+				  m_dit=m_DList.erase(m_dit);
+				  m_dit--;
+			  }
+	  }
+
+	  unsigned int getSlotNumber() const
+	  {
+		  return m_DList.size();
+	  }
+
+	  friend class EventManager;
+
+	  typename std::list<Delegate*> m_DList;
+	  typename std::list<Delegate*>::iterator m_dit;
+  };
 
 
-	void execute(SIGNALS_PARAMS)
-	{
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			(*m_dit)->invoke(SIGNALS_ARGS);
-	}
+  ////////////////////////////PARTIAL SPEZIALIZATION FOR VOID RETURN TYPE////////////////////////////////
+  #if SIGNALS_NUM_ARGS == 0
+  #	define SIGNALS_TYPENAME
+  #else
+  #	define SIGNALS_TYPENAME typename
+  #endif
 
-private:
+  template< 
+	  SIGNALS_TEMPLATE_PARAMS
+  > 
+  class SIGNALS_SIGNAL<
+	  void SIGNALS_COMMA_IF_ARGUMENTS 
+	  SIGNALS_TEMPLATE_ARGS
+  >
+  {
+  public:
 
-	typedef SIGNALS_DELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
+	  SIGNALS_SIGNAL()
+	  {}
 
-	void connect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
-	}
+	  ~SIGNALS_SIGNAL()
+	  {
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  delete (*m_dit);
 
-	template<class C> void connect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
-	}
+		  m_DList.clear();
+	  }
 
-	void disconnect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			if((*m_dit)==tmpObj)
-			{
-				m_dit=m_DList.erase(m_dit);
-				m_dit--;
-			}
-	}
 
-	template<class C> void disconnect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	{
-		Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
-		for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			if((*m_dit)->operator==(tmpObj))
-			{
-				m_dit=m_DList.erase(m_dit);
-				m_dit--;
-			}
-	}
+	  void execute(SIGNALS_PARAMS)
+	  {
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  (*m_dit)->invoke(SIGNALS_ARGS);
+	  }
 
-	friend class EventManager;
+  private:
 
-	SIGNALS_TYPENAME std::list<Delegate*> m_DList;
-	SIGNALS_TYPENAME std::list<Delegate*>::iterator m_dit;
-};
+	  typedef SIGNALS_DELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
+
+	  void connect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
+	  }
+
+	  template<class C> void connect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
+	  }
+
+	  void disconnect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  if((*m_dit)==tmpObj)
+			  {
+				  m_dit=m_DList.erase(m_dit);
+				  m_dit--;
+			  }
+	  }
+
+	  template<class C> void disconnect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+	  {
+		  Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
+		  for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+			  if((*m_dit)->operator==(tmpObj))
+			  {
+				  m_dit=m_DList.erase(m_dit);
+				  m_dit--;
+			  }
+	  }
+
+	  friend class EventManager;
+
+	  SIGNALS_TYPENAME std::list<Delegate*> m_DList;
+	  SIGNALS_TYPENAME std::list<Delegate*>::iterator m_dit;
+  };
+}
 
 #undef SIGNALS_COMMA_IF_ARGUMENTS
 #undef SIGNALS_TYPENAME

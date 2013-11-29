@@ -6,41 +6,44 @@
 #include "Hydrox/Services/Io_service.h"
 #include "Hydrox/Services/RenderManager.h"
 
-class Shader;
-
-class GRAPHICAPI RasterizerRenderManager : public RenderManager
+namespace he
 {
-public:
+  class Shader;
 
-  static RenderManager* getManager(ModelManager *modelManager, 
-                                   MaterialManager *materialManager, 
-                                   ShaderManager *shaderManager, 
-                                   TextureManager *textureManager,
-	                                 BillboardManager *billboardManager,
-                                   SpriteManager *spriteManager, GLfloat aspectRatio);
+  class GRAPHICAPI RasterizerRenderManager : public RenderManager
+  {
+  public:
 
-	~RasterizerRenderManager();
+    static RenderManager* getManager(ModelManager *modelManager, 
+                                     MaterialManager *materialManager, 
+                                     ShaderManager *shaderManager, 
+                                     TextureManager *textureManager,
+	                                   BillboardManager *billboardManager,
+                                     SpriteManager *spriteManager, GLfloat aspectRatio);
 
-  void initialize();
+	  ~RasterizerRenderManager();
 
-	void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
+    void initialize();
 
-private:
+	  void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 
-  RasterizerRenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
+  private:
 
-	RasterizerRenderManager(){}
-	RasterizerRenderManager(const RasterizerRenderManager&){}
+    RasterizerRenderManager(ModelManager *modelManager, 
+                  MaterialManager *materialManager, 
+                  ShaderManager *shaderManager, 
+                  TextureManager *textureManager,
+	                BillboardManager *billboardManager,
+                  SpriteManager *spriteManager, GLfloat aspectRatio);
 
-  GLuint m_spriteVBO;
+	  RasterizerRenderManager(){}
+	  RasterizerRenderManager(const RasterizerRenderManager&){}
 
-  Shader *m_billboardShader;
-  Shader *m_spriteShader;
-};
+    GLuint m_spriteVBO;
+
+    Shader *m_billboardShader;
+    Shader *m_spriteShader;
+  };
+}
 
 #endif

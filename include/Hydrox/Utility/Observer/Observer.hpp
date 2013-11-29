@@ -1,17 +1,20 @@
 #ifndef OBSERVER_H_
 #define OBSERVER_H_
 
-template<class ParamT> class Observer
+namespace he
 {
-public:
+  template<class ParamT> class Observer
+  {
+  public:
 
-  Observer(){}
-  virtual ~Observer(){}
+    Observer(){}
+    virtual ~Observer(){}
 
-  virtual void updateObserver(ParamT params) = 0;
+    virtual void updateObserver(ParamT params) = 0;
 
-private:
+  private:
 
-};
+  };
+}
 
 #endif

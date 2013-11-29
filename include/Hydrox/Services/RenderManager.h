@@ -11,43 +11,46 @@
 
 #include "Hydrox/Services/CacheManager.hpp"
 
-class Sprite;
-class Scene;
-class Camera;
-
-class GRAPHICAPI RenderManager : public Io_service
+namespace he
 {
-public:
+  class Sprite;
+  class Scene;
+  class Camera;
 
-	virtual ~RenderManager();
+  class GRAPHICAPI RenderManager : public Io_service
+  {
+  public:
 
-  virtual void initialize() = 0;
+	  virtual ~RenderManager();
 
-  virtual void addSprite(ResourceHandle spriteID);
-	virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
+    virtual void initialize() = 0;
 
-protected:
+    virtual void addSprite(ResourceHandle spriteID);
+	  virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
 
-  RenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
+  protected:
 
-  RenderManager(){}
-	RenderManager(const RenderManager&){}
+    RenderManager(ModelManager *modelManager, 
+                  MaterialManager *materialManager, 
+                  ShaderManager *shaderManager, 
+                  TextureManager *textureManager,
+	                BillboardManager *billboardManager,
+                  SpriteManager *spriteManager, GLfloat aspectRatio);
 
-  ModelManager    *m_modelManager;
-	MaterialManager *m_materialManager;
-	ShaderManager   *m_shaderManager;
-  TextureManager  *m_textureManager;
-  BillboardManager *m_billboardManager;
-  SpriteManager   *m_spriteManager;
+    RenderManager(){}
+	  RenderManager(const RenderManager&){}
 
-  std::list<ResourceHandle> m_spriteIDs;
+    ModelManager    *m_modelManager;
+	  MaterialManager *m_materialManager;
+	  ShaderManager   *m_shaderManager;
+    TextureManager  *m_textureManager;
+    BillboardManager *m_billboardManager;
+    SpriteManager   *m_spriteManager;
 
-  GLfloat m_aspectRatio;
-};
+    std::list<ResourceHandle> m_spriteIDs;
+
+    GLfloat m_aspectRatio;
+  };
+}
 
 #endif

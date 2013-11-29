@@ -11,40 +11,42 @@
 
 #include "Hydrox/Services/CachedResource.h"
 
-class GRAPHICAPI Texture : public CachedResource
+namespace he
 {
-public:
+  class GRAPHICAPI Texture : public CachedResource
+  {
+  public:
 
-  Texture() {}
-  Texture(const Texture&){}
+    Texture() {}
+    Texture(const Texture&){}
 
-	Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL);
-  Texture& operator=(const Texture& o);
-	~Texture();
+	  Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL);
+    Texture& operator=(const Texture& o);
+	  ~Texture();
 
-  void free();
+    void free();
 
-	void setTexture(GLuint slot);
-	void unsetTexture();
+	  void setTexture(GLuint slot);
+	  void unsetTexture();
 
-	void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
+	  void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
 
-	Vector<unsigned int, 2> getResolution();
-	GLuint getSlot();
-	GLenum getTarget();
+	  Vector<unsigned int, 2> getResolution();
+	  GLuint getSlot();
+	  GLenum getTarget();
 
-	friend class Renderquad;
-  friend class PBO;
+	  friend class Renderquad;
+    friend class PBO;
 
-private:
+  private:
 
-	GLsizei m_width, m_height;
-	GLuint m_texIndex;
-	GLenum m_target;
-  GLenum m_internalFormat;
-  GLenum m_format;
-  GLenum m_type;
-	GLuint m_slot;
-};
-
+	  GLsizei m_width, m_height;
+	  GLuint m_texIndex;
+	  GLenum m_target;
+    GLenum m_internalFormat;
+    GLenum m_format;
+    GLenum m_type;
+	  GLuint m_slot;
+  };
+}
 #endif

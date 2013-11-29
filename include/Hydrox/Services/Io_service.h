@@ -3,6 +3,9 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI Io_service{public: virtual ~Io_service()=0{} };
+namespace he
+{
+  class GRAPHICAPI Io_service{public: virtual ~Io_service()=0{} };
+}
 
 #endif

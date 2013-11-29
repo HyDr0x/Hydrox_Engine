@@ -18,100 +18,103 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-Scene::Scene(GroupNode* rootNode, Vector<float, 3>& cameraPosition)
+namespace he
 {
-  m_rootNode = rootNode;
-
-  TransformTraverser transformTraverser;
-  transformTraverser.doTraverse(m_rootNode);
-
-  InsertObserverTraverser insertObserverTraverser(this);
-  insertObserverTraverser.doTraverse(m_rootNode);//insert this scene as an observer to every Transform node
-
-  SceneCacheManager::addTreeToCaches(m_rootNode, cameraPosition);
-}
-
-Scene::Scene(const Scene&)
-{
-}
-
-Scene::~Scene()
-{
-  DeleteTraverser deleteTraverser;
-  deleteTraverser.doTraverse(m_rootNode);
-}
-
-TreeNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
-{
-  TreeNode *newNode = Tree::addParentNode(destinationNode, sourceNode);
-
-  TransformTraverser transformTraverser;
-  transformTraverser.doAscend(newNode);
-  transformTraverser.doTraverse(newNode);
-
-  TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
-  if(newTransform != nullptr)
+  Scene::Scene(GroupNode* rootNode, Vector<float, 3>& cameraPosition)
   {
-    newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
+    m_rootNode = rootNode;
+
+    TransformTraverser transformTraverser;
+    transformTraverser.doTraverse(m_rootNode);
+
+    InsertObserverTraverser insertObserverTraverser(this);
+    insertObserverTraverser.doTraverse(m_rootNode);//insert this scene as an observer to every Transform node
+
+    SceneCacheManager::addTreeToCaches(m_rootNode, cameraPosition);
   }
 
-  SceneCacheManager::addNodeToCaches(newNode);
-  return newNode;
-}
-
-TreeNode* Scene::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
-{
-  TreeNode *newNode = Tree::addChildNode(destinationNode, sourceNode);
-
-  TransformTraverser transformTraverser;
-  transformTraverser.doAscend(newNode);
-  transformTraverser.doTraverse(newNode);
-
-  TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
-  if(newTransform != nullptr)
+  Scene::Scene(const Scene&)
   {
-    newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
   }
 
-  SceneCacheManager::addNodeToCaches(newNode);
+  Scene::~Scene()
+  {
+    DeleteTraverser deleteTraverser;
+    deleteTraverser.doTraverse(m_rootNode);
+  }
+
+  TreeNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
+  {
+    TreeNode *newNode = Tree::addParentNode(destinationNode, sourceNode);
+
+    TransformTraverser transformTraverser;
+    transformTraverser.doAscend(newNode);
+    transformTraverser.doTraverse(newNode);
+
+    TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
+    if(newTransform != nullptr)
+    {
+      newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
+    }
+
+    SceneCacheManager::addNodeToCaches(newNode);
     return newNode;
-}
+  }
 
-void Scene::removeNode(TreeNode *node)
-{
-  SceneCacheManager::removeNodeFromCaches(node);
+  TreeNode* Scene::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
+  {
+    TreeNode *newNode = Tree::addChildNode(destinationNode, sourceNode);
 
-  Tree::removeNode(node);
-}
+    TransformTraverser transformTraverser;
+    transformTraverser.doAscend(newNode);
+    transformTraverser.doTraverse(newNode);
 
-GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, Vector<float, 3>& cameraPosition, std::string namePrefix)
-{
-  GroupNode* copiedRootNode = Tree::addSubTree(object, sceneNode, namePrefix);
+    TransformNode *newTransform = dynamic_cast<TransformNode*>(newNode);
+    if(newTransform != nullptr)
+    {
+      newTransform->add(dynamic_cast<Observer<TransformNode*>*>(this));//insert this scene as an observer to every Transform node
+    }
 
-  TransformTraverser transformTraverser;
-  transformTraverser.doAscend(copiedRootNode);
-  transformTraverser.doTraverse(copiedRootNode);
+    SceneCacheManager::addNodeToCaches(newNode);
+      return newNode;
+  }
 
-  InsertObserverTraverser insertObserverTraverser(this);
-  insertObserverTraverser.doTraverse(copiedRootNode);//insert this scene as an observer to every Transform node
+  void Scene::removeNode(TreeNode *node)
+  {
+    SceneCacheManager::removeNodeFromCaches(node);
 
-  SceneCacheManager::addTreeToCaches(copiedRootNode, cameraPosition);
+    Tree::removeNode(node);
+  }
 
-  return copiedRootNode;
-}
+  GroupNode* Scene::addSubTree(Tree* object, GroupNode* sceneNode, Vector<float, 3>& cameraPosition, std::string namePrefix)
+  {
+    GroupNode* copiedRootNode = Tree::addSubTree(object, sceneNode, namePrefix);
 
-void Scene::removeSubTree(TreeNode* sceneNode)
-{
-  SceneCacheManager::removeTreeFromCaches(sceneNode);
+    TransformTraverser transformTraverser;
+    transformTraverser.doAscend(copiedRootNode);
+    transformTraverser.doTraverse(copiedRootNode);
 
-  Tree::removeSubTree(sceneNode);
-}
+    InsertObserverTraverser insertObserverTraverser(this);
+    insertObserverTraverser.doTraverse(copiedRootNode);//insert this scene as an observer to every Transform node
 
-TreeNode* Scene::searchNode(const std::string& nodeName)
-{
-  NodeSearchTraverser traverser(nodeName);
+    SceneCacheManager::addTreeToCaches(copiedRootNode, cameraPosition);
 
-  traverser.doTraverse(m_rootNode);
+    return copiedRootNode;
+  }
 
-  return traverser.getDiscoveredNode();
+  void Scene::removeSubTree(TreeNode* sceneNode)
+  {
+    SceneCacheManager::removeTreeFromCaches(sceneNode);
+
+    Tree::removeSubTree(sceneNode);
+  }
+
+  TreeNode* Scene::searchNode(const std::string& nodeName)
+  {
+    NodeSearchTraverser traverser(nodeName);
+
+    traverser.doTraverse(m_rootNode);
+
+    return traverser.getDiscoveredNode();
+  }
 }

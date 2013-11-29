@@ -7,28 +7,31 @@
 
 #include "Hydrox/Services/Io_service.h"
 
-class ServiceManager
+namespace he
 {
-public:
-	ServiceManager(){}
-	~ServiceManager(){}
+  class ServiceManager
+  {
+  public:
+	  ServiceManager(){}
+	  ~ServiceManager(){}
 
-	template<class T> void addService(T* service)
-	{
-		m_serviceMap[std::string(typeid(service).name())] = service;
-	}
+	  template<class T> void addService(T* service)
+	  {
+		  m_serviceMap[std::string(typeid(service).name())] = service;
+	  }
 
-	template<class T> T* getService()
-	{
-		return dynamic_cast<T*>(m_serviceMap[std::string(typeid(T*).name())]);
-	}
+	  template<class T> T* getService()
+	  {
+		  return dynamic_cast<T*>(m_serviceMap[std::string(typeid(T*).name())]);
+	  }
 
-private:
+  private:
 
-	ServiceManager(const ServiceManager&){}
-	ServiceManager& operator=(const ServiceManager&){}
+	  ServiceManager(const ServiceManager&){}
+	  ServiceManager& operator=(const ServiceManager&){}
 
-	std::map<std::string, Io_service*> m_serviceMap;
-};
+	  std::map<std::string, Io_service*> m_serviceMap;
+  };
+}
 
 #endif

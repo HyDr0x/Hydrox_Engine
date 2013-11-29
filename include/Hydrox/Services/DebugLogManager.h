@@ -7,32 +7,35 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI DebugLogManager : public Io_service
+namespace he
 {
-public:
+  class GRAPHICAPI DebugLogManager : public Io_service
+  {
+  public:
 
-  static DebugLogManager* getManager();
-  ~DebugLogManager();
+    static DebugLogManager* getManager();
+    ~DebugLogManager();
 
-  void gatherSystemInformation();
+    void gatherSystemInformation();
 
-  void printSystemInformation();
-  void printSupportedExtensions();
+    void printSystemInformation();
+    void printSupportedExtensions();
 
-  unsigned int getMajorOpenGLVersion();
-  unsigned int getMinorOpenGLVersion();
+    unsigned int getMajorOpenGLVersion();
+    unsigned int getMinorOpenGLVersion();
 
-private:
+  private:
 
-  DebugLogManager();
+    DebugLogManager();
 
-  std::string m_vendorName;
-  std::string m_graphicCardName;
-  std::string m_shadingVersion;
-  std::string m_extensions;
+    std::string m_vendorName;
+    std::string m_graphicCardName;
+    std::string m_shadingVersion;
+    std::string m_extensions;
 
-  unsigned int m_openGLMajorVersion;
-  unsigned int m_openGLMinorVersion;
-};
+    unsigned int m_openGLMajorVersion;
+    unsigned int m_openGLMinorVersion;
+  };
+}
 
 #endif

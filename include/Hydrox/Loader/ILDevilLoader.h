@@ -12,24 +12,27 @@
 
 #include "Hydrox/Services/CacheManager.hpp"
 
-class GRAPHICAPI ILDevilLoader
+namespace he
 {
-public:
+  class GRAPHICAPI ILDevilLoader
+  {
+  public:
 
-  ILDevilLoader(TextureManager *textureManager);
-  ILDevilLoader(const ILDevilLoader& o );
-  ILDevilLoader& operator=(const ILDevilLoader& o);
-  ~ILDevilLoader();
+    ILDevilLoader(TextureManager *textureManager);
+    ILDevilLoader(const ILDevilLoader& o );
+    ILDevilLoader& operator=(const ILDevilLoader& o);
+    ~ILDevilLoader();
 
-  ResourceHandle load(const char* filename, GLenum target);
+    ResourceHandle load(const char* filename, GLenum target);
 
-private:
+  private:
 
-  ILDevilLoader(){}
+    ILDevilLoader(){}
 
-  void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components);
+    void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components);
 
-  TextureManager *m_textureManager;
-};
+    TextureManager *m_textureManager;
+  };
+}
 
 #endif

@@ -7,29 +7,32 @@
 #include "Hydrox/Graphics/Light.h"
 #include "Hydrox/Utility/Tree/TreeNode.h"
 
-class Traverser;
-
-class GRAPHICAPI LightNode : public TreeNode
+namespace he
 {
-public:
+  class Traverser;
 
-  LightNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  LightNode& operator=(const LightNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~LightNode();
+  class GRAPHICAPI LightNode : public TreeNode
+  {
+  public:
 
-  virtual TreeNode* clone() const;
+    LightNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    LightNode& operator=(const LightNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~LightNode();
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual TreeNode* clone() const;
 
-  Matrix<float, 4> getTransformationMatrix() const;
-  void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-private:
+    Matrix<float, 4> getTransformationMatrix() const;
+    void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
-  Matrix<float,4> m_trfMatrix;//the tranformation Matrix
-};
+  private:
+
+    Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+  };
+}
 
 #endif

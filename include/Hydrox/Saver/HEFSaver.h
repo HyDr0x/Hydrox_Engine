@@ -3,13 +3,15 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI HEFSaver
+namespace he
 {
-public:
+  class GRAPHICAPI HEFSaver
+  {
+  public:
 
-private:
+  private:
 
-};
-
+  };
+}
 
 #endif

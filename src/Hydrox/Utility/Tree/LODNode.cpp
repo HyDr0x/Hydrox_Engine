@@ -4,80 +4,83 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-LODNode::LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
-GroupNode(nodeName, parent, nextSibling, firstChild),
-  m_lodLevel(lodLevel),
-  m_position(position)
+namespace he
 {
-  m_dirtyFlag |= LOD_INRANGE;
-  m_transformedPosition = m_position;
-}
+  LODNode::LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
+  GroupNode(nodeName, parent, nextSibling, firstChild),
+    m_lodLevel(lodLevel),
+    m_position(position)
+  {
+    m_dirtyFlag |= LOD_INRANGE;
+    m_transformedPosition = m_position;
+  }
 
-LODNode& LODNode::operator=(const LODNode& sourceNode)
-{
-  GroupNode::operator=(sourceNode);
+  LODNode& LODNode::operator=(const LODNode& sourceNode)
+  {
+    GroupNode::operator=(sourceNode);
 
-  m_lodLevel = sourceNode.m_lodLevel;
-  m_position = sourceNode.m_position;
-  m_transformedPosition = sourceNode.m_transformedPosition;
+    m_lodLevel = sourceNode.m_lodLevel;
+    m_position = sourceNode.m_position;
+    m_transformedPosition = sourceNode.m_transformedPosition;
 
-  return *this;
-}
+    return *this;
+  }
 
-TreeNode& LODNode::operator=(const TreeNode& sourceNode)
-{
-  assert(typeid(*this) == typeid(sourceNode));
+  TreeNode& LODNode::operator=(const TreeNode& sourceNode)
+  {
+    assert(typeid(*this) == typeid(sourceNode));
 
-  const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
-  LODNode::operator=(copyNode);
+    const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
+    LODNode::operator=(copyNode);
 
-  return *this;
-}
+    return *this;
+  }
 
-LODNode::~LODNode()
-{
-}
+  LODNode::~LODNode()
+  {
+  }
 
-GroupNode* LODNode::clone() const
-{
-  LODNode *newNode = new LODNode(m_position, m_lodLevel, m_nodeName);
+  GroupNode* LODNode::clone() const
+  {
+    LODNode *newNode = new LODNode(m_position, m_lodLevel, m_nodeName);
 
-  newNode->m_nodeName = m_nodeName;
-  newNode->m_dirtyFlag = m_dirtyFlag;
-  newNode->m_position = m_position;
-  newNode->m_transformedPosition = m_transformedPosition;
+    newNode->m_nodeName = m_nodeName;
+    newNode->m_dirtyFlag = m_dirtyFlag;
+    newNode->m_position = m_position;
+    newNode->m_transformedPosition = m_transformedPosition;
 
-  return newNode;
-}
+    return newNode;
+  }
 
-bool LODNode::ascendTraverse(Traverser* traverser)
-{
-  return traverser->ascendTraverse(this);
-}
+  bool LODNode::ascendTraverse(Traverser* traverser)
+  {
+    return traverser->ascendTraverse(this);
+  }
 
-bool LODNode::preTraverse(Traverser* traverser)
-{
-  return traverser->preTraverse(this);
-}
+  bool LODNode::preTraverse(Traverser* traverser)
+  {
+    return traverser->preTraverse(this);
+  }
 
-void LODNode::postTraverse(Traverser* traverser)
-{
-  traverser->postTraverse(this);
-}
+  void LODNode::postTraverse(Traverser* traverser)
+  {
+    traverser->postTraverse(this);
+  }
 
-unsigned int LODNode::getLODLevel()
-{
-  return m_lodLevel;
-}
+  unsigned int LODNode::getLODLevel()
+  {
+    return m_lodLevel;
+  }
 
-bool LODNode::getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges)
-{
-  float distance = static_cast<float>((m_transformedPosition - camPos).length());
+  bool LODNode::getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges)
+  {
+    float distance = static_cast<float>((m_transformedPosition - camPos).length());
 
-	return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
-}
+	  return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
+  }
 
-void LODNode::transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
-{
-  m_transformedPosition = translation + rotation.apply(m_position * scale);
+  void LODNode::transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
+  {
+    m_transformedPosition = translation + rotation.apply(m_position * scale);
+  }
 }

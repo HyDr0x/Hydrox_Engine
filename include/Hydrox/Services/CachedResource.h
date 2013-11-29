@@ -3,21 +3,24 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI CachedResource
+namespace he
 {
-public:
+  class GRAPHICAPI CachedResource
+  {
+  public:
 
-  typedef unsigned int CacheIDType;
+    typedef unsigned int CacheIDType;
 
-  CachedResource();
-  virtual ~CachedResource();
+    CachedResource();
+    virtual ~CachedResource();
 
-  virtual void free() = 0;
+    virtual void free() = 0;
 
-protected:
+  protected:
 
-};
+  };
 
-typedef CachedResource::CacheIDType ResourceHandle;
+  typedef CachedResource::CacheIDType ResourceHandle;
+}
 
 #endif

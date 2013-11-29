@@ -4,8 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <stdarg.h>
-#include <cassert>
+#include <assert.h>
 #include <vector>
 
 #include <GL/glew.h>
@@ -16,76 +15,79 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-class GRAPHICAPI Shader : public CachedResource
+namespace he
 {
-public:
+  class GRAPHICAPI Shader : public CachedResource
+  {
+  public:
 
-  enum ShaderSlots
-	{
-		POSITION,
-		TEXTURE0,
-		TEXTURE1,
-		TEXTURE2,
-		TEXTURE3,
-		NORMAL,
-		BINORMAL,
-		TANGENT,
-		WEIGHTS,
-		BONEINDICES,
-		SPECIAL0,
-		SPECIAL1,
-		SPECIAL2,
-		SPECIAL3
-	};
+    enum ShaderSlots
+	  {
+		  POSITION,
+		  TEXTURE0,
+		  TEXTURE1,
+		  TEXTURE2,
+		  TEXTURE3,
+		  NORMAL,
+		  BINORMAL,
+		  TANGENT,
+		  WEIGHTS,
+		  BONEINDICES,
+		  SPECIAL0,
+		  SPECIAL1,
+		  SPECIAL2,
+		  SPECIAL3
+	  };
 
-  Shader();
+    Shader();
 
-	Shader(const Shader& o);
+	  Shader(const Shader& o);
 
-  Shader(const char *vertexFilename, 
-			    const char *fragmentFilename, 
-			    const char *geometryFilename, 
-			    const char *tesselationCTRLFilename, 
-          const char *tesselationEVALFilename,
-          const char *computeFilename,
-          std::vector<std::string> &dynamicDefines = std::vector<std::string>());
+    Shader(const char *vertexFilename, 
+			      const char *fragmentFilename, 
+			      const char *geometryFilename, 
+			      const char *tesselationCTRLFilename, 
+            const char *tesselationEVALFilename,
+            const char *computeFilename,
+            std::vector<std::string> &dynamicDefines = std::vector<std::string>());
 
-  Shader& operator=(const Shader& o);
+    Shader& operator=(const Shader& o);
 
-	~Shader();
+	  ~Shader();
 
-  void free();
+    void free();
 
-  void getUniformParameters(const char **uniformNames, const GLuint uniformCount, std::vector<GLuint> *uniformIndices, 
-                                                                                  std::vector<GLint> *uniformOffsets, 
-                                                                                  std::vector<GLint> *arrayStrides, 
-                                                                                  std::vector<GLint> *matrixStrides);
+    void getUniformParameters(const char **uniformNames, const GLuint uniformCount, std::vector<GLuint> *uniformIndices, 
+                                                                                    std::vector<GLint> *uniformOffsets, 
+                                                                                    std::vector<GLint> *arrayStrides, 
+                                                                                    std::vector<GLint> *matrixStrides);
 
-	void setUniform(int location, int type, const GLfloat* val) const;
-  void setUniform(int location, int type, const GLuint* val) const;
-	void setUniform(int location, int type, const GLint* val) const;
-	void setTexture(int location, GLint slot) const;
+	  void setUniform(int location, int type, const GLfloat* val) const;
+    void setUniform(int location, int type, const GLuint* val) const;
+	  void setUniform(int location, int type, const GLint* val) const;
+	  void setTexture(int location, GLint slot) const;
 
-	void enableTransformFeedback(int count, const char** varyings, GLenum buffertype) const;
-  void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ) const;
-  void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset) const;
+	  void enableTransformFeedback(int count, const char** varyings, GLenum buffertype) const;
+    void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ) const;
+    void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset) const;
 
-	void useShader() const;
-	void useNoShader() const;
+	  void useShader() const;
+	  void useNoShader() const;
 
-private:
+  private:
 
-  bool createProgram(GLuint& program, const char *shaderName, GLuint computeShader, 
-                                                              GLuint vertexShader, 
-                                                              GLuint tesselationControlShader, 
-                                                              GLuint tesselationEvaluationShader, 
-                                                              GLuint geometryShader, 
-                                                              GLuint fragmentShader);
-  bool createShader(GLenum shaderType, const char *shaderFileName, std::vector<std::string>& dynamicDefines, GLuint& shader);
-	bool loadShaderSource(const char *filename, std::string& shadersource, std::vector<std::string>& dynamicDefines);
-	bool checkShaderStatus(GLuint shader, const char *filename) const;
+    bool createProgram(GLuint& program, const char *shaderName, GLuint computeShader, 
+                                                                GLuint vertexShader, 
+                                                                GLuint tesselationControlShader, 
+                                                                GLuint tesselationEvaluationShader, 
+                                                                GLuint geometryShader, 
+                                                                GLuint fragmentShader);
+    bool createShader(GLenum shaderType, const char *shaderFileName, std::vector<std::string>& dynamicDefines, GLuint& shader);
+	  bool loadShaderSource(const char *filename, std::string& shadersource, std::vector<std::string>& dynamicDefines);
+	  bool checkShaderStatus(GLuint shader, const char *filename) const;
 
-	GLuint m_program;
-};
+	  GLuint m_program;
+  };
+}
 
 #endif

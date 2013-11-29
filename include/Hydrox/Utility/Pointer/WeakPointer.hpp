@@ -1,52 +1,55 @@
 #ifndef WEAKPOINTER_HPP_
 #define WEAKPOINTER_HPP_
 
-template<typename T> class WeakPointer
+namespace he
 {
-public:
+  template<typename T> class WeakPointer
+  {
+  public:
 
-  WeakPointer() : m_obj(nullptr), m_referenceNumber(nullptr)
-  {}
+    WeakPointer() : m_obj(nullptr), m_referenceNumber(nullptr)
+    {}
 
-	WeakPointer(T* obj) : m_obj(obj)
-	{}
+	  WeakPointer(T* obj) : m_obj(obj)
+	  {}
 
-	WeakPointer(const WeakPointer& o) : m_obj(o.m_obj)
-	{}
+	  WeakPointer(const WeakPointer& o) : m_obj(o.m_obj)
+	  {}
 
-	WeakPointer& operator=(const WeakPointer& o)
-	{
-		if(o.m_obj == m_obj) 
+	  WeakPointer& operator=(const WeakPointer& o)
+	  {
+		  if(o.m_obj == m_obj) 
+      {
+        return *this;
+      }
+
+		  if(m_obj != nullptr)
+		  {
+			  delete m_obj;
+		  }
+
+		  m_obj = o.m_obj;
+
+		  return *this;
+	  }
+
+	  ~WeakPointer()
+	  {}
+
+    bool operator==(const WeakPointer& o)
     {
-      return *this;
+      return reinterpret_cast<unsigned int>(m_obj) == reinterpret_cast<unsigned int>(o.m_obj);
     }
 
-		if(m_obj != nullptr)
-		{
-			delete m_obj;
-		}
+	  T* operator->() const
+	  {
+		  return m_obj;
+	  }
 
-		m_obj = o.m_obj;
+  private:
 
-		return *this;
-	}
-
-	~WeakPointer()
-	{}
-
-  bool operator==(const WeakPointer& o)
-  {
-    return reinterpret_cast<unsigned int>(m_obj) == reinterpret_cast<unsigned int>(o.m_obj);
-  }
-
-	T* operator->() const
-	{
-		return m_obj;
-	}
-
-private:
-
-	T* m_obj;
-};
+	  T* m_obj;
+  };
+}
 
 #endif

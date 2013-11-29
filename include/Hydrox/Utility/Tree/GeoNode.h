@@ -6,39 +6,41 @@
 #include "Hydrox/Graphics/Mesh.h"
 #include "Hydrox/Utility/Tree/TreeNode.h"
 
-class Traverser;
-
-
-class GRAPHICAPI GeoNode : public TreeNode
+namespace he
 {
-public:
+  class Traverser;
 
-  GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  GeoNode& operator=(const GeoNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~GeoNode();
+  class GRAPHICAPI GeoNode : public TreeNode
+  {
+  public:
 
-  virtual TreeNode* clone() const;
+    GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    GeoNode& operator=(const GeoNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~GeoNode();
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual TreeNode* clone() const;
 
-  ResourceHandle getMeshIndex() const;
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-  Matrix<float, 4> getTransformationMatrix() const;
-  void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
+    ResourceHandle getMeshIndex() const;
 
-  void setRenderable(bool renderable);
-	bool getRenderable() const;
+    Matrix<float, 4> getTransformationMatrix() const;
+    void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
-protected:
+    void setRenderable(bool renderable);
+	  bool getRenderable() const;
 
-  Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+  protected:
 
-  ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
+    Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 
-  bool m_renderable;//boolean which decides if the mesh is being drawn or not
-};
+    ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
+
+    bool m_renderable;//boolean which decides if the mesh is being drawn or not
+  };
+}
 
 #endif

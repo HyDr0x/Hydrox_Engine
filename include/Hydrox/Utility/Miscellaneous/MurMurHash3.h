@@ -9,7 +9,6 @@
 // Platform-specific functions and macros
 
 // Microsoft Visual Studio
-
 #if defined(_MSC_VER)
 
 typedef unsigned char uint8_t;

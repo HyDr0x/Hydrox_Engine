@@ -5,32 +5,35 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI SSBO
+namespace he
 {
-public:
+  class GRAPHICAPI SSBO
+  {
+  public:
 
-  SSBO(){}
-  SSBO( GLuint size, GLenum usage, unsigned char *data = nullptr );
-  ~SSBO();
+    SSBO(){}
+    SSBO( GLuint size, GLenum usage, unsigned char *data = nullptr );
+    ~SSBO();
 
-  void createBuffer(GLuint size, GLenum usage, unsigned char *data = nullptr);
-  void setData(unsigned char *data, GLuint offset, GLuint size);
+    void createBuffer(GLuint size, GLenum usage, unsigned char *data = nullptr);
+    void setData(unsigned char *data, GLuint offset, GLuint size);
 
-  void setBindingPoint(GLuint bindingPoint);
+    void setBindingPoint(GLuint bindingPoint);
 
-  void bindBuffer() const;
-  void unBindBuffer() const;
+    void bindBuffer() const;
+    void unBindBuffer() const;
 
-private:
+  private:
 
-	SSBO(const SSBO&){}
-	SSBO& operator=(const SSBO&){ return *this; }
+	  SSBO(const SSBO&){}
+	  SSBO& operator=(const SSBO&){ return *this; }
 
-  GLuint m_bufferIndex;
-  GLuint m_offset;
-  GLuint m_size;
+    GLuint m_bufferIndex;
+    GLuint m_offset;
+    GLuint m_size;
 
-  GLuint m_bufferBindingPoint;
-};
+    GLuint m_bufferBindingPoint;
+  };
+}
 
 #endif

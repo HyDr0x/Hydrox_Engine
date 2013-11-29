@@ -3,21 +3,24 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-class Scene;
-
-class InsertObserverTraverser : public Traverser
+namespace he
 {
-public:
+  class Scene;
 
-  InsertObserverTraverser(Scene *scene);
-  virtual ~InsertObserverTraverser();
+  class InsertObserverTraverser : public Traverser
+  {
+  public:
 
-  virtual bool preTraverse(TransformNode* treeNode);
-  virtual void postTraverse(TransformNode* treeNode);
+    InsertObserverTraverser(Scene *scene);
+    virtual ~InsertObserverTraverser();
 
-protected:
+    virtual bool preTraverse(TransformNode* treeNode);
+    virtual void postTraverse(TransformNode* treeNode);
 
-  Scene *m_scene;
-};
+  protected:
+
+    Scene *m_scene;
+  };
+}
 
 #endif

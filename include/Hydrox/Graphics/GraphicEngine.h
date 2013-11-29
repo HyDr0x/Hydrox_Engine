@@ -10,56 +10,58 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-class Scene;
-
-class ServiceManager;
-class RenderManager;
-class RasterizerRenderManager;
-class RaytracingRenderManager;
-class EventManager;
-class DebugLogManager;
-
 #include "Hydrox/Services/CacheManager.hpp"
 
-
-class GRAPHICAPI GraphicEngine
+namespace he
 {
-public:
+  class Scene;
+
+  class ServiceManager;
+  class RenderManager;
+  class RasterizerRenderManager;
+  class RaytracingRenderManager;
+  class EventManager;
+  class DebugLogManager;
+
+  class GRAPHICAPI GraphicEngine
+  {
+  public:
 	
-	GraphicEngine();
-	virtual ~GraphicEngine();
+	  GraphicEngine();
+	  virtual ~GraphicEngine();
 
-  Scene* getScene();
+    Scene* getScene();
 
-  void setRenderOptions(unsigned int width, unsigned int height, float aspectRatio);
+    void setRenderOptions(unsigned int width, unsigned int height, float aspectRatio);
 
-	void setClearColor(Vector<float, 4> color);
+	  void setClearColor(Vector<float, 4> color);
 
-  void registerServices(ServiceManager *serviceManager);
+    void registerServices(ServiceManager *serviceManager);
 
-	void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio);
-	void update(Vector<float, 3>& cameraPosition, float currentTime);
-	void draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition);
+	  void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio);
+	  void update(Vector<float, 3>& cameraPosition, float currentTime);
+	  void draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition);
 
-private:
+  private:
 
-  Scene *m_scene;
+    Scene *m_scene;
 
-	RenderManager *m_renderManager;
-	EventManager *m_eventManager;
-	ModelManager *m_modelManager;
-	MaterialManager *m_materialManager;
-	ShaderManager *m_shaderManager;
-  TextureManager *m_textureManager;
-  BillboardManager *m_billboardManager;
-  SpriteManager *m_spriteManager;
-	DebugLogManager *m_debugLogManager;
+	  RenderManager *m_renderManager;
+	  EventManager *m_eventManager;
+	  ModelManager *m_modelManager;
+	  MaterialManager *m_materialManager;
+	  ShaderManager *m_shaderManager;
+    TextureManager *m_textureManager;
+    BillboardManager *m_billboardManager;
+    SpriteManager *m_spriteManager;
+	  DebugLogManager *m_debugLogManager;
 
-  float m_aspectRatio;
-  unsigned int m_width;
-  unsigned int m_height;
+    float m_aspectRatio;
+    unsigned int m_width;
+    unsigned int m_height;
 
-  bool m_initialized;
-};
+    bool m_initialized;
+  };
+}
 
 #endif

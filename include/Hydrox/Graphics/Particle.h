@@ -3,11 +3,14 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI Particle
+namespace he
 {
-public:
+  class GRAPHICAPI Particle
+  {
+  public:
 
-private:
-};
+  private:
+  };
+}
 
 #endif

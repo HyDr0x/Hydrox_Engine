@@ -6,34 +6,37 @@
 #include "Hydrox/Services/Io_service.h"
 #include "Hydrox/Services/RenderManager.h"
 
-class GRAPHICAPI RaytracingRenderManager : public RenderManager
+namespace he
 {
-public:
+  class GRAPHICAPI RaytracingRenderManager : public RenderManager
+  {
+  public:
 
-  static RenderManager* getManager(ModelManager *modelManager, 
-                                   MaterialManager *materialManager, 
-                                   ShaderManager *shaderManager, 
-                                   TextureManager *textureManager,
-	                                 BillboardManager *billboardManager,
-                                   SpriteManager *spriteManager, GLfloat aspectRatio);
+    static RenderManager* getManager(ModelManager *modelManager, 
+                                     MaterialManager *materialManager, 
+                                     ShaderManager *shaderManager, 
+                                     TextureManager *textureManager,
+	                                   BillboardManager *billboardManager,
+                                     SpriteManager *spriteManager, GLfloat aspectRatio);
 
-	~RaytracingRenderManager();
+	  ~RaytracingRenderManager();
 
-  void initialize();
+    void initialize();
 
-	void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
+	  void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 
-private:
+  private:
 
-  RaytracingRenderManager(ModelManager *modelManager, 
-                MaterialManager *materialManager, 
-                ShaderManager *shaderManager, 
-                TextureManager *textureManager,
-	              BillboardManager *billboardManager,
-                SpriteManager *spriteManager, GLfloat aspectRatio);
+    RaytracingRenderManager(ModelManager *modelManager, 
+                  MaterialManager *materialManager, 
+                  ShaderManager *shaderManager, 
+                  TextureManager *textureManager,
+	                BillboardManager *billboardManager,
+                  SpriteManager *spriteManager, GLfloat aspectRatio);
 
-	RaytracingRenderManager(){}
-	RaytracingRenderManager(const RaytracingRenderManager&){}
-};
+	  RaytracingRenderManager(){}
+	  RaytracingRenderManager(const RaytracingRenderManager&){}
+  };
+}
 
 #endif

@@ -6,44 +6,46 @@
 #include "Hydrox/Graphics/Billboard.h"
 #include "Hydrox/Utility/Tree/TreeNode.h"
 
-class Traverser;
-
-
-class GRAPHICAPI BillboardNode : public TreeNode
+namespace he
 {
-public:
+  class Traverser;
 
-  BillboardNode(ResourceHandle billboardIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  BillboardNode& operator=(const BillboardNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~BillboardNode();
+  class GRAPHICAPI BillboardNode : public TreeNode
+  {
+  public:
 
-  virtual TreeNode* clone() const;
+    BillboardNode(ResourceHandle billboardIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    BillboardNode& operator=(const BillboardNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~BillboardNode();
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual TreeNode* clone() const;
 
-  ResourceHandle getBillboardIndex() const;
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-  Matrix<float, 4> getTransformationMatrix() const;
-  void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
+    ResourceHandle getBillboardIndex() const;
 
-  void setRenderable(bool renderable);
-	bool getRenderable() const;
+    Matrix<float, 4> getTransformationMatrix() const;
+    void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
-  void setDeleteThis(bool deleteThis);
-  bool getDeleteThis();
+    void setRenderable(bool renderable);
+	  bool getRenderable() const;
 
-private:
+    void setDeleteThis(bool deleteThis);
+    bool getDeleteThis();
 
-  Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+  private:
 
-  ResourceHandle m_billboardIndex;//index which points into the array of the texturemanager
+    Matrix<float,4> m_trfMatrix;//the tranformation Matrix
 
-  bool m_renderable;//boolean which decides if the mesh is being drawn or not
+    ResourceHandle m_billboardIndex;//index which points into the array of the texturemanager
 
-  bool m_deleteThis;
-};
+    bool m_renderable;//boolean which decides if the mesh is being drawn or not
+
+    bool m_deleteThis;
+  };
+}
 
 #endif

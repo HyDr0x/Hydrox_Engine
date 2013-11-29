@@ -1,110 +1,112 @@
 #include "Hydrox/Graphics/Material.h"
 
-
-Material::Material()
+namespace he
 {
-  m_materialData = new MaterialData(1.0f, 
-                                    1.0f, 
-                                    1.0f, 
-                                    1.0f, 
-                                    false); 
-}
-
-Material::Material(const Material& o)
-{ 
-  m_materialData = new MaterialData(o.m_materialData->diffuseStrength, 
-                                    o.m_materialData->specularStrength, 
-                                    o.m_materialData->ambientStrength, 
-                                    o.m_materialData->specularExponent, 
-                                    o.m_materialData->transparency); 
-}
-
-Material::Material(MaterialData& materialData, std::vector< std::vector<ResourceHandle> >& textureIndices, ResourceHandle shader)
-{
-  m_shaderIndex = shader;
-  m_textureIndices = textureIndices;
-  m_materialData = new MaterialData(materialData);
-  //for(int i = 0; i!= textures.size(); i++)
-  //{
-  //  for(int j = 0; j!= textures[i].size(); j++)
-  //  {
-  //    m_textureIndices[i][j] = SharedPointer<Texture>(textures[i][j]);
-  //  }
-  //}
-}
-
-Material& Material::operator=(const Material& o)
-{
-  m_textureIndices = o.m_textureIndices;
-  m_shaderIndex = o.m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
-
-  return *this;
-}
-
-Material::~Material()
-{ 
-}
-
-void Material::free()
-{
-  if(m_materialData != nullptr)
+  Material::Material()
   {
-    delete m_materialData;
+    m_materialData = new MaterialData(1.0f, 
+                                      1.0f, 
+                                      1.0f, 
+                                      1.0f, 
+                                      false); 
   }
 
-  if(!m_textureIndices.empty())
+  Material::Material(const Material& o)
+  { 
+    m_materialData = new MaterialData(o.m_materialData->diffuseStrength, 
+                                      o.m_materialData->specularStrength, 
+                                      o.m_materialData->ambientStrength, 
+                                      o.m_materialData->specularExponent, 
+                                      o.m_materialData->transparency); 
+  }
+
+  Material::Material(MaterialData& materialData, std::vector< std::vector<ResourceHandle> >& textureIndices, ResourceHandle shader)
   {
-	  for(int i = 0; i < m_textureIndices[i].size(); i++)
+    m_shaderIndex = shader;
+    m_textureIndices = textureIndices;
+    m_materialData = new MaterialData(materialData);
+    //for(int i = 0; i!= textures.size(); i++)
+    //{
+    //  for(int j = 0; j!= textures[i].size(); j++)
+    //  {
+    //    m_textureIndices[i][j] = SharedPointer<Texture>(textures[i][j]);
+    //  }
+    //}
+  }
+
+  Material& Material::operator=(const Material& o)
+  {
+    m_textureIndices = o.m_textureIndices;
+    m_shaderIndex = o.m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
+
+    return *this;
+  }
+
+  Material::~Material()
+  { 
+  }
+
+  void Material::free()
+  {
+    if(m_materialData != nullptr)
     {
-      m_textureIndices[i].clear();
+      delete m_materialData;
     }
+
+    if(!m_textureIndices.empty())
+    {
+	    for(int i = 0; i < m_textureIndices[i].size(); i++)
+      {
+        m_textureIndices[i].clear();
+      }
+    }
+
+	  m_textureIndices.clear();
   }
 
-	m_textureIndices.clear();
-}
+  unsigned int Material::getTextureNumber(TextureType texType) const
+  {
+	  assert(texType >= 0 && texType < m_textureIndices.size());
+	  return static_cast<unsigned int>(m_textureIndices[texType].size());
+  }
 
-unsigned int Material::getTextureNumber(TextureType texType) const
-{
-	assert(texType >= 0 && texType < m_textureIndices.size());
-	return static_cast<unsigned int>(m_textureIndices[texType].size());
-}
+  void Material::setTextureNumber(TextureType texType, unsigned int texNum)
+  {
+    assert(texType >= 0 && texType < m_textureIndices.size());
+    m_textureIndices[texType].resize(texNum);
+  }
 
-void Material::setTextureNumber(TextureType texType, unsigned int texNum)
-{
-  assert(texType >= 0 && texType < m_textureIndices.size());
-  m_textureIndices[texType].resize(texNum);
-}
+  void Material::setTexture(TextureType texType, unsigned int slot, ResourceHandle textureIndex)
+  {
+    assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
 
-void Material::setTexture(TextureType texType, unsigned int slot, ResourceHandle textureIndex)
-{
-  assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
+    m_textureIndices[texType][slot] = textureIndex;
+  }
 
-  m_textureIndices[texType][slot] = textureIndex;
-}
+  ResourceHandle Material::getTexture(TextureType texType, unsigned int slot) const
+  {
+    assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
 
-ResourceHandle Material::getTexture(TextureType texType, unsigned int slot) const
-{
-  assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
+    return m_textureIndices[texType][slot];
+  }
 
-  return m_textureIndices[texType][slot];
-}
+  void Material::setShader(ResourceHandle shaderIndex)
+  {
+    m_shaderIndex = shaderIndex;
+  }
 
-void Material::setShader(ResourceHandle shaderIndex)
-{
-  m_shaderIndex = shaderIndex;
-}
+  ResourceHandle Material::getShader() const
+  {
+    return m_shaderIndex;
+  }
 
-ResourceHandle Material::getShader() const
-{
-  return m_shaderIndex;
-}
+  void Material::setMaterial(Material::MaterialData& material)
+  {
+    *m_materialData = material;
+  }
 
-void Material::setMaterial(Material::MaterialData& material)
-{
-  *m_materialData = material;
-}
-
-Material::MaterialData* Material::getMaterial() const
-{
-  return m_materialData;
+  Material::MaterialData* Material::getMaterial() const
+  {
+    return m_materialData;
+  }
 }

@@ -6,30 +6,33 @@
 
 #include "Hydrox/DLLExport.h"
 
-class TreeNode;
-class GroupNode;
-
-class GRAPHICAPI Tree
+namespace he
 {
-public:
+  class TreeNode;
+  class GroupNode;
 
-  Tree();
-  Tree(Tree& object);
-  virtual ~Tree() = 0;
+  class GRAPHICAPI Tree
+  {
+  public:
 
-  GroupNode* getRootNode();
-  const GroupNode* const getRootNode() const;
+    Tree();
+    Tree(Tree& object);
+    virtual ~Tree() = 0;
 
-  virtual TreeNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
-  virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
-  virtual void removeNode(TreeNode *node);
+    GroupNode* getRootNode();
+    const GroupNode* const getRootNode() const;
 
-  virtual GroupNode* addSubTree(Tree* subTree, GroupNode *parentNode, std::string namePrefix);
-  virtual void removeSubTree(TreeNode *rootNode);
+    virtual TreeNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
+    virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
+    virtual void removeNode(TreeNode *node);
 
-protected:
+    virtual GroupNode* addSubTree(Tree* subTree, GroupNode *parentNode, std::string namePrefix);
+    virtual void removeSubTree(TreeNode *rootNode);
 
-  GroupNode *m_rootNode;//the root node
-};
+  protected:
+
+    GroupNode *m_rootNode;//the root node
+  };
+}
 
 #endif

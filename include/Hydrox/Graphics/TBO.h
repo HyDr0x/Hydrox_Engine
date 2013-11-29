@@ -5,33 +5,35 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI TBO
+namespace he
 {
-public:
+  class GRAPHICAPI TBO
+  {
+  public:
 
-  TBO(){};
-  TBO( GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr );
-  ~TBO();
+    TBO(){};
+    TBO( GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr );
+    ~TBO();
 
-  void createBuffer(GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr);
-  void setData(unsigned char *data, GLuint offset, GLuint size);
+    void createBuffer(GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr);
+    void setData(unsigned char *data, GLuint offset, GLuint size);
 
-  void setBindingPoint(GLenum slot);
+    void setBindingPoint(GLenum slot);
 
-  void bindBuffer() const;
-  void unBindBuffer() const;
+    void bindBuffer() const;
+    void unBindBuffer() const;
 
-private:
+  private:
 
-  TBO(const TBO&){}
-	TBO& operator=(const TBO&){ return *this; }
+    TBO(const TBO&){}
+	  TBO& operator=(const TBO&){ return *this; }
 
-  GLuint m_bufferIndex;
-  GLuint m_textureIndex;
-  GLuint m_offset;
-  GLuint m_size;
+    GLuint m_bufferIndex;
+    GLuint m_textureIndex;
+    GLuint m_offset;
+    GLuint m_size;
 
-  GLenum m_textureSlot;
-};
-
+    GLenum m_textureSlot;
+  };
+}
 #endif

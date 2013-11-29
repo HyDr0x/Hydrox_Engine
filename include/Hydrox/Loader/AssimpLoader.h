@@ -17,97 +17,99 @@
 
 #include "Hydrox/Services/CacheManager.hpp"
 
-class ILDevilLoader;
-
-class GroupNode;
-class TreeNode;
-
-class Scene;
-
-struct heAnimation
+namespace he
 {
-  heAnimation(std::string animationName, aiNodeAnim* nodeAnimation)
+  class ILDevilLoader;
+
+  class GroupNode;
+  class TreeNode;
+
+  class Scene;
+
+  struct heAnimation
   {
-    m_animationName = animationName;
-    m_nodeName = nodeAnimation->mNodeName.C_Str();
+    heAnimation(std::string animationName, aiNodeAnim* nodeAnimation)
+    {
+      m_animationName = animationName;
+      m_nodeName = nodeAnimation->mNodeName.C_Str();
     
-    m_positions.resize(nodeAnimation->mNumPositionKeys);
-    m_positionsTime.resize(nodeAnimation->mNumPositionKeys);
+      m_positions.resize(nodeAnimation->mNumPositionKeys);
+      m_positionsTime.resize(nodeAnimation->mNumPositionKeys);
 
-    m_rotations.resize(nodeAnimation->mNumRotationKeys);
-    m_rotationsTime.resize(nodeAnimation->mNumRotationKeys);
+      m_rotations.resize(nodeAnimation->mNumRotationKeys);
+      m_rotationsTime.resize(nodeAnimation->mNumRotationKeys);
 
-    m_scales.resize(nodeAnimation->mNumScalingKeys);
-    m_scalesTime.resize(nodeAnimation->mNumScalingKeys);
+      m_scales.resize(nodeAnimation->mNumScalingKeys);
+      m_scalesTime.resize(nodeAnimation->mNumScalingKeys);
 
-    for(unsigned int k = 0; k < nodeAnimation->mNumPositionKeys; k++)
-    {
-      aiVector3D pos = nodeAnimation->mPositionKeys[k].mValue;
-       m_positions[k] = Vector<float, 3>(pos[0], pos[1], pos[2]);
-       m_positionsTime[k] = nodeAnimation->mPositionKeys[k].mTime;
+      for(unsigned int k = 0; k < nodeAnimation->mNumPositionKeys; k++)
+      {
+        aiVector3D pos = nodeAnimation->mPositionKeys[k].mValue;
+         m_positions[k] = Vector<float, 3>(pos[0], pos[1], pos[2]);
+         m_positionsTime[k] = nodeAnimation->mPositionKeys[k].mTime;
+      }
+
+      for(unsigned int k = 0; k < nodeAnimation->mNumRotationKeys; k++)
+      {
+        aiQuaternion rotation = nodeAnimation->mRotationKeys[k].mValue;
+         m_rotations[k] = Quaternion<float>(rotation.w, rotation.x, rotation.y, rotation.z);
+         m_rotationsTime[k] = nodeAnimation->mRotationKeys[k].mTime;
+      }
+
+      for(unsigned int k = 0; k < nodeAnimation->mNumScalingKeys; k++)
+      {
+        aiVector3D scale = nodeAnimation->mScalingKeys[k].mValue;
+         m_scales[k] = Vector<float, 3>(scale[0], scale[1], scale[2]);
+         m_scalesTime[k] = nodeAnimation->mScalingKeys[k].mTime;
+      }
     }
 
-    for(unsigned int k = 0; k < nodeAnimation->mNumRotationKeys; k++)
-    {
-      aiQuaternion rotation = nodeAnimation->mRotationKeys[k].mValue;
-       m_rotations[k] = Quaternion<float>(rotation.w, rotation.x, rotation.y, rotation.z);
-       m_rotationsTime[k] = nodeAnimation->mRotationKeys[k].mTime;
-    }
+    std::string m_animationName;
+    std::string m_nodeName;
 
-    for(unsigned int k = 0; k < nodeAnimation->mNumScalingKeys; k++)
-    {
-      aiVector3D scale = nodeAnimation->mScalingKeys[k].mValue;
-       m_scales[k] = Vector<float, 3>(scale[0], scale[1], scale[2]);
-       m_scalesTime[k] = nodeAnimation->mScalingKeys[k].mTime;
-    }
-  }
+    std::vector<Vector<float, 3>>  m_positions;
+    std::vector<float>  m_positionsTime;
 
-  std::string m_animationName;
-  std::string m_nodeName;
+    std::vector<Quaternion<float>>  m_rotations;
+    std::vector<float>  m_rotationsTime;
 
-  std::vector<Vector<float, 3>>  m_positions;
-  std::vector<float>  m_positionsTime;
+    std::vector<Vector<float, 3>>  m_scales;
+    std::vector<float>  m_scalesTime;
+  };
 
-  std::vector<Quaternion<float>>  m_rotations;
-  std::vector<float>  m_rotationsTime;
+  class GRAPHICAPI AssimpLoader
+  {
+  public:
 
-  std::vector<Vector<float, 3>>  m_scales;
-  std::vector<float>  m_scalesTime;
-};
+    AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
+    AssimpLoader(const AssimpLoader& o);
+    AssimpLoader& operator=(const AssimpLoader& o);
+    ~AssimpLoader();
 
-class GRAPHICAPI AssimpLoader
-{
-public:
+    Scene* load(std::string filename, std::string materialFileName, bool yAxisFlipped = true);
 
-  AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
-  AssimpLoader(const AssimpLoader& o);
-  AssimpLoader& operator=(const AssimpLoader& o);
-  ~AssimpLoader();
+  private:
 
-  Scene* load(std::string filename, std::string materialFileName, bool yAxisFlipped = true);
+    AssimpLoader(){}
 
-private:
+    void loadMeshesFromAssimp(std::vector<ResourceHandle>& meshes, std::string materialFileName, const aiScene *scene, bool yAxisFlipped);
+    ResourceHandle loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, bool yAxisFlipped);
+    ResourceHandle loadMaterialsFromAssimp(std::string materialFileName, const aiScene *model, unsigned int id);
+    GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiNode *rootNode, std::vector<ResourceHandle> meshes);
+    void loadAnimatedSkeleton(const aiScene *scene);
+    void findAnimatedSkeleton();
 
-  AssimpLoader(){}
+    TreeNode* createSceneNodes(const aiNode *node, std::vector<ResourceHandle> meshes, GroupNode *parentNode, TreeNode *nextSibling);
 
-  void loadMeshesFromAssimp(std::vector<ResourceHandle>& meshes, std::string materialFileName, const aiScene *scene, bool yAxisFlipped);
-  ResourceHandle loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, bool yAxisFlipped);
-  ResourceHandle loadMaterialsFromAssimp(std::string materialFileName, const aiScene *model, unsigned int id);
-  GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiNode *rootNode, std::vector<ResourceHandle> meshes);
-  void loadAnimatedSkeleton(const aiScene *scene);
-  void findAnimatedSkeleton();
+	  std::string m_modelPath;
 
-  TreeNode* createSceneNodes(const aiNode *node, std::vector<ResourceHandle> meshes, GroupNode *parentNode, TreeNode *nextSibling);
+    ModelManager *m_modelManager;
+    MaterialManager *m_materialManager;
+    TextureManager *m_textureManager;
+    ShaderManager *m_shaderManager;
 
-	std::string m_modelPath;
-
-  ModelManager *m_modelManager;
-  MaterialManager *m_materialManager;
-  TextureManager *m_textureManager;
-  ShaderManager *m_shaderManager;
-
-  std::map<std::string, std::vector<heAnimation*>> m_animationTable;//all the animation tracks per animation
-  std::map<std::string, std::vector<aiBone*>> m_boneAnimationTable;//all the bones per mesh
-};
-
+    std::map<std::string, std::vector<heAnimation*>> m_animationTable;//all the animation tracks per animation
+    std::map<std::string, std::vector<aiBone*>> m_boneAnimationTable;//all the bones per mesh
+  };
+}
 #endif

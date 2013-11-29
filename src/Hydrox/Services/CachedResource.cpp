@@ -1,10 +1,12 @@
 #include "Hydrox/Services/CachedResource.h"
 
-
-CachedResource::CachedResource()
+namespace he
 {
-}
+  CachedResource::CachedResource()
+  {
+  }
 
-CachedResource::~CachedResource()
-{
+  CachedResource::~CachedResource()
+  {
+  }
 }

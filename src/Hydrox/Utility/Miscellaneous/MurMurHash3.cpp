@@ -9,7 +9,6 @@
 
 #include "Hydrox/Utility/Miscellaneous/MurMurHash3.h"
 
-
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros
 
@@ -333,4 +332,3 @@ void MurmurHash3_x64_128 ( const void * key, const int len,
 }
 
 //-----------------------------------------------------------------------------
-

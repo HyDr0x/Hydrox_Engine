@@ -5,38 +5,40 @@
 
 #include "Hydrox/Utility/Observer/Observer.hpp"
 
-template<class ParamT> class Subject
+namespace he
 {
-public:
-
-  Subject(){}
-  virtual ~Subject()
+  template<class ParamT> class Subject
   {
-    m_observer.clear();
-  }
+  public:
 
-  void add(Observer<ParamT> *o)
-  {
-    m_observer.push_back(o);
-  }
-
-  void remove(Observer<ParamT> *o)
-  {
-    m_observer.remove(o);
-  }
-
-  virtual void notify(ParamT params)
-  {
-    for(std::list<Observer<ParamT>*>::iterator oit = m_observer.begin(); oit != m_observer.end(); oit++)
+    Subject(){}
+    virtual ~Subject()
     {
-      (*oit)->updateObserver(params);
+      m_observer.clear();
     }
-  }
 
-private:
+    void add(Observer<ParamT> *o)
+    {
+      m_observer.push_back(o);
+    }
 
-  std::list<Observer<ParamT>*> m_observer;
-};
+    void remove(Observer<ParamT> *o)
+    {
+      m_observer.remove(o);
+    }
 
+    virtual void notify(ParamT params)
+    {
+      for(std::list<Observer<ParamT>*>::iterator oit = m_observer.begin(); oit != m_observer.end(); oit++)
+      {
+        (*oit)->updateObserver(params);
+      }
+    }
+
+  private:
+
+    std::list<Observer<ParamT>*> m_observer;
+  };
+}
 
 #endif

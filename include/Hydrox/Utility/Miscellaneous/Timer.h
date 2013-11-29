@@ -10,39 +10,42 @@
 
 #include "Hydrox/DLLExport.h"
 
-class GRAPHICAPI Timer
+namespace he
 {
-public:
-
-  enum TimerType
+  class GRAPHICAPI Timer
   {
-    OpenGLTimer = 0x00000001,
-    CudaTimer   = 0x00000010,
-    CPUTimer    = 0x00000100,
+  public:
+
+    enum TimerType
+    {
+      OpenGLTimer = 0x00000001,
+      CudaTimer   = 0x00000010,
+      CPUTimer    = 0x00000100,
+    };
+
+    Timer(std::string &timerName, unsigned int bitMask = OpenGLTimer);
+    ~Timer();
+
+  private:
+
+    //void handleError(cudaError_t cuError);
+
+    unsigned int m_bitMask;
+
+    std::string m_timerName;
+    GLuint m_query;
+    //cudaEvent_t m_startEvent, m_stopEvent;
+
+    GLuint m_openGLTime;
+    //float m_cudaTime;
+    clock_t m_cpuTime;
   };
 
-  Timer(std::string &timerName, unsigned int bitMask = OpenGLTimer);
-  ~Timer();
-
-private:
-
-  //void handleError(cudaError_t cuError);
-
-  unsigned int m_bitMask;
-
-  std::string m_timerName;
-  GLuint m_query;
-  //cudaEvent_t m_startEvent, m_stopEvent;
-
-  GLuint m_openGLTime;
-  //float m_cudaTime;
-  clock_t m_cpuTime;
-};
-
-#ifdef NDEBUG
-#define TIMER(name, timerType)
-#else
-#define TIMER(name, timerType) Timer myTimer(std::string(name), timerType);
-#endif
+  #ifdef NDEBUG
+  #define TIMER(name, timerType)
+  #else
+  #define TIMER(name, timerType) Timer myTimer(std::string(name), timerType);
+  #endif
+}
 
 #endif

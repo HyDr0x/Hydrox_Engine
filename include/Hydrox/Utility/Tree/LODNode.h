@@ -8,34 +8,37 @@
 #include "Hydrox/Utility/Math/Math.hpp"
 #include "Hydrox/Utility/Tree/GroupNode.h"
 
-class Traverser;
-
-class GRAPHICAPI LODNode : public GroupNode
+namespace he
 {
-public:
+  class Traverser;
 
-  LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  LODNode& operator=(const LODNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~LODNode();
+  class GRAPHICAPI LODNode : public GroupNode
+  {
+  public:
 
-  virtual GroupNode* clone() const;
+    LODNode(Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+    LODNode& operator=(const LODNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~LODNode();
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual GroupNode* clone() const;
 
-  unsigned int getLODLevel();
-  bool getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges);
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-  void transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
+    unsigned int getLODLevel();
+    bool getLOD(Vector<float, 3> camPos, const std::vector<float>& lodRanges);
 
-private:
+    void transformPosition(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
-  Vector<float, 3> m_position;
-  Vector<float, 3> m_transformedPosition;
+  private:
 
-  unsigned int m_lodLevel;
-};
+    Vector<float, 3> m_position;
+    Vector<float, 3> m_transformedPosition;
+
+    unsigned int m_lodLevel;
+  };
+}
 
 #endif

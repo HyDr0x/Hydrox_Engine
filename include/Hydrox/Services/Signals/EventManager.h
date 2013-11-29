@@ -8,72 +8,75 @@
 
 //const member functions or functions with variadic arguments are not supported!
 
-class EventManager : public Io_service
+namespace he
 {
-public:
-
-  enum Events
-	{
-		OnDefault,
-		OnCollision,
-		OnMouseClick,
-		OnKeyHit
-	};
-
-  static EventManager* EventManager::getManager()
+  class EventManager : public Io_service
   {
-    static EventManager* manager = new EventManager();
-    return manager;
-  }
+  public:
 
-	~EventManager();
+    enum Events
+	  {
+		  OnDefault,
+		  OnCollision,
+		  OnMouseClick,
+		  OnKeyHit
+	  };
 
-	template<typename Signature> void addNewEvent(int _Event)
-	{
-		m_sigMap[_Event]=dynamic_cast<signal_save*>(new Signal<Signature>);
-	}
+    static EventManager* EventManager::getManager()
+    {
+      static EventManager* manager = new EventManager();
+      return manager;
+    }
 
-	void deleteEvent(int _Event)
-	{
-		delete m_sigMap[_Event];
-		m_sigMap.erase(_Event);
-	}
+	  ~EventManager();
 
-	template<typename Signature> void addFuncToEvent(Signature fptr, int _Event)
-	{
-		dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->connect(fptr);
-	}
+	  template<typename Signature> void addNewEvent(int _Event)
+	  {
+		  m_sigMap[_Event]=dynamic_cast<signal_save*>(new Signal<Signature>);
+	  }
 
-	template<class C, typename SignalSignature, typename FuncSignature> void addFuncToEvent(C *obj, FuncSignature fptr, int _Event)
-	{
-		dynamic_cast<Signal<SignalSignature>*>(m_sigMap[_Event])->connect<C>(obj,fptr);
-	}
+	  void deleteEvent(int _Event)
+	  {
+		  delete m_sigMap[_Event];
+		  m_sigMap.erase(_Event);
+	  }
 
-	template<typename Signature> void deleteFuncFromEvent(Signature fptr, int _Event)
-	{
-		dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->disconnect(fptr);
-	}
+	  template<typename Signature> void addFuncToEvent(Signature fptr, int _Event)
+	  {
+		  dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->connect(fptr);
+	  }
 
-	template<class C, typename SignalSignature, typename FuncSignature> void deleteFuncFromEvent(C *obj, FuncSignature fptr, int _Event)
-	{
-		dynamic_cast<Signal<SignalSignature>*>(m_sigMap[_Event])->disconnect(obj,fptr);
-	}
+	  template<class C, typename SignalSignature, typename FuncSignature> void addFuncToEvent(C *obj, FuncSignature fptr, int _Event)
+	  {
+		  dynamic_cast<Signal<SignalSignature>*>(m_sigMap[_Event])->connect<C>(obj,fptr);
+	  }
 
-	template<typename Signature> Signal<Signature>* raiseSignal(int _Event)
-	{
-		return dynamic_cast<Signal<Signature>*>(m_sigMap[_Event]);
-	}
+	  template<typename Signature> void deleteFuncFromEvent(Signature fptr, int _Event)
+	  {
+		  dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->disconnect(fptr);
+	  }
 
-	template<typename Signature> unsigned int getSlotNumber(int _Event)
-	{
-		return dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->getSlotNumber();
-	}
+	  template<class C, typename SignalSignature, typename FuncSignature> void deleteFuncFromEvent(C *obj, FuncSignature fptr, int _Event)
+	  {
+		  dynamic_cast<Signal<SignalSignature>*>(m_sigMap[_Event])->disconnect(obj,fptr);
+	  }
 
-private:
+	  template<typename Signature> Signal<Signature>* raiseSignal(int _Event)
+	  {
+		  return dynamic_cast<Signal<Signature>*>(m_sigMap[_Event]);
+	  }
 
-  EventManager();
+	  template<typename Signature> unsigned int getSlotNumber(int _Event)
+	  {
+		  return dynamic_cast<Signal<Signature>*>(m_sigMap[_Event])->getSlotNumber();
+	  }
 
-	std::map<int,signal_save*> m_sigMap;
-};
+  private:
+
+    EventManager();
+
+	  std::map<int,signal_save*> m_sigMap;
+  };
+}
 
 #endif

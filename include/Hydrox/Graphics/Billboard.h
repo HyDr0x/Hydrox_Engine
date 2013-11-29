@@ -9,56 +9,59 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-class GRAPHICAPI Billboard : public CachedResource
+namespace he
 {
-public:
+  class GRAPHICAPI Billboard : public CachedResource
+  {
+  public:
 
-  Billboard(){}
-	Billboard(const Billboard&){}
+    Billboard(){}
+	  Billboard(const Billboard&){}
 
-	Billboard(ResourceHandle texID, bool anim, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd);
-  Billboard& operator=(const Billboard& o);
-	~Billboard();
+	  Billboard(ResourceHandle texID, bool anim, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd);
+    Billboard& operator=(const Billboard& o);
+	  ~Billboard();
 
-  void free();
+    void free();
 
-  void setAnimation(unsigned int number);
-	void setAnimation(Vector<unsigned int, 2> number);
-	Vector<unsigned int, 2> getAnimationNumber();
-	Vector<unsigned int, 2> getAnimationCount();
+    void setAnimation(unsigned int number);
+	  void setAnimation(Vector<unsigned int, 2> number);
+	  Vector<unsigned int, 2> getAnimationNumber();
+	  Vector<unsigned int, 2> getAnimationCount();
 
-	void setTranslation(Vector<float, 3> v);
-	void setTranslation(float x, float y, float z);
-	void addTranslation(Vector<float,3> v);
-	void addTranslation(float x, float y, float z);
+	  void setTranslation(Vector<float, 3> v);
+	  void setTranslation(float x, float y, float z);
+	  void addTranslation(Vector<float,3> v);
+	  void addTranslation(float x, float y, float z);
 	
-	void setScale(float s);
-	void addScale(float s);
+	  void setScale(float s);
+	  void addScale(float s);
 
-	void setScale(Vector<float, 2> s);
-	void setScale(float sx, float sy);
-	void addScale(Vector<float, 2> s);
-	void addScale(float sx, float sy);
+	  void setScale(Vector<float, 2> s);
+	  void setScale(float sx, float sy);
+	  void addScale(Vector<float, 2> s);
+	  void addScale(float sx, float sy);
 
-	Vector<float, 3> getPosition();
-	Vector<float, 2> getScale();
+	  Vector<float, 3> getPosition();
+	  Vector<float, 2> getScale();
 
-	Matrix<float, 3> getTexTransformationMatrix();
-	ResourceHandle getTextureID() const;
+	  Matrix<float, 3> getTexTransformationMatrix();
+	  ResourceHandle getTextureID() const;
 
-private:
+  private:
 
-	Vector<unsigned int, 2> m_animNumber;
-	Vector<unsigned int, 2> m_animCount;
-	Vector<float, 2> m_texStart;
-	Vector<float, 2> m_texEnd;
+	  Vector<unsigned int, 2> m_animNumber;
+	  Vector<unsigned int, 2> m_animCount;
+	  Vector<float, 2> m_texStart;
+	  Vector<float, 2> m_texEnd;
 
-	Vector<float, 2> m_scale;
-	Vector<float, 3> m_translate;
+	  Vector<float, 2> m_scale;
+	  Vector<float, 3> m_translate;
 
-  ResourceHandle m_texID;
+    ResourceHandle m_texID;
 
-  bool m_anim;
-};
+    bool m_anim;
+  };
+}
 
 #endif

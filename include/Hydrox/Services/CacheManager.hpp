@@ -16,110 +16,113 @@
 #include "Hydrox/Graphics/Billboard.h"
 #include "Hydrox/Graphics/Sprite.h"
 
-template<class CLASS> class GRAPHICAPI CacheManager : public Io_service
+namespace he
 {
-public:
-
-  static CacheManager<CLASS>* getManager(std::string path)
+  template<class CLASS> class GRAPHICAPI CacheManager : public Io_service
   {
-    static CacheManager<CLASS>* manager = new CacheManager<CLASS>(path);
-    return manager;
-  }
+  public:
 
-	~CacheManager()
-  {
-    for(unsigned int i = 0; i < m_objectsCache.size(); i++)
+    static CacheManager<CLASS>* getManager(std::string path)
     {
-      m_objectsCache[i].free();
+      static CacheManager<CLASS>* manager = new CacheManager<CLASS>(path);
+      return manager;
     }
 
-	  m_objectsCache.clear();
-    m_list.clear();
-  }
-
-  CLASS* getObject(ResourceHandle objectID)
-  {
-    return dynamic_cast<CLASS*>(&m_objectsCache[objectID]);
-  }
-
-  ResourceHandle addObject(CLASS& object)
-  {
-    if(m_objectsCache.size() <= m_availableBorder)
+	  ~CacheManager()
     {
-      unsigned int size = static_cast<unsigned int>((m_objectsCache.size() / m_BLOCKSIZE + 1) * m_BLOCKSIZE);
-      m_objectsCache.resize(size);
+      for(unsigned int i = 0; i < m_objectsCache.size(); i++)
+      {
+        m_objectsCache[i].free();
+      }
+
+	    m_objectsCache.clear();
+      m_list.clear();
     }
 
-    ResourceHandle id;
-
-    if(m_list.empty())
+    CLASS* getObject(ResourceHandle objectID)
     {
-      id = m_availableBorder;
-      m_availableBorder++;
-    }
-    else
-    {
-      id = *m_list.begin();
-      m_list.pop_front();
+      return dynamic_cast<CLASS*>(&m_objectsCache[objectID]);
     }
 
-    m_objectsCache[id] = object;
-
-    return id;
-  }
-
-	void deleteObject(ResourceHandle objectID)
-  {
-    assert(objectID < m_availableBorder);
-
-    if(objectID != m_availableBorder - 1)
+    ResourceHandle addObject(CLASS& object)
     {
-      m_list.push_front(objectID);
+      if(m_objectsCache.size() <= m_availableBorder)
+      {
+        unsigned int size = static_cast<unsigned int>((m_objectsCache.size() / m_BLOCKSIZE + 1) * m_BLOCKSIZE);
+        m_objectsCache.resize(size);
+      }
+
+      ResourceHandle id;
+
+      if(m_list.empty())
+      {
+        id = m_availableBorder;
+        m_availableBorder++;
+      }
+      else
+      {
+        id = *m_list.begin();
+        m_list.pop_front();
+      }
+
+      m_objectsCache[id] = object;
+
+      return id;
     }
-    else
+
+	  void deleteObject(ResourceHandle objectID)
     {
-      m_availableBorder--;
+      assert(objectID < m_availableBorder);
+
+      if(objectID != m_availableBorder - 1)
+      {
+        m_list.push_front(objectID);
+      }
+      else
+      {
+        m_availableBorder--;
+      }
     }
-  }
 
-	std::string getPath() const
-  {
-	  return m_path;
-  }
+	  std::string getPath() const
+    {
+	    return m_path;
+    }
 
-private:
+  private:
 
-  CacheManager(std::string path)
-  {
-	  m_path = path;
-    m_availableBorder = 0;
-  }
+    CacheManager(std::string path)
+    {
+	    m_path = path;
+      m_availableBorder = 0;
+    }
 
-	CacheManager(){}
-	CacheManager(const CacheManager&){}
+	  CacheManager(){}
+	  CacheManager(const CacheManager&){}
 
-  static const unsigned int m_BLOCKSIZE = 64;
+    static const unsigned int m_BLOCKSIZE = 64;
 
-  unsigned int m_availableBorder;
-	std::list<ResourceHandle> m_list;
+    unsigned int m_availableBorder;
+	  std::list<ResourceHandle> m_list;
 
-	std::vector<CLASS> m_objectsCache;
+	  std::vector<CLASS> m_objectsCache;
 
-  std::string m_path;
-};
+    std::string m_path;
+  };
 
-template class GRAPHICAPI CacheManager<Mesh>;
-template class GRAPHICAPI CacheManager<Material>;
-template class GRAPHICAPI CacheManager<Shader>;
-template class GRAPHICAPI CacheManager<Texture>;
-template class GRAPHICAPI CacheManager<Billboard>;
-template class GRAPHICAPI CacheManager<Sprite>;
+  template class GRAPHICAPI CacheManager<Mesh>;
+  template class GRAPHICAPI CacheManager<Material>;
+  template class GRAPHICAPI CacheManager<Shader>;
+  template class GRAPHICAPI CacheManager<Texture>;
+  template class GRAPHICAPI CacheManager<Billboard>;
+  template class GRAPHICAPI CacheManager<Sprite>;
 
-typedef CacheManager<Mesh> ModelManager;
-typedef CacheManager<Material> MaterialManager;
-typedef CacheManager<Shader> ShaderManager;
-typedef CacheManager<Texture> TextureManager;
-typedef CacheManager<Billboard> BillboardManager;
-typedef CacheManager<Sprite> SpriteManager;
+  typedef CacheManager<Mesh> ModelManager;
+  typedef CacheManager<Material> MaterialManager;
+  typedef CacheManager<Shader> ShaderManager;
+  typedef CacheManager<Texture> TextureManager;
+  typedef CacheManager<Billboard> BillboardManager;
+  typedef CacheManager<Sprite> SpriteManager;
+}
 
 #endif

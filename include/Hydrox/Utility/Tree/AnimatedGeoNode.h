@@ -8,31 +8,32 @@
 #include "Hydrox/Graphics/Mesh.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 
-class Traverser;
-
-class GRAPHICAPI AnimatedGeoNode : public GeoNode
+namespace he
 {
-public:
+  class GRAPHICAPI AnimatedGeoNode : public GeoNode
+  {
+  public:
 
-  AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
-  AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~AnimatedGeoNode();
+    AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~AnimatedGeoNode();
 
-  virtual TreeNode* clone() const;
+    virtual TreeNode* clone() const;
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-  void setBoneTransform(const Matrix<float, 4>& boneTransform, unsigned int boneIndex);
+    void setBoneTransform(const Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 
-  std::vector<Matrix<float, 4>> getSkinningMatrices();
+    std::vector<Matrix<float, 4>> getSkinningMatrices();
 
-private:
+  private:
 
-  std::vector<Matrix<float, 4>> m_inverseBindPoseMatrices;
-  std::vector<Matrix<float, 4>> m_boneTransformMatrices;
-};
+    std::vector<Matrix<float, 4>> m_inverseBindPoseMatrices;
+    std::vector<Matrix<float, 4>> m_boneTransformMatrices;
+  };
+}
 
 #endif

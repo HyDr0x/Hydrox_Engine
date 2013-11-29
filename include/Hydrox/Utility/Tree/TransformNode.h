@@ -10,58 +10,61 @@
 #include "Hydrox/Utility/Observer/Subject.hpp"
 #include "Hydrox/Utility/Tree/GroupNode.h"
 
-class Traverser;
-
-class GRAPHICAPI TransformNode : public GroupNode, public Subject<TransformNode*>
+namespace he
 {
-public:
+  class Traverser;
 
-  TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-  TransformNode& operator=(const TransformNode& sourceNode);
-  virtual TreeNode& operator=(const TreeNode& sourceNode);
-  virtual ~TransformNode();
+  class GRAPHICAPI TransformNode : public GroupNode, public Subject<TransformNode*>
+  {
+  public:
 
-  virtual GroupNode* clone() const;
+    TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+    TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+    TransformNode& operator=(const TransformNode& sourceNode);
+    virtual TreeNode& operator=(const TreeNode& sourceNode);
+    virtual ~TransformNode();
 
-  virtual bool ascendTraverse(Traverser* traverser);
-  virtual bool preTraverse(Traverser* traverser);
-  virtual void postTraverse(Traverser* traverser);
+    virtual GroupNode* clone() const;
 
-  virtual void calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
+    virtual bool ascendTraverse(Traverser* traverser);
+    virtual bool preTraverse(Traverser* traverser);
+    virtual void postTraverse(Traverser* traverser);
 
-  virtual Vector<float, 3> getPosition();
-	virtual Quaternion<float> getRotation();
-	virtual float getScale();
+    virtual void calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
-  void setTranslation(float x, float y, float z);
-	void setTranslation(Vector<float, 3> v);
+    virtual Vector<float, 3> getPosition();
+	  virtual Quaternion<float> getRotation();
+	  virtual float getScale();
 
-	void addTranslation(float x, float y, float z);
-	void addTranslation(Vector<float, 3> v);
+    void setTranslation(float x, float y, float z);
+	  void setTranslation(Vector<float, 3> v);
 
-  void setRotation(Quaternion<float> q);
-  void addRotation(Quaternion<float> q);
+	  void addTranslation(float x, float y, float z);
+	  void addTranslation(Vector<float, 3> v);
 
-	void setRotationX(float angle);
-	void addRotationX(float angle);
-	void setRotationY(float angle);
-	void addRotationY(float angle);
-	void setRotationZ(float angle);
-	void addRotationZ(float angle);
-	void setRotationXYZ(Vector<float, 3> angle);
-	void addRotationXYZ(Vector<float, 3> angle);
-  void setRotationAxis(float angle, Vector<float, 3> axis);
-  void addRotationAxis(float angle, Vector<float, 3> axis);
+    void setRotation(Quaternion<float> q);
+    void addRotation(Quaternion<float> q);
 
-	void setScale(float s);
-	void addScale(float s);
+	  void setRotationX(float angle);
+	  void addRotationX(float angle);
+	  void setRotationY(float angle);
+	  void addRotationY(float angle);
+	  void setRotationZ(float angle);
+	  void addRotationZ(float angle);
+	  void setRotationXYZ(Vector<float, 3> angle);
+	  void addRotationXYZ(Vector<float, 3> angle);
+    void setRotationAxis(float angle, Vector<float, 3> axis);
+    void addRotationAxis(float angle, Vector<float, 3> axis);
 
-protected:
+	  void setScale(float s);
+	  void addScale(float s);
 
-  Quaternion<float> m_rotation;
-  Vector<float, 3> m_translation;
-  float m_scale;
-};
+  protected:
+
+    Quaternion<float> m_rotation;
+    Vector<float, 3> m_translation;
+    float m_scale;
+  };
+}
 
 #endif

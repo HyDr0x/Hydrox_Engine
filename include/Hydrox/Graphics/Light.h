@@ -3,26 +3,28 @@
 
 #include "Hydrox/DLLExport.h"
 
-
-class GRAPHICAPI Light
+namespace he
 {
-public:
+  class GRAPHICAPI Light
+  {
+  public:
 
-private:
+  private:
 
-  /*
-  m_position;
-  m_intensity;
+    /*
+    m_position;
+    m_intensity;
 
-  m_spotLightDirection;
-  m_spotLightExponent;
-  m_spotLightCutoff;
+    m_spotLightDirection;
+    m_spotLightExponent;
+    m_spotLightCutoff;
 
-  m_constAttenuation;
-  m_linearAttenuation;
-  m_quadricAttenuation;
-  */
+    m_constAttenuation;
+    m_linearAttenuation;
+    m_quadricAttenuation;
+    */
 
-};
+  };
+}
 
 #endif

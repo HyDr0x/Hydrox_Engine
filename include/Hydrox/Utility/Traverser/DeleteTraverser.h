@@ -3,18 +3,21 @@
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
 
-class DeleteTraverser : public Traverser
+namespace he
 {
-public:
+  class DeleteTraverser : public Traverser
+  {
+  public:
 
-  DeleteTraverser();
-  virtual ~DeleteTraverser();
+    DeleteTraverser();
+    virtual ~DeleteTraverser();
 
-  virtual bool preTraverse(TreeNode* treeNode);
-  virtual void postTraverse(TreeNode* treeNode);
+    virtual bool preTraverse(TreeNode* treeNode);
+    virtual void postTraverse(TreeNode* treeNode);
 
-protected:
+  protected:
 
-};
+  };
+}
 
 #endif
