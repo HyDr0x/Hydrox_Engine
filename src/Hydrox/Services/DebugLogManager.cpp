@@ -1,19 +1,32 @@
 #include "Hydrox/Services/DebugLogManager.h"
 
-#include <GL/glew.h>
+#include "Hydrox/Services/DebugMessageHandler.h"
+
 #include <iostream>
 #include <sstream>
 
 namespace he
 {
-  DebugLogManager* DebugLogManager::getManager()
+  DebugLogManager* DebugLogManager::getManager(bool debugMode)
   {
-    static DebugLogManager* manager = new DebugLogManager();
+    static DebugLogManager* manager = new DebugLogManager(debugMode);
     return manager;
   }
 
-  DebugLogManager::DebugLogManager()
+  DebugLogManager::DebugLogManager(bool debugMode)
   {
+    /*if(m_debugMode)
+    {
+      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);//looks like it doesn't work
+    }
+    else*/
+    if(debugMode)
+    {
+      glEnable(GL_DEBUG_OUTPUT);
+    }
+    
+    GLDEBUGCALLBACK callback = &getDebugMessage;
+    glDebugMessageCallback(callback, nullptr);
   }
 
   DebugLogManager::~DebugLogManager()
@@ -45,6 +58,11 @@ namespace he
 
       m_extensions += std::string(extensionName) + std::string("\n");
     }
+
+    glGetIntegerv(GL_MAX_TEXTURE_UNITS, &m_maxTextureUnits);
+    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &m_maxTextureVertexImageUnits);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_maxTextureImageUnits);
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_maxCombinedTextureUnits);
   }
 
   void DebugLogManager::printSystemInformation()
@@ -53,6 +71,7 @@ namespace he
     std::cout << "Graphics Card: " << m_graphicCardName.c_str() << std::endl;
     std::cout << "OpenGL Version: " << m_openGLMajorVersion << "." << m_openGLMinorVersion << std::endl;
     std::cout << "Shader Version: " << m_shadingVersion.c_str() << std::endl;
+    std::cout << "---------------------------------------------------------" << std::endl;
   }
 
   void DebugLogManager::printSupportedExtensions()
@@ -68,5 +87,30 @@ namespace he
   unsigned int DebugLogManager::getMinorOpenGLVersion()
   {
     return m_openGLMinorVersion;
+  }
+
+  void DebugLogManager::enableDebugMode()
+  {
+    glEnable(GL_DEBUG_OUTPUT);
+  }
+
+  void DebugLogManager::disableDebugMode()
+  {
+    glDisable(GL_DEBUG_OUTPUT);
+  }
+
+  void DebugLogManager::setEventSeverity(GLenum severity, bool enable)
+  {
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, severity, 0, nullptr, enable);
+  }
+
+  void DebugLogManager::setEventType(GLenum type, bool enable)
+  {
+    glDebugMessageControl(GL_DONT_CARE, type, GL_DONT_CARE, 0, nullptr, enable);
+  }
+
+  void DebugLogManager::setEventSource(GLenum source, bool enable)
+  {
+    glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
   }
 }

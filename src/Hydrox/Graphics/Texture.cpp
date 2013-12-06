@@ -45,21 +45,21 @@ namespace he
 
   void Texture::setTexture(GLuint slot)
   {
-	  if(slot > GL_TEXTURE31)
+	  if(slot > 31)
     {
 		  printf("ERROR, texture slot too high %i\n", slot);
     }
 
 	  m_slot = slot;
 
-	  glActiveTexture( GL_TEXTURE0 + m_slot );
-	  glBindTexture( m_target, m_texIndex );
+	  glActiveTexture(GL_TEXTURE0 + m_slot);
+	  glBindTexture(m_target, m_texIndex);
   }
 
   void Texture::unsetTexture()
   {
-	  glActiveTexture( GL_TEXTURE0 + m_slot );
-	  glBindTexture( m_target, 0 );
+	  glActiveTexture(GL_TEXTURE0 + m_slot);
+	  glBindTexture(m_target, 0);
   }
 
   void Texture::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter)
@@ -72,7 +72,7 @@ namespace he
 	  glBindTexture(m_target, 0);
   }
 
-  Vector<unsigned int,2> Texture::getResolution()
+  Vector<unsigned int, 2> Texture::getResolution()
   {
 	  return Vector<unsigned int, 2>(m_width, m_height);
   }

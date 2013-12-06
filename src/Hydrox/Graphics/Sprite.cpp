@@ -5,11 +5,14 @@ namespace he
   Sprite::Sprite(ResourceHandle texID, bool renderable, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
                                                                                                                                                   m_renderable(renderable), 
                                                                                                                                                   m_animNumber(animNumber), 
+                                                                                                                                                  m_animCount(Vector<unsigned int, 2>(0, 0)),
                                                                                                                                                   m_texStart(texStart),
                                                                                                                                                   m_texEnd(texEnd),
+                                                                                                                                                  m_angle(0.0f),
                                                                                                                                                   m_rtMatrix(Matrix<float, 3>::identity()),
                                                                                                                                                   m_tlMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                  m_scMatrix(Matrix<float, 3>::identity())
+                                                                                                                                                  m_scMatrix(Matrix<float, 3>::identity()),
+                                                                                                                                                  m_z(0.0f)
   {
   }
 
@@ -32,6 +35,8 @@ namespace he
     m_angle = o.m_angle;
 
     m_renderable = o.m_renderable;
+
+    m_z = o.m_z;
   }
 
   Sprite& Sprite::operator=(const Sprite& o)
@@ -53,6 +58,8 @@ namespace he
     m_angle = o.m_angle;
 
     m_renderable = o.m_renderable;
+
+    m_z = o.m_z;
 
     return *this;
   }

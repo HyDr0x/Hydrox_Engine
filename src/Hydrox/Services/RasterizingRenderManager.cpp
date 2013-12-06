@@ -48,7 +48,7 @@ namespace he
   RasterizerRenderManager::~RasterizerRenderManager()
   {
     glDeleteBuffers(1, &m_boneMatricesBuffer);
-    glDeleteBuffers(1, &m_spriteVBO);
+    glDeleteBuffers(1, &m_dummyVBO);
     glDeleteVertexArrays(1, &m_simpleMeshVAO);
     glDeleteVertexArrays(1, &m_simpleSkinnedMeshVAO);
     delete m_billboardShader;
@@ -57,14 +57,12 @@ namespace he
 
   void RasterizerRenderManager::initialize()
   {
-    float placeholder = 0;
-
-    glGenBuffers(1, &m_spriteVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_spriteVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(placeholder), &placeholder, GL_STATIC_DRAW);
-    glVertexAttribPointer(Shader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(placeholder), NULL);
+    glGenBuffers(1, &m_dummyVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
+    glVertexAttribPointer(Shader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+    
     glGenBuffers(1, &m_boneMatricesBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Matrix<float, 4>) * 64, nullptr, GL_STATIC_DRAW);
@@ -150,7 +148,7 @@ namespace he
 
     Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
     Matrix<float, 4> worldViewProjectionMatrix;
-
+    
     glBindVertexArray(m_simpleMeshVAO);
 
     const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
@@ -169,18 +167,12 @@ namespace he
         worldViewProjectionMatrix = viewProjectionMatrix * (*geometryIterator)->getTransformationMatrix();
         renderShader->setUniform(4, GL_FLOAT_MAT4, &(worldViewProjectionMatrix[0][0]));
 
-        /*renderShader->setTexture(0, 0);
-        renderTexture->setTexture(0);*/
+        //renderShader->setTexture(0, 0);
+        //renderTexture->setTexture(0);
 
         renderMesh->render(0);
       }
     }
-
-    const GLenum ErrorValue = glGetError();
-	  int tmpE = 0;
-	  if(ErrorValue != GL_NO_ERROR)
-	  	tmpE++;
-	  tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
 
     glBindVertexArray(m_simpleSkinnedMeshVAO);
 
@@ -205,8 +197,8 @@ namespace he
 
         renderShader->setUniform(4, GL_FLOAT_MAT4, &(viewProjectionMatrix[0][0]));
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
-        /*renderShader->setTexture(0, 0);
-        renderTexture->setTexture(0);*/
+        //renderShader->setTexture(0, 0);
+        //renderTexture->setTexture(0);
 
         renderMesh->render(0);
       }
@@ -250,18 +242,17 @@ namespace he
 		    m_billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
 		    m_billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
-        glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
-
+        glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
         glDrawArrays(GL_POINTS, 0, 1);
       }
 	  }
-
+    
 
 	  ////////////////////////////////RENDER 2D Sprites////////////////////////////////////////////
 
+    glClear(GL_DEPTH_BUFFER_BIT);
     Sprite *renderSprite;
-
-	  glDisable(GL_DEPTH_TEST);
+	  //glDisable(GL_DEPTH_TEST);
 	  m_spriteShader->useShader();
 
 	  for(std::list<ResourceHandle>::iterator spriteIDIterator = m_spriteIDs.begin(); spriteIDIterator != m_spriteIDs.end(); spriteIDIterator++)
@@ -272,22 +263,23 @@ namespace he
         renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
 
         renderTexture->setTexture(0);
-		    m_spriteShader->setTexture(2, 0);
+
+		    m_spriteShader->setTexture(3, 0);
 		
-		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
+		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix()/* * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1)*/;
 		    Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
         float z = renderSprite->getZValue();
 		    m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		    m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-        m_spriteShader->setUniform(3, GL_FLOAT, &z);
+        m_spriteShader->setUniform(2, GL_FLOAT, &z);
 
-        glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 		    glDrawArrays(GL_POINTS, 0, 1);
       }
 	  }
-
+    m_spriteShader->useNoShader();
     glDisableVertexAttribArray(Shader::SPECIAL0);
-	  glEnable(GL_DEPTH_TEST);
-	  glDisable(GL_BLEND);
+	  //glEnable(GL_DEPTH_TEST);
+	  //glDisable(GL_BLEND);
   }
 }

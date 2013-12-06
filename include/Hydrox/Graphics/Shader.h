@@ -62,10 +62,10 @@ namespace he
                                                                                     std::vector<GLint> *arrayStrides, 
                                                                                     std::vector<GLint> *matrixStrides);
 
-	  void setUniform(int location, int type, const GLfloat* val) const;
-    void setUniform(int location, int type, const GLuint* val) const;
-	  void setUniform(int location, int type, const GLint* val) const;
-	  void setTexture(int location, GLint slot) const;
+	  void setUniform(GLint location, int type, const GLfloat* val) const;
+    void setUniform(GLint location, int type, const GLuint* val) const;
+	  void setUniform(GLint location, int type, const GLint* val) const;
+	  void setTexture(GLint location, GLint slot) const;
 
 	  void enableTransformFeedback(int count, const char** varyings, GLenum buffertype) const;
     void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ) const;

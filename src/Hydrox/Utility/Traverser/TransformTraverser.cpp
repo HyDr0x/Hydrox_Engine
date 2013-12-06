@@ -52,7 +52,9 @@ namespace he
 
   bool TransformTraverser::preTraverse(AnimatedTransformNode* treeNode)
   {
-    return preTraverse((TransformNode*)treeNode);
+    bool ret = preTraverse((TransformNode*)treeNode);
+    treeNode->removeDirtyFlag(GroupNode::ANIM_DIRTY);//animation is updated now
+    return ret;
   }
 
   void TransformTraverser::postTraverse(AnimatedTransformNode* treeNode)

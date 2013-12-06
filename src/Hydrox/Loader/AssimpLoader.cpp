@@ -340,6 +340,7 @@ namespace he
     {
       transformNode = new AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
       m_boneTable[transformNode->getNodeName()] = dynamic_cast<AnimatedTransformNode*>(transformNode);
+      transformNode->addDirtyFlag(GroupNode::ANIM_DIRTY);//animations need to be updated
     }
     else
     {
@@ -348,9 +349,8 @@ namespace he
       tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
       transformNode = new TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+      transformNode->addDirtyFlag(GroupNode::TRF_DIRTY);//transformations need to be updated
     }
-
-    transformNode->addDirtyFlag(GroupNode::TRF_DIRTY);//animations need to be updated
 
     parentNode = transformNode;
     nextSibling = nullptr;

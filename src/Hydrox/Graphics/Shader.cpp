@@ -71,7 +71,7 @@ namespace he
 	  glGetActiveUniformsiv( m_program, uniformCount, &(*uniformIndices)[0], GL_UNIFORM_MATRIX_STRIDE, &(*matrixStrides)[0]);//maybe useless?!
   }
 
-  void Shader::setUniform(int location, int type, const GLfloat* val) const
+  void Shader::setUniform(GLint location, GLint type, const GLfloat* val) const
   {
     switch(type)
     {
@@ -99,7 +99,7 @@ namespace he
     }
   }
 
-  void Shader::setUniform(int location, int type, const GLuint* val) const
+  void Shader::setUniform(GLint location, GLint type, const GLuint* val) const
   {
     switch(type)
 	  {
@@ -118,7 +118,7 @@ namespace he
 	  }
   }
 
-  void Shader::setUniform(int location, int type, const GLint* val) const
+  void Shader::setUniform(GLint location, GLint type, const GLint* val) const
   {
 	  switch(type)
 	  {
@@ -137,9 +137,9 @@ namespace he
 	  }
   }
 
-  void Shader::setTexture(int location, GLint slot) const
+  void Shader::setTexture(GLint location, GLint slot) const
   {
-	  glUniform1i( location, GL_TEXTURE0 + slot );
+	  glUniform1i(location, slot);
   }
 
   void Shader::enableTransformFeedback(int count, const char** varyings, GLenum buffertype) const
@@ -314,7 +314,7 @@ namespace he
 	  {
 		  file.close();
 
-		  std::cout<< "Error: couldn't open shader source file "<<filename<<"."<<std::endl;
+		  std::cout << "Error: couldn't open shader source file " << filename << "." << std::endl;
 
 		  return false;
 	  }

@@ -126,10 +126,10 @@ namespace he
   {
     if(!m_pauseAnimation)
     {
-      if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+      if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
       {
         notify(this);
-        addDirtyFlag(TRF_DIRTY);
+        addDirtyFlag(ANIM_DIRTY);
       }
 
       m_currentAnimationTime = time;
@@ -140,10 +140,10 @@ namespace he
   {
     if(!m_pauseAnimation)
     {
-      if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+      if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
       {
         notify(this);
-        addDirtyFlag(TRF_DIRTY);
+        addDirtyFlag(ANIM_DIRTY);
       }
 
       m_currentAnimationTime += time;
@@ -162,10 +162,10 @@ namespace he
 
   void AnimatedTransformNode::stopAnimation()
   {
-    if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+    if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
     {
       notify(this);
-      addDirtyFlag(TRF_DIRTY);
+      addDirtyFlag(ANIM_DIRTY);
     }
 
     m_currentAnimationTime = 0.0f;
@@ -175,18 +175,14 @@ namespace he
   {
     AnimationTrack& currentTrack = m_animationTracks[m_currentTrack];
 
-    if(m_dirtyFlag & GroupNode::TRF_DIRTY)//update animations only if they changed
+    if(m_dirtyFlag & GroupNode::ANIM_DIRTY)//update animations only if they changed
     {
       interpolateKeyFrames(currentTrack);
     }
 
-    m_animatedTranslation += m_animatedRotation.apply(m_translation * m_animatedScale);
-    m_animatedRotation *= m_rotation;
-    m_animatedScale *= m_scale;
-
-    translation += rotation.apply(m_animatedTranslation * scale);
-    rotation *= m_animatedRotation;
-    scale *= m_animatedScale;
+    translation += rotation.apply((m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale)) * scale);
+    rotation *= (m_animatedRotation * m_rotation);
+    scale *= (m_animatedScale * m_scale);
 
     if(m_animatedMesh != nullptr)
     {

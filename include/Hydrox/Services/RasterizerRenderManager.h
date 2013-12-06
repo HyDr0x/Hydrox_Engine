@@ -45,7 +45,7 @@ namespace he
 
     GLuint m_boneMatricesBuffer;
 
-    GLuint m_spriteVBO;
+    GLuint m_dummyVBO;
 
     Shader *m_billboardShader;
     Shader *m_spriteShader;

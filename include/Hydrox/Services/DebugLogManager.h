@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <GL/glew.h>
+
 #include "Hydrox/Services/Io_service.h"
 
 #include "Hydrox/DLLExport.h"
@@ -13,7 +15,7 @@ namespace he
   {
   public:
 
-    static DebugLogManager* getManager();
+    static DebugLogManager* getManager(bool debugMode);
     ~DebugLogManager();
 
     void gatherSystemInformation();
@@ -24,9 +26,16 @@ namespace he
     unsigned int getMajorOpenGLVersion();
     unsigned int getMinorOpenGLVersion();
 
+    void enableDebugMode();
+    void disableDebugMode();
+
+    void setEventSeverity(GLenum severity, bool enable);
+    void setEventType(GLenum type, bool enable);
+    void setEventSource(GLenum source, bool enable);
+
   private:
 
-    DebugLogManager();
+    DebugLogManager(bool debugMode);
 
     std::string m_vendorName;
     std::string m_graphicCardName;
@@ -35,6 +44,11 @@ namespace he
 
     unsigned int m_openGLMajorVersion;
     unsigned int m_openGLMinorVersion;
+
+    GLint m_maxTextureUnits;
+    GLint m_maxTextureVertexImageUnits;
+    GLint m_maxTextureImageUnits;
+    GLint m_maxCombinedTextureUnits;
   };
 }
 
