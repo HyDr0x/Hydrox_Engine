@@ -1,6 +1,8 @@
 #include "Hydrox/Utility/Traverser/CopyTraverser.h"
 
+#include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
 #include "Hydrox/Utility/Tree/BillboardNode.h"
@@ -17,32 +19,36 @@ namespace he
   {
   }
 
-  void CopyTraverser::doTraverse(TreeNode* treeNode)
+  bool CopyTraverser::preTraverse(AnimatedTransformNode* treeNode)
   {
-    m_childNode = true;//child node needs to be attached
+    AnimatedTransformNode *newTransformNode = (AnimatedTransformNode*)cloneGroupNode(treeNode);
 
-    while(treeNode != nullptr)
+    AnimatedGeoNode *oldGeoNode = treeNode->getSkinnedMesh();
+    if(oldGeoNode != nullptr)
     {
-      if(treeNode->preTraverse(this))
+      AnimatedGeoNode *newGeoNode = m_newGeoNodeTable[oldGeoNode];
+      if(newGeoNode == nullptr)
       {
-        doTraverse(treeNode->getFirstChild());
+        m_oldGeoNodeTable[oldGeoNode].push_back(newTransformNode);
       }
-
-      treeNode->postTraverse(this);
-
-      if(m_stopTraversal)
+      else
       {
-        return;
+        newTransformNode->setSkinnedMesh(newGeoNode);
       }
-
-      treeNode = treeNode->getNextSibling();
-      m_childNode = false;//sibling needs to be attached
     }
+    
+    return true;
+  }
+
+  void CopyTraverser::postTraverse(AnimatedTransformNode* treeNode)
+  {
+    ascendingGroupNode(treeNode);
   }
 
   bool CopyTraverser::preTraverse(TransformNode* treeNode)
   {
-    return cloneGroupNode(treeNode);
+    cloneGroupNode(treeNode);
+    return true;
   }
 
   void CopyTraverser::postTraverse(TransformNode* treeNode)
@@ -52,7 +58,8 @@ namespace he
 
   bool CopyTraverser::preTraverse(LODNode* treeNode)
   {
-    return cloneGroupNode(treeNode);
+    cloneGroupNode(treeNode);
+    return true;
   }
 
   void CopyTraverser::postTraverse(LODNode* treeNode)
@@ -60,9 +67,32 @@ namespace he
     ascendingGroupNode(treeNode);
   }
 
+  bool CopyTraverser::preTraverse(AnimatedGeoNode* treeNode)
+  {
+    AnimatedGeoNode *newGeoNode = (AnimatedGeoNode*)cloneTreeNode(treeNode);
+    m_newGeoNodeTable[treeNode] = newGeoNode;
+
+    std::list<AnimatedTransformNode*> transformList = m_oldGeoNodeTable[treeNode];
+
+    for(std::list<AnimatedTransformNode*>::iterator lit = transformList.begin(); lit != transformList.end(); lit++)
+    {
+      (*lit)->setSkinnedMesh(newGeoNode);
+    }
+
+    m_oldGeoNodeTable.erase(treeNode);
+
+    return false;
+  }
+
+  void CopyTraverser::postTraverse(AnimatedGeoNode* treeNode)
+  {
+    ascendingTreeNode(treeNode);
+  }
+
   bool CopyTraverser::preTraverse(GeoNode* treeNode)
   {
-    return cloneTreeNode(treeNode);
+    cloneTreeNode(treeNode);
+    return false;
   }
 
   void CopyTraverser::postTraverse(GeoNode* treeNode)
@@ -72,7 +102,8 @@ namespace he
 
   bool CopyTraverser::preTraverse(BillboardNode* treeNode)
   {
-    return cloneTreeNode(treeNode);
+    cloneTreeNode(treeNode);
+    return false;
   }
 
   void CopyTraverser::postTraverse(BillboardNode* treeNode)
@@ -82,7 +113,8 @@ namespace he
 
   bool CopyTraverser::preTraverse(ParticleNode* treeNode)
   {
-    return cloneTreeNode(treeNode);
+    cloneTreeNode(treeNode);
+    return false;
   }
 
   void CopyTraverser::postTraverse(ParticleNode* treeNode)
@@ -92,7 +124,8 @@ namespace he
 
   bool CopyTraverser::preTraverse(LightNode* treeNode)
   {
-    return cloneTreeNode(treeNode);
+    cloneTreeNode(treeNode);
+    return false;
   }
 
   void CopyTraverser::postTraverse(LightNode* treeNode)
@@ -105,7 +138,7 @@ namespace he
     return m_rootNode;
   }
 
-  bool CopyTraverser::cloneGroupNode(GroupNode* treeNode)
+  GroupNode* CopyTraverser::cloneGroupNode(GroupNode* treeNode)
   {
     GroupNode* newNode = treeNode->clone();
 
@@ -130,10 +163,15 @@ namespace he
     m_sibling = newNode;
     m_parent = newNode;
 
-    return true;
+    if(treeNode->getFirstChild() != nullptr)
+    {
+      m_childNode = true;
+    }
+
+    return newNode;
   }
 
-  bool CopyTraverser::cloneTreeNode(TreeNode* treeNode)
+  TreeNode* CopyTraverser::cloneTreeNode(TreeNode* treeNode)
   {
     TreeNode* newNode = treeNode->clone();
 
@@ -150,11 +188,17 @@ namespace he
 
     m_sibling = newNode;
 
-    return false;
+    if(treeNode->getFirstChild() != nullptr)
+    {
+      m_childNode = true;
+    }
+
+    return newNode;
   }
 
   void CopyTraverser::ascendingGroupNode(TreeNode* treeNode)
   {
+    m_childNode = false;
     m_sibling = m_parent;
     if(m_parent != nullptr)
     {
@@ -164,6 +208,7 @@ namespace he
 
   void CopyTraverser::ascendingTreeNode(TreeNode* treeNode)
   {
+    m_childNode = false;
     m_sibling = m_parent;
   }
 

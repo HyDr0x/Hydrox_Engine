@@ -1,6 +1,8 @@
 #include "Hydrox/Utility/Traverser/NodeSearchTraverser.h"
 
+#include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
 #include "Hydrox/Utility/Tree/BillboardNode.h"
@@ -14,6 +16,15 @@ namespace he
   }
 
   NodeSearchTraverser::~NodeSearchTraverser()
+  {
+  }
+
+  bool NodeSearchTraverser::preTraverse(AnimatedTransformNode* treeNode)
+  {
+    return findNode(treeNode);
+  }
+
+  void NodeSearchTraverser::postTraverse(AnimatedTransformNode* treeNode)
   {
   }
 
@@ -32,6 +43,15 @@ namespace he
   }
 
   void NodeSearchTraverser::postTraverse(LODNode* treeNode)
+  {
+  }
+
+  bool NodeSearchTraverser::preTraverse(AnimatedGeoNode* treeNode)
+  {
+    return findNode(treeNode);
+  }
+
+  void NodeSearchTraverser::postTraverse(AnimatedGeoNode* treeNode)
   {
   }
 

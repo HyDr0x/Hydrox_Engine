@@ -3,26 +3,18 @@
 #include <assert.h>
 
 #include "Hydrox/Utility/Traverser/Traverser.h"
+#include "Hydrox/Utility/Traverser/AnimationControlTraverser.h"
 #include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 
 namespace he
 {
-  AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, AnimatedGeoNode* animatedMesh, unsigned int boneIndex, 
-    Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
-    : TransformNode(trfMatrix, nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(animatedMesh), m_boneIndex(boneIndex), m_currentTrack(0), m_currentAnimationTime(0.0f)
+  AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
+    GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
+    : TransformNode(Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTime(0.0f), m_pauseAnimation(false)
   {
-    m_animatedTranslation = m_translation;
-    m_animatedRotation = m_rotation;
-    m_animatedScale = m_scale;
-  }
-
-  AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, AnimatedGeoNode* animatedMesh, unsigned int boneIndex, 
-    Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
-    : TransformNode(translation, scale, rotation, nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(animatedMesh), m_boneIndex(boneIndex), m_currentTrack(0), m_currentAnimationTime(0.0f)
-  {
-    m_animatedTranslation = m_translation;
-    m_animatedRotation = m_rotation;
-    m_animatedScale = m_scale;
+    m_animatedTranslation = Vector<float, 3>::identity();
+    m_animatedRotation = Quaternion<float>::identity();
+    m_animatedScale = 1.0f;
   }
 
   AnimatedTransformNode& AnimatedTransformNode::operator=(const AnimatedTransformNode& sourceNode)
@@ -35,8 +27,12 @@ namespace he
 
     m_animationTracks = sourceNode.m_animationTracks;
     m_currentTrack = sourceNode.m_currentTrack;
+    m_currentAnimationTime = sourceNode.m_currentAnimationTime;
+
     m_animatedMesh = sourceNode.m_animatedMesh;
     m_boneIndex = sourceNode.m_boneIndex;
+
+    m_pauseAnimation = sourceNode.m_pauseAnimation;
 
     return *this;
   }
@@ -57,20 +53,24 @@ namespace he
 
   GroupNode* AnimatedTransformNode::clone() const
   {
-    AnimatedTransformNode *newNode = new AnimatedTransformNode(m_animationTracks, m_animatedMesh, m_boneIndex, Matrix<float, 4>::identity(), m_nodeName);
+    AnimatedTransformNode *newNode = new AnimatedTransformNode(m_animationTracks, m_nodeName);
 
-    newNode->m_nodeName = m_nodeName;
     newNode->m_dirtyFlag = m_dirtyFlag;
 
     newNode->m_translation = m_translation;
     newNode->m_scale = m_scale;
     newNode->m_rotation = m_rotation;
 
-    newNode->m_currentTrack = m_currentTrack;
-
     newNode->m_animatedTranslation = m_animatedTranslation;
     newNode->m_animatedRotation = m_animatedRotation;
     newNode->m_animatedScale = m_animatedScale;
+
+    newNode->m_currentTrack = m_currentTrack;
+    newNode->m_currentAnimationTime = m_currentAnimationTime;
+    newNode->m_pauseAnimation = m_pauseAnimation;
+
+    newNode->m_animatedMesh = m_animatedMesh;
+    newNode->m_boneIndex = m_boneIndex;
 
     return newNode;
   }
@@ -90,6 +90,26 @@ namespace he
     traverser->postTraverse(this);
   }
 
+  void AnimatedTransformNode::setBoneIndex(unsigned int boneIndex)
+  {
+    m_boneIndex = boneIndex;
+  }
+
+  unsigned int AnimatedTransformNode::getBoneIndex()
+  {
+    return m_boneIndex;
+  }
+
+  void AnimatedTransformNode::setSkinnedMesh(AnimatedGeoNode* animatedMesh)
+  {
+    m_animatedMesh = animatedMesh;
+  }
+
+  AnimatedGeoNode* AnimatedTransformNode::getSkinnedMesh()
+  {
+    return m_animatedMesh;
+  }
+
   void AnimatedTransformNode::setCurrentAnimationTrack(unsigned int currentTrack)
   {
     assert(currentTrack < m_animationTracks.size() && " Animation Track too big ");
@@ -102,54 +122,67 @@ namespace he
     return m_currentTrack;
   }
 
-  void AnimatedTransformNode::setCurrentTime(float time)
+  void AnimatedTransformNode::setCurrentAnimationTime(float time)
   {
-    m_currentAnimationTime = time;
+    if(!m_pauseAnimation)
+    {
+      if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+      {
+        notify(this);
+        addDirtyFlag(TRF_DIRTY);
+      }
+
+      m_currentAnimationTime = time;
+    }
   }
 
-  void AnimatedTransformNode::addCurrentTime(float time)
+  void AnimatedTransformNode::addCurrentAnimationTime(float time)
   {
-    m_currentAnimationTime += time;
+    if(!m_pauseAnimation)
+    {
+      if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+      {
+        notify(this);
+        addDirtyFlag(TRF_DIRTY);
+      }
+
+      m_currentAnimationTime += time;
+    }
+  }
+
+  void AnimatedTransformNode::setPauseAnimation(bool pauseAnimation)
+  {
+    m_pauseAnimation = pauseAnimation;
+  }
+
+  bool AnimatedTransformNode::getPauseAnimation()
+  {
+    return m_pauseAnimation;
+  }
+
+  void AnimatedTransformNode::stopAnimation()
+  {
+    if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
+    {
+      notify(this);
+      addDirtyFlag(TRF_DIRTY);
+    }
+
+    m_currentAnimationTime = 0.0f;
   }
 
   void AnimatedTransformNode::calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation)
   {
     AnimationTrack& currentTrack = m_animationTracks[m_currentTrack];
 
-    Vector<float, 3> animatedTranslation;
-    Quaternion<float> animatedRotation;
-    float animatedScale;
-
-    for(unsigned int i = 0; i < currentTrack.m_scalesTime.size(); i++)
+    if(m_dirtyFlag & GroupNode::TRF_DIRTY)//update animations only if they changed
     {
-      if(currentTrack.m_scalesTime[i] > m_currentAnimationTime && i > 0)
-      {
-        animatedScale = currentTrack.m_scales[i - 1] + m_currentAnimationTime / currentTrack.m_scalesTime[i] * (currentTrack.m_scales[i] - currentTrack.m_scales[i - 1]);
-        break;
-      }
+      interpolateKeyFrames(currentTrack);
     }
 
-    for(unsigned int i = 0; i < currentTrack.m_rotationsTime.size(); i++)
-    {
-      if(currentTrack.m_rotationsTime[i] > m_currentAnimationTime && i > 0)
-      {
-        animatedRotation = Quaternion<float>::slerp(currentTrack.m_rotations[i - 1], currentTrack.m_rotations[i], m_currentAnimationTime / currentTrack.m_rotationsTime[i]);
-        break;
-      }
-    }
-
-    for(unsigned int i = 0; i < currentTrack.m_positionsTime.size(); i++)
-    {
-      if(currentTrack.m_positionsTime[i] > m_currentAnimationTime && i > 0)
-      {
-        animatedTranslation = Vector<float, 3>::lerp(currentTrack.m_positions[i - 1], currentTrack.m_positions[i], m_currentAnimationTime / currentTrack.m_positionsTime[i]);
-        break;
-      }
-    }
-
-    m_animatedTranslation += animatedRotation.apply(m_translation * animatedScale);
-    m_animatedRotation = animatedRotation * m_rotation;
-    m_animatedScale = animatedScale * m_scale;
+    m_animatedTranslation += m_animatedRotation.apply(m_translation * m_animatedScale);
+    m_animatedRotation *= m_rotation;
+    m_animatedScale *= m_scale;
 
     translation += rotation.apply(m_animatedTranslation * scale);
     rotation *= m_animatedRotation;
@@ -174,5 +207,101 @@ namespace he
   float AnimatedTransformNode::getScale()
   {
     return m_animatedScale;
+  }
+
+  void AnimatedTransformNode::setAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
+  {
+    AnimationControlTraverser traverser;
+    traverser.setAnimationTime(animationTime);
+    traverser.doTraverse(node);
+  }
+
+  void addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
+  {
+    AnimationControlTraverser traverser;
+    traverser.addAnimationTime(animationTime);
+    traverser.doTraverse(node);
+  }
+
+  void AnimatedTransformNode::pauseAnimatedScene(AnimatedTransformNode *node, bool pauseAnimation)
+  {
+    AnimationControlTraverser traverser;
+    traverser.setPauseAnimation(pauseAnimation);
+    traverser.doTraverse(node);
+  }
+
+  void AnimatedTransformNode::stopAnimatedScene(AnimatedTransformNode *node)
+  {
+    AnimationControlTraverser traverser;
+    traverser.setStopAnimation();
+    traverser.doTraverse(node);
+  }
+
+  void AnimatedTransformNode::interpolateKeyFrames(AnimationTrack& currentTrack)
+  {
+    float timeInTicks = fmod(m_currentAnimationTime * currentTrack.m_animationTicksPerSecond, m_animationTracks[m_currentTrack].m_duration);
+
+    for(unsigned int i = 0; i < currentTrack.m_scalesTime.size(); i++)
+    {
+      if(i + 1 < currentTrack.m_scalesTime.size())
+      {
+        if(currentTrack.m_scalesTime[i + 1] >= timeInTicks)
+        {
+          float diffTime = timeInTicks - currentTrack.m_scalesTime[i];
+          if(diffTime < 0.0f)
+          {
+            diffTime = currentTrack.m_scalesTime[i] + timeInTicks;
+          }
+          m_animatedScale = currentTrack.m_scales[i] + diffTime / (currentTrack.m_scalesTime[i + 1] - currentTrack.m_scalesTime[i]) * (currentTrack.m_scales[i + 1] - currentTrack.m_scales[i]);
+          break;
+        }
+      }
+      else
+      {
+        m_animatedScale = currentTrack.m_scales[i];
+      }
+    }
+
+    for(unsigned int i = 0; i < currentTrack.m_rotationsTime.size(); i++)
+    {
+      if(i + 1 < currentTrack.m_rotationsTime.size())
+      {
+        if(currentTrack.m_rotationsTime[i + 1] >= timeInTicks)
+        {
+          float diffTime = timeInTicks - currentTrack.m_rotationsTime[i];
+          if(diffTime < 0.0f)
+          {
+            diffTime = currentTrack.m_rotationsTime[i] + timeInTicks;
+          }
+          m_animatedRotation = Quaternion<float>::slerp(currentTrack.m_rotations[i], currentTrack.m_rotations[i + 1], diffTime / (currentTrack.m_rotationsTime[i + 1] - currentTrack.m_rotationsTime[i]));
+          break;
+        }
+      }
+      else
+      {
+        m_animatedRotation = currentTrack.m_rotations[i];
+      }
+    }
+
+    for(unsigned int i = 0; i < currentTrack.m_positionsTime.size(); i++)
+    {
+      if(i + 1 < currentTrack.m_positionsTime.size())
+      {
+        if(currentTrack.m_positionsTime[i + 1] >= timeInTicks)
+        {
+          float diffTime = timeInTicks - currentTrack.m_positionsTime[i];
+          if(diffTime < 0.0f)
+          {
+            diffTime = currentTrack.m_positionsTime[i] + timeInTicks;
+          }
+          m_animatedTranslation = Vector<float, 3>::lerp(currentTrack.m_positions[i], currentTrack.m_positions[i + 1], diffTime / (currentTrack.m_positionsTime[i + 1] - currentTrack.m_positionsTime[i]));
+          break;
+        }
+      }
+      else
+      {
+        m_animatedTranslation = currentTrack.m_positions[i];
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@ namespace he
     m_rotation = math::createRotXQuaternion(angles[0]) * math::createRotYQuaternion(angles[1]) * math::createRotZQuaternion(angles[2]);
   }
 
-  TransformNode::TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
+  TransformNode::TransformNode(Vector<float, 3>& translation, float scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
     : GroupNode(nodeName, parent, nextSibling, firstChild),
     m_translation(translation),
     m_scale(scale),

@@ -21,7 +21,7 @@ namespace he
               std::vector<Vector<float, 2>> textureCoords, 
               std::vector<Vector<float, 3>> normals, 
               std::vector<Vector<float, 3>> binormals, 
-              std::vector<Vector<unsigned int, 4>> boneIndices, 
+              std::vector<Vector<float, 4>> boneIndices, 
               std::vector<Vector<float, 4>> boneWeights,
               std::vector<indexType> indices,
               GLuint primitiveType)
@@ -103,7 +103,7 @@ namespace he
       lokalStride += binormalStride;
 	  }
 
-	  if(boneIndices.size() > 0)//TODO ANIMATION
+	  if(boneIndices.size() > 0)
 	  {
       for(int i = 0; i < m_vertexCount; i++)
 		  {

@@ -19,7 +19,8 @@ namespace he
       DEFAULT     = 0,
       TRF_DIRTY   = 1,
       BV_DIRTY    = 2,
-      LOD_INRANGE   = 4,
+      LOD_INRANGE = 4,
+      ANIM_DIRTY  = 8,
     };
 
     GroupNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);

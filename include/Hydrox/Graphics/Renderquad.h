@@ -2,7 +2,7 @@
 #define RENDERQUAD_H_
 
 #include <iostream>
-//#include <stdarg.h>
+#include <stdarg.h>
 #include <assert.h>
 
 #include "Hydrox/DLLExport.h"
@@ -19,7 +19,7 @@ namespace he
 	  ~Renderquad();
 
 	  void setRenderTarget(int count, Texture *tex[]);
-	  //void setRenderTarget(int count, ...);
+	  void setRenderTarget(int count, ...);
 	  void render(bool direct);
 
   private:

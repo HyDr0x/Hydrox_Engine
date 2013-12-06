@@ -36,18 +36,14 @@ namespace he
     stream2 << openGLVersion.substr(2, 3);
     stream2 >> m_openGLMinorVersion;
 
-    for(GLuint i = 0; ; i++)
+    GLint maxExtensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &maxExtensions);
+
+    for(GLuint i = 0; i < maxExtensions; i++)
     {
       const char* extensionName = (const char*)glGetStringi(GL_EXTENSIONS, i);
 
-      if(extensionName == nullptr)
-      {
-        break;
-      }
-
       m_extensions += std::string(extensionName) + std::string("\n");
-
-      i++;
     }
   }
 

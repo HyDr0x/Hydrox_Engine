@@ -1,6 +1,8 @@
 #include "Hydrox/Utility/Traverser/TransformTraverser.h"
 
+#include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
 #include "Hydrox/Utility/Tree/BillboardNode.h"
@@ -43,6 +45,21 @@ namespace he
     m_rotationStack.push(trfRotation);
   }
 
+  bool TransformTraverser::ascendTraverse(AnimatedTransformNode* treeNode)
+  {
+    return ascendTraverse((TransformNode*)treeNode);
+  }
+
+  bool TransformTraverser::preTraverse(AnimatedTransformNode* treeNode)
+  {
+    return preTraverse((TransformNode*)treeNode);
+  }
+
+  void TransformTraverser::postTraverse(AnimatedTransformNode* treeNode)
+  {
+    postTraverse((TransformNode*)treeNode);
+  }
+
   bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
   {
     if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
@@ -66,8 +83,6 @@ namespace he
 
   bool TransformTraverser::preTraverse(TransformNode* treeNode)
   {
-    treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
-
     Vector<float, 3> translation;
     float scale;
     Quaternion<float> rotation;
@@ -86,6 +101,8 @@ namespace he
     }
 
     treeNode->calculateTransformation(translation, scale, rotation);
+
+    treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
 
     m_translateStack.push(translation);
     m_scaleStack.push(scale);

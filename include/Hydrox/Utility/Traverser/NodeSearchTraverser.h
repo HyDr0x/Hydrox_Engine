@@ -14,11 +14,17 @@ namespace he
     NodeSearchTraverser(const std::string& nodeName);
     virtual ~NodeSearchTraverser();
 
+    virtual bool preTraverse(AnimatedTransformNode* treeNode);
+    virtual void postTraverse(AnimatedTransformNode* treeNode);
+
     virtual bool preTraverse(TransformNode* treeNode);
     virtual void postTraverse(TransformNode* treeNode);
 
     virtual bool preTraverse(LODNode* treeNode);
     virtual void postTraverse(LODNode* treeNode);
+
+    virtual bool preTraverse(AnimatedGeoNode* treeNode);
+    virtual void postTraverse(AnimatedGeoNode* treeNode);
 
     virtual bool preTraverse(GeoNode* treeNode);
     virtual void postTraverse(GeoNode* treeNode);

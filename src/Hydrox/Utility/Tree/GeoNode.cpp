@@ -10,6 +10,7 @@ namespace he
                                                                                                                                     m_meshIndex(meshIndex),
                                                                                                                                     m_renderable(renderable)
   {
+    m_trfMatrix = Matrix<float, 4>::identity();
   }
 
   GeoNode& GeoNode::operator=(const GeoNode& sourceNode)

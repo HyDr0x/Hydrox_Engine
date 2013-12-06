@@ -187,6 +187,16 @@ namespace he
     return Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
   }
 
+  void Sprite::setZValue(float z)
+  {
+    m_z = z;
+  }
+
+  float Sprite::getZValue()
+  {
+    return m_z;
+  }
+
   Matrix<float,3> Sprite::getTransformationMatrix()
   {
 	  return m_tlMatrix * m_rtMatrix * m_scMatrix;
@@ -196,9 +206,9 @@ namespace he
   {
 	  float width = m_texEnd[0] - m_texStart[0];
 	  float height = m_texEnd[1] - m_texStart[1];
-	  return Matrix<float,3>(width/m_animNumber[0],0.0f,(static_cast<float>(m_animCount[0])/static_cast<float>(m_animNumber[0]))*width+m_texStart[0], 
-					    0.0f,height/m_animNumber[1],(static_cast<float>(m_animCount[1])/static_cast<float>(m_animNumber[1]))*height+m_texStart[1], 
-					    0.0f,0.0f,1.0f);
+	  return Matrix<float, 3>(width / m_animNumber[0], 0.0f,                     (static_cast<float>(m_animCount[0]) / static_cast<float>(m_animNumber[0])) * width + m_texStart[0], 
+					                  0.0f,                    height / m_animNumber[1], (static_cast<float>(m_animCount[1]) / static_cast<float>(m_animNumber[1])) * height + m_texStart[1], 
+					                  0.0f,                    0.0f,                      1.0f);
   }
 
   ResourceHandle Sprite::getTextureID() const

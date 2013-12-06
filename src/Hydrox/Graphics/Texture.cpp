@@ -65,16 +65,16 @@ namespace he
   void Texture::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter)
   {
 	  glBindTexture(m_target, m_texIndex);
-		  glTexParameteri(m_target,GL_TEXTURE_WRAP_S, edgeModeS);
-		  glTexParameteri(m_target,GL_TEXTURE_WRAP_T, edgeModeT);
-		  glTexParameteri(m_target,GL_TEXTURE_MAG_FILTER, magFilter);
-		  glTexParameteri(m_target,GL_TEXTURE_MIN_FILTER, minFilter);
+		  glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
+		  glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
+		  glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
+		  glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
 	  glBindTexture(m_target, 0);
   }
 
   Vector<unsigned int,2> Texture::getResolution()
   {
-	  return Vector<unsigned int,2>(m_width, m_height);
+	  return Vector<unsigned int, 2>(m_width, m_height);
   }
 
   GLuint Texture::getSlot()

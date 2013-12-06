@@ -86,7 +86,7 @@ namespace he
 
     inline static Vector<TYPE, VECTOR_NUM_ARGS> lerp(Vector<TYPE, VECTOR_NUM_ARGS> a, Vector<TYPE, VECTOR_NUM_ARGS> b, TYPE t)
     {
-      return a * (1.0f - t) + b* t;
+      return a * (1.0f - t) + b * t;
     }
 
     inline const unsigned int dimension() { return VECTOR_NUM_ARGS; }

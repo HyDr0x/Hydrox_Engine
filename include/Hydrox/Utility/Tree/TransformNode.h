@@ -19,7 +19,7 @@ namespace he
   public:
 
     TransformNode(Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-    TransformNode(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+    TransformNode(Vector<float, 3>& translation, float scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
     TransformNode& operator=(const TransformNode& sourceNode);
     virtual TreeNode& operator=(const TreeNode& sourceNode);
     virtual ~TransformNode();

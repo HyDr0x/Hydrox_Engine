@@ -56,11 +56,6 @@ namespace he
       return sqrt(m_coord[0] * m_coord[0] + m_coord[1] * m_coord[1] + m_coord[2] * m_coord[2] + m_coord[3] * m_coord[3]);
     }
 
-    inline TYPE quadLength()
-    {
-      return m_coord[0] * m_coord[0] + m_coord[1] * m_coord[1] + m_coord[2] * m_coord[2] + m_coord[3] * m_coord[3];
-    }
-
     inline void normalize()
     {
       *this /= length();
@@ -68,7 +63,7 @@ namespace he
 
     inline Quaternion invert()
     {
-      return conjugate() / quadLength();
+      return conjugate() / dot(*this, *this);
     }
 
     inline Quaternion operator + (const Quaternion& q)
@@ -198,15 +193,30 @@ namespace he
       return v + t * m_coord[0] + math::cross<TYPE>(t, pureQuad);
     }
 
+    static inline TYPE dot(Quaternion<TYPE> a, Quaternion<TYPE> b)
+    {
+      return a.m_coord[0] * b.m_coord[0] + a.m_coord[1] * b.m_coord[1] + a.m_coord[2] * b.m_coord[2] + a.m_coord[3] * b.m_coord[3];
+    }
+
     static inline Quaternion<TYPE> slerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)
     {
-      float alpha = acosf(Vector<TYPE, 3>::dot(Vector<TYPE, 3>(a.m_coord[1], a.m_coord[2], a.m_coord[3]), Vector<TYPE, 3>(b.m_coord[1], b.m_coord[2], b.m_coord[3])));
+      float cosTheta = Quaternion<TYPE>::dot(a, b);
+      if(cosTheta > 0.9995f)
+      {
+        return nlerp(a, b, t);
+      }
+      else
+      {
+        float theta = acosf(math::clamp(cosTheta, -1.0f, 1.0f));
+        float thetap = theta * t;
 
-      float sinAlpha = 1.0f / sinf(alpha);
+        Quaternion<float> qperp = b - a * cosTheta;
+        qperp.normalize();
 
-      Quaternion<float> result = a * sinf((1.0f - t) * alpha) * sinAlpha + b * sin(t * alpha) * sinAlpha;
+        //Quaternion<float> result = (a * sinf((1.0f - t) * theta) + b * sinf(t * theta)) / sinf(theta);
 
-      return result;
+        return a * cosf(thetap) + qperp * sinf(thetap);
+      }
     }
 
     static inline Quaternion<TYPE> nlerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)

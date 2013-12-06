@@ -24,6 +24,9 @@ namespace he
 
     void free();
 
+    void setRenderable(bool renderable);
+	  bool getRenderable() const;
+
     void setAnimation(unsigned int number);
 	  void setAnimation(Vector<unsigned int, 2> number);
 	  Vector<unsigned int, 2> getAnimationNumber();
@@ -60,7 +63,7 @@ namespace he
 
     ResourceHandle m_texID;
 
-    bool m_anim;
+    bool m_renderable;
   };
 }
 

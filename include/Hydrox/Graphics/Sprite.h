@@ -52,6 +52,9 @@ namespace he
     float getRotation();
     Vector<float, 2> getScale();
 
+    void setZValue(float z);
+    float getZValue();
+
 	  Matrix<float, 3> getTransformationMatrix();
 	  Matrix<float, 3> getTexTransformationMatrix();
 	  ResourceHandle getTextureID() const;
@@ -63,6 +66,7 @@ namespace he
     Matrix<float, 3> m_rtMatrix;
 	  Matrix<float, 3> m_tlMatrix;
 	  Matrix<float, 3> m_scMatrix;
+    float m_z;
 	
 	  Vector<unsigned int, 2> m_animNumber;
 	  Vector<unsigned int, 2> m_animCount;

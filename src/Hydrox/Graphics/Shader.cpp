@@ -236,7 +236,7 @@ namespace he
     if(errorCode == GL_FALSE)
     {
       GLsizei length;
-      glGetProgramInfoLog(program, 0, &length, nullptr);
+      glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
 
 	    GLchar *errorLog = new GLchar[length];
 	    glGetProgramInfoLog(program, length, nullptr, errorLog);
@@ -325,15 +325,16 @@ namespace he
 
   bool Shader::checkShaderStatus(GLuint shader, const char *filename) const
   {
-	  GLint testVal;
-	  glGetShaderiv(shader, GL_COMPILE_STATUS, &testVal);
+	  GLint errorCode;
+	  glGetShaderiv(shader, GL_COMPILE_STATUS, &errorCode);
 
-	  if(testVal == GL_FALSE)
+	  if(errorCode == GL_FALSE)
 	  {
-      int length;
+      GLsizei length;
 
-		  glGetShaderInfoLog(shader, 0, &length, nullptr);
-      char *errorLog = new char[length];
+		  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+
+      GLchar *errorLog = new char[length];
       glGetShaderInfoLog(shader, length, nullptr, errorLog);
 
 		  std::cout << "Error compiling " << filename << " because of " << errorLog << std::endl;

@@ -14,6 +14,9 @@ namespace he
     InsertObserverTraverser(Scene *scene);
     virtual ~InsertObserverTraverser();
 
+    virtual bool preTraverse(AnimatedTransformNode* treeNode);
+    virtual void postTraverse(AnimatedTransformNode* treeNode);
+
     virtual bool preTraverse(TransformNode* treeNode);
     virtual void postTraverse(TransformNode* treeNode);
 

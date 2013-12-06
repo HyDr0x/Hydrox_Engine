@@ -9,6 +9,7 @@
 #include "Hydrox/Graphics/Billboard.h"
 #include "Hydrox/Graphics/Sprite.h"
 
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
@@ -46,7 +47,10 @@ namespace he
 
   RasterizerRenderManager::~RasterizerRenderManager()
   {
+    glDeleteBuffers(1, &m_boneMatricesBuffer);
     glDeleteBuffers(1, &m_spriteVBO);
+    glDeleteVertexArrays(1, &m_simpleMeshVAO);
+    glDeleteVertexArrays(1, &m_simpleSkinnedMeshVAO);
     delete m_billboardShader;
     delete m_spriteShader;
   }
@@ -54,17 +58,71 @@ namespace he
   void RasterizerRenderManager::initialize()
   {
     float placeholder = 0;
-    glGenBuffers(1, &m_spriteVBO);
 
+    glGenBuffers(1, &m_spriteVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_spriteVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(placeholder), &placeholder, GL_STATIC_DRAW);
     glVertexAttribPointer(Shader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(placeholder), NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    glGenBuffers(1, &m_boneMatricesBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Matrix<float, 4>) * 64, nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    glGenVertexArrays(1, &m_simpleMeshVAO);
+    glBindVertexArray(m_simpleMeshVAO);
     glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribBinding(Shader::POSITION, 1);
     glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
-    glVertexAttribBinding(Shader::TEXTURE0, 1);
+
+    glVertexAttribBinding(Shader::POSITION, 0);
+    glVertexAttribBinding(Shader::TEXTURE0, 0);
+
+    glEnableVertexAttribArray(Shader::POSITION);
+    glEnableVertexAttribArray(Shader::TEXTURE0);
+    glBindVertexArray(0);
+
+    glGenVertexArrays(1, &m_simpleSkinnedMeshVAO);
+    glBindVertexArray(m_simpleSkinnedMeshVAO);
+    glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(Shader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(Shader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(Shader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+
+    glVertexAttribBinding(Shader::POSITION, 0);
+    glVertexAttribBinding(Shader::TEXTURE0, 0);
+    glVertexAttribBinding(Shader::NORMAL, 0);
+    glVertexAttribBinding(Shader::BINORMAL, 0);
+    glVertexAttribBinding(Shader::BONEWEIGHTS, 0);
+    glVertexAttribBinding(Shader::BONEINDICES, 0);
+
+    glEnableVertexAttribArray(Shader::POSITION);
+    glEnableVertexAttribArray(Shader::TEXTURE0);
+    glEnableVertexAttribArray(Shader::NORMAL);
+    glEnableVertexAttribArray(Shader::BINORMAL);
+    glEnableVertexAttribArray(Shader::BONEWEIGHTS);
+    glEnableVertexAttribArray(Shader::BONEINDICES);
+    glBindVertexArray(0);
+
+    glGenVertexArrays(1, &m_simpleSkinnedTestVAO);
+    glBindVertexArray(m_simpleSkinnedTestVAO);
+    glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(Shader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>));
+    glVertexAttribFormat(Shader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 2 * sizeof(Vector<float, 3>));
+
+    glVertexAttribBinding(Shader::POSITION, 0);
+    glVertexAttribBinding(Shader::NORMAL, 0);
+    glVertexAttribBinding(Shader::BONEWEIGHTS, 0);
+    glVertexAttribBinding(Shader::BONEINDICES, 0);
+
+    glEnableVertexAttribArray(Shader::POSITION);
+    glEnableVertexAttribArray(Shader::NORMAL);
+    glEnableVertexAttribArray(Shader::BONEWEIGHTS);
+    glEnableVertexAttribArray(Shader::BONEINDICES);
+    glBindVertexArray(0);
 
     std::string shaderPath = m_shaderManager->getPath();
 
@@ -93,10 +151,9 @@ namespace he
     Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
     Matrix<float, 4> worldViewProjectionMatrix;
 
-    const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
+    glBindVertexArray(m_simpleMeshVAO);
 
-    glEnableVertexAttribArray(Shader::POSITION);
-    glEnableVertexAttribArray(Shader::TEXTURE0);
+    const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
 
     for(std::list<GeoNode*>::const_iterator geometryIterator = renderGeometryList.begin(); geometryIterator != renderGeometryList.end(); geometryIterator++)//Render 3D Objects
     {
@@ -115,14 +172,48 @@ namespace he
         /*renderShader->setTexture(0, 0);
         renderTexture->setTexture(0);*/
 
-        renderMesh->render(1);
+        renderMesh->render(0);
       }
     }
 
-	  glBindVertexBuffer(0, 0, 0, 0);//restore renderstates to avoid problems with attribute slots in the shader
-    glDisableVertexAttribArray(Shader::POSITION);
-    glDisableVertexAttribArray(Shader::TEXTURE0);
-	  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+    const GLenum ErrorValue = glGetError();
+	  int tmpE = 0;
+	  if(ErrorValue != GL_NO_ERROR)
+	  	tmpE++;
+	  tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
+
+    glBindVertexArray(m_simpleSkinnedMeshVAO);
+
+    const std::list<AnimatedGeoNode*> renderAnimatedGeometryList = scene->getAnimatedMeshes();
+
+    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++)//Render 3D Objects
+    {
+      if((*animatedGeometryIterator)->getRenderable())
+      {
+        renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
+        renderMaterial = m_materialManager->getObject(renderMesh->getMaterial());
+        renderShader = m_shaderManager->getObject(renderMaterial->getShader());
+        //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
+
+        renderShader->useShader();
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
+        std::vector<Matrix<float, 4>> skinningMatrices = (*animatedGeometryIterator)->getSkinningMatrices();
+
+        glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        renderShader->setUniform(4, GL_FLOAT_MAT4, &(viewProjectionMatrix[0][0]));
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
+        /*renderShader->setTexture(0, 0);
+        renderTexture->setTexture(0);*/
+
+        renderMesh->render(0);
+      }
+    }
+    glBindVertexArray(0);
+
+	  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
 	  ////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
@@ -143,23 +234,26 @@ namespace he
 	  for(std::list<BillboardNode*>::const_iterator billboarditerator = renderBillboardList.begin(); billboarditerator != renderBillboardList.end(); billboarditerator++)
 	  {
       renderBillboard = m_billboardManager->getObject((*billboarditerator)->getBillboardIndex());
-      renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
+      if(renderBillboard->getRenderable())
+      {
+        renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
 
-      renderTexture->setTexture(0);
-		  m_billboardShader->setTexture(6, 0);
+        renderTexture->setTexture(0);
+		    m_billboardShader->setTexture(6, 0);
 
-      Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
-		  Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
-      Vector<float, 2> scale = renderBillboard->getScale();
-		  Vector<float, 3> translate = renderBillboard->getPosition();
-      m_billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
-		  m_billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
-		  m_billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
-		  m_billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
+        Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
+		    Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
+        Vector<float, 2> scale = renderBillboard->getScale();
+		    Vector<float, 3> translate = renderBillboard->getPosition();
+        m_billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
+		    m_billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
+		    m_billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
+		    m_billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
-      glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
+        glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
 
-      glDrawArrays(GL_POINTS, 0, 1);
+        glDrawArrays(GL_POINTS, 0, 1);
+      }
 	  }
 
 
@@ -182,8 +276,10 @@ namespace he
 		
 		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix() * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1);
 		    Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+        float z = renderSprite->getZValue();
 		    m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		    m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+        m_spriteShader->setUniform(3, GL_FLOAT, &z);
 
         glBindBuffer(GL_VERTEX_ARRAY, m_spriteVBO);
 		    glDrawArrays(GL_POINTS, 0, 1);

@@ -31,7 +31,7 @@ namespace he
 		  NORMAL,
 		  BINORMAL,
 		  TANGENT,
-		  WEIGHTS,
+		  BONEWEIGHTS,
 		  BONEINDICES,
 		  SPECIAL0,
 		  SPECIAL1,

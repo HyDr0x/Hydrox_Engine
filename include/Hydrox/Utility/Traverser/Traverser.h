@@ -34,7 +34,7 @@ namespace he
 
     virtual void doAscend(TreeNode* treeNode);//starts with the parent node of the given treeNode
 
-    virtual void doTraverse(TreeNode* treeNode);//starts with the given treeNode
+    void doTraverse(TreeNode* treeNode);//starts with the given treeNode
 
     virtual bool ascendTraverse(TreeNode* treeNode);
     virtual bool preTraverse(TreeNode* treeNode);

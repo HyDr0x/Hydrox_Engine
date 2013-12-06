@@ -75,7 +75,7 @@ namespace he
   {
     for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
     {
-      (*tit)->addCurrentTime(currentTime);
+      (*tit)->addCurrentAnimationTime(currentTime);
     }
   }
 
@@ -87,9 +87,12 @@ namespace he
     {
       node = *tit;
    
-      TransformTraverser transformTraverser;
-      transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
-      transformTraverser.doTraverse(node);
+      if(node->getDirtyFlag() & GroupNode::TRF_DIRTY)//traverse it only if its not been traversed before
+      {
+        TransformTraverser transformTraverser;
+        transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+        transformTraverser.doTraverse(node);
+      }
     }
 
     m_dirtyTransforms.clear();

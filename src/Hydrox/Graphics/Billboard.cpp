@@ -2,8 +2,8 @@
 
 namespace he
 {
-  Billboard::Billboard(ResourceHandle texID, bool anim, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
-                                                                                                                                                  m_anim(anim), 
+  Billboard::Billboard(ResourceHandle texID, bool renderable, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
+                                                                                                                                                  m_renderable(renderable), 
                                                                                                                                                   m_animNumber(animNumber), 
                                                                                                                                                   m_texStart(texStart), 
                                                                                                                                                   m_texEnd(texEnd),
@@ -23,7 +23,7 @@ namespace he
 	  m_scale = o.m_scale;
 	  m_translate = o.m_translate;
 
-    m_anim = o.m_anim;
+    m_renderable = o.m_renderable;
 
     return *this;
   }
@@ -33,6 +33,16 @@ namespace he
 
   void Billboard::free()
   {
+  }
+
+  void Billboard::setRenderable(bool renderable)
+  {
+    m_renderable = renderable;
+  }
+
+	bool Billboard::getRenderable() const
+  {
+    return m_renderable;
   }
 
   void Billboard::setAnimation(unsigned int number)

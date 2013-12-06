@@ -39,6 +39,12 @@ namespace he
 	  RasterizerRenderManager(){}
 	  RasterizerRenderManager(const RasterizerRenderManager&){}
 
+    GLuint m_simpleMeshVAO;
+    GLuint m_simpleSkinnedMeshVAO;
+    GLuint m_simpleSkinnedTestVAO;
+
+    GLuint m_boneMatricesBuffer;
+
     GLuint m_spriteVBO;
 
     Shader *m_billboardShader;

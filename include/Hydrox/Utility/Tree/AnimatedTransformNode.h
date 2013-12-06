@@ -16,27 +16,25 @@ namespace he
   struct AnimationTrack//an animation track, each track represents all the keys for one animation in one node
   {
     std::string m_animationName;
-    std::string m_nodeName;
+    float m_duration;
+    float m_animationTicksPerSecond;
 
-    std::vector<Vector<float, 3>>  m_positions;
-    std::vector<float>  m_positionsTime;
+    std::vector<Vector<float, 3>> m_positions;
+    std::vector<float> m_positionsTime;
 
-    std::vector<Quaternion<float>>  m_rotations;
-    std::vector<float>  m_rotationsTime;
+    std::vector<Quaternion<float>> m_rotations;
+    std::vector<float> m_rotationsTime;
 
-    std::vector<float>  m_scales;
-    std::vector<float>  m_scalesTime;
+    std::vector<float> m_scales;
+    std::vector<float> m_scalesTime;
   };
 
   class GRAPHICAPI AnimatedTransformNode : public TransformNode
   {
   public:
 
-    AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, AnimatedGeoNode* animatedMesh, unsigned int boneIndex, 
-      Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-
-    AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, AnimatedGeoNode* animatedMesh, unsigned int boneIndex, 
-      Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+    AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
+      GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
 
     AnimatedTransformNode& operator=(const AnimatedTransformNode& sourceNode);
     virtual TreeNode& operator=(const TreeNode& sourceNode);
@@ -48,11 +46,22 @@ namespace he
     virtual bool preTraverse(Traverser* traverser);
     virtual void postTraverse(Traverser* traverser);
 
+    void setBoneIndex(unsigned int boneIndex);
+    unsigned int getBoneIndex();
+
+    void setSkinnedMesh(AnimatedGeoNode* animatedMesh);
+    AnimatedGeoNode* getSkinnedMesh();
+
     void setCurrentAnimationTrack(unsigned int currentTrack);
     unsigned int getCurrentAnimationTrack();
 
-    void setCurrentTime(float time);
-    void addCurrentTime(float time);
+    void setCurrentAnimationTime(float time);
+    void addCurrentAnimationTime(float time);
+
+    void setPauseAnimation(bool pauseAnimation);
+    bool getPauseAnimation();
+
+    void stopAnimation();
 
     void calculateTransformation(Vector<float, 3>& translation, float& scale, Quaternion<float>& rotation);
 
@@ -60,16 +69,27 @@ namespace he
 	  Quaternion<float> getRotation();
 	  float getScale();
 
+    static void setAnimatedSceneTime(AnimatedTransformNode *node, float animationTime);
+    static void addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime);
+    static void pauseAnimatedScene(AnimatedTransformNode *node, bool pauseAnimation);
+    static void stopAnimatedScene(AnimatedTransformNode *node);
+
   private:
+
+    void interpolateKeyFrames(AnimationTrack& currentTrack);
 
     Vector<float, 3> m_animatedTranslation;
     Quaternion<float> m_animatedRotation;
     float m_animatedScale;
+
     std::vector<AnimationTrack> m_animationTracks;//tha animation tracks for skeletal and skinned animation
+
     AnimatedGeoNode* m_animatedMesh;//the corresponding animatedGeoNode if it is skinned
+
     float m_currentAnimationTime;
     unsigned int m_currentTrack;
     unsigned int m_boneIndex;//index into the bone vector of the animatedGeoNode if it is skinned
+    bool m_pauseAnimation;
   };
 }
 

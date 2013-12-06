@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "Hydrox/Utility/Tree/GroupNode.h"
+#include "Hydrox/Utility/Tree/AnimatedGeoNode.h"
 #include "Hydrox/Utility/Tree/GeoNode.h"
 #include "Hydrox/Utility/Tree/LODNode.h"
 #include "Hydrox/Utility/Tree/TransformNode.h"
@@ -17,8 +18,10 @@ namespace he
   AssimpLoader::AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager) : m_modelManager(modelManager),
                                                                                                                                                            m_materialManager(materialManager),
                                                                                                                                                            m_textureManager(textureManager),
-                                                                                                                                                           m_shaderManager(shaderManager)
+                                                                                                                                                           m_shaderManager(shaderManager),
+                                                                                                                                                           m_animationTimeUnit(AnimationTimeUnit::Seconds)
   {
+    setAnimationTimeUnit(m_animationTimeUnit);
   }
 
   AssimpLoader::AssimpLoader(const AssimpLoader& o)
@@ -47,6 +50,31 @@ namespace he
   {
   }
 
+  void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
+  {
+    m_animationTimeUnit = animationTimeUnit;
+    switch(m_animationTimeUnit)
+    {
+    case AnimationTimeUnit::Microseconds:
+      m_animationTimeUnitConvert = 0.000001f;
+      break;
+    case AnimationTimeUnit::Milliseconds:
+      m_animationTimeUnitConvert = 0.001f;
+      break;
+    case AnimationTimeUnit::Minutes:
+      m_animationTimeUnitConvert = 60.0f;
+      break;
+    case AnimationTimeUnit::Seconds:
+    default:
+      m_animationTimeUnitConvert = 1.0f;
+    }
+  }
+
+  AssimpLoader::AnimationTimeUnit AssimpLoader::getAnimationTimeUnit()
+  {
+    return m_animationTimeUnit;
+  }
+
   Scene* AssimpLoader::load(std::string filename, std::string materialFileName, bool yAxisFlipped)
   {
     Assimp::Importer importer;
@@ -54,52 +82,54 @@ namespace he
 
 	  if(!assimpScene)
     {
-		  printf("%s", importer.GetErrorString());
+		  printf("%s\n", importer.GetErrorString());
     }
 
 	  assert(assimpScene);
 
     std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
+    std::vector<ResourceHandle> materials;//contains the material id's of the scene
+    
+    loadMaterialsFromAssimp(materials, materialFileName, assimpScene);
 
-    loadMeshesFromAssimp(meshes, materialFileName, assimpScene, yAxisFlipped);
+    loadMeshesFromAssimp(meshes, materials, assimpScene, yAxisFlipped);
 
     loadAnimatedSkeleton(assimpScene);
 
     GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
 
+    attachBonesToSkinnedMesh();
+
     Scene *scene = new Scene(rootNode, Vector<float, 3>::identity());
 
 	  importer.FreeScene();
 
+    m_animationTracks.clear();
+    m_inverseBindPoseTable.clear();
+    m_boneNameTable.clear();
+    m_skinnedMeshTable.clear();
+    m_boneTable.clear();
+
 	  return scene;
   }
 
-  void AssimpLoader::loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, std::string materialFileName, const aiScene *scene, bool yAxisFlipped)
+  void AssimpLoader::loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, std::vector<ResourceHandle>& in_materials, const aiScene *scene, bool yAxisFlipped)
   {
-    std::vector<ResourceHandle> materialBuffer;//holds the information of the old ID in the scene graph and the new ID of the material
-
-    materialBuffer.resize(scene->mNumMaterials, ~0);
     out_meshes.resize(scene->mNumMeshes);
+    m_inverseBindPoseTable.resize(scene->mNumMeshes);
+    m_boneNameTable.resize(scene->mNumMeshes);
 
-    ResourceHandle tmpMaterialIndex;
-  
+    ResourceHandle materialHandle;
+
 	  for(unsigned int i = 0; i != scene->mNumMeshes; i++)
 	  {
-		  if(materialBuffer[scene->mMeshes[i]->mMaterialIndex] == ~0)//if material wasn't loaded yet, do it!
-		  {
-        tmpMaterialIndex = loadMaterialsFromAssimp(materialFileName, scene, scene->mMeshes[i]->mMaterialIndex);
-			  materialBuffer[scene->mMeshes[i]->mMaterialIndex] = tmpMaterialIndex;//remember where the model was which has the material data already converted and loaded
-		  }
-		  else
-      {
-        tmpMaterialIndex = materialBuffer[scene->mMeshes[i]->mMaterialIndex];//if material is already loaded, just copy it
-      }
+      materialHandle = in_materials[scene->mMeshes[i]->mMaterialIndex];
 
-      out_meshes[i] = loadVertices(scene->mMeshes[i], tmpMaterialIndex, yAxisFlipped);
+      out_meshes[i] = loadVertices(scene->mMeshes[i], materialHandle, i, yAxisFlipped);
 	  }
   }
 
-  ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, bool yAxisFlipped)
+  ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, unsigned int meshIndex, bool yAxisFlipped)
   {
     GLuint vertexDeclarationFlags;
 
@@ -114,7 +144,7 @@ namespace he
     std::vector<Vector<float, 2>> textureCoords;
     std::vector<Vector<float, 3>> normals;
     std::vector<Vector<float, 3>> binormals;
-    std::vector<Vector<unsigned int, 4>> boneIndices;
+    std::vector<Vector<float, 4>> boneIndices;
     std::vector<Vector<float, 4>> boneWeights;
     std::vector<Mesh::indexType> indices;
 
@@ -170,15 +200,23 @@ namespace he
       }
 	  }
 
-	  if(mesh->HasBones())//TODO SKINNED ANIMATION
+	  if(mesh->HasBones())
 	  {
       boneWeights.resize(mesh->mNumVertices, Vector<float, 4>::identity());
-      boneIndices.resize(mesh->mNumVertices, Vector<unsigned int, 4>(~0, ~0, ~0, ~0));
-      m_boneAnimationTable[std::string(mesh->mName.C_Str())].resize(mesh->mNumBones);
+      boneIndices.resize(mesh->mNumVertices, Vector<float, 4>(~0, ~0, ~0, ~0));
+
+      Matrix<float, 4> tmpBoneMatrix;
+      m_inverseBindPoseTable[meshIndex].resize(mesh->mNumBones);
+      m_boneNameTable[meshIndex].resize(mesh->mNumBones);
+
       for(unsigned int i = 0; i < mesh->mNumBones; i++)
 		  {
-        m_boneAnimationTable[std::string(mesh->mName.C_Str())][i] = mesh->mBones[i];
-        mesh->mBones[i]->mName;
+        memcpy(&(tmpBoneMatrix[0][0]), &(mesh->mBones[i]->mOffsetMatrix[0][0]), sizeof(Matrix<float, 4>));
+        tmpBoneMatrix = tmpBoneMatrix.transpose();
+
+        m_inverseBindPoseTable[meshIndex][i] = tmpBoneMatrix;
+        m_boneNameTable[meshIndex][i] = std::string(mesh->mBones[i]->mName.C_Str());
+
         for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 		    {
           for(unsigned int k = 0; k < 4; k++)
@@ -219,58 +257,69 @@ namespace he
       indices));
   }
 
-  ResourceHandle AssimpLoader::loadMaterialsFromAssimp(std::string materialFileName, const aiScene *model, unsigned int id)
+  void AssimpLoader::loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, std::string materialFileName, const aiScene *scene)
   {
+    out_materials.resize(scene->mNumMaterials);
     std::vector< std::vector<ResourceHandle> > textures;
-    textures.resize(4);
-    textures[0].resize(model->mMaterials[id]->GetTextureCount(aiTextureType_DIFFUSE));
-    textures[1].resize(model->mMaterials[id]->GetTextureCount(aiTextureType_NORMALS));
-    textures[2].resize(model->mMaterials[id]->GetTextureCount(aiTextureType_DISPLACEMENT));
-    textures[3].resize(model->mMaterials[id]->GetTextureCount(aiTextureType_SPECULAR));
-  
+    ILDevilLoader texLoader(m_textureManager);
     aiString texPath;
 
-    ILDevilLoader texLoader(m_textureManager);
-
-	  for(unsigned int k = 0; k != textures[0].size(); k++)
-	  {
-		  model->mMaterials[id]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
-		  textures[0][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	  }
-
-	  for(unsigned int k = 0; k != textures[1].size(); k++)
-	  {
-		  model->mMaterials[id]->GetTexture(aiTextureType_NORMALS, 0, &texPath);
-		  textures[1][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	  }
-
-	  for(unsigned int k = 0; k != textures[2].size(); k++)
-	  {
-		  model->mMaterials[id]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
-		  textures[2][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	  }
-
-	  for(unsigned int k = 0;k != textures[3].size(); k++)
-	  {
-		  model->mMaterials[id]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
-		  textures[3][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	  }
-
-    std::string shaderPath = m_shaderManager->getPath();
-
-    std::string simpleVert = "Shader/simpleShader.vert";
-    std::string simpleFrag = "Shader/simpleShader.frag";
-
-    ResourceHandle tmpMaterial = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
-
-    for(unsigned int i = 0; i != textures.size(); i++)
+    for(unsigned int j = 0; j < out_materials.size(); j++)
     {
-      textures[i].clear();
+      textures.resize(4);
+      textures[0].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_DIFFUSE));
+      textures[1].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_NORMALS));
+      textures[2].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_DISPLACEMENT));
+      textures[3].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_SPECULAR));
+  
+	    for(unsigned int k = 0; k != textures[0].size(); k++)
+	    {
+		    scene->mMaterials[j]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
+		    textures[0][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
+	    }
+
+	    for(unsigned int k = 0; k != textures[1].size(); k++)
+	    {
+		    scene->mMaterials[j]->GetTexture(aiTextureType_NORMALS, 0, &texPath);
+		    textures[1][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
+	    }
+
+	    for(unsigned int k = 0; k != textures[2].size(); k++)
+	    {
+		    scene->mMaterials[j]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
+		    textures[2][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
+	    }
+
+	    for(unsigned int k = 0;k != textures[3].size(); k++)
+	    {
+		    scene->mMaterials[j]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
+		    textures[3][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
+	    }
+
+      std::string shaderPath = m_shaderManager->getPath();
+
+      if(j == 1)
+      {
+        std::string simpleVert = "Shader/simpleSkinningShader.vert";
+        std::string simpleFrag = "Shader/simpleSkinningShader.frag";
+
+        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
+      }
+      else
+      {
+        std::string simpleVert = "Shader/simpleShader.vert";
+        std::string simpleFrag = "Shader/simpleShader.frag";
+
+        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
+      }
+
+      for(unsigned int i = 0; i != textures.size(); i++)
+      {
+        textures[i].clear();
+      }
+
+      textures.clear();
     }
-
-    textures.clear();
-
-    return tmpMaterial;
   }
 
   GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiNode *rootNode, std::vector<ResourceHandle> meshes)
@@ -283,20 +332,48 @@ namespace he
 
   TreeNode* AssimpLoader::createSceneNodes(const aiNode *node, std::vector<ResourceHandle> meshes, GroupNode *parentNode, TreeNode *nextSibling)
   {
-    Matrix<float, 4> tmpTransformationMatrix;
-    memcpy(&(tmpTransformationMatrix[0][0]), &(node->mTransformation[0][0]), sizeof(Matrix<float, 4>));
-    tmpTransformationMatrix = tmpTransformationMatrix.transpose();
+    TransformNode *transformNode = nullptr;
 
-    TransformNode *transformNode = new TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+    std::map<std::string, std::vector<AnimationTrack>>::iterator mit = m_animationTracks.find(std::string(node->mName.C_Str()));
+
+    if(mit != m_animationTracks.end())
+    {
+      transformNode = new AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+      m_boneTable[transformNode->getNodeName()] = dynamic_cast<AnimatedTransformNode*>(transformNode);
+    }
+    else
+    {
+      Matrix<float, 4> tmpTransformationMatrix;
+      memcpy(&(tmpTransformationMatrix[0][0]), &(node->mTransformation[0][0]), sizeof(Matrix<float, 4>));
+      tmpTransformationMatrix = tmpTransformationMatrix.transpose();
+
+      transformNode = new TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+    }
+
+    transformNode->addDirtyFlag(GroupNode::TRF_DIRTY);//animations need to be updated
 
     parentNode = transformNode;
     nextSibling = nullptr;
 
     std::stringstream stream;
+    GeoNode *geoNode = nullptr;
+    Matrix<float, 4> tmpBoneMatrix;
+
     for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
     {
+      unsigned int meshIndex = node->mMeshes[i];
+
       stream << i;
-      GeoNode *geoNode = new GeoNode(meshes[node->mMeshes[i]], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+      if(!m_inverseBindPoseTable[meshIndex].empty())
+      {
+        geoNode = new AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], meshes[meshIndex], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+        m_skinnedMeshTable[dynamic_cast<AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
+      }
+      else
+      {
+        geoNode = new GeoNode(meshes[node->mMeshes[i]], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+      }
+      
       stream.clear();
       nextSibling = geoNode;
     }
@@ -320,17 +397,68 @@ namespace he
     {
       std::string animationName = scene->mAnimations[i]->mName.C_Str();
 
-      m_animationTable[animationName].resize(scene->mAnimations[i]->mNumChannels);
-
       for(unsigned int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
       {
-        m_animationTable[animationName][j] = new heAnimation(animationName, scene->mAnimations[i]->mChannels[j]);
+        aiNodeAnim *channel = scene->mAnimations[i]->mChannels[j];
+
+        std::string nodeName = std::string(channel->mNodeName.C_Str());
+        if(m_animationTracks[nodeName].empty())
+        {
+          m_animationTracks[nodeName].resize(scene->mNumAnimations);
+        }
+
+        AnimationTrack& animationTrack = m_animationTracks[nodeName][i];
+
+        animationTrack.m_positions.resize(channel->mNumPositionKeys);
+        animationTrack.m_positionsTime.resize(channel->mNumPositionKeys);
+
+        animationTrack.m_rotations.resize(channel->mNumRotationKeys);
+        animationTrack.m_rotationsTime.resize(channel->mNumRotationKeys);
+
+        animationTrack.m_scales.resize(channel->mNumScalingKeys);
+        animationTrack.m_scalesTime.resize(channel->mNumScalingKeys);
+
+        animationTrack.m_animationName = animationName;
+        animationTrack.m_duration = scene->mAnimations[i]->mDuration;
+        animationTrack.m_animationTicksPerSecond = scene->mAnimations[i]->mTicksPerSecond == 0.0 ? m_animationTimeUnitConvert : scene->mAnimations[i]->mTicksPerSecond / m_animationTimeUnitConvert;
+
+        for(unsigned int k = 0; k < channel->mNumPositionKeys; k++)
+        {
+          aiVector3D position = channel->mPositionKeys[k].mValue;
+          animationTrack.m_positions[k] = Vector<float, 3>(position.x, position.y, position.z);
+          animationTrack.m_positionsTime[k] = channel->mPositionKeys[k].mTime;
+        }
+
+        for(unsigned int k = 0; k < channel->mNumRotationKeys; k++)
+        {
+          aiQuaternion rotation = channel->mRotationKeys[k].mValue;
+          animationTrack.m_rotations[k] = Quaternion<float>(rotation.w, rotation.x, rotation.y, rotation.z).invert();
+          animationTrack.m_rotationsTime[k] = channel->mRotationKeys[k].mTime;
+        }
+
+        for(unsigned int k = 0; k < channel->mNumScalingKeys; k++)
+        {
+          aiVector3D scale = channel->mScalingKeys[k].mValue;
+          assert(abs(scale.x - scale.y) < 0.001f && abs(scale.x - scale.z) < 0.001f && abs(scale.y - scale.z) < 0.001f);
+
+          animationTrack.m_scales[k] = scale.x;
+          animationTrack.m_scalesTime[k] = channel->mScalingKeys[k].mTime;
+        }
       }
     }
   }
 
-  void AssimpLoader::findAnimatedSkeleton()
+  void AssimpLoader::attachBonesToSkinnedMesh()
   {
-
+    for(std::map<AnimatedGeoNode*, std::vector<std::string>>::iterator mit = m_skinnedMeshTable.begin(); mit != m_skinnedMeshTable.end(); mit++)
+    {
+      AnimatedGeoNode *geoNode = mit->first;
+      for(unsigned int i = 0; i < mit->second.size(); i++)
+      {
+        std::map<std::string, AnimatedTransformNode*>::iterator animNode = m_boneTable.find(mit->second[i]);
+        animNode->second->setSkinnedMesh(geoNode);
+        animNode->second->setBoneIndex(i);
+      }
+    }
   }
 }

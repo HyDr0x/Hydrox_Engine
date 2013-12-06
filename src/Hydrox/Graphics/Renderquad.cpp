@@ -73,7 +73,7 @@ namespace he
 	  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  /*void Renderquad::setRenderTarget(int count, ...)
+  void Renderquad::setRenderTarget(int count, ...)
   {
 	  assert(count > 1);
 	  m_count = count;
@@ -108,7 +108,7 @@ namespace he
 		  }
 		  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTex, 0);
 	  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  }*/
+  }
 
   void Renderquad::render(bool direct)
   {
