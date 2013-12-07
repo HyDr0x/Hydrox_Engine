@@ -37,4 +37,9 @@ namespace he
       m_opaqueSpriteIDs.push_back(spriteID);
     }
   }
+
+  const size_t RenderManager::getMaxSpriteLayer() const
+  {
+    return m_maxLayer;
+  }
 }

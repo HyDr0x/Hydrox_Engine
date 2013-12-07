@@ -7,23 +7,19 @@
 
 namespace he
 {
-  DebugLogManager* DebugLogManager::getManager(bool debugMode)
+  DebugLogManager* DebugLogManager::getManager()
   {
-    static DebugLogManager* manager = new DebugLogManager(debugMode);
+    static DebugLogManager* manager = new DebugLogManager();
     return manager;
   }
 
-  DebugLogManager::DebugLogManager(bool debugMode)
+  DebugLogManager::DebugLogManager()
   {
     /*if(m_debugMode)
     {
       glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);//looks like it doesn't work
     }
     else*/
-    if(debugMode)
-    {
-      glEnable(GL_DEBUG_OUTPUT);
-    }
     
     GLDEBUGCALLBACK callback = &getDebugMessage;
     glDebugMessageCallback(callback, nullptr);

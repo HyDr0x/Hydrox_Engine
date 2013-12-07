@@ -40,7 +40,7 @@ namespace he
 
     void registerServices(ServiceManager *serviceManager);
 
-	  void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio, bool debugMode);
+	  void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, unsigned int width, unsigned int height, std::string worldRootNodeName = std::string("wordlRootNode"), size_t spriteLayer = 32);
 	  void update(Vector<float, 3>& cameraPosition, float currentTime);
 	  void draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition);
 

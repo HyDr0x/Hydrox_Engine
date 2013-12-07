@@ -15,7 +15,7 @@ namespace he
   {
   public:
 
-    static DebugLogManager* getManager(bool debugMode);
+    static DebugLogManager* getManager();
     ~DebugLogManager();
 
     void gatherSystemInformation();
@@ -35,7 +35,7 @@ namespace he
 
   private:
 
-    DebugLogManager(bool debugMode);
+    DebugLogManager();
 
     std::string m_vendorName;
     std::string m_graphicCardName;

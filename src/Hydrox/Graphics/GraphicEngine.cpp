@@ -79,10 +79,11 @@ namespace he
     serviceManager->addService(m_debugLogManager);
   }
  
-  void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio, bool debugMode)
+  void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, unsigned int width, unsigned int height, std::string worldRootNodeName, size_t spriteLayer)
   {
     m_initialized = true;
 
+    float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
     setRenderOptions(width, height, aspectRatio);
 
     ilInit();
@@ -109,9 +110,9 @@ namespace he
 	  m_textureManager = TextureManager::getManager(texPath);
     m_billboardManager = BillboardManager::getManager(texPath);
     m_spriteManager = SpriteManager::getManager(texPath);
-	  m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, 32);
+	  m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
 	  m_eventManager = EventManager::getManager();
-    m_debugLogManager = DebugLogManager::getManager(debugMode);
+    m_debugLogManager = DebugLogManager::getManager();
   
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 

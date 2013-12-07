@@ -25,9 +25,11 @@ namespace he
 
     virtual void initialize() = 0;
 
-    virtual void addSprite(ResourceHandle spriteID, bool transparent);
+    virtual void addSprite(ResourceHandle spriteID, bool transparent = true);
 
 	  virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
+
+    const size_t getMaxSpriteLayer() const;
 
   protected:
 
