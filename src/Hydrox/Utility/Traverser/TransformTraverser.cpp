@@ -19,6 +19,16 @@ namespace he
   {
   }
 
+  void TransformTraverser::clearStacks()
+  {
+    while(!m_scaleStack.empty())
+    {
+      m_translateStack.pop();
+      m_scaleStack.pop();
+      m_rotationStack.pop();
+    }
+  }
+
   void TransformTraverser::postAscendTraverse()
   {
     Vector<float, 3> trfTranslation = Vector<float, 3>::identity();
@@ -73,12 +83,7 @@ namespace he
       return true;
     }
 
-    while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
-    {
-      m_translateStack.pop();
-      m_scaleStack.pop();
-      m_rotationStack.pop();
-    }
+    clearStacks();//clear the transform stack, because there is another dirty node higher in the tree
 
     return false;
   }

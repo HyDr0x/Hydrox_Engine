@@ -15,6 +15,8 @@ namespace he
     TransformTraverser();
     virtual ~TransformTraverser();
 
+    void clearStacks();
+
     virtual bool ascendTraverse(AnimatedTransformNode* treeNode);
     virtual bool preTraverse(AnimatedTransformNode* treeNode);
     virtual void postTraverse(AnimatedTransformNode* treeNode);

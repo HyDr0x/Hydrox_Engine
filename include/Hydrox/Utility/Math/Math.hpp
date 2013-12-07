@@ -224,41 +224,18 @@ namespace he
 
     inline Matrix<float, 4> createTransformationMatrix(Vector<float, 3> translation, float scale, Quaternion<float> rotation)
     {
-      /*Quaternion<float> rotationQuaternion = math::createRotXQuaternion(rotation[0]) * 
-                                             math::createRotYQuaternion(rotation[1]) * 
-                                             math::createRotZQuaternion(rotation[2]);
+      Matrix<float, 4> trfMatrix;
 
-      Matrix<float, 3> rotationMatrix = rotationQuaternion.toMatrix();
+      trfMatrix = rotation.toMatrix();
 
-      Matrix<float, 3> t = Matrix<float, 3>::identity();
+      trfMatrix *= scale;
+      trfMatrix[3][3] = 1.0f;
 
-      t[0][0] = scale[0];
-      t[1][1] = scale[1];
-      t[2][2] = scale[2];
+      trfMatrix[3][0] = translation[0];
+      trfMatrix[3][1] = translation[1];
+      trfMatrix[3][2] = translation[2];
 
-      t *= rotationMatrix;
-
-      return Matrix<float, 4>(
-        t[0][0], t[1][0], t[2][0], translation[0],
-        t[0][1], t[1][1], t[2][1], translation[1],
-        t[0][2], t[1][2], t[2][2], translation[2],
-           0.0f,    0.0f,    0.0f, 1.0f);*/
-
-      Matrix<float, 4> tlMatrix, rotationMatrix, scMatrix;
-
-      tlMatrix = rotationMatrix = scMatrix = Matrix<float, 4>::identity();
-
-      tlMatrix[3][0] = translation[0];
-      tlMatrix[3][1] = translation[1];
-      tlMatrix[3][2] = translation[2];
-
-      rotationMatrix = rotation.toMatrix();
-
-      scMatrix[0][0] = scale;
-	    scMatrix[1][1] = scale;
-	    scMatrix[2][2] = scale;
-
-      return tlMatrix * rotationMatrix * scMatrix;
+      return trfMatrix;
     }
 
     #if defined(SSE4)

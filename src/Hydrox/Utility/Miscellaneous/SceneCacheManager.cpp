@@ -82,6 +82,7 @@ namespace he
   void SceneCacheManager::updateTransformNodes()
   {
     TransformNode *node = nullptr;
+    TransformTraverser transformTraverser;
 
     for(std::list<TransformNode*>::iterator tit = m_dirtyTransforms.begin(); tit != m_dirtyTransforms.end(); tit++)
     {
@@ -89,9 +90,9 @@ namespace he
    
       if(node->getDirtyFlag() & GroupNode::TRF_DIRTY || node->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
       {
-        TransformTraverser transformTraverser;
         transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
         transformTraverser.doTraverse(node);
+        transformTraverser.clearStacks();
       }
     }
 
