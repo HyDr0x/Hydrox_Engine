@@ -47,11 +47,23 @@ namespace he
 
   void Traverser::doTraverse(TreeNode* treeNode)
   {
+    if(treeNode != nullptr)
+    {
+      if(treeNode->preTraverse(this))
+      {
+        doTraverseDown(treeNode->getFirstChild());
+      }
+      treeNode->postTraverse(this);
+    }
+  }
+
+  void Traverser::doTraverseDown(TreeNode* treeNode)
+  {
     while(treeNode != nullptr)
     {
       if(treeNode->preTraverse(this))
       {
-        doTraverse(treeNode->getFirstChild());
+        doTraverseDown(treeNode->getFirstChild());
       }
 
       treeNode->postTraverse(this);
