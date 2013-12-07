@@ -1,50 +1,29 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include <iostream>
-#include <time.h>
-#include <string>
+#ifdef _WIN32
+  #include "Hydrox\Utility\Miscellaneous\TimerCPUWin.h" 
+#else
+  #include "Hydrox\Utility\Miscellaneous\TimerCPUUnix.h"
+#endif
 
-#include <GL\glew.h>
-//#include <cuda_runtime.h>
-
-#include "Hydrox/DLLExport.h"
+#include "Hydrox\Utility\Miscellaneous\TimerGPUOGL.h"
 
 namespace he
 {
-  class GRAPHICAPI Timer
-  {
-  public:
-
-    enum TimerType
-    {
-      OpenGLTimer = 0x00000001,
-      CudaTimer   = 0x00000010,
-      CPUTimer    = 0x00000100,
-    };
-
-    Timer(std::string &timerName, unsigned int bitMask = OpenGLTimer);
-    ~Timer();
-
-  private:
-
-    //void handleError(cudaError_t cuError);
-
-    unsigned int m_bitMask;
-
-    std::string m_timerName;
-    GLuint m_query;
-    //cudaEvent_t m_startEvent, m_stopEvent;
-
-    GLuint m_openGLTime;
-    //float m_cudaTime;
-    clock_t m_cpuTime;
-  };
-
   #ifdef NDEBUG
-  #define TIMER(name, timerType)
+    #define CPUTIMER(name)
+    #define OGLTIMER(name)
   #else
-  #define TIMER(name, timerType) Timer myTimer(std::string(name), timerType);
+    #ifdef _WIN32
+      #define CPUTIMER(name, i) CPUTimerWin myTimer##i(std::string(name));
+      #define CPUGETTIMEDIFF(i) myTimer##i.getTimeDifference()
+    #else
+      #define CPUTIMER(name, i) CPUTimerUnix myTimer##i(std::string(name));
+      #define CPUGETTIMEDIFF(i) myTimer##i.getTimeDifference()
+    #endif
+    #define OGLTIMER(name, i) OGLTimer myTimer##i(std::string(name));
+    #define OGLGETTIMEDIFF(i) myTimer##i.getTimeDifference()
   #endif
 }
 
