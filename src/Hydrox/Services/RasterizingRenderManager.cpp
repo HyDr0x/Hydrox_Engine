@@ -20,28 +20,28 @@
 namespace he
 {
   RenderManager* RasterizerRenderManager::getManager(ModelManager *modelManager, 
-                                     MaterialManager *materialManager, 
-                                     ShaderManager *shaderManager, 
-                                     TextureManager *textureManager,
-	                                   BillboardManager *billboardManager,
-                                     SpriteManager *spriteManager, GLfloat aspectRatio)
+                                                     MaterialManager *materialManager, 
+                                                     ShaderManager *shaderManager, 
+                                                     TextureManager *textureManager,
+	                                                   BillboardManager *billboardManager,
+                                                     SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
   {
-    static RenderManager *manager = new RasterizerRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio);
+    static RenderManager *manager = new RasterizerRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
     return manager;
   }
 
   RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager, 
-                  MaterialManager *materialManager, 
-                  ShaderManager *shaderManager, 
-                  TextureManager *textureManager,
-	                BillboardManager *billboardManager,
-                  SpriteManager *spriteManager, GLfloat aspectRatio) : RenderManager(modelManager,
-                                                                                      materialManager,
-                                                                                      shaderManager, 
-                                                                                      textureManager,
-                                                                                      billboardManager,
-                                                                                      spriteManager,
-                                                                                      aspectRatio)
+                                                   MaterialManager *materialManager, 
+                                                   ShaderManager *shaderManager, 
+                                                   TextureManager *textureManager,
+	                                                 BillboardManager *billboardManager,
+                                                   SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer) : RenderManager(modelManager,
+                                                                                                                                             materialManager,
+                                                                                                                                             shaderManager, 
+                                                                                                                                             textureManager,
+                                                                                                                                             billboardManager,
+                                                                                                                                             spriteManager,
+                                                                                                                                             aspectRatio, maxSpriteLayer)
   {
   }
 
@@ -216,6 +216,7 @@ namespace he
 
 	  glEnable(GL_BLEND);
 	  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glEnableVertexAttribArray(Shader::SPECIAL0);
  
 	  m_billboardShader->useShader();
@@ -247,15 +248,17 @@ namespace he
       }
 	  }
     
+    glDisable(GL_BLEND);
 
-	  ////////////////////////////////RENDER 2D Sprites////////////////////////////////////////////
+	  ////////////////////////////////RENDER OPAQUE 2D Sprites////////////////////////////////////////////
 
     glClear(GL_DEPTH_BUFFER_BIT);
+
     Sprite *renderSprite;
-	  //glDisable(GL_DEPTH_TEST);
+
 	  m_spriteShader->useShader();
 
-	  for(std::list<ResourceHandle>::iterator spriteIDIterator = m_spriteIDs.begin(); spriteIDIterator != m_spriteIDs.end(); spriteIDIterator++)
+	  for(std::list<ResourceHandle>::iterator spriteIDIterator = m_opaqueSpriteIDs.begin(); spriteIDIterator != m_opaqueSpriteIDs.end(); spriteIDIterator++)
     {
       renderSprite = m_spriteManager->getObject(*spriteIDIterator);
       if(renderSprite->getRenderable())
@@ -268,7 +271,7 @@ namespace he
 		
 		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix()/* * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1)*/;
 		    Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-        float z = renderSprite->getZValue();
+        float z = renderSprite->getLayer() / (const float)m_maxLayer;
 		    m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		    m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
         m_spriteShader->setUniform(2, GL_FLOAT, &z);
@@ -277,9 +280,63 @@ namespace he
 		    glDrawArrays(GL_POINTS, 0, 1);
       }
 	  }
-    m_spriteShader->useNoShader();
+
+    ////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
+
+    for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//sort all sprites according to their layer
+    {
+      for(std::list<ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
+      {
+        renderSprite = m_spriteManager->getObject(*spriteIDIterator);
+        if(renderSprite->getLayerChanged())
+        {
+          m_transparentSpriteIDs[renderSprite->getLayer()].push_back(*spriteIDIterator);
+          renderSprite->spriteSorted();
+          spriteIDIterator = m_transparentSpriteIDs[i].erase(spriteIDIterator);
+
+          if(spriteIDIterator == m_transparentSpriteIDs[i].end())
+          {
+            break;
+          }
+        }
+      }
+    }
+
+    glDepthMask(GL_FALSE);
+
+    glEnable(GL_BLEND);
+	  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)
+    {
+      for(std::list<ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
+      {
+        renderSprite = m_spriteManager->getObject(*spriteIDIterator);
+        if(renderSprite->getRenderable())
+        {
+          renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
+
+          renderTexture->setTexture(0);
+
+		      m_spriteShader->setTexture(3, 0);
+		
+		      Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix()/* * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1)*/;
+		      Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+          float z = renderSprite->getLayer() / (const float)m_maxLayer;
+		      m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		      m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+          m_spriteShader->setUniform(2, GL_FLOAT, &z);
+
+          glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
+		      glDrawArrays(GL_POINTS, 0, 1);
+        }
+	    }
+    }
+
     glDisableVertexAttribArray(Shader::SPECIAL0);
-	  //glEnable(GL_DEPTH_TEST);
-	  //glDisable(GL_BLEND);
+
+    glDisable(GL_BLEND);
+
+    glDepthMask(GL_TRUE);
   }
 }

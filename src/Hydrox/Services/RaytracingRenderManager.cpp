@@ -9,9 +9,9 @@ namespace he
                                      ShaderManager *shaderManager, 
                                      TextureManager *textureManager,
 	                                   BillboardManager *billboardManager,
-                                     SpriteManager *spriteManager, GLfloat aspectRatio)
+                                     SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
   {
-    static RenderManager *manager = new RaytracingRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio);
+    static RenderManager *manager = new RaytracingRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
     return manager;
   }
 
@@ -20,13 +20,13 @@ namespace he
                   ShaderManager *shaderManager, 
                   TextureManager *textureManager,
 	                BillboardManager *billboardManager,
-                  SpriteManager *spriteManager, GLfloat aspectRatio) : RenderManager(modelManager,
+                  SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer) : RenderManager(modelManager,
                                                                                       materialManager,
                                                                                       shaderManager, 
                                                                                       textureManager,
                                                                                       billboardManager,
                                                                                       spriteManager,
-                                                                                      aspectRatio)
+                                                                                      aspectRatio, maxSpriteLayer)
   {
   }
 

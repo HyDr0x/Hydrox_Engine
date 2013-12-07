@@ -36,6 +36,8 @@ namespace he
 
 	  void setClearColor(Vector<float, 4> color);
 
+    void resizeRenderWindow(unsigned int width, unsigned int height);
+
     void registerServices(ServiceManager *serviceManager);
 
 	  void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, std::string worldRootNodeName, unsigned int width, unsigned int height, float aspectRatio, bool debugMode);

@@ -19,7 +19,7 @@ namespace he
                                      ShaderManager *shaderManager, 
                                      TextureManager *textureManager,
 	                                   BillboardManager *billboardManager,
-                                     SpriteManager *spriteManager, GLfloat aspectRatio);
+                                     SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
 
 	  ~RasterizerRenderManager();
 
@@ -34,7 +34,7 @@ namespace he
                   ShaderManager *shaderManager, 
                   TextureManager *textureManager,
 	                BillboardManager *billboardManager,
-                  SpriteManager *spriteManager, GLfloat aspectRatio);
+                  SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
 
 	  RasterizerRenderManager(){}
 	  RasterizerRenderManager(const RasterizerRenderManager&){}

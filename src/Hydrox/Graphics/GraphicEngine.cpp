@@ -60,6 +60,11 @@ namespace he
 	  glClearColor(color[0], color[1], color[2], color[3]);
   }
 
+  void GraphicEngine::resizeRenderWindow(unsigned int width, unsigned int height)
+  {
+    glViewport(0, 0, width, height);
+  }
+
   void GraphicEngine::registerServices(ServiceManager *serviceManager)
   {
 	  serviceManager->addService(m_modelManager);
@@ -104,7 +109,7 @@ namespace he
 	  m_textureManager = TextureManager::getManager(texPath);
     m_billboardManager = BillboardManager::getManager(texPath);
     m_spriteManager = SpriteManager::getManager(texPath);
-	  m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio);
+	  m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, 32);
 	  m_eventManager = EventManager::getManager();
     m_debugLogManager = DebugLogManager::getManager(debugMode);
   

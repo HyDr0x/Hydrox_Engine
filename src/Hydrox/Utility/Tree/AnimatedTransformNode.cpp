@@ -15,6 +15,10 @@ namespace he
     m_animatedTranslation = Vector<float, 3>::identity();
     m_animatedRotation = Quaternion<float>::identity();
     m_animatedScale = 1.0f;
+
+    m_currentScaleKey = 0;
+    m_currentPositionKey = 0;
+    m_currentRotationKey = 0;
   }
 
   AnimatedTransformNode& AnimatedTransformNode::operator=(const AnimatedTransformNode& sourceNode)
@@ -28,6 +32,10 @@ namespace he
     m_animationTracks = sourceNode.m_animationTracks;
     m_currentTrack = sourceNode.m_currentTrack;
     m_currentAnimationTime = sourceNode.m_currentAnimationTime;
+
+    m_currentScaleKey = sourceNode.m_currentScaleKey;
+    m_currentPositionKey = sourceNode.m_currentPositionKey;
+    m_currentRotationKey = sourceNode.m_currentRotationKey;
 
     m_animatedMesh = sourceNode.m_animatedMesh;
     m_boneIndex = sourceNode.m_boneIndex;
@@ -68,6 +76,10 @@ namespace he
     newNode->m_currentTrack = m_currentTrack;
     newNode->m_currentAnimationTime = m_currentAnimationTime;
     newNode->m_pauseAnimation = m_pauseAnimation;
+
+    newNode->m_currentScaleKey = m_currentScaleKey;
+    newNode->m_currentPositionKey = m_currentPositionKey;
+    newNode->m_currentRotationKey = m_currentRotationKey;
 
     newNode->m_animatedMesh = m_animatedMesh;
     newNode->m_boneIndex = m_boneIndex;
@@ -115,6 +127,10 @@ namespace he
     assert(currentTrack < m_animationTracks.size() && " Animation Track too big ");
 
     m_currentTrack = currentTrack;
+
+    m_currentPositionKey = 0;
+    m_currentRotationKey = 0;
+    m_currentScaleKey = 0;
   }
 
   unsigned int AnimatedTransformNode::getCurrentAnimationTrack()
@@ -237,12 +253,28 @@ namespace he
   {
     float timeInTicks = fmod(m_currentAnimationTime * currentTrack.m_animationTicksPerSecond, m_animationTracks[m_currentTrack].m_duration);
 
-    for(unsigned int i = 0; i < currentTrack.m_scalesTime.size(); i++)
+    if(currentTrack.m_scalesTime[m_currentScaleKey] > timeInTicks)
+    {
+      m_currentScaleKey = 0;
+    }
+
+    if(currentTrack.m_positionsTime[m_currentPositionKey] > timeInTicks)
+    {
+      m_currentPositionKey = 0;
+    }
+
+    if(currentTrack.m_rotationsTime[m_currentRotationKey] > timeInTicks)
+    {
+      m_currentRotationKey = 0;
+    }
+
+    for(unsigned int i = m_currentScaleKey; i < currentTrack.m_scalesTime.size(); i++)
     {
       if(i + 1 < currentTrack.m_scalesTime.size())
       {
         if(currentTrack.m_scalesTime[i + 1] >= timeInTicks)
         {
+          m_currentScaleKey = i;
           float diffTime = timeInTicks - currentTrack.m_scalesTime[i];
           if(diffTime < 0.0f)
           {
@@ -258,12 +290,13 @@ namespace he
       }
     }
 
-    for(unsigned int i = 0; i < currentTrack.m_rotationsTime.size(); i++)
+    for(unsigned int i = m_currentRotationKey; i < currentTrack.m_rotationsTime.size(); i++)
     {
       if(i + 1 < currentTrack.m_rotationsTime.size())
       {
         if(currentTrack.m_rotationsTime[i + 1] >= timeInTicks)
         {
+          m_currentRotationKey = i;
           float diffTime = timeInTicks - currentTrack.m_rotationsTime[i];
           if(diffTime < 0.0f)
           {
@@ -279,12 +312,13 @@ namespace he
       }
     }
 
-    for(unsigned int i = 0; i < currentTrack.m_positionsTime.size(); i++)
+    for(unsigned int i = m_currentPositionKey; i < currentTrack.m_positionsTime.size(); i++)
     {
       if(i + 1 < currentTrack.m_positionsTime.size())
       {
         if(currentTrack.m_positionsTime[i + 1] >= timeInTicks)
         {
+          m_currentPositionKey = i;
           float diffTime = timeInTicks - currentTrack.m_positionsTime[i];
           if(diffTime < 0.0f)
           {

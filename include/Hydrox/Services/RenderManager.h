@@ -2,6 +2,7 @@
 #define RENDERER_H_
 
 #include <list>
+#include <vector>
 
 #include <GL/glew.h>
 
@@ -13,7 +14,6 @@
 
 namespace he
 {
-  class Sprite;
   class Scene;
   class Camera;
 
@@ -25,7 +25,8 @@ namespace he
 
     virtual void initialize() = 0;
 
-    virtual void addSprite(ResourceHandle spriteID);
+    virtual void addSprite(ResourceHandle spriteID, bool transparent);
+
 	  virtual void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene) = 0;
 
   protected:
@@ -35,20 +36,22 @@ namespace he
                   ShaderManager *shaderManager, 
                   TextureManager *textureManager,
 	                BillboardManager *billboardManager,
-                  SpriteManager *spriteManager, GLfloat aspectRatio);
+                  SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
 
-    RenderManager(){}
-	  RenderManager(const RenderManager&){}
+    RenderManager() : m_maxLayer(0) {}
+	  RenderManager(const RenderManager&) : m_maxLayer(0) {}
 
-    ModelManager    *m_modelManager;
+    std::list<ResourceHandle> m_opaqueSpriteIDs;
+    std::vector<std::list<ResourceHandle>> m_transparentSpriteIDs;
+
+    ModelManager *m_modelManager;
 	  MaterialManager *m_materialManager;
-	  ShaderManager   *m_shaderManager;
-    TextureManager  *m_textureManager;
+	  ShaderManager *m_shaderManager;
+    TextureManager *m_textureManager;
     BillboardManager *m_billboardManager;
-    SpriteManager   *m_spriteManager;
+    SpriteManager *m_spriteManager;
 
-    std::list<ResourceHandle> m_spriteIDs;
-
+    const size_t m_maxLayer;
     GLfloat m_aspectRatio;
   };
 }

@@ -52,8 +52,11 @@ namespace he
     float getRotation();
     Vector<float, 2> getScale();
 
-    void setZValue(float z);
-    float getZValue();
+    void setLayer(unsigned char layer);
+    unsigned char getLayer();
+
+    void spriteSorted();
+    bool getLayerChanged();
 
 	  Matrix<float, 3> getTransformationMatrix();
 	  Matrix<float, 3> getTexTransformationMatrix();
@@ -66,8 +69,9 @@ namespace he
     Matrix<float, 3> m_rtMatrix;
 	  Matrix<float, 3> m_tlMatrix;
 	  Matrix<float, 3> m_scMatrix;
-    float m_z;
-	
+    unsigned char m_layer;
+	  bool m_layerChanged;
+
 	  Vector<unsigned int, 2> m_animNumber;
 	  Vector<unsigned int, 2> m_animCount;
 	  Vector<float, 2> m_texStart;

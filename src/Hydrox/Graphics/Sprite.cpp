@@ -12,7 +12,8 @@ namespace he
                                                                                                                                                   m_rtMatrix(Matrix<float, 3>::identity()),
                                                                                                                                                   m_tlMatrix(Matrix<float, 3>::identity()),
                                                                                                                                                   m_scMatrix(Matrix<float, 3>::identity()),
-                                                                                                                                                  m_z(0.0f)
+                                                                                                                                                  m_layer(0),
+                                                                                                                                                  m_layerChanged(false)
   {
   }
 
@@ -36,7 +37,8 @@ namespace he
 
     m_renderable = o.m_renderable;
 
-    m_z = o.m_z;
+    m_layer = o.m_layer;
+    m_layerChanged = o.m_layerChanged;
   }
 
   Sprite& Sprite::operator=(const Sprite& o)
@@ -59,7 +61,8 @@ namespace he
 
     m_renderable = o.m_renderable;
 
-    m_z = o.m_z;
+    m_layer = o.m_layer;
+    m_layerChanged = o.m_layerChanged;
 
     return *this;
   }
@@ -194,14 +197,26 @@ namespace he
     return Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
   }
 
-  void Sprite::setZValue(float z)
+  void Sprite::setLayer(unsigned char layer)
   {
-    m_z = z;
+    m_layer = layer;
+    m_layerChanged = true;
   }
 
-  float Sprite::getZValue()
+  unsigned char Sprite::getLayer()
   {
-    return m_z;
+    return m_layer;
+  }
+
+  void Sprite::spriteSorted()
+  {
+    m_layerChanged = false;
+  }
+
+
+  bool Sprite::getLayerChanged()
+  {
+    return m_layerChanged;
   }
 
   Matrix<float,3> Sprite::getTransformationMatrix()

@@ -86,6 +86,10 @@ namespace he
 
     AnimatedGeoNode* m_animatedMesh;//the corresponding animatedGeoNode if it is skinned
 
+    unsigned int m_currentScaleKey;
+    unsigned int m_currentRotationKey;
+    unsigned int m_currentPositionKey;
+
     float m_currentAnimationTime;
     unsigned int m_currentTrack;
     unsigned int m_boneIndex;//index into the bone vector of the animatedGeoNode if it is skinned
