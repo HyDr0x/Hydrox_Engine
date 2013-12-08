@@ -10,7 +10,7 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-#include "Hydrox/Services/CacheManager.hpp"
+#include "Hydrox/Singletons/CacheManager.hpp"
 
 namespace he
 {
@@ -37,8 +37,6 @@ namespace he
 	  void setClearColor(Vector<float, 4> color);
 
     void resizeRenderWindow(unsigned int width, unsigned int height);
-
-    void registerServices(ServiceManager *serviceManager);
 
 	  void initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, unsigned int width, unsigned int height, std::string worldRootNodeName = std::string("wordlRootNode"), size_t spriteLayer = 32);
 	  void update(Vector<float, 3>& cameraPosition, float currentTime);

@@ -2,12 +2,12 @@
 
 #include "Hydrox/Graphics/Scene.h"
 
-#include "Hydrox/Services/ServiceManager.hpp"
-#include "Hydrox/Services/RenderManager.h"
-#include "Hydrox/Services/RasterizerRenderManager.h"
-#include "Hydrox/Services/RaytracingRenderManager.h"
-#include "Hydrox/Services/Signals/EventManager.h"
-#include "Hydrox/Services/DebugLogManager.h"
+#include "Hydrox/Singletons/Singleton.hpp"
+#include "Hydrox/Singletons/RenderManager.h"
+#include "Hydrox/Singletons/RasterizerRenderManager.h"
+#include "Hydrox/Singletons/RaytracingRenderManager.h"
+#include "Hydrox/Singletons/Signals/EventManager.h"
+#include "Hydrox/Singletons/DebugLogManager.h"
 
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
@@ -64,20 +64,6 @@ namespace he
   {
     glViewport(0, 0, width, height);
   }
-
-  void GraphicEngine::registerServices(ServiceManager *serviceManager)
-  {
-	  serviceManager->addService(m_modelManager);
-    serviceManager->addService(m_materialManager);
-    serviceManager->addService(m_shaderManager);
-	  serviceManager->addService(m_textureManager);
-    serviceManager->addService(m_billboardManager);
-	  serviceManager->addService(m_spriteManager);
-
-    serviceManager->addService(m_renderManager);
-	  serviceManager->addService(m_eventManager);
-    serviceManager->addService(m_debugLogManager);
-  }
  
   void GraphicEngine::initialize(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, unsigned int width, unsigned int height, std::string worldRootNodeName, size_t spriteLayer)
   {
@@ -104,16 +90,26 @@ namespace he
 	  //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
 	  //create Manager
-    m_modelManager = ModelManager::getManager(modelPath);
-    m_materialManager = MaterialManager::getManager(materialPath);
-    m_shaderManager = ShaderManager::getManager(vfxPath);
-	  m_textureManager = TextureManager::getManager(texPath);
-    m_billboardManager = BillboardManager::getManager(texPath);
-    m_spriteManager = SpriteManager::getManager(texPath);
-	  m_renderManager = RasterizerRenderManager::getManager(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
-	  m_eventManager = EventManager::getManager();
-    m_debugLogManager = DebugLogManager::getManager();
-  
+    ModelManager::createService(modelPath);
+    MaterialManager::createService(materialPath);
+    ShaderManager::createService(vfxPath);
+    TextureManager::createService(texPath);
+    BillboardManager::createService(texPath);
+    SpriteManager::createService(texPath);
+    EventManager::createService();
+    DebugLogManager::createService();
+
+    m_modelManager = (ModelManager*)ModelManager::getInstance();
+    m_materialManager = (MaterialManager*)MaterialManager::getInstance();
+    m_shaderManager = (ShaderManager*)ShaderManager::getInstance();
+	  m_textureManager = (TextureManager*)TextureManager::getInstance();
+    m_billboardManager = (BillboardManager*)BillboardManager::getInstance();
+    m_spriteManager = (SpriteManager*)SpriteManager::getInstance();
+	  m_eventManager = (EventManager*)EventManager::getInstance();
+    m_debugLogManager = (DebugLogManager*)DebugLogManager::getInstance();
+    RasterizerRenderManager::createService(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
+	  m_renderManager = (RasterizerRenderManager*)RasterizerRenderManager::getInstance();
+
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 
     m_debugLogManager->gatherSystemInformation();

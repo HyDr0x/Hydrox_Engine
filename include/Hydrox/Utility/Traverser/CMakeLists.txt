@@ -1,6 +1,7 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/CullTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 

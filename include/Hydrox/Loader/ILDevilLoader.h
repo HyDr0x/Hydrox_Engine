@@ -10,7 +10,7 @@
 
 #include "Hydrox/Graphics/Texture.h"
 
-#include "Hydrox/Services/CacheManager.hpp"
+#include "Hydrox/Singletons/CacheManager.hpp"
 
 namespace he
 {

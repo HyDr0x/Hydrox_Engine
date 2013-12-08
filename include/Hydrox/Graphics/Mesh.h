@@ -10,7 +10,7 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-#include "Hydrox/Services/CachedResource.h"
+#include "Hydrox/Singletons/CachedResource.h"
 
 #define GLINDEXTYPE GL_UNSIGNED_INT
 

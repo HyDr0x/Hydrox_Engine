@@ -5,7 +5,7 @@
 
 #include "Hydrox/DLLExport.h"
 
-#include "Hydrox/Services/CachedResource.h"
+#include "Hydrox/Singletons/CachedResource.h"
 
 #include "Hydrox/Utility/Math/Math.hpp"
 

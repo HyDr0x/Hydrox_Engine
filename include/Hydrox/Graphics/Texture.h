@@ -9,7 +9,7 @@
 
 #include "Hydrox/Utility/Math/Math.hpp"
 
-#include "Hydrox/Services/CachedResource.h"
+#include "Hydrox/Singletons/CachedResource.h"
 
 namespace he
 {

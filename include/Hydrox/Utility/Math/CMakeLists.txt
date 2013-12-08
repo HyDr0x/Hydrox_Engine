@@ -3,6 +3,9 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/Math.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Matrix.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Matrix2.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Matrix3.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Matrix4.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Quaternion.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Vector.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Vector_Template.hpp 

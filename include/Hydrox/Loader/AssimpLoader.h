@@ -14,7 +14,7 @@
 #include "Hydrox/Graphics/Material.h"
 #include "Hydrox/Graphics/Mesh.h"
 
-#include "Hydrox/Services/CacheManager.hpp"
+#include "Hydrox/Singletons/CacheManager.hpp"
 
 #include "Hydrox/Utility/Tree/AnimatedTransformNode.h"
 

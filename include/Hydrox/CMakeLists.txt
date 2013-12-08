@@ -1,7 +1,7 @@
 add_subdirectory(Graphics)
 add_subdirectory(Loader)
 add_subdirectory(Saver)
-add_subdirectory(Services)
+add_subdirectory(Singletons)
 add_subdirectory(Utility)
 
 set(

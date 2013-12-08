@@ -1,6 +1,7 @@
 set(
 	SOURCE 
 	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CullTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.cpp 
