@@ -19,7 +19,7 @@ namespace he
                                                                                                                                                            m_materialManager(materialManager),
                                                                                                                                                            m_textureManager(textureManager),
                                                                                                                                                            m_shaderManager(shaderManager),
-                                                                                                                                                           m_animationTimeUnit(AnimationTimeUnit::Seconds)
+                                                                                                                                                           m_animationTimeUnit(Seconds)
   {
     setAnimationTimeUnit(m_animationTimeUnit);
   }
@@ -55,16 +55,16 @@ namespace he
     m_animationTimeUnit = animationTimeUnit;
     switch(m_animationTimeUnit)
     {
-    case AnimationTimeUnit::Microseconds:
+    case Microseconds:
       m_animationTimeUnitConvert = 0.000001f;
       break;
-    case AnimationTimeUnit::Milliseconds:
+    case Milliseconds:
       m_animationTimeUnitConvert = 0.001f;
       break;
-    case AnimationTimeUnit::Minutes:
+    case Minutes:
       m_animationTimeUnitConvert = 60.0f;
       break;
-    case AnimationTimeUnit::Seconds:
+    case Seconds:
     default:
       m_animationTimeUnitConvert = 1.0f;
     }
@@ -225,7 +225,7 @@ namespace he
             if(boneIndices[vertexID][k] == ~0)
             {
               boneWeights[vertexID][k] = mesh->mBones[i]->mWeights[j].mWeight;
-              boneIndices[vertexID][k] = i;
+              boneIndices[vertexID][k] = static_cast<float>(i);
               break;
             }
           }

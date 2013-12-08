@@ -49,6 +49,8 @@ namespace he
       case GL_DEBUG_TYPE_OTHER:
         return std::string("Other event type");
         break;
+      default:
+        return std::string("UNEXPECTED TYPE");
     }
   }
 
@@ -74,6 +76,8 @@ namespace he
       case GL_DEBUG_SOURCE_OTHER:
         return std::string("Other source");
         break;
+      default:
+        return std::string("UNEXPECTED SOURCE");
     }
   }
 
@@ -93,6 +97,8 @@ namespace he
       case GL_DEBUG_SEVERITY_NOTIFICATION:
         return std::string("NOTIFICATION");
         break;
+      default:
+        return std::string("UNEXPECTED SEVERITY");
     }
   }
 }

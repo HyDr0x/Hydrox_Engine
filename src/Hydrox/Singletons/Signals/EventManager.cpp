@@ -2,6 +2,11 @@
 
 namespace he
 {
+  void EventManager::createService()
+  {
+    m_instance = new EventManager();
+  }
+
   EventManager::EventManager()
   {
   }

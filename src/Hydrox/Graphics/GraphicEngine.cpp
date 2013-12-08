@@ -99,16 +99,16 @@ namespace he
     EventManager::createService();
     DebugLogManager::createService();
 
-    m_modelManager = (ModelManager*)ModelManager::getInstance();
-    m_materialManager = (MaterialManager*)MaterialManager::getInstance();
-    m_shaderManager = (ShaderManager*)ShaderManager::getInstance();
-	  m_textureManager = (TextureManager*)TextureManager::getInstance();
-    m_billboardManager = (BillboardManager*)BillboardManager::getInstance();
-    m_spriteManager = (SpriteManager*)SpriteManager::getInstance();
-	  m_eventManager = (EventManager*)EventManager::getInstance();
-    m_debugLogManager = (DebugLogManager*)DebugLogManager::getInstance();
+    m_modelManager = ModelManager::getInstance();
+    m_materialManager = MaterialManager::getInstance();
+    m_shaderManager = ShaderManager::getInstance();
+	  m_textureManager = TextureManager::getInstance();
+    m_billboardManager = BillboardManager::getInstance();
+    m_spriteManager = SpriteManager::getInstance();
+	  m_eventManager = EventManager::getInstance();
+    m_debugLogManager = DebugLogManager::getInstance();
     RasterizerRenderManager::createService(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
-	  m_renderManager = (RasterizerRenderManager*)RasterizerRenderManager::getInstance();
+	  m_renderManager = RasterizerRenderManager::getInstance();
 
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 

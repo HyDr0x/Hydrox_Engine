@@ -11,6 +11,7 @@
 #include "Hydrox/Utility/Math/Math.hpp"
 
 #include "Hydrox/Singletons/CacheManager.hpp"
+#include "Hydrox/Singletons/Signals/EventManager.h"
 
 namespace he
 {
@@ -20,7 +21,7 @@ namespace he
   class RenderManager;
   class RasterizerRenderManager;
   class RaytracingRenderManager;
-  class EventManager;
+  //class EventManager;
   class DebugLogManager;
 
   class GRAPHICAPI GraphicEngine

@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include "Hydrox/DLLExport.h"
+
 #include "Hydrox/Singletons/Singleton.hpp"
 #include "Hydrox/Singletons/Signals/Signal.h"
 
@@ -10,7 +12,7 @@
 
 namespace he
 {
-  class EventManager : public Singleton<EventManager>
+  class GRAPHICAPI EventManager : public Singleton<EventManager>
   {
   public:
 
@@ -22,11 +24,7 @@ namespace he
 		  OnKeyHit
 	  };
 
-    static void EventManager::createService()
-    {
-      m_instance = new EventManager();
-    }
-
+    static void createService();
 	  ~EventManager();
 
 	  template<typename Signature> void addNewEvent(int _Event)
@@ -74,7 +72,7 @@ namespace he
 
     EventManager();
 
-	  std::map<int,signal_save*> m_sigMap;
+	  std::map<int, signal_save*> m_sigMap;
   };
 }
 

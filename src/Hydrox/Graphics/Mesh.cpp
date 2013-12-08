@@ -105,13 +105,13 @@ namespace he
 
 	  if(boneIndices.size() > 0)
 	  {
-      for(int i = 0; i < m_vertexCount; i++)
+      for(unsigned int i = 0; i < m_vertexCount; i++)
 		  {
         glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneWeights[0]), &boneWeights[i]);
       }
       lokalStride += boneWeightStride;
 
-      for(int i = 0; i < m_vertexCount; i++)
+      for(unsigned int i = 0; i < m_vertexCount; i++)
 		  {
         glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneIndices[0]), &boneIndices[i]);
       }
