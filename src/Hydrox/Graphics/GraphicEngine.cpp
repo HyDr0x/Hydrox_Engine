@@ -90,15 +90,6 @@ namespace he
 	  //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
 	  //create Manager
-    ModelManager::createService(modelPath);
-    MaterialManager::createService(materialPath);
-    ShaderManager::createService(vfxPath);
-    TextureManager::createService(texPath);
-    BillboardManager::createService(texPath);
-    SpriteManager::createService(texPath);
-    EventManager::createService();
-    DebugLogManager::createService();
-
     m_modelManager = ModelManager::getInstance();
     m_materialManager = MaterialManager::getInstance();
     m_shaderManager = ShaderManager::getInstance();
@@ -107,8 +98,16 @@ namespace he
     m_spriteManager = SpriteManager::getInstance();
 	  m_eventManager = EventManager::getInstance();
     m_debugLogManager = DebugLogManager::getInstance();
-    RasterizerRenderManager::createService(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
 	  m_renderManager = RasterizerRenderManager::getInstance();
+
+    //initialize the manager
+    m_modelManager->initialize(modelPath);
+    m_materialManager->initialize(materialPath);
+    m_shaderManager->initialize(vfxPath);
+    m_textureManager->initialize(texPath);
+    m_billboardManager->initialize(texPath);
+    m_spriteManager->initialize(texPath);
+    m_renderManager->initialize(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
 
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 
@@ -122,9 +121,6 @@ namespace he
     }
 
     assert(m_debugLogManager->getMajorOpenGLVersion() >= 4 && m_debugLogManager->getMinorOpenGLVersion() >= 3);
-
-    //initialize the renderer
-    m_renderManager->initialize();
   }
 
   void GraphicEngine::update(Vector<float, 3>& cameraPosition, float currentTime)

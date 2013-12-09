@@ -13,15 +13,25 @@ namespace he
 
     static T* getInstance()
     {
+      if(m_instance == nullptr) m_instance = new T;
       return m_instance;
+    }
+
+    void deleteInstance()
+    {
+      assert(m_instance != nullptr);
+      delete m_instance;
     }
 
   protected:
 
     Singleton(){}
-    Singleton(const Singleton&){}
-    Singleton& operator=(const Singleton&){ return *this; }
     ~Singleton(){} 
+
+  private:
+
+    Singleton(const Singleton&);
+    Singleton& operator=(const Singleton&);
 
     static T* m_instance;
   };

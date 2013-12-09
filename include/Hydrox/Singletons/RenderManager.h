@@ -15,13 +15,19 @@ namespace he
   class Scene;
   class Camera;
 
-  class GRAPHICAPI RenderManager : public Singleton<RenderManager>
+  class GRAPHICAPI RenderManager
   {
   public:
 
-	  virtual ~RenderManager();
+    RenderManager() {}
+	  virtual ~RenderManager() = 0;
 
-    virtual void initialize() = 0;
+    virtual void initialize(ModelManager *modelManager, 
+                            MaterialManager *materialManager, 
+                            ShaderManager *shaderManager, 
+                            TextureManager *textureManager,
+	                          BillboardManager *billboardManager,
+                            SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
 
     virtual void addSprite(ResourceHandle spriteID, bool transparent = true);
 
@@ -31,14 +37,6 @@ namespace he
 
   protected:
 
-    RenderManager(ModelManager *modelManager, 
-                  MaterialManager *materialManager, 
-                  ShaderManager *shaderManager, 
-                  TextureManager *textureManager,
-	                BillboardManager *billboardManager,
-                  SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
-
-    RenderManager() : m_maxLayer(0) {}
 	  RenderManager(const RenderManager&) : m_maxLayer(0) {}
 
     std::list<ResourceHandle> m_opaqueSpriteIDs;
@@ -51,7 +49,7 @@ namespace he
     BillboardManager *m_billboardManager;
     SpriteManager *m_spriteManager;
 
-    const size_t m_maxLayer;
+    size_t m_maxLayer;
     GLfloat m_aspectRatio;
   };
 }

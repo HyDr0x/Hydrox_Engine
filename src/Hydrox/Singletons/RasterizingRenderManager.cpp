@@ -19,31 +19,6 @@
 
 namespace he
 {
-  RasterizerRenderManager::RasterizerRenderManager(ModelManager *modelManager, 
-                                                   MaterialManager *materialManager, 
-                                                   ShaderManager *shaderManager, 
-                                                   TextureManager *textureManager,
-	                                                 BillboardManager *billboardManager,
-                                                   SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer) : RenderManager(modelManager,
-                                                                                                                                             materialManager,
-                                                                                                                                             shaderManager, 
-                                                                                                                                             textureManager,
-                                                                                                                                             billboardManager,
-                                                                                                                                             spriteManager,
-                                                                                                                                             aspectRatio, maxSpriteLayer)
-  {
-  }
-
-  void RasterizerRenderManager::createService(ModelManager *modelManager, 
-                                                     MaterialManager *materialManager, 
-                                                     ShaderManager *shaderManager, 
-                                                     TextureManager *textureManager,
-	                                                   BillboardManager *billboardManager,
-                                                     SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
-  {
-    m_instance = new RasterizerRenderManager(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
-  }
-
   RasterizerRenderManager::~RasterizerRenderManager()
   {
     glDeleteBuffers(1, &m_boneMatricesBuffer);
@@ -54,8 +29,15 @@ namespace he
     delete m_spriteShader;
   }
 
-  void RasterizerRenderManager::initialize()
+  void RasterizerRenderManager::initialize(ModelManager *modelManager, 
+                                           MaterialManager *materialManager, 
+                                           ShaderManager *shaderManager, 
+                                           TextureManager *textureManager,
+	                                         BillboardManager *billboardManager,
+                                           SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
   {
+    RenderManager::initialize(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
+
     glGenBuffers(1, &m_dummyVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);

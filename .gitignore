@@ -14,6 +14,7 @@
 
 #no build directory
 /msc100_64
+/lib
 
 #no sandbox directory
 /Sandbox

@@ -20,9 +20,9 @@ namespace he
   {
   public:
 
-    static void createService(std::string path)
+    CacheManager()
     {
-      m_instance = new CacheManager<CLASS>(path);
+      m_availableBorder = 0;
     }
 
 	  ~CacheManager()
@@ -34,6 +34,11 @@ namespace he
 
 	    m_objectsCache.clear();
       m_list.clear();
+    }
+
+    void initialize(std::string path)
+    {
+      m_path = path;
     }
 
     CLASS* getObject(ResourceHandle objectID)
@@ -88,13 +93,6 @@ namespace he
 
   private:
 
-    CacheManager(std::string path)
-    {
-	    m_path = path;
-      m_availableBorder = 0;
-    }
-
-	  CacheManager(){}
 	  CacheManager(const CacheManager&){}
 
     static const unsigned int m_BLOCKSIZE = 64;

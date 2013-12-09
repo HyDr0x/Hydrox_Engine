@@ -15,7 +15,7 @@ namespace he
   {
   public:
 
-    static void createService();
+    DebugLogManager();
     ~DebugLogManager();
 
     void gatherSystemInformation();
@@ -34,8 +34,6 @@ namespace he
     void setEventSource(GLenum source, bool enable);
 
   private:
-
-    DebugLogManager();
 
     std::string m_vendorName;
     std::string m_graphicCardName;

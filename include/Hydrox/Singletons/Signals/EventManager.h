@@ -24,7 +24,7 @@ namespace he
 		  OnKeyHit
 	  };
 
-    static void createService();
+    EventManager();
 	  ~EventManager();
 
 	  template<typename Signature> void addNewEvent(int _Event)
@@ -69,8 +69,6 @@ namespace he
 	  }
 
   private:
-
-    EventManager();
 
 	  std::map<int, signal_save*> m_sigMap;
   };

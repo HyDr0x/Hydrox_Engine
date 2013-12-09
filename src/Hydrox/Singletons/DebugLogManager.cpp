@@ -7,11 +7,6 @@
 
 namespace he
 {
-  void DebugLogManager::createService()
-  {
-    m_instance = new DebugLogManager();
-  }
-
   DebugLogManager::DebugLogManager()
   {
     /*if(m_debugMode)
