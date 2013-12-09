@@ -1,4 +1,4 @@
-#include "Hydrox/Utility/Miscellaneous/SceneCacheManager.h"
+#include "Hydrox/Graphics/SceneCacheManager.h"
 
 #include "Hydrox/Utility/Traverser/CullTraverser.h"
 #include "Hydrox/Utility/Traverser/TransformTraverser.h"
@@ -61,8 +61,9 @@ namespace he
 
   void SceneCacheManager::updateCaches(Vector<float, 3>& cameraPosition, float currentTime)
   {
-    updateAnimatedTransformNodes(currentTime);
+    updateAnimationTime(currentTime);
     updateTransformNodes();
+    updateAnimatedTransformNodes();
     updateLODNodes(cameraPosition);
   }
 
@@ -71,11 +72,29 @@ namespace he
     m_dirtyTransforms.push_back(data);
   }
 
-  void SceneCacheManager::updateAnimatedTransformNodes(float currentTime)
+  void SceneCacheManager::updateAnimationTime(float currentTime)
   {
     for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
     {
-      (*tit)->addCurrentAnimationTime(currentTime);
+      (*tit)->addCurrentAnimationTime(currentTime);   
+    }
+  }
+
+  void SceneCacheManager::updateAnimatedTransformNodes()
+  {
+    TransformNode *node = nullptr;
+    TransformTraverser transformTraverser;
+
+    for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
+    {
+      node = *tit;
+   
+      if(node->getDirtyFlag() & GroupNode::TRF_DIRTY || node->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
+      {
+        transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+        transformTraverser.doTraverse(node);
+        transformTraverser.clearStacks();
+      }
     }
   }
 
@@ -88,7 +107,7 @@ namespace he
     {
       node = *tit;
    
-      if(node->getDirtyFlag() & GroupNode::TRF_DIRTY || node->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
+      if(node->getDirtyFlag() & GroupNode::TRF_DIRTY)//traverse it only if its not been traversed before
       {
         transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
         transformTraverser.doTraverse(node);

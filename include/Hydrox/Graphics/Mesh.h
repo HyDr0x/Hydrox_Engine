@@ -44,7 +44,7 @@ namespace he
       std::vector<Vector<float, 4>> boneWeights,
       std::vector<indexType> indices,
       GLuint primitiveType = GL_TRIANGLES);
-
+    
     Mesh& operator=(const Mesh& o);
 
 	  ~Mesh();
@@ -57,6 +57,7 @@ namespace he
     ResourceHandle getMaterial() const;
 
     GLuint getVertexDeclarationFlags() const;
+    GLuint getPrimitiveType() const;
 
   private:
 

@@ -144,7 +144,6 @@ namespace he
     {
       if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
       {
-        notify(this);
         addDirtyFlag(ANIM_DIRTY);
       }
 
@@ -158,7 +157,6 @@ namespace he
     {
       if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
       {
-        notify(this);
         addDirtyFlag(ANIM_DIRTY);
       }
 
@@ -180,10 +178,10 @@ namespace he
   {
     if(!(m_dirtyFlag & ANIM_DIRTY))//add it only if its not dirty already
     {
-      notify(this);
       addDirtyFlag(ANIM_DIRTY);
     }
 
+    m_pauseAnimation = true;
     m_currentAnimationTime = 0.0f;
   }
 
@@ -228,7 +226,7 @@ namespace he
     traverser.doTraverse(node);
   }
 
-  void addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
+  void AnimatedTransformNode::addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
   {
     AnimationControlTraverser traverser;
     traverser.addAnimationTime(animationTime);

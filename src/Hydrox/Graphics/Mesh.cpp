@@ -199,4 +199,9 @@ namespace he
   {
     return m_vertexDeclarationFlags;
   }
+
+  GLuint Mesh::getPrimitiveType() const
+  {
+    return m_primitiveType;
+  }
 }

@@ -2,7 +2,7 @@
 
 #include <stack>
 
-#include "Hydrox/Utility/Miscellaneous/SceneCacheManager.h"
+#include "Hydrox/Graphics/SceneCacheManager.h"
 
 #include "Hydrox/Utility/Traverser/TransformTraverser.h"
 #include "Hydrox/Utility/Traverser/InsertObserverTraverser.h"

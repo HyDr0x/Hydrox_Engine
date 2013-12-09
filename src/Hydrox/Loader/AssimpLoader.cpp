@@ -85,7 +85,7 @@ namespace he
 		  printf("%s\n", importer.GetErrorString());
     }
 
-	  assert(assimpScene);
+	  assert(assimpScene && "");
 
     std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
     std::vector<ResourceHandle> materials;//contains the material id's of the scene
@@ -147,6 +147,26 @@ namespace he
     std::vector<Vector<float, 4>> boneIndices;
     std::vector<Vector<float, 4>> boneWeights;
     std::vector<Mesh::indexType> indices;
+
+    GLuint primitiveType;
+    unsigned int indicesPerFace;
+
+    switch(mesh->mPrimitiveTypes)
+    {
+    case aiPrimitiveType_POINT:
+      primitiveType = GL_POINTS;
+      indicesPerFace = 1;
+      break;
+    case aiPrimitiveType_LINE:
+      primitiveType = GL_LINES;
+      indicesPerFace = 2;
+      break;
+    case aiPrimitiveType_TRIANGLE:
+    default:
+      primitiveType = GL_TRIANGLES;
+      indicesPerFace = 3;
+      break;
+    }
 
 	  if(mesh->HasPositions())
 	  {
@@ -235,14 +255,14 @@ namespace he
 
 	  if(mesh->HasFaces())
 	  {
-		  indices.resize(mesh->mNumFaces * 3);
+		  indices.resize(mesh->mNumFaces * indicesPerFace);
 
 		  for(unsigned int j = 0; j < mesh->mNumFaces; j++)
 		  {
         for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++)
         {
-          assert(mesh->mFaces[j].mNumIndices == 3);
-          indices[j * 3 + k] = static_cast<Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
+          assert(mesh->mFaces[j].mNumIndices < 4 && "NO QUADS OR POLYGON PRIMITIVES ALLOWED!");
+          indices[j * indicesPerFace + k] = static_cast<Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
         }
 		  }
 	  }
@@ -254,7 +274,8 @@ namespace he
       binormals,
       boneIndices,
       boneWeights,
-      indices));
+      indices,
+      primitiveType));
   }
 
   void AssimpLoader::loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, std::string materialFileName, const aiScene *scene)
@@ -298,14 +319,14 @@ namespace he
 
       std::string shaderPath = m_shaderManager->getPath();
 
-      if(j == 1)
-      {
-        std::string simpleVert = "Shader/simpleSkinningShader.vert";
-        std::string simpleFrag = "Shader/simpleSkinningShader.frag";
+      //if(j == 1)
+      //{
+      //  std::string simpleVert = "Shader/simpleSkinningShader.vert";
+      //  std::string simpleFrag = "Shader/simpleSkinningShader.frag";
 
-        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
-      }
-      else
+      //  out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
+      //}
+      //else
       {
         std::string simpleVert = "Shader/simpleShader.vert";
         std::string simpleFrag = "Shader/simpleShader.frag";

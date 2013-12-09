@@ -100,7 +100,8 @@ namespace he
     SceneCacheManager(const SceneCacheManager&){}
 
     void updateObserver(TransformNode* data);
-    void updateAnimatedTransformNodes(float currentTime);
+    void updateAnimationTime(float currentTime);
+    void updateAnimatedTransformNodes();
     void updateTransformNodes();
     void updateLODNodes(Vector<float, 3>& cameraPosition);
 

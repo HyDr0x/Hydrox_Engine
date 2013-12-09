@@ -57,24 +57,60 @@ namespace he
 
   bool TransformTraverser::ascendTraverse(AnimatedTransformNode* treeNode)
   {
-    return ascendTraverse((TransformNode*)treeNode);
+    if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
+    {
+      m_translateStack.push(treeNode->getPosition());
+      m_scaleStack.push(treeNode->getScale());
+      m_rotationStack.push(treeNode->getRotation());
+
+      return true;
+    }
+
+    clearStacks();//clear the transform stack, because there is another dirty node higher in the tree
+
+    return false;
   }
 
   bool TransformTraverser::preTraverse(AnimatedTransformNode* treeNode)
   {
-    bool ret = preTraverse((TransformNode*)treeNode);
-    treeNode->removeDirtyFlag(GroupNode::ANIM_DIRTY);//animation is updated now
-    return ret;
+    Vector<float, 3> translation;
+    float scale;
+    Quaternion<float> rotation;
+
+    if(!m_scaleStack.empty())
+    {
+      translation = m_translateStack.top();
+      scale = m_scaleStack.top();
+      rotation = m_rotationStack.top();
+    }
+    else
+    {
+      translation = Vector<float, 3>::identity();
+      scale = 1.0f;
+      rotation = Quaternion<float>::identity();
+    }
+
+    treeNode->calculateTransformation(translation, scale, rotation);
+
+    m_translateStack.push(translation);
+    m_scaleStack.push(scale);
+    m_rotationStack.push(rotation);
+
+    treeNode->removeDirtyFlag((GroupNode::DirtyFlags)(GroupNode::ANIM_DIRTY | GroupNode::TRF_DIRTY));//animation is updated now
+
+    return true;
   }
 
   void TransformTraverser::postTraverse(AnimatedTransformNode* treeNode)
   {
-    postTraverse((TransformNode*)treeNode);
+    m_scaleStack.pop();
+    m_translateStack.pop();
+    m_rotationStack.pop();
   }
 
   bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
   {
-    if(!treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
+    if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
     {
       m_translateStack.push(treeNode->getPosition());
       m_scaleStack.push(treeNode->getScale());

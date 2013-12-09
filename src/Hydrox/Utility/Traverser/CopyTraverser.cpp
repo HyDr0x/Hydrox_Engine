@@ -199,17 +199,25 @@ namespace he
   void CopyTraverser::ascendingGroupNode(TreeNode* treeNode)
   {
     m_childNode = false;
-    m_sibling = m_parent;
-    if(m_parent != nullptr)
+
+    if(treeNode->getNextSibling() == nullptr)
     {
-      m_parent = m_parent->getParent();
+      m_sibling = m_parent;
+      if(m_parent != nullptr)
+      {
+        m_parent = m_parent->getParent();
+      }
     }
   }
 
   void CopyTraverser::ascendingTreeNode(TreeNode* treeNode)
   {
     m_childNode = false;
-    m_sibling = m_parent;
+
+    if(treeNode->getNextSibling() == nullptr)
+    {
+      m_sibling = m_parent;
+    }
   }
 
   void CopyTraverser::addChild(GroupNode* parent, TreeNode* newNode)

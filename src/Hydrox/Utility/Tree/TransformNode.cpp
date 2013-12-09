@@ -12,7 +12,7 @@ namespace he
     Vector<float, 3> scale;
     math::decomposeMatrix(trfMatrix, angles, m_translation, scale);
 
-    assert(abs(scale[0] - scale[1]) < 0.001f && abs(scale[0] - scale[2]) < 0.001f && abs(scale[1] - scale[2]) < 0.001f);
+    assert(abs(scale[0] - scale[1]) < 0.001f && abs(scale[0] - scale[2]) < 0.001f && abs(scale[1] - scale[2]) < 0.001f && "NON UNIFORM SCALE NOT ALLOWED");
 
     m_scale = scale[0];
     m_rotation = math::createRotXQuaternion(angles[0]) * math::createRotYQuaternion(angles[1]) * math::createRotZQuaternion(angles[2]);
