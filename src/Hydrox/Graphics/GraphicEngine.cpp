@@ -33,13 +33,13 @@ namespace he
     if(m_initialized)
     {
       delete m_scene;
-	    delete m_modelManager;
-	    delete m_textureManager;
-	    delete m_shaderManager;
-	    delete m_renderManager;
-      delete m_materialManager;
-	    delete m_eventManager;
-      delete m_debugLogManager;
+      RasterizerRenderManager::deleteInstance();
+      DebugLogManager::deleteInstance();
+      EventManager::deleteInstance();
+      ModelManager::deleteInstance();
+      MaterialManager::deleteInstance();
+      TextureManager::deleteInstance();
+      ShaderManager::deleteInstance();
     }
   }
 

@@ -319,19 +319,21 @@ namespace he
 
       std::string shaderPath = m_shaderManager->getPath();
 
-      //if(j == 1)
-      //{
-      //  std::string simpleVert = "Shader/simpleSkinningShader.vert";
-      //  std::string simpleFrag = "Shader/simpleSkinningShader.frag";
+      if(j == 1)
+      {
+        std::string simpleVert = "Shader/simpleSkinningShader.vert";
+        std::string simpleFrag = "Shader/simpleSkinningShader.frag";
 
-      //  out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
-      //}
-      //else
+        ResourceHandle shaderHandle = m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr));
+        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
+      }
+      else
       {
         std::string simpleVert = "Shader/simpleShader.vert";
         std::string simpleFrag = "Shader/simpleShader.frag";
 
-        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr))));
+        ResourceHandle shaderHandle = m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr));
+        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
       }
 
       for(unsigned int i = 0; i != textures.size(); i++)

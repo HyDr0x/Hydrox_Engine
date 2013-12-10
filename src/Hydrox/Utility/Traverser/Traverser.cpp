@@ -66,14 +66,14 @@ namespace he
         doTraverseDown(treeNode->getFirstChild());
       }
 
+      TreeNode *node = treeNode->getNextSibling();
       treeNode->postTraverse(this);
+      treeNode = node;
 
       if(m_stopTraversal)
       {
         return;
       }
-
-      treeNode = treeNode->getNextSibling();
     }
   }
 

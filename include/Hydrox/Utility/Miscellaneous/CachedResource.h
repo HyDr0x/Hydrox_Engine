@@ -9,18 +9,14 @@ namespace he
   {
   public:
 
-    typedef unsigned int CacheIDType;
-
     CachedResource();
-    virtual ~CachedResource();
+    virtual ~CachedResource() = 0;
 
     virtual void free() = 0;
 
   protected:
 
   };
-
-  typedef CachedResource::CacheIDType ResourceHandle;
 }
 
 #endif

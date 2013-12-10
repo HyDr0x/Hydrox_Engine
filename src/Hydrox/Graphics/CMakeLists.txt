@@ -9,6 +9,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/Particle.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Scene.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SceneCacheManager.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Sprite.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SSBO.cpp 

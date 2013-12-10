@@ -2,8 +2,7 @@ add_subdirectory(Signals)
 
 set(
 	HEADER 
-	${HEADER}
-	${CMAKE_CURRENT_SOURCE_DIR}/CachedResource.h 
+	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheManager.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DebugLogManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DebugMessageHandler.h 

@@ -17,7 +17,7 @@ namespace he
       return m_instance;
     }
 
-    void deleteInstance()
+    static void deleteInstance()
     {
       assert(m_instance != nullptr);
       delete m_instance;
@@ -26,7 +26,7 @@ namespace he
   protected:
 
     Singleton(){}
-    ~Singleton(){} 
+    virtual ~Singleton(){} 
 
   private:
 

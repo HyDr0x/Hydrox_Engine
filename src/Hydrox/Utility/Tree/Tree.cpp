@@ -1,5 +1,7 @@
 #include "Hydrox/Utility/Tree/Tree.h"
 
+#include <assert.h>
+
 #include "Hydrox/Utility/Tree/GroupNode.h"
 
 #include "Hydrox/Utility/Traverser/DeleteTraverser.h"
@@ -32,6 +34,8 @@ namespace he
 
   TreeNode* Tree::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
   {
+    assert(destinationNode != nullptr && sourceNode != nullptr);
+
     GroupNode *oldParent = destinationNode->getParent();
     GroupNode *newParent = sourceNode->clone();
 
@@ -69,6 +73,8 @@ namespace he
 
   TreeNode* Tree::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
   {
+    assert(destinationNode != nullptr && sourceNode != nullptr);
+
     TreeNode* oldFirstChild = destinationNode->getFirstChild();
     TreeNode* newFirstChild = sourceNode->clone();
 
@@ -81,6 +87,8 @@ namespace he
 
   void Tree::removeNode(TreeNode *node)
   {
+    assert(node != nullptr);
+
     TreeNode *sibling = node->getNextSibling();
     GroupNode *parent = node->getParent();
     TreeNode *firstChild = node->getFirstChild();
@@ -136,6 +144,8 @@ namespace he
 
   GroupNode* Tree::addSubTree(Tree* subTree, GroupNode* parentNode, std::string namePrefix)
   {
+    assert(subTree != nullptr && parentNode != nullptr);
+
     CopyTraverser traverser(namePrefix);
     traverser.doTraverse(subTree->getRootNode());
     GroupNode *newNode = traverser.getCopiedRootNode();
@@ -158,36 +168,38 @@ namespace he
 
   void Tree::removeSubTree(TreeNode* rootNode)
   {
+    assert(rootNode != nullptr);
+
     GroupNode* parentNode = rootNode->getParent();
-    TreeNode* currentSibling = rootNode->getFirstChild();
-    TreeNode* predSibling = currentSibling;
 
-    //disconnect the subtree from the whole tree
-    while(currentSibling != nullptr)
+    if(parentNode != nullptr)
     {
-      if(currentSibling == rootNode)
+      TreeNode* currentSibling = parentNode->getFirstChild();
+      TreeNode* predSibling = currentSibling;
+
+      //disconnect the subtree from the whole tree
+      while(currentSibling != nullptr)
       {
-        if(currentSibling == predSibling && parentNode != nullptr)
+        if(currentSibling == rootNode)
         {
-          parentNode->setFirstChild(currentSibling->getNextSibling());
-        }
-        else
-        {
-          predSibling->setNextSibling(currentSibling->getNextSibling());
+          if(currentSibling == predSibling)
+          {
+            parentNode->setFirstChild(currentSibling->getNextSibling());
+          }
+          else
+          {
+            predSibling->setNextSibling(currentSibling->getNextSibling());
+          }
+
+          break;//leave the loop
         }
 
-        break;//leave the loop
+        predSibling = currentSibling;
+        currentSibling = currentSibling->getNextSibling();
       }
-
-      predSibling = currentSibling;
-      currentSibling = currentSibling->getNextSibling();
     }
 
-    if(currentSibling != nullptr)
-    {
-      DeleteTraverser traverser;
-
-      traverser.doTraverse(currentSibling);
-    }
+    DeleteTraverser traverser;
+    traverser.doTraverse(rootNode);
   }
 }

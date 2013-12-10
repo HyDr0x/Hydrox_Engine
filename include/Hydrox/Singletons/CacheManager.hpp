@@ -4,8 +4,10 @@
 #include <vector>
 #include <list>
 
+#include "Hydrox/Utility/Observer/Observer.hpp"
 #include "Hydrox/Singletons/Singleton.hpp"
-#include "Hydrox/Singletons/CachedResource.h"
+#include "Hydrox/Utility/Miscellaneous/CachedResource.h"
+#include "Hydrox/Utility/Miscellaneous/ResourceHandle.h"
 
 #include "Hydrox/Graphics/Mesh.h"
 #include "Hydrox/Graphics/Material.h"
@@ -16,7 +18,7 @@
 
 namespace he
 {
-  template<class CLASS> class CacheManager : public Singleton<CacheManager<CLASS>>
+  template<class CLASS> class CacheManager : public Singleton<CacheManager<CLASS>>, public Observer<ResourceHandle*>
   {
   public:
 
@@ -41,9 +43,9 @@ namespace he
       m_path = path;
     }
 
-    CLASS* getObject(ResourceHandle objectID)
+    CLASS* getObject(ResourceHandle handle)
     {
-      return dynamic_cast<CLASS*>(&m_objectsCache[objectID]);
+      return dynamic_cast<CLASS*>(&m_objectsCache[handle.getID()]);
     }
 
     ResourceHandle addObject(CLASS& object)
@@ -54,12 +56,10 @@ namespace he
         m_objectsCache.resize(size);
       }
 
-      ResourceHandle id;
-
+      unsigned int id;
       if(m_list.empty())
       {
-        id = m_availableBorder;
-        m_availableBorder++;
+        id = m_availableBorder++;
       }
       else
       {
@@ -67,18 +67,23 @@ namespace he
         m_list.pop_front();
       }
 
-      m_objectsCache[id] = object;
+      ResourceHandle handle(id);
+      handle.add(this);
 
-      return id;
+      m_objectsCache[handle.getID()] = object;
+
+      return handle;
     }
 
-	  void deleteObject(ResourceHandle objectID)
+    void updateObserver(ResourceHandle* param)
     {
-      assert(objectID < m_availableBorder);
+      assert(param->getID() < m_availableBorder);
 
-      if(objectID != m_availableBorder - 1)
+      m_objectsCache[param->getID()].free();
+
+      if(param->getID() != m_availableBorder - 1)
       {
-        m_list.push_front(objectID);
+        m_list.push_front(param->getID());
       }
       else
       {
@@ -98,7 +103,7 @@ namespace he
     static const unsigned int m_BLOCKSIZE = 64;
 
     unsigned int m_availableBorder;
-	  std::list<ResourceHandle> m_list;
+	  std::list<unsigned int> m_list;
 
 	  std::vector<CLASS> m_objectsCache;
 

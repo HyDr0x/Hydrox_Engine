@@ -12,6 +12,19 @@ namespace he
   public:
 
     Subject(){}
+
+    Subject(const Subject& o)
+    {
+      m_observer = o.m_observer;
+    }
+
+    Subject& operator=(const Subject& o)
+    {
+      m_observer = o.m_observer;
+
+      return *this;
+    }
+
     virtual ~Subject()
     {
       m_observer.clear();
@@ -35,7 +48,7 @@ namespace he
       }
     }
 
-  private:
+  protected:
 
     std::list<Observer<ParamT>*> m_observer;
   };

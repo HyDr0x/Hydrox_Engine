@@ -11,7 +11,8 @@
 
 #include "Hydrox/DLLExport.h"
 
-#include "Hydrox/Singletons/CachedResource.h"
+#include "Hydrox/Utility/Miscellaneous/CachedResource.h"
+#include "Hydrox/Utility/Miscellaneous/ResourceHandle.h"
 
 #include "Hydrox/Utility/Math/Math.hpp"
 

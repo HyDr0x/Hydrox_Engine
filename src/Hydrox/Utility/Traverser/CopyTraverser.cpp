@@ -161,10 +161,10 @@ namespace he
     }
 
     m_sibling = newNode;
-    m_parent = newNode;
-
+    
     if(treeNode->getFirstChild() != nullptr)
     {
+      m_parent = newNode;
       m_childNode = true;
     }
 
@@ -198,10 +198,9 @@ namespace he
 
   void CopyTraverser::ascendingGroupNode(TreeNode* treeNode)
   {
-    m_childNode = false;
-
     if(treeNode->getNextSibling() == nullptr)
     {
+      m_childNode = false;
       m_sibling = m_parent;
       if(m_parent != nullptr)
       {
@@ -212,10 +211,9 @@ namespace he
 
   void CopyTraverser::ascendingTreeNode(TreeNode* treeNode)
   {
-    m_childNode = false;
-
     if(treeNode->getNextSibling() == nullptr)
     {
+      m_childNode = false;
       m_sibling = m_parent;
     }
   }

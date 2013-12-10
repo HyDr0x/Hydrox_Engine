@@ -53,16 +53,16 @@ namespace he
     glGenVertexArrays(1, &m_simpleMeshVAO);
     glBindVertexArray(m_simpleMeshVAO);
     glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-    //glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
-    glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    //glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
 
     glVertexAttribBinding(Shader::POSITION, 0);
-    //glVertexAttribBinding(Shader::TEXTURE0, 0);
-    glVertexAttribBinding(Shader::NORMAL, 0);
+    glVertexAttribBinding(Shader::TEXTURE0, 0);
+    //glVertexAttribBinding(Shader::NORMAL, 0);
 
     glEnableVertexAttribArray(Shader::POSITION);
-    //glEnableVertexAttribArray(Shader::TEXTURE0);
-    glEnableVertexAttribArray(Shader::NORMAL);
+    glEnableVertexAttribArray(Shader::TEXTURE0);
+    //glEnableVertexAttribArray(Shader::NORMAL);
     glBindVertexArray(0);
 
     glGenVertexArrays(1, &m_simpleSkinnedMeshVAO);

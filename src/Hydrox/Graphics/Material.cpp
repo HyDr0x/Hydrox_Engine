@@ -51,6 +51,7 @@ namespace he
     if(m_materialData != nullptr)
     {
       delete m_materialData;
+      m_materialData = nullptr;
     }
 
     if(!m_textureIndices.empty())

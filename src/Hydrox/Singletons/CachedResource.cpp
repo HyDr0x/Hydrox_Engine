@@ -1,4 +1,4 @@
-#include "Hydrox/Singletons/CachedResource.h"
+#include "Hydrox/Utility/Miscellaneous/CachedResource.h"
 
 namespace he
 {
