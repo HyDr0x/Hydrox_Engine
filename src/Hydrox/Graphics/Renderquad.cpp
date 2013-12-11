@@ -6,9 +6,9 @@ namespace he
   {
 	  m_fboIndex = m_depthTex = ~0;
 
-	  float v[]={-1,-1, 1,-1, -1,1, 1,1};
+	  float v[] = {-1,-1, 1,-1, -1,1, 1,1};
 
-	  float texVec[]={0,0, 1,0, 0,1, 1,1};
+	  float texVec[] = {0,0, 1,0, 0,1, 1,1};
 
 	  glGenVertexArrays(1, &m_vaoIndex);
 	  glBindVertexArray(m_vaoIndex);
@@ -31,6 +31,10 @@ namespace he
 
   Renderquad::~Renderquad()
   {
+    glDeleteVertexArrays(1, &m_vaoIndex);
+    glDeleteBuffers(1, &m_vboindex);
+    glDeleteBuffers(1, &m_texIndex);
+
 	  if(m_depthTex != ~0)
     {
       glDeleteTextures(1, &m_depthTex);

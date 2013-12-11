@@ -4,20 +4,7 @@ namespace he
 {
   Material::Material()
   {
-    m_materialData = new MaterialData(1.0f, 
-                                      1.0f, 
-                                      1.0f, 
-                                      1.0f, 
-                                      false); 
-  }
-
-  Material::Material(const Material& o)
-  { 
-    m_materialData = new MaterialData(o.m_materialData->diffuseStrength, 
-                                      o.m_materialData->specularStrength, 
-                                      o.m_materialData->ambientStrength, 
-                                      o.m_materialData->specularExponent, 
-                                      o.m_materialData->transparency); 
+    m_materialData = nullptr;
   }
 
   Material::Material(MaterialData& materialData, std::vector< std::vector<ResourceHandle> >& textureIndices, ResourceHandle shader)
@@ -34,8 +21,29 @@ namespace he
     //}
   }
 
+  Material::Material(const Material& o)
+  { 
+    m_materialData = nullptr;
+    if(o.m_materialData != nullptr)
+    {
+      m_materialData = new MaterialData(o.m_materialData->diffuseStrength, 
+                                        o.m_materialData->specularStrength, 
+                                        o.m_materialData->ambientStrength, 
+                                        o.m_materialData->specularExponent, 
+                                        o.m_materialData->transparency); 
+    }
+  }
+
   Material& Material::operator=(const Material& o)
   {
+    delete m_materialData;
+
+    m_materialData= new MaterialData(o.m_materialData->diffuseStrength, 
+                                      o.m_materialData->specularStrength, 
+                                      o.m_materialData->ambientStrength, 
+                                      o.m_materialData->specularExponent, 
+                                      o.m_materialData->transparency); 
+
     m_textureIndices = o.m_textureIndices;
     m_shaderIndex = o.m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
 
@@ -44,6 +52,7 @@ namespace he
 
   Material::~Material()
   { 
+    free();
   }
 
   void Material::free()
@@ -52,17 +61,16 @@ namespace he
     {
       delete m_materialData;
       m_materialData = nullptr;
-    }
+      m_shaderIndex.free();
 
-    if(!m_textureIndices.empty())
-    {
-	    for(int i = 0; i < m_textureIndices[i].size(); i++)
+      for(int i = 0; i < m_textureIndices.size(); i++)
       {
-        m_textureIndices[i].clear();
+	      for(int j = 0; j < m_textureIndices[i].size(); j++)
+        {
+          m_textureIndices[i][j].free();
+        }
       }
     }
-
-	  m_textureIndices.clear();
   }
 
   unsigned int Material::getTextureNumber(TextureType texType) const

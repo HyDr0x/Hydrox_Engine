@@ -254,7 +254,7 @@ namespace he
 
 		    m_spriteShader->setTexture(3, 0);
 		
-		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix()/* * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1)*/;
+		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		    Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
         float z = renderSprite->getLayer() / (const float)m_maxLayer;
 		    m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
@@ -305,7 +305,7 @@ namespace he
 
 		      m_spriteShader->setTexture(3, 0);
 		
-		      Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix()/* * Matrix<float, 3>(1.0f / m_aspectRatio,0,0, 0,1,0, 0,0,1)*/;
+		      Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		      Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
           float z = renderSprite->getLayer() / (const float)m_maxLayer;
 		      m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);

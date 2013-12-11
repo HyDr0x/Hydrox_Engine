@@ -46,6 +46,11 @@ namespace he
 
   Shader& Shader::operator=(const Shader& o)
   {
+    if(m_program != 0)
+    {
+      glDeleteProgram(m_program);
+    }
+
 	  m_program = o.m_program;
 
     return *this;
@@ -58,6 +63,7 @@ namespace he
   void Shader::free()
   {
     glDeleteProgram(m_program);
+    m_program = 0;
   }
 
   void Shader::getUniformParameters(const char **uniformNames, const GLuint uniformCount, std::vector<GLuint> *uniformIndices, 

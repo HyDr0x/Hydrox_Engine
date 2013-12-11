@@ -16,7 +16,7 @@ namespace he
 	  SharedPointer(T* obj) : m_obj(obj), m_referenceNumber(new unsigned int(1))
 	  {}
 
-	  SharedPointer(const SharedPointer& o) : m_obj(o.m_obj), m_referenceNumber(o.m_referenceNumber)
+	  SharedPointer(const SharedPointer& o) : m_referenceNumber(o.m_referenceNumber), m_obj(o.m_obj)
 	  {
       if(m_referenceNumber != nullptr)
       {
@@ -39,7 +39,11 @@ namespace he
 
 		  m_referenceNumber = o.m_referenceNumber;
 		  m_obj = o.m_obj;
-		  (*m_referenceNumber)++;
+
+      if(m_referenceNumber != nullptr)
+      {
+		    (*m_referenceNumber)++;
+      }
 
 		  return *this;
 	  }

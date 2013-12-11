@@ -7,7 +7,7 @@ namespace he
     m_geometryData = 0;
     m_indexData = 0;
 
-    m_materialIndex = 0;
+    m_materialIndex = ~0;
     m_primitiveCount = 0;
     m_vertexCount = 0;
     m_vertexStride = 0;
@@ -154,6 +154,12 @@ namespace he
 
   Mesh& Mesh::operator=(const Mesh& o)
   {
+    if(m_geometryData != 0)
+    {
+      glDeleteBuffers(1, &m_geometryData);
+      glDeleteBuffers(1, &m_indexData);
+    }
+
     m_materialIndex = o.m_materialIndex;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
@@ -175,6 +181,7 @@ namespace he
   {
     glDeleteBuffers(1, &m_geometryData);
     glDeleteBuffers(1, &m_indexData);
+    m_materialIndex.free();
   }
 
   void Mesh::render(GLuint bindingIndex) const

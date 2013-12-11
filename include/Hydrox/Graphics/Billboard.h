@@ -17,9 +17,8 @@ namespace he
   public:
 
     Billboard(){}
-	  Billboard(const Billboard&){}
-
 	  Billboard(ResourceHandle texID, bool anim, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd);
+    Billboard(const Billboard&);
     Billboard& operator=(const Billboard& o);
 	  ~Billboard();
 

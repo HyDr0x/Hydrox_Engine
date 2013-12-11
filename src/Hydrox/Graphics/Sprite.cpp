@@ -73,6 +73,7 @@ namespace he
 
   void Sprite::free()
   {
+    m_texID.free();
   }
 
   void Sprite::setRenderable(bool renderable)

@@ -4,7 +4,7 @@
 
 namespace he
 {
-  UBO::UBO() : m_bufferData(NULL)
+  UBO::UBO() : m_bufferData(nullptr), m_bufferIndex(0)
   {
   }
 
@@ -46,10 +46,10 @@ namespace he
 
   UBO::~UBO()
   {
-    m_uniformIndices.clear();
-	  m_uniformOffsets.clear();
-	  m_arrayStrides.clear();
-	  m_matrixStrides.clear();
+    if(m_bufferIndex != 0)
+    {
+      glDeleteBuffers(1, &m_bufferIndex);
+    }
 
     if(m_bufferData != nullptr)
     {

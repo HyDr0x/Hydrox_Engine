@@ -38,7 +38,7 @@ namespace he
 
   private:
 
-    Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+    Matrix<float, 4> m_trfMatrix;//the tranformation Matrix
 
     ResourceHandle m_billboardIndex;//index which points into the array of the texturemanager
 

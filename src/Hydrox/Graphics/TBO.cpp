@@ -2,9 +2,9 @@
 
 namespace he
 {
-  TBO::TBO( GLuint size, GLenum usage, GLenum format, unsigned char *data) : m_size(size),
-                                                                              m_offset(0),
-                                                                              m_textureSlot(0)
+  TBO::TBO(GLuint size, GLenum usage, GLenum format, unsigned char *data) : m_size(size),
+                                                                            m_offset(0),
+                                                                            m_textureSlot(0)
   {
     glGenBuffers(1, &m_bufferIndex);
     glGenTextures(1, &m_textureIndex);

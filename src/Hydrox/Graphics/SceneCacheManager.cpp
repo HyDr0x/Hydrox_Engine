@@ -22,14 +22,6 @@ namespace he
 
   SceneCacheManager::~SceneCacheManager()
   {
-    m_dirtyTransforms.clear();
-    m_activeLODs.clear();
-    m_activeAnimatedTransforms.clear();
-    m_activeAnimatedGeometry.clear();
-    m_activeGeometry.clear();
-    m_activeBillboards.clear();
-    m_activeParticles.clear();
-    m_activeLights.clear();
   }
 
   const std::list<AnimatedGeoNode*>& SceneCacheManager::getAnimatedMeshes()

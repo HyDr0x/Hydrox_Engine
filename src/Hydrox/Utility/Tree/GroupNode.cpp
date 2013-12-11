@@ -35,8 +35,6 @@ namespace he
   GroupNode::~GroupNode()
   {
     m_firstChild = nullptr;
-    m_nextSibling = nullptr;
-    m_parent = nullptr;
   }
 
   GroupNode* GroupNode::clone() const

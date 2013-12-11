@@ -11,6 +11,21 @@ namespace he
                                                                                                                                                   m_scale(Vector<float, 2>(1.0f, 1.0f))
   {}
 
+  Billboard::Billboard(const Billboard& o)
+  {
+    m_texID = o.m_texID;
+
+	  m_animNumber = o.m_animNumber;
+	  m_animCount = o.m_animCount;
+	  m_texStart = o.m_texStart;
+	  m_texEnd = o.m_texEnd;
+
+	  m_scale = o.m_scale;
+	  m_translate = o.m_translate;
+
+    m_renderable = o.m_renderable;
+  }
+
   Billboard& Billboard::operator=(const Billboard& o)
   {
     m_texID = o.m_texID;
@@ -33,6 +48,7 @@ namespace he
 
   void Billboard::free()
   {
+    m_texID.free();
   }
 
   void Billboard::setRenderable(bool renderable)

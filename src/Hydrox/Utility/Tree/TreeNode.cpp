@@ -22,6 +22,8 @@ namespace he
 
   TreeNode::~TreeNode()
   {
+    m_nextSibling = nullptr;
+    m_parent = nullptr;
   }
 
   TreeNode* TreeNode::getNextSibling() const

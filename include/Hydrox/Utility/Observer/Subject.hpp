@@ -27,7 +27,6 @@ namespace he
 
     virtual ~Subject()
     {
-      m_observer.clear();
     }
 
     void add(Observer<ParamT> *o)

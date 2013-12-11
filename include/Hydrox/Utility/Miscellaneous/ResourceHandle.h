@@ -17,6 +17,8 @@ namespace he
     ResourceHandle& operator=(const ResourceHandle& o);
     ~ResourceHandle();
 
+    void free();
+
     unsigned int getID();
 
   private:

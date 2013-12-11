@@ -19,6 +19,8 @@ namespace he
 
     m_scene = nullptr;
 
+    m_spriteManager = nullptr;
+    m_billboardManager = nullptr;
 	  m_modelManager = nullptr;
 	  m_textureManager = nullptr;
 	  m_shaderManager = nullptr;
@@ -33,6 +35,8 @@ namespace he
     if(m_initialized)
     {
       delete m_scene;
+      SpriteManager::deleteInstance();
+      BillboardManager::deleteInstance();
       RasterizerRenderManager::deleteInstance();
       DebugLogManager::deleteInstance();
       EventManager::deleteInstance();

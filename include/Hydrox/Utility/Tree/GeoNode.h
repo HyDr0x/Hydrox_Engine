@@ -35,7 +35,7 @@ namespace he
 
   protected:
 
-    Matrix<float,4> m_trfMatrix;//the tranformation Matrix
+    Matrix<float, 4> m_trfMatrix;//the tranformation Matrix
 
     ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
 
