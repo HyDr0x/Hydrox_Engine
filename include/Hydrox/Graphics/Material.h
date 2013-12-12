@@ -26,6 +26,10 @@ namespace he
 
     struct MaterialData
     {
+      MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), transparency(false)
+      {
+      }
+
       MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, bool in_transparency) :
         diffuseStrength(in_diffuseStrength),
         specularStrength(in_specularStrength),
@@ -60,14 +64,14 @@ namespace he
     ResourceHandle getShader() const;
 
     void setMaterial(MaterialData& material);
-    MaterialData* getMaterial() const;
+    const MaterialData& getMaterial() const;
 
   private:
 
     std::vector< std::vector<ResourceHandle> > m_textureIndices;
     ResourceHandle m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
 
-    MaterialData *m_materialData;
+    MaterialData m_materialData;
   };
 }
 
