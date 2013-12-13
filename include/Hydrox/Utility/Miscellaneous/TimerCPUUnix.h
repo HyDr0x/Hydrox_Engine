@@ -9,6 +9,8 @@
 
 namespace he
 {
+  typedef clock_t time;
+
   class GRAPHICAPI CPUTimerUnix
   {
   public:
@@ -16,13 +18,13 @@ namespace he
     CPUTimerUnix(std::string &timerName);
     ~CPUTimerUnix();
 
-    clock_t getTimeDifference();
+    time getTimeDifference();
 
   private:
 
     std::string m_timerName;
 
-    clock_t m_cpuTime;
+    time m_cpuTime;
 
     bool m_showTimerWhenDying;
   };

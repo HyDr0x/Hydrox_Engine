@@ -11,7 +11,7 @@
 
 namespace he
 {
-  #ifdef PNDEBUG
+  #ifdef NDEBUG
     #define CPUTIMER(name)
     #define OGLTIMER(name)
     #define CPUGETTIMEDIFF(i)

@@ -9,6 +9,8 @@
 
 namespace he
 {
+  typedef __int64 time;
+
   class GRAPHICAPI CPUTimerWin
   {
   public:
@@ -16,7 +18,7 @@ namespace he
     CPUTimerWin(std::string &timerName);
     ~CPUTimerWin();
 
-    __int64 getTimeDifference();
+    time getTimeDifference();
 
   private:
 
@@ -24,7 +26,7 @@ namespace he
 
     std::string m_timerName;
 
-    __int64 m_cpuTime;
+    time m_cpuTime;
     double m_cpuFrequency;
 
     bool m_showTimerWhenDying;

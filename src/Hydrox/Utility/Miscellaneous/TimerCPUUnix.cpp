@@ -19,7 +19,7 @@ namespace he
     }
   }
 
-  clock_t CPUTimerUnix::getTimeDifference()
+  time CPUTimerUnix::getTimeDifference()
   {
     m_cpuTime = clock() - m_cpuTime;
     m_cpuTime /= (CLOCKS_PER_SEC * 0.001f);

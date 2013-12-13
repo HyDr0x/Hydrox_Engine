@@ -125,6 +125,8 @@ namespace he
     }
 
     assert(m_debugLogManager->getMajorOpenGLVersion() >= 4 && m_debugLogManager->getMinorOpenGLVersion() >= 3);
+
+    m_debugLogManager->initDebugMode();
   }
 
   void GraphicEngine::update(Vector<float, 3>& cameraPosition, float currentTime)

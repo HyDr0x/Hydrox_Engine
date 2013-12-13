@@ -25,7 +25,7 @@ namespace he
     }
   }
 
-  __int64 CPUTimerWin::getTimeDifference()
+  time CPUTimerWin::getTimeDifference()
   {
     LARGE_INTEGER newTime;
     QueryPerformanceCounter(&newTime);

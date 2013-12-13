@@ -9,14 +9,6 @@ namespace he
 {
   DebugLogManager::DebugLogManager()
   {
-    /*if(m_debugMode)
-    {
-      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);//looks like it doesn't work
-    }
-    else*/
-    
-    GLDEBUGCALLBACK callback = &getDebugMessage;
-    glDebugMessageCallback(callback, nullptr);
   }
 
   DebugLogManager::~DebugLogManager()
@@ -53,6 +45,18 @@ namespace he
     glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &m_maxTextureVertexImageUnits);
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_maxTextureImageUnits);
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_maxCombinedTextureUnits);
+  }
+
+  void DebugLogManager::initDebugMode()
+  {
+    /*if(m_debugMode)
+    {
+      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);//looks like it doesn't work
+    }
+    else*/
+    
+    GLDEBUGCALLBACK callback = &getDebugMessage;
+    glDebugMessageCallback(callback, nullptr);
   }
 
   void DebugLogManager::printSystemInformation()

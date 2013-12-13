@@ -20,6 +20,8 @@ namespace he
 
     void gatherSystemInformation();
 
+    void initDebugMode();
+
     void printSystemInformation();
     void printSupportedExtensions();
 
