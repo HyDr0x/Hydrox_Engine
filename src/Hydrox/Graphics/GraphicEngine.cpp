@@ -35,9 +35,9 @@ namespace he
     if(m_initialized)
     {
       delete m_scene;
+      RasterizerRenderManager::deleteInstance();
       SpriteManager::deleteInstance();
       BillboardManager::deleteInstance();
-      RasterizerRenderManager::deleteInstance();
       DebugLogManager::deleteInstance();
       EventManager::deleteInstance();
       ModelManager::deleteInstance();
