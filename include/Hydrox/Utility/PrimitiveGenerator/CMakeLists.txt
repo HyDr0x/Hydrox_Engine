@@ -1,0 +1,7 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/CubeGenerator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SphereGenerator.h 
+	PARENT_SCOPE 
+)

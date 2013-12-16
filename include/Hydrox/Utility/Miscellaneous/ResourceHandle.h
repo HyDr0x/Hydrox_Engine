@@ -12,7 +12,7 @@ namespace he
   public:
 
     ResourceHandle();
-    ResourceHandle(unsigned int id);
+    ResourceHandle(unsigned int id, unsigned int *referenceCounter);
     ResourceHandle(const ResourceHandle& o);
     ResourceHandle& operator=(const ResourceHandle& o);
     ~ResourceHandle();

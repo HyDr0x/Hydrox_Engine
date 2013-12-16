@@ -8,25 +8,31 @@ namespace he
   }
   Shader::Shader(const Shader& o)
   {
+    m_hash = o.m_hash;
     m_program = o.m_program;
   }
 
-  Shader::Shader(const char *vertexFilename, 
-			            const char *fragmentFilename, 
-			            const char *geometryFilename, 
-			            const char *tesselationCTRLFilename, 
-                  const char *tesselationEVALFilename,
-                  const char *computeFilename,
-                  std::vector<std::string>& dynamicDefines)
+  Shader::Shader(std::string shaderName,
+                 std::string vertexShaderSource, 
+			           std::string fragmentShaderSource, 
+			           std::string geometryShaderSource, 
+			           std::string tesselationCTRLShaderSource, 
+                 std::string tesselationEVALShaderSource,
+                 std::string computeShaderSource)
   {
-	  bool error = true;
+    std::string data = std::string();
+    data += shaderName + vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + computeShaderSource;
+
+    m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
+
+	  bool allOK = true;
 
     GLuint computeShader;
-    error = createShader(GL_COMPUTE_SHADER, computeFilename, dynamicDefines, computeShader);
+    allOK = createShader(GL_COMPUTE_SHADER, shaderName, computeShaderSource, computeShader);
 
-    if(error)//compute shader
+    if(allOK)//compute shader
     {
-      createProgram(m_program, computeFilename, computeShader, 0, 0, 0, 0, 0);
+      createProgram(m_program, shaderName, computeShader, 0, 0, 0, 0, 0);
     }
 
     GLuint vertexShader;
@@ -35,13 +41,13 @@ namespace he
     GLuint geometryShader; 
     GLuint fragmentShader;
   
-    createShader(GL_VERTEX_SHADER, vertexFilename, dynamicDefines, vertexShader);
-    createShader(GL_TESS_CONTROL_SHADER, tesselationCTRLFilename, dynamicDefines, tesselationControlShader);
-    createShader(GL_TESS_EVALUATION_SHADER, tesselationEVALFilename, dynamicDefines, tesselationEvaluationShader);
-    createShader(GL_GEOMETRY_SHADER, geometryFilename, dynamicDefines, geometryShader);
-    createShader(GL_FRAGMENT_SHADER, fragmentFilename, dynamicDefines, fragmentShader);
+    createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource, vertexShader);
+    createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource, tesselationControlShader);
+    createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource, tesselationEvaluationShader);
+    createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource, geometryShader);
+    createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource, fragmentShader);
 
-    createProgram(m_program, vertexFilename, 0, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
+    createProgram(m_program, shaderName, 0, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
   }
 
   Shader& Shader::operator=(const Shader& o)
@@ -51,6 +57,7 @@ namespace he
       glDeleteProgram(m_program);
     }
 
+    m_hash = o.m_hash;
 	  m_program = o.m_program;
 
     return *this;
@@ -148,12 +155,12 @@ namespace he
 	  glUniform1i(location, slot);
   }
 
-  void Shader::enableTransformFeedback(int count, const char** varyings, GLenum buffertype) const
+  void Shader::enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const
   {
 	  glTransformFeedbackVaryings(m_program, count, varyings, buffertype);
 	  glLinkProgram(m_program);//new linking because some unused varyings could be in use now
 	
-	  int length;
+	  GLsizei length;
 	  GLsizei size;
 	  GLenum type;
 	
@@ -161,7 +168,7 @@ namespace he
 	  {
       glGetTransformFeedbackVarying(m_program, i, 0, &length, nullptr, nullptr, nullptr);
 
-      char *var = new char[length];
+      GLchar *var = new GLchar[length];
 
 		  glGetTransformFeedbackVarying(m_program, i, length, nullptr, &size, &type, var);
 
@@ -196,7 +203,7 @@ namespace he
 	  glUseProgram(0);
   }
 
-  bool Shader::createProgram(GLuint& program, const char *shaderName, GLuint computeShader, 
+  bool Shader::createProgram(GLuint& program, std::string shaderName, GLuint computeShader, 
                                                                       GLuint vertexShader, 
                                                                       GLuint tesselationControlShader, 
                                                                       GLuint tesselationEvaluationShader, 
@@ -258,29 +265,21 @@ namespace he
     return true;
   }
 
-  bool Shader::createShader(GLenum shaderType, const char *shaderFileName, std::vector<std::string>& dynamicDefines, GLuint& shader)
+  bool Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource, GLuint& shader)
   {
-    if(shaderFileName == nullptr)
+    if(shaderSource.empty())
     {
       shader = 0;
       return false;
     }
 
-	  std::string source;
-
-    if(!loadShaderSource(shaderFileName, source, dynamicDefines))
-    {
-      shader = 0;
-      return false;
-    }
-
-    const char *include = source.c_str();
+    const GLchar *include = shaderSource.c_str();
 
     shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &include, nullptr );
     glCompileShader(shader);
 
-    if(!checkShaderStatus(shader, shaderFileName))
+    if(!checkShaderStatus(shader, shaderName))
 	  {
 		  glDeleteShader(shader);
       shader = 0;
@@ -290,46 +289,7 @@ namespace he
     return true;
   }
 
-  bool Shader::loadShaderSource(const char *filename, std::string &shadersource, std::vector<std::string> &dynamicDefines)
-  {
-	  std::ifstream file(filename);
-	  std::string line;
-
-	  if(file.is_open())
-    {
-		  while(!file.eof())
-		  {
-			  std::getline(file, line);
-			  line += '\n';
-
-        for(int i = 0; i < dynamicDefines.size(); i++)
-        {
-          size_t pos = line.find(dynamicDefines[i]);
-          if(pos != std::string::npos)
-          {
-            size_t defineOffset = dynamicDefines[i].find(" ");
-            line.insert(pos + defineOffset, dynamicDefines[i], defineOffset, std::string::npos);
-            dynamicDefines.erase(dynamicDefines.begin() + i);
-          }
-        }
-
-			  shadersource += line;
-		  }
-    }
-	  else
-	  {
-		  file.close();
-
-		  std::cout << "Error: couldn't open shader source file " << filename << "." << std::endl;
-
-		  return false;
-	  }
-
-	  file.close();
-	  return true;
-  }
-
-  bool Shader::checkShaderStatus(GLuint shader, const char *filename) const
+  bool Shader::checkShaderStatus(GLuint shader, std::string shaderName) const
   {
 	  GLint errorCode;
 	  glGetShaderiv(shader, GL_COMPILE_STATUS, &errorCode);
@@ -340,10 +300,10 @@ namespace he
 
 		  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
 
-      GLchar *errorLog = new char[length];
+      GLchar *errorLog = new GLchar[length];
       glGetShaderInfoLog(shader, length, nullptr, errorLog);
 
-		  std::cout << "Error compiling " << filename << " because of " << errorLog << std::endl;
+		  std::cout << "Error compiling " << shaderName << " because of " << errorLog << std::endl;
 
       delete[] errorLog;
 

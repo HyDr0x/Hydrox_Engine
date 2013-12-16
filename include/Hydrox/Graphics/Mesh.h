@@ -38,13 +38,14 @@ namespace he
 
 	  Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
       std::vector<Vector<float, 3>> positions, 
-      std::vector<Vector<float, 2>> textureCoords, 
-      std::vector<Vector<float, 3>> normals, 
-      std::vector<Vector<float, 3>> binormals, 
-      std::vector<Vector<float, 4>> boneIndices, 
-      std::vector<Vector<float, 4>> boneWeights,
-      std::vector<indexType> indices,
-      GLuint primitiveType = GL_TRIANGLES);
+      GLuint primitiveType = GL_TRIANGLES,
+      std::vector<indexType> indices = std::vector<indexType>(),
+      std::vector<Vector<float, 2>> textureCoords = std::vector<Vector<float, 2>>(), 
+      std::vector<Vector<float, 3>> normals = std::vector<Vector<float, 3>>(), 
+      std::vector<Vector<float, 3>> binormals = std::vector<Vector<float, 3>>(), 
+      std::vector<Vector<float, 4>> boneIndices = std::vector<Vector<float, 4>>(), 
+      std::vector<Vector<float, 4>> boneWeights = std::vector<Vector<float, 4>>()
+      );
     
     Mesh& operator=(const Mesh& o);
 

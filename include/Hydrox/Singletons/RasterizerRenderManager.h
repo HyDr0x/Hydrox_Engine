@@ -37,8 +37,8 @@ namespace he
 
     GLuint m_dummyVBO;
 
-    Shader *m_billboardShader;
-    Shader *m_spriteShader;
+    ResourceHandle m_billboardHandle;
+    ResourceHandle m_spriteHandle;
   };
 }
 

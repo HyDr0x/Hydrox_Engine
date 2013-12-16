@@ -9,6 +9,7 @@
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
 #include "Hydrox/Loader/ILDevilLoader.h"
+#include "Hydrox/Loader/ShaderLoader.h"
 
 #include "Hydrox/Graphics/Scene.h"
 #include "Hydrox/Graphics/Texture.h"
@@ -75,42 +76,57 @@ namespace he
     return m_animationTimeUnit;
   }
 
-  Scene* AssimpLoader::load(std::string filename, std::string materialFileName, bool yAxisFlipped)
+  Scene* AssimpLoader::load(std::string filename, bool yAxisFlipped)
   {
+    Scene *scene = nullptr;
     Assimp::Importer importer;
 	  const aiScene *assimpScene = importer.ReadFile(m_modelManager->getPath() + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
 
 	  if(!assimpScene)
     {
 		  printf("%s\n", importer.GetErrorString());
+
+      GroupNode *rootNode = loadDefaultSceneGraph();
+
+      scene = new Scene(rootNode, Vector<float, 3>::identity());
+    }
+    else
+    {
+      std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
+      std::vector<ResourceHandle> materials;//contains the material id's of the scene
+    
+      loadMaterialsFromAssimp(materials, assimpScene);
+
+      loadMeshesFromAssimp(meshes, materials, assimpScene, yAxisFlipped);
+
+      loadAnimatedSkeleton(assimpScene);
+
+      GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
+
+      attachBonesToSkinnedMesh();
+
+      scene = new Scene(rootNode, Vector<float, 3>::identity());
+
+      m_animationTracks.clear();
+      m_inverseBindPoseTable.clear();
+      m_boneNameTable.clear();
+      m_skinnedMeshTable.clear();
+      m_boneTable.clear();
     }
 
-	  assert(assimpScene && "");
-
-    std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
-    std::vector<ResourceHandle> materials;//contains the material id's of the scene
-    
-    loadMaterialsFromAssimp(materials, materialFileName, assimpScene);
-
-    loadMeshesFromAssimp(meshes, materials, assimpScene, yAxisFlipped);
-
-    loadAnimatedSkeleton(assimpScene);
-
-    GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene->mRootNode, meshes);
-
-    attachBonesToSkinnedMesh();
-
-    Scene *scene = new Scene(rootNode, Vector<float, 3>::identity());
-
-	  importer.FreeScene();
-
-    m_animationTracks.clear();
-    m_inverseBindPoseTable.clear();
-    m_boneNameTable.clear();
-    m_skinnedMeshTable.clear();
-    m_boneTable.clear();
+    importer.FreeScene();
 
 	  return scene;
+  }
+
+  GroupNode* AssimpLoader::loadDefaultSceneGraph()
+  {
+    TransformNode *sceneRootNode = new TransformNode(Matrix<float, 4>::identity(), std::string("defaultCube"));
+
+    GeoNode *mesh = new GeoNode(m_modelManager->getDefaultResource(), true, std::string("defaultCubeMesh"), sceneRootNode);
+    sceneRootNode->setFirstChild(mesh);
+
+    return sceneRootNode;
   }
 
   void AssimpLoader::loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, std::vector<ResourceHandle>& in_materials, const aiScene *scene, bool yAxisFlipped)
@@ -269,16 +285,16 @@ namespace he
 
     return m_modelManager->addObject(Mesh(vertexDeclarationFlags, materialIndex, 
       positions,
+      primitiveType,
+      indices,
       textureCoords,
       normals,
       binormals,
       boneIndices,
-      boneWeights,
-      indices,
-      primitiveType));
+      boneWeights));
   }
 
-  void AssimpLoader::loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, std::string materialFileName, const aiScene *scene)
+  void AssimpLoader::loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene)
   {
     out_materials.resize(scene->mNumMaterials);
     std::vector< std::vector<ResourceHandle> > textures;
@@ -319,22 +335,10 @@ namespace he
 
       std::string shaderPath = m_shaderManager->getPath();
 
-      if(j == 1)
-      {
-        std::string simpleVert = "Shader/simpleSkinningShader.vert";
-        std::string simpleFrag = "Shader/simpleSkinningShader.frag";
+      ShaderLoader shaderLoader(m_shaderManager);
 
-        ResourceHandle shaderHandle = m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr));
-        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
-      }
-      else
-      {
-        std::string simpleVert = "Shader/simpleShader.vert";
-        std::string simpleFrag = "Shader/simpleShader.frag";
-
-        ResourceHandle shaderHandle = m_shaderManager->addObject(Shader((shaderPath + simpleVert).c_str(), (shaderPath + simpleFrag).c_str(), nullptr, nullptr, nullptr, nullptr));
-        out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
-      }
+      ResourceHandle shaderHandle = shaderLoader.loadShader(std::string("simpleShader"), std::string("Shader/simpleShader.vert"), std::string("Shader/simpleShader.frag"));
+      out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
 
       for(unsigned int i = 0; i != textures.size(); i++)
       {

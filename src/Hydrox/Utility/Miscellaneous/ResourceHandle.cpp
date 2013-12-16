@@ -8,10 +8,10 @@ namespace he
     m_id = ~0;
   }
 
-  ResourceHandle::ResourceHandle(unsigned int id)
+  ResourceHandle::ResourceHandle(unsigned int id, unsigned int *referenceCounter)
   {
-    m_referenceCounter = nullptr;
-    m_referenceCounter = new unsigned int(1);
+    (*referenceCounter)++;
+    m_referenceCounter = referenceCounter;
     m_id = id;
   }
 
@@ -35,7 +35,6 @@ namespace he
     if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
     {
       notify(this);
-      delete m_referenceCounter;
     }
 
     m_referenceCounter = o.m_referenceCounter;
@@ -55,7 +54,6 @@ namespace he
     if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
     {
       notify(this);
-      delete m_referenceCounter;
       m_referenceCounter = nullptr;
     }
   }
@@ -65,7 +63,6 @@ namespace he
     if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
     {
       notify(this);
-      delete m_referenceCounter;
     }
 
     m_referenceCounter = nullptr;

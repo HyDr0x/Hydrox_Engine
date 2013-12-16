@@ -19,7 +19,7 @@ namespace he
   public:
 
     Texture() {}
-    Texture(const Texture&){}
+    Texture(const Texture&);
 
 	  Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL);
     Texture& operator=(const Texture& o);

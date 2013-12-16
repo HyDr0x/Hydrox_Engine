@@ -8,6 +8,25 @@ namespace he
 
   Material::Material(MaterialData& materialData, std::vector< std::vector<ResourceHandle> >& textureIndices, ResourceHandle shader)
   {
+    unsigned int length = sizeof(MaterialData) + sizeof(unsigned int);
+    std::vector<unsigned char> data(length);
+    memcpy(&data[0], &materialData, sizeof(MaterialData));
+    unsigned int id = shader.getID();
+    memcpy(&data[sizeof(MaterialData)], &id, sizeof(unsigned int));
+
+    for(size_t i = 0; i < textureIndices.size(); i++)
+    {
+      for(size_t j = 0; j < textureIndices[i].size(); j++)
+      {
+        data.resize(data.size() + sizeof(unsigned int));
+        unsigned int id = textureIndices[i][j].getID();
+        memcpy(&data[length], &id, sizeof(unsigned int));
+        length += sizeof(unsigned int);
+      }
+    }
+
+    m_hash = MurmurHash64A(&data[0], length, 0);
+
     m_shaderIndex = shader;
     m_textureIndices = textureIndices;
     m_materialData = materialData;
@@ -22,6 +41,8 @@ namespace he
 
   Material::Material(const Material& o)
   { 
+    m_hash = o.m_hash;
+
     m_materialData = MaterialData(o.m_materialData.diffuseStrength, 
                                   o.m_materialData.specularStrength, 
                                   o.m_materialData.ambientStrength, 
@@ -31,6 +52,8 @@ namespace he
 
   Material& Material::operator=(const Material& o)
   {
+    m_hash = o.m_hash;
+
     m_materialData = MaterialData(o.m_materialData.diffuseStrength, 
                                   o.m_materialData.specularStrength, 
                                   o.m_materialData.ambientStrength, 
@@ -53,10 +76,13 @@ namespace he
     if(m_shaderIndex.getID() != ~0)
     {
       m_shaderIndex.free();
+    }
 
-      for(int i = 0; i < m_textureIndices.size(); i++)
+    for(int i = 0; i < m_textureIndices.size(); i++)
+    {
+	    for(int j = 0; j < m_textureIndices[i].size(); j++)
       {
-	      for(int j = 0; j < m_textureIndices[i].size(); j++)
+        if(m_textureIndices[i][j].getID() != ~0)
         {
           m_textureIndices[i][j].free();
         }

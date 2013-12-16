@@ -47,13 +47,14 @@ namespace he
     void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
     AnimationTimeUnit getAnimationTimeUnit();
 
-    Scene* load(std::string filename, std::string materialFileName, bool yAxisFlipped = true);
+    Scene* load(std::string filename, bool yAxisFlipped = true);
 
   private:
 
     AssimpLoader(){}
 
-    void loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, std::string materialFileName, const aiScene *scene);
+    GroupNode* loadDefaultSceneGraph();
+    void loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene);
     void loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, std::vector<ResourceHandle>& in_materials, const aiScene *scene, bool yAxisFlipped);
     ResourceHandle loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, unsigned int meshIndex, bool yAxisFlipped);
     void loadAnimatedSkeleton(const aiScene *scene);

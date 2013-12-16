@@ -9,6 +9,9 @@
 #include "Hydrox/Singletons/Signals/EventManager.h"
 #include "Hydrox/Singletons/DebugLogManager.h"
 
+#include "Hydrox/Utility/PrimitiveGenerator/CubeGenerator.h"
+#include "Hydrox/Loader/ShaderLoader.h"
+
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
 namespace he
@@ -105,13 +108,7 @@ namespace he
 	  m_renderManager = RasterizerRenderManager::getInstance();
 
     //initialize the manager
-    m_modelManager->initialize(modelPath);
-    m_materialManager->initialize(materialPath);
-    m_shaderManager->initialize(vfxPath);
-    m_textureManager->initialize(texPath);
-    m_billboardManager->initialize(texPath);
-    m_spriteManager->initialize(texPath);
-    m_renderManager->initialize(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
+    initializeResourceManager(vfxPath, texPath, modelPath, materialPath, spriteLayer);
 
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 
@@ -137,5 +134,44 @@ namespace he
   void GraphicEngine::draw(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition)
   {
     m_renderManager->render(viewMatrix, projectionMatrix, cameraPosition, m_scene);
+  }
+
+  void GraphicEngine::initializeResourceManager(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, size_t spriteLayer)
+  {
+    CubeGenerator cubeGenerator;
+
+    Vector<float, 3> textureData = Vector<float, 3>(0.0f, 1.0f, 0.0f);
+    m_textureManager->initialize(Texture(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]), texPath);
+
+    m_billboardManager->initialize(Billboard(m_textureManager->getDefaultResource(), false, Vector<unsigned int, 2>(1, 1), Vector<float, 2>(0.0f, 0.0f), Vector<float, 2>(1.0f, 1.0f)), texPath);
+    m_spriteManager->initialize(Sprite(m_textureManager->getDefaultResource(), false, Vector<unsigned int, 2>(1, 1), Vector<float, 2>(0.0f, 0.0f), Vector<float, 2>(1.0f, 1.0f)), texPath);
+
+    std::string vertexSource = "#version 430 core\n\
+                                layout(location = 4) uniform mat4 MVP;\n\
+                                \n\
+                                layout(location = 0) in vec3 in_Pos;\n\
+                                \n\
+                                void main()\n\
+                                {\n\
+	                                gl_Position = MVP * vec4(in_Pos, 1);\n\
+                                }";
+
+    std::string fragmentSource = "#version 430 core\n\
+                                  layout(early_fragment_tests) in;\n\
+                                  \n\
+                                  out vec4 color;\n\
+                                  \n\
+                                  void main()\n\
+                                  {\n\
+	                                  color = vec4(1,1,1,1);\n\
+                                  }";
+
+    m_shaderManager->initialize(Shader(std::string("defaultShader"), vertexSource, fragmentSource), vfxPath);
+
+    m_materialManager->initialize(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<ResourceHandle>>(), m_shaderManager->getDefaultResource()), materialPath);
+
+    m_modelManager->initialize(cubeGenerator.generateCube(m_materialManager->getDefaultResource()), modelPath);
+
+    m_renderManager->initialize(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
   }
 }

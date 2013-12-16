@@ -39,13 +39,12 @@ namespace he
 
   TreeNode* BillboardNode::clone() const
   {
-    BillboardNode *newNode = new BillboardNode(~0, true, m_nodeName);
+    BillboardNode *newNode = new BillboardNode(m_billboardIndex, true, m_nodeName);
 
     newNode->m_nodeName = m_nodeName;
 
     newNode->m_trfMatrix = m_trfMatrix;
     newNode->m_renderable = m_renderable;
-    newNode->m_billboardIndex = m_billboardIndex;
 
     return newNode;
   }

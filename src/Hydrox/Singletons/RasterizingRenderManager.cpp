@@ -17,6 +17,8 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
+#include "Hydrox/Loader/ShaderLoader.h"
+
 namespace he
 {
   RasterizerRenderManager::~RasterizerRenderManager()
@@ -26,8 +28,6 @@ namespace he
     glDeleteVertexArrays(1, &m_simpleMeshVAO);
     glDeleteVertexArrays(1, &m_simpleSkinnedMeshVAO);
     glDeleteVertexArrays(1, &m_simpleSkinnedTestVAO);
-    delete m_billboardShader;
-    delete m_spriteShader;
   }
 
   void RasterizerRenderManager::initialize(ModelManager *modelManager, 
@@ -107,18 +107,11 @@ namespace he
     glEnableVertexAttribArray(Shader::BONEINDICES);
     glBindVertexArray(0);
 
-    std::string shaderPath = m_shaderManager->getPath();
+    ShaderLoader shaderLoader(m_shaderManager);
 
-    std::string billboardVertName = "Shader/billboardShader.vert";
-    std::string billboardFragName = "Shader/billboardShader.frag";
-    std::string billboardGeomName = "Shader/billboardShader.geom";
+    m_billboardHandle = shaderLoader.loadShader(std::string("billboard shader"), std::string("Shader/billboardShader.vert"), std::string("Shader/billboardShader.frag"),  std::string("Shader/billboardShader.geom"));
 
-    std::string spriteVertName = "Shader/spriteShader.vert";
-    std::string spriteFragName = "Shader/spriteShader.frag";
-    std::string spriteGeomName = "Shader/spriteShader.geom";
-
-    m_billboardShader = new Shader((shaderPath + billboardVertName).c_str(), (shaderPath + billboardFragName).c_str(), (shaderPath + billboardGeomName).c_str(), nullptr, nullptr, nullptr);
-    m_spriteShader = new Shader((shaderPath + spriteVertName).c_str(), (shaderPath + spriteFragName).c_str(), (shaderPath + spriteGeomName).c_str(), nullptr, nullptr, nullptr);
+    m_spriteHandle = shaderLoader.loadShader(std::string("sprite shader"), std::string("Shader/spriteShader.vert"), std::string("Shader/spriteShader.frag"), std::string("Shader/spriteShader.geom"));
   }
 
   void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)
@@ -204,10 +197,11 @@ namespace he
 
     glEnableVertexAttribArray(Shader::SPECIAL0);
  
-	  m_billboardShader->useShader();
+    Shader *billboardShader = m_shaderManager->getObject(m_billboardHandle);
+	  billboardShader->useShader();
 
-    m_billboardShader->setUniform(1, GL_FLOAT_MAT4, &viewMatrix[0][0]);
-    m_billboardShader->setUniform(2, GL_FLOAT_MAT4, &projectionMatrix[0][0]);
+    billboardShader->setUniform(1, GL_FLOAT_MAT4, &viewMatrix[0][0]);
+    billboardShader->setUniform(2, GL_FLOAT_MAT4, &projectionMatrix[0][0]);
 
 	  for(std::list<BillboardNode*>::const_iterator billboarditerator = renderBillboardList.begin(); billboarditerator != renderBillboardList.end(); billboarditerator++)
 	  {
@@ -217,16 +211,16 @@ namespace he
         renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
 
         renderTexture->setTexture(0);
-		    m_billboardShader->setTexture(6, 0);
+		    billboardShader->setTexture(6, 0);
 
         Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
 		    Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
         Vector<float, 2> scale = renderBillboard->getScale();
 		    Vector<float, 3> translate = renderBillboard->getPosition();
-        m_billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
-		    m_billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
-		    m_billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
-		    m_billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
+        billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
+		    billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
+		    billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
+		    billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
         glDrawArrays(GL_POINTS, 0, 1);
@@ -241,7 +235,8 @@ namespace he
 
     Sprite *renderSprite;
 
-	  m_spriteShader->useShader();
+    Shader *spriteShader = m_shaderManager->getObject(m_spriteHandle);
+	  spriteShader->useShader();
 
 	  for(std::list<ResourceHandle>::iterator spriteIDIterator = m_opaqueSpriteIDs.begin(); spriteIDIterator != m_opaqueSpriteIDs.end(); spriteIDIterator++)
     {
@@ -252,14 +247,14 @@ namespace he
 
         renderTexture->setTexture(0);
 
-		    m_spriteShader->setTexture(3, 0);
+		    spriteShader->setTexture(3, 0);
 		
 		    Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		    Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
         float z = renderSprite->getLayer() / (const float)m_maxLayer;
-		    m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		    m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-        m_spriteShader->setUniform(2, GL_FLOAT, &z);
+		    spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		    spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+        spriteShader->setUniform(2, GL_FLOAT, &z);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 		    glDrawArrays(GL_POINTS, 0, 1);
@@ -268,7 +263,7 @@ namespace he
 
     ////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
 
-    for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//sort all sprites according to their layer
+    for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//resort all sprites according to their layer if their layer has been changed
     {
       for(std::list<ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
       {
@@ -303,14 +298,14 @@ namespace he
 
           renderTexture->setTexture(0);
 
-		      m_spriteShader->setTexture(3, 0);
+		      spriteShader->setTexture(3, 0);
 		
 		      Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		      Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
           float z = renderSprite->getLayer() / (const float)m_maxLayer;
-		      m_spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		      m_spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-          m_spriteShader->setUniform(2, GL_FLOAT, &z);
+		      spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		      spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+          spriteShader->setUniform(2, GL_FLOAT, &z);
 
           glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 		      glDrawArrays(GL_POINTS, 0, 1);

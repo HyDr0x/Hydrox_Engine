@@ -6,9 +6,37 @@ namespace he
 	                                                                                                                              m_width(width),
 	                                                                                                                              m_height(height),
                                                                                                                                 m_type(type),
+                                                                                                                                m_internalFormat(internalFormat),
                                                                                                                                 m_format(format),
                                                                                                                                 m_slot(0)
   {
+    unsigned int bytesPerPixel;
+
+    switch(m_internalFormat)
+    {
+    case GL_RGB16:
+      bytesPerPixel = 6;
+      break;
+    case GL_RGB32F:
+      bytesPerPixel = 12;
+      break;
+    case GL_RGB8:
+      bytesPerPixel = 3;
+      break;
+    case GL_RGBA16:
+      bytesPerPixel = 8;
+      break;
+    case GL_RGBA32F:
+      bytesPerPixel = 16;
+      break;
+    case GL_RGBA8:
+    default:
+      bytesPerPixel = 4;
+    }
+
+    unsigned int length = m_width * m_height * bytesPerPixel;
+    m_hash = MurmurHash64A(data, length, 0);
+
 	  glGenTextures(1, &m_texIndex);
 		  glBindTexture(m_target, m_texIndex);
 		  glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -20,10 +48,24 @@ namespace he
 	  glBindTexture(m_target, 0);
   }
 
+  Texture::Texture(const Texture& o)
+  {
+    m_hash = o.m_hash;
+    m_width = o.m_width;
+    m_height = o.m_height;
+	  m_texIndex = o.m_texIndex;
+	  m_target = o.m_target;
+    m_internalFormat = o.m_internalFormat;
+    m_format = o.m_format;
+    m_type = o.m_type;
+	  m_slot = o.m_slot;
+  }
+
   Texture& Texture::operator=(const Texture& o)
   {
     glDeleteTextures(1, &m_texIndex);
 
+    m_hash = o.m_hash;
     m_width = o.m_width;
     m_height = o.m_height;
 	  m_texIndex = o.m_texIndex;

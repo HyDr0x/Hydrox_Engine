@@ -1,5 +1,7 @@
 #include "Hydrox/Graphics/Billboard.h"
 
+#include <vector>
+
 namespace he
 {
   Billboard::Billboard(ResourceHandle texID, bool renderable, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
@@ -9,10 +11,22 @@ namespace he
                                                                                                                                                   m_texEnd(texEnd),
                                                                                                                                                   m_translate(Vector<float, 3>::identity()),
                                                                                                                                                   m_scale(Vector<float, 2>(1.0f, 1.0f))
-  {}
+  {
+    std::vector<unsigned char> hashData(36);
+    unsigned int id = m_texID.getID();
+    memcpy(&hashData[0], &id, 4);
+    memcpy(&hashData[4], &m_animNumber[0], 8);
+    memcpy(&hashData[12], &m_animCount[0], 8);
+    memcpy(&hashData[20], &m_texStart[0], 8);
+    memcpy(&hashData[28], &m_texEnd[0], 8);
+
+    m_hash = MurmurHash64A(&hashData[0], hashData.size(), 0);
+  }
 
   Billboard::Billboard(const Billboard& o)
   {
+    m_hash = o.m_hash;
+
     m_texID = o.m_texID;
 
 	  m_animNumber = o.m_animNumber;
@@ -28,6 +42,8 @@ namespace he
 
   Billboard& Billboard::operator=(const Billboard& o)
   {
+    m_hash = o.m_hash;
+
     m_texID = o.m_texID;
 
 	  m_animNumber = o.m_animNumber;

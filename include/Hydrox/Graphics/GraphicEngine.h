@@ -45,6 +45,8 @@ namespace he
 
   private:
 
+    void initializeResourceManager(std::string vfxPath, std::string texPath, std::string modelPath, std::string materialPath, size_t spriteLayer);
+
     Scene *m_scene;
 
 	  RenderManager *m_renderManager;

@@ -3,6 +3,7 @@ add_subdirectory(Miscellaneous)
 add_subdirectory(Observer)
 add_subdirectory(Parser)
 add_subdirectory(Pointer)
+add_subdirectory(PrimitiveGenerator)
 add_subdirectory(Traverser)
 add_subdirectory(Tree)
 

@@ -1,5 +1,7 @@
 #include "Hydrox/Graphics/Sprite.h"
 
+#include <vector>
+
 namespace he
 {
   Sprite::Sprite(ResourceHandle texID, bool renderable, Vector<unsigned int, 2> animNumber, Vector<float, 2> texStart, Vector<float, 2> texEnd) : m_texID(texID), 
@@ -15,10 +17,21 @@ namespace he
                                                                                                                                                   m_layer(0),
                                                                                                                                                   m_layerChanged(false)
   {
+    std::vector<unsigned char> hashData(36);
+    unsigned int id = m_texID.getID();
+    memcpy(&hashData[0], &id, 4);
+    memcpy(&hashData[4], &m_animNumber[0], 8);
+    memcpy(&hashData[12], &m_animCount[0], 8);
+    memcpy(&hashData[20], &m_texStart[0], 8);
+    memcpy(&hashData[28], &m_texEnd[0], 8);
+
+    m_hash = MurmurHash64A(&hashData[0], hashData.size(), 0);
   }
 
   Sprite::Sprite(const Sprite& o)
   {
+    m_hash = o.m_hash;
+
     m_texID = o.m_texID;
 
     m_rtMatrix = o.m_rtMatrix;
@@ -43,6 +56,8 @@ namespace he
 
   Sprite& Sprite::operator=(const Sprite& o)
   {
+    m_hash = o.m_hash;
+
     m_texID = o.m_texID;
 
     m_rtMatrix = o.m_rtMatrix;

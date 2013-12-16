@@ -1,6 +1,7 @@
 #ifndef CACHEMANAGER_H_
 #define CACHEMANAGER_H_
 
+#include <map>
 #include <vector>
 #include <list>
 
@@ -24,23 +25,32 @@ namespace he
 
     CacheManager()
     {
-      m_availableBorder = 0;
     }
 
 	  ~CacheManager()
     {
+      m_defaultResource.free();
+
       for(unsigned int i = 0; i < m_objectsCache.size(); i++)
       {
+        if(m_referenceCounter[i] > 0)
+        {
+          std::cout << "WARNING, Resource not being cleaned correctly!" << std::endl;
+        }
+
         m_objectsCache[i].free();
       }
-
-	    m_objectsCache.clear();
-      m_list.clear();
     }
 
-    void initialize(std::string path)
+    void initialize(CLASS& defaultResource, std::string path)
     {
       m_path = path;
+      m_defaultResource = addObject(defaultResource);
+    }
+
+    ResourceHandle getDefaultResource()
+    {
+      return m_defaultResource;
     }
 
     CLASS* getObject(ResourceHandle handle)
@@ -48,47 +58,57 @@ namespace he
       return dynamic_cast<CLASS*>(&m_objectsCache[handle.getID()]);
     }
 
+    bool isAlreadyCached(CLASS& object)
+    {
+      return m_objectHash.count(object.getHash());
+    }
+
     ResourceHandle addObject(CLASS& object)
     {
-      if(m_objectsCache.size() <= m_availableBorder)
-      {
-        unsigned int size = static_cast<unsigned int>((m_objectsCache.size() / m_BLOCKSIZE + 1) * m_BLOCKSIZE);
-        m_objectsCache.resize(size);
-      }
+      uint64_t hash = object.getHash();
 
-      unsigned int id;
-      if(m_list.empty())
+      if(!m_objectHash.count(hash))
       {
-        id = m_availableBorder++;
+        if(m_list.empty())
+        {
+          unsigned int oldSize = m_objectsCache.size();
+          unsigned int size = static_cast<unsigned int>((m_objectsCache.size() / m_BLOCKSIZE + 1) * m_BLOCKSIZE);
+          m_objectsCache.resize(size);
+          m_referenceCounter.resize(size, 0);
+          for(unsigned int i = oldSize; i < size; i++)
+          {
+            m_list.push_back(i);
+          }
+        }
+
+        unsigned int id = *m_list.begin();
+        m_list.pop_front();
+
+        ResourceHandle handle(id, &m_referenceCounter[id]);
+        handle.add(this);
+
+        m_objectsCache[handle.getID()] = object;
+        m_objectHash[hash] = handle.getID();
+
+        return handle;
       }
       else
       {
-        id = *m_list.begin();
-        m_list.pop_front();
+        unsigned int id = m_objectHash[hash];
+        ResourceHandle handle(id, &m_referenceCounter[id]);
+        handle.add(this);
+
+        return handle;
       }
-
-      ResourceHandle handle(id);
-      handle.add(this);
-
-      m_objectsCache[handle.getID()] = object;
-
-      return handle;
     }
 
     void updateObserver(ResourceHandle* param)
     {
-      assert(param->getID() < m_availableBorder);
-
+      uint64_t hash = m_objectsCache[param->getID()].getHash();
+      m_objectHash.erase(m_objectsCache[param->getID()].getHash());
       m_objectsCache[param->getID()].free();
 
-      if(param->getID() != m_availableBorder - 1)
-      {
-        m_list.push_front(param->getID());
-      }
-      else
-      {
-        m_availableBorder--;
-      }
+      m_list.push_front(param->getID());
     }
 
 	  std::string getPath() const
@@ -102,10 +122,13 @@ namespace he
 
     static const unsigned int m_BLOCKSIZE = 64;
 
-    unsigned int m_availableBorder;
 	  std::list<unsigned int> m_list;
 
+    ResourceHandle m_defaultResource;
+
 	  std::vector<CLASS> m_objectsCache;
+    std::vector<unsigned int> m_referenceCounter;
+    std::map<uint64_t, unsigned int> m_objectHash;
 
     std::string m_path;
   };

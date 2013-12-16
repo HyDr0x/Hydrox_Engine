@@ -36,23 +36,30 @@ namespace he
     {
       std::string texturePath = m_textureManager->getPath();
       texturePath += std::string(filename);
-		  ILboolean success = ilLoadImage((const char*)(texturePath).c_str());
+		  ILboolean success = ilLoadImage(texturePath.c_str());
 
 		  if(!success)
       {
-			  printf("ERROR, couldn't open file %s\n", filename);
+			  printf("ERROR, couldn't open file %s\n", texturePath.c_str());
+
+        tmpTextureID = m_textureManager->getDefaultResource();
       }
+      else
+      {
+        GLuint componentNumber = 0;
+        getImageInformations(width, height, internalFormat, format, type, componentNumber);
 
-      GLuint componentNumber = 0;
-      getImageInformations(width, height, internalFormat, format, type, componentNumber);
+        //success = ilConvertImage(format, type);
+		    //if(!success)
+        //{
+		    //	printf("ERROR, couldn't convert file %s\n", filename);
+        //}
 
-    //  success = ilConvertImage(format, type);
-		  //if(!success)
-    //  {
-		  //	printf("ERROR, couldn't convert file %s\n", filename);
-    //  }
-
-      tmpTextureID = m_textureManager->addObject(Texture(width, height, target, type, internalFormat, format, ilGetData()));
+        int bytesPerPixel = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+        bytesPerPixel = ilGetInteger(IL_FORMAT_MODE);
+        
+        tmpTextureID = m_textureManager->addObject(Texture(width, height, target, type, internalFormat, format, ilGetData()));
+      }
     }
     ilBindImage(0);
     ilDeleteImages(1, &tex);
@@ -90,13 +97,13 @@ namespace he
       components = 3;
       switch(ilGetInteger(IL_IMAGE_BITS_PER_PIXEL))
       {
-      case 16:
+      case 48:
         internalFormat = GL_RGB16;
         break;
-      case 32:
+      case 96:
         internalFormat = GL_RGB32F;
         break;
-      case 8:
+      case 24:
       default:
         internalFormat = GL_RGB8;
       }
@@ -106,13 +113,13 @@ namespace he
       components = 4;
       switch(ilGetInteger(IL_IMAGE_BITS_PER_PIXEL))
       {
-      case 16:
+      case 64:
         internalFormat = GL_RGBA16;
         break;
-      case 32:
+      case 128:
         internalFormat = GL_RGBA32F;
         break;
-      case 8:
+      case 32:
       default:
         internalFormat = GL_RGBA8;
       }

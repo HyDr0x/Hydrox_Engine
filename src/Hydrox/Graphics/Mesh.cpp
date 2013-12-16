@@ -7,7 +7,6 @@ namespace he
     m_geometryData = 0;
     m_indexData = 0;
 
-    m_materialIndex = ~0;
     m_primitiveCount = 0;
     m_vertexCount = 0;
     m_vertexStride = 0;
@@ -17,15 +16,43 @@ namespace he
   }
 
   Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
-              std::vector<Vector<float, 3>> positions, 
-              std::vector<Vector<float, 2>> textureCoords, 
-              std::vector<Vector<float, 3>> normals, 
-              std::vector<Vector<float, 3>> binormals, 
-              std::vector<Vector<float, 4>> boneIndices, 
-              std::vector<Vector<float, 4>> boneWeights,
-              std::vector<indexType> indices,
-              GLuint primitiveType)
+      std::vector<Vector<float, 3>> positions, 
+      GLuint primitiveType,
+      std::vector<indexType> indices,
+      std::vector<Vector<float, 2>> textureCoords, 
+      std::vector<Vector<float, 3>> normals, 
+      std::vector<Vector<float, 3>> binormals, 
+      std::vector<Vector<float, 4>> boneIndices, 
+      std::vector<Vector<float, 4>> boneWeights)
   {
+    std::vector<Vector<float, 3>> data(positions.size() * sizeof(Vector<float, 3>) + 
+                                       textureCoords.size() * sizeof(Vector<float, 2>) + 
+                                       normals.size() * sizeof(Vector<float, 3>) + 
+                                       binormals.size() * sizeof(Vector<float, 3>) + 
+                                       boneIndices.size() * sizeof(Vector<float, 4>) + 
+                                       boneWeights.size() * sizeof(Vector<float, 4>));
+    unsigned int offset = 0;
+    unsigned int length = positions.size() * sizeof(Vector<float, 3>);
+    memcpy(&data[offset], &positions[0], length);
+    offset += length;
+    length = textureCoords.size() * sizeof(Vector<float, 2>);
+    if(length) memcpy(&data[offset], &textureCoords[0], length);
+    offset += length;
+    length = normals.size() * sizeof(Vector<float, 3>);
+    if(length) memcpy(&data[offset], &normals[0], length);
+    offset += length;
+    length = binormals.size() * sizeof(Vector<float, 3>);
+    if(length) memcpy(&data[offset], &binormals[0], length);
+    offset += length;
+    length = boneIndices.size() * sizeof(Vector<float, 4>);
+    if(length) memcpy(&data[offset], &boneIndices[0], length);
+    offset += length;
+    length = boneWeights.size() * sizeof(Vector<float, 4>);
+    if(length) memcpy(&data[offset], &boneWeights[0], length);
+
+    offset += length;
+    m_hash = MurmurHash64A(&data[0], offset, 0);
+    
     m_primitiveType = primitiveType;
 
     switch(m_primitiveType)
@@ -141,6 +168,7 @@ namespace he
 
   Mesh::Mesh(const Mesh& o)
   {
+    m_hash = o.m_hash;
     m_materialIndex = o.m_materialIndex;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
@@ -160,6 +188,7 @@ namespace he
       glDeleteBuffers(1, &m_indexData);
     }
 
+    m_hash = o.m_hash;
     m_materialIndex = o.m_materialIndex;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;

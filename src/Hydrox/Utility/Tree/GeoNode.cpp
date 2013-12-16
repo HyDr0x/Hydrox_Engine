@@ -40,13 +40,12 @@ namespace he
 
   TreeNode* GeoNode::clone() const
   {
-    GeoNode *newNode = new GeoNode(~0, true, m_nodeName);
+    GeoNode *newNode = new GeoNode(m_meshIndex, true, m_nodeName);
 
     newNode->m_nodeName = m_nodeName;
 
     newNode->m_trfMatrix = m_trfMatrix;
     newNode->m_renderable = m_renderable;
-    newNode->m_meshIndex = m_meshIndex;
 
     return newNode;
   }
