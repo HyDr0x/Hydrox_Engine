@@ -9,27 +9,16 @@
 
 namespace he
 {
-  class ShaderLoader
+  class GRAPHICAPI ShaderLoader
   {
   public:
 
-    ShaderLoader(ShaderManager *shaderManager);
-    ~ShaderLoader();
+    ShaderLoader();
+    virtual ~ShaderLoader() = 0;
 
-    ResourceHandle loadShader(std::string shaderName,
-                              std::string vertexShaderFilename, 
-			                        std::string fragmentShaderFilename, 
-			                        std::string geometryShaderFilename = std::string(), 
-			                        std::string tesselationCTRLShaderFilename = std::string(), 
-                              std::string tesselationEVALShaderFilename = std::string(),
-                              std::string computeShaderFilename = std::string(),
-                              std::vector<std::string>& dynamicDefines = std::vector<std::string>());
+  protected:
 
-  private:
-
-    std::string loadShaderSource(std::string shaderFilename, std::vector<std::string>& dynamicDefines);
-
-    ShaderManager *m_shaderManager;
+    std::string loadShaderSource(std::string shaderFilename, std::string shaderPath, std::vector<std::string>& dynamicDefines);
   };
 }
 

@@ -17,7 +17,8 @@
 #include "Hydrox/Utility/Tree/ParticleNode.h"
 #include "Hydrox/Utility/Tree/LightNode.h"
 
-#include "Hydrox/Loader/ShaderLoader.h"
+#include "Hydrox/Loader/RenderShaderLoader.h"
+#include "Hydrox/Loader/ComputeShaderLoader.h"
 
 namespace he
 {
@@ -32,17 +33,18 @@ namespace he
 
   void RasterizerRenderManager::initialize(ModelManager *modelManager, 
                                            MaterialManager *materialManager, 
-                                           ShaderManager *shaderManager, 
+                                           RenderShaderManager *renderShaderManager, 
+                                           ComputeShaderManager *computeShaderManager, 
                                            TextureManager *textureManager,
 	                                         BillboardManager *billboardManager,
                                            SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
   {
-    RenderManager::initialize(modelManager, materialManager, shaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
+    RenderManager::initialize(modelManager, materialManager, renderShaderManager, computeShaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
 
     glGenBuffers(1, &m_dummyVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
-    glVertexAttribPointer(Shader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
+    glVertexAttribPointer(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     glGenBuffers(1, &m_boneMatricesBuffer);
@@ -52,66 +54,66 @@ namespace he
 
     glGenVertexArrays(1, &m_simpleMeshVAO);
     glBindVertexArray(m_simpleMeshVAO);
-    glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
-    //glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    //glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
 
-    glVertexAttribBinding(Shader::POSITION, 0);
-    glVertexAttribBinding(Shader::TEXTURE0, 0);
-    //glVertexAttribBinding(Shader::NORMAL, 0);
+    glVertexAttribBinding(RenderShader::POSITION, 0);
+    glVertexAttribBinding(RenderShader::TEXTURE0, 0);
+    //glVertexAttribBinding(RenderShader::NORMAL, 0);
 
-    glEnableVertexAttribArray(Shader::POSITION);
-    glEnableVertexAttribArray(Shader::TEXTURE0);
-    //glEnableVertexAttribArray(Shader::NORMAL);
+    glEnableVertexAttribArray(RenderShader::POSITION);
+    glEnableVertexAttribArray(RenderShader::TEXTURE0);
+    //glEnableVertexAttribArray(RenderShader::NORMAL);
     glBindVertexArray(0);
 
     glGenVertexArrays(1, &m_simpleSkinnedMeshVAO);
     glBindVertexArray(m_simpleSkinnedMeshVAO);
-    glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribFormat(Shader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
-    glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
-    glVertexAttribFormat(Shader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
-    glVertexAttribFormat(Shader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
-    glVertexAttribFormat(Shader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
+    glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 3 * sizeof(Vector<float, 3>) + sizeof(Vector<float, 2>));
 
-    glVertexAttribBinding(Shader::POSITION, 0);
-    glVertexAttribBinding(Shader::TEXTURE0, 0);
-    glVertexAttribBinding(Shader::NORMAL, 0);
-    glVertexAttribBinding(Shader::BINORMAL, 0);
-    glVertexAttribBinding(Shader::BONEWEIGHTS, 0);
-    glVertexAttribBinding(Shader::BONEINDICES, 0);
+    glVertexAttribBinding(RenderShader::POSITION, 0);
+    glVertexAttribBinding(RenderShader::TEXTURE0, 0);
+    glVertexAttribBinding(RenderShader::NORMAL, 0);
+    glVertexAttribBinding(RenderShader::BINORMAL, 0);
+    glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
+    glVertexAttribBinding(RenderShader::BONEINDICES, 0);
 
-    glEnableVertexAttribArray(Shader::POSITION);
-    glEnableVertexAttribArray(Shader::TEXTURE0);
-    glEnableVertexAttribArray(Shader::NORMAL);
-    glEnableVertexAttribArray(Shader::BINORMAL);
-    glEnableVertexAttribArray(Shader::BONEWEIGHTS);
-    glEnableVertexAttribArray(Shader::BONEINDICES);
+    glEnableVertexAttribArray(RenderShader::POSITION);
+    glEnableVertexAttribArray(RenderShader::TEXTURE0);
+    glEnableVertexAttribArray(RenderShader::NORMAL);
+    glEnableVertexAttribArray(RenderShader::BINORMAL);
+    glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
+    glEnableVertexAttribArray(RenderShader::BONEINDICES);
     glBindVertexArray(0);
 
     glGenVertexArrays(1, &m_simpleSkinnedTestVAO);
     glBindVertexArray(m_simpleSkinnedTestVAO);
-    glVertexAttribFormat(Shader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribFormat(Shader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
-    glVertexAttribFormat(Shader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>));
-    glVertexAttribFormat(Shader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 2 * sizeof(Vector<float, 3>));
+    glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 3>));
+    glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(Vector<float, 3>));
+    glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vector<float, 4>) + 2 * sizeof(Vector<float, 3>));
 
-    glVertexAttribBinding(Shader::POSITION, 0);
-    glVertexAttribBinding(Shader::NORMAL, 0);
-    glVertexAttribBinding(Shader::BONEWEIGHTS, 0);
-    glVertexAttribBinding(Shader::BONEINDICES, 0);
+    glVertexAttribBinding(RenderShader::POSITION, 0);
+    glVertexAttribBinding(RenderShader::NORMAL, 0);
+    glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
+    glVertexAttribBinding(RenderShader::BONEINDICES, 0);
 
-    glEnableVertexAttribArray(Shader::POSITION);
-    glEnableVertexAttribArray(Shader::NORMAL);
-    glEnableVertexAttribArray(Shader::BONEWEIGHTS);
-    glEnableVertexAttribArray(Shader::BONEINDICES);
+    glEnableVertexAttribArray(RenderShader::POSITION);
+    glEnableVertexAttribArray(RenderShader::NORMAL);
+    glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
+    glEnableVertexAttribArray(RenderShader::BONEINDICES);
     glBindVertexArray(0);
 
-    ShaderLoader shaderLoader(m_shaderManager);
+    RenderShaderLoader renderShaderLoader(m_renderShaderManager);
 
-    m_billboardHandle = shaderLoader.loadShader(std::string("billboard shader"), std::string("billboardShader.vert"), std::string("billboardShader.frag"),  std::string("billboardShader.geom"));
+    m_billboardHandle = renderShaderLoader.loadShader(std::string("billboard shader"), std::string("billboardShader.vert"), std::string("billboardShader.frag"),  std::string("billboardShader.geom"));
 
-    m_spriteHandle = shaderLoader.loadShader(std::string("sprite shader"), std::string("spriteShader.vert"), std::string("spriteShader.frag"), std::string("spriteShader.geom"));
+    m_spriteHandle = renderShaderLoader.loadShader(std::string("sprite shader"), std::string("spriteShader.vert"), std::string("spriteShader.frag"), std::string("spriteShader.geom"));
   }
 
   void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)
@@ -121,7 +123,7 @@ namespace he
 	  ////////////////////////////////RENDER 3D Objects////////////////////////////////////////////
     Mesh *renderMesh;
     Material *renderMaterial;
-    Shader *renderShader;
+    RenderShader *renderShader;
     Texture *renderTexture;
 
     Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -137,7 +139,7 @@ namespace he
       {
         renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());
         renderMaterial = m_materialManager->getObject(renderMesh->getMaterial());
-        renderShader = m_shaderManager->getObject(renderMaterial->getShader());
+        renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
         //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
 
         renderShader->useShader();
@@ -162,7 +164,7 @@ namespace he
       {
         renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
         renderMaterial = m_materialManager->getObject(renderMesh->getMaterial());
-        renderShader = m_shaderManager->getObject(renderMaterial->getShader());
+        renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
         //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
 
         renderShader->useShader();
@@ -195,9 +197,9 @@ namespace he
 	  glEnable(GL_BLEND);
 	  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnableVertexAttribArray(Shader::SPECIAL0);
+    glEnableVertexAttribArray(RenderShader::SPECIAL0);
  
-    Shader *billboardShader = m_shaderManager->getObject(m_billboardHandle);
+    RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardHandle);
 	  billboardShader->useShader();
 
     billboardShader->setUniform(1, GL_FLOAT_MAT4, &viewMatrix[0][0]);
@@ -235,7 +237,7 @@ namespace he
 
     Sprite *renderSprite;
 
-    Shader *spriteShader = m_shaderManager->getObject(m_spriteHandle);
+    RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteHandle);
 	  spriteShader->useShader();
 
 	  for(std::list<ResourceHandle>::iterator spriteIDIterator = m_opaqueSpriteIDs.begin(); spriteIDIterator != m_opaqueSpriteIDs.end(); spriteIDIterator++)
@@ -313,7 +315,7 @@ namespace he
 	    }
     }
 
-    glDisableVertexAttribArray(Shader::SPECIAL0);
+    glDisableVertexAttribArray(RenderShader::SPECIAL0);
 
     glDisable(GL_BLEND);
 

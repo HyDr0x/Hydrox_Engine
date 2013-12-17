@@ -2,8 +2,10 @@ set(
 	HEADER 
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/AssimpLoader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShaderLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ILDevilLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialLoader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderLoader.h 
 	PARENT_SCOPE 
 )

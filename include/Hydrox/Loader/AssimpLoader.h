@@ -39,7 +39,7 @@ namespace he
       Minutes,
     };
 
-    AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
+    AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager);
     AssimpLoader(const AssimpLoader& o);
     AssimpLoader& operator=(const AssimpLoader& o);
     ~AssimpLoader();
@@ -70,7 +70,7 @@ namespace he
     ModelManager *m_modelManager;
     MaterialManager *m_materialManager;
     TextureManager *m_textureManager;
-    ShaderManager *m_shaderManager;
+    RenderShaderManager *m_renderShaderManager;
 
     std::map<std::string, std::vector<AnimationTrack>> m_animationTracks;//all the animation tracks per node
     std::vector<std::vector<Matrix<float, 4>>> m_inverseBindPoseTable;//all the boneMatrices per mesh

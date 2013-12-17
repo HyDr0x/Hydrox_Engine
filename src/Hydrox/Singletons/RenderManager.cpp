@@ -10,14 +10,16 @@ namespace he
 
   void RenderManager::initialize(ModelManager *modelManager, 
                                  MaterialManager *materialManager, 
-                                 ShaderManager *shaderManager, 
+                                 RenderShaderManager *renderShaderManager, 
+                                 ComputeShaderManager *computeShaderManager,
                                  TextureManager *textureManager,
 	                               BillboardManager *billboardManager,
                                  SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
   {
     m_aspectRatio = aspectRatio;
     m_maxLayer = maxSpriteLayer;
-    m_shaderManager = shaderManager;
+    m_renderShaderManager = renderShaderManager;
+    m_computeShaderManager = computeShaderManager;
     m_textureManager = textureManager;
     m_billboardManager = billboardManager;
     m_spriteManager = spriteManager;

@@ -9,18 +9,18 @@
 #include "Hydrox/Utility/Tree/TransformNode.h"
 
 #include "Hydrox/Loader/ILDevilLoader.h"
-#include "Hydrox/Loader/ShaderLoader.h"
+#include "Hydrox/Loader/RenderShaderLoader.h"
 
 #include "Hydrox/Graphics/Scene.h"
 #include "Hydrox/Graphics/Texture.h"
 
 namespace he
 {
-  AssimpLoader::AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager) : m_modelManager(modelManager),
-                                                                                                                                                           m_materialManager(materialManager),
-                                                                                                                                                           m_textureManager(textureManager),
-                                                                                                                                                           m_shaderManager(shaderManager),
-                                                                                                                                                           m_animationTimeUnit(Seconds)
+  AssimpLoader::AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager) : m_modelManager(modelManager),
+                                                                                                                                                                       m_materialManager(materialManager),
+                                                                                                                                                                       m_textureManager(textureManager),
+                                                                                                                                                                       m_renderShaderManager(renderShaderManager),
+                                                                                                                                                                       m_animationTimeUnit(Seconds)
   {
     setAnimationTimeUnit(m_animationTimeUnit);
   }
@@ -32,7 +32,7 @@ namespace he
     m_modelManager = o.m_modelManager;
     m_materialManager = o.m_materialManager;
     m_textureManager = o.m_textureManager;
-    m_shaderManager = o.m_shaderManager;
+    m_renderShaderManager = o.m_renderShaderManager;
   }
 
   AssimpLoader& AssimpLoader::operator=(const AssimpLoader& o)
@@ -42,7 +42,7 @@ namespace he
     m_modelManager = o.m_modelManager;
     m_materialManager = o.m_materialManager;
     m_textureManager = o.m_textureManager;
-    m_shaderManager = o.m_shaderManager;
+    m_renderShaderManager = o.m_renderShaderManager;
 
     return *this;
   }
@@ -333,11 +333,11 @@ namespace he
 		    textures[3][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
 	    }
 
-      std::string shaderPath = m_shaderManager->getPath();
+      std::string shaderPath = m_renderShaderManager->getPath();
 
-      ShaderLoader shaderLoader(m_shaderManager);
+      RenderShaderLoader renderShaderLoader(m_renderShaderManager);
 
-      ResourceHandle shaderHandle = shaderLoader.loadShader(std::string("simpleShader"), std::string("simpleShader.vert"), std::string("simpleShader.frag"));
+      ResourceHandle shaderHandle = renderShaderLoader.loadShader(std::string("simpleShader"), std::string("simpleShader.vert"), std::string("simpleShader.frag"));
       out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
 
       for(unsigned int i = 0; i != textures.size(); i++)

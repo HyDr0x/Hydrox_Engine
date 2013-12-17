@@ -14,7 +14,7 @@ namespace he
   {
   public:
 
-    MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
+    MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager);
     ~MaterialLoader();
 
     ResourceHandle loadMaterial(std::string materialFilename);
@@ -23,7 +23,7 @@ namespace he
 
     MaterialManager *m_materialManager;
     TextureManager *m_textureManager;
-    ShaderManager *m_shaderManager;
+    RenderShaderManager *m_renderShaderManager;
 
     static const unsigned int m_TEXNUMBER = 4;
   };

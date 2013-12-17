@@ -53,7 +53,8 @@ namespace he
 	  EventManager *m_eventManager;
 	  ModelManager *m_modelManager;
 	  MaterialManager *m_materialManager;
-	  ShaderManager *m_shaderManager;
+	  RenderShaderManager *m_renderShaderManager;
+    ComputeShaderManager *m_computeShaderManager;
     TextureManager *m_textureManager;
     BillboardManager *m_billboardManager;
     SpriteManager *m_spriteManager;

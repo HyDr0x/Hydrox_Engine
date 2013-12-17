@@ -7,74 +7,20 @@
 
 namespace he
 {
-  ShaderLoader::ShaderLoader(ShaderManager *shaderManager)
+  ShaderLoader::ShaderLoader()
   {
-    m_shaderManager = shaderManager;
   }
 
   ShaderLoader::~ShaderLoader()
   {
   }
 
-  ResourceHandle ShaderLoader::loadShader(std::string shaderName,
-                                          std::string vertexShaderFilename, 
-			                                    std::string fragmentShaderFilename, 
-			                                    std::string geometryShaderFilename, 
-			                                    std::string tesselationCTRLShaderFilename, 
-                                          std::string tesselationEVALShaderFilename,
-                                          std::string computeShaderFilename,
-                                          std::vector<std::string>& dynamicDefines)
-  {
-    std::string vertexShaderSource = loadShaderSource(vertexShaderFilename, dynamicDefines);
-    std::string fragmentShaderSource = loadShaderSource(fragmentShaderFilename, dynamicDefines);
-    std::string geometryShaderSource = loadShaderSource(geometryShaderFilename, dynamicDefines);
-    std::string tesselationCTRLShaderSource = loadShaderSource(tesselationCTRLShaderFilename, dynamicDefines);
-    std::string tesselationEVALShaderSource = loadShaderSource(tesselationEVALShaderFilename, dynamicDefines);
-    std::string computeShaderSource = loadShaderSource(computeShaderFilename, dynamicDefines);
-
-    ResourceHandle shaderHandle;
-
-    bool noRenderShader = (
-                            computeShaderFilename == std::string() && 
-                            (
-                              (vertexShaderSource == std::string() || fragmentShaderSource == std::string()) || 
-                              (geometryShaderFilename != std::string() && geometryShaderSource == std::string()) ||
-                              (tesselationCTRLShaderFilename != std::string() && tesselationCTRLShaderSource == std::string()) ||
-                              (tesselationEVALShaderFilename != std::string() && computeShaderSource == std::string())
-                            )
-                          );
-
-    bool noComputeShader = (computeShaderFilename != std::string() && computeShaderSource == std::string());
-
-    if(noRenderShader || noComputeShader)
-    {
-      std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
-      if(noRenderShader)
-      {
-        shaderHandle = m_shaderManager->getDefaultResource();
-      }
-      else
-      {
-        assert("IMPLEMENT DEFAULT COMPUTE SHADER!");
-        shaderHandle;
-      }
-    }
-    else
-    {
-      shaderHandle = m_shaderManager->addObject(Shader(shaderName, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource, computeShaderSource));
-    }
-
-    return shaderHandle;
-  }
-
-  std::string ShaderLoader::loadShaderSource(std::string shaderFilename, std::vector<std::string>& dynamicDefines)
+  std::string ShaderLoader::loadShaderSource(std::string shaderFilename, std::string shaderPath, std::vector<std::string>& dynamicDefines)
   {
     if(shaderFilename == std::string())
     {
       return std::string();
     }
-
-    std::string shaderPath = m_shaderManager->getPath();
 
     shaderFilename = shaderPath + shaderFilename;
 

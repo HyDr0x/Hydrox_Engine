@@ -26,7 +26,8 @@ namespace he
     m_billboardManager = nullptr;
 	  m_modelManager = nullptr;
 	  m_textureManager = nullptr;
-	  m_shaderManager = nullptr;
+	  m_renderShaderManager = nullptr;
+    m_computeShaderManager = nullptr;
 	  m_renderManager = nullptr;
     m_materialManager = nullptr;
 	  m_eventManager = nullptr;
@@ -46,7 +47,8 @@ namespace he
       ModelManager::deleteInstance();
       MaterialManager::deleteInstance();
       TextureManager::deleteInstance();
-      ShaderManager::deleteInstance();
+      RenderShaderManager::deleteInstance();
+      ComputeShaderManager::deleteInstance();
     }
   }
 
@@ -99,7 +101,8 @@ namespace he
 	  //create Manager
     m_modelManager = ModelManager::getInstance();
     m_materialManager = MaterialManager::getInstance();
-    m_shaderManager = ShaderManager::getInstance();
+    m_renderShaderManager = RenderShaderManager::getInstance();
+    m_computeShaderManager = ComputeShaderManager::getInstance();
 	  m_textureManager = TextureManager::getInstance();
     m_billboardManager = BillboardManager::getInstance();
     m_spriteManager = SpriteManager::getInstance();
@@ -166,12 +169,22 @@ namespace he
 	                                  color = vec4(1,1,1,1);\n\
                                   }";
 
-    m_shaderManager->initialize(Shader(std::string("defaultShader"), vertexSource, fragmentSource), vfxPath);
+    m_renderShaderManager->initialize(RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource), vfxPath);
 
-    m_materialManager->initialize(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<ResourceHandle>>(), m_shaderManager->getDefaultResource()), materialPath);
+    std::string computeSource = "#version 430 core\n\
+                                \n\
+                                layout(local_size_x = 1) in;\n\
+                                \n\
+                                void main()\n\
+                                {\n\
+                                }";
+
+    m_computeShaderManager->initialize(ComputeShader(std::string("defaultComputeShader"), computeSource), vfxPath);
+
+    m_materialManager->initialize(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<ResourceHandle>>(), m_renderShaderManager->getDefaultResource()), materialPath);
 
     m_modelManager->initialize(cubeGenerator.generateCube(m_materialManager->getDefaultResource()), modelPath);
 
-    m_renderManager->initialize(m_modelManager, m_materialManager, m_shaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
+    m_renderManager->initialize(m_modelManager, m_materialManager, m_renderShaderManager, m_computeShaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
   }
 }

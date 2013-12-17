@@ -12,7 +12,8 @@
 
 #include "Hydrox/Graphics/Mesh.h"
 #include "Hydrox/Graphics/Material.h"
-#include "Hydrox/Graphics/Shader.h"
+#include "Hydrox/Graphics/RenderShader.h"
+#include "Hydrox/Graphics/ComputeShader.h"
 #include "Hydrox/Graphics/Texture.h"
 #include "Hydrox/Graphics/Billboard.h"
 #include "Hydrox/Graphics/Sprite.h"
@@ -135,14 +136,16 @@ namespace he
 
   template class GRAPHICAPI CacheManager<Mesh>;
   template class GRAPHICAPI CacheManager<Material>;
-  template class GRAPHICAPI CacheManager<Shader>;
+  template class GRAPHICAPI CacheManager<RenderShader>;
+  template class GRAPHICAPI CacheManager<ComputeShader>;
   template class GRAPHICAPI CacheManager<Texture>;
   template class GRAPHICAPI CacheManager<Billboard>;
   template class GRAPHICAPI CacheManager<Sprite>;
 
   typedef CacheManager<Mesh> ModelManager;
   typedef CacheManager<Material> MaterialManager;
-  typedef CacheManager<Shader> ShaderManager;
+  typedef CacheManager<RenderShader> RenderShaderManager;
+  typedef CacheManager<ComputeShader> ComputeShaderManager;
   typedef CacheManager<Texture> TextureManager;
   typedef CacheManager<Billboard> BillboardManager;
   typedef CacheManager<Sprite> SpriteManager;

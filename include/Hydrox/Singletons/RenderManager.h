@@ -24,7 +24,8 @@ namespace he
 
     virtual void initialize(ModelManager *modelManager, 
                             MaterialManager *materialManager, 
-                            ShaderManager *shaderManager, 
+                            RenderShaderManager *renderShaderManager, 
+                            ComputeShaderManager *computeShaderManager,
                             TextureManager *textureManager,
 	                          BillboardManager *billboardManager,
                             SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
@@ -44,7 +45,8 @@ namespace he
 
     ModelManager *m_modelManager;
 	  MaterialManager *m_materialManager;
-	  ShaderManager *m_shaderManager;
+	  RenderShaderManager *m_renderShaderManager;
+    ComputeShaderManager *m_computeShaderManager;
     TextureManager *m_textureManager;
     BillboardManager *m_billboardManager;
     SpriteManager *m_spriteManager;

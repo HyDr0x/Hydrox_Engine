@@ -18,7 +18,8 @@ namespace he
 
     void initialize(ModelManager *modelManager, 
                     MaterialManager *materialManager, 
-                    ShaderManager *shaderManager, 
+                    RenderShaderManager *renderShaderManager, 
+                    ComputeShaderManager *computeShaderManager,
                     TextureManager *textureManager,
 	                  BillboardManager *billboardManager,
                     SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);

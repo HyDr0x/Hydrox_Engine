@@ -6,57 +6,6 @@ namespace he
   {
     m_program = 0;
   }
-  Shader::Shader(const Shader& o)
-  {
-    m_hash = o.m_hash;
-    m_program = o.m_program;
-  }
-
-  Shader::Shader(std::string shaderName,
-                 std::string vertexShaderSource, 
-			           std::string fragmentShaderSource, 
-			           std::string geometryShaderSource, 
-			           std::string tesselationCTRLShaderSource, 
-                 std::string tesselationEVALShaderSource,
-                 std::string computeShaderSource)
-  {
-    std::string data = std::string();
-    data += vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + computeShaderSource;
-
-    m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
-
-	  bool allOK = true;
-
-    GLuint computeShader;
-    allOK = createShader(GL_COMPUTE_SHADER, shaderName, computeShaderSource, computeShader);
-
-    if(allOK)//compute shader
-    {
-      createProgram(m_program, shaderName, computeShader, 0, 0, 0, 0, 0);
-    }
-
-    GLuint vertexShader;
-    GLuint tesselationControlShader;
-    GLuint tesselationEvaluationShader;
-    GLuint geometryShader; 
-    GLuint fragmentShader;
-  
-    createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource, vertexShader);
-    createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource, tesselationControlShader);
-    createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource, tesselationEvaluationShader);
-    createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource, geometryShader);
-    createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource, fragmentShader);
-
-    createProgram(m_program, shaderName, 0, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
-  }
-
-  Shader& Shader::operator=(const Shader& o)
-  {
-    m_hash = o.m_hash;
-	  m_program = o.m_program;
-
-    return *this;
-  }
 
   Shader::~Shader()
   {
@@ -150,44 +99,6 @@ namespace he
 	  glUniform1i(location, slot);
   }
 
-  void Shader::enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const
-  {
-	  glTransformFeedbackVaryings(m_program, count, varyings, buffertype);
-	  glLinkProgram(m_program);//new linking because some unused varyings could be in use now
-	
-	  GLsizei length;
-	  GLsizei size;
-	  GLenum type;
-	
-	  for(int i = 0; i != count; i++)
-	  {
-      glGetTransformFeedbackVarying(m_program, i, 0, &length, nullptr, nullptr, nullptr);
-
-      GLchar *var = new GLchar[length];
-
-		  glGetTransformFeedbackVarying(m_program, i, length, nullptr, &size, &type, var);
-
-      delete[] var;
-    
-		  if(strcmp(var, varyings[i]))
-      {
-			  std::cout<<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
-      }
-	  }
-  }
-
-  void Shader::dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ) const
-  {
-    glDispatchCompute(workGroupNumberX, workGroupNumberY, workGroupNumberZ);
-  }
-
-  void Shader::dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset) const
-  {
-    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, dispatchBuffer);
-    glDispatchComputeIndirect(offset);
-    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
-  }
-
   void Shader::useShader() const
   {
 	  glUseProgram(m_program);
@@ -196,68 +107,6 @@ namespace he
   void Shader::useNoShader() const
   {
 	  glUseProgram(0);
-  }
-
-  bool Shader::createProgram(GLuint& program, std::string shaderName, GLuint computeShader, 
-                                                                      GLuint vertexShader, 
-                                                                      GLuint tesselationControlShader, 
-                                                                      GLuint tesselationEvaluationShader, 
-                                                                      GLuint geometryShader, 
-                                                                      GLuint fragmentShader)
-  {
-    program = glCreateProgram();
-
-    if(vertexShader != 0)
-    {
-	    glAttachShader(m_program, vertexShader);
-      glDeleteShader(vertexShader);
-
-	    if(fragmentShader != 0)
-      {
-		    glAttachShader(m_program, fragmentShader);
-        glDeleteShader(fragmentShader);
-      }
-	    if(geometryShader != 0)
-      {
-		    glAttachShader(m_program, geometryShader);
-        glDeleteShader(geometryShader);
-      }
-	    if(tesselationControlShader != 0)
-	    {
-		    glAttachShader(m_program, tesselationControlShader);
-		    glAttachShader(m_program, tesselationEvaluationShader);
-        glDeleteShader(tesselationControlShader);
-		    glDeleteShader(tesselationEvaluationShader);
-	    }
-    }
-    else
-    {
-      glAttachShader(m_program, computeShader);
-      glDeleteShader(computeShader);
-    }
-
-    glLinkProgram(program);
-
-    GLint errorCode;
-    glGetProgramiv(program, GL_LINK_STATUS, &errorCode);
-
-    if(errorCode == GL_FALSE)
-    {
-      GLsizei length;
-      glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-
-	    GLchar *errorLog = new GLchar[length];
-	    glGetProgramInfoLog(program, length, nullptr, errorLog);
-
-      std::cout << "Error linking shader program " << shaderName <<  " because of:\n "<< errorLog << std::endl;
-
-      delete[] errorLog;
-	    glDeleteProgram(program);
-
-      return false;
-    }
-
-    return true;
   }
 
   bool Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource, GLuint& shader)

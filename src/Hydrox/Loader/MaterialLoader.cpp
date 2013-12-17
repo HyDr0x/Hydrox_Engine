@@ -5,16 +5,16 @@
 #include <iostream>
 
 #include "Hydrox/Graphics/Material.h"
-#include "Hydrox/Loader/ShaderLoader.h"
+#include "Hydrox/Loader/RenderShaderLoader.h"
 #include "Hydrox/Loader/ILDevilLoader.h"
 
 namespace he
 {
-  MaterialLoader::MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager)
+  MaterialLoader::MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager)
   {
     m_materialManager = materialManager;
     m_textureManager = textureManager;
-    m_shaderManager = shaderManager;
+    m_renderShaderManager = renderShaderManager;
   }
 
   MaterialLoader::~MaterialLoader()
@@ -30,7 +30,7 @@ namespace he
 
     ResourceHandle materialHandle;
 
-    std::string vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename, computeFilename;
+    std::string vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename;
     std::string diffuseFilename[m_TEXNUMBER], normalFilename[m_TEXNUMBER], specularFilename[m_TEXNUMBER], displacementFilename[m_TEXNUMBER];
 
     std::string materialPath = m_materialManager->getPath();
@@ -179,19 +179,10 @@ namespace he
             tesselationEvaluationFilename = line;
           }
         }
-
-        if(line.find("Compute Shader") != std::string::npos)
-        {
-          std::getline(file, line);
-          if(line != std::string("NULL"))
-          {
-            computeFilename = line;
-          }
-        }
 		  }
 
-      ShaderLoader shaderLoader(m_shaderManager);
-      ResourceHandle shaderHandle = shaderLoader.loadShader(materialFilename + std::string("_Shader"), vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename, computeFilename);
+      RenderShaderLoader renderShaderLoader(m_renderShaderManager);
+      ResourceHandle shaderHandle = renderShaderLoader.loadShader(materialFilename + std::string("_Shader"), vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename);
 
       ILDevilLoader textureLoader(m_textureManager);
 
