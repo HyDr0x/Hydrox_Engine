@@ -63,8 +63,6 @@ namespace he
 
   Texture& Texture::operator=(const Texture& o)
   {
-    glDeleteTextures(1, &m_texIndex);
-
     m_hash = o.m_hash;
     m_width = o.m_width;
     m_height = o.m_height;

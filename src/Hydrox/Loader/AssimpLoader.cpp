@@ -337,7 +337,7 @@ namespace he
 
       ShaderLoader shaderLoader(m_shaderManager);
 
-      ResourceHandle shaderHandle = shaderLoader.loadShader(std::string("simpleShader"), std::string("Shader/simpleShader.vert"), std::string("Shader/simpleShader.frag"));
+      ResourceHandle shaderHandle = shaderLoader.loadShader(std::string("simpleShader"), std::string("simpleShader.vert"), std::string("simpleShader.frag"));
       out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
 
       for(unsigned int i = 0; i != textures.size(); i++)

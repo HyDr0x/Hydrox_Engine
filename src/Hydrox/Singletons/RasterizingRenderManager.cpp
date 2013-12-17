@@ -109,9 +109,9 @@ namespace he
 
     ShaderLoader shaderLoader(m_shaderManager);
 
-    m_billboardHandle = shaderLoader.loadShader(std::string("billboard shader"), std::string("Shader/billboardShader.vert"), std::string("Shader/billboardShader.frag"),  std::string("Shader/billboardShader.geom"));
+    m_billboardHandle = shaderLoader.loadShader(std::string("billboard shader"), std::string("billboardShader.vert"), std::string("billboardShader.frag"),  std::string("billboardShader.geom"));
 
-    m_spriteHandle = shaderLoader.loadShader(std::string("sprite shader"), std::string("Shader/spriteShader.vert"), std::string("Shader/spriteShader.frag"), std::string("Shader/spriteShader.geom"));
+    m_spriteHandle = shaderLoader.loadShader(std::string("sprite shader"), std::string("spriteShader.vert"), std::string("spriteShader.frag"), std::string("spriteShader.geom"));
   }
 
   void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)

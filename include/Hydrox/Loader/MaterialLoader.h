@@ -3,22 +3,29 @@
 
 #include <string>
 
+#include "Hydrox/DLLExport.h"
+
 #include "Hydrox/Singletons/CacheManager.hpp"
 #include "Hydrox/Utility/Miscellaneous/ResourceHandle.h"
 
 namespace he
 {
-  class MaterialLoader
+  class GRAPHICAPI MaterialLoader
   {
   public:
 
-    MaterialLoader();
+    MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, ShaderManager *shaderManager);
     ~MaterialLoader();
 
     ResourceHandle loadMaterial(std::string materialFilename);
 
   private:
 
+    MaterialManager *m_materialManager;
+    TextureManager *m_textureManager;
+    ShaderManager *m_shaderManager;
+
+    static const unsigned int m_TEXNUMBER = 4;
   };
 }
 

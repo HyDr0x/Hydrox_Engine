@@ -21,7 +21,7 @@ namespace he
                  std::string computeShaderSource)
   {
     std::string data = std::string();
-    data += shaderName + vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + computeShaderSource;
+    data += vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + computeShaderSource;
 
     m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
 
@@ -52,11 +52,6 @@ namespace he
 
   Shader& Shader::operator=(const Shader& o)
   {
-    if(m_program != 0)
-    {
-      glDeleteProgram(m_program);
-    }
-
     m_hash = o.m_hash;
 	  m_program = o.m_program;
 

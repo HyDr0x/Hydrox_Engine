@@ -48,6 +48,7 @@ namespace he
 
     if(noRenderShader || noComputeShader)
     {
+      std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
       if(noRenderShader)
       {
         shaderHandle = m_shaderManager->getDefaultResource();
@@ -78,7 +79,7 @@ namespace he
     shaderFilename = shaderPath + shaderFilename;
 
     std::ifstream file(shaderFilename);
-    std::string shadersource;
+    std::string shaderSource;
 	  std::string line;
 
 	  if(file.is_open())
@@ -99,7 +100,7 @@ namespace he
           }
         }
 
-			  shadersource += line;
+			  shaderSource += line;
 		  }
     }
 	  else
@@ -113,6 +114,6 @@ namespace he
 
 	  file.close();
 
-    return shadersource;
+    return shaderSource;
   }
 }

@@ -22,7 +22,7 @@ namespace he
   {
   }
 
-  ResourceHandle ILDevilLoader::load(const char* filename, GLenum target)
+  ResourceHandle ILDevilLoader::load(std::string filename, GLenum target)
   {
     ResourceHandle tmpTextureID;
     GLsizei width, height;
@@ -35,12 +35,12 @@ namespace he
 	  ilBindImage(tex);
     {
       std::string texturePath = m_textureManager->getPath();
-      texturePath += std::string(filename);
+      texturePath += filename;
 		  ILboolean success = ilLoadImage(texturePath.c_str());
 
 		  if(!success)
       {
-			  printf("ERROR, couldn't open file %s\n", texturePath.c_str());
+        std::cout << "ERROR, couldn't open file: " << texturePath << std::endl;
 
         tmpTextureID = m_textureManager->getDefaultResource();
       }

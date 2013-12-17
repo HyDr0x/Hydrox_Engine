@@ -1,9 +1,10 @@
 #ifndef ILDEVILLOADER_H_
 #define ILDEVILLOADER_H_
 
+#include <string>
+
 #include <IL/il.h>
 #include <IL/ilu.h>
-
 #include <GL/glew.h>
 
 #include "Hydrox/DLLExport.h"
@@ -23,7 +24,7 @@ namespace he
     ILDevilLoader& operator=(const ILDevilLoader& o);
     ~ILDevilLoader();
 
-    ResourceHandle load(const char* filename, GLenum target);
+    ResourceHandle load(std::string filename, GLenum target);
 
   private:
 

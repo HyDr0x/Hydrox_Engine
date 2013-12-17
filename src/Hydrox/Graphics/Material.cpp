@@ -30,13 +30,6 @@ namespace he
     m_shaderIndex = shader;
     m_textureIndices = textureIndices;
     m_materialData = materialData;
-    //for(int i = 0; i!= textures.size(); i++)
-    //{
-    //  for(int j = 0; j!= textures[i].size(); j++)
-    //  {
-    //    m_textureIndices[i][j] = SharedPointer<Texture>(textures[i][j]);
-    //  }
-    //}
   }
 
   Material::Material(const Material& o)
@@ -48,6 +41,9 @@ namespace he
                                   o.m_materialData.ambientStrength, 
                                   o.m_materialData.specularExponent, 
                                   o.m_materialData.transparency); 
+
+    m_textureIndices = o.m_textureIndices;
+    m_shaderIndex = o.m_shaderIndex;
   }
 
   Material& Material::operator=(const Material& o)
@@ -61,31 +57,24 @@ namespace he
                                   o.m_materialData.transparency); 
 
     m_textureIndices = o.m_textureIndices;
-    m_shaderIndex = o.m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
+    m_shaderIndex = o.m_shaderIndex;
 
     return *this;
   }
 
   Material::~Material()
   { 
-    free();
   }
 
   void Material::free()
   {
-    if(m_shaderIndex.getID() != ~0)
-    {
-      m_shaderIndex.free();
-    }
+    m_shaderIndex.free();
 
     for(int i = 0; i < m_textureIndices.size(); i++)
     {
 	    for(int j = 0; j < m_textureIndices[i].size(); j++)
       {
-        if(m_textureIndices[i][j].getID() != ~0)
-        {
-          m_textureIndices[i][j].free();
-        }
+        m_textureIndices[i][j].free();
       }
     }
   }
