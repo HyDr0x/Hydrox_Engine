@@ -36,11 +36,7 @@ namespace he
   { 
     m_hash = o.m_hash;
 
-    m_materialData = MaterialData(o.m_materialData.diffuseStrength, 
-                                  o.m_materialData.specularStrength, 
-                                  o.m_materialData.ambientStrength, 
-                                  o.m_materialData.specularExponent, 
-                                  o.m_materialData.transparency); 
+    m_materialData = o.m_materialData; 
 
     m_textureIndices = o.m_textureIndices;
     m_shaderIndex = o.m_shaderIndex;
@@ -50,11 +46,7 @@ namespace he
   {
     m_hash = o.m_hash;
 
-    m_materialData = MaterialData(o.m_materialData.diffuseStrength, 
-                                  o.m_materialData.specularStrength, 
-                                  o.m_materialData.ambientStrength, 
-                                  o.m_materialData.specularExponent, 
-                                  o.m_materialData.transparency); 
+    m_materialData = o.m_materialData; 
 
     m_textureIndices = o.m_textureIndices;
     m_shaderIndex = o.m_shaderIndex;

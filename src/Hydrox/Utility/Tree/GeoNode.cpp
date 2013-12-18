@@ -6,9 +6,10 @@
 
 namespace he
 {
-  GeoNode::GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                                                                                                    m_meshIndex(meshIndex),
-                                                                                                                                    m_renderable(renderable)
+  GeoNode::GeoNode(ResourceHandle meshIndex, ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
+                                                                                                                                                                     m_meshIndex(meshIndex),
+                                                                                                                                                                     m_materialIndex(materialIndex),
+                                                                                                                                                                     m_renderable(renderable)
   {
     m_trfMatrix = Matrix<float, 4>::identity();
   }
@@ -17,6 +18,7 @@ namespace he
   {
     TreeNode::operator=(sourceNode);
 
+    m_materialIndex = sourceNode.m_materialIndex;
     m_trfMatrix = sourceNode.m_trfMatrix;
     m_meshIndex = sourceNode.m_meshIndex;
     m_renderable = sourceNode.m_renderable;
@@ -40,7 +42,7 @@ namespace he
 
   TreeNode* GeoNode::clone() const
   {
-    GeoNode *newNode = new GeoNode(m_meshIndex, true, m_nodeName);
+    GeoNode *newNode = new GeoNode(m_meshIndex, m_materialIndex, true, m_nodeName);
 
     newNode->m_nodeName = m_nodeName;
 
@@ -68,6 +70,16 @@ namespace he
   ResourceHandle GeoNode::getMeshIndex() const
   {
     return m_meshIndex;
+  }
+
+  void GeoNode::setMaterial(ResourceHandle materialIndex)
+  {
+    m_materialIndex = materialIndex;
+  }
+
+  ResourceHandle GeoNode::getMaterial() const
+  {
+    return m_materialIndex;
   }
 
   Matrix<float,4> GeoNode::getTransformationMatrix() const

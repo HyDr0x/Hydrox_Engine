@@ -36,7 +36,7 @@ namespace he
     Mesh();
 	  Mesh(const Mesh& o);
 
-	  Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
+	  Mesh(GLuint vertexDeclarationFlags, 
       std::vector<Vector<float, 3>> positions, 
       GLuint primitiveType = GL_TRIANGLES,
       std::vector<indexType> indices = std::vector<indexType>(),
@@ -55,15 +55,11 @@ namespace he
 
 	  void render(GLuint bindingIndex) const;
 
-    void setMaterial(ResourceHandle materialIndex);
-    ResourceHandle getMaterial() const;
-
     GLuint getVertexDeclarationFlags() const;
     GLuint getPrimitiveType() const;
 
   private:
 
-    ResourceHandle m_materialIndex;
     GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
     GLuint m_verticesPerPrimitive;
 

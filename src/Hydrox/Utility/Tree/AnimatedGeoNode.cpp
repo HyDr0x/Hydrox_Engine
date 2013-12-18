@@ -6,8 +6,8 @@
 
 namespace he
 {
-  AnimatedGeoNode::AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
-    : GeoNode(meshIndex, renderable, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
+  AnimatedGeoNode::AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
+    : GeoNode(meshIndex, materialIndex, renderable, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
   {
     m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
   }
@@ -38,7 +38,7 @@ namespace he
 
   TreeNode* AnimatedGeoNode::clone() const
   {
-    AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_meshIndex, m_renderable, m_nodeName);
+    AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_meshIndex, m_materialIndex, m_renderable, m_nodeName);
 
     newNode->m_trfMatrix = m_trfMatrix;
 

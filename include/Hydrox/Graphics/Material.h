@@ -10,6 +10,8 @@
 #include "Hydrox/Utility/Miscellaneous/CachedResource.h"
 #include "Hydrox/Utility/Miscellaneous/ResourceHandle.h"
 
+#include "Hydrox/Utility/Math/Math.hpp"
+
 namespace he
 {
   class GRAPHICAPI Material : public CachedResource
@@ -26,19 +28,21 @@ namespace he
 
     struct MaterialData
     {
-      MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), transparency(false)
+      MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), transparency(false), color(Vector<float, 3>::identity())
       {
       }
 
-      MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, bool in_transparency) :
+      MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, bool in_transparency, Vector<float, 3> in_color = Vector<float, 3>::identity()) :
         diffuseStrength(in_diffuseStrength),
         specularStrength(in_specularStrength),
         ambientStrength(in_ambientStrength),
         specularExponent(in_specularExponent),
-        transparency(in_transparency)
+        transparency(in_transparency),
+        color(in_color)
       {
       }
 
+      Vector<float, 3> color;
       float diffuseStrength;
       float specularStrength;//metall materials have their own color as specular reflection
       float ambientStrength;

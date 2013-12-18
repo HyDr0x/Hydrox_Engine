@@ -85,6 +85,21 @@ namespace he
           stream >> materialData.transparency;
         }
 
+        if(line.find("Mesh Color") != std::string::npos)
+        {
+          std::getline(file, line);
+          std::stringstream stream(line);
+          stream >> materialData.color[0];
+
+          std::getline(file, line);
+          std::stringstream stream2(line);
+          stream2 >> materialData.color[1];
+
+          std::getline(file, line);
+          std::stringstream stream3(line);
+          stream3 >> materialData.color[2];
+        }
+
         /////////////////////////TEXTURES/////////////////////////
         if(line.find("Diffuse Color") != std::string::npos)
         {

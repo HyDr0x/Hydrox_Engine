@@ -55,11 +55,11 @@ namespace he
 
     GroupNode* loadDefaultSceneGraph();
     void loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene);
-    void loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, std::vector<ResourceHandle>& in_materials, const aiScene *scene, bool yAxisFlipped);
-    ResourceHandle loadVertices(const aiMesh *mesh, ResourceHandle materialIndex, unsigned int meshIndex, bool yAxisFlipped);
+    void loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, const aiScene *scene, bool yAxisFlipped);
+    ResourceHandle loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped);
     void loadAnimatedSkeleton(const aiScene *scene);
-    GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiNode *rootNode, std::vector<ResourceHandle> meshes);
-    TreeNode* createSceneNodes(const aiNode *node, std::vector<ResourceHandle> meshes, GroupNode *parentNode, TreeNode *nextSibling);
+    GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials);
+    TreeNode* createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials, GroupNode *parentNode, TreeNode *nextSibling);
     void attachBonesToSkinnedMesh();    
 
     AnimationTimeUnit m_animationTimeUnit;

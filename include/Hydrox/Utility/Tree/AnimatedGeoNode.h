@@ -14,7 +14,7 @@ namespace he
   {
   public:
 
-    AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    AnimatedGeoNode(const std::vector<Matrix<float, 4>>& inverseBindPoseMatrices, ResourceHandle meshIndex, ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
     AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
     virtual TreeNode& operator=(const TreeNode& sourceNode);
     virtual ~AnimatedGeoNode();

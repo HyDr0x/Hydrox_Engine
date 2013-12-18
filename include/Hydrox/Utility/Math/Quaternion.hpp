@@ -166,6 +166,11 @@ namespace he
       return *this;
     }
 
+    inline TYPE& operator [] (unsigned int i) 
+    { 
+      return m_coord[i]; 
+    }
+
     /*inline Vector<TYPE, 3> apply(Vector<TYPE, 3> v)
     {
       TYPE a00 = m_coord[0] * m_coord[0];

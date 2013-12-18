@@ -15,7 +15,7 @@ namespace he
     m_verticesPerPrimitive = 3;
   }
 
-  Mesh::Mesh(GLuint vertexDeclarationFlags, ResourceHandle materialIndex, 
+  Mesh::Mesh(GLuint vertexDeclarationFlags, 
       std::vector<Vector<float, 3>> positions, 
       GLuint primitiveType,
       std::vector<indexType> indices,
@@ -73,7 +73,6 @@ namespace he
 
     m_vertexCount = static_cast<unsigned int>(positions.size());
     m_vertexDeclarationFlags = vertexDeclarationFlags;
-    m_materialIndex = materialIndex;
 
     GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(GLfloat) * 3 : 0;
     GLuint texStride        = m_vertexDeclarationFlags & MODEL_TEXTURE       ? sizeof(GLfloat) * 2 : 0;
@@ -169,7 +168,6 @@ namespace he
   Mesh::Mesh(const Mesh& o)
   {
     m_hash = o.m_hash;
-    m_materialIndex = o.m_materialIndex;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	  m_primitiveCount = o.m_primitiveCount;
@@ -183,7 +181,6 @@ namespace he
   Mesh& Mesh::operator=(const Mesh& o)
   {
     m_hash = o.m_hash;
-    m_materialIndex = o.m_materialIndex;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	  m_primitiveCount = o.m_primitiveCount;
@@ -204,7 +201,6 @@ namespace he
   {
     glDeleteBuffers(1, &m_geometryData);
     glDeleteBuffers(1, &m_indexData);
-    m_materialIndex.free();
   }
 
   void Mesh::render(GLuint bindingIndex) const
@@ -213,16 +209,6 @@ namespace he
 	  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexData);
 	  glDrawElements(m_primitiveType, m_primitiveCount * m_verticesPerPrimitive, GLINDEXTYPE, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-
-  void Mesh::setMaterial(ResourceHandle materialIndex)
-  {
-    m_materialIndex = materialIndex;
-  }
-
-  ResourceHandle Mesh::getMaterial() const
-  {
-    return m_materialIndex;
   }
 
   GLuint Mesh::getVertexDeclarationFlags() const

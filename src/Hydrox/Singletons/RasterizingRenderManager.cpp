@@ -138,7 +138,7 @@ namespace he
       if((*geometryIterator)->getRenderable())
       {
         renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());
-        renderMaterial = m_materialManager->getObject(renderMesh->getMaterial());
+        renderMaterial = m_materialManager->getObject((*geometryIterator)->getMaterial());
         renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
         //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
 
@@ -146,6 +146,8 @@ namespace he
 
         worldViewProjectionMatrix = viewProjectionMatrix * (*geometryIterator)->getTransformationMatrix();
         renderShader->setUniform(4, GL_FLOAT_MAT4, &(worldViewProjectionMatrix[0][0]));
+        Vector<float, 3> color = renderMaterial->getMaterial().color;
+        renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
 
         //renderShader->setTexture(0, 0);
         //renderTexture->setTexture(0);
@@ -163,7 +165,7 @@ namespace he
       if((*animatedGeometryIterator)->getRenderable())
       {
         renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
-        renderMaterial = m_materialManager->getObject(renderMesh->getMaterial());
+        renderMaterial = m_materialManager->getObject((*animatedGeometryIterator)->getMaterial());
         renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
         //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
 
@@ -175,7 +177,9 @@ namespace he
         glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        renderShader->setUniform(4, GL_FLOAT_MAT4, &(viewProjectionMatrix[0][0]));
+        renderShader->setUniform(4, GL_FLOAT_MAT4, &viewProjectionMatrix[0][0]);
+        Vector<float, 3> color = renderMaterial->getMaterial().color;
+        renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
         //renderShader->setTexture(0, 0);
         //renderTexture->setTexture(0);

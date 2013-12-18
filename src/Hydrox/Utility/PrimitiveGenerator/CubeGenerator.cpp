@@ -79,6 +79,6 @@ namespace he
     index[34] = 0;
     index[35] = 1;
 
-    return Mesh(Mesh::MODEL_POSITION, materialHandle, position, GL_TRIANGLES, index);
+    return Mesh(Mesh::MODEL_POSITION, position, GL_TRIANGLES, index);
   }
 }

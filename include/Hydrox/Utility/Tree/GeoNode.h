@@ -14,7 +14,7 @@ namespace he
   {
   public:
 
-    GeoNode(ResourceHandle meshIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+    GeoNode(ResourceHandle meshIndex, ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
     GeoNode& operator=(const GeoNode& sourceNode);
     virtual TreeNode& operator=(const TreeNode& sourceNode);
     virtual ~GeoNode();
@@ -27,6 +27,9 @@ namespace he
 
     ResourceHandle getMeshIndex() const;
 
+    void setMaterial(ResourceHandle materialIndex);
+    ResourceHandle getMaterial() const;
+
     Matrix<float, 4> getTransformationMatrix() const;
     void setTransformationMatrix(const Matrix<float, 4>& trfMatrix);
 
@@ -37,6 +40,7 @@ namespace he
 
     Matrix<float, 4> m_trfMatrix;//the tranformation Matrix
 
+    ResourceHandle m_materialIndex;
     ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
 
     bool m_renderable;//boolean which decides if the mesh is being drawn or not
