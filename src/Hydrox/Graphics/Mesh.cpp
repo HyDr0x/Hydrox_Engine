@@ -211,6 +211,20 @@ namespace he
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
+  void Mesh::setPositions(std::vector<Vector<float, 3>> positions)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_POSITION);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < positions.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, m_vertexStride * i, sizeof(positions[0]), &positions[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
   GLuint Mesh::getVertexDeclarationFlags() const
   {
     return m_vertexDeclarationFlags;

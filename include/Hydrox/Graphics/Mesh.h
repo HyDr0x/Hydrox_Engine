@@ -55,6 +55,8 @@ namespace he
 
 	  void render(GLuint bindingIndex) const;
 
+    void setPositions(std::vector<Vector<float, 3>> positions);
+
     GLuint getVertexDeclarationFlags() const;
     GLuint getPrimitiveType() const;
 
