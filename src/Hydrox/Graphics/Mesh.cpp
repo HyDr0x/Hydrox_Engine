@@ -225,6 +225,106 @@ namespace he
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
+  void Mesh::setTextureCoordinations(std::vector<Vector<float, 3>> textureCoords)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_TEXTURE);
+
+    GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(Vector<float, 3>) : 0;
+
+    GLuint lokalStride = posStride;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < textureCoords.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(textureCoords[0]), &textureCoords[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  void Mesh::setNormals(std::vector<Vector<float, 3>> normals)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_NORMAL);
+
+    GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(Vector<float, 3>) : 0;
+    GLuint texStride = m_vertexDeclarationFlags & MODEL_TEXTURE  ? sizeof(Vector<float, 2>) : 0;
+
+    GLuint lokalStride = posStride + texStride;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < normals.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride +  m_vertexStride * i, sizeof(normals[0]), &normals[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  void Mesh::setBiNormals(std::vector<Vector<float, 3>> binormals)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_BINORMAL);
+
+    GLuint posStride     = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(Vector<float, 3>) : 0;
+    GLuint texStride     = m_vertexDeclarationFlags & MODEL_TEXTURE  ? sizeof(Vector<float, 2>) : 0;
+    GLuint normalStride  = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(Vector<float, 3>) : 0;
+
+    GLuint lokalStride = posStride + texStride + normalStride;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < binormals.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(binormals[0]), &binormals[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  void Mesh::setBoneWeights(std::vector<Vector<float, 3>> boneWeights)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS);
+
+    GLuint posStride      = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(Vector<float, 3>) : 0;
+    GLuint texStride      = m_vertexDeclarationFlags & MODEL_TEXTURE  ? sizeof(Vector<float, 2>) : 0;
+    GLuint normalStride   = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(Vector<float, 3>) : 0;
+    GLuint binormalStride = m_vertexDeclarationFlags & MODEL_BINORMAL ? sizeof(Vector<float, 3>) : 0;
+
+    GLuint lokalStride = posStride + texStride + normalStride + binormalStride;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < boneWeights.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneWeights[0]), &boneWeights[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  void Mesh::setBoneIndices(std::vector<Vector<float, 3>> boneIndices)
+  {
+    assert(m_vertexDeclarationFlags & MODEL_BONE_INDICES);
+
+    GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(Vector<float, 3>) : 0;
+    GLuint texStride        = m_vertexDeclarationFlags & MODEL_TEXTURE       ? sizeof(Vector<float, 2>) : 0;
+    GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(Vector<float, 3>) : 0;
+    GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(Vector<float, 3>) : 0;
+    GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(Vector<float, 4>) : 0;
+
+    GLuint lokalStride = posStride + texStride + normalStride + binormalStride + boneWeightStride;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+    for(unsigned int i = 0; i < boneIndices.size(); i++)
+		{
+      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneIndices[0]), &boneIndices[i]);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
   GLuint Mesh::getVertexDeclarationFlags() const
   {
     return m_vertexDeclarationFlags;

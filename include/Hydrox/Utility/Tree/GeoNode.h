@@ -25,6 +25,7 @@ namespace he
     virtual bool preTraverse(Traverser* traverser);
     virtual void postTraverse(Traverser* traverser);
 
+    void setMeshIndex(ResourceHandle meshIndex);
     ResourceHandle getMeshIndex() const;
 
     void setMaterial(ResourceHandle materialIndex);
