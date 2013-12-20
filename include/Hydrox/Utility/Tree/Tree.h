@@ -22,7 +22,7 @@ namespace he
     GroupNode* getRootNode();
     const GroupNode* const getRootNode() const;
 
-    virtual TreeNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
+    virtual GroupNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
     virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
     virtual void removeNode(TreeNode *node);
 

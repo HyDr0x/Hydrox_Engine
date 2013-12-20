@@ -43,9 +43,9 @@ namespace he
     deleteTraverser.doTraverse(m_rootNode);
   }
 
-  TreeNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
+  GroupNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
   {
-    TreeNode *newNode = Tree::addParentNode(destinationNode, sourceNode);
+    GroupNode *newNode = Tree::addParentNode(destinationNode, sourceNode);
 
     TransformTraverser transformTraverser;
     transformTraverser.doAscend(newNode);

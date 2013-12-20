@@ -31,7 +31,7 @@ namespace he
     Scene(const Scene& object);
 	  ~Scene();
 
-    TreeNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
+    GroupNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
     TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
     void removeNode(TreeNode *node);
 

@@ -32,7 +32,7 @@ namespace he
     return m_rootNode;
   }
 
-  TreeNode* Tree::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
+  GroupNode* Tree::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
   {
     assert(destinationNode != nullptr && sourceNode != nullptr);
 
