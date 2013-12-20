@@ -13,6 +13,8 @@
 #include "Hydrox/Utility/Miscellaneous/CachedResource.h"
 #include "Hydrox/Utility/Miscellaneous/ResourceHandle.h"
 
+#include "Hydrox/Graphics/AABB.h"
+
 #define GLINDEXTYPE GL_UNSIGNED_INT
 
 namespace he
@@ -58,7 +60,12 @@ namespace he
     GLuint getVertexDeclarationFlags() const;
     GLuint getPrimitiveType() const;
 
+    Vector<float, 3> getBBMin();
+    Vector<float, 3> getBBMax();
+
   private:
+
+    AABB m_boundingVolume;
 
     GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
     GLuint m_verticesPerPrimitive;

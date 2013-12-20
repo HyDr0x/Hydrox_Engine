@@ -23,7 +23,7 @@ namespace he
       std::vector<Vector<float, 3>> normals, 
       std::vector<Vector<float, 3>> binormals, 
       std::vector<Vector<float, 4>> boneIndices, 
-      std::vector<Vector<float, 4>> boneWeights)
+      std::vector<Vector<float, 4>> boneWeights) : m_boundingVolume(positions)
   {
     std::vector<Vector<float, 3>> data(positions.size() * sizeof(Vector<float, 3>) + 
                                        textureCoords.size() * sizeof(Vector<float, 2>) + 
@@ -168,6 +168,7 @@ namespace he
   Mesh::Mesh(const Mesh& o)
   {
     m_hash = o.m_hash;
+    m_boundingVolume = o.m_boundingVolume;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	  m_primitiveCount = o.m_primitiveCount;
@@ -181,6 +182,7 @@ namespace he
   Mesh& Mesh::operator=(const Mesh& o)
   {
     m_hash = o.m_hash;
+    m_boundingVolume = o.m_boundingVolume;
     m_primitiveType = o.m_primitiveType;
     m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	  m_primitiveCount = o.m_primitiveCount;
@@ -219,5 +221,15 @@ namespace he
   GLuint Mesh::getPrimitiveType() const
   {
     return m_primitiveType;
+  }
+
+  Vector<float, 3> Mesh::getBBMin()
+  {
+    return m_boundingVolume.getBBMin();
+  }
+
+  Vector<float, 3> Mesh::getBBMax()
+  {
+    return m_boundingVolume.getBBMax();
   }
 }

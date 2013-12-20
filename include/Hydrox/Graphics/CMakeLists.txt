@@ -1,6 +1,7 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AABB.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Billboard.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GraphicEngine.h 
