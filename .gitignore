@@ -13,6 +13,7 @@
 /backups
 
 #no build directory
+/build
 /msc100_64
 /lib
 
