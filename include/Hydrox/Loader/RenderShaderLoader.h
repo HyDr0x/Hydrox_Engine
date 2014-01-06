@@ -9,7 +9,7 @@ namespace he
   {
   public:
 
-    RenderShaderLoader(RenderShaderManager *renderShaderManager);
+    RenderShaderLoader();
     ~RenderShaderLoader();
 
     ResourceHandle loadShader(std::string shaderName,

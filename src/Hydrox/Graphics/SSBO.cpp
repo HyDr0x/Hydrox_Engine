@@ -2,15 +2,9 @@
 
 namespace he
 {
-  SSBO::SSBO( GLuint size, GLenum usage, unsigned char *data) : m_size(size),
-                                                                m_offset(0),
-                                                                m_bufferBindingPoint(0)
+  SSBO::SSBO() : m_bufferBindingPoint(0)
   {
     glGenBuffers(1, &m_bufferIndex);
-
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_bufferIndex);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, m_size, data, usage);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
   }
 
   SSBO::~SSBO()
@@ -18,21 +12,24 @@ namespace he
     glDeleteBuffers(1, &m_bufferIndex);
   }
 
-  void SSBO::createBuffer(GLuint size, GLenum usage, unsigned char *data)
+  void SSBO::createBuffer(GLuint size, GLenum usage, void *data)
   {
-    m_size = size;
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_bufferIndex);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, m_size, data, usage);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, usage);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
   }
 
-  void SSBO::setData(unsigned char *data, GLuint offset, GLuint size)
+  void SSBO::setData(void *data, GLuint offset, GLuint size)
   {
-    m_offset = offset;
-    m_size = size;
-
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_bufferIndex);
-    glBufferSubData(GL_SHADER_STORAGE_BUFFER, m_offset, m_size, data);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, size, data);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+  }
+
+  void SSBO::getData(void *data, GLuint offset, GLuint size)
+  {
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_bufferIndex);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, size, data);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
   }
 

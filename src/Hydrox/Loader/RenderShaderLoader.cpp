@@ -7,9 +7,8 @@
 
 namespace he
 {
-  RenderShaderLoader::RenderShaderLoader(RenderShaderManager *renderShaderManager)
+  RenderShaderLoader::RenderShaderLoader() : m_renderShaderManager(RenderShaderManager::getInstance())
   {
-    m_renderShaderManager = renderShaderManager;
   }
 
   RenderShaderLoader::~RenderShaderLoader()

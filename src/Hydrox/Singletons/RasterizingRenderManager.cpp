@@ -31,15 +31,9 @@ namespace he
     glDeleteVertexArrays(1, &m_simpleSkinnedTestVAO);
   }
 
-  void RasterizerRenderManager::initialize(ModelManager *modelManager, 
-                                           MaterialManager *materialManager, 
-                                           RenderShaderManager *renderShaderManager, 
-                                           ComputeShaderManager *computeShaderManager, 
-                                           TextureManager *textureManager,
-	                                         BillboardManager *billboardManager,
-                                           SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
+  void RasterizerRenderManager::initialize(GLfloat aspectRatio, size_t maxSpriteLayer)
   {
-    RenderManager::initialize(modelManager, materialManager, renderShaderManager, computeShaderManager, textureManager, billboardManager, spriteManager, aspectRatio, maxSpriteLayer);
+    RenderManager::initialize(aspectRatio, maxSpriteLayer);
 
     glGenBuffers(1, &m_dummyVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
@@ -109,33 +103,82 @@ namespace he
     glEnableVertexAttribArray(RenderShader::BONEINDICES);
     glBindVertexArray(0);
 
-    RenderShaderLoader renderShaderLoader(m_renderShaderManager);
+    RenderShaderLoader renderShaderLoader;
 
     m_billboardHandle = renderShaderLoader.loadShader(std::string("billboard shader"), std::string("billboardShader.vert"), std::string("billboardShader.frag"),  std::string("billboardShader.geom"));
 
     m_spriteHandle = renderShaderLoader.loadShader(std::string("sprite shader"), std::string("spriteShader.vert"), std::string("spriteShader.frag"), std::string("spriteShader.geom"));
+
+    m_frustumCullingGPU.initialize();
+
+    m_cameraParameterUBO.createBuffer(sizeof(Matrix<float, 4>) * 3 + sizeof(Vector<float, 4>), GL_DYNAMIC_DRAW);
+    m_cameraParameterUBO.setBindingPoint(0);
   }
 
   void RasterizerRenderManager::render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene)
   {
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	  ////////////////////////////////RENDER 3D Objects////////////////////////////////////////////
+    Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
+    Vector<float, 4> eyeVec = Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
+
+    m_cameraParameterUBO.setData(&viewMatrix[0][0], 0, sizeof(Matrix<float, 4>));
+    m_cameraParameterUBO.setData(&projectionMatrix[0][0], sizeof(Matrix<float, 4>), sizeof(Matrix<float, 4>));
+    m_cameraParameterUBO.setData(&viewProjectionMatrix[0][0], 2 * sizeof(Matrix<float, 4>), sizeof(Matrix<float, 4>));
+    m_cameraParameterUBO.setData(&eyeVec[0], 3 * sizeof(Matrix<float, 4>), sizeof(Vector<float, 4>));
+    m_cameraParameterUBO.uploadData();
+    m_cameraParameterUBO.bindBuffer();
+
+    ////////////////////////////////////////////CULL 3D Objects////////////////////////////////////////////
+
     Mesh *renderMesh;
     Material *renderMaterial;
     RenderShader *renderShader;
     Texture *renderTexture;
 
-    Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-    Matrix<float, 4> worldViewProjectionMatrix;
+    const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
+    const std::list<AnimatedGeoNode*> renderAnimatedGeometryList = scene->getAnimatedMeshes();
+
+    std::vector<Matrix<float, 4>> transformMatrices(renderGeometryList.size() + renderAnimatedGeometryList.size());
+    std::vector<Vector<float, 4>> bbMin(renderGeometryList.size() + renderAnimatedGeometryList.size());
+    std::vector<Vector<float, 4>> bbMax(renderGeometryList.size() + renderAnimatedGeometryList.size());
+    std::vector<unsigned int> culledAABB;
+
+    unsigned int k = 0;
+
+    //collect culling data for static 3D Objects
+    for(std::list<GeoNode*>::const_iterator geometryIterator = renderGeometryList.begin(); geometryIterator != renderGeometryList.end(); geometryIterator++, k++)
+    {
+      renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
+
+      transformMatrices[k] = (*geometryIterator)->getTransformationMatrix();
+      memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
+      memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(Vector<float, 3>));
+    }
+    //collect culling data for skinned 3D Objects
+    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++)
+    {
+      renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
+
+      transformMatrices[k] = (*animatedGeometryIterator)->getTransformationMatrix();
+      memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
+      memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(Vector<float, 3>));
+    }
+
+    culledAABB.resize(renderGeometryList.size() + renderAnimatedGeometryList.size());
+    m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
+    //culledAABB.resize(renderGeometryList.size() + renderAnimatedGeometryList.size(), 1);
+
+	  ////////////////////////////////////////////RENDER 3D Objects////////////////////////////////////////////
+    
+    Matrix<float, 4> worldMatrix;
     
     glBindVertexArray(m_simpleMeshVAO);
 
-    const std::list<GeoNode*> renderGeometryList = scene->getMeshes();
-
-    for(std::list<GeoNode*>::const_iterator geometryIterator = renderGeometryList.begin(); geometryIterator != renderGeometryList.end(); geometryIterator++)//Render 3D Objects
+    k = 0;
+    for(std::list<GeoNode*>::const_iterator geometryIterator = renderGeometryList.begin(); geometryIterator != renderGeometryList.end(); geometryIterator++, k++)//Render 3D Objects
     {
-      if((*geometryIterator)->getRenderable())
+      if((*geometryIterator)->getRenderable() && culledAABB[k])
       {
         renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());
         renderMaterial = m_materialManager->getObject((*geometryIterator)->getMaterial());
@@ -144,8 +187,9 @@ namespace he
 
         renderShader->useShader();
 
-        worldViewProjectionMatrix = viewProjectionMatrix * (*geometryIterator)->getTransformationMatrix();
-        renderShader->setUniform(4, GL_FLOAT_MAT4, &(worldViewProjectionMatrix[0][0]));
+        worldMatrix = (*geometryIterator)->getTransformationMatrix();
+        renderShader->setUniform(0, GL_FLOAT_MAT4, &(worldMatrix[0][0]));
+
         Vector<float, 3> color = renderMaterial->getMaterial().color;
         renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
 
@@ -158,11 +202,9 @@ namespace he
 
     glBindVertexArray(m_simpleSkinnedMeshVAO);
 
-    const std::list<AnimatedGeoNode*> renderAnimatedGeometryList = scene->getAnimatedMeshes();
-
-    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++)//Render 3D Objects
+    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++, k++)//Render 3D Objects
     {
-      if((*animatedGeometryIterator)->getRenderable())
+      if((*animatedGeometryIterator)->getRenderable() && culledAABB[k])
       {
         renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
         renderMaterial = m_materialManager->getObject((*animatedGeometryIterator)->getMaterial());
@@ -177,7 +219,6 @@ namespace he
         glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        renderShader->setUniform(4, GL_FLOAT_MAT4, &viewProjectionMatrix[0][0]);
         Vector<float, 3> color = renderMaterial->getMaterial().color;
         renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
@@ -192,7 +233,7 @@ namespace he
 	  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
-	  ////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
+	  ////////////////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
 
     const std::list<BillboardNode*> renderBillboardList = scene->getBillboards();
 
@@ -235,7 +276,7 @@ namespace he
     
     glDisable(GL_BLEND);
 
-	  ////////////////////////////////RENDER OPAQUE 2D Sprites////////////////////////////////////////////
+	  ////////////////////////////////////////////RENDER OPAQUE 2D Sprites////////////////////////////////////////////
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -267,7 +308,7 @@ namespace he
       }
 	  }
 
-    ////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
+    ////////////////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
 
     for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//resort all sprites according to their layer if their layer has been changed
     {
@@ -324,5 +365,7 @@ namespace he
     glDisable(GL_BLEND);
 
     glDepthMask(GL_TRUE);
+
+    m_cameraParameterUBO.unBindBuffer();
   }
 }

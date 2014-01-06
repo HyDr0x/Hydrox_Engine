@@ -4,6 +4,8 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/AABB.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Billboard.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingGPU.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRasterizer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GraphicEngine.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Light.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Material.h 

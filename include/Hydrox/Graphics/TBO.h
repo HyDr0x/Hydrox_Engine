@@ -11,12 +11,13 @@ namespace he
   {
   public:
 
-    TBO(){};
-    TBO( GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr );
+    TBO();
     ~TBO();
 
-    void createBuffer(GLuint size, GLenum usage, GLenum format, unsigned char *data = nullptr);
-    void setData(unsigned char *data, GLuint offset, GLuint size);
+    void createBuffer(GLuint size, GLenum usage, GLenum format, void *data = nullptr);
+
+    void setData(void *data, GLuint offset, GLuint size);
+    void getData(void *data, GLuint offset, GLuint size);
 
     void setBindingPoint(GLenum slot);
 
@@ -30,8 +31,6 @@ namespace he
 
     GLuint m_bufferIndex;
     GLuint m_textureIndex;
-    GLuint m_offset;
-    GLuint m_size;
 
     GLenum m_textureSlot;
   };

@@ -11,12 +11,13 @@ namespace he
   {
   public:
 
-    SSBO(){}
-    SSBO( GLuint size, GLenum usage, unsigned char *data = nullptr );
+    SSBO();
     ~SSBO();
 
-    void createBuffer(GLuint size, GLenum usage, unsigned char *data = nullptr);
-    void setData(unsigned char *data, GLuint offset, GLuint size);
+    void createBuffer(GLuint size, GLenum usage, void *data = nullptr);
+
+    void setData(void *data, GLuint offset, GLuint size);
+    void getData(void *data, GLuint offset, GLuint size);
 
     void setBindingPoint(GLuint bindingPoint);
 
@@ -29,9 +30,6 @@ namespace he
 	  SSBO& operator=(const SSBO&){ return *this; }
 
     GLuint m_bufferIndex;
-    GLuint m_offset;
-    GLuint m_size;
-
     GLuint m_bufferBindingPoint;
   };
 }

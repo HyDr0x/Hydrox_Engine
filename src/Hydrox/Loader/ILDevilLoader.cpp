@@ -2,7 +2,7 @@
 
 namespace he
 {
-  ILDevilLoader::ILDevilLoader(TextureManager *textureManager) : m_textureManager(textureManager)
+  ILDevilLoader::ILDevilLoader() : m_textureManager(TextureManager::getInstance())
   {
   }
 

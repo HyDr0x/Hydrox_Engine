@@ -22,13 +22,7 @@ namespace he
     RenderManager() {}
 	  virtual ~RenderManager() = 0;
 
-    virtual void initialize(ModelManager *modelManager, 
-                            MaterialManager *materialManager, 
-                            RenderShaderManager *renderShaderManager, 
-                            ComputeShaderManager *computeShaderManager,
-                            TextureManager *textureManager,
-	                          BillboardManager *billboardManager,
-                            SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
+    virtual void initialize(GLfloat aspectRatio, size_t maxSpriteLayer);
 
     virtual void addSprite(ResourceHandle spriteID, bool transparent = true);
 

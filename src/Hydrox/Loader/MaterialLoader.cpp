@@ -10,11 +10,10 @@
 
 namespace he
 {
-  MaterialLoader::MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager)
+  MaterialLoader::MaterialLoader() : m_materialManager(MaterialManager::getInstance()),
+                                     m_textureManager(TextureManager::getInstance()),
+                                     m_renderShaderManager(RenderShaderManager::getInstance())
   {
-    m_materialManager = materialManager;
-    m_textureManager = textureManager;
-    m_renderShaderManager = renderShaderManager;
   }
 
   MaterialLoader::~MaterialLoader()
@@ -30,7 +29,7 @@ namespace he
 
     ResourceHandle materialHandle;
 
-    std::string vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename;
+    std::string vertexFileName, fragmentFilename, geometryFilename, tesselationControlFilename, tesselationEvaluationFilename;
     std::string diffuseFilename[m_TEXNUMBER], normalFilename[m_TEXNUMBER], specularFilename[m_TEXNUMBER], displacementFilename[m_TEXNUMBER];
 
     std::string materialPath = m_materialManager->getPath();
@@ -182,7 +181,7 @@ namespace he
           std::getline(file, line);
           if(line != std::string("NULL"))
           {
-            tesselatioControlFilename = line;
+            tesselationControlFilename = line;
           }
         }
 
@@ -196,10 +195,10 @@ namespace he
         }
 		  }
 
-      RenderShaderLoader renderShaderLoader(m_renderShaderManager);
-      ResourceHandle shaderHandle = renderShaderLoader.loadShader(materialFilename + std::string("_Shader"), vertexFileName, fragmentFilename, geometryFilename, tesselatioControlFilename, tesselationEvaluationFilename);
+      RenderShaderLoader renderShaderLoader;
+      ResourceHandle shaderHandle = renderShaderLoader.loadShader(materialFilename + std::string("_Shader"), vertexFileName, fragmentFilename, geometryFilename, tesselationControlFilename, tesselationEvaluationFilename);
 
-      ILDevilLoader textureLoader(m_textureManager);
+      ILDevilLoader textureLoader;
 
       std::vector<std::vector<ResourceHandle>> textureHandles(4);
       for(unsigned int j = 0; j < m_TEXNUMBER; j++)

@@ -8,23 +8,17 @@ namespace he
   {
   }
 
-  void RenderManager::initialize(ModelManager *modelManager, 
-                                 MaterialManager *materialManager, 
-                                 RenderShaderManager *renderShaderManager, 
-                                 ComputeShaderManager *computeShaderManager,
-                                 TextureManager *textureManager,
-	                               BillboardManager *billboardManager,
-                                 SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer)
+  void RenderManager::initialize(GLfloat aspectRatio, size_t maxSpriteLayer)
   {
     m_aspectRatio = aspectRatio;
     m_maxLayer = maxSpriteLayer;
-    m_renderShaderManager = renderShaderManager;
-    m_computeShaderManager = computeShaderManager;
-    m_textureManager = textureManager;
-    m_billboardManager = billboardManager;
-    m_spriteManager = spriteManager;
-    m_modelManager = modelManager;
-    m_materialManager = materialManager;
+    m_renderShaderManager = RenderShaderManager::getInstance();
+    m_computeShaderManager = ComputeShaderManager::getInstance();
+    m_textureManager = TextureManager::getInstance();
+    m_billboardManager = BillboardManager::getInstance();
+    m_spriteManager = SpriteManager::getInstance();
+    m_modelManager = ModelManager::getInstance();
+    m_materialManager = MaterialManager::getInstance();
 
     m_transparentSpriteIDs.resize(m_maxLayer);
   }

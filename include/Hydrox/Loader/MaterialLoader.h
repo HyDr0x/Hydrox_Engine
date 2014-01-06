@@ -14,7 +14,7 @@ namespace he
   {
   public:
 
-    MaterialLoader(MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager);
+    MaterialLoader();
     ~MaterialLoader();
 
     ResourceHandle loadMaterial(std::string materialFilename);

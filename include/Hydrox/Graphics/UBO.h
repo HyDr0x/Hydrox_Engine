@@ -16,14 +16,12 @@ namespace he
   public:
 
     UBO();
-	  UBO(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout constructor
-    UBO(const GLuint bufferSize, const GLuint uniformCount, GLenum usage);//std140 layout constructor
 	  ~UBO();
 
     void createBuffer(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
-    void createBuffer(const GLuint bufferSize, const GLuint uniformCount, GLenum usage);//std140 layout
+    void createBuffer(const GLuint bufferSize, GLenum usage);//std140 layout
 
-	  template<class T> void setData( const GLuint index, T *data, const GLuint count = 1 )//shared layout
+	  template<class T> void setData(const GLuint index, T *data, const GLuint count = 1)//shared layout
 	  {
 		  bufferDataOffset = uniformOffsets[index];
 		  for( int i = 0; i != count ; i++ )
@@ -34,7 +32,7 @@ namespace he
 		  }
 	  }
 
-	  template<class T> void setMatrixData( const GLuint index, T *data, const GLuint rows, const GLuint columns )//shared layout
+	  template<class T> void setMatrixData(const GLuint index, T *data, const GLuint rows, const GLuint columns)//shared layout
 	  {
       bufferDataOffset = uniformOffsets[index];
       for(int i = 0; i != rows; i++ )
@@ -48,7 +46,8 @@ namespace he
 		  }
 	  }
 
-    void setData(unsigned char *data, unsigned int offset, const GLuint size );//standart layout
+    void setData(void *data, unsigned int offset, const GLuint size);//standard layout
+    void getData(void *data, GLuint offset, GLuint size);
 
 	  void uploadData() const;
 

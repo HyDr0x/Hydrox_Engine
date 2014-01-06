@@ -9,7 +9,7 @@ namespace he
   {
   public:
 
-    ComputeShaderLoader(ComputeShaderManager *computeShaderManager);
+    ComputeShaderLoader();
     ~ComputeShaderLoader();
 
     ResourceHandle loadShader(std::string shaderName, std::string computeShaderFilename, std::vector<std::string>& dynamicDefines = std::vector<std::string>());

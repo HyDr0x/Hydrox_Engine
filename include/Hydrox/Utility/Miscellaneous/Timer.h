@@ -11,12 +11,12 @@
 
 namespace he
 {
-  #ifdef NDEBUG
-    #define CPUTIMER(name)
-    #define OGLTIMER(name)
-    #define CPUGETTIMEDIFF(i)
-    #define OGLGETTIMEDIFF(i)
-  #else
+  //#ifdef NDEBUG
+  //  #define CPUTIMER(name)
+  //  #define OGLTIMER(name)
+  //  #define CPUGETTIMEDIFF(i)
+  //  #define OGLGETTIMEDIFF(i)
+  //#else
     #ifdef _WIN32
       #define CPUTIMER(name, i) he::CPUTimerWin myTimer##i(std::string(name));
       #define CPUGETTIMEDIFF(i) myTimer##i.getTimeDifference()
@@ -26,7 +26,7 @@ namespace he
     #endif
     #define OGLTIMER(name, i) he::OGLTimer myTimer##i(std::string(name));
     #define OGLGETTIMEDIFF(i) myTimer##i.getTimeDifference()
-  #endif
+  //#endif
 }
 
 #endif

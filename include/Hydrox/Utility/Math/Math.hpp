@@ -73,38 +73,28 @@ namespace he
 
     inline Matrix<float, 4> createPerspective(float left, float right, float bottom, float top, float cnear, float cfar)
     {
-      return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                           (right + left) / (right - left), 0.0f,
-                          0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
-                          0.0f,                           0.0f,                           (cfar + cnear) / (cfar - cnear),     (2.0f * cfar * cnear) / (cfar - cnear),
-                          0.0f,                           0.0f,                          -1.0f,                            0.0f);
+      return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left), 0.0f,
+                               0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
+                               0.0f,                           0.0f,                            (cfar + cnear) / (cfar - cnear), (2.0f * cfar * cnear) / (cfar - cnear),
+                               0.0f,                           0.0f,                            -1.0f,                           0.0f);
     }
 
     inline Matrix<float, 4> createPerspective(float fov, float aspectRatio, float cnear, float cfar)
     {
       float f = 1.0f / tanf(fov / 2.0f);
 
-      return Matrix<float,4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
-                          0.0f,                           f,                             0.0f,                               0.0f,
-                          0.0f,                           0.0f,                          (cfar + cnear) / (cfar - cnear),       (2.0f * cfar * cnear) / (cfar - cnear),
-                          0.0f,                           0.0f,                          -1.0f,                              0.0f);
+      return Matrix<float,4>(f / aspectRatio,             0.0f,                       0.0f,                               0.0f,
+                             0.0f,                        f,                          0.0f,                               0.0f,
+                             0.0f,                        0.0f,                       (cfar + cnear) / (cfar - cnear),    (2.0f * cfar * cnear) / (cfar - cnear),
+                             0.0f,                        0.0f,                       -1.0f,                              0.0f);
     }
-
-    //inline Matrix<float, 4> createPerspective(float fov, float aspectRatio, float near, float far)
-    //{
-    //  float f = 1.0f / tanf(fov / 2.0f);
-
-    //  return Matrix<float, 4>(f / aspectRatio,                0.0f,                          0.0f,                               0.0f,
-    //                      0.0f,                           f,                             0.0f,                               0.0f,
-    //                      0.0f,                           0.0f,                          (far + near) / (near - far),       -1.0f,
-    //                      0.0f,                           0.0f,                          (2.0f * far * near) / (near - far), 0.0f);
-    //}
 
     inline Matrix<float, 4> createOrthographic(float left, float right, float bottom, float top, float cnear, float cfar)
     {
-      return Matrix<float, 4>(2.0f / (right - left),0.0f,                   0.0f,                -(left + right) / (right - left),
-                          0.0f,                 2.0f / (top - bottom),  0.0f,                -(bottom + top) / (top - bottom),
-                          0.0f,                 0.0f,                  -2.0f / (cfar - cnear), -(cnear + cfar)   / (cfar - cnear),
-                          0.0f,                 0.0f,                   0.0f,                 1.0f);
+      return Matrix<float, 4>(2.0f / (right - left), 0.0f,                   0.0f,                   -(left + right) / (right - left),
+                              0.0f,                  2.0f / (top - bottom),  0.0f,                   -(bottom + top) / (top - bottom),
+                              0.0f,                  0.0f,                  -2.0f / (cfar - cnear),  -(cnear + cfar) / (cfar - cnear),
+                              0.0f,                  0.0f,                   0.0f,                   1.0f);
     }
 
     inline Matrix<float, 4> createLookAt(Vector<float,3> camPos, Vector<float, 3> aimPos, Vector<float, 3> upVektor)
@@ -117,9 +107,9 @@ namespace he
       Vector<float, 3> y = cross(x, z);
 
       Matrix<float,4> rotMat(x[0], x[1], x[2], 0,
-                          y[0], y[1], y[2], 0,
-                          -z[0],-z[1],-z[2], 0,
-                          0.0f, 0.0f, 0.0f, 1.0f);
+                             y[0], y[1], y[2], 0,
+                            -z[0],-z[1],-z[2], 0,
+                             0.0f, 0.0f, 0.0f, 1.0f);
 
 
       rotMat[3] = rotMat[0] * -camPos[0] + rotMat[1] * -camPos[1] + rotMat[2] * -camPos[2] + rotMat[3];
@@ -136,9 +126,9 @@ namespace he
       Vector<Type, 3> vTmp = v * (1.0f - cosAngle);
 
       Matrix<Type, 4> rotMat( cosAngle + vTmp[0] * v[0]                  , 0.0f + vTmp[0] * v[1] + sinAngle * v[2], 0.0f + vTmp[0] * v[2] - sinAngle * v[1], 0.0f,
-                          0.0f     + vTmp[1] * v[0] - sinAngle * v[2], cosAngle + vTmp[1] * v[1]              , 0.0f + vTmp[1] * v[2] + sinAngle * v[0], 0.0f,
-                          0.0f     + vTmp[2] * v[0] + sinAngle * v[1], 0.0f + vTmp[2] * v[1] - sinAngle * v[0], cosAngle + vTmp[2] * v[2]              , 0.0f,
-                          0.0f                                       , 0.0f                                   , 0.0f                                   , 1.0f);
+                              0.0f     + vTmp[1] * v[0] - sinAngle * v[2], cosAngle + vTmp[1] * v[1]              , 0.0f + vTmp[1] * v[2] + sinAngle * v[0], 0.0f,
+                              0.0f     + vTmp[2] * v[0] + sinAngle * v[1], 0.0f + vTmp[2] * v[1] - sinAngle * v[0], cosAngle + vTmp[2] * v[2]              , 0.0f,
+                              0.0f                                       , 0.0f                                   , 0.0f                                   , 1.0f);
 
       Matrix<Type, 4> result;
       result[0] = rotMat[0] * m[0][0] + rotMat[1] * m[0][1] + rotMat[2] * m[0][2];

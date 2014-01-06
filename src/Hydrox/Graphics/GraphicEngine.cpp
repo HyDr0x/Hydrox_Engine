@@ -110,9 +110,6 @@ namespace he
     m_debugLogManager = DebugLogManager::getInstance();
 	  m_renderManager = RasterizerRenderManager::getInstance();
 
-    //initialize the manager
-    initializeResourceManager(vfxPath, texPath, modelPath, materialPath, spriteLayer);
-
     m_scene = new Scene(new TransformNode(Matrix<float, 4>::identity(), worldRootNodeName), Vector<float, 3>::identity());
 
     m_debugLogManager->gatherSystemInformation();
@@ -127,6 +124,9 @@ namespace he
     assert(m_debugLogManager->getMajorOpenGLVersion() >= 4 && m_debugLogManager->getMinorOpenGLVersion() >= 3);
 
     m_debugLogManager->initDebugMode();
+
+    //initialize the manager
+    initializeResourceManager(vfxPath, texPath, modelPath, materialPath, spriteLayer);
   }
 
   void GraphicEngine::update(Vector<float, 3>& cameraPosition, float currentTime)
@@ -185,6 +185,6 @@ namespace he
 
     m_modelManager->initialize(cubeGenerator.generateCube(m_materialManager->getDefaultResource()), modelPath);
 
-    m_renderManager->initialize(m_modelManager, m_materialManager, m_renderShaderManager, m_computeShaderManager, m_textureManager, m_billboardManager, m_spriteManager, m_aspectRatio, spriteLayer);
+    m_renderManager->initialize(m_aspectRatio, spriteLayer);
   }
 }

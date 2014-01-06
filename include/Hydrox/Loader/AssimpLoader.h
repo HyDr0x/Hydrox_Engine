@@ -39,7 +39,7 @@ namespace he
       Minutes,
     };
 
-    AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager);
+    AssimpLoader();
     AssimpLoader(const AssimpLoader& o);
     AssimpLoader& operator=(const AssimpLoader& o);
     ~AssimpLoader();
@@ -50,8 +50,6 @@ namespace he
     Scene* load(std::string filename, bool yAxisFlipped = true);
 
   private:
-
-    AssimpLoader(){}
 
     GroupNode* loadDefaultSceneGraph();
     void loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene);

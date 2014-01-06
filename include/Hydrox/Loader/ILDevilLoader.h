@@ -19,7 +19,7 @@ namespace he
   {
   public:
 
-    ILDevilLoader(TextureManager *textureManager);
+    ILDevilLoader();
     ILDevilLoader(const ILDevilLoader& o );
     ILDevilLoader& operator=(const ILDevilLoader& o);
     ~ILDevilLoader();
@@ -27,8 +27,6 @@ namespace he
     ResourceHandle load(std::string filename, GLenum target);
 
   private:
-
-    ILDevilLoader(){}
 
     void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components);
 

@@ -14,13 +14,7 @@ namespace he
     RaytracingRenderManager(){}
 	  ~RaytracingRenderManager();
 
-    void initialize(ModelManager *modelManager, 
-                    MaterialManager *materialManager, 
-                    RenderShaderManager *renderShaderManager, 
-                    ComputeShaderManager *computeShaderManager,
-                    TextureManager *textureManager,
-	                  BillboardManager *billboardManager,
-                    SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
+    void initialize(GLfloat aspectRatio, size_t maxSpriteLayer);
 
 	  void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 

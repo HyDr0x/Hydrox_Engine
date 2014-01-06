@@ -7,9 +7,8 @@
 
 namespace he
 {
-  ComputeShaderLoader::ComputeShaderLoader(ComputeShaderManager *computeShaderManager)
+  ComputeShaderLoader::ComputeShaderLoader() : m_computeShaderManager(ComputeShaderManager::getInstance())
   {
-    m_computeShaderManager = computeShaderManager;
   }
 
   ComputeShaderLoader::~ComputeShaderLoader()

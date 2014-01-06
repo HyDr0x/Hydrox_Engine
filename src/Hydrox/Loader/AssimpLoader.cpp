@@ -16,11 +16,11 @@
 
 namespace he
 {
-  AssimpLoader::AssimpLoader(ModelManager *modelManager, MaterialManager *materialManager, TextureManager *textureManager, RenderShaderManager *renderShaderManager) : m_modelManager(modelManager),
-                                                                                                                                                                       m_materialManager(materialManager),
-                                                                                                                                                                       m_textureManager(textureManager),
-                                                                                                                                                                       m_renderShaderManager(renderShaderManager),
-                                                                                                                                                                       m_animationTimeUnit(Seconds)
+  AssimpLoader::AssimpLoader() : m_modelManager(ModelManager::getInstance()),
+                                 m_materialManager(MaterialManager::getInstance()),
+                                 m_textureManager(TextureManager::getInstance()),
+                                 m_renderShaderManager(RenderShaderManager::getInstance()),
+                                 m_animationTimeUnit(Seconds)
   {
     setAnimationTimeUnit(m_animationTimeUnit);
   }
@@ -296,7 +296,7 @@ namespace he
   {
     out_materials.resize(scene->mNumMaterials);
     std::vector< std::vector<ResourceHandle> > textures;
-    ILDevilLoader texLoader(m_textureManager);
+    ILDevilLoader texLoader;
     aiString texPath;
 
     for(unsigned int j = 0; j < out_materials.size(); j++)
@@ -333,7 +333,7 @@ namespace he
 
       std::string shaderPath = m_renderShaderManager->getPath();
 
-      RenderShaderLoader renderShaderLoader(m_renderShaderManager);
+      RenderShaderLoader renderShaderLoader;
 
       ResourceHandle shaderHandle = renderShaderLoader.loadShader(std::string("simpleShader"), std::string("simpleShader.vert"), std::string("simpleShader.frag"));
       out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));

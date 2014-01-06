@@ -5,6 +5,11 @@
 
 #include "Hydrox/Singletons/RenderManager.h"
 
+#include "Hydrox/Graphics/FrustumCullingGPU.h"
+
+#include "Hydrox/Graphics/UBO.h"
+#include "Hydrox/Graphics/SSBO.h"
+
 namespace he
 {
   class Shader;
@@ -16,13 +21,7 @@ namespace he
     RasterizerRenderManager(){}
 	  ~RasterizerRenderManager();
 
-    void initialize(ModelManager *modelManager, 
-                    MaterialManager *materialManager, 
-                    RenderShaderManager *renderShaderManager, 
-                    ComputeShaderManager *computeShaderManager,
-                    TextureManager *textureManager,
-	                  BillboardManager *billboardManager,
-                    SpriteManager *spriteManager, GLfloat aspectRatio, size_t maxSpriteLayer);
+    void initialize(GLfloat aspectRatio, size_t maxSpriteLayer);
 
 	  void render(Matrix<float, 4>& viewMatrix, Matrix<float, 4>& projectionMatrix, Vector<float, 3>& cameraPosition, Scene *scene);
 
@@ -40,6 +39,10 @@ namespace he
 
     ResourceHandle m_billboardHandle;
     ResourceHandle m_spriteHandle;
+
+    UBO m_cameraParameterUBO;
+
+    FrustumCullingGPU m_frustumCullingGPU;
   };
 }
 
