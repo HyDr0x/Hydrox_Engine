@@ -67,6 +67,11 @@ namespace he
     traverser->postTraverse(this);
   }
 
+  void GeoNode::setMeshIndex(ResourceHandle meshIndex)
+  {
+    m_meshIndex = meshIndex;
+  }
+
   ResourceHandle GeoNode::getMeshIndex() const
   {
     return m_meshIndex;

@@ -57,6 +57,13 @@ namespace he
 
 	  void render(GLuint bindingIndex) const;
 
+    void setPositions(std::vector<Vector<float, 3>> positions);
+    void setTextureCoordinations(std::vector<Vector<float, 3>> textureCoords);
+    void setNormals(std::vector<Vector<float, 3>> normals);
+    void setBiNormals(std::vector<Vector<float, 3>> binormals);
+    void setBoneWeights(std::vector<Vector<float, 3>> boneWeights);
+    void setBoneIndices(std::vector<Vector<float, 3>> boneIndices);
+
     GLuint getVertexDeclarationFlags() const;
     GLuint getPrimitiveType() const;
 
