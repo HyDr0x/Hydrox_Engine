@@ -14,13 +14,17 @@
 #include "Hydrox/Graphics/Scene.h"
 #include "Hydrox/Graphics/Texture.h"
 
+#include "Hydrox/Utility/PrimitiveGenerator/CubeGenerator.h"
+#include "Hydrox/Loader/MaterialLoader.h"
+
 namespace he
 {
   AssimpLoader::AssimpLoader() : m_modelManager(ModelManager::getInstance()),
                                  m_materialManager(MaterialManager::getInstance()),
                                  m_textureManager(TextureManager::getInstance()),
                                  m_renderShaderManager(RenderShaderManager::getInstance()),
-                                 m_animationTimeUnit(Seconds)
+                                 m_animationTimeUnit(Seconds),
+                                 m_defaultMaterial(MaterialLoader::getDefaultMaterial())
   {
     setAnimationTimeUnit(m_animationTimeUnit);
   }
@@ -33,6 +37,7 @@ namespace he
     m_materialManager = o.m_materialManager;
     m_textureManager = o.m_textureManager;
     m_renderShaderManager = o.m_renderShaderManager;
+    m_defaultMaterial = o.m_defaultMaterial;
   }
 
   AssimpLoader& AssimpLoader::operator=(const AssimpLoader& o)
@@ -43,6 +48,7 @@ namespace he
     m_materialManager = o.m_materialManager;
     m_textureManager = o.m_textureManager;
     m_renderShaderManager = o.m_renderShaderManager;
+    m_defaultMaterial = o.m_defaultMaterial;
 
     return *this;
   }
@@ -86,22 +92,17 @@ namespace he
     {
 		  printf("%s\n", importer.GetErrorString());
 
-      GroupNode *rootNode = loadDefaultSceneGraph();
-
-      scene = new Scene(rootNode, Vector<float, 3>::identity());
+      scene = loadDefaultSceneGraph();
     }
     else
     {
       std::vector<ResourceHandle> meshes;//contains the mesh id's of the scene
-      std::vector<ResourceHandle> materials;//contains the material id's of the scene
     
-      loadMaterialsFromAssimp(materials, assimpScene);
-
       loadMeshesFromAssimp(meshes, assimpScene, yAxisFlipped);
 
       loadAnimatedSkeleton(assimpScene);
 
-      GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene, meshes, materials);
+      GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene, meshes);
 
       attachBonesToSkinnedMesh();
 
@@ -119,14 +120,14 @@ namespace he
 	  return scene;
   }
 
-  GroupNode* AssimpLoader::loadDefaultSceneGraph()
+  Scene* AssimpLoader::loadDefaultSceneGraph()
   {
     TransformNode *sceneRootNode = new TransformNode(Matrix<float, 4>::identity(), std::string("defaultCube"));
 
-    GeoNode *mesh = new GeoNode(m_modelManager->getDefaultResource(), m_materialManager->getDefaultResource(), true, std::string("defaultCubeMesh"), sceneRootNode);
+    GeoNode *mesh = new GeoNode(ModelManager::getInstance()->addObject(CubeGenerator::generateCube()), MaterialLoader::getDefaultMaterial(), true, std::string("defaultCubeMesh"), sceneRootNode);
     sceneRootNode->setFirstChild(mesh);
 
-    return sceneRootNode;
+    return new Scene(sceneRootNode, Vector<float, 3>::identity());
   }
 
   void AssimpLoader::loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, const aiScene *scene, bool yAxisFlipped)
@@ -292,70 +293,15 @@ namespace he
       boneWeights));
   }
 
-  void AssimpLoader::loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene)
-  {
-    out_materials.resize(scene->mNumMaterials);
-    std::vector< std::vector<ResourceHandle> > textures;
-    ILDevilLoader texLoader;
-    aiString texPath;
-
-    for(unsigned int j = 0; j < out_materials.size(); j++)
-    {
-      textures.resize(4);
-      textures[0].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_DIFFUSE));
-      textures[1].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_NORMALS));
-      textures[2].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_DISPLACEMENT));
-      textures[3].resize(scene->mMaterials[j]->GetTextureCount(aiTextureType_SPECULAR));
-  
-	    for(unsigned int k = 0; k != textures[0].size(); k++)
-	    {
-		    scene->mMaterials[j]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
-		    textures[0][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	    }
-
-	    for(unsigned int k = 0; k != textures[1].size(); k++)
-	    {
-		    scene->mMaterials[j]->GetTexture(aiTextureType_NORMALS, 0, &texPath);
-		    textures[1][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	    }
-
-	    for(unsigned int k = 0; k != textures[2].size(); k++)
-	    {
-		    scene->mMaterials[j]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
-		    textures[2][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	    }
-
-	    for(unsigned int k = 0;k != textures[3].size(); k++)
-	    {
-		    scene->mMaterials[j]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
-		    textures[3][k] = texLoader.load(texPath.data, GL_TEXTURE_2D);
-	    }
-
-      std::string shaderPath = m_renderShaderManager->getPath();
-
-      RenderShaderLoader renderShaderLoader;
-
-      ResourceHandle shaderHandle = renderShaderLoader.loadShader(std::string("simpleShader"), std::string("simpleShader.vert"), std::string("simpleShader.frag"));
-      out_materials[j] = m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), textures, shaderHandle));
-
-      for(unsigned int i = 0; i != textures.size(); i++)
-      {
-        textures[i].clear();
-      }
-
-      textures.clear();
-    }
-  }
-
-  GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials)
+  GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<ResourceHandle>& meshes)
   {
     TransformNode *sceneRootNode = new TransformNode(Matrix<float, 4>::identity(), filename);
-    sceneRootNode->setFirstChild(createSceneNodes(scene, scene->mRootNode, meshes, materials, sceneRootNode, nullptr));
+    sceneRootNode->setFirstChild(createSceneNodes(scene, scene->mRootNode, meshes, sceneRootNode, nullptr));
 
     return sceneRootNode;
   }
 
-  TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials, GroupNode *parentNode, TreeNode *nextSibling)
+  TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<ResourceHandle>& meshes, GroupNode *parentNode, TreeNode *nextSibling)
   {
     TransformNode *transformNode = nullptr;
 
@@ -391,21 +337,21 @@ namespace he
       stream << i;
       if(!m_inverseBindPoseTable[meshIndex].empty())
       {
-        geoNode = new AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], meshes[meshIndex], materials[scene->mMeshes[meshIndex]->mMaterialIndex], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+        geoNode = new AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], meshes[meshIndex], m_defaultMaterial, true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
         m_skinnedMeshTable[dynamic_cast<AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
       }
       else
       {
-        geoNode = new GeoNode(meshes[meshIndex], materials[scene->mMeshes[meshIndex]->mMaterialIndex], true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+        geoNode = new GeoNode(meshes[meshIndex], m_defaultMaterial, true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
       }
       
-      stream.clear();
+      stream.str("");
       nextSibling = geoNode;
     }
 
     for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
     {
-      nextSibling = createSceneNodes(scene, node->mChildren[i], meshes, materials, parentNode, nextSibling);
+      nextSibling = createSceneNodes(scene, node->mChildren[i], meshes, parentNode, nextSibling);
     }
 
     if(node->mNumMeshes != 0 || node->mNumChildren != 0)

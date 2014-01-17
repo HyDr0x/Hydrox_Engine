@@ -20,6 +20,8 @@ namespace he
                               std::string tesselationEVALShaderFilename = std::string(),
                               std::vector<std::string>& dynamicDefines = std::vector<std::string>());
 
+    static ResourceHandle getDefaultRenderShader();
+
   private:
 
     RenderShaderManager *m_renderShaderManager;

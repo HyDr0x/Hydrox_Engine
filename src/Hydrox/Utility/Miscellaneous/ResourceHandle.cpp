@@ -10,8 +10,8 @@ namespace he
 
   ResourceHandle::ResourceHandle(unsigned int id, unsigned int *referenceCounter)
   {
-    (*referenceCounter)++;
     m_referenceCounter = referenceCounter;
+    (*m_referenceCounter)++;
     m_id = id;
   }
 

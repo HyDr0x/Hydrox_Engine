@@ -42,7 +42,7 @@ namespace he
       {
         std::cout << "ERROR, couldn't open file: " << texturePath << std::endl;
 
-        tmpTextureID = m_textureManager->getDefaultResource();
+        return getDefaultTexture();
       }
       else
       {
@@ -65,6 +65,12 @@ namespace he
     ilDeleteImages(1, &tex);
 
     return tmpTextureID;
+  }
+
+  ResourceHandle ILDevilLoader::getDefaultTexture()
+  {
+    Vector<float, 3> textureData = Vector<float, 3>(0.0f, 1.0f, 0.0f);
+    return TextureManager::getInstance()->addObject(Texture(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));
   }
 
   void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components)

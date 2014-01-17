@@ -49,15 +49,15 @@ namespace he
 
     Scene* load(std::string filename, bool yAxisFlipped = true);
 
+    static Scene* loadDefaultSceneGraph();
+
   private:
 
-    GroupNode* loadDefaultSceneGraph();
-    void loadMaterialsFromAssimp(std::vector<ResourceHandle>& out_materials, const aiScene *scene);
     void loadMeshesFromAssimp(std::vector<ResourceHandle>& out_meshes, const aiScene *scene, bool yAxisFlipped);
     ResourceHandle loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped);
     void loadAnimatedSkeleton(const aiScene *scene);
-    GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials);
-    TreeNode* createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<ResourceHandle>& meshes, std::vector<ResourceHandle>& materials, GroupNode *parentNode, TreeNode *nextSibling);
+    GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<ResourceHandle>& meshes);
+    TreeNode* createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<ResourceHandle>& meshes, GroupNode *parentNode, TreeNode *nextSibling);
     void attachBonesToSkinnedMesh();    
 
     AnimationTimeUnit m_animationTimeUnit;
@@ -69,6 +69,8 @@ namespace he
     MaterialManager *m_materialManager;
     TextureManager *m_textureManager;
     RenderShaderManager *m_renderShaderManager;
+
+    ResourceHandle m_defaultMaterial;
 
     std::map<std::string, std::vector<AnimationTrack>> m_animationTracks;//all the animation tracks per node
     std::vector<std::vector<Matrix<float, 4>>> m_inverseBindPoseTable;//all the boneMatrices per mesh

@@ -14,6 +14,8 @@ namespace he
 
     ResourceHandle loadShader(std::string shaderName, std::string computeShaderFilename, std::vector<std::string>& dynamicDefines = std::vector<std::string>());
 
+    static ResourceHandle getDefaultComputeShader();
+
   private:
 
     ComputeShaderManager *m_computeShaderManager;

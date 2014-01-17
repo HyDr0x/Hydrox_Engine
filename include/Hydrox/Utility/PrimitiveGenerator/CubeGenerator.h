@@ -13,7 +13,7 @@ namespace he
     CubeGenerator();
     ~CubeGenerator();
 
-    Mesh generateCube(ResourceHandle materialHandle);
+    static Mesh generateCube();
 
   private:
 

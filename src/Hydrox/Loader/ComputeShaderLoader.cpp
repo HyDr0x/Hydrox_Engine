@@ -26,7 +26,8 @@ namespace he
     if(noComputeShader)
     {
       std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
-      shaderHandle = m_computeShaderManager->getDefaultResource();
+
+      shaderHandle = getDefaultComputeShader();
     }
     else
     {
@@ -34,5 +35,18 @@ namespace he
     }
 
     return shaderHandle;
+  }
+
+  ResourceHandle ComputeShaderLoader::getDefaultComputeShader()
+  {
+    std::string computeSource = "#version 430 core\n\
+                                \n\
+                                layout(local_size_x = 1) in;\n\
+                                \n\
+                                void main()\n\
+                                {\n\
+                                }";
+
+    return ComputeShaderManager::getInstance()->addObject(ComputeShader(std::string("defaultComputeShader"), computeSource));
   }
 }

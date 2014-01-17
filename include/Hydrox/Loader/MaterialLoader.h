@@ -19,6 +19,8 @@ namespace he
 
     ResourceHandle loadMaterial(std::string materialFilename);
 
+    static ResourceHandle getDefaultMaterial();
+
   private:
 
     MaterialManager *m_materialManager;

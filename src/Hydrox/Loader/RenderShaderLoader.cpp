@@ -44,7 +44,8 @@ namespace he
     if(noRenderShader)
     {
       std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
-      shaderHandle = m_renderShaderManager->getDefaultResource();
+
+      shaderHandle = getDefaultRenderShader();
     }
     else
     {
@@ -52,5 +53,30 @@ namespace he
     }
 
     return shaderHandle;
+  }
+
+  ResourceHandle RenderShaderLoader::getDefaultRenderShader()
+  {
+    std::string vertexSource = "#version 430 core\n\
+                                layout(location = 0) uniform mat4 MVP;\n\
+                                \n\
+                                layout(location = 0) in vec3 in_Pos;\n\
+                                \n\
+                                void main()\n\
+                                {\n\
+	                                gl_Position = MVP * vec4(in_Pos, 1);\n\
+                                }";
+
+    std::string fragmentSource = "#version 430 core\n\
+                                  layout(early_fragment_tests) in;\n\
+                                  \n\
+                                  out vec4 color;\n\
+                                  \n\
+                                  void main()\n\
+                                  {\n\
+	                                  color = vec4(1,1,1,1);\n\
+                                  }";
+
+    return RenderShaderManager::getInstance()->addObject(RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
   }
 }

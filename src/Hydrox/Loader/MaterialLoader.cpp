@@ -241,11 +241,39 @@ namespace he
 
 		  std::cout << "Error: couldn't open material source file " << materialFilename << "." << std::endl;
 
-      return ResourceHandle(~0, nullptr);
+
+      std::string vertexSource = "#version 430 core\n\
+                                layout(location = 4) uniform mat4 MVP;\n\
+                                \n\
+                                layout(location = 0) in vec3 in_Pos;\n\
+                                \n\
+                                void main()\n\
+                                {\n\
+	                                gl_Position = MVP * vec4(in_Pos, 1);\n\
+                                }";
+
+      std::string fragmentSource = "#version 430 core\n\
+                                    layout(early_fragment_tests) in;\n\
+                                    \n\
+                                    out vec4 color;\n\
+                                    \n\
+                                    void main()\n\
+                                    {\n\
+	                                    color = vec4(1,1,1,1);\n\
+                                    }";
+
+      ResourceHandle renderShaderHandle = m_renderShaderManager->addObject(RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
+
+      return m_materialManager->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<ResourceHandle>>(), renderShaderHandle));
 	  }
 
 	  file.close();
 
     return materialHandle;
+  }
+
+  ResourceHandle MaterialLoader::getDefaultMaterial()
+  {
+    return MaterialManager::getInstance()->addObject(Material(Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<ResourceHandle>>(), RenderShaderLoader::getDefaultRenderShader()));
   }
 }

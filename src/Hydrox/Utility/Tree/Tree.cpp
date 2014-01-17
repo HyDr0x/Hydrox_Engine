@@ -95,10 +95,10 @@ namespace he
 
     if(parent->getFirstChild() == node)
     {
-      parent->setFirstChild(firstChild);
-
       if(firstChild != nullptr)
       {
+        parent->setFirstChild(firstChild);
+
         TreeNode *oldChildSibling;
         while(firstChild != nullptr)
         {
@@ -109,6 +109,10 @@ namespace he
         }
 
         oldChildSibling->setNextSibling(sibling);
+      }
+      else
+      {
+        parent->setFirstChild(sibling);
       }
     }
     else
@@ -135,6 +139,10 @@ namespace he
         }
 
         oldChildSibling->setNextSibling(sibling);
+      }
+      else
+      {
+        oldParentFirstChild->setNextSibling(sibling);
       }
     }
 

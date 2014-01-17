@@ -15,7 +15,7 @@ namespace he
   {
   }
 
-  Mesh CubeGenerator::generateCube(ResourceHandle materialHandle)
+  Mesh CubeGenerator::generateCube()
   {
     std::vector<Vector<float, 3>> position(8);
 

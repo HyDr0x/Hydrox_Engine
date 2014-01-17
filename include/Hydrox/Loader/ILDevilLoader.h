@@ -26,6 +26,8 @@ namespace he
 
     ResourceHandle load(std::string filename, GLenum target);
 
+    static ResourceHandle getDefaultTexture();
+
   private:
 
     void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components);

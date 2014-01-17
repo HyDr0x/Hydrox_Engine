@@ -30,8 +30,6 @@ namespace he
 
 	  ~CacheManager()
     {
-      m_defaultResource.free();
-
       for(unsigned int i = 0; i < m_objectsCache.size(); i++)
       {
         if(m_referenceCounter[i] > 0)
@@ -43,15 +41,9 @@ namespace he
       }
     }
 
-    void initialize(CLASS& defaultResource, std::string path)
+    void initialize(std::string path)
     {
       m_path = path;
-      m_defaultResource = addObject(defaultResource);
-    }
-
-    ResourceHandle getDefaultResource()
-    {
-      return m_defaultResource;
     }
 
     CLASS* getObject(ResourceHandle handle)
@@ -124,8 +116,6 @@ namespace he
     static const unsigned int m_BLOCKSIZE = 64;
 
 	  std::list<unsigned int> m_list;
-
-    ResourceHandle m_defaultResource;
 
 	  std::vector<CLASS> m_objectsCache;
     std::vector<unsigned int> m_referenceCounter;

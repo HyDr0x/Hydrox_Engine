@@ -2,6 +2,7 @@ set(
 	SOURCE 
 	${SOURCE}
 	${CMAKE_CURRENT_SOURCE_DIR}/Buffer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/CachedResource.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerCPUUnix.cpp 
