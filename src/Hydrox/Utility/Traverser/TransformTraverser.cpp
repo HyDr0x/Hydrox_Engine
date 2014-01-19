@@ -198,6 +198,17 @@ namespace he
   {
   }
 
+  bool TransformTraverser::preTraverse(AnimatedGeoNode* treeNode)
+  {
+    treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+
+    return true;
+  }
+
+  void TransformTraverser::postTraverse(AnimatedGeoNode* treeNode)
+  {
+  }
+
   bool TransformTraverser::preTraverse(GeoNode* treeNode)
   {
     treeNode->setTransformationMatrix(math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));

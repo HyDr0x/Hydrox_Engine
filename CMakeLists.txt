@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 2.6)
-
 project(Hydrox_Engine)
 
 set(
@@ -9,13 +7,11 @@ set(
 
 add_definitions(-DDLL_EXPORT)
 
-add_subdirectory(include/Hydrox)
-
-add_subdirectory(src/Hydrox)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+add_subdirectory(include/Hydrox)
+add_subdirectory(src/Hydrox)
 
 add_library(Hydrox_Engine SHARED ${SOURCE} ${HEADER})
 
@@ -26,9 +22,10 @@ find_package(ASSIMP)
 
 set(
 	INCLUDES 
+	${CMAKE_CURRENT_SOURCE_DIR}/include 
 	${IL_INCLUDE_DIR} 
 	${GLEW_INCLUDE_DIRS} 
-	${ASSIMP_DIR}/include 
+	${ASSIMP_INCLUDE_DIR} 
 )
 
 include_directories(${INCLUDES})
@@ -36,13 +33,13 @@ include_directories(${INCLUDES})
 set(
 	DEBUG_LIBRARIES 
 	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
-	debug ${ASSIMP_DIR}/lib/x64/Debug/assimpD${LIBSUFFIX} 
+	debug ${ASSIMP_LIBRARY_DBG}
 )
 
 set(
 	RELEASE_LIBRARIES 
 	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
-	optimized ${ASSIMP_DIR}/lib/x64/Release/assimp${LIBSUFFIX} 
+	optimized ${ASSIMP_LIBRARY_REL} 
 )
 
 set(

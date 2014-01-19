@@ -156,7 +156,7 @@ namespace he
       memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(Vector<float, 3>));
     }
     //collect culling data for skinned 3D Objects
-    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++)
+    for(std::list<AnimatedGeoNode*>::const_iterator animatedGeometryIterator = renderAnimatedGeometryList.begin(); animatedGeometryIterator != renderAnimatedGeometryList.end(); animatedGeometryIterator++, k++)
     {
       renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
 

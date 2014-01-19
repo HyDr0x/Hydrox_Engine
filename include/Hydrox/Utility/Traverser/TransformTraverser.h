@@ -29,6 +29,9 @@ namespace he
     virtual bool preTraverse(LODNode* treeNode);
     virtual void postTraverse(LODNode* treeNode);
 
+    virtual bool preTraverse(AnimatedGeoNode* treeNode);
+    virtual void postTraverse(AnimatedGeoNode* treeNode);
+
     virtual bool preTraverse(GeoNode* treeNode);
     virtual void postTraverse(GeoNode* treeNode);
 
