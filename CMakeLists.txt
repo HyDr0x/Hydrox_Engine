@@ -1,82 +1,20 @@
-project(Hydrox_Engine)
+cmake_minimum_required (VERSION 2.6) 
 
-set(
-	LIBSUFFIX 
-	${CMAKE_STATIC_LIBRARY_SUFFIX}
-)
+project(Hydrox_Utilities) 
+add_subdirectory(HydroxUtilities) 
 
-add_definitions(-DDLL_EXPORT)
+project(Hydrox_Renderer) 
+add_subdirectory(HydroxRenderer) 
+add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_SceneGraph)
 
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+project(Hydrox_SceneGraph) 
+add_subdirectory(HydroxSceneGraph) 
+add_dependencies(Hydrox_SceneGraph Hydrox_Utilities)
 
-add_subdirectory(include/Hydrox)
-add_subdirectory(src/Hydrox)
+project(Hydrox_Loader) 
+add_subdirectory(HydroxLoader) 
+add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
 
-add_library(Hydrox_Engine SHARED ${SOURCE} ${HEADER})
-
-find_package(GLEW)
-find_package(OPENGL)
-find_package(DEVIL)
-find_package(ASSIMP)
-
-set(
-	INCLUDES 
-	${CMAKE_CURRENT_SOURCE_DIR}/include 
-	${IL_INCLUDE_DIR} 
-	${GLEW_INCLUDE_DIRS} 
-	${ASSIMP_INCLUDE_DIR} 
-)
-
-include_directories(${INCLUDES})
-
-set(
-	DEBUG_LIBRARIES 
-	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
-	debug ${ASSIMP_LIBRARY_DBG}
-)
-
-set(
-	RELEASE_LIBRARIES 
-	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
-	optimized ${ASSIMP_LIBRARY_REL} 
-)
-
-set(
-	GENERAL_LIBRARIES 
-	general ${IL_LIBRARIES}/DevIL${LIBSUFFIX} 
-	general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
-)
-
-target_link_libraries(Hydrox_Engine ${DEBUG_LIBRARIES})
-target_link_libraries(Hydrox_Engine ${RELEASE_LIBRARIES})
-target_link_libraries(Hydrox_Engine ${GENERAL_LIBRARIES})
-
-#source_group("Header Files\\Graphics" FILES ${HEADER})
-
-MACRO( source_group_tree )
-        FILE( GLOB all_files ${ARGV1}/* )
-        SET( files "" )
-        FOREACH( each ${all_files} )
-                IF( NOT IS_DIRECTORY ${each} )
-                        GET_FILENAME_COMPONENT( file_name ${each} NAME )
-                        LIST( APPEND files "${ARGV1}/${file_name}" )
-                ENDIF()
-        ENDFOREACH()
-        LIST( LENGTH files files_len )
-        IF( ${files_len} GREATER 0 )
-                STRING( REPLACE "/" "\\\\" group_name ${ARGV0} )
-                SOURCE_GROUP("${group_name}" FILES ${files})
-        ENDIF()
-                
-        FILE( GLOB directories ${ARGV1}/*/ )
-        FOREACH( each ${directories} )
-                IF( IS_DIRECTORY ${each} )
-                        GET_FILENAME_COMPONENT( file_name ${each} NAME )
-                        source_group_tree("${ARGV0}/${file_name}" "${ARGV1}/${file_name}")
-                ENDIF()
-        ENDFOREACH()
-ENDMACRO()
-
-source_group_tree("Header" include)
-source_group_tree("Source" src)
+project(Sandbox) 
+add_subdirectory(Sandbox) 
+add_dependencies(Sandbox Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)

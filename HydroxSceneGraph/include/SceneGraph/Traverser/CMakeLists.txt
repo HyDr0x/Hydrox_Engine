@@ -1,0 +1,14 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/CollectRenderNodesTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertObserverTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeSearchTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveRenderNodesTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TransformTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 
+	PARENT_SCOPE 
+)

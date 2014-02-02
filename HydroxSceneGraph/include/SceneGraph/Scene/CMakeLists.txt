@@ -1,0 +1,7 @@
+set(
+	HEADER 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderScene.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Scene.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SceneCacheManager.h 
+	PARENT_SCOPE 
+)

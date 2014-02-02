@@ -1,0 +1,8 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderScene.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Scene.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SceneCacheManager.cpp 
+	PARENT_SCOPE 
+)
