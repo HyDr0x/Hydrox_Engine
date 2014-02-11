@@ -6,8 +6,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     Billboard::Billboard(util::ResourceHandle texID, bool renderable, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd) : m_texID(texID), 
                                                                                                                                                     m_renderable(renderable), 
                                                                                                                                                     m_animNumber(animNumber), 
@@ -185,6 +183,5 @@ namespace he
     {
 	    return m_texID;
     }
-
 	}
 }

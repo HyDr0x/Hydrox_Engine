@@ -8,9 +8,10 @@
 #include "SceneGraph/DLLExport.h"
 
 #include <Utilities/Math/Math.hpp>
+//#include <Utilities/Observer/Observer.hpp>
+#include <Utilities/Signals/EventManager.h>
 
 #include "SceneGraph/Scene/Scene.h"
-#include "SceneGraph/Scene/SceneCacheManager.h"
 
 #include "SceneGraph/TreeNodes/GroupNode.h"
 
@@ -18,6 +19,8 @@ namespace he
 {
 	namespace sg
 	{
+    class SceneCacheManager;
+
     class TreeNode;
     class GroupNode;
     class LODNode;
@@ -27,7 +30,7 @@ namespace he
     class ParticleNode;
     class LightNode;
 
-    class GRAPHICAPI RenderScene : public Scene
+    class GRAPHICAPI RenderScene : public Scene/*, public util::Observer<TransformNode*>*/
     {
     public:
 
@@ -45,12 +48,18 @@ namespace he
       void updateScene(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
     private:
-
-	    RenderScene() : Scene(new GroupNode("")) {}
-      RenderScene(const RenderScene&) : Scene(new GroupNode("")) {}
+ 
+	    RenderScene() : Scene(new GroupNode("")), m_eventManager(util::EventManager()) {}
+      RenderScene(const RenderScene& object) : Scene(object.m_rootNode), m_eventManager(object.m_eventManager) {}
 	    RenderScene& operator=(const RenderScene&){ return *this; }
 
+      //void updateObserver(TransformNode* data);
+
       SceneCacheManager *m_sceneCacheManager;
+
+      util::EventManager& m_eventManager;
+
+      //std::vector<float> m_lodRanges;
     };
   }
 }

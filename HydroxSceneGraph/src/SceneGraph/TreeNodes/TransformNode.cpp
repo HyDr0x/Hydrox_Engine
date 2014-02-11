@@ -82,9 +82,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    TransformNode* TransformNode::getNodeType()
+    bool TransformNode::isTransformNode()
     {
-      return this;
+      return true;
     }
 
     void TransformNode::calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation)

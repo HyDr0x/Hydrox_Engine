@@ -19,11 +19,6 @@ namespace he
       m_frustumCullingShaderHandle = frustumCullingShaderHandle;
 
       m_computeShaderManager = computeShaderManager;
-
-      m_transformBuffer.setBindingPoint(0);
-      m_bbMinBuffer.setBindingPoint(1);
-      m_bbMaxBuffer.setBindingPoint(2);
-      m_culledAABBBuffer.setBindingPoint(3);
     }
 
     void FrustumCullingGPU::cullAABB(std::vector<util::Matrix<float, 4>>& transformMatrices, std::vector<util::Vector<float, 4>>& bbMin, std::vector<util::Vector<float, 4>>& bbMax, std::vector<unsigned int>& culledAABB)
@@ -37,10 +32,10 @@ namespace he
         m_bbMaxBuffer.createBuffer(bbMax.size() * sizeof(util::Vector<float, 4>), GL_STREAM_DRAW, &bbMax[0][0]);
         m_culledAABBBuffer.createBuffer(boundingBoxNumber * sizeof(unsigned int), GL_STREAM_READ, nullptr);
 
-        m_transformBuffer.bindBuffer();
-        m_bbMinBuffer.bindBuffer();
-        m_bbMaxBuffer.bindBuffer();
-        m_culledAABBBuffer.bindBuffer();
+        m_transformBuffer.bindBuffer(0);
+        m_bbMinBuffer.bindBuffer(1);
+        m_bbMaxBuffer.bindBuffer(2);
+        m_culledAABBBuffer.bindBuffer(3);
 
         ComputeShader *frustumCullingShader = m_computeShaderManager->getObject(m_frustumCullingShaderHandle);
 

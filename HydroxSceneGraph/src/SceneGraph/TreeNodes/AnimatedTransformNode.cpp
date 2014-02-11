@@ -103,9 +103,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    AnimatedTransformNode* AnimatedTransformNode::getNodeType()
+    bool AnimatedTransformNode::isAnimatedTransformNode()
     {
-      return this;
+      return true;
     }
 
     void AnimatedTransformNode::setBoneIndex(unsigned int boneIndex)

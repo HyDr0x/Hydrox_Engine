@@ -16,8 +16,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     class GRAPHICAPI Texture : public ManagedResource
     {
     public:
@@ -31,13 +29,12 @@ namespace he
 
       void free();
 
-	    void setTexture(GLuint slot);
+	    void setTexture(GLint location, GLuint slot);
 	    void unsetTexture();
 
 	    void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
 
 	    util::Vector<unsigned int, 2> getResolution();
-	    GLuint getSlot();
 	    GLenum getTarget();
 
 	    friend class Renderquad;
@@ -53,7 +50,6 @@ namespace he
       GLenum m_type;
 	    GLuint m_slot;
     };
-
 	}
 }
 #endif

@@ -1,18 +1,23 @@
 #include "SceneGraph/Scene/RenderScene.h"
 
+#include <assert.h>
 #include <stack>
 
 #include "SceneGraph/Scene/SceneCacheManager.h"
 
+#include "SceneGraph/Traverser/AddRenderNodesTraverser.h"
+#include "SceneGraph/Traverser/RemoveRenderNodesTraverser.h"
 #include "SceneGraph/Traverser/TransformTraverser.h"
 #include "SceneGraph/Traverser/InsertObserverTraverser.h"
 #include "SceneGraph/Traverser/DeleteTraverser.h"
+
+#include "SceneGraph/TreeNodes/TransformNode.h"
 
 namespace he
 {
 	namespace sg
 	{
-    RenderScene::RenderScene(GroupNode* rootNode, util::EventManager& eventManger, util::Vector<float, 3>& cameraPosition) : Scene(rootNode)
+    RenderScene::RenderScene(GroupNode* rootNode, util::EventManager& eventManger, util::Vector<float, 3>& cameraPosition) : Scene(rootNode), m_eventManager(eventManger)
     {
       m_sceneCacheManager = new SceneCacheManager(eventManger);
 
@@ -22,7 +27,7 @@ namespace he
       InsertObserverTraverser insertObserverTraverser(m_sceneCacheManager);
       insertObserverTraverser.doTraverse(m_rootNode);//insert this scene as an observer to every Transform node
 
-      m_sceneCacheManager->addTreeToCaches(m_rootNode, cameraPosition);
+      m_sceneCacheManager->addSubTree(m_rootNode, cameraPosition);
     }
 
     RenderScene::~RenderScene()
@@ -38,7 +43,7 @@ namespace he
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager->editNodeCaches(eventID, newNode->getNodeType());
+      m_sceneCacheManager->addSubTree(newNode, util::Vector<float, 3>::identity());
 
       return newNode;
     }
@@ -51,14 +56,14 @@ namespace he
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager->editNodeCaches(eventID, newNode->getNodeType());
+      m_sceneCacheManager->addSubTree(newNode, util::Vector<float, 3>::identity());
 
       return newNode;
     }
 
     void RenderScene::removeNode(TreeNode *node)
     {
-      m_sceneCacheManager->editNodeCaches(util::EventManager::OnRemoveAnimatedGeometryNode, node->getNodeType());
+      m_sceneCacheManager->removeSubTree(node);
 
       Scene::removeNode(node);
     }
@@ -74,14 +79,14 @@ namespace he
       InsertObserverTraverser insertObserverTraverser(m_sceneCacheManager);
       insertObserverTraverser.doTraverse(copiedRootNode);//insert this scene as an observer to every Transform node
 
-      m_sceneCacheManager->addTreeToCaches(copiedRootNode, cameraPosition);
+      m_sceneCacheManager->addSubTree(copiedRootNode, cameraPosition);
 
       return copiedRootNode;
     }
 
     void RenderScene::removeSubTree(TreeNode* sceneNode)
     {
-      m_sceneCacheManager->removeTreeFromCaches(sceneNode);
+      m_sceneCacheManager->removeSubTree(m_rootNode);
 
       Scene::removeSubTree(sceneNode);
     }
@@ -93,6 +98,9 @@ namespace he
 
     void RenderScene::updateScene(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
     {
+      /*UpdateSceneTraverser updateTraverser(m_eventManager, m_lodRanges, cameraPosition, currentTime, isTimeRelative);
+      updateTraverser.doTraverse(m_rootNode);*/
+
       m_sceneCacheManager->updateCaches(cameraPosition, currentTime, isTimeRelative);
     }
   }

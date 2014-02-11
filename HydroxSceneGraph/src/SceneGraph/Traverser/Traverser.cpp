@@ -15,21 +15,6 @@ namespace he
     {
     }
 
-    void Traverser::addTraverserFlag(TraverserFlags traverserFlag)
-    {
-      m_traverserFlags |= (unsigned int)traverserFlag;
-    }
-
-    void Traverser::removeTraverserFlag(TraverserFlags traverserFlag)
-    {
-      m_traverserFlags &= ~traverserFlag;
-    }
-
-    Traverser::TraverserFlags Traverser::getTraverserFlag() const
-    {
-      return (TraverserFlags)m_traverserFlags;
-    }
-
     void Traverser::doAscend(TreeNode* treeNode)
     {
       GroupNode *parentNode = treeNode->getParent();

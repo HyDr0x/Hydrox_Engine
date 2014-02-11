@@ -20,10 +20,6 @@ namespace he
 
       enum Events
 	    {
-		    OnDefault,
-		    OnCollision,
-		    OnMouseClick,
-		    OnKeyHit,
         OnAddBillboardNode,
         OnAddGeometryNode,
         OnAddAnimatedGeometryNode,
@@ -34,6 +30,12 @@ namespace he
         OnRemoveAnimatedGeometryNode,
         OnRemoveLightNode,
         OnRemoveParticleTransmitterNode,
+        OnAddLODNode,
+        OnAddTransformNode,
+        OnAddAnimatedTransformNode,
+        OnRemoveLODNode,
+        OnRemoveTransformNode,
+        OnRemoveAnimatedTransformNode,
 	    };
 
       EventManager();

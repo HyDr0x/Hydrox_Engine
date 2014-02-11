@@ -1,5 +1,7 @@
 #include "Renderer/Resources/Texture.h"
 
+#include <assert.h>
+
 namespace he
 {
 	namespace renderer
@@ -89,17 +91,15 @@ namespace he
       glDeleteTextures(1, &m_texIndex);
     }
 
-    void Texture::setTexture(GLuint slot)
+    void Texture::setTexture(GLint location, GLuint slot)
     {
-	    if(slot > 31)
-      {
-		    printf("ERROR, texture slot too high %i\n", slot);
-      }
+      assert(slot < 31 && "ERROR, texture slot too high\n");
 
 	    m_slot = slot;
 
 	    glActiveTexture(GL_TEXTURE0 + m_slot);
 	    glBindTexture(m_target, m_texIndex);
+      glUniform1i(location, slot);
     }
 
     void Texture::unsetTexture()
@@ -121,11 +121,6 @@ namespace he
     util::Vector<unsigned int, 2> Texture::getResolution()
     {
 	    return util::Vector<unsigned int, 2>(m_width, m_height);
-    }
-
-    GLuint Texture::getSlot()
-    {
-	    return m_slot;
     }
 
     GLenum Texture::getTarget()

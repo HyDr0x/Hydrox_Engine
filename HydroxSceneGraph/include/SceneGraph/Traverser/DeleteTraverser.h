@@ -6,7 +6,7 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     class DeleteTraverser : public Traverser
     {
     public:
@@ -37,12 +37,6 @@ namespace he
 
       virtual bool preTraverse(LightNode* treeNode);
       virtual void postTraverse(LightNode* treeNode);
-
-    protected:
-
-      TreeNode *m_lastVisitedNode;
-      bool m_postKill;
-
     };
 	}
 }

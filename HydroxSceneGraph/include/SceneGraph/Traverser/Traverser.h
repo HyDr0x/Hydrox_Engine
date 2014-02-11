@@ -21,18 +21,8 @@ namespace he
     {
     public:
 
-      enum TraverserFlags
-      {
-        TRAVERSE_DEFAULT = 0,
-        TRAVERSE_IGNORE_LODS = 1,
-      };
-
       Traverser();
       virtual ~Traverser() = 0;
-
-      void addTraverserFlag(TraverserFlags traverserFlag);
-      void removeTraverserFlag(TraverserFlags traverserFlag);
-      TraverserFlags getTraverserFlag() const;
 
       virtual void doAscend(TreeNode* treeNode);//starts with the parent node of the given treeNode
 
@@ -85,7 +75,6 @@ namespace he
       virtual void postAscendTraverse();
 
       bool m_stopTraversal;
-      unsigned int m_traverserFlags;
     };
 	}
 }

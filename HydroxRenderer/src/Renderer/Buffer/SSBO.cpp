@@ -4,8 +4,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     SSBO::SSBO() : m_bufferBindingPoint(0)
     {
       glGenBuffers(1, &m_bufferIndex);
@@ -37,13 +35,9 @@ namespace he
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    void SSBO::setBindingPoint(GLuint bindingPoint)
+    void SSBO::bindBuffer(GLuint bindingPoint)
     {
       m_bufferBindingPoint = bindingPoint;
-    }
-
-    void SSBO::bindBuffer() const
-    {
       glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bufferBindingPoint, m_bufferIndex);
     }
 
@@ -51,6 +45,5 @@ namespace he
     {
       glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_bufferBindingPoint, 0);
     }
-
 	}
 }

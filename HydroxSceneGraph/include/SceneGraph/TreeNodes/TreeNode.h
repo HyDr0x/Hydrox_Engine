@@ -26,7 +26,16 @@ namespace he
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
 
-      virtual TreeNode* getNodeType();
+      virtual bool isTreeNode();
+      virtual bool isTransformNode();
+      virtual bool isParticleNode();
+      virtual bool isLODNode();
+      virtual bool isLightNode();
+      virtual bool isGroupNode();
+      virtual bool isGeoNode();
+      virtual bool isBillboardNode();
+      virtual bool isAnimatedTransformNode();
+      virtual bool isAnimatedGeoNode();
 
       virtual TreeNode* getFirstChild() const;
       TreeNode* getNextSibling() const;

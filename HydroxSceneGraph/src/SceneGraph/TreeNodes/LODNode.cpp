@@ -69,9 +69,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    LODNode* LODNode::getNodeType()
+    bool LODNode::isLODNode()
     {
-      return this;
+      return true;
     }
 
     unsigned int LODNode::getLODLevel()

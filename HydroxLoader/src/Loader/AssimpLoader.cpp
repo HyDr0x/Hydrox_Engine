@@ -154,7 +154,7 @@ namespace he
 
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
     {
-      GLuint vertexDeclarationFlags;
+      GLuint vertexDeclarationFlags = 0;
 
       vertexDeclarationFlags |= mesh->HasPositions()              ? renderer::Mesh::MODEL_POSITION     : 0;
       vertexDeclarationFlags |= mesh->HasTextureCoords(0)         ? renderer::Mesh::MODEL_TEXTURE      : 0;
@@ -162,6 +162,7 @@ namespace he
       vertexDeclarationFlags |= mesh->HasTangentsAndBitangents()  ? renderer::Mesh::MODEL_BINORMAL     : 0;
       vertexDeclarationFlags |= mesh->HasBones()                  ? renderer::Mesh::MODEL_BONE_WEIGHTS : 0;
       vertexDeclarationFlags |= mesh->HasBones()                  ? renderer::Mesh::MODEL_BONE_INDICES : 0;
+      vertexDeclarationFlags |= mesh->HasVertexColors(0)          ? renderer::Mesh::MODEL_COLOR        : 0;
 
       std::vector<util::Vector<float, 3>> positions;
       std::vector<util::Vector<float, 2>> textureCoords;
@@ -169,6 +170,7 @@ namespace he
       std::vector<util::Vector<float, 3>> binormals;
       std::vector<util::Vector<float, 4>> boneIndices;
       std::vector<util::Vector<float, 4>> boneWeights;
+      std::vector<util::Vector<float, 4>> vertexColors;
       std::vector<renderer::Mesh::indexType> indices;
 
       GLuint primitiveType;
@@ -201,7 +203,7 @@ namespace he
         }
 	    }
 
-	    if(mesh->HasTextureCoords(0) && mesh->mNumUVComponents[0]!=0)
+	    if(mesh->HasTextureCoords(0) && mesh->mNumUVComponents[0] != 0)
 	    {
 		    assert(!mesh->mNumUVComponents[1] && !mesh->mNumUVComponents[2] && !mesh->mNumUVComponents[3]);
 
@@ -276,6 +278,16 @@ namespace he
         }
 	    }
 
+      if(mesh->HasVertexColors(0))
+      {
+        vertexColors.resize(mesh->mNumVertices);
+
+        for(unsigned int i = 0; i < mesh->mNumVertices; i++)
+		    {
+          vertexColors[i] = util::Vector<float, 4>(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
+        }
+      }
+
 	    if(mesh->HasFaces())
 	    {
 		    indices.resize(mesh->mNumFaces * indicesPerFace);
@@ -297,8 +309,9 @@ namespace he
         textureCoords,
         normals,
         binormals,
+        boneWeights,
         boneIndices,
-        boneWeights));
+        vertexColors));
     }
 
     sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<util::ResourceHandle>& meshes)

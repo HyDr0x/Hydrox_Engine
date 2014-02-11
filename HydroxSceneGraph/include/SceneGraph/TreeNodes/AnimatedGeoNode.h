@@ -11,8 +11,7 @@
 namespace he
 {
 	namespace sg
-	{
-    class GRAPHICAPI AnimatedGeoNode : public GeoNode
+	{    class GRAPHICAPI AnimatedGeoNode : public GeoNode
     {
     public:
 
@@ -27,7 +26,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual AnimatedGeoNode* getNodeType();
+      virtual bool isAnimatedGeoNode();
 
       void setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 

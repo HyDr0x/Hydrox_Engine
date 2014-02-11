@@ -21,9 +21,7 @@ namespace he
       void setData(void *data, GLuint offset, GLuint size);
       void getData(void *data, GLuint offset, GLuint size);
 
-      void setBindingPoint(GLuint bindingPoint);
-
-      void bindBuffer() const;
+      void bindBuffer(GLuint bindingPoint);
       void unBindBuffer() const;
 
     private:

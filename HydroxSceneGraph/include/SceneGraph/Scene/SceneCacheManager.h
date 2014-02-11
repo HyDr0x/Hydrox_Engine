@@ -8,6 +8,7 @@
 #include <Utilities/Observer/Observer.hpp>
 #include <Utilities/Signals/EventManager.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+
 #include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
@@ -34,29 +35,27 @@ namespace he
 
       void setLODRanges(std::vector<float> lodRanges);
 
+      void addSubTree(TreeNode *rootNode, util::Vector<float, 3>& cameraPosition);
+      void removeSubTree(TreeNode *rootNode);
+
       void updateCaches(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
-      template<class NODETYPE> void editNodeCaches(unsigned int eventID, NODETYPE *node)
-      {
-        m_eventManager.raiseSignal<void (*)(NODETYPE *newNode)>(eventID)->execute(node);
-      }
+      void addNodeToCache(sg::LODNode *lodNode);
+      void addNodeToCache(sg::TransformNode *transformNode);
+      void addNodeToCache(sg::AnimatedTransformNode *animatedTransformNode);
 
-      void addTreeToCaches(TreeNode *rootNode, util::Vector<float, 3>& cameraPosition);
-      void removeTreeFromCaches(TreeNode *rootNode);
+      void removeNodeFromCache(sg::LODNode *lodNode);
+      void removeNodeFromCache(sg::TransformNode *transformNode);
+      void removeNodeFromCache(sg::AnimatedTransformNode *animatedTransformNode);
 
     private:
 
-      template<class CLASS> void deleteFromCacheList(std::list<CLASS*>& sourceCacheList, std::list<CLASS*>& destinationCacheList)
-      {
-        for(std::list<CLASS*>::iterator sourceIterator = sourceCacheList.begin(); sourceIterator != sourceCacheList.end(); sourceIterator++)
-        {
-          destinationCacheList.remove(*sourceIterator);
-        }
-      }
+      SceneCacheManager(const SceneCacheManager& object) : m_eventManager(object.m_eventManager){}
 
-      SceneCacheManager(const SceneCacheManager&) : m_eventManager(util::EventManager()){}
+      void registerNodeCacheSlots();
 
       void updateObserver(TransformNode* data);
+
       void updateAnimationTime(float currentTime, bool isTimeRelative);
       void updateAnimatedTransformNodes();
       void updateTransformNodes();
@@ -67,8 +66,8 @@ namespace he
       std::vector<float> m_lodRanges;
 
       std::list<TransformNode*> m_dirtyTransforms;
-      std::list<LODNode*> m_activeLODs;
       std::list<AnimatedTransformNode*> m_activeAnimatedTransforms;
+      std::list<LODNode*> m_activeLODs;
     };
   }
 }

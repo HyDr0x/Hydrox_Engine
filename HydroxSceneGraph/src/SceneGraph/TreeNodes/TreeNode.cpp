@@ -28,9 +28,54 @@ namespace he
       m_parent = nullptr;
     }
 
-    TreeNode* TreeNode::getNodeType()
+    bool TreeNode::isTreeNode()
     {
-      return this;
+      return true;
+    }
+
+    bool TreeNode::isTransformNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isParticleNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isLODNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isLightNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isGroupNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isGeoNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isBillboardNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isAnimatedTransformNode()
+    {
+      return false;
+    }
+
+    bool TreeNode::isAnimatedGeoNode()
+    {
+      return false;
     }
 
     TreeNode* TreeNode::getNextSibling() const

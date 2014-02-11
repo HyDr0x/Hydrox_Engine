@@ -1,8 +1,8 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AddRenderNodesTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/CollectRenderNodesTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertObserverTraverser.h 

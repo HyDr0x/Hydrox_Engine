@@ -78,28 +78,6 @@ namespace he
             stream >> materialData.specularExponent;
           }
 
-          if(line.find("Transparency") != std::string::npos)
-          {
-            std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.transparency;
-          }
-
-          if(line.find("Mesh Color") != std::string::npos)
-          {
-            std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.color[0];
-
-            std::getline(file, line);
-            std::stringstream stream2(line);
-            stream2 >> materialData.color[1];
-
-            std::getline(file, line);
-            std::stringstream stream3(line);
-            stream3 >> materialData.color[2];
-          }
-
           /////////////////////////TEXTURES/////////////////////////
           if(line.find("Diffuse Color") != std::string::npos)
           {
@@ -253,7 +231,7 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultMaterial()
     {
       RenderShaderLoader renderShaderLoader(m_renderShaderManager);
-      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, false), std::vector<std::vector<util::ResourceHandle>>(), renderShaderLoader.getDefaultRenderShader()));
+      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(), renderShaderLoader.getDefaultRenderShader()));
     }
   }
 }

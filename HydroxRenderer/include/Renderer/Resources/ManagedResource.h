@@ -9,7 +9,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
     class GRAPHICAPI ManagedResource
     {
     public:
@@ -27,7 +26,6 @@ namespace he
 
       uint64_t m_hash;
     };
-
 	}
 }
 

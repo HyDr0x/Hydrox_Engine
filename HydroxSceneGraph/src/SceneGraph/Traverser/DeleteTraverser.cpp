@@ -15,8 +15,6 @@ namespace he
 	{
     DeleteTraverser::DeleteTraverser()
     {
-      m_postKill = true;
-      m_lastVisitedNode = nullptr;
     }
 
     DeleteTraverser::~DeleteTraverser()

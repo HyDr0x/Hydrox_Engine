@@ -40,7 +40,7 @@ namespace he
 
     TreeNode* AnimatedGeoNode::clone() const
     {
-      AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_meshIndex, m_materialIndex, m_renderable, m_nodeName);
+      AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_meshHandle, m_materialHandle, m_renderable, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 
@@ -64,9 +64,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    AnimatedGeoNode* AnimatedGeoNode::getNodeType()
+    bool AnimatedGeoNode::isAnimatedGeoNode()
     {
-      return this;
+      return true;
     }
 
     void AnimatedGeoNode::setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex)

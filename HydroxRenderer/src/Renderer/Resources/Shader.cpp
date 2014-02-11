@@ -98,11 +98,6 @@ namespace he
 	    }
     }
 
-    void Shader::setTexture(GLint location, GLint slot) const
-    {
-	    glUniform1i(location, slot);
-    }
-
     void Shader::useShader() const
     {
 	    glUseProgram(m_program);

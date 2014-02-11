@@ -61,9 +61,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    ParticleNode* ParticleNode::getNodeType()
+    bool ParticleNode::isParticleNode()
     {
-      return this;
+      return true;
     }
 
     util::Matrix<float,4> ParticleNode::getTransformationMatrix() const

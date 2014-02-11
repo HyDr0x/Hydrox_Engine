@@ -9,8 +9,8 @@ namespace he
 	namespace sg
 	{
     GeoNode::GeoNode(util::ResourceHandle meshIndex, util::ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                                                                                                                                       m_meshIndex(meshIndex),
-                                                                                                                                                                       m_materialIndex(materialIndex),
+                                                                                                                                                                       m_meshHandle(meshIndex),
+                                                                                                                                                                       m_materialHandle(materialIndex),
                                                                                                                                                                        m_renderable(renderable)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
@@ -20,9 +20,9 @@ namespace he
     {
       TreeNode::operator=(sourceNode);
 
-      m_materialIndex = sourceNode.m_materialIndex;
+      m_materialHandle = sourceNode.m_materialHandle;
       m_trfMatrix = sourceNode.m_trfMatrix;
-      m_meshIndex = sourceNode.m_meshIndex;
+      m_meshHandle = sourceNode.m_meshHandle;
       m_renderable = sourceNode.m_renderable;
 
       return *this;
@@ -44,7 +44,7 @@ namespace he
 
     TreeNode* GeoNode::clone() const
     {
-      GeoNode *newNode = new GeoNode(m_meshIndex, m_materialIndex, true, m_nodeName);
+      GeoNode *newNode = new GeoNode(m_meshHandle, m_materialHandle, true, m_nodeName);
 
       newNode->m_nodeName = m_nodeName;
 
@@ -69,29 +69,29 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    GeoNode* GeoNode::getNodeType()
+    bool GeoNode::isGeoNode()
     {
-      return this;
+      return true;
     }
 
-    void GeoNode::setMeshIndex(util::ResourceHandle meshIndex)
+    void GeoNode::setMeshHandle(util::ResourceHandle meshHandle)
     {
-      m_meshIndex = meshIndex;
+      m_meshHandle = meshHandle;
     }
 
-    util::ResourceHandle GeoNode::getMeshIndex() const
+    util::ResourceHandle GeoNode::getMeshHandle() const
     {
-      return m_meshIndex;
+      return m_meshHandle;
     }
 
-    void GeoNode::setMaterial(util::ResourceHandle materialIndex)
+    void GeoNode::setMaterialHandle(util::ResourceHandle materialHandle)
     {
-      m_materialIndex = materialIndex;
+      m_materialHandle = materialHandle;
     }
 
-    util::ResourceHandle GeoNode::getMaterial() const
+    util::ResourceHandle GeoNode::getMaterialHandle() const
     {
-      return m_materialIndex;
+      return m_materialHandle;
     }
 
     util::Matrix<float,4> GeoNode::getTransformationMatrix() const

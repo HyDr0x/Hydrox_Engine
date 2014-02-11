@@ -29,6 +29,7 @@ namespace he
 		    TANGENT,
 		    BONEWEIGHTS,
 		    BONEINDICES,
+        COLOR,
 		    SPECIAL0,
 		    SPECIAL1,
 		    SPECIAL2,

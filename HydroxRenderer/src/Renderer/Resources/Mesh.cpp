@@ -26,15 +26,17 @@ namespace he
         std::vector<util::Vector<float, 2>> textureCoords, 
         std::vector<util::Vector<float, 3>> normals, 
         std::vector<util::Vector<float, 3>> binormals, 
+        std::vector<util::Vector<float, 4>> boneWeights,
         std::vector<util::Vector<float, 4>> boneIndices, 
-        std::vector<util::Vector<float, 4>> boneWeights) : m_boundingVolume(positions)
+        std::vector<util::Vector<float, 4>> vertexColors) : m_boundingVolume(positions)
     {
       std::vector<util::Vector<float, 3>> data(positions.size() * sizeof(util::Vector<float, 3>) + 
                                          textureCoords.size() * sizeof(util::Vector<float, 2>) + 
                                          normals.size() * sizeof(util::Vector<float, 3>) + 
                                          binormals.size() * sizeof(util::Vector<float, 3>) + 
+                                         boneWeights.size() * sizeof(util::Vector<float, 4>) +
                                          boneIndices.size() * sizeof(util::Vector<float, 4>) + 
-                                         boneWeights.size() * sizeof(util::Vector<float, 4>));
+                                         vertexColors.size() * sizeof(util::Vector<float, 4>));
       unsigned int offset = 0;
       unsigned int length = positions.size() * sizeof(util::Vector<float, 3>);
       memcpy(&data[offset], &positions[0], length);
@@ -48,11 +50,14 @@ namespace he
       length = binormals.size() * sizeof(util::Vector<float, 3>);
       if(length) memcpy(&data[offset], &binormals[0], length);
       offset += length;
+      length = boneWeights.size() * sizeof(util::Vector<float, 4>);
+      if(length) memcpy(&data[offset], &boneWeights[0], length);
+      offset += length;
       length = boneIndices.size() * sizeof(util::Vector<float, 4>);
       if(length) memcpy(&data[offset], &boneIndices[0], length);
       offset += length;
-      length = boneWeights.size() * sizeof(util::Vector<float, 4>);
-      if(length) memcpy(&data[offset], &boneWeights[0], length);
+      length = vertexColors.size() * sizeof(util::Vector<float, 4>);
+      if(length) memcpy(&data[offset], &vertexColors[0], length);
 
       offset += length;
       m_hash = MurmurHash64A(&data[0], offset, 0);
@@ -78,14 +83,15 @@ namespace he
       m_vertexCount = static_cast<unsigned int>(positions.size());
       m_vertexDeclarationFlags = vertexDeclarationFlags;
 
-      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(GLfloat) * 3 : 0;
-      GLuint texStride        = m_vertexDeclarationFlags & MODEL_TEXTURE       ? sizeof(GLfloat) * 2 : 0;
-      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(GLfloat) * 3 : 0;
-      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(GLfloat) * 3 : 0;
-      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(GLfloat) * 4 : 0;
-      GLuint boneIndexStride  = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(GLfloat) * 4 : 0;
+      GLuint posStride         = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint texStride         = m_vertexDeclarationFlags & MODEL_TEXTURE       ? sizeof(util::Vector<float, 2>) : 0;
+      GLuint normalStride      = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint binormalStride    = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint boneWeightStride  = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint boneIndexStride   = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint vertexColorStride = m_vertexDeclarationFlags & MODEL_COLOR         ? sizeof(util::Vector<float, 4>) : 0;
 
-      m_vertexStride = posStride + texStride + normalStride + binormalStride + boneWeightStride + boneIndexStride;
+      m_vertexStride = posStride + texStride + normalStride + binormalStride + boneWeightStride + boneIndexStride + vertexColorStride;
 
       m_vertexStride += m_vertexStride % 4;
 
@@ -97,56 +103,47 @@ namespace he
       glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
 	    glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
 
-	    if(positions.size() > 0)
-	    {
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-          glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(positions[0]), &positions[i]);
-        }
-        lokalStride += posStride;
-	    }
+      for(unsigned int i = 0; i < positions.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 3>), &positions[i]);
+      }
+      lokalStride += posStride;
 
-	    if(textureCoords.size() > 0)
-	    {
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-		      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(textureCoords[0]), &textureCoords[i]);
-        }
-        lokalStride += texStride;
-	    }
+      for(unsigned int i = 0; i < textureCoords.size(); i++)
+		  {
+		    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 2>), &textureCoords[i]);
+      }
+      lokalStride += texStride;
 
-	    if(normals.size() > 0)
-	    {
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-		      glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(normals[0]), &normals[i]);
-        }
-        lokalStride += normalStride;
-	    }
+      for(unsigned int i = 0; i < normals.size(); i++)
+		  {
+		    glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 3>), &normals[i]);
+      }
+      lokalStride += normalStride;
 
-	    if(binormals.size() > 0)
-	    {
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-          glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(binormals[0]), &binormals[i]);
-        }
-        lokalStride += binormalStride;
-	    }
+      for(unsigned int i = 0; i < binormals.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 3>), &binormals[i]);
+      }
+      lokalStride += binormalStride;
 
-	    if(boneIndices.size() > 0)
-	    {
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-          glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneWeights[0]), &boneWeights[i]);
-        }
-        lokalStride += boneWeightStride;
+      for(unsigned int i = 0; i < boneWeights.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 4>), &boneWeights[i]);
+      }
+      lokalStride += boneWeightStride;
 
-        for(unsigned int i = 0; i < m_vertexCount; i++)
-		    {
-          glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneIndices[0]), &boneIndices[i]);
-        }
-        lokalStride += boneIndexStride;
-	    }
+      for(unsigned int i = 0; i < boneIndices.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 4>), &boneIndices[i]);
+      }
+      lokalStride += boneIndexStride;
+
+      for(unsigned int i = 0; i < vertexColors.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(util::Vector<float, 4>), &vertexColors[i]);
+      }
+      lokalStride += vertexColorStride;
 
 	    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -231,7 +228,7 @@ namespace he
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void Mesh::setTextureCoordinations(std::vector<util::Vector<float, 3>> textureCoords)
+    void Mesh::setTextureCoordinations(std::vector<util::Vector<float, 2>> textureCoords)
     {
       assert(m_vertexDeclarationFlags & MODEL_TEXTURE);
 
@@ -288,7 +285,7 @@ namespace he
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void Mesh::setBoneWeights(std::vector<util::Vector<float, 3>> boneWeights)
+    void Mesh::setBoneWeights(std::vector<util::Vector<float, 4>> boneWeights)
     {
       assert(m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS);
 
@@ -309,7 +306,7 @@ namespace he
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void Mesh::setBoneIndices(std::vector<util::Vector<float, 3>> boneIndices)
+    void Mesh::setBoneIndices(std::vector<util::Vector<float, 4>> boneIndices)
     {
       assert(m_vertexDeclarationFlags & MODEL_BONE_INDICES);
 
@@ -326,6 +323,29 @@ namespace he
       for(unsigned int i = 0; i < boneIndices.size(); i++)
 		  {
         glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(boneIndices[0]), &boneIndices[i]);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    void Mesh::setVertexColors(std::vector<util::Vector<float, 4>> vertexColors)
+    {
+      assert(m_vertexDeclarationFlags & MODEL_COLOR);
+
+      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint texStride        = m_vertexDeclarationFlags & MODEL_TEXTURE       ? sizeof(util::Vector<float, 2>) : 0;
+      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint boneIndextStride = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(util::Vector<float, 4>) : 0;
+
+      GLuint lokalStride = posStride + texStride + normalStride + binormalStride + boneWeightStride + boneIndextStride;
+
+      glBindBuffer(GL_ARRAY_BUFFER, m_geometryData);
+
+      for(unsigned int i = 0; i < vertexColors.size(); i++)
+		  {
+        glBufferSubData(GL_ARRAY_BUFFER, lokalStride + m_vertexStride * i, sizeof(vertexColors[0]), &vertexColors[i]);
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);

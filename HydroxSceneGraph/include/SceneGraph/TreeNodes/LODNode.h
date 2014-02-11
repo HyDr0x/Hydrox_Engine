@@ -29,7 +29,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual LODNode* getNodeType();
+      virtual bool isLODNode();
 
       unsigned int getLODLevel();
       bool getLOD(util::Vector<float, 3> camPos, const std::vector<float>& lodRanges);

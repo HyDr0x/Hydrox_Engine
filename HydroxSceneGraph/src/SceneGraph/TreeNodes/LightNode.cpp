@@ -61,9 +61,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    LightNode* LightNode::getNodeType()
+    bool LightNode::isLightNode()
     {
-      return this;
+      return true;
     }
 
     util::Matrix<float,4> LightNode::getTransformationMatrix() const

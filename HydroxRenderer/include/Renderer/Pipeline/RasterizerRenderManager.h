@@ -10,6 +10,7 @@
 
 #include <Renderer/Resources/ResourceManager.hpp>
 #include "Renderer/Pipeline/FrustumCullingGPU.h"
+#include "Renderer/Pipeline/GeometryRasterizer.h"
 
 #include "Renderer/Buffer/UBO.h"
 #include "Renderer/Buffer/SSBO.h"
@@ -72,13 +73,13 @@ namespace he
 
     private:
 
+      void oldRenderPath(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
+
 	    RasterizerRenderManager(const RasterizerRenderManager&){}
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
       GLuint m_simpleMeshVAO;
-      GLuint m_simpleSkinnedMeshVAO;
-      GLuint m_simpleSkinnedTestVAO;
 
       GLuint m_boneMatricesBuffer;
 
@@ -90,6 +91,8 @@ namespace he
       UBO m_cameraParameterUBO;
 
       FrustumCullingGPU m_frustumCullingGPU;
+
+      GeometryRasterizer *m_geometryRasterizer;
 
       size_t m_maxLayer;
       std::list<util::ResourceHandle> m_opaqueSpriteIDs;

@@ -16,8 +16,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     class GRAPHICAPI Material : public ManagedResource
     {
     public:
@@ -32,26 +30,22 @@ namespace he
 
       struct MaterialData
       {
-        MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), transparency(false), color(util::Vector<float, 3>::identity())
+        MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f)
         {
         }
 
-        MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, bool in_transparency, util::Vector<float, 3> in_color = util::Vector<float, 3>::identity()) :
+        MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent) :
           diffuseStrength(in_diffuseStrength),
           specularStrength(in_specularStrength),
           ambientStrength(in_ambientStrength),
-          specularExponent(in_specularExponent),
-          transparency(in_transparency),
-          color(in_color)
+          specularExponent(in_specularExponent)
         {
         }
 
-        util::Vector<float, 3> color;
         float diffuseStrength;
         float specularStrength;//metall materials have their own color as specular reflection
         float ambientStrength;
         float specularExponent;
-        bool transparency;//transparency y/n
       };
 
       Material();
@@ -65,23 +59,22 @@ namespace he
 	    void setTextureNumber(TextureType texType, unsigned int texNum);
 	    unsigned int getTextureNumber(TextureType texType) const;
 
-	    void setTexture(TextureType texType, unsigned int slot, util::ResourceHandle textureIndex);
-	    util::ResourceHandle getTexture(TextureType texType, unsigned int slot) const;
+	    void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle);
+	    util::ResourceHandle getTextureHandle(TextureType texType, unsigned int slot) const;
 
-      void setShader(util::ResourceHandle shaderIndex);
-      util::ResourceHandle getShader() const;
+      void setShaderHandle(util::ResourceHandle shaderHandle);
+      util::ResourceHandle getShaderHandle() const;
 
-      void setMaterial(MaterialData& material);
-      const MaterialData& getMaterial() const;
+      void setMaterialData(MaterialData& material);
+      MaterialData& getMaterialData();
 
     private:
 
-      std::vector< std::vector<util::ResourceHandle> > m_textureIndices;
-      util::ResourceHandle m_shaderIndex;//specifies the Shader of the submesh in the Shadermanager for the renderpass
+      std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
+      util::ResourceHandle m_shaderHandle;//specifies the Shader of the submesh in the Shadermanager for the renderpass
 
       MaterialData m_materialData;
     };
-
 	}
 }
 

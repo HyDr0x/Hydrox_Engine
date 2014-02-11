@@ -48,7 +48,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual AnimatedTransformNode* getNodeType();
+      virtual bool isAnimatedTransformNode();
 
       void setBoneIndex(unsigned int boneIndex);
       unsigned int getBoneIndex();

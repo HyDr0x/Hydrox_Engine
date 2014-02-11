@@ -6,8 +6,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     UBO::UBO() : m_bufferData(nullptr), 
                  m_bufferDataOffset(0), 
                  m_bufferBindingPoint(0), 
@@ -78,13 +76,9 @@ namespace he
 	    glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    void UBO::setBindingPoint(GLuint bindingPoint)
+    void UBO::bindBuffer(GLuint bindingPoint)
     {
       m_bufferBindingPoint = bindingPoint;
-    }
-
-    void UBO::bindBuffer() const
-    {
 	    glBindBufferBase(GL_UNIFORM_BUFFER, m_bufferBindingPoint, m_bufferIndex);
     }
 
@@ -92,6 +86,5 @@ namespace he
     {
       glBindBufferBase(GL_UNIFORM_BUFFER, m_bufferBindingPoint, 0);
     }
-
 	}
 }

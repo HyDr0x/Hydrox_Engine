@@ -28,7 +28,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual BillboardNode* getNodeType();
+      virtual bool isBillboardNode();
 
       util::ResourceHandle getBillboardIndex() const;
 

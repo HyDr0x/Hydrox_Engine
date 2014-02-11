@@ -64,6 +64,11 @@ namespace he
       traverser->postTraverse(this);
     }
 
+    bool GroupNode::isGroupNode()
+    {
+      return true;
+    }
+
     TreeNode* GroupNode::getFirstChild() const
     {
       return m_firstChild;

@@ -1,30 +1,30 @@
 #ifndef INSERTOBSERVERTRAVERSER_H_
 #define INSERTOBSERVERTRAVERSER_H_
 
+#include <Utilities/Observer/Observer.hpp>
+
 #include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
 {
 	namespace sg
-	{
-    class SceneCacheManager;
-
+	{
     class InsertObserverTraverser : public Traverser
     {
     public:
 
-      InsertObserverTraverser(SceneCacheManager *sceneCacheManager);
+      InsertObserverTraverser(util::Observer<TransformNode*> *observer);
       virtual ~InsertObserverTraverser();
 
-      virtual bool preTraverse(AnimatedTransformNode* treeNode);
-      virtual void postTraverse(AnimatedTransformNode* treeNode);
+      bool preTraverse(AnimatedTransformNode* treeNode);
+      void postTraverse(AnimatedTransformNode* treeNode);
 
-      virtual bool preTraverse(TransformNode* treeNode);
-      virtual void postTraverse(TransformNode* treeNode);
+      bool preTraverse(TransformNode* treeNode);
+      void postTraverse(TransformNode* treeNode);
 
     protected:
 
-      SceneCacheManager *m_sceneCacheManager;
+      util::Observer<TransformNode*> *m_observer;
     };
 	}
 }

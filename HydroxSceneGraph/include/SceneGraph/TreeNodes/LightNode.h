@@ -27,7 +27,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual LightNode* getNodeType();
+      virtual bool isLightNode();
 
       util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);

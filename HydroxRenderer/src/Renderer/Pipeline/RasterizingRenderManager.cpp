@@ -13,8 +13,8 @@ namespace he
       glDeleteBuffers(1, &m_boneMatricesBuffer);
       glDeleteBuffers(1, &m_dummyVBO);
       glDeleteVertexArrays(1, &m_simpleMeshVAO);
-      glDeleteVertexArrays(1, &m_simpleSkinnedMeshVAO);
-      glDeleteVertexArrays(1, &m_simpleSkinnedTestVAO);
+
+      delete m_geometryRasterizer;
 
       m_renderGeometry.clear();
       m_renderAnimatedGeometry.clear();
@@ -70,6 +70,8 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
+      m_geometryRasterizer = new GeometryRasterizer(singletonManager);
+
       m_aspectRatio = aspectRatio;
       m_maxLayer = maxSpriteLayer;
 
@@ -90,25 +92,11 @@ namespace he
       glBindVertexArray(m_simpleMeshVAO);
       glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
-      //glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
-
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::TEXTURE0, 0);
-      //glVertexAttribBinding(RenderShader::NORMAL, 0);
-
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::TEXTURE0);
-      //glEnableVertexAttribArray(RenderShader::NORMAL);
-      glBindVertexArray(0);
-
-      glGenVertexArrays(1, &m_simpleSkinnedMeshVAO);
-      glBindVertexArray(m_simpleSkinnedMeshVAO);
-      glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
       glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
       glVertexAttribFormat(RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
       glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
       glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
+      glVertexAttribFormat(RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
 
       glVertexAttribBinding(RenderShader::POSITION, 0);
       glVertexAttribBinding(RenderShader::TEXTURE0, 0);
@@ -116,35 +104,10 @@ namespace he
       glVertexAttribBinding(RenderShader::BINORMAL, 0);
       glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
       glVertexAttribBinding(RenderShader::BONEINDICES, 0);
-
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::TEXTURE0);
-      glEnableVertexAttribArray(RenderShader::NORMAL);
-      glEnableVertexAttribArray(RenderShader::BINORMAL);
-      glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
-      glEnableVertexAttribArray(RenderShader::BONEINDICES);
-      glBindVertexArray(0);
-
-      glGenVertexArrays(1, &m_simpleSkinnedTestVAO);
-      glBindVertexArray(m_simpleSkinnedTestVAO);
-      glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
-      glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 3>));
-      glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 4>) + 2 * sizeof(util::Vector<float, 3>));
-
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::NORMAL, 0);
-      glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
-      glVertexAttribBinding(RenderShader::BONEINDICES, 0);
-
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::NORMAL);
-      glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
-      glEnableVertexAttribArray(RenderShader::BONEINDICES);
+      glVertexAttribBinding(RenderShader::COLOR, 0);
       glBindVertexArray(0);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
-      m_cameraParameterUBO.setBindingPoint(0);
     }
 
     void RasterizerRenderManager::initializeShader(util::ResourceHandle billboardShaderHandle, util::ResourceHandle spriteShaderHandle, util::ResourceHandle frustumCullingShaderHandle)
@@ -157,7 +120,14 @@ namespace he
 
     void RasterizerRenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
     {
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	    //oldRenderPath(viewMatrix, projectionMatrix, cameraPosition);
+
+      m_geometryRasterizer->rasterizeGeometry(viewMatrix, projectionMatrix, cameraPosition);
+    }
+
+    void RasterizerRenderManager::oldRenderPath(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
+    {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
@@ -167,7 +137,7 @@ namespace he
       m_cameraParameterUBO.setData(&viewProjectionMatrix[0][0], 2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>));
       m_cameraParameterUBO.setData(&eyeVec[0], 3 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>));
       m_cameraParameterUBO.uploadData();
-      m_cameraParameterUBO.bindBuffer();
+      m_cameraParameterUBO.bindBuffer(0);
 
       ////////////////////////////////////////////CULL 3D Objects////////////////////////////////////////////
 
@@ -183,10 +153,10 @@ namespace he
 
       unsigned int k = 0;
 
-      //collect culling data for static 3D Objects
+      /*//collect culling data for static 3D Objects
       for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_renderGeometry.begin(); geometryIterator != m_renderGeometry.end(); geometryIterator++, k++)
       {
-        renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
+        renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
 
         transformMatrices[k] = (*geometryIterator)->getTransformationMatrix();
         memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
@@ -195,16 +165,16 @@ namespace he
       //collect culling data for skinned 3D Objects
       for(std::list<sg::AnimatedGeoNode*>::const_iterator animatedGeometryIterator = m_renderAnimatedGeometry.begin(); animatedGeometryIterator != m_renderAnimatedGeometry.end(); animatedGeometryIterator++, k++)
       {
-        renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
+        renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshHandle());
 
         transformMatrices[k] = (*animatedGeometryIterator)->getTransformationMatrix();
         memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
         memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-      }
+      }*/
 
-      culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
-      //culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size(), 1);
+      //culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
+      //m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
+      culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size(), 1);
 
 	    ////////////////////////////////////////////RENDER 3D Objects////////////////////////////////////////////
     
@@ -212,41 +182,43 @@ namespace he
     
       glBindVertexArray(m_simpleMeshVAO);
 
+      glEnableVertexAttribArray(RenderShader::POSITION);
+      glEnableVertexAttribArray(RenderShader::TEXTURE0);
+
       k = 0;
       for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_renderGeometry.begin(); geometryIterator != m_renderGeometry.end(); geometryIterator++, k++)//Render 3D Objects
       {
         if((*geometryIterator)->getRenderable() && culledAABB[k])
         {
-          renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshIndex());
-          renderMaterial = m_materialManager->getObject((*geometryIterator)->getMaterial());
-          renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
-          //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
+          renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());
+          renderMaterial = m_materialManager->getObject((*geometryIterator)->getMaterialHandle());
+          renderShader = m_renderShaderManager->getObject(renderMaterial->getShaderHandle());
+          renderTexture = m_textureManager->getObject(renderMaterial->getTextureHandle(Material::DIFFUSETEX, 0));
 
           renderShader->useShader();
 
           worldMatrix = (*geometryIterator)->getTransformationMatrix();
-          renderShader->setUniform(0, GL_FLOAT_MAT4, &(worldMatrix[0][0]));
+          renderShader->setUniform(17, GL_FLOAT_MAT4, &(worldMatrix[0][0]));
 
-          util::Vector<float, 3> color = renderMaterial->getMaterial().color;
-          renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
-
-          //renderShader->setTexture(0, 0);
-          //renderTexture->setTexture(0);
+          renderTexture->setTexture(0, 0);
 
           renderMesh->render(0);
         }
       }
 
-      glBindVertexArray(m_simpleSkinnedMeshVAO);
+      glEnableVertexAttribArray(RenderShader::NORMAL);
+      glEnableVertexAttribArray(RenderShader::BINORMAL);
+      glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
+      glEnableVertexAttribArray(RenderShader::BONEINDICES);
 
       for(std::list<sg::AnimatedGeoNode*>::const_iterator animatedGeometryIterator = m_renderAnimatedGeometry.begin(); animatedGeometryIterator != m_renderAnimatedGeometry.end(); animatedGeometryIterator++, k++)//Render 3D Objects
       {
         if((*animatedGeometryIterator)->getRenderable() && culledAABB[k])
         {
-          renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshIndex());
-          renderMaterial = m_materialManager->getObject((*animatedGeometryIterator)->getMaterial());
-          renderShader = m_renderShaderManager->getObject(renderMaterial->getShader());
-          //renderTexture = m_textureManager->getObject(renderMaterial->getTexture(Material::DIFFUSETEX, 0));
+          renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshHandle());
+          renderMaterial = m_materialManager->getObject((*animatedGeometryIterator)->getMaterialHandle());
+          renderShader = m_renderShaderManager->getObject(renderMaterial->getShaderHandle());
+          renderTexture = m_textureManager->getObject(renderMaterial->getTextureHandle(Material::DIFFUSETEX, 0));
 
           renderShader->useShader();
 
@@ -255,20 +227,14 @@ namespace he
 
           glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(util::Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
           glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-          util::Vector<float, 3> color = renderMaterial->getMaterial().color;
-          renderShader->setUniform(10, GL_FLOAT_VEC3, &color[0]); 
+ 
           glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
-          //renderShader->setTexture(0, 0);
-          //renderTexture->setTexture(0);
+          renderTexture->setTexture(0, 0);
 
           renderMesh->render(0);
         }
       }
       glBindVertexArray(0);
-
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
 
 	    ////////////////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
       Billboard *renderBillboard;
@@ -291,8 +257,7 @@ namespace he
         {
           renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
 
-          renderTexture->setTexture(0);
-		      billboardShader->setTexture(6, 0);
+          renderTexture->setTexture(6, 0);
 
           util::Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
 		      util::Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
@@ -326,9 +291,7 @@ namespace he
         {
           renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
 
-          renderTexture->setTexture(0);
-
-		      spriteShader->setTexture(3, 0);
+          renderTexture->setTexture(3, 0);
 		
 		      util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		      util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
@@ -377,9 +340,7 @@ namespace he
           {
             renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
 
-            renderTexture->setTexture(0);
-
-		        spriteShader->setTexture(3, 0);
+            renderTexture->setTexture(3, 0);
 		
 		        util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		        util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
@@ -448,11 +409,14 @@ namespace he
     void RasterizerRenderManager::addRenderComponent(sg::GeoNode *geoNode)
     {
       m_renderGeometry.push_back(geoNode);
+
+      m_geometryRasterizer->insertGeometry(geoNode);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
     {
       m_renderAnimatedGeometry.push_back(animatedGeoNode);
+      m_geometryRasterizer->insertGeometry(animatedGeoNode);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::LightNode *lightNode)
@@ -473,11 +437,13 @@ namespace he
     void RasterizerRenderManager::removeRenderComponent(sg::GeoNode *geoNode)
     {
       m_renderGeometry.remove(geoNode);
+      m_geometryRasterizer->removeGeometry(geoNode);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
     {
       m_renderAnimatedGeometry.remove(animatedGeoNode);
+      m_geometryRasterizer->removeGeometry(animatedGeoNode);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::LightNode *lightNode)
@@ -508,19 +474,19 @@ namespace he
       eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::ParticleNode *node), void (RasterizerRenderManager::*)(sg::ParticleNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
 
       eventManager->addNewSignal<void (*)(sg::BillboardNode *node)>(util::EventManager::OnRemoveBillboardNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::BillboardNode *node), void (RasterizerRenderManager::*)(sg::BillboardNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddBillboardNode);
+      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::BillboardNode *node), void (RasterizerRenderManager::*)(sg::BillboardNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveBillboardNode);
 
       eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnRemoveAnimatedGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::AnimatedGeoNode *node), void (RasterizerRenderManager::*)(sg::AnimatedGeoNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddAnimatedGeometryNode);
+      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::AnimatedGeoNode *node), void (RasterizerRenderManager::*)(sg::AnimatedGeoNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveAnimatedGeometryNode);
 
       eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnRemoveGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::GeoNode *node), void (RasterizerRenderManager::*)(sg::GeoNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddGeometryNode);
+      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::GeoNode *node), void (RasterizerRenderManager::*)(sg::GeoNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
 
       eventManager->addNewSignal<void (*)(sg::LightNode *node)>(util::EventManager::OnRemoveLightNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::LightNode *node), void (RasterizerRenderManager::*)(sg::LightNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
+      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::LightNode *node), void (RasterizerRenderManager::*)(sg::LightNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
 
       eventManager->addNewSignal<void (*)(sg::ParticleNode *node)>(util::EventManager::OnRemoveParticleTransmitterNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::ParticleNode *node), void (RasterizerRenderManager::*)(sg::ParticleNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
+      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::ParticleNode *node), void (RasterizerRenderManager::*)(sg::ParticleNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
     }
 	}
 }

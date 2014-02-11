@@ -31,7 +31,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual TransformNode* getNodeType();
+      virtual bool isTransformNode();
 
       virtual void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
 

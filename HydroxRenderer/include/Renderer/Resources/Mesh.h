@@ -21,8 +21,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     class GRAPHICAPI Mesh : public ManagedResource
     {
     public:
@@ -35,6 +33,7 @@ namespace he
         MODEL_BINORMAL     = 8,
         MODEL_BONE_WEIGHTS = 16,
         MODEL_BONE_INDICES = 32,
+        MODEL_COLOR        = 64,
       };
 
       typedef GLuint indexType;
@@ -49,8 +48,9 @@ namespace he
         std::vector<util::Vector<float, 2>> textureCoords = std::vector<util::Vector<float, 2>>(), 
         std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 
         std::vector<util::Vector<float, 3>> binormals = std::vector<util::Vector<float, 3>>(), 
-        std::vector<util::Vector<float, 4>> boneIndices = std::vector<util::Vector<float, 4>>(), 
-        std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>()
+        std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>(),
+        std::vector<util::Vector<float, 4>> boneIndices = std::vector<util::Vector<float, 4>>(),
+        std::vector<util::Vector<float, 4>> vertexColors = std::vector<util::Vector<float, 4>>()
         );
     
       Mesh& operator=(const Mesh& o);
@@ -62,11 +62,12 @@ namespace he
 	    void render(GLuint bindingIndex) const;
 
       void setPositions(std::vector<util::Vector<float, 3>> positions);
-      void setTextureCoordinations(std::vector<util::Vector<float, 3>> textureCoords);
+      void setTextureCoordinations(std::vector<util::Vector<float, 2>> textureCoords);
       void setNormals(std::vector<util::Vector<float, 3>> normals);
       void setBiNormals(std::vector<util::Vector<float, 3>> binormals);
-      void setBoneWeights(std::vector<util::Vector<float, 3>> boneWeights);
-      void setBoneIndices(std::vector<util::Vector<float, 3>> boneIndices);
+      void setBoneWeights(std::vector<util::Vector<float, 4>> boneWeights);
+      void setBoneIndices(std::vector<util::Vector<float, 4>> boneIndices);
+      void setVertexColors(std::vector<util::Vector<float, 4>> vertexColors);
 
       GLuint getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
@@ -90,7 +91,6 @@ namespace he
       GLuint m_vertexDeclarationFlags;
 	    ////////////////////////////////
     };
-
 	}
 }
 

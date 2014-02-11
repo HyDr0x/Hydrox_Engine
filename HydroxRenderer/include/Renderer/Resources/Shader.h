@@ -38,7 +38,6 @@ namespace he
 	    void setUniform(GLint location, int type, const GLfloat* val) const;
       void setUniform(GLint location, int type, const GLuint* val) const;
 	    void setUniform(GLint location, int type, const GLint* val) const;
-	    void setTexture(GLint location, GLint slot) const;
 
 	    void useShader() const;
 	    void useNoShader() const;

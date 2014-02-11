@@ -66,9 +66,9 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    BillboardNode* BillboardNode::getNodeType()
+    bool BillboardNode::isBillboardNode()
     {
-      return this;
+      return true;
     }
 
     util::ResourceHandle BillboardNode::getBillboardIndex() const

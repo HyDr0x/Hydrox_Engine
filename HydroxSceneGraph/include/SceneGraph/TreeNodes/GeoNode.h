@@ -28,13 +28,13 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual GeoNode* getNodeType();
+      virtual bool isGeoNode();
 
-      void setMeshIndex(util::ResourceHandle meshIndex);
-      util::ResourceHandle getMeshIndex() const;
+      void setMeshHandle(util::ResourceHandle meshHandle);
+      util::ResourceHandle getMeshHandle() const;
 
-      void setMaterial(util::ResourceHandle materialIndex);
-      util::ResourceHandle getMaterial() const;
+      void setMaterialHandle(util::ResourceHandle materialHandle);
+      util::ResourceHandle getMaterialHandle() const;
 
       util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
@@ -46,10 +46,11 @@ namespace he
 
       util::Matrix<float, 4> m_trfMatrix;//the tranformation util::Matrix
 
-      util::ResourceHandle m_materialIndex;
-      util::ResourceHandle m_meshIndex;//index which points into the array of the modelmanager
+      util::ResourceHandle m_materialHandle;
+      util::ResourceHandle m_meshHandle;//index which points into the array of the modelmanager
 
       bool m_renderable;//boolean which decides if the mesh is being drawn or not
+      bool m_transparency;
     };
 	}
 }

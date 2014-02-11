@@ -23,8 +23,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     template<class CLASS> class ResourceManager : public util::SingletonBehaviour, public util::Observer<util::ResourceHandle*>
     {
     public:
@@ -65,7 +63,7 @@ namespace he
           if(m_list.empty())
           {
             unsigned int oldSize = m_objectsCache.size();
-            unsigned int size = static_cast<unsigned int>((m_objectsCache.size() / m_BLOCKSIZE + 1) * m_BLOCKSIZE);
+            unsigned int size = static_cast<unsigned int>(m_objectsCache.size() + m_BLOCKSIZE);
             m_objectsCache.resize(size);
             m_referenceCounter.resize(size, 0);
             for(unsigned int i = oldSize; i < size; i++)
@@ -132,7 +130,6 @@ namespace he
     typedef ResourceManager<Texture> TextureManager;
     typedef ResourceManager<Billboard> BillboardManager;
     typedef ResourceManager<Sprite> SpriteManager;
-
 	}
 }
 

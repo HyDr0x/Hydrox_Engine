@@ -4,8 +4,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     ComputeShader::ComputeShader()
     {
       m_program = 0;
@@ -83,6 +81,5 @@ namespace he
 
       return true;
     }
-
 	}
 }

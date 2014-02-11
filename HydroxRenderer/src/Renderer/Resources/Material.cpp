@@ -31,8 +31,8 @@ namespace he
 
       m_hash = MurmurHash64A(&data[0], length, 0);
 
-      m_shaderIndex = shader;
-      m_textureIndices = textureIndices;
+      m_shaderHandle = shader;
+      m_textureHandles = textureIndices;
       m_materialData = materialData;
     }
 
@@ -42,8 +42,8 @@ namespace he
 
       m_materialData = o.m_materialData; 
 
-      m_textureIndices = o.m_textureIndices;
-      m_shaderIndex = o.m_shaderIndex;
+      m_textureHandles = o.m_textureHandles;
+      m_shaderHandle = o.m_shaderHandle;
     }
 
     Material& Material::operator=(const Material& o)
@@ -52,8 +52,8 @@ namespace he
 
       m_materialData = o.m_materialData; 
 
-      m_textureIndices = o.m_textureIndices;
-      m_shaderIndex = o.m_shaderIndex;
+      m_textureHandles = o.m_textureHandles;
+      m_shaderHandle = o.m_shaderHandle;
 
       return *this;
     }
@@ -64,59 +64,59 @@ namespace he
 
     void Material::free()
     {
-      m_shaderIndex.free();
+      m_shaderHandle.free();
 
-      for(int i = 0; i < m_textureIndices.size(); i++)
+      for(int i = 0; i < m_textureHandles.size(); i++)
       {
-	      for(int j = 0; j < m_textureIndices[i].size(); j++)
+	      for(int j = 0; j < m_textureHandles[i].size(); j++)
         {
-          m_textureIndices[i][j].free();
+          m_textureHandles[i][j].free();
         }
       }
     }
 
     unsigned int Material::getTextureNumber(TextureType texType) const
     {
-	    assert(texType >= 0 && texType < m_textureIndices.size());
-	    return static_cast<unsigned int>(m_textureIndices[texType].size());
+	    assert(texType >= 0 && texType < m_textureHandles.size());
+	    return static_cast<unsigned int>(m_textureHandles[texType].size());
     }
 
     void Material::setTextureNumber(TextureType texType, unsigned int texNum)
     {
-      assert(texType >= 0 && texType < m_textureIndices.size());
-      m_textureIndices[texType].resize(texNum);
+      assert(texType >= 0 && texType < m_textureHandles.size());
+      m_textureHandles[texType].resize(texNum);
     }
 
-    void Material::setTexture(TextureType texType, unsigned int slot, util::ResourceHandle textureIndex)
+    void Material::setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle)
     {
-      assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
+      assert(texType >= 0 && texType < m_textureHandles.size() && slot >= 0 && slot < m_textureHandles[texType].size());
 
-      m_textureIndices[texType][slot] = textureIndex;
+      m_textureHandles[texType][slot] = textureHandle;
     }
 
-    util::ResourceHandle Material::getTexture(TextureType texType, unsigned int slot) const
+    util::ResourceHandle Material::getTextureHandle(TextureType texType, unsigned int slot) const
     {
-      assert(texType >= 0 && texType < m_textureIndices.size() && slot >= 0 && slot < m_textureIndices[texType].size());
+      assert(texType >= 0 && texType < m_textureHandles.size() && slot >= 0 && slot < m_textureHandles[texType].size());
 
-      return m_textureIndices[texType][slot];
+      return m_textureHandles[texType][slot];
     }
 
-    void Material::setShader(util::ResourceHandle shaderIndex)
+    void Material::setShaderHandle(util::ResourceHandle shaderHandle)
     {
-      m_shaderIndex = shaderIndex;
+      m_shaderHandle = shaderHandle;
     }
 
-    util::ResourceHandle Material::getShader() const
+    util::ResourceHandle Material::getShaderHandle() const
     {
-      return m_shaderIndex;
+      return m_shaderHandle;
     }
 
-    void Material::setMaterial(Material::MaterialData& material)
+    void Material::setMaterialData(Material::MaterialData& material)
     {
       m_materialData = material;
     }
 
-    const Material::MaterialData& Material::getMaterial() const
+    Material::MaterialData& Material::getMaterialData()
     {
       return m_materialData;
     }

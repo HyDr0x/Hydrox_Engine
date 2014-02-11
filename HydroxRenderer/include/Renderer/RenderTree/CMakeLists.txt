@@ -1,0 +1,18 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedRenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/GroupNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShaderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticRenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TextureNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/VertexDeclarationNode.h 
+	PARENT_SCOPE 
+)

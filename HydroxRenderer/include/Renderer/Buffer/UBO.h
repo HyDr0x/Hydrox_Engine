@@ -25,25 +25,25 @@ namespace he
 
 	    template<class T> void setData(const GLuint index, T *data, const GLuint count = 1)//shared layout
 	    {
-		    bufferDataOffset = uniformOffsets[index];
+		    m_bufferDataOffset = m_uniformOffsets[index];
 		    for( int i = 0; i != count ; i++ )
 		    {
-			    assert( bufferDataOffset <= bufferSize );
-			    *reinterpret_cast<T*>( bufferData + bufferDataOffset ) = data[i];
-			    bufferDataOffset += arrayStrides[index];
+			    assert( m_bufferDataOffset <= m_bufferSize );
+			    *reinterpret_cast<T*>( m_bufferData + m_bufferDataOffset ) = data[i];
+			    m_bufferDataOffset += m_arrayStrides[index];
 		    }
 	    }
 
 	    template<class T> void setMatrixData(const GLuint index, T *data, const GLuint rows, const GLuint columns)//shared layout
 	    {
-        bufferDataOffset = uniformOffsets[index];
+        m_bufferDataOffset = m_uniformOffsets[index];
         for(int i = 0; i != rows; i++ )
 		    {
 			    for( int j = 0; j != columns; j++ )
 			    {
-				    assert( bufferDataOffset <= bufferSize );
-				    *reinterpret_cast<T*>( bufferData + bufferDataOffset ) = data[i * columns + j];
-				    bufferDataOffset += sizeof( data[0] );
+				    assert( m_bufferDataOffset <= m_bufferSize );
+				    *reinterpret_cast<T*>( m_bufferData + m_bufferDataOffset ) = data[i * columns + j];
+				    m_bufferDataOffset += sizeof( data[0] );
 			    }
 		    }
 	    }
@@ -53,9 +53,7 @@ namespace he
 
 	    void uploadData() const;
 
-      void setBindingPoint(GLuint bindingPoint);
-
-	    void bindBuffer() const;
+	    void bindBuffer(GLuint bindingPoint);
       void unBindBuffer() const;
 
     private:
