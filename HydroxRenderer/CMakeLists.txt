@@ -18,14 +18,6 @@ add_library(Hydrox_Renderer SHARED ${SOURCE} ${HEADER})
 find_package(GLEW)
 find_package(OPENGL)
 
-set(HYDROX_SG_INCLUDE "default value" CACHE FILEPATH "Path to the SceneGraph include directory.")
-set(HYDROX_SG_LIB_DBG "default value" CACHE FILEPATH "Path to the SceneGraph debug library directory.")
-set(HYDROX_SG_LIB_REL "default value" CACHE FILEPATH "Path to the SceneGraph release library directory.")
-
-set(HYDROX_UTIL_INCLUDE "default value" CACHE FILEPATH "Path to the util include directory.")
-set(HYDROX_UTIL_LIB_DBG "default value" CACHE FILEPATH "Path to the util debug library directory.")
-set(HYDROX_UTIL_LIB_REL "default value" CACHE FILEPATH "Path to the util release library directory.")
-
 set(
 	INCLUDES 
 	${CMAKE_CURRENT_SOURCE_DIR}/include 
@@ -38,16 +30,16 @@ include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
-	debug ${HYDROX_UTIL_LIB_DBG} 
-	debug ${HYDROX_SG_LIB_DBG} 
-	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
+	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+	debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
+	debug ${GLEW_LIBRARIES}
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL} 
-	optimized ${HYDROX_SG_LIB_REL} 
-	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
+	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+	optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
+	optimized ${GLEW_LIBRARIES} 
 )
 
 set(

@@ -18,10 +18,6 @@ add_library(Hydrox_SceneGraph SHARED ${SOURCE} ${HEADER})
 find_package(GLEW)
 find_package(OPENGL)
 
-set(HYDROX_UTIL_INCLUDE "default value" CACHE FILEPATH "Path to the util include directory.")
-set(HYDROX_UTIL_LIB_DBG "default value" CACHE FILEPATH "Path to the util debug library directory.")
-set(HYDROX_UTIL_LIB_REL "default value" CACHE FILEPATH "Path to the util release library directory.")
-
 set(
 	INCLUDES 
 	${HYDROX_UTIL_INCLUDE} 
@@ -33,14 +29,14 @@ include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
-	debug ${HYDROX_UTIL_LIB_DBG} 
-	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
+	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+	debug ${GLEW_LIBRARIES}
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL} 
-	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
+	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+	optimized ${GLEW_LIBRARIES} 
 )
 
 set(

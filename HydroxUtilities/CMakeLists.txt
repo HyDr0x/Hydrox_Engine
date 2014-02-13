@@ -17,8 +17,6 @@ add_library(Hydrox_Utilities SHARED ${SOURCE} ${HEADER})
 
 find_package(GLEW)
 find_package(OPENGL)
-find_package(DEVIL)
-find_package(ASSIMP)
 
 set(
 	INCLUDES 
@@ -30,12 +28,12 @@ include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
-	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
+	debug ${GLEW_LIBRARIES}
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
+	optimized ${GLEW_LIBRARIES}
 )
 
 set(

@@ -17,18 +17,8 @@ add_library(Hydrox_Loader SHARED ${SOURCE} ${HEADER})
 
 find_package(GLEW)
 find_package(OPENGL)
-
-set(HYDROX_UTIL_INCLUDE "default value" CACHE FILEPATH "Path to the util include directory.")
-set(HYDROX_UTIL_LIB_DBG "default value" CACHE FILEPATH "Path to the util debug library directory.")
-set(HYDROX_UTIL_LIB_REL "default value" CACHE FILEPATH "Path to the util release library directory.")
-
-set(HYDROX_SG_INCLUDE "default value" CACHE FILEPATH "Path to the SceneGraph include directory.")
-set(HYDROX_SG_LIB_DBG "default value" CACHE FILEPATH "Path to the SceneGraph debug library directory.")
-set(HYDROX_SG_LIB_REL "default value" CACHE FILEPATH "Path to the SceneGraph release library directory.")
-
-set(HYDROX_RE_INCLUDE "default value" CACHE FILEPATH "Path to the Renderer include directory.")
-set(HYDROX_RE_LIB_DBG "default value" CACHE FILEPATH "Path to the Renderer debug library directory.")
-set(HYDROX_RE_LIB_REL "default value" CACHE FILEPATH "Path to the Renderer release library directory.")
+find_package(DevIL)
+find_package(Assimp)
 
 set(
 	INCLUDES 
@@ -45,25 +35,25 @@ include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
-	debug ${HYDROX_UTIL_LIB_DBG} 
-	debug ${HYDROX_SG_LIB_DBG} 
-	debug ${HYDROX_RE_LIB_DBG} 
-	debug ${GLEW_LIBRARY}/glew32d${LIBSUFFIX} 
+	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+	debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
+	debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
+	debug ${GLEW_LIBRARIES}
 	debug ${ASSIMP_LIBRARY_DBG} 
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL} 
-	optimized ${HYDROX_SG_LIB_REL} 
-	optimized ${HYDROX_RE_LIB_REL} 
-	optimized ${GLEW_LIBRARY}/glew32${LIBSUFFIX} 
+	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+	optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
+	optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
+	optimized ${GLEW_LIBRARIES} 
 	optimized ${ASSIMP_LIBRARY_REL} 
 )
 
 set(
 	GENERAL_LIBRARIES 
-	general ${IL_LIBRARIES}/DevIL${LIBSUFFIX} 
+	general ${IL_LIBRARIES}
 	general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
 )
 

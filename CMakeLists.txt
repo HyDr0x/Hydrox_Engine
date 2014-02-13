@@ -1,5 +1,23 @@
 cmake_minimum_required (VERSION 2.6) 
 
+set(HYDROX_DIR ${CMAKE_SOURCE_DIR})
+
+set(HYDROX_UTIL_INCLUDE ${HYDROX_DIR}/HydroxUtilities/include)
+set(HYDROX_UTIL_LIB_DBG ${HYDROX_DIR}/HydroxUtilities/lib/Debug/Hydrox_Utilities)
+set(HYDROX_UTIL_LIB_REL ${HYDROX_DIR}/HydroxUtilities/lib/Release/Hydrox_Utilities)
+
+set(HYDROX_SG_INCLUDE ${HYDROX_DIR}/HydroxSceneGraph/include)
+set(HYDROX_SG_LIB_DBG ${HYDROX_DIR}/HydroxSceneGraph/lib/Debug/Hydrox_SceneGraph)
+set(HYDROX_SG_LIB_REL ${HYDROX_DIR}/HydroxSceneGraph/lib/Release/Hydrox_SceneGraph)
+
+set(HYDROX_RE_INCLUDE ${HYDROX_DIR}/HydroxRenderer/include)
+set(HYDROX_RE_LIB_DBG ${HYDROX_DIR}/HydroxRenderer/lib/Debug/Hydrox_Renderer)
+set(HYDROX_RE_LIB_REL ${HYDROX_DIR}/HydroxRenderer/lib/Release/Hydrox_Renderer)
+
+set(HYDROX_LOADER_INCLUDE ${HYDROX_DIR}/HydroxLoader/include)
+set(HYDROX_LOADER_LIB_DBG ${HYDROX_DIR}/HydroxLoader/lib/Debug/Hydrox_Loader)
+set(HYDROX_LOADER_LIB_REL ${HYDROX_DIR}/HydroxLoader/lib/Release/Hydrox_Loader)
+
 project(Hydrox_Utilities) 
 add_subdirectory(HydroxUtilities) 
 
