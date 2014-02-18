@@ -16,8 +16,6 @@
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/ComputeShader.h"
 #include "Renderer/Resources/Texture.h"
-#include "Renderer/Resources/Billboard.h"
-#include "Renderer/Resources/Sprite.h"
 
 namespace he
 {
@@ -120,16 +118,12 @@ namespace he
     template class GRAPHICAPI ResourceManager<RenderShader>;
     template class GRAPHICAPI ResourceManager<ComputeShader>;
     template class GRAPHICAPI ResourceManager<Texture>;
-    template class GRAPHICAPI ResourceManager<Billboard>;
-    template class GRAPHICAPI ResourceManager<Sprite>;
 
     typedef ResourceManager<Mesh> ModelManager;
     typedef ResourceManager<Material> MaterialManager;
     typedef ResourceManager<RenderShader> RenderShaderManager;
     typedef ResourceManager<ComputeShader> ComputeShaderManager;
     typedef ResourceManager<Texture> TextureManager;
-    typedef ResourceManager<Billboard> BillboardManager;
-    typedef ResourceManager<Sprite> SpriteManager;
 	}
 }
 

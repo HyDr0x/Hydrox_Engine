@@ -12,8 +12,8 @@ namespace he
     {
       glDeleteBuffers(1, &m_dummyVBO);
 
-      m_opaqueSpriteIDs.clear();
-      m_transparentSpriteIDs.clear();
+      m_opaqueSprites.clear();
+      m_transparentSprites.clear();
     }
 
     const size_t SpriteRenderer::getMaxSpriteLayer() const
@@ -25,13 +25,14 @@ namespace he
     {
       m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
       m_textureManager = singletonManager->getService<TextureManager>();
-      m_spriteManager = singletonManager->getService<SpriteManager>();
+
+      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_maxLayer = maxSpriteLayer;
 
       m_spriteShaderHandle = spriteShaderHandle;
 
-      m_transparentSpriteIDs.resize(m_maxLayer);
+      m_transparentSprites.resize(m_maxLayer);
 
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
@@ -55,12 +56,12 @@ namespace he
 
 	    spriteShader->useShader();
 
-	    for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_opaqueSpriteIDs.begin(); spriteIDIterator != m_opaqueSpriteIDs.end(); spriteIDIterator++)
+	    for(std::list<Sprite*>::iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
       {
-        renderSprite = m_spriteManager->getObject(*spriteIDIterator);
+        renderSprite = (*spriteIDIterator);
         if(renderSprite->getRenderable())
         {
-          renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
+          renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
 
           renderTexture->setTexture(3, 0);
 		      
@@ -78,18 +79,18 @@ namespace he
 
       ////////////////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
 
-      for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//resort all sprites according to their layer if their layer has been changed
+      for(unsigned int i = 0; i < m_transparentSprites.size(); i++)//resort all sprites according to their layer if their layer has been changed
       {
-        for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
+        for(std::list<Sprite*>::iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
         {
-          renderSprite = m_spriteManager->getObject(*spriteIDIterator);
+          renderSprite = (*spriteIDIterator);
           if(renderSprite->getLayerChanged())
           {
-            m_transparentSpriteIDs[renderSprite->getLayer()].push_back(*spriteIDIterator);
+            m_transparentSprites[renderSprite->getLayer()].push_back(*spriteIDIterator);
             renderSprite->spriteSorted();
-            spriteIDIterator = m_transparentSpriteIDs[i].erase(spriteIDIterator);
+            spriteIDIterator = m_transparentSprites[i].erase(spriteIDIterator);
 
-            if(spriteIDIterator == m_transparentSpriteIDs[i].end())
+            if(spriteIDIterator == m_transparentSprites[i].end())
             {
               break;
             }
@@ -102,14 +103,14 @@ namespace he
       glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)
+      for(unsigned int i = 0; i < m_transparentSprites.size(); i++)
       {
-        for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
+        for(std::list<Sprite*>::iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
         {
-          renderSprite = m_spriteManager->getObject(*spriteIDIterator);
+          renderSprite = (*spriteIDIterator);
           if(renderSprite->getRenderable())
           {
-            renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
+            renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
 
             renderTexture->setTexture(3, 0);
 		
@@ -134,54 +135,37 @@ namespace he
       glDepthMask(GL_TRUE);
     }
 
-    void SpriteRenderer::addSprite(util::ResourceHandle spriteID, bool transparent)
+    void SpriteRenderer::addRenderComponent(Sprite* sprite)
     {
-      if(transparent)
+      if(sprite->getTransparency())
       {
-        Sprite *renderSprite = m_spriteManager->getObject(spriteID);
-        m_transparentSpriteIDs[renderSprite->getLayer()].push_back(spriteID);
+        m_transparentSprites[sprite->getLayer()].push_back(sprite);
       }
       else
       {
-        m_opaqueSpriteIDs.push_back(spriteID);
+        m_opaqueSprites.push_back(sprite);
       }
     }
 
-    void SpriteRenderer::addSprite(const std::list<util::ResourceHandle>& spriteIDList, bool transparent)
+    void SpriteRenderer::removeRenderComponent(Sprite* sprite)
     {
-      Sprite *renderSprite;
-
-      for(std::list<util::ResourceHandle>::const_iterator sit = spriteIDList.begin(); sit != spriteIDList.end(); sit++)
+      if(sprite->getTransparency())
       {
-        if(transparent)
-        {
-          renderSprite = m_spriteManager->getObject(*sit);
-          m_transparentSpriteIDs[renderSprite->getLayer()].push_back(*sit);
-        }
-        else
-        {
-          m_opaqueSpriteIDs.push_back(*sit);
-        }
-      }
-    }
-
-    void SpriteRenderer::removeSprite(util::ResourceHandle spriteID, bool transparent)
-    {
-      if(transparent)
-      {
-        Sprite *renderSprite = m_spriteManager->getObject(spriteID);
-        m_transparentSpriteIDs[renderSprite->getLayer()].remove(spriteID);
+        m_transparentSprites[sprite->getLayer()].remove(sprite);
       }
       else
       {
-        m_opaqueSpriteIDs.remove(spriteID);
+        m_opaqueSprites.remove(sprite);
       }
     }
 
-    void SpriteRenderer::removeAllSprites()
+    void SpriteRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      m_opaqueSpriteIDs.clear();
-      m_transparentSpriteIDs.clear();
+      eventManager->addNewSignal<void (*)(Sprite* sprite)>(util::EventManager::OnAddSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(Sprite* sprite), void (SpriteRenderer::*)(Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);
+
+      eventManager->addNewSignal<void (*)(Sprite* sprite)>(util::EventManager::OnRemoveSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(Sprite* sprite), void (SpriteRenderer::*)(Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
     }
 	}
 }

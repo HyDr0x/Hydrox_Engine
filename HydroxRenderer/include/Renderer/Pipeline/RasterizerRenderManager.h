@@ -21,7 +21,6 @@
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/ComputeShader.h"
 #include "Renderer/Resources/Texture.h"
-#include "Renderer/Resources/Billboard.h"
 #include "Renderer/Resources/Sprite.h"
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
@@ -57,17 +56,14 @@ namespace he
 
 	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
 
-      void addSprite(util::ResourceHandle spriteID, bool transparent = true);
-      void addSprite(const std::list<util::ResourceHandle>& spriteIDList, bool transparent = true);
-      void removeSprite(util::ResourceHandle spriteID, bool transparent = true);
-      void removeAllSprites();
-
+      void addRenderComponent(Sprite* sprite);
       void addRenderComponent(sg::BillboardNode *billboardNode);
       void addRenderComponent(sg::GeoNode *geoNode);
       void addRenderComponent(sg::AnimatedGeoNode *animatedGeoNode);
       void addRenderComponent(sg::LightNode *lightNode);
       void addRenderComponent(sg::ParticleNode *particleNode);
 
+      void removeRenderComponent(Sprite* sprite);
       void removeRenderComponent(sg::BillboardNode *billboardNode);
       void removeRenderComponent(sg::GeoNode *geoNode);
       void removeRenderComponent(sg::AnimatedGeoNode *animatedGeoNode);

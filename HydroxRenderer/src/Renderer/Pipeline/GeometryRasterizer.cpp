@@ -72,25 +72,11 @@ namespace he
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
 
-    void GeometryRasterizer::addRenderComponent(sg::AnimatedGeoNode *node)
-    {
-      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_cullingShaderHandle);
-      insertTraverser.setNode(node);
-      insertTraverser.doTraverse(m_renderRootNode);
-    }
-
     void GeometryRasterizer::addRenderComponent(sg::GeoNode *node)
     {
       InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_cullingShaderHandle);
       insertTraverser.setNode(node);
       insertTraverser.doTraverse(m_renderRootNode);
-    }
-
-    void GeometryRasterizer::removeRenderComponent(sg::AnimatedGeoNode *node)
-    {
-      RemoveGeometryTraverser removeTraverser(m_singletonManager);
-      removeTraverser.setNode(node);
-      removeTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRasterizer::removeRenderComponent(sg::GeoNode *node)
@@ -114,14 +100,8 @@ namespace he
 
     void GeometryRasterizer::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnAddAnimatedGeometryNode);
-      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::AnimatedGeoNode *node), void (GeometryRasterizer::*)(sg::AnimatedGeoNode *node)>(this, &GeometryRasterizer::addRenderComponent, util::EventManager::OnAddAnimatedGeometryNode);
-
       eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnAddGeometryNode);
       eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::GeoNode *node), void (GeometryRasterizer::*)(sg::GeoNode *node)>(this, &GeometryRasterizer::addRenderComponent, util::EventManager::OnAddGeometryNode);
-
-      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnRemoveAnimatedGeometryNode);
-      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::AnimatedGeoNode *node), void (GeometryRasterizer::*)(sg::AnimatedGeoNode *node)>(this, &GeometryRasterizer::removeRenderComponent, util::EventManager::OnRemoveAnimatedGeometryNode);
 
       eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnRemoveGeometryNode);
       eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::GeoNode *node), void (GeometryRasterizer::*)(sg::GeoNode *node)>(this, &GeometryRasterizer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);

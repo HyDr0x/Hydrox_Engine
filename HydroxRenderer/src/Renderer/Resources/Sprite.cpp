@@ -6,37 +6,28 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
-    Sprite::Sprite(util::ResourceHandle texID, bool renderable, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd) : m_texID(texID), 
-                                                                                                                                                    m_renderable(renderable), 
-                                                                                                                                                    m_animNumber(animNumber), 
-                                                                                                                                                    m_animCount(util::Vector<unsigned int, 2>(0, 0)),
-                                                                                                                                                    m_texStart(texStart),
-                                                                                                                                                    m_texEnd(texEnd),
-                                                                                                                                                    m_angle(0.0f),
-                                                                                                                                                    m_rtMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                    m_tlMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                    m_scMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                    m_layer(0),
-                                                                                                                                                    m_layerChanged(false)
+    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd) : m_eventManager(eventManager),
+                                                                                                                                                                                                                                         m_textureHandle(textureHandle), 
+                                                                                                                                                                                                                                         m_renderable(renderable), 
+                                                                                                                                                                                                                                         m_transparency(transparency),
+                                                                                                                                                                                                                                         m_animNumber(animNumber), 
+                                                                                                                                                                                                                                         m_animCount(util::Vector<unsigned int, 2>(0, 0)),
+                                                                                                                                                                                                                                         m_texStart(texStart),
+                                                                                                                                                                                                                                         m_texEnd(texEnd),
+                                                                                                                                                                                                                                         m_angle(0.0f),
+                                                                                                                                                                                                                                         m_rtMatrix(util::Matrix<float, 3>::identity()),
+                                                                                                                                                                                                                                         m_tlMatrix(util::Matrix<float, 3>::identity()),
+                                                                                                                                                                                                                                         m_scMatrix(util::Matrix<float, 3>::identity()),
+                                                                                                                                                                                                                                         m_layer(0),
+                                                                                                                                                                                                                                         m_layerChanged(false)
     {
-      std::vector<unsigned char> hashData(36);
-      unsigned int id = m_texID.getID();
-      memcpy(&hashData[0], &id, 4);
-      memcpy(&hashData[4], &m_animNumber[0], 8);
-      memcpy(&hashData[12], &m_animCount[0], 8);
-      memcpy(&hashData[20], &m_texStart[0], 8);
-      memcpy(&hashData[28], &m_texEnd[0], 8);
-
-      m_hash = MurmurHash64A(&hashData[0], hashData.size(), 0);
     }
 
     Sprite::Sprite(const Sprite& o)
     {
-      m_hash = o.m_hash;
+      m_eventManager = o.m_eventManager;
 
-      m_texID = o.m_texID;
+      m_textureHandle = o.m_textureHandle;
 
       m_rtMatrix = o.m_rtMatrix;
 	    m_tlMatrix = o.m_tlMatrix;
@@ -60,9 +51,9 @@ namespace he
 
     Sprite& Sprite::operator=(const Sprite& o)
     {
-      m_hash = o.m_hash;
+      m_eventManager = o.m_eventManager;
 
-      m_texID = o.m_texID;
+      m_textureHandle = o.m_textureHandle;
 
       m_rtMatrix = o.m_rtMatrix;
 	    m_tlMatrix = o.m_tlMatrix;
@@ -90,14 +81,23 @@ namespace he
     {
     }
 
-    void Sprite::free()
-    {
-      m_texID.free();
-    }
-
     void Sprite::setRenderable(bool renderable)
     {
+      if(!m_renderable && renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+      }
+      else if(m_renderable && !renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+      }
+
       m_renderable = renderable;
+    }
+
+	  bool Sprite::getTransparency() const
+    {
+      return m_transparency;
     }
 
     bool Sprite::getRenderable() const
@@ -233,7 +233,6 @@ namespace he
       m_layerChanged = false;
     }
 
-
     bool Sprite::getLayerChanged()
     {
       return m_layerChanged;
@@ -246,17 +245,16 @@ namespace he
 
     util::Matrix<float,3> Sprite::getTexTransformationMatrix()
     {
-	    float width = m_texEnd[0] - m_texStart[0];
+	    float width  = m_texEnd[0] - m_texStart[0];
 	    float height = m_texEnd[1] - m_texStart[1];
-	    return util::Matrix<float, 3>(width / m_animNumber[0], 0.0f,                     (static_cast<float>(m_animCount[0]) / static_cast<float>(m_animNumber[0])) * width + m_texStart[0], 
-					                    0.0f,                    height / m_animNumber[1], (static_cast<float>(m_animCount[1]) / static_cast<float>(m_animNumber[1])) * height + m_texStart[1], 
-					                    0.0f,                    0.0f,                      1.0f);
+	    return util::Matrix<float, 3>(width / m_animNumber[0], 0.0f,                     (static_cast<float>(m_animCount[0]) / static_cast<float>(m_animNumber[0])) * width  + m_texStart[0], 
+					                          0.0f,                    height / m_animNumber[1], (static_cast<float>(m_animCount[1]) / static_cast<float>(m_animNumber[1])) * height + m_texStart[1], 
+					                          0.0f,                    0.0f,                      1.0f);
     }
 
-    util::ResourceHandle Sprite::getTextureID() const
+    util::ResourceHandle Sprite::getTextureHandle() const
     {
-	    return m_texID;
+	    return m_textureHandle;
     }
-
 	}
 }

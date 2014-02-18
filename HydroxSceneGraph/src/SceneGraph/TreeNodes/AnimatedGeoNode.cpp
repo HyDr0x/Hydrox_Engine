@@ -8,8 +8,8 @@ namespace he
 {
 	namespace sg
 	{
-    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::ResourceHandle meshIndex, util::ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
-      : GeoNode(meshIndex, materialIndex, renderable, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
+    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool renderable, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
+      : GeoNode(eventManager, meshHandle, materialHandle, renderable, transparency, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
       m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
     }
@@ -40,7 +40,7 @@ namespace he
 
     TreeNode* AnimatedGeoNode::clone() const
     {
-      AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_meshHandle, m_materialHandle, m_renderable, m_nodeName);
+      AnimatedGeoNode *newNode = new AnimatedGeoNode(m_inverseBindPoseMatrices, m_eventManager, m_meshHandle, m_materialHandle, m_renderable, m_transparency, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 

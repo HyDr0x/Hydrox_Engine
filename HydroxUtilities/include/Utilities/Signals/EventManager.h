@@ -20,14 +20,14 @@ namespace he
 
       enum Events
 	    {
+        OnAddSprite,
         OnAddBillboardNode,
         OnAddGeometryNode,
-        OnAddAnimatedGeometryNode,
         OnAddLightNode,
         OnAddParticleTransmitterNode,
+        OnRemoveSprite,
         OnRemoveBillboardNode,
         OnRemoveGeometryNode,
-        OnRemoveAnimatedGeometryNode,
         OnRemoveLightNode,
         OnRemoveParticleTransmitterNode,
         OnAddLODNode,

@@ -23,13 +23,14 @@ namespace he
 {
   namespace loader
   {
-    AssimpLoader::AssimpLoader(renderer::ModelManager *modelManager, renderer::MaterialManager *materialManager, renderer::TextureManager *textureManager,
-                               renderer::RenderShaderManager *renderShaderManager) : m_modelManager(modelManager),
-                                                                                     m_materialManager(materialManager),
-                                                                                     m_textureManager(textureManager),
-                                                                                     m_renderShaderManager(renderShaderManager),
-                                                                                     m_animationTimeUnit(Seconds)
+    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_animationTimeUnit(Seconds)
     {
+      m_eventManager = singletonManager->getService<util::EventManager>();
+      m_modelManager = singletonManager->getService<renderer::ModelManager>();
+      m_materialManager = singletonManager->getService<renderer::MaterialManager>();
+      m_textureManager = singletonManager->getService<renderer::TextureManager>();
+      m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
+
       MaterialLoader materialLoader(m_materialManager, m_textureManager, m_renderShaderManager);
       m_defaultMaterial = materialLoader.getDefaultMaterial();
       setAnimationTimeUnit(m_animationTimeUnit);
@@ -132,7 +133,7 @@ namespace he
     
       MaterialLoader materialLoader(m_materialManager, m_textureManager, m_renderShaderManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_modelManager->addObject(renderer::Mesh(renderer::Mesh::MODEL_POSITION, positions, GL_TRIANGLES, indices)), materialLoader.getDefaultMaterial(), true, std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(renderer::Mesh::MODEL_POSITION, positions, GL_TRIANGLES, indices)), materialLoader.getDefaultMaterial(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);
@@ -358,12 +359,12 @@ namespace he
         stream << i;
         if(!m_inverseBindPoseTable[meshIndex].empty())
         {
-          geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], meshes[meshIndex], m_defaultMaterial, true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+          geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, true, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
           m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
         }
         else
         {
-          geoNode = new sg::GeoNode(meshes[meshIndex], m_defaultMaterial, true, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+          geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, true, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
         }
       
         stream.str("");

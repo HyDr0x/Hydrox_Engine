@@ -19,7 +19,6 @@ namespace he
     {
       m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
       m_textureManager = singletonManager->getService<TextureManager>();
-      m_billboardManager = singletonManager->getService<BillboardManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
@@ -35,7 +34,6 @@ namespace he
     void BillboardRenderer::render()
     {
       Texture *renderTexture;
-      Billboard *renderBillboard;
 
 	    glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -47,17 +45,16 @@ namespace he
 
 	    for(std::list<sg::BillboardNode*>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
 	    {
-        renderBillboard = m_billboardManager->getObject((*billboarditerator)->getBillboardIndex());
-        if(renderBillboard->getRenderable())
+        if((*billboarditerator)->getRenderable())
         {
-          renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
+          renderTexture = m_textureManager->getObject((*billboarditerator)->getTextureHandle());
 
           renderTexture->setTexture(6, 0);
 
           util::Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
-		      util::Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
-          util::Vector<float, 2> scale = renderBillboard->getScale();
-		      util::Vector<float, 3> translate = renderBillboard->getPosition();
+		      util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator)->getTexTransformationMatrix();
+          util::Vector<float, 2> scale = (*billboarditerator)->getScale();
+		      util::Vector<float, 3> translate = (*billboarditerator)->getPosition();
           billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
 		      billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
 		      billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);

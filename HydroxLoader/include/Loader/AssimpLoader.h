@@ -11,6 +11,9 @@
 
 #include "Loader/DLLExport.h"
 
+#include <Utilities/Signals/EventManager.h>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <Renderer/Resources/ResourceManager.hpp>
 
 #include <SceneGraph/Scene/Scene.h>
@@ -36,7 +39,7 @@ namespace he
         Minutes,
       };
 
-      AssimpLoader(renderer::ModelManager *modelManager, renderer::MaterialManager *materialManager, renderer::TextureManager *textureManager, renderer::RenderShaderManager *renderShaderManager);
+      AssimpLoader(util::SingletonManager *singletonManager);
       AssimpLoader(const AssimpLoader& o);
       AssimpLoader& operator=(const AssimpLoader& o);
       ~AssimpLoader();
@@ -59,6 +62,8 @@ namespace he
 
       AnimationTimeUnit m_animationTimeUnit;
       float m_animationTimeUnitConvert;
+
+      util::EventManager *m_eventManager;
 
       renderer::ModelManager *m_modelManager;
       renderer::MaterialManager *m_materialManager;

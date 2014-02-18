@@ -1,6 +1,8 @@
 #include "SceneGraph/Traverser/AddNodesTraverser.h"
 
 #include "SceneGraph/TreeNodes/LODNode.h"
+#include "SceneGraph/TreeNodes/GeoNode.h"
+#include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
 
 namespace he
 {
@@ -48,7 +50,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedGeoNode *treeNode)>(util::EventManager::OnAddAnimatedGeometryNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnAddGeometryNode)->execute(treeNode);
 
       return true;
     }
@@ -56,7 +58,6 @@ namespace he
     void AddNodesTraverser::postTraverse(AnimatedGeoNode* treeNode)
     {
     }
-
 
     bool AddNodesTraverser::preTraverse(GeoNode* treeNode)
     {

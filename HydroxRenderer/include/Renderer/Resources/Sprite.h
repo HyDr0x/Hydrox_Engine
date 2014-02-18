@@ -5,8 +5,8 @@
 
 #include "Renderer/DLLExport.h"
 
-#include "Renderer/Resources/ManagedResource.h"
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Signals/EventManager.h>
 
 #include <Utilities/Math/Math.hpp>
 
@@ -14,22 +14,20 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
-    class GRAPHICAPI Sprite : public ManagedResource
+    class GRAPHICAPI Sprite
     {
     public:
 
-      Sprite(){}
-	    Sprite(util::ResourceHandle texID, bool anim, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd);
+	    Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd);
       Sprite(const Sprite& o);
       Sprite& operator=(const Sprite& o);
 	    ~Sprite();
 
-      void free();
-
       void setRenderable(bool renderable);
 	    bool getRenderable() const;
+
+      void setTransparency(bool transparency);
+	    bool getTransparency() const;
 
 	    void setAnimation(unsigned int number);
 	    void setAnimation(util::Vector<unsigned int, 2> number);
@@ -65,11 +63,15 @@ namespace he
 
 	    util::Matrix<float, 3> getTransformationMatrix();
 	    util::Matrix<float, 3> getTexTransformationMatrix();
-	    util::ResourceHandle getTextureID() const;
+	    util::ResourceHandle getTextureHandle() const;
 
     private:
 
-      util::ResourceHandle m_texID;
+      Sprite(){}
+
+      util::EventManager *m_eventManager;
+
+      util::ResourceHandle m_textureHandle;
 
       util::Matrix<float, 3> m_rtMatrix;
 	    util::Matrix<float, 3> m_tlMatrix;
@@ -86,9 +88,9 @@ namespace he
 
       float m_angle;
 
+      bool m_transparency;
       bool m_renderable;//boolean which decides if the sprite is being drawn or not
     };
-
 	}
 }
 

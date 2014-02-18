@@ -34,26 +34,25 @@ namespace he
 
 	    void render();
 
-      void addSprite(util::ResourceHandle spriteID, bool transparent = true);
-      void addSprite(const std::list<util::ResourceHandle>& spriteIDList, bool transparent = true);
-      void removeSprite(util::ResourceHandle spriteID, bool transparent = true);
-      void removeAllSprites();
+      void addRenderComponent(Sprite* sprite);
+      void removeRenderComponent(Sprite* sprite);
 
     private:
 
 	    SpriteRenderer(const SpriteRenderer&){}
+
+      void registerRenderComponentSlots(util::EventManager *eventManager);
 
       GLuint m_dummyVBO;
 
       util::ResourceHandle m_spriteShaderHandle;
 
       size_t m_maxLayer;
-      std::list<util::ResourceHandle> m_opaqueSpriteIDs;
-      std::vector<std::list<util::ResourceHandle>> m_transparentSpriteIDs;
+      std::list<Sprite*> m_opaqueSprites;
+      std::vector<std::list<Sprite*>> m_transparentSprites;
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
-      SpriteManager *m_spriteManager;
     };
 	}
 }

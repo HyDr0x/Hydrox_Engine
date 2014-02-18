@@ -2,7 +2,6 @@ set(
 	SOURCE 
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/AABB.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/Billboard.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Light.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ManagedResource.cpp 

@@ -11,7 +11,6 @@
 
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/Texture.h"
-#include "Renderer/Resources/Billboard.h"
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
@@ -51,7 +50,6 @@ namespace he
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
-      BillboardManager *m_billboardManager;
     };
 	}
 }

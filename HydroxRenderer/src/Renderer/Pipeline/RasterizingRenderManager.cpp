@@ -230,24 +230,9 @@ namespace he
       m_cameraParameterUBO.unBindBuffer();*/
     }
 
-    void RasterizerRenderManager::addSprite(util::ResourceHandle spriteID, bool transparent)
+    void RasterizerRenderManager::addRenderComponent(Sprite* sprite)
     {
-      m_spriteRenderer.addSprite(spriteID, transparent);
-    }
-
-    void RasterizerRenderManager::addSprite(const std::list<util::ResourceHandle>& spriteIDList, bool transparent)
-    {
-      m_spriteRenderer.addSprite(spriteIDList, transparent);
-    }
-
-    void RasterizerRenderManager::removeSprite(util::ResourceHandle spriteID, bool transparent)
-    {
-      m_spriteRenderer.removeSprite(spriteID, transparent);
-    }
-
-    void RasterizerRenderManager::removeAllSprites()
-    {
-      m_spriteRenderer.removeAllSprites();
+      m_spriteRenderer.addRenderComponent(sprite);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::BillboardNode *billboardNode)
@@ -278,6 +263,11 @@ namespace he
     void RasterizerRenderManager::removeRenderComponent(sg::BillboardNode *billboardNode)
     {
       m_billboardRenderer.removeRenderComponent(billboardNode);
+    }
+
+    void RasterizerRenderManager::removeRenderComponent(Sprite* sprite)
+    {
+      m_spriteRenderer.removeRenderComponent(sprite);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::GeoNode *geoNode)

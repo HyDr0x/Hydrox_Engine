@@ -30,10 +30,8 @@ namespace he
 
       void rasterizeGeometry();
 
-      void addRenderComponent(sg::AnimatedGeoNode *node);
       void addRenderComponent(sg::GeoNode *node);
 
-      void removeRenderComponent(sg::AnimatedGeoNode *node);
       void removeRenderComponent(sg::GeoNode *node);
 
     private:

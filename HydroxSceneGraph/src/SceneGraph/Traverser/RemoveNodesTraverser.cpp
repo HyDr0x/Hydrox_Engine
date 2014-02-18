@@ -1,5 +1,8 @@
 #include "SceneGraph/Traverser/RemoveNodesTraverser.h"
 
+#include "SceneGraph/TreeNodes/GeoNode.h"
+#include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
+
 namespace he
 {
 	namespace sg
@@ -46,7 +49,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedGeoNode *treeNode)>(util::EventManager::OnRemoveAnimatedGeometryNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnRemoveGeometryNode)->execute(treeNode);
 
       return true;
     }

@@ -4,7 +4,9 @@
 #include "SceneGraph/DLLExport.h"
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Signals/EventManager.h>
 #include <Utilities/Math/Math.hpp>
+
 #include "SceneGraph/TreeNodes/TreeNode.h"
 
 namespace he
@@ -17,7 +19,7 @@ namespace he
     {
     public:
 
-      GeoNode(util::ResourceHandle meshIndex, util::ResourceHandle materialIndex, bool renderable, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool renderable, bool transparency, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       GeoNode& operator=(const GeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
       virtual ~GeoNode();
@@ -42,7 +44,11 @@ namespace he
       void setRenderable(bool renderable);
 	    bool getRenderable() const;
 
+	    bool getTransparency() const;
+
     protected:
+
+      util::EventManager *m_eventManager;
 
       util::Matrix<float, 4> m_trfMatrix;//the tranformation util::Matrix
 
