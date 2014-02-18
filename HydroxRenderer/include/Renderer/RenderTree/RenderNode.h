@@ -67,8 +67,6 @@ namespace he
       MaterialManager *m_materialManager;
       ModelManager *m_modelManager;
 
-      FrustumCullingGPU m_frustumCulling;
-
       GPUBuffer m_commandBuffer;
       GPUBuffer m_meshIndexBuffer;
       GPUBuffer m_meshVertexBuffer;

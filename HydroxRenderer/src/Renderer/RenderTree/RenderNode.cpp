@@ -181,7 +181,7 @@ namespace he
       m_instanceIndexBuffer.bindVertexbuffer(1, 0, sizeof(GLuint));
       m_meshIndexBuffer.bindBuffer();
 
-      glMultiDrawElementsIndirect(GL_TRIANGLES, GLINDEXTYPE, nullptr, m_meshHandles.size(), 0);
+      glMultiDrawElementsIndirect(m_primitiveType, GLINDEXTYPE, nullptr, m_meshHandles.size(), 0);
 
       m_meshIndexBuffer.unbindBuffer();
       m_instanceIndexBuffer.unbindVertexBuffer(1);

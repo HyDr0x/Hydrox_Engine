@@ -11,6 +11,8 @@
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 
+#include "Renderer/Pipeline/FrustumCullingGPU.h"
+
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include "Renderer/RenderTree/GroupNode.h"
@@ -40,6 +42,8 @@ namespace he
 
       void resizeMeshBuffer();
       void resizeMaterialBuffer();
+
+      FrustumCullingGPU m_frustumCulling;
 
       GLuint m_meshVAO;
 
