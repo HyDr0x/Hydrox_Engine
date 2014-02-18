@@ -1,7 +1,7 @@
 #ifndef GEOMETRYRASTERIZER_H_
 #define GEOMETRYRASTERIZER_H_
 
-#include <vector>
+#include <list>
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
@@ -9,13 +9,13 @@
 #include <Utilities/Signals/EventManager.h>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
-#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 
 #include "Renderer/Pipeline/FrustumCullingGPU.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include "Renderer/RenderTree/GroupNode.h"
+#include "Renderer/RenderTree/RenderNode.h"
 
 namespace he
 {
@@ -33,7 +33,6 @@ namespace he
       void rasterizeGeometry();
 
       void addRenderComponent(sg::GeoNode *node);
-
       void removeRenderComponent(sg::GeoNode *node);
 
     private:
@@ -44,6 +43,8 @@ namespace he
       void resizeMaterialBuffer();
 
       FrustumCullingGPU m_frustumCulling;
+
+      std::list<RenderNode*> m_renderNodes;
 
       GLuint m_meshVAO;
 
