@@ -10,15 +10,6 @@ namespace he
 
     RasterizerRenderManager::~RasterizerRenderManager()
     {
-      glDeleteBuffers(1, &m_boneMatricesBuffer);
-      glDeleteBuffers(1, &m_dummyVBO);
-      glDeleteVertexArrays(1, &m_simpleMeshVAO);
-
-      delete m_geometryRasterizer;
-
-      m_renderGeometry.clear();
-      m_renderAnimatedGeometry.clear();
-      m_renderBillboards.clear();
     }
 
     void RasterizerRenderManager::setClearColor(he::util::Vector<float, 4> color)
@@ -33,102 +24,24 @@ namespace he
       glViewport(0, 0, width, height);
     }
 
-    const size_t RasterizerRenderManager::getMaxSpriteLayer() const
+    void RasterizerRenderManager::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer, 
+      util::ResourceHandle billboardShaderHandle, 
+      util::ResourceHandle spriteShaderHandle, 
+      util::ResourceHandle frustumCullingShaderHandle)
     {
-      return m_maxLayer;
-    }
-
-    void RasterizerRenderManager::addSprite(util::ResourceHandle spriteID, bool transparent)
-    {
-      if(transparent)
-      {
-        Sprite *renderSprite = m_spriteManager->getObject(spriteID);
-        m_transparentSpriteIDs[renderSprite->getLayer()].push_back(spriteID);
-      }
-      else
-      {
-        m_opaqueSpriteIDs.push_back(spriteID);
-      }
-    }
-
-    void RasterizerRenderManager::initialize(util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer)
-    {
-	    glEnable(GL_DEPTH_TEST);
-	    glDepthMask(GL_TRUE);
-	    glDepthFunc(GL_GREATER);
-
-	    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	    glClearDepth(0.0f);
-
-      m_computeShaderManager = singletonManager->getService<ComputeShaderManager>();
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
-      m_billboardManager = singletonManager->getService<BillboardManager>();
-      m_spriteManager = singletonManager->getService<SpriteManager>();
-      m_modelManager = singletonManager->getService<ModelManager>();
-      m_materialManager = singletonManager->getService<MaterialManager>();
-
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_geometryRasterizer = new GeometryRasterizer(singletonManager);
+      m_geometryRasterizer.initialize(maxMaterials, maxGeometry, maxBones, singletonManager, frustumCullingShaderHandle);
+      m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
+      m_spriteRenderer.initialize(singletonManager, maxSpriteLayer, spriteShaderHandle);
 
       m_aspectRatio = aspectRatio;
-      m_maxLayer = maxSpriteLayer;
-
-      m_transparentSpriteIDs.resize(m_maxLayer);
-
-      glGenBuffers(1, &m_dummyVBO);
-      glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
-      glVertexAttribPointer(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-      glGenBuffers(1, &m_boneMatricesBuffer);
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
-      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * 64, nullptr, GL_STATIC_DRAW);
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-      glGenVertexArrays(1, &m_simpleMeshVAO);
-      glBindVertexArray(m_simpleMeshVAO);
-      glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
-      glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::TEXTURE0, 0);
-      glVertexAttribBinding(RenderShader::NORMAL, 0);
-      glVertexAttribBinding(RenderShader::BINORMAL, 0);
-      glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
-      glVertexAttribBinding(RenderShader::BONEINDICES, 0);
-      glVertexAttribBinding(RenderShader::COLOR, 0);
-      glBindVertexArray(0);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
     }
 
-    void RasterizerRenderManager::initializeShader(util::ResourceHandle billboardShaderHandle, util::ResourceHandle spriteShaderHandle, util::ResourceHandle frustumCullingShaderHandle)
-    {
-      m_billboardShaderHandle = billboardShaderHandle;
-      m_spriteShaderHandle = spriteShaderHandle;
-
-      m_frustumCullingGPU.initialize(m_computeShaderManager, frustumCullingShaderHandle);
-    }
-
     void RasterizerRenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
     {
-	    //oldRenderPath(viewMatrix, projectionMatrix, cameraPosition);
-
-      m_geometryRasterizer->rasterizeGeometry(viewMatrix, projectionMatrix, cameraPosition);
-    }
-
-    void RasterizerRenderManager::oldRenderPath(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
-    {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
@@ -138,6 +51,18 @@ namespace he
       m_cameraParameterUBO.setData(&eyeVec[0], 3 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>));
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
+
+      m_geometryRasterizer.rasterizeGeometry();
+      m_billboardRenderer.render();
+      m_spriteRenderer.render();
+    }
+
+    void RasterizerRenderManager::oldRenderPath(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
+    {/*
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+      util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
+      util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
       ////////////////////////////////////////////CULL 3D Objects////////////////////////////////////////////
 
@@ -153,7 +78,7 @@ namespace he
 
       unsigned int k = 0;
 
-      /*//collect culling data for static 3D Objects
+      //collect culling data for static 3D Objects
       for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_renderGeometry.begin(); geometryIterator != m_renderGeometry.end(); geometryIterator++, k++)
       {
         renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
@@ -170,71 +95,11 @@ namespace he
         transformMatrices[k] = (*animatedGeometryIterator)->getTransformationMatrix();
         memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
         memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-      }*/
-
-      //culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      //m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
-      culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size(), 1);
-
-	    ////////////////////////////////////////////RENDER 3D Objects////////////////////////////////////////////
-    
-      util::Matrix<float, 4> worldMatrix;
-    
-      glBindVertexArray(m_simpleMeshVAO);
-
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::TEXTURE0);
-
-      k = 0;
-      for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_renderGeometry.begin(); geometryIterator != m_renderGeometry.end(); geometryIterator++, k++)//Render 3D Objects
-      {
-        if((*geometryIterator)->getRenderable() && culledAABB[k])
-        {
-          renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());
-          renderMaterial = m_materialManager->getObject((*geometryIterator)->getMaterialHandle());
-          renderShader = m_renderShaderManager->getObject(renderMaterial->getShaderHandle());
-          renderTexture = m_textureManager->getObject(renderMaterial->getTextureHandle(Material::DIFFUSETEX, 0));
-
-          renderShader->useShader();
-
-          worldMatrix = (*geometryIterator)->getTransformationMatrix();
-          renderShader->setUniform(17, GL_FLOAT_MAT4, &(worldMatrix[0][0]));
-
-          renderTexture->setTexture(0, 0);
-
-          renderMesh->render(0);
-        }
       }
 
-      glEnableVertexAttribArray(RenderShader::NORMAL);
-      glEnableVertexAttribArray(RenderShader::BINORMAL);
-      glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
-      glEnableVertexAttribArray(RenderShader::BONEINDICES);
-
-      for(std::list<sg::AnimatedGeoNode*>::const_iterator animatedGeometryIterator = m_renderAnimatedGeometry.begin(); animatedGeometryIterator != m_renderAnimatedGeometry.end(); animatedGeometryIterator++, k++)//Render 3D Objects
-      {
-        if((*animatedGeometryIterator)->getRenderable() && culledAABB[k])
-        {
-          renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshHandle());
-          renderMaterial = m_materialManager->getObject((*animatedGeometryIterator)->getMaterialHandle());
-          renderShader = m_renderShaderManager->getObject(renderMaterial->getShaderHandle());
-          renderTexture = m_textureManager->getObject(renderMaterial->getTextureHandle(Material::DIFFUSETEX, 0));
-
-          renderShader->useShader();
-
-          glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
-          std::vector<util::Matrix<float, 4>> skinningMatrices = (*animatedGeometryIterator)->getSkinningMatrices();
-
-          glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(util::Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
-          glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
- 
-          glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
-          renderTexture->setTexture(0, 0);
-
-          renderMesh->render(0);
-        }
-      }
-      glBindVertexArray(0);
+      culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
+      m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
+      //culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size(), 1);
 
 	    ////////////////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
       Billboard *renderBillboard;
@@ -355,68 +220,49 @@ namespace he
 	      }
       }
 
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glDisableVertexAttribArray(RenderShader::SPECIAL0);
 
       glDisable(GL_BLEND);
 
       glDepthMask(GL_TRUE);
 
-      m_cameraParameterUBO.unBindBuffer();
+      m_cameraParameterUBO.unBindBuffer();*/
+    }
+
+    void RasterizerRenderManager::addSprite(util::ResourceHandle spriteID, bool transparent)
+    {
+      m_spriteRenderer.addSprite(spriteID, transparent);
     }
 
     void RasterizerRenderManager::addSprite(const std::list<util::ResourceHandle>& spriteIDList, bool transparent)
     {
-      Sprite *renderSprite;
-
-      for(std::list<util::ResourceHandle>::const_iterator sit = spriteIDList.begin(); sit != spriteIDList.end(); sit++)
-      {
-        if(transparent)
-        {
-          renderSprite = m_spriteManager->getObject(*sit);
-          m_transparentSpriteIDs[renderSprite->getLayer()].push_back(*sit);
-        }
-        else
-        {
-          m_opaqueSpriteIDs.push_back(*sit);
-        }
-      }
+      m_spriteRenderer.addSprite(spriteIDList, transparent);
     }
 
     void RasterizerRenderManager::removeSprite(util::ResourceHandle spriteID, bool transparent)
     {
-      if(transparent)
-      {
-        Sprite *renderSprite = m_spriteManager->getObject(spriteID);
-        m_transparentSpriteIDs[renderSprite->getLayer()].remove(spriteID);
-      }
-      else
-      {
-        m_opaqueSpriteIDs.remove(spriteID);
-      }
+      m_spriteRenderer.removeSprite(spriteID, transparent);
     }
 
     void RasterizerRenderManager::removeAllSprites()
     {
-      m_opaqueSpriteIDs.clear();
-      m_transparentSpriteIDs.clear();
+      m_spriteRenderer.removeAllSprites();
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::BillboardNode *billboardNode)
     {
-      m_renderBillboards.push_back(billboardNode);
+      m_billboardRenderer.addRenderComponent(billboardNode);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::GeoNode *geoNode)
     {
-      m_renderGeometry.push_back(geoNode);
-
-      m_geometryRasterizer->insertGeometry(geoNode);
+      m_geometryRasterizer.addRenderComponent(geoNode);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
     {
-      m_renderAnimatedGeometry.push_back(animatedGeoNode);
-      m_geometryRasterizer->insertGeometry(animatedGeoNode);
+      m_geometryRasterizer.addRenderComponent(animatedGeoNode);
     }
 
     void RasterizerRenderManager::addRenderComponent(sg::LightNode *lightNode)
@@ -431,19 +277,17 @@ namespace he
 
     void RasterizerRenderManager::removeRenderComponent(sg::BillboardNode *billboardNode)
     {
-      m_renderBillboards.remove(billboardNode);
+      m_billboardRenderer.removeRenderComponent(billboardNode);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::GeoNode *geoNode)
     {
-      m_renderGeometry.remove(geoNode);
-      m_geometryRasterizer->removeGeometry(geoNode);
+      m_geometryRasterizer.removeRenderComponent(geoNode);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
     {
-      m_renderAnimatedGeometry.remove(animatedGeoNode);
-      m_geometryRasterizer->removeGeometry(animatedGeoNode);
+      m_geometryRasterizer.removeRenderComponent(animatedGeoNode);
     }
 
     void RasterizerRenderManager::removeRenderComponent(sg::LightNode *lightNode)
@@ -458,29 +302,11 @@ namespace he
 
     void RasterizerRenderManager::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(sg::BillboardNode *node)>(util::EventManager::OnAddBillboardNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::BillboardNode *node), void (RasterizerRenderManager::*)(sg::BillboardNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddBillboardNode);
-
-      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnAddAnimatedGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::AnimatedGeoNode *node), void (RasterizerRenderManager::*)(sg::AnimatedGeoNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddAnimatedGeometryNode);
-
-      eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnAddGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::GeoNode *node), void (RasterizerRenderManager::*)(sg::GeoNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddGeometryNode);
-
       eventManager->addNewSignal<void (*)(sg::LightNode *node)>(util::EventManager::OnAddLightNode);
       eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::LightNode *node), void (RasterizerRenderManager::*)(sg::LightNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
 
       eventManager->addNewSignal<void (*)(sg::ParticleNode *node)>(util::EventManager::OnAddParticleTransmitterNode);
       eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::ParticleNode *node), void (RasterizerRenderManager::*)(sg::ParticleNode *node)>(this, &RasterizerRenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
-
-      eventManager->addNewSignal<void (*)(sg::BillboardNode *node)>(util::EventManager::OnRemoveBillboardNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::BillboardNode *node), void (RasterizerRenderManager::*)(sg::BillboardNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveBillboardNode);
-
-      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnRemoveAnimatedGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::AnimatedGeoNode *node), void (RasterizerRenderManager::*)(sg::AnimatedGeoNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveAnimatedGeometryNode);
-
-      eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnRemoveGeometryNode);
-      eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::GeoNode *node), void (RasterizerRenderManager::*)(sg::GeoNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
 
       eventManager->addNewSignal<void (*)(sg::LightNode *node)>(util::EventManager::OnRemoveLightNode);
       eventManager->addSlotToSignal<RasterizerRenderManager, void (*)(sg::LightNode *node), void (RasterizerRenderManager::*)(sg::LightNode *node)>(this, &RasterizerRenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);

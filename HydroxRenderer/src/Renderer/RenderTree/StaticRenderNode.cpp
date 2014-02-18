@@ -10,7 +10,7 @@ namespace he
 {
 	namespace renderer
 	{
-    StaticRenderNode::StaticRenderNode()
+    StaticRenderNode::StaticRenderNode(unsigned int maxMaterials, unsigned int maxGeometry) : RenderNode(maxMaterials, maxGeometry)
     {
     }
 
@@ -35,26 +35,22 @@ namespace he
 
     void StaticRenderNode::resizeMatrixBuffer()
     {
-      m_matrixBuffer.createBuffer(sizeof(util::Matrix<float, 4>) * m_geoNodes.size(), GL_STATIC_DRAW);
+      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * m_instanceCount);
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_instanceCount, 0, GL_DYNAMIC_DRAW, nullptr);
     }
 
     void StaticRenderNode::fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex)
     {
-      m_matrixBuffer.setData(&node->getTransformationMatrix(), geometryIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>));
+      memcpy(&m_matrixCache[geometryIndex * sizeof(util::Matrix<float, 4>)], &node->getTransformationMatrix()[0], sizeof(util::Matrix<float, 4>));
     }
 
     void StaticRenderNode::fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex)
     {
     }
 
-    void StaticRenderNode::uploadMatrixBuffer(sg::AnimatedGeoNode *node, Shader *renderShader)
+    void StaticRenderNode::uploadMatrices()
     {
-    }
-
-    void StaticRenderNode::uploadMatrixBuffer(sg::GeoNode *node, Shader *renderShader)
-    {
-      util::Matrix<float, 4> worldMatrix = node->getTransformationMatrix();
-      renderShader->setUniform(17, GL_FLOAT_MAT4, &(worldMatrix[0][0]));
+      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * m_instanceCount, &m_matrixCache[0]);
     }
 	}
 }

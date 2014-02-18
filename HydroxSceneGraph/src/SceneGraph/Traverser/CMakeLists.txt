@@ -1,13 +1,13 @@
 set(
 	SOURCE 
 	${SOURCE} 
-	${CMAKE_CURRENT_SOURCE_DIR}/AddRenderNodesTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/AddNodesTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertObserverTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/NodeSearchTraverser.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/RemoveRenderNodesTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveNodesTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.cpp 
 	PARENT_SCOPE 

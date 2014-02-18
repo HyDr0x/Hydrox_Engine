@@ -10,12 +10,8 @@ namespace he
 {
 	namespace renderer
 	{
-    AnimatedRenderNode::AnimatedRenderNode() : m_maxBones(64)
+    AnimatedRenderNode::AnimatedRenderNode(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones) : RenderNode(maxMaterials, maxGeometry), m_maxBones(maxBones)
     {
-      glGenBuffers(1, &m_boneMatricesBuffer);
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
-      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_maxBones, nullptr, GL_STATIC_DRAW);
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     AnimatedRenderNode::~AnimatedRenderNode()
@@ -39,7 +35,8 @@ namespace he
 
     void AnimatedRenderNode::resizeMatrixBuffer()
     {
-      m_matrixBuffer.createBuffer(sizeof(util::Matrix<float, 4>) * m_geoNodes.size() * m_maxBones, GL_STATIC_DRAW);
+      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * m_instanceCount * m_maxBones);
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_matrixCache.size(), 0, GL_DYNAMIC_DRAW, nullptr);
     }
 
     void AnimatedRenderNode::fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex)
@@ -48,22 +45,15 @@ namespace he
 
     void AnimatedRenderNode::fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex)
     {
-      std::vector<util::Matrix<float, 4>> skinningMatrices = node->getSkinningMatrices();
+      std::vector<util::Matrix<float, 4>>& skinningMatrices = node->getSkinningMatrices();
       unsigned int size = sizeof(util::Matrix<float, 4>) * skinningMatrices.size();
-      m_matrixBuffer.setData(&skinningMatrices, geometryIndex * size, size);
+      unsigned int offset = sizeof(util::Matrix<float, 4>) * m_maxBones * geometryIndex;
+      memcpy(&m_matrixCache[offset], &(skinningMatrices[0][0][0]), size);
     }
 
-    void AnimatedRenderNode::uploadMatrixBuffer(sg::GeoNode *node, Shader *renderShader)
+    void AnimatedRenderNode::uploadMatrices()
     {
-    }
-
-    void AnimatedRenderNode::uploadMatrixBuffer(sg::AnimatedGeoNode *node, Shader *renderShader)
-    {
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_boneMatricesBuffer);
-      std::vector<util::Matrix<float, 4>> skinningMatrices = node->getSkinningMatrices();
-      glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(util::Matrix<float, 4>) * skinningMatrices.size(), &(skinningMatrices[0][0][0]));
-      glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-      glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_boneMatricesBuffer); 
+      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * m_maxBones * m_instanceCount, &m_matrixCache[0]);
     }
 	}
 }

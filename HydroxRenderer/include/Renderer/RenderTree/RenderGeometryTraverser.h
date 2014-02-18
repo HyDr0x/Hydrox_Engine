@@ -7,6 +7,7 @@
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include "Renderer/RenderTree/Traverser.h"
 
@@ -19,7 +20,7 @@ namespace he
     {
     public:
 
-      RenderGeometryTraverser(ModelManager *modelManager, MaterialManager *materialManager, RenderShaderManager *renderShaderManager, TextureManager *textureManager);
+      RenderGeometryTraverser(util::SingletonManager *singletonManager);
       virtual ~RenderGeometryTraverser();
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);

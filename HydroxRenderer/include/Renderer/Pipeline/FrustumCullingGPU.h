@@ -7,7 +7,7 @@
 
 #include <Utilities/Math/Math.hpp>
 
-#include "Renderer/Buffer/SSBO.h"
+#include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
@@ -29,10 +29,10 @@ namespace he
 
       private:
 
-        SSBO m_transformBuffer;
-        SSBO m_bbMinBuffer;
-        SSBO m_bbMaxBuffer;
-        SSBO m_culledAABBBuffer;
+        GPUBuffer m_transformBuffer;
+        GPUBuffer m_bbMinBuffer;
+        GPUBuffer m_bbMaxBuffer;
+        GPUBuffer m_culledAABBBuffer;
 
         util::ResourceHandle m_frustumCullingShaderHandle;
         renderer::ComputeShaderManager *m_computeShaderManager;

@@ -1,101 +1,101 @@
-#include "SceneGraph/Traverser/RemoveRenderNodesTraverser.h"
+#include "SceneGraph/Traverser/RemoveNodesTraverser.h"
 
 namespace he
 {
 	namespace sg
-	{    RemoveRenderNodesTraverser::RemoveRenderNodesTraverser(util::EventManager& eventManager) : m_eventManager(eventManager)
+	{    RemoveNodesTraverser::RemoveNodesTraverser(util::EventManager& eventManager) : m_eventManager(eventManager)
     {
     }
 
-    RemoveRenderNodesTraverser::~RemoveRenderNodesTraverser()
+    RemoveNodesTraverser::~RemoveNodesTraverser()
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(TransformNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(TransformNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(TransformNode *treeNode)>(util::EventManager::OnRemoveTransformNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(TransformNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(TransformNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(AnimatedTransformNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(AnimatedTransformNode *treeNode)>(util::EventManager::OnRemoveAnimatedTransformNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(AnimatedTransformNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(LODNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(LODNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(LODNode *treeNode)>(util::EventManager::OnRemoveLODNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(LODNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(LODNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(AnimatedGeoNode *treeNode)>(util::EventManager::OnRemoveAnimatedGeometryNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(AnimatedGeoNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(GeoNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(GeoNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnRemoveGeometryNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(GeoNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(GeoNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(BillboardNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(BillboardNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(BillboardNode *treeNode)>(util::EventManager::OnRemoveBillboardNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(BillboardNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(BillboardNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(ParticleNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(ParticleNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(ParticleNode *treeNode)>(util::EventManager::OnRemoveParticleTransmitterNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(ParticleNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(ParticleNode* treeNode)
     {
     }
 
-    bool RemoveRenderNodesTraverser::preTraverse(LightNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(LightNode* treeNode)
     {
       m_eventManager.raiseSignal<void (*)(LightNode *treeNode)>(util::EventManager::OnRemoveLightNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveRenderNodesTraverser::postTraverse(LightNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(LightNode* treeNode)
     {
     }
 	}

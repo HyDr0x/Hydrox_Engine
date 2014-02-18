@@ -59,8 +59,6 @@ namespace he
 
       void free();
 
-	    void render(GLuint bindingIndex) const;
-
       void setPositions(std::vector<util::Vector<float, 3>> positions);
       void setTextureCoordinations(std::vector<util::Vector<float, 2>> textureCoords);
       void setNormals(std::vector<util::Vector<float, 3>> normals);
@@ -75,6 +73,15 @@ namespace he
       util::Vector<float, 3> getBBMin();
       util::Vector<float, 3> getBBMax();
 
+      std::vector<GLubyte>& getVBOBuffer();
+      GLuint getVertexStride();
+      GLuint getVertexCount();
+      GLuint getVBOSize();
+
+      std::vector<GLuint>& getIndexBuffer();
+      GLuint getIndexCount();
+      GLuint getPrimitiveCount();
+
     private:
 
       AABB m_boundingVolume;
@@ -86,8 +93,8 @@ namespace he
 	    unsigned int m_primitiveCount;
       unsigned int m_vertexCount;
       GLuint m_vertexStride;
-      GLuint m_geometryData;
-      GLuint m_indexData;
+      std::vector<GLubyte> m_geometryData;
+      std::vector<GLuint> m_indexData;
       GLuint m_vertexDeclarationFlags;
 	    ////////////////////////////////
     };

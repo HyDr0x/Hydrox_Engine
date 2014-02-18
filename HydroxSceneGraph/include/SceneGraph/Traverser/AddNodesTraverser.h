@@ -1,24 +1,22 @@
-#ifndef REMOVERENDERNODESTRAVERSER_H_
-#define REMOVERENDERNODESTRAVERSER_H_
+#ifndef ADDNODESTRAVERSER_H_
+#define ADDNODESTRAVERSER_H_
 
-#include <list>
 #include <vector>
 
+#include "SceneGraph/Traverser/Traverser.h"
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Signals/EventManager.h>
-
-#include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
 {
 	namespace sg
 	{
-    class RemoveRenderNodesTraverser : public Traverser
+    class AddNodesTraverser : public Traverser
     {
     public:
 
-      RemoveRenderNodesTraverser(util::EventManager& eventManager);
-      virtual ~RemoveRenderNodesTraverser();
+      AddNodesTraverser(util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos);
+      virtual ~AddNodesTraverser();
 
       virtual bool preTraverse(TransformNode* treeNode);
       virtual void postTraverse(TransformNode* treeNode);
@@ -47,6 +45,9 @@ namespace he
     protected:
 
       util::EventManager& m_eventManager;
+
+      util::Vector<float, 3> m_camPos;
+      std::vector<float> m_lodRanges;
     };
 	}
 }

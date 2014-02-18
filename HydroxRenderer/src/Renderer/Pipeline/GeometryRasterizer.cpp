@@ -11,17 +11,41 @@ namespace he
 {
 	namespace renderer
 	{
-    GeometryRasterizer::GeometryRasterizer(util::SingletonManager *singletonManager, unsigned int nodeCacheBlockSize)
+    GeometryRasterizer::GeometryRasterizer()
     {
-      m_modelManager = singletonManager->getService<ModelManager>();
-      m_materialManager = singletonManager->getService<MaterialManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
+    }
 
-      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
+    GeometryRasterizer::~GeometryRasterizer()
+    {
+      DeleteTraverser deleteTraverser;
+      deleteTraverser.doTraverse(m_renderRootNode);
 
-      glGenVertexArrays(1, &m_simpleMeshVAO);
-      glBindVertexArray(m_simpleMeshVAO);
+      delete m_renderRootNode;
+
+      glDeleteVertexArrays(1, &m_meshVAO);
+    }
+
+    void GeometryRasterizer::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize)
+    {
+      m_maxMaterials = maxMaterials;
+      m_maxGeometry = maxGeometry;
+      m_maxBones = maxBones;
+
+      glEnable(GL_DEPTH_TEST);
+	    glDepthMask(GL_TRUE);
+	    glDepthFunc(GL_GREATER);
+
+	    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	    glClearDepth(0.0f);
+
+      m_renderRootNode = new GroupNode();
+
+      m_singletonManager = singletonManager;
+
+      m_cullingShaderHandle = cullingShaderHandle;
+
+      glGenVertexArrays(1, &m_meshVAO);
+      glBindVertexArray(m_meshVAO);
       glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
       glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
@@ -37,55 +61,70 @@ namespace he
       glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
       glVertexAttribBinding(RenderShader::BONEINDICES, 0);
       glVertexAttribBinding(RenderShader::COLOR, 0);
+
+      glVertexAttribFormat(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, 0);//per instance data (index affected through base instance)
+      glVertexAttribBinding(RenderShader::SPECIAL0, 1);
+      glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glVertexBindingDivisor(1, 1);
+
       glBindVertexArray(0);
 
-      m_renderRootNode = new GroupNode();
+      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
 
-    GeometryRasterizer::~GeometryRasterizer()
+    void GeometryRasterizer::addRenderComponent(sg::AnimatedGeoNode *node)
     {
-      DeleteTraverser deleteTraverser;
-      deleteTraverser.doTraverse(m_renderRootNode);
-
-      delete m_renderRootNode;
-
-      glDeleteVertexArrays(1, &m_simpleMeshVAO);
-    }
-
-    void GeometryRasterizer::insertGeometry(sg::GeoNode *node)
-    {
-      InsertGeometryTraverser insertTraverser(m_modelManager, m_materialManager, m_renderShaderManager);
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_cullingShaderHandle);
       insertTraverser.setNode(node);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
-    void GeometryRasterizer::removeGeometry(sg::GeoNode *node)
+    void GeometryRasterizer::addRenderComponent(sg::GeoNode *node)
     {
-      RemoveGeometryTraverser removeTraverser(m_modelManager, m_materialManager);
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_cullingShaderHandle);
+      insertTraverser.setNode(node);
+      insertTraverser.doTraverse(m_renderRootNode);
+    }
+
+    void GeometryRasterizer::removeRenderComponent(sg::AnimatedGeoNode *node)
+    {
+      RemoveGeometryTraverser removeTraverser(m_singletonManager);
       removeTraverser.setNode(node);
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
-    void GeometryRasterizer::rasterizeGeometry(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
+    void GeometryRasterizer::removeRenderComponent(sg::GeoNode *node)
+    {
+      RemoveGeometryTraverser removeTraverser(m_singletonManager);
+      removeTraverser.setNode(node);
+      removeTraverser.doTraverse(m_renderRootNode);
+    }
+
+    void GeometryRasterizer::rasterizeGeometry()
     {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-      util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-      util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
+      glBindVertexArray(m_meshVAO);
 
-      m_cameraParameterUBO.setData(&viewMatrix[0][0], 0, sizeof(util::Matrix<float, 4>));
-      m_cameraParameterUBO.setData(&projectionMatrix[0][0], sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>));
-      m_cameraParameterUBO.setData(&viewProjectionMatrix[0][0], 2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>));
-      m_cameraParameterUBO.setData(&eyeVec[0], 3 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>));
-      m_cameraParameterUBO.uploadData();
-      m_cameraParameterUBO.bindBuffer(0);
-
-      glBindVertexArray(m_simpleMeshVAO);
-
-      RenderGeometryTraverser renderTraverser(m_modelManager, m_materialManager, m_renderShaderManager, m_textureManager);
+      RenderGeometryTraverser renderTraverser(m_singletonManager);
       renderTraverser.doTraverse(m_renderRootNode);
 
       glBindVertexArray(0);
+    }
+
+    void GeometryRasterizer::registerRenderComponentSlots(util::EventManager *eventManager)
+    {
+      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnAddAnimatedGeometryNode);
+      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::AnimatedGeoNode *node), void (GeometryRasterizer::*)(sg::AnimatedGeoNode *node)>(this, &GeometryRasterizer::addRenderComponent, util::EventManager::OnAddAnimatedGeometryNode);
+
+      eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnAddGeometryNode);
+      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::GeoNode *node), void (GeometryRasterizer::*)(sg::GeoNode *node)>(this, &GeometryRasterizer::addRenderComponent, util::EventManager::OnAddGeometryNode);
+
+      eventManager->addNewSignal<void (*)(sg::AnimatedGeoNode *node)>(util::EventManager::OnRemoveAnimatedGeometryNode);
+      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::AnimatedGeoNode *node), void (GeometryRasterizer::*)(sg::AnimatedGeoNode *node)>(this, &GeometryRasterizer::removeRenderComponent, util::EventManager::OnRemoveAnimatedGeometryNode);
+
+      eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnRemoveGeometryNode);
+      eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::GeoNode *node), void (GeometryRasterizer::*)(sg::GeoNode *node)>(this, &GeometryRasterizer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
     }
   }
 }

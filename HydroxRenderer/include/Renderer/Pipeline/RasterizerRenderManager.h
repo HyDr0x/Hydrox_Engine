@@ -11,9 +11,10 @@
 #include <Renderer/Resources/ResourceManager.hpp>
 #include "Renderer/Pipeline/FrustumCullingGPU.h"
 #include "Renderer/Pipeline/GeometryRasterizer.h"
+#include "Renderer/Pipeline/BillboardRenderer.h"
+#include "Renderer/Pipeline/SpriteRenderer.h"
 
 #include "Renderer/Buffer/UBO.h"
-#include "Renderer/Buffer/SSBO.h"
 
 #include "Renderer/Resources/Mesh.h"
 #include "Renderer/Resources/Material.h"
@@ -49,8 +50,10 @@ namespace he
 
       const size_t getMaxSpriteLayer() const;
 
-      void initialize(util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer);
-      void initializeShader(util::ResourceHandle billboardShaderHandle, util::ResourceHandle spriteShaderHandle, util::ResourceHandle frustumCullingShaderHandle);
+      void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer, 
+        util::ResourceHandle billboardShaderHandle, 
+        util::ResourceHandle spriteShaderHandle, 
+        util::ResourceHandle frustumCullingShaderHandle);
 
 	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
 
@@ -79,40 +82,16 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      GLuint m_simpleMeshVAO;
-
-      GLuint m_boneMatricesBuffer;
-
-      GLuint m_dummyVBO;
-
-      util::ResourceHandle m_billboardShaderHandle;
-      util::ResourceHandle m_spriteShaderHandle;
-
       UBO m_cameraParameterUBO;
 
-      FrustumCullingGPU m_frustumCullingGPU;
+      GeometryRasterizer m_geometryRasterizer;
+      BillboardRenderer m_billboardRenderer;
+      SpriteRenderer m_spriteRenderer;
 
-      GeometryRasterizer *m_geometryRasterizer;
-
-      size_t m_maxLayer;
-      std::list<util::ResourceHandle> m_opaqueSpriteIDs;
-      std::vector<std::list<util::ResourceHandle>> m_transparentSpriteIDs;
-
-      std::list<sg::BillboardNode*> m_renderBillboards;
-      std::list<sg::GeoNode*> m_renderGeometry;
-      std::list<sg::AnimatedGeoNode*> m_renderAnimatedGeometry;
       std::list<sg::LightNode*> m_renderLight;
       std::list<sg::ParticleNode*> m_renderParticle;
 
       GLfloat m_aspectRatio;
-
-      ModelManager *m_modelManager;
-	    MaterialManager *m_materialManager;
-	    RenderShaderManager *m_renderShaderManager;
-      ComputeShaderManager *m_computeShaderManager;
-      TextureManager *m_textureManager;
-      BillboardManager *m_billboardManager;
-      SpriteManager *m_spriteManager;
     };
 	}
 }

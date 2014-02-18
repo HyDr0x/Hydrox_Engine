@@ -33,7 +33,8 @@ namespace he
 		    SPECIAL0,
 		    SPECIAL1,
 		    SPECIAL2,
-		    SPECIAL3
+		    SPECIAL3,
+        SPECIAL4,
 	    };
 
       RenderShader();

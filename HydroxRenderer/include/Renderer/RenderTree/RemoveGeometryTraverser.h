@@ -7,6 +7,7 @@
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include "Renderer/RenderTree/Traverser.h"
 
@@ -19,7 +20,7 @@ namespace he
     {
     public:
 
-      RemoveGeometryTraverser(ModelManager *modelManager, MaterialManager *materialManager);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager);
       virtual ~RemoveGeometryTraverser();
 
       void setNode(sg::GeoNode *node);

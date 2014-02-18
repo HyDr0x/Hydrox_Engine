@@ -27,10 +27,10 @@ namespace he
 
       if(boundingBoxNumber > 0)
       {
-        m_transformBuffer.createBuffer(boundingBoxNumber * sizeof(util::Matrix<float, 4>), GL_STREAM_DRAW, &transformMatrices[0][0][0]);
-        m_bbMinBuffer.createBuffer(bbMin.size() * sizeof(util::Vector<float, 4>), GL_STREAM_DRAW, &bbMin[0][0]);
-        m_bbMaxBuffer.createBuffer(bbMax.size() * sizeof(util::Vector<float, 4>), GL_STREAM_DRAW, &bbMax[0][0]);
-        m_culledAABBBuffer.createBuffer(boundingBoxNumber * sizeof(unsigned int), GL_STREAM_READ, nullptr);
+        m_transformBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, boundingBoxNumber * sizeof(util::Matrix<float, 4>), 0, GL_STREAM_DRAW, &transformMatrices[0][0][0]);
+        m_bbMinBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, bbMin.size() * sizeof(util::Vector<float, 4>), 0, GL_STREAM_DRAW, &bbMin[0][0]);
+        m_bbMaxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, bbMax.size() * sizeof(util::Vector<float, 4>), 0, GL_STREAM_DRAW, &bbMax[0][0]);
+        m_culledAABBBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, boundingBoxNumber * sizeof(unsigned int), 0, GL_STREAM_READ, nullptr);
 
         m_transformBuffer.bindBuffer(0);
         m_bbMinBuffer.bindBuffer(1);
@@ -44,12 +44,12 @@ namespace he
 
         frustumCullingShader->dispatchComputeShader(256, 1, 1);
 
-        m_transformBuffer.unBindBuffer();
-        m_bbMinBuffer.unBindBuffer();
-        m_bbMaxBuffer.unBindBuffer();
-        m_culledAABBBuffer.unBindBuffer();
+        m_transformBuffer.unbindBuffer(0);
+        m_bbMinBuffer.unbindBuffer(1);
+        m_bbMaxBuffer.unbindBuffer(2);
+        m_culledAABBBuffer.unbindBuffer(3);
 
-        m_culledAABBBuffer.getData(&culledAABB[0], 0, boundingBoxNumber * sizeof(unsigned int));
+        m_culledAABBBuffer.getData(0, boundingBoxNumber * sizeof(unsigned int), &culledAABB[0]);
       }
     }
 	}

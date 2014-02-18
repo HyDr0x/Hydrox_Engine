@@ -12,11 +12,12 @@ namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(ModelManager *modelManager, MaterialManager *materialManager) : 
-      m_modelManager(modelManager),
-      m_materialManager(materialManager)
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager)
     {
       m_node = nullptr;
+
+      m_modelManager = singletonManager->getService<ModelManager>();
+      m_materialManager = singletonManager->getService<MaterialManager>();
     }
 
     RemoveGeometryTraverser::~RemoveGeometryTraverser()
@@ -96,14 +97,9 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(StaticRenderNode* treeNode)
     {
-      if(m_node != nullptr)
-      {
-        treeNode->removeGeometry(m_node);
+      treeNode->removeGeometry(m_node);
 
-        return true;
-      }
-
-      return false;
+      return true;
     }
 
     void RemoveGeometryTraverser::postTraverse(StaticRenderNode* treeNode)
@@ -112,14 +108,9 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(AnimatedRenderNode* treeNode)
     {
-      if(m_node != nullptr)
-      {
-        treeNode->removeGeometry(m_node);
+      treeNode->removeGeometry(m_node);
 
-        return true;
-      }
-
-      return false;
+      return true;
     }
 
     void RemoveGeometryTraverser::postTraverse(AnimatedRenderNode* treeNode)

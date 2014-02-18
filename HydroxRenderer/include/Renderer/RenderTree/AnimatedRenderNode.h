@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      AnimatedRenderNode();
+      AnimatedRenderNode(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones);
       ~AnimatedRenderNode();
 
       bool preTraverse(Traverser* traverser);
@@ -28,12 +28,9 @@ namespace he
       void fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex);
       void fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex);
 
-      void uploadMatrixBuffer(sg::GeoNode *node, Shader *renderShader);
-      void uploadMatrixBuffer(sg::AnimatedGeoNode *node, Shader *renderShader);
+      void uploadMatrices();
 
       unsigned int m_maxBones;
-
-      GLuint m_boneMatricesBuffer;
     };
 	}
 }

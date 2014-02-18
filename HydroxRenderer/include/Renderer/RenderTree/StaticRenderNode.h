@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      StaticRenderNode();
+      StaticRenderNode(unsigned int maxMaterials, unsigned int maxGeometry);
       ~StaticRenderNode();
 
       bool preTraverse(Traverser* traverser);
@@ -28,8 +28,7 @@ namespace he
       void fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex);
       void fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex);
 
-      void uploadMatrixBuffer(sg::GeoNode *node, Shader *renderShader);
-      void uploadMatrixBuffer(sg::AnimatedGeoNode *node, Shader *renderShader);
+      void uploadMatrices();
     };
 	}
 }

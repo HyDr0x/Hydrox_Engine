@@ -1,8 +1,11 @@
 set(
 	SOURCE 
 	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingGPU.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRasterizer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RasterizingRenderManager.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.cpp 
 	PARENT_SCOPE 
 )

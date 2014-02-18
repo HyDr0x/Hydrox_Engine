@@ -5,11 +5,11 @@
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Signals/EventManager.h>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
-
-#include "Renderer/Buffer/UBO.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
@@ -23,27 +23,37 @@ namespace he
     {
     public:
 
-      GeometryRasterizer(util::SingletonManager *singletonManager, unsigned int nodeCacheBlockSize = 8);
+      GeometryRasterizer();
       ~GeometryRasterizer();
 
-      void insertGeometry(sg::GeoNode *node);
+      void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
 
-      void removeGeometry(sg::GeoNode *node);
+      void rasterizeGeometry();
 
-      void rasterizeGeometry(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
+      void addRenderComponent(sg::AnimatedGeoNode *node);
+      void addRenderComponent(sg::GeoNode *node);
+
+      void removeRenderComponent(sg::AnimatedGeoNode *node);
+      void removeRenderComponent(sg::GeoNode *node);
 
     private:
 
-      GLuint m_simpleMeshVAO;
+      void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      UBO m_cameraParameterUBO;
+      void resizeMeshBuffer();
+      void resizeMaterialBuffer();
+
+      GLuint m_meshVAO;
+
+      unsigned int m_maxMaterials;
+      unsigned int m_maxGeometry;
+      unsigned int m_maxBones;
 
       GroupNode *m_renderRootNode;
 
-      ModelManager *m_modelManager;
-	    MaterialManager *m_materialManager;
-	    RenderShaderManager *m_renderShaderManager;
-      TextureManager *m_textureManager;
+      util::ResourceHandle m_cullingShaderHandle;
+
+      util::SingletonManager *m_singletonManager;
     };
 	}
 }

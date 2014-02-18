@@ -5,10 +5,7 @@
 
 #include "SceneGraph/Scene/SceneCacheManager.h"
 
-#include "SceneGraph/Traverser/AddRenderNodesTraverser.h"
-#include "SceneGraph/Traverser/RemoveRenderNodesTraverser.h"
 #include "SceneGraph/Traverser/TransformTraverser.h"
-#include "SceneGraph/Traverser/InsertObserverTraverser.h"
 #include "SceneGraph/Traverser/DeleteTraverser.h"
 
 #include "SceneGraph/TreeNodes/TransformNode.h"
@@ -23,9 +20,6 @@ namespace he
 
       TransformTraverser transformTraverser;
       transformTraverser.doTraverse(m_rootNode);
-
-      InsertObserverTraverser insertObserverTraverser(m_sceneCacheManager);
-      insertObserverTraverser.doTraverse(m_rootNode);//insert this scene as an observer to every Transform node
 
       m_sceneCacheManager->addSubTree(m_rootNode, cameraPosition);
     }
@@ -76,9 +70,6 @@ namespace he
       transformTraverser.doAscend(copiedRootNode);
       transformTraverser.doTraverse(copiedRootNode);
 
-      InsertObserverTraverser insertObserverTraverser(m_sceneCacheManager);
-      insertObserverTraverser.doTraverse(copiedRootNode);//insert this scene as an observer to every Transform node
-
       m_sceneCacheManager->addSubTree(copiedRootNode, cameraPosition);
 
       return copiedRootNode;
@@ -98,9 +89,6 @@ namespace he
 
     void RenderScene::updateScene(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
     {
-      /*UpdateSceneTraverser updateTraverser(m_eventManager, m_lodRanges, cameraPosition, currentTime, isTimeRelative);
-      updateTraverser.doTraverse(m_rootNode);*/
-
       m_sceneCacheManager->updateCaches(cameraPosition, currentTime, isTimeRelative);
     }
   }

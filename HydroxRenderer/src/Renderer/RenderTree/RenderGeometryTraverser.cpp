@@ -12,12 +12,12 @@ namespace he
 {
 	namespace renderer
 	{
-    RenderGeometryTraverser::RenderGeometryTraverser(ModelManager *modelManager, MaterialManager *materialManager, RenderShaderManager *renderShaderManager, TextureManager *textureManager) : 
-      m_modelManager(modelManager),
-      m_materialManager(materialManager),
-      m_renderShaderManager(renderShaderManager),
-      m_textureManager(textureManager)
+    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
     {
+      m_modelManager = singletonManager->getService<ModelManager>();
+      m_materialManager = singletonManager->getService<MaterialManager>();
+      m_textureManager = singletonManager->getService<TextureManager>();
+      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
     }
 
     RenderGeometryTraverser::~RenderGeometryTraverser()
@@ -194,7 +194,7 @@ namespace he
     {
       treeNode->rasterizeGeometry();
 
-      return false;
+      return true;
     }
 
     void RenderGeometryTraverser::postTraverse(StaticRenderNode* treeNode)
@@ -205,7 +205,7 @@ namespace he
     {
       treeNode->rasterizeGeometry();
 
-      return false;
+      return true;
     }
 
     void RenderGeometryTraverser::postTraverse(AnimatedRenderNode* treeNode)

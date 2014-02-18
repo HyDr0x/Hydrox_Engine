@@ -12,13 +12,19 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(ModelManager *modelManager, MaterialManager *materialManager, RenderShaderManager *renderShaderManager) : 
-      m_modelManager(modelManager),
-      m_materialManager(materialManager),
-      m_renderShaderManager(renderShaderManager)
+    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle) : 
+      m_maxMaterials(maxMaterials),
+      m_maxGeometry(maxGeometry),
+      m_maxBones(maxBones),
+      m_cullingShaderHandle(cullingShaderHandle)
     {
       m_node = nullptr;
       m_parentNode = nullptr;
+
+      m_modelManager = singletonManager->getService<ModelManager>();
+      m_materialManager = singletonManager->getService<MaterialManager>();
+      m_computeShaderManager = singletonManager->getService<ComputeShaderManager>();
+      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
     }
 
     InsertGeometryTraverser::~InsertGeometryTraverser()
@@ -138,9 +144,7 @@ namespace he
 
     bool InsertGeometryTraverser::preTraverse(StaticRenderNode* treeNode)
     {
-      treeNode->insertGeometry(m_node);
-
-      return true;
+      return treeNode->insertGeometry(m_node);
     }
 
     void InsertGeometryTraverser::postTraverse(StaticRenderNode* treeNode)
@@ -149,9 +153,7 @@ namespace he
 
     bool InsertGeometryTraverser::preTraverse(AnimatedRenderNode* treeNode)
     {
-      treeNode->insertGeometry(m_node);
-
-      return true;
+      return treeNode->insertGeometry(m_node);
     }
 
     void InsertGeometryTraverser::postTraverse(AnimatedRenderNode* treeNode)
@@ -163,7 +165,7 @@ namespace he
       return nullptr;
     }
 
-    TreeNode* InsertGeometryTraverser::createNewNode(GroupNode* parent)
+    TreeNode* InsertGeometryTraverser::createNewNode(TextureNode* parent)
     {
       VertexDeclarationNode *treeNode = new VertexDeclarationNode();
       treeNode->initialize(m_vertexDeclaration);
@@ -176,7 +178,7 @@ namespace he
       return treeNode;
     }
 
-    TreeNode* InsertGeometryTraverser::createNewNode(VertexDeclarationNode* parent)
+    TreeNode* InsertGeometryTraverser::createNewNode(GroupNode* parent)
     {
       ShaderNode *treeNode = new ShaderNode();
       treeNode->initialize(m_shaderHandle);
@@ -202,19 +204,19 @@ namespace he
       return treeNode;
     }
 
-    TreeNode* InsertGeometryTraverser::createNewNode(TextureNode* parent)
+    TreeNode* InsertGeometryTraverser::createNewNode(VertexDeclarationNode* parent)
     {
       RenderNode *treeNode;
       if(dynamic_cast<sg::AnimatedGeoNode*>(m_node) != nullptr)
       {
-        treeNode = new AnimatedRenderNode();
+        treeNode = new AnimatedRenderNode(m_maxMaterials, m_maxGeometry, m_maxBones);
       }
       else
       {
-        treeNode = new StaticRenderNode();
+        treeNode = new StaticRenderNode(m_maxMaterials, m_maxGeometry);
       }
 
-      treeNode->initialize(m_renderShaderManager, m_materialManager, m_modelManager);
+      treeNode->initialize(m_materialManager, m_modelManager, m_cullingShaderHandle);
 
       TreeNode *sibling = parent->getFirstChild();
       parent->setFirstChild(treeNode);

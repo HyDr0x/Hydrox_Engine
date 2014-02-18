@@ -8,7 +8,6 @@
 #include "SceneGraph/DLLExport.h"
 
 #include <Utilities/Math/Math.hpp>
-//#include <Utilities/Observer/Observer.hpp>
 #include <Utilities/Signals/EventManager.h>
 
 #include "SceneGraph/Scene/Scene.h"
@@ -30,7 +29,7 @@ namespace he
     class ParticleNode;
     class LightNode;
 
-    class GRAPHICAPI RenderScene : public Scene/*, public util::Observer<TransformNode*>*/
+    class GRAPHICAPI RenderScene : public Scene
     {
     public:
 
@@ -53,13 +52,9 @@ namespace he
       RenderScene(const RenderScene& object) : Scene(object.m_rootNode), m_eventManager(object.m_eventManager) {}
 	    RenderScene& operator=(const RenderScene&){ return *this; }
 
-      //void updateObserver(TransformNode* data);
-
       SceneCacheManager *m_sceneCacheManager;
 
       util::EventManager& m_eventManager;
-
-      //std::vector<float> m_lodRanges;
     };
   }
 }

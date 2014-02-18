@@ -5,14 +5,17 @@
 #include <map>
 
 #include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
+#include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"
-#include "Renderer/Buffer/SSBO.h"
+
+#include "Renderer/Pipeline/FrustumCullingGPU.h"
 
 #include "Renderer/RenderTree/TreeNode.h"
 
@@ -22,11 +25,20 @@ namespace he
 	{
     class Traverser;
 
+    struct DrawElementsIndirectCommand
+    {
+      GLuint count;//number of indices
+      GLuint instanceCount;//the number of instances
+      GLuint firstIndex;//offset in the index array
+      GLuint baseVertex;//offset which adds to every index value
+      GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
+    };
+
     class RenderNode : public TreeNode
     {
     public:
 
-      RenderNode();
+      RenderNode(unsigned int maxMaterials, unsigned int maxGeometry);
       virtual ~RenderNode() = 0;
 
       virtual bool preTraverse(Traverser* traverser);
@@ -34,9 +46,9 @@ namespace he
 
       virtual TreeNode* createNewNode(InsertGeometryTraverser* traverser);
 
-      void initialize(RenderShaderManager *renderShaderManager, MaterialManager *materialManager, ModelManager *modelManager);
+      void initialize(MaterialManager *materialManager, ModelManager *modelManager, util::ResourceHandle cullingShaderHandle);
 
-      void insertGeometry(sg::GeoNode *node);
+      bool insertGeometry(sg::GeoNode *node);
       bool removeGeometry(sg::GeoNode *node);
 
       void rasterizeGeometry();
@@ -50,25 +62,40 @@ namespace he
       virtual void fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex) = 0;
       virtual void fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex) = 0;
 
-      virtual void uploadMatrixBuffer(sg::GeoNode *node, Shader *renderShader) = 0;
-      virtual void uploadMatrixBuffer(sg::AnimatedGeoNode *node, Shader *renderShader) = 0;//DEPRECATED --> should be in the resizeBuffer() method
+      virtual void uploadMatrices() = 0;
 
-      RenderShaderManager *m_renderShaderManager;
       MaterialManager *m_materialManager;
       ModelManager *m_modelManager;
 
+      FrustumCullingGPU m_frustumCulling;
+
+      GPUBuffer m_commandBuffer;
+      GPUBuffer m_meshIndexBuffer;
+      GPUBuffer m_meshVertexBuffer;
+      GPUBuffer m_instanceIndexBuffer;
+
       //gpu buffer for drawing
       UBO m_materialBuffer;
-      UBO m_materialIndexBuffer;
-      SSBO m_matrixBuffer;
+      GPUBuffer m_materialIndexBuffer;
+      GPUBuffer m_matrixBuffer;
+      std::vector<GLubyte> m_matrixCache;
+
+      unsigned int m_primitiveType;
+
+      unsigned int m_maxMaterials;
+      unsigned int m_materialCount;
+      unsigned int m_maxGeometry;
+      unsigned int m_geometryCounter;
+      unsigned int m_vboSize;
+      unsigned int m_vertexStride;
+      unsigned int m_indexSize;
+      unsigned int m_instanceCount;
 
       std::map<unsigned int, unsigned int> m_materialHandles;
+      std::map<Mesh*, std::list<sg::GeoNode*>> m_meshHandles;
 
       bool m_geometryChanged;
-      unsigned int m_maxMaterials;
-
-      //geoNodes cache, if they change they can be reuploaded fast
-      std::list<sg::GeoNode*> m_geoNodes;
+      bool m_instanceNumberChanged;
     };
 	}
 }

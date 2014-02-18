@@ -2,8 +2,9 @@
 
 #include <assert.h>
 
-#include "SceneGraph/Traverser/AddRenderNodesTraverser.h"
-#include "SceneGraph/Traverser/RemoveRenderNodesTraverser.h"
+#include "SceneGraph/Traverser/InsertObserverTraverser.h"
+#include "SceneGraph/Traverser/AddNodesTraverser.h"
+#include "SceneGraph/Traverser/RemoveNodesTraverser.h"
 #include "SceneGraph/Traverser/TransformTraverser.h"
 
 #include "SceneGraph/TreeNodes/TreeNode.h"
@@ -41,13 +42,16 @@ namespace he
 
     void SceneCacheManager::addSubTree(TreeNode *rootNode, util::Vector<float, 3>& cameraPosition)
     {
-      AddRenderNodesTraverser addRenderNodesTraverser(m_eventManager, m_lodRanges, cameraPosition);
+      InsertObserverTraverser insertObserverTraverser(this);
+      insertObserverTraverser.doTraverse(rootNode);//insert this scene as an observer to every Transform node
+
+      AddNodesTraverser addRenderNodesTraverser(m_eventManager, m_lodRanges, cameraPosition);
       addRenderNodesTraverser.doTraverse(rootNode);
     }
 
     void SceneCacheManager::removeSubTree(TreeNode *rootNode)
     {
-      RemoveRenderNodesTraverser removeRenderNodesTraverser(m_eventManager);
+      RemoveNodesTraverser removeRenderNodesTraverser(m_eventManager);
       removeRenderNodesTraverser.doTraverse(rootNode);
     }
 
@@ -185,7 +189,7 @@ namespace he
           {
             (*lit)->addDirtyFlag(GroupNode::LOD_INRANGE);
 
-            AddRenderNodesTraverser addTraverser(m_eventManager, m_lodRanges, cameraPosition);
+            AddNodesTraverser addTraverser(m_eventManager, m_lodRanges, cameraPosition);
             addTraverser.doTraverse(*lit);
           }
         }
@@ -193,7 +197,7 @@ namespace he
         {
           (*lit)->removeDirtyFlag(GroupNode::LOD_INRANGE);
 
-          RemoveRenderNodesTraverser removeTraverser(m_eventManager);
+          RemoveNodesTraverser removeTraverser(m_eventManager);
           removeTraverser.doTraverse(*lit);
         }
       }

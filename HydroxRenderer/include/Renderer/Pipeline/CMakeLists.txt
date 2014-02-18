@@ -1,9 +1,11 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingGPU.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRasterizer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RasterizerRenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.h 
 	PARENT_SCOPE 
 )
