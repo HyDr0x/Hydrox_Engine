@@ -231,7 +231,7 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultMaterial()
     {
       RenderShaderLoader renderShaderLoader(m_renderShaderManager);
-      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(), renderShaderLoader.getDefaultRenderShader()));
+      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(4), renderShaderLoader.getDefaultRenderShader()));
     }
   }
 }

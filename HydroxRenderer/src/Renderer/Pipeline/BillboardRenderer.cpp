@@ -39,6 +39,8 @@ namespace he
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       glEnableVertexAttribArray(RenderShader::SPECIAL0);
+
+      glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
  
       RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardShaderHandle);
 	    billboardShader->useShader();
@@ -60,7 +62,6 @@ namespace he
 		      billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
 		      billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
-          glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
           glDrawArrays(GL_POINTS, 0, 1);
         }
 	    }

@@ -43,10 +43,9 @@ namespace he
 
     void SpriteRenderer::render()
     {
-      glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
       glEnableVertexAttribArray(RenderShader::SPECIAL0);
+
+      glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 
       glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -72,7 +71,6 @@ namespace he
 		      spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
           spriteShader->setUniform(2, GL_FLOAT, &z);
 
-          glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 		      glDrawArrays(GL_POINTS, 0, 1);
         }
 	    }
@@ -121,13 +119,13 @@ namespace he
 		        spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
             spriteShader->setUniform(2, GL_FLOAT, &z);
 
-            glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 		        glDrawArrays(GL_POINTS, 0, 1);
           }
 	      }
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
+
       glDisableVertexAttribArray(RenderShader::SPECIAL0);
 
       glDisable(GL_BLEND);

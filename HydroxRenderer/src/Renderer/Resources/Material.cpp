@@ -4,8 +4,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     Material::Material()
     {
     }
