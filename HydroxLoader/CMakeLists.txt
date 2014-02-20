@@ -19,7 +19,8 @@ find_package(GLEW)
 find_package(OPENGL)
 find_package(DevIL)
 
-if(NOT ASSIMP_FOUND) # bad assimp find_package workaround
+if(ASSIMP_FOUND) # bad assimp find_package workaround
+else()
   find_package(Assimp)
 endif()
 
