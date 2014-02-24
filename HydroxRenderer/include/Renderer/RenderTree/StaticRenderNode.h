@@ -23,6 +23,8 @@ namespace he
 
     private:
 
+      GPUBuffer& getTransformationMatrixBuffer();
+
       void resizeMatrixBuffer();
 
       void fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex);

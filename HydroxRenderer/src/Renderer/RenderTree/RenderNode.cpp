@@ -17,8 +17,7 @@ namespace he
       m_vboSize(0), 
       m_indexSize(0), 
       m_vertexStride(0), 
-      m_instanceCount(0), 
-      m_geometryCounter(0), 
+      m_instanceCounter(0), 
       m_primitiveType(~0)
     {
       GLuint size = sizeof(Material::MaterialData) * m_maxMaterials;
@@ -44,12 +43,12 @@ namespace he
       return traverser->createNewNode(this);
     }
 
-    void RenderNode::initialize(MaterialManager *materialManager, ModelManager *modelManager, util::ResourceHandle cullingShaderHandle)
+    void RenderNode::initialize(util::SingletonManager *singletonManager, util::ResourceHandle frustumCullingShaderHandle)
     {
-      m_materialManager = materialManager;
-      m_modelManager = modelManager;
+      m_materialManager = singletonManager->getService<MaterialManager>();
+      m_modelManager = singletonManager->getService<ModelManager>();
 
-      //m_frustumCulling.initialize(computeShaderManager, cullingShaderHandle);
+      m_frustumCulling.initialize(singletonManager->getService<ComputeShaderManager>(), frustumCullingShaderHandle, m_maxGeometry);
     }
 
     bool RenderNode::insertGeometry(sg::GeoNode *node)
@@ -61,7 +60,7 @@ namespace he
         m_primitiveType = mesh->getPrimitiveType();
       }
 
-      if(m_geometryCounter >= m_maxGeometry || m_primitiveType != mesh->getPrimitiveType())
+      if(m_instanceCounter >= m_maxGeometry || m_primitiveType != mesh->getPrimitiveType())
       {
         return false;
       }
@@ -96,7 +95,7 @@ namespace he
       }
 
       m_meshHandles[mesh].push_back(node);
-      m_geometryCounter++;
+      m_instanceCounter++;
 
       return true;
     }
@@ -118,12 +117,12 @@ namespace he
         m_indexSize -= mesh->getIndexCount() * sizeof(GLuint);
       }
 
-      m_geometryCounter--;
+      m_instanceCounter--;
 
-      return m_meshHandles[mesh].size() == 0;
+      return m_meshHandles.size() == 0;
     }
 
-    void RenderNode::rasterizeGeometry()
+    void RenderNode::updateBuffer()
     {
       if(m_geometryChanged || m_instanceNumberChanged)
       {
@@ -132,26 +131,6 @@ namespace he
         m_geometryChanged = false;
         m_instanceNumberChanged = false;
       }
-
-      Mesh *renderMesh;
-
-      //std::vector<util::Matrix<float, 4>> transformMatrices(m_geoNodes.size());
-      //std::vector<util::Vector<float, 4>> bbMin(m_geoNodes.size());
-      //std::vector<util::Vector<float, 4>> bbMax(m_geoNodes.size());
-
-      //unsigned int k = 0;
-      //for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_geoNodes.begin(); geometryIterator != m_geoNodes.end(); geometryIterator++, k++)//Render 3D Objects
-      //{
-      //  renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
-
-      //  transformMatrices[k] = (*geometryIterator)->getTransformationMatrix();
-      //  memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
-      //  memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-      //}
-
-      //std::vector<unsigned int> culledAABB;
-      //culledAABB.resize(m_geoNodes.size());
-      //m_frustumCulling.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
 
       unsigned int geometryCounter = 0;
       for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
@@ -170,6 +149,31 @@ namespace he
       }
 
       uploadMatrices();
+    }
+
+    void RenderNode::frustumCulling()
+    {
+      updateBuffer();
+
+      getTransformationMatrixBuffer().bindBuffer(0);
+      m_bboxesBuffer.bindBuffer(1);
+      m_commandBuffer.bindBuffer(3);
+      m_cullingCommandBuffer.bindBuffer(4);
+      m_meshInstanceIndexBuffer.bindBuffer(5);
+
+      std::vector<GLuint> culledAABB(m_maxGeometry);
+      m_frustumCulling.cullAABB(culledAABB, m_instanceCounter);
+
+      getTransformationMatrixBuffer().unbindBuffer(0);
+      m_bboxesBuffer.unbindBuffer(1);
+      m_commandBuffer.unbindBuffer(3);
+      m_cullingCommandBuffer.unbindBuffer(4);
+      m_meshInstanceIndexBuffer.unbindBuffer(5);
+    }
+
+    void RenderNode::rasterizeGeometry()
+    {
+      updateBuffer();
 
       m_matrixBuffer.bindBuffer(0);
       m_materialIndexBuffer.bindBuffer(1);
@@ -178,13 +182,11 @@ namespace he
 
       m_commandBuffer.bindBuffer();
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
-      m_instanceIndexBuffer.bindVertexbuffer(1, 0, sizeof(GLuint));
       m_meshIndexBuffer.bindBuffer();
 
       glMultiDrawElementsIndirect(m_primitiveType, GLINDEXTYPE, nullptr, m_meshHandles.size(), 0);
 
       m_meshIndexBuffer.unbindBuffer();
-      m_instanceIndexBuffer.unbindVertexBuffer(1);
       m_meshVertexBuffer.unbindVertexBuffer(0);
       m_commandBuffer.unbindBuffer();
 
@@ -201,6 +203,11 @@ namespace he
         m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_STATIC_DRAW, nullptr);
         m_meshIndexBuffer.createBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexSize, 0, GL_STATIC_DRAW, nullptr);
         m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * m_meshHandles.size(), 0, GL_STATIC_DRAW, nullptr);
+        m_cullingCommandBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshHandles.size(), 0, GL_STATIC_DRAW, nullptr);
+        m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshHandles.size() * 2, 0, GL_STATIC_DRAW, nullptr);
+
+        std::vector<util::Vector<unsigned int, 4>> cullingCommandCache(m_meshHandles.size());
+        std::vector<util::Vector<float, 4>> boundingBoxes(m_meshHandles.size() * 2);
 
         unsigned int commandCounter = 0;
         unsigned int vertexOffset = 0;
@@ -225,12 +232,22 @@ namespace he
 
           m_commandBuffer.setData(commandCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
 
+          cullingCommandCache[commandCounter][0] = command.count;
+          cullingCommandCache[commandCounter][1] = command.firstIndex;
+          cullingCommandCache[commandCounter][2] = command.baseVertex;
+          cullingCommandCache[commandCounter][3] = command.baseInstance;
+
           indexCount += meshIterator->first->getIndexCount();
           vertexCount += meshIterator->first->getVertexCount();
           instanceCounter += meshIterator->second.size();
+
+          //update bbox data
+          memcpy(&boundingBoxes[2 * commandCounter + 0][0], &meshIterator->first->getBBMin()[0], sizeof(util::Vector<float, 3>));
+          memcpy(&boundingBoxes[2 * commandCounter + 1][0], &meshIterator->first->getBBMax()[0], sizeof(util::Vector<float, 3>));
         }
 
-        m_instanceCount = instanceCounter;
+        m_bboxesBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_meshHandles.size() * 2, &boundingBoxes[0]);
+        m_cullingCommandBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_meshHandles.size(), &cullingCommandCache[0]);
       }
       else if(m_instanceNumberChanged)
       {
@@ -244,21 +261,22 @@ namespace he
 
       resizeMatrixBuffer();
       
-      std::vector<GLuint> materialIndexData(m_instanceCount);
-      std::vector<GLuint> instanceIndex(m_instanceCount);
+      std::vector<GLuint> meshIndex(m_instanceCounter);
+      std::vector<GLuint> materialIndexData(m_instanceCounter);
 
+      unsigned int meshCounter = 0;
       unsigned int geometryCounter = 0;
-      for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
+      for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshCounter++)
       {
         for(std::list<sg::GeoNode*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, geometryCounter++)
         {
           materialIndexData[geometryCounter] = m_materialHandles[(*geometryIterator)->getMaterialHandle().getID()];
-          instanceIndex[geometryCounter] = geometryCounter;
+          meshIndex[geometryCounter] = meshCounter;
         }
       }
 
-      m_materialIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_instanceCount, 0, GL_STATIC_DRAW, &materialIndexData[0]);
-      m_instanceIndexBuffer.createBuffer(GL_ARRAY_BUFFER, sizeof(GLuint) * m_instanceCount, 0, GL_STATIC_DRAW, &instanceIndex[0]);
+      m_materialIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_instanceCounter, 0, GL_STATIC_DRAW, &materialIndexData[0]);
+      m_meshInstanceIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_instanceCounter, 0, GL_STATIC_DRAW, &meshIndex[0]);
 
       m_materialBuffer.uploadData();
     }

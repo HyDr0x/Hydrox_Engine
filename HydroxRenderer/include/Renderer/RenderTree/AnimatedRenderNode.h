@@ -23,12 +23,17 @@ namespace he
 
     private:
 
+      GPUBuffer& getTransformationMatrixBuffer();
+
       void resizeMatrixBuffer();
 
       void fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex);
       void fillMatrixBuffer(sg::AnimatedGeoNode *node, unsigned int geometryIndex);
 
       void uploadMatrices();
+
+      std::vector<GLubyte> m_bboxMatrixCache;
+      GPUBuffer m_bboxMatrixBuffer;
 
       unsigned int m_maxBones;
     };

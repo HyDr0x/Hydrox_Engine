@@ -6,6 +6,7 @@
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
@@ -46,14 +47,19 @@ namespace he
 
       virtual TreeNode* createNewNode(InsertGeometryTraverser* traverser);
 
-      void initialize(MaterialManager *materialManager, ModelManager *modelManager, util::ResourceHandle cullingShaderHandle);
+      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle frustumCullingShaderHandle);
 
       bool insertGeometry(sg::GeoNode *node);
       bool removeGeometry(sg::GeoNode *node);
 
+      void updateBuffer();
+
+      void frustumCulling();
       void rasterizeGeometry();
 
     protected:
+
+      virtual GPUBuffer& getTransformationMatrixBuffer() = 0;
 
       void resizeBuffer();
 
@@ -67,14 +73,21 @@ namespace he
       MaterialManager *m_materialManager;
       ModelManager *m_modelManager;
 
+      FrustumCullingGPU m_frustumCulling;
+
+      //gpu buffer for drawing
+
+      //per mesh buffer
       GPUBuffer m_commandBuffer;
       GPUBuffer m_meshIndexBuffer;
       GPUBuffer m_meshVertexBuffer;
-      GPUBuffer m_instanceIndexBuffer;
+      GPUBuffer m_bboxesBuffer;
+      GPUBuffer m_cullingCommandBuffer;
 
-      //gpu buffer for drawing
+      //per instance buffer
       UBO m_materialBuffer;
       GPUBuffer m_materialIndexBuffer;
+      GPUBuffer m_meshInstanceIndexBuffer;
       GPUBuffer m_matrixBuffer;
       std::vector<GLubyte> m_matrixCache;
 
@@ -83,11 +96,10 @@ namespace he
       unsigned int m_maxMaterials;
       unsigned int m_materialCount;
       unsigned int m_maxGeometry;
-      unsigned int m_geometryCounter;
+      unsigned int m_instanceCounter;
       unsigned int m_vboSize;
       unsigned int m_vertexStride;
       unsigned int m_indexSize;
-      unsigned int m_instanceCount;
 
       std::map<unsigned int, unsigned int> m_materialHandles;
       std::map<Mesh*, std::list<sg::GeoNode*>> m_meshHandles;

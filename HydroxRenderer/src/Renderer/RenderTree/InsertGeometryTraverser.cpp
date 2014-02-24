@@ -12,19 +12,16 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, util::ResourceHandle frustumShaderHandle) : 
       m_maxMaterials(maxMaterials),
       m_maxGeometry(maxGeometry),
       m_maxBones(maxBones),
-      m_cullingShaderHandle(cullingShaderHandle)
+      m_singletonManager(singletonManager),
+      m_renderNodes(renderNodes),
+      m_frustumShaderHandle(frustumShaderHandle),
+      m_node(nullptr),
+      m_parentNode(nullptr)
     {
-      m_node = nullptr;
-      m_parentNode = nullptr;
-
-      m_modelManager = singletonManager->getService<ModelManager>();
-      m_materialManager = singletonManager->getService<MaterialManager>();
-      m_computeShaderManager = singletonManager->getService<ComputeShaderManager>();
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
     }
 
     InsertGeometryTraverser::~InsertGeometryTraverser()
@@ -35,9 +32,9 @@ namespace he
     {
       m_node = node;
 
-      m_vertexDeclaration = m_modelManager->getObject(m_node->getMeshHandle())->getVertexDeclarationFlags();
+      m_vertexDeclaration = m_singletonManager->getService<ModelManager>()->getObject(m_node->getMeshHandle())->getVertexDeclarationFlags();
 
-      Material *material = m_materialManager->getObject(m_node->getMaterialHandle());
+      Material *material = m_singletonManager->getService<MaterialManager>()->getObject(m_node->getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
       m_textureHandles.resize(4);
@@ -216,12 +213,14 @@ namespace he
         treeNode = new StaticRenderNode(m_maxMaterials, m_maxGeometry);
       }
 
-      treeNode->initialize(m_materialManager, m_modelManager, m_cullingShaderHandle);
+      treeNode->initialize(m_singletonManager, m_frustumShaderHandle);
 
       TreeNode *sibling = parent->getFirstChild();
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
       treeNode->setNextSibling(sibling);
+
+      m_renderNodes.push_back(treeNode);
 
       return treeNode;
     }

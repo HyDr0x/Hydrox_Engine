@@ -20,7 +20,7 @@ namespace he
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes);
       virtual ~RemoveGeometryTraverser();
 
       void setNode(sg::GeoNode *node);
@@ -45,7 +45,11 @@ namespace he
       ModelManager *m_modelManager;
 	    MaterialManager *m_materialManager;
 
+      std::list<RenderNode*>& m_renderNodes;
+
       sg::GeoNode *m_node;
+
+      RenderNode *m_deleteRenderNode;
 
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;

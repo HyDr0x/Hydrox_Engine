@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 2.6) 
 
+set(CMAKE_PROJECT_NAME HydroxEngine)
+
 set(HYDROX_DIR ${CMAKE_SOURCE_DIR})
 
 set(HYDROX_UTIL_INCLUDE ${HYDROX_DIR}/HydroxUtilities/include)

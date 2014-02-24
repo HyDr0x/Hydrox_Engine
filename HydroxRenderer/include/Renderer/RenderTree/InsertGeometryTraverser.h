@@ -20,7 +20,7 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle);
+      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, util::ResourceHandle frustumShaderHandle);
       virtual ~InsertGeometryTraverser();
 
       void setNode(sg::GeoNode *node);
@@ -54,12 +54,10 @@ namespace he
 
     private:
 
-      ComputeShaderManager *m_computeShaderManager;
-      ModelManager *m_modelManager;
-	    MaterialManager *m_materialManager;
-	    RenderShaderManager *m_renderShaderManager;
+      util::SingletonManager *m_singletonManager;
+      util::ResourceHandle m_frustumShaderHandle;
 
-      util::ResourceHandle m_cullingShaderHandle;
+      std::list<RenderNode*>& m_renderNodes;
 
       TreeNode *m_parentNode;
 

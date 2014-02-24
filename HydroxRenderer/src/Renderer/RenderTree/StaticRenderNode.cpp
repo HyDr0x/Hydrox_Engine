@@ -33,10 +33,15 @@ namespace he
       return traverser->createNewNode(this);
     }
 
+    GPUBuffer& StaticRenderNode::getTransformationMatrixBuffer()
+    {
+      return m_matrixBuffer;
+    }
+
     void StaticRenderNode::resizeMatrixBuffer()
     {
-      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * m_instanceCount);
-      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_instanceCount, 0, GL_DYNAMIC_DRAW, nullptr);
+      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * m_instanceCounter);
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_instanceCounter, 0, GL_DYNAMIC_DRAW, nullptr);
     }
 
     void StaticRenderNode::fillMatrixBuffer(sg::GeoNode *node, unsigned int geometryIndex)
@@ -50,7 +55,7 @@ namespace he
 
     void StaticRenderNode::uploadMatrices()
     {
-      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * m_instanceCount, &m_matrixCache[0]);
+      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * m_instanceCounter, &m_matrixCache[0]);
     }
 	}
 }

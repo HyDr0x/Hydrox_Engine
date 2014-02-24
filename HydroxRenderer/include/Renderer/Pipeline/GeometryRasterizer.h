@@ -10,8 +10,6 @@
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 
-#include "Renderer/Pipeline/FrustumCullingGPU.h"
-
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include "Renderer/RenderTree/GroupNode.h"
@@ -39,12 +37,10 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      void resizeMeshBuffer();
-      void resizeMaterialBuffer();
-
-      FrustumCullingGPU m_frustumCulling;
+      void frustumCulling();
 
       std::list<RenderNode*> m_renderNodes;
+      util::ResourceHandle m_frustumCullingShaderHandle;
 
       GLuint m_meshVAO;
 
@@ -53,8 +49,6 @@ namespace he
       unsigned int m_maxBones;
 
       GroupNode *m_renderRootNode;
-
-      util::ResourceHandle m_cullingShaderHandle;
 
       util::SingletonManager *m_singletonManager;
     };

@@ -12,10 +12,8 @@ namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager)
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes) : m_renderNodes(renderNodes), m_node(nullptr), m_deleteRenderNode(nullptr)
     {
-      m_node = nullptr;
-
       m_modelManager = singletonManager->getService<ModelManager>();
       m_materialManager = singletonManager->getService<MaterialManager>();
     }
@@ -75,6 +73,34 @@ namespace he
 
     void RemoveGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
+      if(m_deleteRenderNode != nullptr)
+      {
+        TreeNode *currentRenderNode = treeNode->getFirstChild();
+        TreeNode *oldRenderNode = currentRenderNode;
+
+        while(currentRenderNode != nullptr)
+        {
+          if(currentRenderNode == m_deleteRenderNode)
+          {
+            if(oldRenderNode != currentRenderNode)
+            {
+              oldRenderNode->setNextSibling(currentRenderNode->getNextSibling());
+            }
+            else
+            {
+              treeNode->setFirstChild(currentRenderNode->getNextSibling());
+            }
+
+            delete m_deleteRenderNode;
+            m_deleteRenderNode = nullptr;
+
+            return;
+          }
+
+          oldRenderNode = currentRenderNode;
+          currentRenderNode = currentRenderNode->getNextSibling();
+        }
+      }
     }
 
     bool RemoveGeometryTraverser::preTraverse(ShaderNode* treeNode)
@@ -97,7 +123,11 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(StaticRenderNode* treeNode)
     {
-      treeNode->removeGeometry(m_node);
+      if(treeNode->removeGeometry(m_node))
+      {
+        m_renderNodes.remove(treeNode);
+        m_deleteRenderNode = treeNode;
+      }
 
       return true;
     }
@@ -108,7 +138,11 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(AnimatedRenderNode* treeNode)
     {
-      treeNode->removeGeometry(m_node);
+      if(treeNode->removeGeometry(m_node))
+      {
+        m_renderNodes.remove(treeNode);
+        m_deleteRenderNode = treeNode;
+      }
 
       return true;
     }

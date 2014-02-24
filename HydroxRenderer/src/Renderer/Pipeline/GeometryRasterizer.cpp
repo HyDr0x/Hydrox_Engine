@@ -42,10 +42,11 @@ namespace he
 
       m_singletonManager = singletonManager;
 
-      m_cullingShaderHandle = cullingShaderHandle;
+      m_frustumCullingShaderHandle = cullingShaderHandle;
 
       glGenVertexArrays(1, &m_meshVAO);
       glBindVertexArray(m_meshVAO);
+
       glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
       glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
@@ -62,11 +63,6 @@ namespace he
       glVertexAttribBinding(RenderShader::BONEINDICES, 0);
       glVertexAttribBinding(RenderShader::COLOR, 0);
 
-      glVertexAttribFormat(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, 0);//per instance data (index affected through base instance)
-      glVertexAttribBinding(RenderShader::SPECIAL0, 1);
-      glEnableVertexAttribArray(RenderShader::SPECIAL0);
-      glVertexBindingDivisor(1, 1);
-
       glBindVertexArray(0);
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
@@ -74,20 +70,22 @@ namespace he
 
     void GeometryRasterizer::addRenderComponent(sg::GeoNode *node)
     {
-      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_cullingShaderHandle);
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, m_frustumCullingShaderHandle);
       insertTraverser.setNode(node);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRasterizer::removeRenderComponent(sg::GeoNode *node)
     {
-      RemoveGeometryTraverser removeTraverser(m_singletonManager);
+      RemoveGeometryTraverser removeTraverser(m_singletonManager, m_renderNodes);
       removeTraverser.setNode(node);
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRasterizer::rasterizeGeometry()
-    {
+    {  
+      //frustumCulling();
+
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       glBindVertexArray(m_meshVAO);
@@ -105,6 +103,19 @@ namespace he
 
       eventManager->addNewSignal<void (*)(sg::GeoNode *node)>(util::EventManager::OnRemoveGeometryNode);
       eventManager->addSlotToSignal<GeometryRasterizer, void (*)(sg::GeoNode *node), void (GeometryRasterizer::*)(sg::GeoNode *node)>(this, &GeometryRasterizer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
+    }
+
+    void GeometryRasterizer::frustumCulling()
+    {
+      ComputeShader *frustumCullingShader = m_singletonManager->getService<ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
+      frustumCullingShader->useShader();
+
+      for(std::list<RenderNode*>::const_iterator nodeIterator = m_renderNodes.begin(); nodeIterator != m_renderNodes.end(); nodeIterator++)
+      {
+        (*nodeIterator)->frustumCulling();
+      }
+
+      frustumCullingShader->useNoShader();
     }
   }
 }
