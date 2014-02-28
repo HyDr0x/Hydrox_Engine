@@ -80,7 +80,7 @@ namespace he
         m_materialCount++;
       }
 
-      if(m_meshHandles[mesh].size() != 0)
+      if(m_meshHandles[node->getMeshHandle()].size() != 0)
       {
         m_instanceNumberChanged = true;
       }
@@ -94,7 +94,7 @@ namespace he
         m_indexSize += mesh->getIndexCount() * sizeof(GLuint);
       }
 
-      m_meshHandles[mesh].push_back(node);
+      m_meshHandles[node->getMeshHandle()].push_back(node);
       m_instanceCounter++;
 
       return true;
@@ -103,15 +103,15 @@ namespace he
     bool RenderNode::removeGeometry(sg::GeoNode *node)
     {
       Mesh *mesh = m_modelManager->getObject(node->getMeshHandle());
-      m_meshHandles[mesh].remove(node);
+      m_meshHandles[node->getMeshHandle()].remove(node);
 
       m_instanceNumberChanged = true;
 
-      if(m_meshHandles[mesh].size() == 0)
+      if(m_meshHandles[node->getMeshHandle()].size() == 0)
       {
         m_geometryChanged = true;
 
-        m_meshHandles.erase(mesh);
+        m_meshHandles.erase(node->getMeshHandle());
 
         m_vboSize -= mesh->getVBOSize();
         m_indexSize -= mesh->getIndexCount() * sizeof(GLuint);
@@ -133,7 +133,7 @@ namespace he
       }
 
       unsigned int geometryCounter = 0;
-      for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
+      for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
       {
         for(std::list<sg::GeoNode*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, geometryCounter++)
         {
@@ -209,22 +209,26 @@ namespace he
         std::vector<util::Vector<unsigned int, 4>> cullingCommandCache(m_meshHandles.size());
         std::vector<util::Vector<float, 4>> boundingBoxes(m_meshHandles.size() * 2);
 
+        Mesh *mesh;
+
         unsigned int commandCounter = 0;
         unsigned int vertexOffset = 0;
         unsigned int indexOffset = 0;
         unsigned int vertexCount = 0;
         unsigned int indexCount = 0;
         unsigned int instanceCounter = 0;
-        for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, commandCounter++)
+        for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, commandCounter++)
         {
-          m_meshVertexBuffer.setData(vertexOffset, meshIterator->first->getVBOSize(), &(meshIterator->first->getVBOBuffer()[0]));
-          vertexOffset += meshIterator->first->getVBOSize();
+          mesh = m_modelManager->getObject(meshIterator->first);
 
-          m_meshIndexBuffer.setData(indexOffset, meshIterator->first->getIndexCount() * sizeof(GLuint), &(meshIterator->first->getIndexBuffer()[0]));
-          indexOffset += meshIterator->first->getIndexCount() * sizeof(GLuint);
+          m_meshVertexBuffer.setData(vertexOffset, mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
+          vertexOffset += mesh->getVBOSize();
+
+          m_meshIndexBuffer.setData(indexOffset, mesh->getIndexCount() * sizeof(GLuint), &(mesh->getIndexBuffer()[0]));
+          indexOffset += mesh->getIndexCount() * sizeof(GLuint);
 
           DrawElementsIndirectCommand command;
-          command.count = meshIterator->first->getIndexCount();
+          command.count = mesh->getIndexCount();
           command.instanceCount = meshIterator->second.size();
           command.firstIndex = indexCount;
           command.baseVertex = vertexCount;
@@ -237,13 +241,13 @@ namespace he
           cullingCommandCache[commandCounter][2] = command.baseVertex;
           cullingCommandCache[commandCounter][3] = command.baseInstance;
 
-          indexCount += meshIterator->first->getIndexCount();
-          vertexCount += meshIterator->first->getVertexCount();
+          indexCount += mesh->getIndexCount();
+          vertexCount += mesh->getVertexCount();
           instanceCounter += meshIterator->second.size();
 
           //update bbox data
-          memcpy(&boundingBoxes[2 * commandCounter + 0][0], &meshIterator->first->getBBMin()[0], sizeof(util::Vector<float, 3>));
-          memcpy(&boundingBoxes[2 * commandCounter + 1][0], &meshIterator->first->getBBMax()[0], sizeof(util::Vector<float, 3>));
+          memcpy(&boundingBoxes[2 * commandCounter + 0][0], &mesh->getBBMin()[0], sizeof(util::Vector<float, 3>));
+          memcpy(&boundingBoxes[2 * commandCounter + 1][0], &mesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
         }
 
         m_bboxesBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_meshHandles.size() * 2, &boundingBoxes[0]);
@@ -252,7 +256,7 @@ namespace he
       else if(m_instanceNumberChanged)
       {
         unsigned int commandCounter = 0;
-        for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator commandIterator = m_meshHandles.begin(); commandIterator != m_meshHandles.end(); commandIterator++, commandCounter++)
+        for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator commandIterator = m_meshHandles.begin(); commandIterator != m_meshHandles.end(); commandIterator++, commandCounter++)
         {
           size_t size = commandIterator->second.size();
           m_commandBuffer.setData(commandCounter * sizeof(DrawElementsIndirectCommand) + sizeof(GLuint), sizeof(GLuint), &size);
@@ -266,7 +270,7 @@ namespace he
 
       unsigned int meshCounter = 0;
       unsigned int geometryCounter = 0;
-      for(std::map<Mesh*, std::list<sg::GeoNode*>>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshCounter++)
+      for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshCounter++)
       {
         for(std::list<sg::GeoNode*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, geometryCounter++)
         {

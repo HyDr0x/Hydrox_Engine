@@ -101,8 +101,17 @@ namespace he
       unsigned int m_vertexStride;
       unsigned int m_indexSize;
 
+      class Less
+      {
+      public:
+        bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
+        {
+          return o1.getID() < o2.getID();
+        }
+      };
+
       std::map<unsigned int, unsigned int> m_materialHandles;
-      std::map<Mesh*, std::list<sg::GeoNode*>> m_meshHandles;
+      std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less> m_meshHandles;
 
       bool m_geometryChanged;
       bool m_instanceNumberChanged;
