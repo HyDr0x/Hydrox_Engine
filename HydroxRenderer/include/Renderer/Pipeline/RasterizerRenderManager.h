@@ -47,6 +47,10 @@ namespace he
 
       void resizeRenderWindow(unsigned int width, unsigned int height);
 
+      void setBackfaceCulling(GLenum cullingMode);
+
+      void setWireframe(bool wireFrame);
+
       const size_t getMaxSpriteLayer() const;
 
       void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer, 

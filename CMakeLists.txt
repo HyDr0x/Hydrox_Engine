@@ -20,21 +20,16 @@ set(HYDROX_LOADER_INCLUDE ${HYDROX_DIR}/HydroxLoader/include)
 set(HYDROX_LOADER_LIB_DBG ${HYDROX_DIR}/HydroxLoader/lib/Debug/Hydrox_Loader)
 set(HYDROX_LOADER_LIB_REL ${HYDROX_DIR}/HydroxLoader/lib/Release/Hydrox_Loader)
 
-project(Hydrox_Utilities) 
 add_subdirectory(HydroxUtilities) 
 
-project(Hydrox_Renderer) 
 add_subdirectory(HydroxRenderer) 
 add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_SceneGraph)
 
-project(Hydrox_SceneGraph) 
 add_subdirectory(HydroxSceneGraph) 
 add_dependencies(Hydrox_SceneGraph Hydrox_Utilities)
 
-project(Hydrox_Loader) 
 add_subdirectory(HydroxLoader) 
 add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
 
-#project(Sandbox) 
-#add_subdirectory(Sandbox) 
-#add_dependencies(Sandbox Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
+add_subdirectory(Sandbox) 
+add_dependencies(Sandbox Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)

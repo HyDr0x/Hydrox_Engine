@@ -24,6 +24,23 @@ namespace he
       glViewport(0, 0, width, height);
     }
 
+    void RasterizerRenderManager::setBackfaceCulling(GLenum cullingMode)
+    {
+      glFrontFace(cullingMode);
+    }
+
+    void RasterizerRenderManager::setWireframe(bool wireFrame)
+    {
+      if(wireFrame)
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      }
+      else
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
+    }
+
     void RasterizerRenderManager::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer, 
       util::ResourceHandle billboardShaderHandle, 
       util::ResourceHandle spriteShaderHandle, 
