@@ -11,20 +11,24 @@ namespace he
     {
     public:
 
-      RenderShaderLoader(renderer::RenderShaderManager *renderShaderManager);
+      RenderShaderLoader(util::SingletonManager *singletonManager);
       ~RenderShaderLoader();
 
-      util::ResourceHandle loadShader(std::string path, std::string shaderName,
-                                std::string vertexShaderFilename, 
-			                          std::string fragmentShaderFilename, 
-			                          std::string geometryShaderFilename = std::string(), 
-			                          std::string tesselationCTRLShaderFilename = std::string(), 
-                                std::string tesselationEVALShaderFilename = std::string(),
-                                std::vector<std::string>& dynamicDefines = std::vector<std::string>());
+      void setUsedShaderPrograms(bool fragmentShaderProgram,
+                                 bool geometryShaderProgram,
+                                 bool tesselationControlShaderProgram,
+                                 bool tesselationEvalShaderProgram);
 
-      util::ResourceHandle getDefaultRenderShader();
+      util::ResourceHandle loadResource(std::string filename);
+
+      util::ResourceHandle getDefaultResource();
 
     private:
+
+      bool m_fragmentShaderProgram;
+      bool m_geometryShaderProgram;
+      bool m_tesselationControlShaderProgram;
+      bool m_tesselationEvalShaderProgram;
 
       renderer::RenderShaderManager *m_renderShaderManager;
     };

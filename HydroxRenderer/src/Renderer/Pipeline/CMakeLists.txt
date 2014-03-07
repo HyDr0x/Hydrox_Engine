@@ -1,11 +1,15 @@
 set(
 	SOURCE 
 	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ArrayDrawCommand.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingGPU.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRasterizer.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/RasterizingRenderManager.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndexedDrawCommand.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryRenderCommand.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryRenderCommand.cpp 
 	PARENT_SCOPE 
 )

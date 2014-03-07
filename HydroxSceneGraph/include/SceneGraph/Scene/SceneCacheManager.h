@@ -35,8 +35,8 @@ namespace he
 
       void setLODRanges(std::vector<float> lodRanges);
 
-      void addSubTree(TreeNode *rootNode, util::Vector<float, 3>& cameraPosition);
-      void removeSubTree(TreeNode *rootNode);
+      void addSubTree(TreeNode* rootNode, util::Vector<float, 3>& cameraPosition);
+      void removeSubTree(TreeNode* rootNode);
 
       void updateCaches(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
@@ -50,7 +50,7 @@ namespace he
 
     private:
 
-      SceneCacheManager(const SceneCacheManager& object) : m_eventManager(object.m_eventManager){}
+      //SceneCacheManager(const SceneCacheManager& object) : m_eventManager(object.m_eventManager){}
 
       void registerNodeCacheSlots();
 

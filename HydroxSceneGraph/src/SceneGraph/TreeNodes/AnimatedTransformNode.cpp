@@ -3,12 +3,14 @@
 #include <assert.h>
 
 #include "SceneGraph/Traverser/Traverser.h"
+#include "SceneGraph/Traverser/GetGlobalCoordinateTraverser.h"
+
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
 
 namespace he
 {
 	namespace sg
-	{
+	{
     AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
       GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
       : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTime(0.0f), m_pauseAnimation(false)
@@ -188,7 +190,7 @@ namespace he
     {
       AnimationTrack& currentTrack = m_animationTracks[m_currentTrack];
 
-      if(m_dirtyFlag & GroupNode::ANIM_DIRTY)//update animations only if they changed
+      if(m_dirtyFlag & GroupNode::ANIM_DIRTY && !m_pauseAnimation)//update animations only if they changed
       {
         interpolateKeyFrames(currentTrack);
       }
@@ -203,19 +205,43 @@ namespace he
       }
     }
 
-    util::Vector<float, 3> AnimatedTransformNode::getPosition()
+    util::Vector<float, 3> AnimatedTransformNode::getGlobalPosition()
     {
-      return m_animatedTranslation;
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale) * traverser.getGlobalScale());
     }
 
-    util::Quaternion<float> AnimatedTransformNode::getRotation()
+    util::Quaternion<float> AnimatedTransformNode::getGlobalRotation()
     {
-      return m_animatedRotation;
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalRotation() * m_animatedRotation * m_rotation;
     }
 
-    float AnimatedTransformNode::getScale()
+	  float AnimatedTransformNode::getGlobalScale()
     {
-      return m_animatedScale;
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalScale() * m_animatedScale * m_scale;
+    }
+
+    util::Vector<float, 3> AnimatedTransformNode::getLocalPosition()
+    {
+      return m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale);
+    }
+
+    util::Quaternion<float> AnimatedTransformNode::getLocalRotation()
+    {
+      return m_animatedRotation * m_rotation;
+    }
+
+    float AnimatedTransformNode::getLocalScale()
+    {
+      return m_animatedScale * m_scale;
     }
 
     void AnimatedTransformNode::interpolateKeyFrames(AnimationTrack& currentTrack)

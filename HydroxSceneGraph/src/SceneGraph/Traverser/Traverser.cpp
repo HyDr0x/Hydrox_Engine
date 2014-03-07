@@ -15,7 +15,7 @@ namespace he
     {
     }
 
-    void Traverser::doAscend(TreeNode* treeNode)
+    void Traverser::doAscend(TreeNode *treeNode)
     {
       GroupNode *parentNode = treeNode->getParent();
 
@@ -32,16 +32,13 @@ namespace he
       postAscendTraverse();
     }
 
-    void Traverser::doTraverse(TreeNode* treeNode)
+    void Traverser::doTraverse(TreeNode *treeNode)
     {
-      if(treeNode != nullptr)
+      if(treeNode->preTraverse(this))
       {
-        if(treeNode->preTraverse(this))
-        {
-          doTraverseDown(treeNode->getFirstChild());
-        }
-        treeNode->postTraverse(this);
+        doTraverseDown(treeNode->getFirstChild());
       }
+      treeNode->postTraverse(this);
     }
 
     void Traverser::doTraverseDown(TreeNode* treeNode)

@@ -1,0 +1,10 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.cpp 
+	PARENT_SCOPE 
+)

@@ -1,0 +1,58 @@
+#ifndef GEOMETRYRENDERER_H_
+#define GEOMETRYRENDERER_H_
+
+#include <list>
+
+#include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Signals/EventManager.h>
+
+#include <SceneGraph/TreeNodes/GeoNode.h>
+
+#include "Renderer/Resources/ResourceManager.hpp"
+
+#include "Renderer/TreeNodes/GroupNode.h"
+#include "Renderer/TreeNodes/RenderNode.h"
+
+namespace he
+{
+	namespace renderer
+	{
+    class GeometryRenderer
+    {
+    public:
+
+      GeometryRenderer();
+      ~GeometryRenderer();
+
+      void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
+
+      void rasterizeGeometry();
+
+      void addRenderComponent(sg::GeoNode *node);
+      void removeRenderComponent(sg::GeoNode *node);
+
+    private:
+
+      void registerRenderComponentSlots(util::EventManager *eventManager);
+
+      void frustumCulling();
+
+      std::list<RenderNode*> m_renderNodes;
+      util::ResourceHandle m_frustumCullingShaderHandle;
+
+      GLuint m_meshVAO;
+
+      unsigned int m_maxMaterials;
+      unsigned int m_maxGeometry;
+      unsigned int m_maxBones;
+
+      GroupNode *m_renderRootNode;
+
+      util::SingletonManager *m_singletonManager;
+    };
+	}
+}
+
+#endif

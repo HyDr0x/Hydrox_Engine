@@ -12,9 +12,11 @@ namespace he
 {
   namespace loader
   {
-    MaterialLoader::MaterialLoader(renderer::MaterialManager *materialManager, renderer::TextureManager *textureManager, renderer::RenderShaderManager *renderShaderManager) : m_materialManager(materialManager),
-                                                                                                                                                                               m_textureManager(textureManager),
-                                                                                                                                                                               m_renderShaderManager(renderShaderManager)
+    MaterialLoader::MaterialLoader(util::SingletonManager *singletonManager, unsigned int texNumber) : ResourceLoader(singletonManager),
+                                                                                                       m_materialManager(singletonManager->getService<renderer::MaterialManager>()),
+                                                                                                       m_textureManager(singletonManager->getService<renderer::TextureManager>()),
+                                                                                                       m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>()),
+                                                                                                       m_texNumber(texNumber)
     {
     }
 
@@ -22,20 +24,20 @@ namespace he
     {
     }
 
-    util::ResourceHandle MaterialLoader::loadMaterial(std::string materialPath, std::string texturePath, std::string shaderPath, std::string materialFilename)
+    util::ResourceHandle MaterialLoader::loadResource(std::string filename)
     {
-      if(materialFilename == std::string())
+      if(filename == std::string())
       {
         return util::ResourceHandle(~0, nullptr);
       }
 
       util::ResourceHandle materialHandle;
 
-      std::string vertexFileName, fragmentFilename, geometryFilename, tesselationControlFilename, tesselationEvaluationFilename;
-      std::string diffuseFilename[m_TEXNUMBER], normalFilename[m_TEXNUMBER], specularFilename[m_TEXNUMBER], displacementFilename[m_TEXNUMBER];
+      std::string shaderFilename;
+      std::vector<bool> shaderPrograms(4, false);
+      std::vector<std::string> diffuseFilename(m_texNumber), normalFilename(m_texNumber), specularFilename(m_texNumber), displacementFilename(m_texNumber);
 
-      materialFilename = materialPath + materialFilename;
-      std::ifstream file(materialFilename);
+      std::ifstream file(filename);
 	    std::string line;
 
 	    if(file.is_open())
@@ -81,7 +83,7 @@ namespace he
           /////////////////////////TEXTURES/////////////////////////
           if(line.find("Diffuse Color") != std::string::npos)
           {
-            for(unsigned int i = 0; i < m_TEXNUMBER; i++)
+            for(unsigned int i = 0; i < m_texNumber; i++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -93,7 +95,7 @@ namespace he
 
           if(line.find("Normal Map") != std::string::npos)
           {
-            for(unsigned int i = 0; i < m_TEXNUMBER; i++)
+            for(unsigned int i = 0; i < m_texNumber; i++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -105,7 +107,7 @@ namespace he
 
           if(line.find("Specular Map") != std::string::npos)
           {
-            for(unsigned int i = 0; i < m_TEXNUMBER; i++)
+            for(unsigned int i = 0; i < m_texNumber; i++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -117,7 +119,7 @@ namespace he
 
           if(line.find("Displacement Map") != std::string::npos)
           {
-            for(unsigned int i = 0; i < m_TEXNUMBER; i++)
+            for(unsigned int i = 0; i < m_texNumber; i++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -128,87 +130,85 @@ namespace he
           }
 
           /////////////////////////SHADER/////////////////////////
-          if(line.find("Vertex Shader") != std::string::npos)
+          if(line.find("Shader Name") != std::string::npos)
           {
             std::getline(file, line);
-            if(line != std::string("NULL"))
-            {
-              vertexFileName = line;
-            }
+            shaderFilename = line;
           }
 
           if(line.find("Fragment Shader") != std::string::npos)
           {
             std::getline(file, line);
-            if(line != std::string("NULL"))
+            if(line == std::string("TRUE"))
             {
-              fragmentFilename = line;
+              shaderPrograms[0] = true;
             }
           }
 
           if(line.find("Geometry Shader") != std::string::npos)
           {
             std::getline(file, line);
-            if(line != std::string("NULL"))
+            if(line == std::string("TRUE"))
             {
-              geometryFilename = line;
+              shaderPrograms[1] = true;
             }
           }
 
           if(line.find("Tesselation Control Shader") != std::string::npos)
           {
             std::getline(file, line);
-            if(line != std::string("NULL"))
+            if(line == std::string("TRUE"))
             {
-              tesselationControlFilename = line;
+              shaderPrograms[2] = true;
             }
           }
 
           if(line.find("Tesselation Evaluation Shader") != std::string::npos)
           {
             std::getline(file, line);
-            if(line != std::string("NULL"))
+            if(line == std::string("TRUE"))
             {
-              tesselationEvaluationFilename = line;
+              shaderPrograms[3] = true;
             }
           }
 		    }
 
-        RenderShaderLoader renderShaderLoader(m_renderShaderManager);
-        util::ResourceHandle shaderHandle = renderShaderLoader.loadShader(shaderPath, materialFilename + std::string("_Shader"), vertexFileName, fragmentFilename, geometryFilename, tesselationControlFilename, tesselationEvaluationFilename);
+        RenderShaderLoader renderShaderLoader(m_singletonManager);
+        renderShaderLoader.setUsedShaderPrograms(shaderPrograms[0], shaderPrograms[1], shaderPrograms[2], shaderPrograms[3]);
+        util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(shaderFilename);
 
-        ILDevilLoader textureLoader(m_textureManager);
+        ILDevilLoader textureLoader(m_singletonManager);
 
         std::vector<std::vector<util::ResourceHandle>> textureHandles(4);
-        for(unsigned int j = 0; j < m_TEXNUMBER; j++)
+        for(unsigned int j = 0; j < m_texNumber; j++)
         {
           if(diffuseFilename[j] != std::string())
           {
-            textureHandles[0].push_back(textureLoader.load(texturePath, diffuseFilename[j], GL_TEXTURE_2D));
+            textureHandles[0].push_back(textureLoader.loadResource(diffuseFilename[j]));
           }
         }
 
-        for(unsigned int j = 0; j < m_TEXNUMBER; j++)
+        for(unsigned int j = 0; j < m_texNumber; j++)
         {
           if(normalFilename[j] != std::string())
           {
-            textureHandles[1].push_back(textureLoader.load(texturePath, normalFilename[j], GL_TEXTURE_2D));
+            textureHandles[1].push_back(textureLoader.loadResource(normalFilename[j]));
           }
         }
 
-        for(unsigned int j = 0; j < m_TEXNUMBER; j++)
+        for(unsigned int j = 0; j < m_texNumber; j++)
         {
           if(specularFilename[j] != std::string())
           {
-            textureHandles[2].push_back(textureLoader.load(texturePath, specularFilename[j], GL_TEXTURE_2D));
+            textureHandles[2].push_back(textureLoader.loadResource(specularFilename[j]));
           }
         }
 
-        for(unsigned int j = 0; j < m_TEXNUMBER; j++)
+        for(unsigned int j = 0; j < m_texNumber; j++)
         {
           if(displacementFilename[j] != std::string())
           {
-            textureHandles[3].push_back(textureLoader.load(texturePath, displacementFilename[j], GL_TEXTURE_2D));
+            textureHandles[3].push_back(textureLoader.loadResource(displacementFilename[j]));
           }
         }
 
@@ -218,9 +218,9 @@ namespace he
 	    {
 		    file.close();
 
-		    std::cout << "Error: couldn't open material source file " << materialFilename << "." << std::endl;
+		    std::cout << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
 
-        return getDefaultMaterial();
+        return getDefaultResource();
 	    }
 
 	    file.close();
@@ -228,10 +228,10 @@ namespace he
       return materialHandle;
     }
 
-    util::ResourceHandle MaterialLoader::getDefaultMaterial()
+    util::ResourceHandle MaterialLoader::getDefaultResource()
     {
-      RenderShaderLoader renderShaderLoader(m_renderShaderManager);
-      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(4), renderShaderLoader.getDefaultRenderShader()));
+      RenderShaderLoader renderShaderLoader(m_singletonManager);
+      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(4), renderShaderLoader.getDefaultResource()));
     }
   }
 }

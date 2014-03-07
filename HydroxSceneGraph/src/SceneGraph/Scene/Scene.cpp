@@ -22,7 +22,7 @@ namespace he
 
     Scene::Scene(Scene& object)
     {
-      addSubTree(&object, m_rootNode, "");
+      addSubTree(object, m_rootNode, "");
     }
 
     Scene::~Scene()
@@ -52,8 +52,6 @@ namespace he
 
     GroupNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
     {
-      assert(destinationNode != nullptr && sourceNode != nullptr);
-
       GroupNode *oldParent = destinationNode->getParent();
       GroupNode *newParent = sourceNode->clone();
 
@@ -89,10 +87,8 @@ namespace he
       return newParent;
     }
 
-    TreeNode* Scene::addChildNode(GroupNode* destinationNode, TreeNode* sourceNode)
+    TreeNode* Scene::addChildNode(GroupNode *destinationNode, TreeNode *sourceNode)
     {
-      assert(destinationNode != nullptr && sourceNode != nullptr);
-
       TreeNode* oldFirstChild = destinationNode->getFirstChild();
       TreeNode* newFirstChild = sourceNode->clone();
 
@@ -105,8 +101,6 @@ namespace he
 
     void Scene::removeNode(TreeNode *node)
     {
-      assert(node != nullptr);
-
       TreeNode *sibling = node->getNextSibling();
       GroupNode *parent = node->getParent();
       TreeNode *firstChild = node->getFirstChild();
@@ -165,18 +159,15 @@ namespace he
       }
 
       delete node;
-      node = nullptr;
     }
 
-    GroupNode* Scene::addSubTree(Scene* subTree, GroupNode* parentNode, std::string namePrefix)
+    GroupNode* Scene::addSubTree(Scene& subTree, GroupNode* parentNode, std::string namePrefix)
     {
-      assert(subTree != nullptr && parentNode != nullptr);
-
       CopyTraverser traverser(namePrefix);
-      traverser.doTraverse(subTree->getRootNode());
+      traverser.doTraverse(subTree.getRootNode());
       GroupNode *newNode = traverser.getCopiedRootNode();
 
-      if(parentNode != nullptr && m_rootNode != nullptr)
+      if(m_rootNode != nullptr)
       {
         TreeNode *oldFirstChild = parentNode->getFirstChild();
 
@@ -192,10 +183,8 @@ namespace he
       return newNode;
     }
 
-    void Scene::removeSubTree(TreeNode* rootNode)
+    void Scene::removeSubTree(TreeNode *rootNode)
     {
-      assert(rootNode != nullptr);
-
       GroupNode* parentNode = rootNode->getParent();
 
       if(parentNode != nullptr)

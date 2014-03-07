@@ -61,9 +61,9 @@ namespace he
     {
       if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
       {
-        m_translateStack.push(treeNode->getPosition());
-        m_scaleStack.push(treeNode->getScale());
-        m_rotationStack.push(treeNode->getRotation());
+        m_translateStack.push(treeNode->getLocalPosition());
+        m_scaleStack.push(treeNode->getLocalScale());
+        m_rotationStack.push(treeNode->getLocalRotation());
 
         return true;
       }
@@ -114,9 +114,9 @@ namespace he
     {
       if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
       {
-        m_translateStack.push(treeNode->getPosition());
-        m_scaleStack.push(treeNode->getScale());
-        m_rotationStack.push(treeNode->getRotation());
+        m_translateStack.push(treeNode->getLocalPosition());
+        m_scaleStack.push(treeNode->getLocalScale());
+        m_rotationStack.push(treeNode->getLocalRotation());
 
         return true;
       }

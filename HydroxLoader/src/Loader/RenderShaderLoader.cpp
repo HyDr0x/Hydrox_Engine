@@ -9,53 +9,60 @@ namespace he
 {
   namespace loader
   {
-    RenderShaderLoader::RenderShaderLoader(renderer::RenderShaderManager *renderShaderManager) : m_renderShaderManager(renderShaderManager)
+    RenderShaderLoader::RenderShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_renderShaderManager(m_singletonManager->getService<renderer::RenderShaderManager>())
     {
+      m_fragmentShaderProgram = false;
+      m_geometryShaderProgram = false;
+      m_tesselationControlShaderProgram = false;
+      m_tesselationEvalShaderProgram = false;
     }
 
     RenderShaderLoader::~RenderShaderLoader()
     {
     }
 
-    util::ResourceHandle RenderShaderLoader::loadShader(std::string path, std::string shaderName,
-                                                  std::string vertexShaderFilename, 
-			                                            std::string fragmentShaderFilename, 
-			                                            std::string geometryShaderFilename, 
-			                                            std::string tesselationCTRLShaderFilename, 
-                                                  std::string tesselationEVALShaderFilename,
-                                                  std::vector<std::string>& dynamicDefines)
+    void RenderShaderLoader::setUsedShaderPrograms(bool fragmentShaderProgram,
+                                                   bool geometryShaderProgram,
+                                                   bool tesselationControlShaderProgram,
+                                                   bool tesselationEvalShaderProgram)
     {
-      std::string vertexShaderSource = loadShaderSource(vertexShaderFilename, path, dynamicDefines);
-      std::string fragmentShaderSource = loadShaderSource(fragmentShaderFilename, path, dynamicDefines);
-      std::string geometryShaderSource = loadShaderSource(geometryShaderFilename, path, dynamicDefines);
-      std::string tesselationCTRLShaderSource = loadShaderSource(tesselationCTRLShaderFilename, path, dynamicDefines);
-      std::string tesselationEVALShaderSource = loadShaderSource(tesselationEVALShaderFilename, path, dynamicDefines);
+      m_fragmentShaderProgram = fragmentShaderProgram;
+      m_geometryShaderProgram = geometryShaderProgram;
+      m_tesselationControlShaderProgram = tesselationControlShaderProgram;
+      m_tesselationEvalShaderProgram = tesselationEvalShaderProgram;
+    }
 
-      bool noRenderShader = (
-                              vertexShaderSource == std::string() || 
-                              (fragmentShaderSource != std::string() && fragmentShaderSource == std::string()) || 
-                              (geometryShaderFilename != std::string() && geometryShaderSource == std::string()) ||
-                              (tesselationCTRLShaderFilename != std::string() && tesselationCTRLShaderSource == std::string()) ||
-                              (tesselationEVALShaderFilename != std::string() && tesselationEVALShaderFilename == std::string())
-                            );
+    util::ResourceHandle RenderShaderLoader::loadResource(std::string filename)
+    {
+      std::string vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource;
+
+      vertexShaderSource = loadShaderSource(filename + ".vert");
+      if(m_fragmentShaderProgram) fragmentShaderSource = loadShaderSource(filename + ".frag");
+      if(m_geometryShaderProgram) geometryShaderSource = loadShaderSource(filename + ".geom");
+      if(m_tesselationControlShaderProgram) tesselationCTRLShaderSource = loadShaderSource(filename + ".control");
+      if(m_tesselationEvalShaderProgram) tesselationEVALShaderSource = loadShaderSource(filename + ".eval");
 
       util::ResourceHandle shaderHandle;
 
-      if(noRenderShader)
+      if(vertexShaderSource == std::string() || 
+        (m_fragmentShaderProgram && fragmentShaderSource == std::string()) || 
+        (m_geometryShaderProgram && geometryShaderSource == std::string()) || 
+        (m_tesselationControlShaderProgram && tesselationCTRLShaderSource == std::string()) || 
+        (m_tesselationEvalShaderProgram && tesselationEVALShaderSource == std::string()))
       {
-        std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
+        std::cout << "ERROR, couldn't open file: " << filename << std::endl;
 
-        shaderHandle = getDefaultRenderShader();
+        shaderHandle = getDefaultResource();
       }
       else
       {
-        shaderHandle = m_renderShaderManager->addObject(renderer::RenderShader(shaderName, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
+        shaderHandle = m_renderShaderManager->addObject(renderer::RenderShader(filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
       }
 
       return shaderHandle;
     }
 
-    util::ResourceHandle RenderShaderLoader::getDefaultRenderShader()
+    util::ResourceHandle RenderShaderLoader::getDefaultResource()
     {
       std::string vertexSource = "#version 440 core\n\
                                   #extension ARB_shader_draw_parameters : enable\n\

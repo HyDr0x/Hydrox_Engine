@@ -9,7 +9,7 @@ namespace he
 {
   namespace loader
   {
-    ShaderLoader::ShaderLoader()
+    ShaderLoader::ShaderLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager)
     {
     }
 
@@ -17,16 +17,19 @@ namespace he
     {
     }
 
-    std::string ShaderLoader::loadShaderSource(std::string shaderFilename, std::string shaderPath, std::vector<std::string>& dynamicDefines)
+    void ShaderLoader::setDynamicDefines(std::vector<std::string>& dynamicDefines)
     {
-      if(shaderFilename == std::string())
+      m_dynamicDefines = dynamicDefines;
+    }
+
+    std::string ShaderLoader::loadShaderSource(std::string filename)
+    {
+      if(filename == std::string())
       {
         return std::string();
       }
 
-      shaderFilename = shaderPath + shaderFilename;
-
-      std::ifstream file(shaderFilename);
+      std::ifstream file(filename);
       std::string shaderSource;
 	    std::string line;
 
@@ -37,14 +40,14 @@ namespace he
 			    std::getline(file, line);
 			    line += '\n';
 
-          for(int i = 0; i < dynamicDefines.size(); i++)
+          for(int i = 0; i < m_dynamicDefines.size(); i++)
           {
-            size_t pos = line.find(dynamicDefines[i]);
+            size_t pos = line.find(m_dynamicDefines[i]);
             if(pos != std::string::npos)
             {
-              size_t defineOffset = dynamicDefines[i].find(" ");
-              line.insert(pos + defineOffset, dynamicDefines[i], defineOffset, std::string::npos);
-              dynamicDefines.erase(dynamicDefines.begin() + i);
+              size_t defineOffset = m_dynamicDefines[i].find(" ");
+              line.insert(pos + defineOffset, m_dynamicDefines[i], defineOffset, std::string::npos);
+              m_dynamicDefines.erase(m_dynamicDefines.begin() + i);
             }
           }
 
@@ -55,7 +58,7 @@ namespace he
 	    {
 		    file.close();
 
-		    std::cout << "Error: couldn't open shader source file " << shaderFilename << "." << std::endl;
+		    std::cout << "Error: couldn't open shader source file " << filename << "." << std::endl;
 
         return std::string();
 	    }

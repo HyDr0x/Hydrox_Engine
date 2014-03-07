@@ -44,9 +44,9 @@ namespace he
 
     protected:
 
-      bool findNode(TreeNode* treeNode);
+      bool findNode(TreeNode *treeNode);
 
-      TreeNode* m_discoveredNode;
+      TreeNode *m_discoveredNode;
       std::string m_nodeName;
     };
 	}

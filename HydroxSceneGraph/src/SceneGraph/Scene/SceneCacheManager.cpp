@@ -40,7 +40,7 @@ namespace he
       m_lodRanges = lodRanges;
     }
 
-    void SceneCacheManager::addSubTree(TreeNode *rootNode, util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::addSubTree(TreeNode* rootNode, util::Vector<float, 3>& cameraPosition)
     {
       InsertObserverTraverser insertObserverTraverser(this);
       insertObserverTraverser.doTraverse(rootNode);//insert this scene as an observer to every Transform node
@@ -49,7 +49,7 @@ namespace he
       addRenderNodesTraverser.doTraverse(rootNode);
     }
 
-    void SceneCacheManager::removeSubTree(TreeNode *rootNode)
+    void SceneCacheManager::removeSubTree(TreeNode* rootNode)
     {
       RemoveNodesTraverser removeRenderNodesTraverser(m_eventManager);
       removeRenderNodesTraverser.doTraverse(rootNode);
@@ -141,17 +141,14 @@ namespace he
 
     void SceneCacheManager::updateAnimatedTransformNodes()
     {
-      TransformNode *node = nullptr;
       TransformTraverser transformTraverser;
 
       for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
-      {
-        node = *tit;
-   
-        if(node->getDirtyFlag() & GroupNode::TRF_DIRTY || node->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
+      { 
+        if((*tit)->getDirtyFlag() & GroupNode::TRF_DIRTY || (*tit)->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
         {
-          transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
-          transformTraverser.doTraverse(node);
+          transformTraverser.doAscend(*tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+          transformTraverser.doTraverse(*tit);
           transformTraverser.clearStacks();
         }
       }
@@ -159,17 +156,14 @@ namespace he
 
     void SceneCacheManager::updateTransformNodes()
     {
-      TransformNode *node = nullptr;
       TransformTraverser transformTraverser;
 
       for(std::list<TransformNode*>::iterator tit = m_dirtyTransforms.begin(); tit != m_dirtyTransforms.end(); tit++)
-      {
-        node = *tit;
-   
-        if(node->getDirtyFlag() & GroupNode::TRF_DIRTY)//traverse it only if its not been traversed before
+      { 
+        if((*tit)->getDirtyFlag() & GroupNode::TRF_DIRTY)//traverse it only if its not been traversed before
         {
-          transformTraverser.doAscend(node);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
-          transformTraverser.doTraverse(node);
+          transformTraverser.doAscend(*tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+          transformTraverser.doTraverse(*tit);
           transformTraverser.clearStacks();
         }
       }

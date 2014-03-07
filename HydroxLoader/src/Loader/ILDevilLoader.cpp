@@ -6,13 +6,14 @@ namespace he
 {
   namespace loader
   {
-    ILDevilLoader::ILDevilLoader(renderer::TextureManager *textureManager) : m_textureManager(textureManager)
+    ILDevilLoader::ILDevilLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager), m_textureManager(m_singletonManager->getService<renderer::TextureManager>()), m_target(GL_TEXTURE_2D)
     {
     }
 
-    ILDevilLoader::ILDevilLoader(const ILDevilLoader& o )
+    ILDevilLoader::ILDevilLoader(const ILDevilLoader& o ) : ResourceLoader(o)
     {
       m_textureManager = o.m_textureManager;
+      m_target = o.m_target;
     }
 
     ILDevilLoader& ILDevilLoader::operator=(const ILDevilLoader& o)
@@ -26,7 +27,12 @@ namespace he
     {
     }
 
-    util::ResourceHandle ILDevilLoader::load(std::string path, std::string filename, GLenum target)
+    void ILDevilLoader::setTarget(GLenum target)
+    {
+      m_target = target;
+    }
+
+    util::ResourceHandle ILDevilLoader::loadResource(std::string filename)
     {
       util::ResourceHandle tmpTextureID;
       GLsizei width, height;
@@ -38,15 +44,13 @@ namespace he
 	    ilGenImages(1, &tex);
 	    ilBindImage(tex);
       {
-        std::string texturePath = path;
-        texturePath += filename;
-		    ILboolean success = ilLoadImage(texturePath.c_str());
+		    ILboolean success = ilLoadImage(filename.c_str());
 
 		    if(!success)
         {
-          std::cout << "ERROR, couldn't open file: " << texturePath << std::endl;
+          std::cout << "ERROR, couldn't open file: " << filename << std::endl;
 
-          return getDefaultTexture();
+          return getDefaultResource();
         }
         else
         {
@@ -62,7 +66,7 @@ namespace he
           int bytesPerPixel = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
           bytesPerPixel = ilGetInteger(IL_FORMAT_MODE);
         
-          tmpTextureID = m_textureManager->addObject(renderer::Texture(width, height, target, type, internalFormat, format, ilGetData()));
+          tmpTextureID = m_textureManager->addObject(renderer::Texture(width, height, m_target, type, internalFormat, format, ilGetData()));
         }
       }
       ilBindImage(0);
@@ -71,7 +75,7 @@ namespace he
       return tmpTextureID;
     }
 
-    util::ResourceHandle ILDevilLoader::getDefaultTexture()
+    util::ResourceHandle ILDevilLoader::getDefaultResource()
     {
       util::Vector<float, 3> textureData = util::Vector<float, 3>(0.0f, 1.0f, 0.0f);
       return m_textureManager->addObject(renderer::Texture(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));
