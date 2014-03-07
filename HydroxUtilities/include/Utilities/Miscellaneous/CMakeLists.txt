@@ -1,8 +1,6 @@
 set(
 	HEADER 
 	${HEADER}
-	${CMAKE_CURRENT_SOURCE_DIR}/Buffer.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/Identificator.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Singleton.hpp 

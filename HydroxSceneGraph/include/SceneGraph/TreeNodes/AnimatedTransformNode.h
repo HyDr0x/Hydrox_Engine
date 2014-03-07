@@ -69,9 +69,13 @@ namespace he
 
       void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
 
-      util::Vector<float, 3> getPosition();
-	    util::Quaternion<float> getRotation();
-	    float getScale();
+      util::Vector<float, 3> getGlobalPosition();
+      util::Quaternion<float> getGlobalRotation();
+	    float getGlobalScale();
+
+      util::Vector<float, 3> getLocalPosition();
+	    util::Quaternion<float> getLocalRotation();
+	    float getLocalScale();
 
     private:
 

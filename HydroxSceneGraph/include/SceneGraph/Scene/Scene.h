@@ -32,7 +32,7 @@ namespace he
       virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
       virtual void removeNode(TreeNode *node);
 
-      virtual GroupNode* addSubTree(Scene* subTree, GroupNode *parentNode, std::string namePrefix);
+      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, std::string namePrefix);
       virtual void removeSubTree(TreeNode *rootNode);
 
       template<class CLASS> CLASS* getNode(const std::string& nodeName)
@@ -40,10 +40,10 @@ namespace he
         return dynamic_cast<CLASS*>(searchNode(nodeName));
       }
 
-      static void setAnimatedSceneTime(AnimatedTransformNode *node, float animationTime);
-      static void addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime);
-      static void pauseAnimatedScene(AnimatedTransformNode *node, bool pauseAnimation);
-      static void stopAnimatedScene(AnimatedTransformNode *node);
+      static void setAnimatedSceneTime(AnimatedTransformNode* node, float animationTime);
+      static void addAnimatedSceneTime(AnimatedTransformNode* node, float animationTime);
+      static void pauseAnimatedScene(AnimatedTransformNode* node, bool pauseAnimation);
+      static void stopAnimatedScene(AnimatedTransformNode* node);
 
     protected:
 

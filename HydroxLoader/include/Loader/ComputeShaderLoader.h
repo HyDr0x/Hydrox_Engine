@@ -11,12 +11,12 @@ namespace he
     {
     public:
 
-      ComputeShaderLoader(renderer::ComputeShaderManager *computeShaderManager);
+      ComputeShaderLoader(util::SingletonManager *singletonManager);
       ~ComputeShaderLoader();
 
-      util::ResourceHandle loadShader(std::string path, std::string shaderName, std::string computeShaderFilename, std::vector<std::string>& dynamicDefines = std::vector<std::string>());
+      util::ResourceHandle loadResource(std::string filename);
 
-      util::ResourceHandle getDefaultComputeShader();
+      util::ResourceHandle getDefaultResource();
 
     private:
 

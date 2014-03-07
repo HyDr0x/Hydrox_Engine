@@ -76,7 +76,7 @@ namespace he
       m_id = ~0;
     }
 
-    unsigned int ResourceHandle::getID()
+    unsigned int ResourceHandle::getID() const
     {
       return m_id;
     }

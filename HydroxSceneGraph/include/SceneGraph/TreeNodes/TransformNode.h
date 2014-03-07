@@ -35,32 +35,43 @@ namespace he
 
       virtual void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
 
-      virtual util::Vector<float, 3> getPosition();
-	    virtual util::Quaternion<float> getRotation();
-	    virtual float getScale();
+      virtual util::Vector<float, 3> getGlobalPosition();
+      virtual util::Quaternion<float> getGlobalRotation();
+	    virtual float getGlobalScale();
 
-      void setTranslation(float x, float y, float z);
-	    void setTranslation(util::Vector<float, 3> v);
+      virtual util::Vector<float, 3> getLocalPosition();
+	    virtual util::Quaternion<float> getLocalRotation();
+	    virtual float getLocalScale();
 
-	    void addTranslation(float x, float y, float z);
-	    void addTranslation(util::Vector<float, 3> v);
+      void setGlobalTranslation(float x, float y, float z);
+      void setGlobalTranslation(util::Vector<float, 3> v);
 
-      void setRotation(util::Quaternion<float> q);
-      void addRotation(util::Quaternion<float> q);
+      void setGlobalRotation(util::Quaternion<float> q);
 
-	    void setRotationX(float angle);
-	    void addRotationX(float angle);
-	    void setRotationY(float angle);
-	    void addRotationY(float angle);
-	    void setRotationZ(float angle);
-	    void addRotationZ(float angle);
-	    void setRotationXYZ(util::Vector<float, 3> angle);
-	    void addRotationXYZ(util::Vector<float, 3> angle);
-      void setRotationAxis(float angle, util::Vector<float, 3> axis);
-      void addRotationAxis(float angle, util::Vector<float, 3> axis);
+      void setGlobalScale(float s);
 
-	    void setScale(float s);
-	    void addScale(float s);
+      void setLocalTranslation(float x, float y, float z);
+	    void setLocalTranslation(util::Vector<float, 3> v);
+
+	    void addLocalTranslation(float x, float y, float z);
+	    void addLocalTranslation(util::Vector<float, 3> v);
+
+      void setLocalRotation(util::Quaternion<float> q);
+      void addLocalRotation(util::Quaternion<float> q);
+
+	    void setLocalRotationX(float angle);
+	    void addLocalRotationX(float angle);
+	    void setLocalRotationY(float angle);
+	    void addLocalRotationY(float angle);
+	    void setLocalRotationZ(float angle);
+	    void addLocalRotationZ(float angle);
+	    void setLocalRotationXYZ(util::Vector<float, 3> angle);
+	    void addLocalRotationXYZ(util::Vector<float, 3> angle);
+      void setLocalRotationAxis(float angle, util::Vector<float, 3> axis);
+      void addLocalRotationAxis(float angle, util::Vector<float, 3> axis);
+
+	    void setLocalScale(float s);
+	    void addLocalScale(float s);
 
     protected:
 

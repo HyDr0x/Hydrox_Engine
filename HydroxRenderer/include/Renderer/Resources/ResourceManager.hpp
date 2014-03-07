@@ -31,9 +31,17 @@ namespace he
 
 	    ~ResourceManager()
       {
+        std::list<std::vector<unsigned int>>::iterator referenceIterator = m_referenceCounterList.begin();
+        std::vector<unsigned int>& currentBlockReferences = *referenceIterator;
         for(unsigned int i = 0; i < m_objectsCache.size(); i++)
         {
-          if(m_referenceCounter[i] > 0)
+          if(i % m_BLOCKSIZE == 0)
+          {
+            currentBlockReferences = *referenceIterator;
+            referenceIterator++;
+          }
+
+          if(currentBlockReferences[i % m_BLOCKSIZE] > 0)
           {
             std::cout << "WARNING, Resource not being cleaned correctly!" << std::endl;
           }
@@ -63,7 +71,7 @@ namespace he
             unsigned int oldSize = m_objectsCache.size();
             unsigned int size = static_cast<unsigned int>(m_objectsCache.size() + m_BLOCKSIZE);
             m_objectsCache.resize(size);
-            m_referenceCounter.resize(size, 0);
+            m_referenceCounterList.push_back(std::vector<unsigned int>(size, 0));
             for(unsigned int i = oldSize; i < size; i++)
             {
               m_list.push_back(i);
@@ -73,7 +81,15 @@ namespace he
           unsigned int id = *m_list.begin();
           m_list.pop_front();
 
-          util::ResourceHandle handle(id, &m_referenceCounter[id]);
+          unsigned int currentReferenceBlock = id / m_BLOCKSIZE;
+          std::list<std::vector<unsigned int>>::iterator referenceIterator = m_referenceCounterList.begin();
+          for(unsigned int i = 0; i < currentReferenceBlock; i++)
+          {
+            referenceIterator++;
+          }
+
+          std::vector<unsigned int>& referenceCounter = *referenceIterator;
+          util::ResourceHandle handle(id, &referenceCounter[id % m_BLOCKSIZE]);
           handle.add(this);
 
           m_objectsCache[handle.getID()] = object;
@@ -84,7 +100,17 @@ namespace he
         else
         {
           unsigned int id = m_objectHash[hash];
-          util::ResourceHandle handle(id, &m_referenceCounter[id]);
+
+          unsigned int currentReferenceBlock = id / m_BLOCKSIZE;
+          std::list<std::vector<unsigned int>>::iterator referenceIterator = m_referenceCounterList.begin();
+          for(unsigned int i = 0; i < currentReferenceBlock; i++)
+          {
+            referenceIterator++;
+          }
+
+          std::vector<unsigned int>& referenceCounter = *referenceIterator;
+
+          util::ResourceHandle handle(id, &referenceCounter[id % m_BLOCKSIZE]);
           handle.add(this);
 
           return handle;
@@ -109,7 +135,7 @@ namespace he
 	    std::list<unsigned int> m_list;
 
 	    std::vector<CLASS> m_objectsCache;
-      std::vector<unsigned int> m_referenceCounter;
+      std::list<std::vector<unsigned int>> m_referenceCounterList;
       std::map<uint64_t, unsigned int> m_objectHash;
     };
 

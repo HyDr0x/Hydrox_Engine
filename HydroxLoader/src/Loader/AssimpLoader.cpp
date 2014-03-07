@@ -23,7 +23,7 @@ namespace he
 {
   namespace loader
   {
-    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_animationTimeUnit(Seconds)
+    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_texNumber(4), m_singletonManager(singletonManager), m_animationTimeUnit(Seconds)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<renderer::ModelManager>();
@@ -31,12 +31,12 @@ namespace he
       m_textureManager = singletonManager->getService<renderer::TextureManager>();
       m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
 
-      MaterialLoader materialLoader(m_materialManager, m_textureManager, m_renderShaderManager);
-      m_defaultMaterial = materialLoader.getDefaultMaterial();
+      MaterialLoader materialLoader(m_singletonManager, m_texNumber);
+      m_defaultMaterial = materialLoader.getDefaultResource();
       setAnimationTimeUnit(m_animationTimeUnit);
     }
 
-    AssimpLoader::AssimpLoader(const AssimpLoader& o)
+    AssimpLoader::AssimpLoader(const AssimpLoader& o) : m_texNumber(o.m_texNumber)
     {
       m_modelManager = o.m_modelManager;
       m_materialManager = o.m_materialManager;
@@ -131,9 +131,9 @@ namespace he
       std::vector<renderer::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices);
     
-      MaterialLoader materialLoader(m_materialManager, m_textureManager, m_renderShaderManager);
+      MaterialLoader materialLoader(m_singletonManager, m_texNumber);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(renderer::Mesh::MODEL_POSITION, positions, GL_TRIANGLES, indices)), materialLoader.getDefaultMaterial(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(renderer::Mesh::MODEL_POSITION, positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);

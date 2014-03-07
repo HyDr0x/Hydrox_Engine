@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "SceneGraph/Traverser/Traverser.h"
+#include "SceneGraph/Traverser/GetGlobalCoordinateTraverser.h"
 
 namespace he
 {
@@ -96,22 +97,78 @@ namespace he
 
     ///////////////////TRANSFORMATIONS//////////////////////////
 
-    util::Vector<float, 3> TransformNode::getPosition()
+    util::Vector<float, 3> TransformNode::getGlobalPosition()
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_translation * traverser.getGlobalScale());
+    }
+
+    util::Quaternion<float> TransformNode::getGlobalRotation()
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalRotation() * m_rotation;
+    }
+
+	  float TransformNode::getGlobalScale()
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      return traverser.getGlobalScale() * m_scale;
+    }
+
+    util::Vector<float, 3> TransformNode::getLocalPosition()
     {
 	    return m_translation;
     }
 
-    util::Quaternion<float> TransformNode::getRotation()
+    util::Quaternion<float> TransformNode::getLocalRotation()
     {
 	    return m_rotation;
     }
 
-    float TransformNode::getScale()
+    float TransformNode::getLocalScale()
     {
 	    return m_scale;
     }
 
-    void TransformNode::setTranslation(float x, float y, float z)
+    void TransformNode::setGlobalTranslation(float x, float y, float z)
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      m_translation = traverser.getGlobalRotation().invert().apply(util::Vector<float, 3>(x, y, z) - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
+    }
+
+    void TransformNode::setGlobalTranslation(util::Vector<float, 3> v)
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      m_translation = traverser.getGlobalRotation().invert().apply(v - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
+    }
+
+    void TransformNode::setGlobalRotation(util::Quaternion<float> q)
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      m_rotation = traverser.getGlobalRotation().invert() * q;
+    }
+
+    void TransformNode::setGlobalScale(float s)
+    {
+      GetGlobalCoordinateTraverser traverser;
+      traverser.doAscend(this);
+
+      m_scale = s / traverser.getGlobalScale();
+    }
+
+    void TransformNode::setLocalTranslation(float x, float y, float z)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -124,7 +181,7 @@ namespace he
 	    m_translation[2] = z;
     }
 
-    void TransformNode::setTranslation(util::Vector<float, 3> v)
+    void TransformNode::setLocalTranslation(util::Vector<float, 3> v)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -135,7 +192,7 @@ namespace he
 	    m_translation = v;
     }
 
-    void TransformNode::addTranslation(float x, float y, float z)
+    void TransformNode::addLocalTranslation(float x, float y, float z)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -148,7 +205,7 @@ namespace he
 	    m_translation[2] += z;
     }
 
-    void TransformNode::addTranslation(util::Vector<float, 3> v)
+    void TransformNode::addLocalTranslation(util::Vector<float, 3> v)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -159,7 +216,7 @@ namespace he
 	    m_translation += v;
     }
 
-    void TransformNode::setRotation(util::Quaternion<float> q)
+    void TransformNode::setLocalRotation(util::Quaternion<float> q)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -170,7 +227,7 @@ namespace he
       m_rotation = q;
     }
 
-    void TransformNode::addRotation(util::Quaternion<float> q)
+    void TransformNode::addLocalRotation(util::Quaternion<float> q)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -181,7 +238,7 @@ namespace he
       m_rotation *= q;
     }
 
-    void TransformNode::setRotationX(float angle)
+    void TransformNode::setLocalRotationX(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -192,7 +249,7 @@ namespace he
 	    m_rotation = util::math::createRotXQuaternion(angle);
     }
 
-    void TransformNode::addRotationX(float angle)
+    void TransformNode::addLocalRotationX(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -203,7 +260,7 @@ namespace he
 	    m_rotation *= util::math::createRotXQuaternion(angle);
     }
 
-    void TransformNode::setRotationY(float angle)
+    void TransformNode::setLocalRotationY(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -214,7 +271,7 @@ namespace he
 	    m_rotation = util::math::createRotYQuaternion(angle);
     }
 
-    void TransformNode::addRotationY(float angle)
+    void TransformNode::addLocalRotationY(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -225,7 +282,7 @@ namespace he
 	    m_rotation *= util::math::createRotYQuaternion(angle);
     }
 
-    void TransformNode::setRotationZ(float angle)
+    void TransformNode::setLocalRotationZ(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -236,7 +293,7 @@ namespace he
 	    m_rotation = util::math::createRotZQuaternion(angle);
     }
 
-    void TransformNode::addRotationZ(float angle)
+    void TransformNode::addLocalRotationZ(float angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -247,7 +304,7 @@ namespace he
 	    m_rotation *= util::math::createRotZQuaternion(angle);
     }
 
-    void TransformNode::setRotationXYZ(util::Vector<float, 3> angle)
+    void TransformNode::setLocalRotationXYZ(util::Vector<float, 3> angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -258,7 +315,7 @@ namespace he
 	    m_rotation = util::math::createRotXQuaternion(angle[0]) * util::math::createRotYQuaternion(angle[1]) * util::math::createRotZQuaternion(angle[2]);
     }
 
-    void TransformNode::addRotationXYZ(util::Vector<float, 3> angle)
+    void TransformNode::addLocalRotationXYZ(util::Vector<float, 3> angle)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -269,7 +326,7 @@ namespace he
 	    m_rotation *= util::math::createRotXQuaternion(angle[0]) * util::math::createRotYQuaternion(angle[1]) * util::math::createRotZQuaternion(angle[2]);
     }
 
-    void TransformNode::setRotationAxis(float angle, util::Vector<float, 3> axis)
+    void TransformNode::setLocalRotationAxis(float angle, util::Vector<float, 3> axis)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -280,7 +337,7 @@ namespace he
       m_rotation = util::math::createRotAxisQuaternion(angle, axis);
     }
 
-    void TransformNode::addRotationAxis(float angle, util::Vector<float, 3> axis)
+    void TransformNode::addLocalRotationAxis(float angle, util::Vector<float, 3> axis)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -291,7 +348,7 @@ namespace he
       m_rotation *= util::math::createRotAxisQuaternion(angle, axis);
     }
 
-    void TransformNode::setScale(float s)
+    void TransformNode::setLocalScale(float s)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {
@@ -302,7 +359,7 @@ namespace he
 	    m_scale = s;
     }
 
-    void TransformNode::addScale(float s)
+    void TransformNode::addLocalScale(float s)
     {
       if(!m_dirtyFlag & TRF_DIRTY)//add it only if its not dirty already
       {

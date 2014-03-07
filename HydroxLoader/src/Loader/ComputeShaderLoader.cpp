@@ -9,7 +9,7 @@ namespace he
 {
   namespace loader
   {
-    ComputeShaderLoader::ComputeShaderLoader(renderer::ComputeShaderManager *computeShaderManager) : m_computeShaderManager(computeShaderManager)
+    ComputeShaderLoader::ComputeShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_computeShaderManager(m_singletonManager->getService<renderer::ComputeShaderManager>())
     {
     }
 
@@ -17,29 +17,27 @@ namespace he
     {
     }
 
-    util::ResourceHandle ComputeShaderLoader::loadShader(std::string path, std::string shaderName, std::string computeShaderFilename, std::vector<std::string>& dynamicDefines)
+    util::ResourceHandle ComputeShaderLoader::loadResource(std::string filename)
     {
-      std::string computeShaderSource = loadShaderSource(computeShaderFilename, path, dynamicDefines);
+      std::string computeShaderSource = loadShaderSource(filename + ".comp");
 
       util::ResourceHandle shaderHandle;
 
-      bool noComputeShader = computeShaderSource == std::string();
-
-      if(noComputeShader)
+      if(computeShaderSource == std::string())
       {
-        std::cout << "ERROR, couldn't open file: " << shaderName << std::endl;
+        std::cout << "ERROR, couldn't open file: " << filename << std::endl;
 
-        shaderHandle = getDefaultComputeShader();
+        shaderHandle = getDefaultResource();
       }
       else
       {
-        shaderHandle = m_computeShaderManager->addObject(renderer::ComputeShader(shaderName, computeShaderSource));
+        shaderHandle = m_computeShaderManager->addObject(renderer::ComputeShader(filename, computeShaderSource));
       }
 
       return shaderHandle;
     }
 
-    util::ResourceHandle ComputeShaderLoader::getDefaultComputeShader()
+    util::ResourceHandle ComputeShaderLoader::getDefaultResource()
     {
       std::string computeSource = "#version 430 core\n\
                                   \n\

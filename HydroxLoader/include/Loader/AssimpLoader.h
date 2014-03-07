@@ -63,6 +63,10 @@ namespace he
       AnimationTimeUnit m_animationTimeUnit;
       float m_animationTimeUnitConvert;
 
+      const unsigned int m_texNumber;
+
+      util::SingletonManager *m_singletonManager;
+
       util::EventManager *m_eventManager;
 
       renderer::ModelManager *m_modelManager;

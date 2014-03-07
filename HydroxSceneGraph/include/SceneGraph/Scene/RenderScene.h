@@ -11,6 +11,7 @@
 #include <Utilities/Signals/EventManager.h>
 
 #include "SceneGraph/Scene/Scene.h"
+#include "SceneGraph/Scene/SceneCacheManager.h"
 
 #include "SceneGraph/TreeNodes/GroupNode.h"
 
@@ -36,11 +37,11 @@ namespace he
 	    RenderScene(GroupNode* rootNode, util::EventManager& eventManger, util::Vector<float, 3>& cameraPosition);
 	    ~RenderScene();
 
-      GroupNode* addParentNode(unsigned int eventID, TreeNode *destinationNode, GroupNode *sourceNode);
-      TreeNode* addChildNode(unsigned int eventID, GroupNode *destinationNode, TreeNode *sourceNode);
-      void removeNode(TreeNode *node);
+      GroupNode* addParentNode(unsigned int eventID, TreeNode* destinationNode, GroupNode* sourceNode);
+      TreeNode* addChildNode(unsigned int eventID, GroupNode* destinationNode, TreeNode* sourceNode);
+      void removeNode(TreeNode& node);
 
-	    GroupNode* addSubTree(Scene* subScene, GroupNode* sceneNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
+	    GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
       void removeSubTree(TreeNode* sceneNode);
 
       void setLODRanges(std::vector<float> lodRanges);
@@ -48,11 +49,11 @@ namespace he
 
     private:
  
-	    RenderScene() : Scene(new GroupNode("")), m_eventManager(util::EventManager()) {}
-      RenderScene(const RenderScene& object) : Scene(object.m_rootNode), m_eventManager(object.m_eventManager) {}
+	    RenderScene() : Scene(new GroupNode("")), m_eventManager(util::EventManager()), m_sceneCacheManager(SceneCacheManager(util::EventManager())) {}
+      RenderScene(const RenderScene& object) : Scene(object.m_rootNode), m_eventManager(object.m_eventManager), m_sceneCacheManager(object.m_sceneCacheManager) {}
 	    RenderScene& operator=(const RenderScene&){ return *this; }
 
-      SceneCacheManager *m_sceneCacheManager;
+      SceneCacheManager m_sceneCacheManager;
 
       util::EventManager& m_eventManager;
     };

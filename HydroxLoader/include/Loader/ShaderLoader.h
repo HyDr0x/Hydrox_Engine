@@ -1,26 +1,26 @@
 #ifndef SHADERLOADER_H_
 #define SHADERLOADER_H_
 
-#include <string>
-#include <vector>
-
-#include <Renderer/Resources/ResourceManager.hpp>
-#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include "Loader/ResourceLoader.h"
 
 namespace he
 {
   namespace loader
   {
-    class GRAPHICAPI ShaderLoader
+    class GRAPHICAPI ShaderLoader : public ResourceLoader
     {
     public:
 
-      ShaderLoader();
+      ShaderLoader(util::SingletonManager *singletonManager);
       virtual ~ShaderLoader() = 0;
+
+      void setDynamicDefines(std::vector<std::string>& dynamicDefines);
 
     protected:
 
-      std::string loadShaderSource(std::string shaderFilename, std::string shaderPath, std::vector<std::string>& dynamicDefines);
+      std::string loadShaderSource(std::string filename);
+
+      std::vector<std::string> m_dynamicDefines;
     };
   }
 }

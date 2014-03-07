@@ -23,7 +23,7 @@ namespace he
 
       void free();
 
-      unsigned int getID();
+      unsigned int getID() const;
 
     private:
 

@@ -5,6 +5,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShaderLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ILDevilLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialLoader.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ResourceLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderLoader.cpp 
 	PARENT_SCOPE 

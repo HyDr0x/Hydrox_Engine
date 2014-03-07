@@ -28,8 +28,7 @@ namespace he
       BillboardRenderer();
 	    ~BillboardRenderer();
 
-      void initialize(util::SingletonManager *singletonManager, 
-        util::ResourceHandle billboardShaderHandle);
+      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle billboardShaderHandle);
 
 	    void render();
 

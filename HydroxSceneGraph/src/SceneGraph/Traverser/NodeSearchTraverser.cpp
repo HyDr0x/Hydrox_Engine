@@ -12,8 +12,7 @@
 namespace he
 {
 	namespace sg
-	{
-    NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
+	{    NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
     {
     }
 
@@ -95,7 +94,14 @@ namespace he
 
     TreeNode* NodeSearchTraverser::getDiscoveredNode() const
     {
-      return m_discoveredNode;
+      if(m_discoveredNode != nullptr)
+      {
+        return m_discoveredNode;
+      }
+      else
+      {
+        return nullptr;//GroupNode(m_nodeName);
+      }
     }
 
     bool NodeSearchTraverser::findNode(TreeNode* treeNode)
