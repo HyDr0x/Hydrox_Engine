@@ -28,12 +28,15 @@ namespace he
       enum VertexDeclarationFlags
       {
         MODEL_POSITION     = 1,
-        MODEL_TEXTURE      = 2,
-        MODEL_NORMAL       = 4,
-        MODEL_BINORMAL     = 8,
-        MODEL_BONE_WEIGHTS = 16,
-        MODEL_BONE_INDICES = 32,
-        MODEL_COLOR        = 64,
+        MODEL_TEXTURE0     = 2,
+        MODEL_TEXTURE1     = 4,
+        MODEL_TEXTURE2     = 8,
+        MODEL_TEXTURE3     = 16,
+        MODEL_NORMAL       = 32,
+        MODEL_BINORMAL     = 64,
+        MODEL_BONE_WEIGHTS = 128,
+        MODEL_BONE_INDICES = 256,
+        MODEL_COLOR        = 512,
       };
 
       typedef GLuint indexType;
@@ -41,17 +44,16 @@ namespace he
       Mesh();
 	    Mesh(const Mesh& o);
 
-	    Mesh(GLuint vertexDeclarationFlags, 
-        std::vector<util::Vector<float, 3>> positions, 
-        GLuint primitiveType = GL_TRIANGLES,
-        std::vector<indexType> indices = std::vector<indexType>(),
-        std::vector<util::Vector<float, 2>> textureCoords = std::vector<util::Vector<float, 2>>(), 
-        std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 
-        std::vector<util::Vector<float, 3>> binormals = std::vector<util::Vector<float, 3>>(), 
-        std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>(),
-        std::vector<util::Vector<float, 4>> boneIndices = std::vector<util::Vector<float, 4>>(),
-        std::vector<util::Vector<float, 4>> vertexColors = std::vector<util::Vector<float, 4>>()
-        );
+	    Mesh(std::vector<util::Vector<float, 3>> positions, 
+           GLenum primitiveType = GL_TRIANGLES,
+           std::vector<indexType> indices = std::vector<indexType>(),
+           std::vector<std::vector<util::Vector<float, 2>>> textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(), 
+           std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 
+           std::vector<util::Vector<float, 3>> binormals = std::vector<util::Vector<float, 3>>(), 
+           std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>(),
+           std::vector<util::Vector<float, 4>> boneIndices = std::vector<util::Vector<float, 4>>(),
+           std::vector<util::Vector<float, 4>> vertexColors = std::vector<util::Vector<float, 4>>()
+           );
     
       Mesh& operator=(const Mesh& o);
 
@@ -60,7 +62,7 @@ namespace he
       void free();
 
       void setPositions(std::vector<util::Vector<float, 3>> positions);
-      void setTextureCoordinations(std::vector<util::Vector<float, 2>> textureCoords);
+      void setTextureCoordinations(std::vector<std::vector<util::Vector<float, 2>>> textureCoords);
       void setNormals(std::vector<util::Vector<float, 3>> normals);
       void setBiNormals(std::vector<util::Vector<float, 3>> binormals);
       void setBoneWeights(std::vector<util::Vector<float, 4>> boneWeights);

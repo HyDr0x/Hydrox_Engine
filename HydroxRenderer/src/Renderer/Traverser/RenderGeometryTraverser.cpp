@@ -32,9 +32,24 @@ namespace he
         glEnableVertexAttribArray(RenderShader::POSITION);
       }
 
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE)
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE0)
       {
         glEnableVertexAttribArray(RenderShader::TEXTURE0);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE1)
+      {
+        glEnableVertexAttribArray(RenderShader::TEXTURE1);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE2)
+      {
+        glEnableVertexAttribArray(RenderShader::TEXTURE2);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE3)
+      {
+        glEnableVertexAttribArray(RenderShader::TEXTURE3);
       }
 
       if(vertexDeclaration & Mesh::MODEL_NORMAL)
@@ -74,9 +89,24 @@ namespace he
         glDisableVertexAttribArray(RenderShader::POSITION);
       }
 
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE)
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE0)
       {
         glDisableVertexAttribArray(RenderShader::TEXTURE0);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE1)
+      {
+        glDisableVertexAttribArray(RenderShader::TEXTURE1);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE2)
+      {
+        glDisableVertexAttribArray(RenderShader::TEXTURE2);
+      }
+
+      if(vertexDeclaration & Mesh::MODEL_TEXTURE3)
+      {
+        glDisableVertexAttribArray(RenderShader::TEXTURE3);
       }
 
       if(vertexDeclaration & Mesh::MODEL_NORMAL)

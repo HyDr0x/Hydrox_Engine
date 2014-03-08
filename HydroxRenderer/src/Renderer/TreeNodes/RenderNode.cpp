@@ -6,10 +6,10 @@
 
 #include "Renderer/Traverser/InsertGeometryTraverser.h"
 
-#include "Renderer/Pipeline/ArrayDrawCommand.h"
-#include "Renderer/Pipeline/IndexedDrawCommand.h"
-#include "Renderer/Pipeline/StaticGeometryRenderCommand.h"
-#include "Renderer/Pipeline/SkinnedGeometryRenderCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates//ArrayDrawCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/IndexedDrawCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/StaticGeometryRenderCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/SkinnedGeometryRenderCommand.h"
 
 namespace he
 {

@@ -87,7 +87,11 @@ namespace he
 
     void GeoNode::setMaterialHandle(util::ResourceHandle materialHandle)
     {
+      //m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnRemoveGeometryNode)->execute(this);
+
       m_materialHandle = materialHandle;
+
+      //m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnAddGeometryNode)->execute(this);
     }
 
     util::ResourceHandle GeoNode::getMaterialHandle() const
@@ -100,7 +104,7 @@ namespace he
       return m_trfMatrix;
     }
 
-    void GeoNode::setTransformationMatrix(const util::Matrix<float,4>& trfMatrix)
+    void GeoNode::setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix)
     {
       m_trfMatrix = trfMatrix;
     }

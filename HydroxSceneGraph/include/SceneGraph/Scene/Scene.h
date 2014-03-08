@@ -28,6 +28,8 @@ namespace he
 
       TreeNode* searchNode(const std::string& nodeName);
 
+      TreeNode* searchNode(const std::string& nodeName, TreeNode *searchRootNode);
+
       virtual GroupNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
       virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
       virtual void removeNode(TreeNode *node);
@@ -38,6 +40,11 @@ namespace he
       template<class CLASS> CLASS* getNode(const std::string& nodeName)
       {
         return dynamic_cast<CLASS*>(searchNode(nodeName));
+      }
+
+      template<class CLASS> CLASS* getNode(const std::string& nodeName, TreeNode *searchRootNode)
+      {
+        return dynamic_cast<CLASS*>(searchNode(nodeName, searchRootNode));
       }
 
       static void setAnimatedSceneTime(AnimatedTransformNode* node, float animationTime);

@@ -12,11 +12,11 @@ namespace he
 {
   namespace loader
   {
-    MaterialLoader::MaterialLoader(util::SingletonManager *singletonManager, unsigned int texNumber) : ResourceLoader(singletonManager),
-                                                                                                       m_materialManager(singletonManager->getService<renderer::MaterialManager>()),
-                                                                                                       m_textureManager(singletonManager->getService<renderer::TextureManager>()),
-                                                                                                       m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>()),
-                                                                                                       m_texNumber(texNumber)
+    MaterialLoader::MaterialLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager),
+                                                                               m_materialManager(singletonManager->getService<renderer::MaterialManager>()),
+                                                                               m_textureManager(singletonManager->getService<renderer::TextureManager>()),
+                                                                               m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>()),
+                                                                               m_texNumber(4)
     {
     }
 

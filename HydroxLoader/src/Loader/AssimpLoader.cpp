@@ -31,7 +31,7 @@ namespace he
       m_textureManager = singletonManager->getService<renderer::TextureManager>();
       m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
 
-      MaterialLoader materialLoader(m_singletonManager, m_texNumber);
+      MaterialLoader materialLoader(m_singletonManager);
       m_defaultMaterial = materialLoader.getDefaultResource();
       setAnimationTimeUnit(m_animationTimeUnit);
     }
@@ -131,9 +131,9 @@ namespace he
       std::vector<renderer::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices);
     
-      MaterialLoader materialLoader(m_singletonManager, m_texNumber);
+      MaterialLoader materialLoader(m_singletonManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(renderer::Mesh::MODEL_POSITION, positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);
@@ -155,18 +155,8 @@ namespace he
 
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
     {
-      GLuint vertexDeclarationFlags = 0;
-
-      vertexDeclarationFlags |= mesh->HasPositions()              ? renderer::Mesh::MODEL_POSITION     : 0;
-      vertexDeclarationFlags |= mesh->HasTextureCoords(0)         ? renderer::Mesh::MODEL_TEXTURE      : 0;
-      vertexDeclarationFlags |= mesh->HasNormals()                ? renderer::Mesh::MODEL_NORMAL       : 0;
-      vertexDeclarationFlags |= mesh->HasTangentsAndBitangents()  ? renderer::Mesh::MODEL_BINORMAL     : 0;
-      vertexDeclarationFlags |= mesh->HasBones()                  ? renderer::Mesh::MODEL_BONE_WEIGHTS : 0;
-      vertexDeclarationFlags |= mesh->HasBones()                  ? renderer::Mesh::MODEL_BONE_INDICES : 0;
-      vertexDeclarationFlags |= mesh->HasVertexColors(0)          ? renderer::Mesh::MODEL_COLOR        : 0;
-
-      std::vector<util::Vector<float, 3>> positions;
-      std::vector<util::Vector<float, 2>> textureCoords;
+      std::vector<util::Vector<float, 3>> positions;   
+      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(4);
       std::vector<util::Vector<float, 3>> normals;
       std::vector<util::Vector<float, 3>> binormals;
       std::vector<util::Vector<float, 4>> boneIndices;
@@ -204,29 +194,30 @@ namespace he
         }
 	    }
 
-	    if(mesh->HasTextureCoords(0) && mesh->mNumUVComponents[0] != 0)
-	    {
-		    assert(!mesh->mNumUVComponents[1] && !mesh->mNumUVComponents[2] && !mesh->mNumUVComponents[3]);
+      for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
+      {
+	      if(mesh->HasTextureCoords(j) && mesh->mNumUVComponents[j] != 0)
+	      {
+          textureCoords[j].resize(mesh->mNumVertices);
 
-        textureCoords.resize(mesh->mNumVertices);
+		      GLfloat tmpYCoordinates;
+		      for(unsigned int i = 0; i < mesh->mNumVertices; i++)
+		      {
+            //assert(mesh->mTextureCoords[j][i][0] >= 0.0 && mesh->mTextureCoords[j][i][1] >= 0.0 && mesh->mTextureCoords[j][i][0] <= 1.0 && mesh->mTextureCoords[j][i][1] <= 1.0);
 
-		    GLfloat tmpYCoordinates;
-		    for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		    {
-          //assert(mesh->mTextureCoords[0][i][0] >= 0.0 && mesh->mTextureCoords[0][i][1] >= 0.0 && mesh->mTextureCoords[0][i][0] <= 1.0 && mesh->mTextureCoords[0][i][1] <= 1.0);
+			      if( yAxisFlipped )
+            {
+              tmpYCoordinates = -mesh->mTextureCoords[j][i][1];
+            }
+			      else
+            {
+              tmpYCoordinates = mesh->mTextureCoords[j][i][1];
+            }
 
-			    if( yAxisFlipped )
-          {
-            tmpYCoordinates = -mesh->mTextureCoords[0][i][1];
-          }
-			    else
-          {
-            tmpYCoordinates = mesh->mTextureCoords[0][i][1];
-          }
-
-          textureCoords[i] = util::Vector<float, 2>(mesh->mTextureCoords[0][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
-		    }
-	    }
+            textureCoords[j][i] = util::Vector<float, 2>(mesh->mTextureCoords[j][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
+		      }
+	      }
+      }
 
 	    if(mesh->HasNormals())
 	    {
@@ -303,8 +294,7 @@ namespace he
 		    }
 	    }
 
-      return m_modelManager->addObject(renderer::Mesh(vertexDeclarationFlags, 
-        positions,
+      return m_modelManager->addObject(renderer::Mesh(positions,
         primitiveType,
         indices,
         textureCoords,

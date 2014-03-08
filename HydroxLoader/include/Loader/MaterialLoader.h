@@ -11,7 +11,7 @@ namespace he
     {
     public:
 
-      MaterialLoader(util::SingletonManager *singletonManager, unsigned int texNumber);
+      MaterialLoader(util::SingletonManager *singletonManager);
       ~MaterialLoader();
 
       util::ResourceHandle loadResource(std::string filename);

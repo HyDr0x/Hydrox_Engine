@@ -50,6 +50,15 @@ namespace he
       return traverser.getDiscoveredNode();
     }
 
+    TreeNode* Scene::searchNode(const std::string& nodeName, TreeNode *searchRootNode)
+    {
+      NodeSearchTraverser traverser(nodeName);
+
+      traverser.doTraverse(searchRootNode);
+
+      return traverser.getDiscoveredNode(); 
+    }
+
     GroupNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
     {
       GroupNode *oldParent = destinationNode->getParent();
