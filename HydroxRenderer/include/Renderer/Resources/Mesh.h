@@ -47,7 +47,7 @@ namespace he
 	    Mesh(std::vector<util::Vector<float, 3>> positions, 
            GLenum primitiveType = GL_TRIANGLES,
            std::vector<indexType> indices = std::vector<indexType>(),
-           std::vector<std::vector<util::Vector<float, 2>>> textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(), 
+           std::vector<std::vector<util::Vector<float, 2>>> textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
            std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 
            std::vector<util::Vector<float, 3>> binormals = std::vector<util::Vector<float, 3>>(), 
            std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>(),

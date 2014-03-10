@@ -1,0 +1,11 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ArrayDrawCommand.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawCommandInterface.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/GeometryCommandInterface.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndexedDrawCommand.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryRenderCommand.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryRenderCommand.h 
+	PARENT_SCOPE 
+)

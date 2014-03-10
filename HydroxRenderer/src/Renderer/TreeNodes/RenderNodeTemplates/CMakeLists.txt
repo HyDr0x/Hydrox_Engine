@@ -1,0 +1,9 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ArrayDrawCommand.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndexedDrawCommand.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryRenderCommand.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryRenderCommand.cpp 
+	PARENT_SCOPE 
+)
