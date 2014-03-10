@@ -2,6 +2,7 @@
 
 #include "SceneGraph/TreeNodes/GeoNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
+#include "SceneGraph/TreeNodes/BillboardNode.h"
 
 namespace he
 {
@@ -11,17 +12,6 @@ namespace he
     }
 
     RemoveNodesTraverser::~RemoveNodesTraverser()
-    {
-    }
-
-    bool RemoveNodesTraverser::preTraverse(TransformNode* treeNode)
-    {
-      m_eventManager.raiseSignal<void (*)(TransformNode *treeNode)>(util::EventManager::OnRemoveTransformNode)->execute(treeNode);
-
-      return true;
-    }
-
-    void RemoveNodesTraverser::postTraverse(TransformNode* treeNode)
     {
     }
 
@@ -49,7 +39,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnRemoveGeometryNode)->execute(treeNode);
+      treeNode->setRenderable(false);
 
       return true;
     }
@@ -60,7 +50,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(GeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnRemoveGeometryNode)->execute(treeNode);
+      treeNode->setRenderable(false);
 
       return true;
     }
@@ -71,7 +61,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(BillboardNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(BillboardNode *treeNode)>(util::EventManager::OnRemoveBillboardNode)->execute(treeNode);
+      treeNode->setRenderable(false);
 
       return true;
     }

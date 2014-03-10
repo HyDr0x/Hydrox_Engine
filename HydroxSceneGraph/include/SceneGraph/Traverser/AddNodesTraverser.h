@@ -18,9 +18,6 @@ namespace he
       AddNodesTraverser(util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos);
       virtual ~AddNodesTraverser();
 
-      virtual bool preTraverse(TransformNode* treeNode);
-      virtual void postTraverse(TransformNode* treeNode);
-
       virtual bool preTraverse(AnimatedTransformNode* treeNode);
       virtual void postTraverse(AnimatedTransformNode* treeNode);
 

@@ -133,7 +133,7 @@ namespace he
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), true, false, std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), false, std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);
@@ -349,12 +349,12 @@ namespace he
         stream << i;
         if(!m_inverseBindPoseTable[meshIndex].empty())
         {
-          geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, true, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+          geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
           m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
         }
         else
         {
-          geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, true, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+          geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, false, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
         }
       
         stream.str("");

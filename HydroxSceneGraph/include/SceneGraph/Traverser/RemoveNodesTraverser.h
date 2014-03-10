@@ -19,9 +19,6 @@ namespace he
       RemoveNodesTraverser(util::EventManager& eventManager);
       virtual ~RemoveNodesTraverser();
 
-      virtual bool preTraverse(TransformNode* treeNode);
-      virtual void postTraverse(TransformNode* treeNode);
-
       virtual bool preTraverse(AnimatedTransformNode* treeNode);
       virtual void postTraverse(AnimatedTransformNode* treeNode);
 

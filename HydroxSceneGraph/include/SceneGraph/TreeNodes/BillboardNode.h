@@ -18,7 +18,7 @@ namespace he
     {
     public:
 
-      BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       BillboardNode& operator=(const BillboardNode& o);
       virtual TreeNode& operator=(const TreeNode& o);
       virtual ~BillboardNode();

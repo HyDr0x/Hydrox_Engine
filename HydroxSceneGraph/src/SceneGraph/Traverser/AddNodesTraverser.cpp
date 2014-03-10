@@ -3,6 +3,7 @@
 #include "SceneGraph/TreeNodes/LODNode.h"
 #include "SceneGraph/TreeNodes/GeoNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
+#include "SceneGraph/TreeNodes/BillboardNode.h"
 
 namespace he
 {
@@ -12,17 +13,6 @@ namespace he
     }
 
     AddNodesTraverser::~AddNodesTraverser()
-    {
-    }
-
-    bool AddNodesTraverser::preTraverse(TransformNode* treeNode)
-    {
-      m_eventManager.raiseSignal<void (*)(TransformNode *treeNode)>(util::EventManager::OnAddTransformNode)->execute(treeNode);
-
-      return true;
-    }
-
-    void AddNodesTraverser::postTraverse(TransformNode* treeNode)
     {
     }
 
@@ -50,7 +40,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnAddGeometryNode)->execute(treeNode);
+      treeNode->setRenderable(true);
 
       return true;
     }
@@ -61,7 +51,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(GeoNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(GeoNode *treeNode)>(util::EventManager::OnAddGeometryNode)->execute(treeNode);
+      treeNode->setRenderable(true);
 
       return true;
     }
@@ -72,7 +62,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(BillboardNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(BillboardNode *treeNode)>(util::EventManager::OnAddBillboardNode)->execute(treeNode);
+      treeNode->setRenderable(true);
 
       return true;
     }

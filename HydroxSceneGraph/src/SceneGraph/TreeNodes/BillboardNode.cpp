@@ -9,8 +9,7 @@ namespace he
 	namespace sg
 	{
     BillboardNode::BillboardNode(util::EventManager *eventManager,
-                                util::ResourceHandle textureHandle, 
-                                bool renderable, 
+                                util::ResourceHandle textureHandle,
                                 util::Vector<unsigned int, 2> animNumber, 
                                 util::Vector<float, 2> texStart, 
                                 util::Vector<float, 2> texEnd, 
@@ -19,12 +18,12 @@ namespace he
                                 TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
                                                          m_eventManager(eventManager),
                                                          m_textureHandle(textureHandle),
-                                                         m_renderable(renderable),
                                                          m_animNumber(animNumber), 
                                                          m_texStart(texStart), 
                                                          m_texEnd(texEnd),
                                                          m_translate(util::Vector<float, 3>::identity()),
-                                                         m_scale(util::Vector<float, 2>(1.0f, 1.0f))
+                                                         m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
+                                                         m_renderable(false)
     {
     }
 
@@ -65,7 +64,7 @@ namespace he
 
     TreeNode* BillboardNode::clone() const
     {
-      BillboardNode *newNode = new BillboardNode(m_eventManager, m_textureHandle, m_renderable, m_animNumber, m_texStart, m_texEnd, m_nodeName);
+      BillboardNode *newNode = new BillboardNode(m_eventManager, m_textureHandle, m_animNumber, m_texStart, m_texEnd, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 

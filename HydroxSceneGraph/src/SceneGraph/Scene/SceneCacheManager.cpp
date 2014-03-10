@@ -98,19 +98,12 @@ namespace he
       m_eventManager.addNewSignal<void (*)(sg::LODNode *node)>(util::EventManager::OnAddLODNode);
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode *node), void (SceneCacheManager::*)(sg::LODNode *node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddLODNode);
 
-      m_eventManager.addNewSignal<void (*)(sg::TransformNode *node)>(util::EventManager::OnAddTransformNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::TransformNode *node), void (SceneCacheManager::*)(sg::TransformNode *node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddTransformNode);
-
       m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode *node)>(util::EventManager::OnAddAnimatedTransformNode);
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddAnimatedTransformNode);
 
 
-
       m_eventManager.addNewSignal<void (*)(sg::LODNode *node)>(util::EventManager::OnRemoveLODNode);
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode *node), void (SceneCacheManager::*)(sg::LODNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveLODNode);
-
-      m_eventManager.addNewSignal<void (*)(sg::TransformNode *node)>(util::EventManager::OnRemoveTransformNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::TransformNode *node), void (SceneCacheManager::*)(sg::TransformNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveTransformNode);
 
       m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode *node)>(util::EventManager::OnRemoveAnimatedTransformNode);
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveAnimatedTransformNode);

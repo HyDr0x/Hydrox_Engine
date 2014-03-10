@@ -8,12 +8,12 @@ namespace he
 {
 	namespace sg
 	{
-    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool renderable, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                                                                                                                                                                       m_eventManager(eventManager),
-                                                                                                                                                                                                       m_meshHandle(meshHandle),
-                                                                                                                                                                                                       m_materialHandle(materialHandle),
-                                                                                                                                                                                                       m_renderable(renderable),
-                                                                                                                                                                                                       m_transparency(transparency)
+    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
+                                                                                                                                                                                                                          m_eventManager(eventManager),
+                                                                                                                                                                                                                          m_meshHandle(meshHandle),
+                                                                                                                                                                                                                          m_materialHandle(materialHandle),
+                                                                                                                                                                                                                          m_transparency(transparency),
+                                                                                                                                                                                                                          m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
     }
@@ -48,7 +48,7 @@ namespace he
 
     TreeNode* GeoNode::clone() const
     {
-      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_renderable, m_transparency, m_nodeName);
+      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_transparency, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 
@@ -87,11 +87,17 @@ namespace he
 
     void GeoNode::setMaterialHandle(util::ResourceHandle materialHandle)
     {
-      //m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnRemoveGeometryNode)->execute(this);
+      if(m_renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnRemoveGeometryNode)->execute(this);
+      }
 
       m_materialHandle = materialHandle;
 
-      //m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnAddGeometryNode)->execute(this);
+      if(m_renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnAddGeometryNode)->execute(this);
+      }
     }
 
     util::ResourceHandle GeoNode::getMaterialHandle() const
