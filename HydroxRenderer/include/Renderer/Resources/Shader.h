@@ -35,9 +35,9 @@ namespace he
                                                                                       std::vector<GLint> *arrayStrides, 
                                                                                       std::vector<GLint> *matrixStrides);
 
-	    void setUniform(GLint location, int type, const GLfloat* val) const;
-      void setUniform(GLint location, int type, const GLuint* val) const;
-	    void setUniform(GLint location, int type, const GLint* val) const;
+	    static void setUniform(GLint location, int type, const GLfloat* val);
+      static void setUniform(GLint location, int type, const GLuint* val);
+	    static void setUniform(GLint location, int type, const GLint* val);
 
 	    void useShader() const;
 	    void useNoShader() const;

@@ -4,11 +4,12 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
+#include "SceneGraph/XBarContainer/ParticleContainer.h"
+
 namespace he
 {
 	namespace sg
-	{
-    ParticleNode::ParticleNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling)
+	{    ParticleNode::ParticleNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling)
     {
     }
 

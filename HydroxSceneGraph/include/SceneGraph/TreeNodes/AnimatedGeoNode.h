@@ -28,6 +28,10 @@ namespace he
 
       virtual bool isAnimatedGeoNode();
 
+      void setMeshHandle(util::ResourceHandle meshHandle);
+      void setMaterialHandle(util::ResourceHandle materialHandle);
+      void setRenderable(bool renderable);
+
       void setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 
       std::vector<util::Matrix<float, 4>> getSkinningMatrices();

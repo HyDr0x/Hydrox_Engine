@@ -3,9 +3,9 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/ArrayDrawCommand.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawCommandInterface.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/GeometryCommandInterface.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/MatrixBufferInterface.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndexedDrawCommand.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryRenderCommand.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryRenderCommand.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedMatrixBuffer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticMatrixBuffer.h 
 	PARENT_SCOPE 
 )

@@ -38,12 +38,12 @@ namespace he
     {
     }
 
-    void ComputeShader::dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ) const
+    void ComputeShader::dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ)
     {
       glDispatchCompute(workGroupNumberX, workGroupNumberY, workGroupNumberZ);
     }
 
-    void ComputeShader::dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset) const
+    void ComputeShader::dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset)
     {
       glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, dispatchBuffer);
       glDispatchComputeIndirect(offset);

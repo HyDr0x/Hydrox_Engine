@@ -32,7 +32,7 @@ namespace he
 	    glGetActiveUniformsiv( m_program, uniformCount, &(*uniformIndices)[0], GL_UNIFORM_MATRIX_STRIDE, &(*matrixStrides)[0]);//maybe useless?!
     }
 
-    void Shader::setUniform(GLint location, GLint type, const GLfloat* val) const
+    void Shader::setUniform(GLint location, GLint type, const GLfloat* val)
     {
       switch(type)
       {
@@ -60,7 +60,7 @@ namespace he
       }
     }
 
-    void Shader::setUniform(GLint location, GLint type, const GLuint* val) const
+    void Shader::setUniform(GLint location, GLint type, const GLuint* val)
     {
       switch(type)
 	    {
@@ -79,7 +79,7 @@ namespace he
 	    }
     }
 
-    void Shader::setUniform(GLint location, GLint type, const GLint* val) const
+    void Shader::setUniform(GLint location, GLint type, const GLint* val)
     {
 	    switch(type)
 	    {

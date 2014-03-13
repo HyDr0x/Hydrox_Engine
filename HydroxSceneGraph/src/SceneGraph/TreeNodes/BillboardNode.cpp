@@ -4,6 +4,8 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
+#include <XBar/BillboardContainer.h>
+
 namespace he
 {
 	namespace sg
@@ -33,7 +35,6 @@ namespace he
 
       m_eventManager = o.m_eventManager;
 
-      m_trfMatrix = o.m_trfMatrix;
       m_textureHandle = o.m_textureHandle;
       m_renderable = o.m_renderable;
 
@@ -65,8 +66,6 @@ namespace he
     TreeNode* BillboardNode::clone() const
     {
       BillboardNode *newNode = new BillboardNode(m_eventManager, m_textureHandle, m_animNumber, m_texStart, m_texEnd, m_nodeName);
-
-      newNode->m_trfMatrix = m_trfMatrix;
 
 	    newNode->m_scale = m_scale;
 	    newNode->m_translate = m_translate;
@@ -199,25 +198,15 @@ namespace he
 					      0.0f,0.0f,1.0f);
     }
 
-    util::Matrix<float,4> BillboardNode::getTransformationMatrix() const
-    {
-      return m_trfMatrix;
-    }
-
-    void BillboardNode::setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix)
-    {
-      m_trfMatrix = trfMatrix;
-    }
-
     void BillboardNode::setRenderable(bool renderable)
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(BillboardNode *node)>(util::EventManager::OnAddBillboardNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(BillboardNode *node)>(util::EventManager::OnRemoveBillboardNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
       }
 
       m_renderable = renderable;

@@ -3,9 +3,6 @@
 
 #include <vector>
 
-#include <SceneGraph/TreeNodes/GeoNode.h>
-#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
@@ -15,15 +12,16 @@
 
 namespace he
 {
+  namespace xBar  {    class StaticGeometryContainer;
+    class SkinnedGeometryContainer;  }
+
 	namespace renderer
 	{    class InsertGeometryTraverser : public Traverser
     {
     public:
 
-      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, util::ResourceHandle frustumShaderHandle);
+      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned);
       virtual ~InsertGeometryTraverser();
-
-      void setNode(sg::GeoNode *node);
 
       virtual bool preTraverse(GroupNode* treeNode);
       virtual void postTraverse(GroupNode* treeNode);
@@ -55,18 +53,21 @@ namespace he
     private:
 
       util::SingletonManager *m_singletonManager;
-      util::ResourceHandle m_frustumShaderHandle;
 
       std::list<RenderNode*>& m_renderNodes;
 
       bool m_inserted;
 
-      sg::GeoNode *m_node;
+      xBar::StaticGeometryContainer& m_geometryContainer;
 
       unsigned int m_maxMaterials;
       unsigned int m_maxGeometry;
       unsigned int m_maxBones;
 
+      bool m_skinned;
+      bool m_indexed;
+      GLenum m_primitiveType;
+      GLuint m_vertexStride;
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;

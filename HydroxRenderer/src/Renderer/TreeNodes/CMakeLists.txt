@@ -1,4 +1,3 @@
-add_subdirectory(GeometryContainer)
 add_subdirectory(RenderNodeTemplates)
 
 set(

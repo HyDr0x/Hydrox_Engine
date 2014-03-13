@@ -4,6 +4,8 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
+#include "SceneGraph/XBarContainer/LightContainer.h"
+
 namespace he
 {
 	namespace sg

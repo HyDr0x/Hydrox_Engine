@@ -15,10 +15,13 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
 
-#include <SceneGraph/TreeNodes/BillboardNode.h>
-
 namespace he
 {
+  namespace xBar
+  {
+    class BillboardContainer;
+  }
+
 	namespace renderer
 	{
     class BillboardRenderer
@@ -32,8 +35,9 @@ namespace he
 
 	    void render();
 
-      void addRenderComponent(sg::BillboardNode *billboardNode);
-      void removeRenderComponent(sg::BillboardNode *billboardNode);
+      void addRenderComponent(xBar::BillboardContainer& billboard);
+
+      void removeRenderComponent(xBar::BillboardContainer& billboard);
 
     private:
 
@@ -45,7 +49,7 @@ namespace he
 
       util::ResourceHandle m_billboardShaderHandle;
 
-      std::list<sg::BillboardNode*> m_renderBillboards;
+      std::list<xBar::BillboardContainer*> m_renderBillboards;
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;

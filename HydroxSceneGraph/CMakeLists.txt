@@ -21,6 +21,7 @@ find_package(OPENGL)
 set(
 	INCLUDES 
 	${HYDROX_UTIL_INCLUDE} 
+	${HYDROX_XBAR_INCLUDE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/include 
 	${GLEW_INCLUDE_DIRS} 
 )
@@ -30,12 +31,14 @@ include_directories(${INCLUDES})
 set(
 	DEBUG_LIBRARIES 
 	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+	debug ${HYDROX_XBAR_LIB_DBG}${LIBSUFFIX} 
 	debug ${GLEW_LIBRARIES}
 )
 
 set(
 	RELEASE_LIBRARIES 
 	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+	optimized ${HYDROX_XBAR_LIB_REL}${LIBSUFFIX} 
 	optimized ${GLEW_LIBRARIES} 
 )
 

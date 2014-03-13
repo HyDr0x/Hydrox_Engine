@@ -1,4 +1,4 @@
-project(Hydrox_Renderer)
+project(Hydrox_XBar)
 
 set(
 	LIBSUFFIX 
@@ -10,10 +10,10 @@ add_definitions(-DDLL_EXPORT)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-add_subdirectory(include/Renderer)
-add_subdirectory(src/Renderer)
+add_subdirectory(include/XBar)
+add_subdirectory(src/XBar)
 
-add_library(Hydrox_Renderer SHARED ${SOURCE} ${HEADER})
+add_library(Hydrox_XBar SHARED ${SOURCE} ${HEADER})
 
 find_package(GLEW)
 find_package(OPENGL)
@@ -21,25 +21,22 @@ find_package(OPENGL)
 set(
 	INCLUDES 
 	${CMAKE_CURRENT_SOURCE_DIR}/include 
-	${HYDROX_UTIL_INCLUDE} 
-	${HYDROX_XBAR_INCLUDE} 
 	${GLEW_INCLUDE_DIRS} 
+	${HYDROX_UTIL_INCLUDE} 
 )
 
 include_directories(${INCLUDES})
 
 set(
 	DEBUG_LIBRARIES 
+	debug ${GLEW_LIBRARIES} 
 	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
-	debug ${HYDROX_XBAR_LIB_DBG}${LIBSUFFIX} 
-	debug ${GLEW_LIBRARIES}
 )
 
 set(
 	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
-	optimized ${HYDROX_XBAR_LIB_REL}${LIBSUFFIX} 
 	optimized ${GLEW_LIBRARIES} 
+	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
 )
 
 set(
@@ -47,9 +44,9 @@ set(
 	general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
 )
 
-target_link_libraries(Hydrox_Renderer ${DEBUG_LIBRARIES})
-target_link_libraries(Hydrox_Renderer ${RELEASE_LIBRARIES})
-target_link_libraries(Hydrox_Renderer ${GENERAL_LIBRARIES})
+target_link_libraries(Hydrox_XBar ${DEBUG_LIBRARIES})
+target_link_libraries(Hydrox_XBar ${RELEASE_LIBRARIES})
+target_link_libraries(Hydrox_XBar ${GENERAL_LIBRARIES})
 
 #source_group("Header Files\\Graphics" FILES ${HEADER})
 

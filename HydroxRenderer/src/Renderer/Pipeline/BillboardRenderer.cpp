@@ -1,5 +1,7 @@
 #include "Renderer/Pipeline/BillboardRenderer.h"
 
+#include <XBar/BillboardContainer.h>
+
 namespace he
 {
 	namespace renderer
@@ -45,25 +47,20 @@ namespace he
       RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardShaderHandle);
 	    billboardShader->useShader();
 
-	    for(std::list<sg::BillboardNode*>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
+	    for(std::list<xBar::BillboardContainer*>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
 	    {
-        if((*billboarditerator)->getRenderable())
-        {
-          renderTexture = m_textureManager->getObject((*billboarditerator)->getTextureHandle());
+        renderTexture = m_textureManager->getObject((*billboarditerator)->getTextureHandle());
 
-          renderTexture->setTexture(6, 0);
+        renderTexture->setTexture(6, 0);
 
-          util::Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
-		      util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator)->getTexTransformationMatrix();
-          util::Vector<float, 2> scale = (*billboarditerator)->getScale();
-		      util::Vector<float, 3> translate = (*billboarditerator)->getPosition();
-          billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
-		      billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
-		      billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
-		      billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
+		    util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator)->getTexTransformationMatrix();
+        util::Vector<float, 2> scale = (*billboarditerator)->getScale();
+		    util::Vector<float, 3> translate = (*billboarditerator)->getPosition();
+		    billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
+		    billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
+		    billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
-          glDrawArrays(GL_POINTS, 0, 1);
-        }
+        glDrawArrays(GL_POINTS, 0, 1);
 	    }
     
       glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -72,23 +69,23 @@ namespace he
       glDisable(GL_BLEND);
     }
 
-    void BillboardRenderer::addRenderComponent(sg::BillboardNode *billboardNode)
+    void BillboardRenderer::addRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_renderBillboards.push_back(billboardNode);
+      m_renderBillboards.push_back(billboard.clone());
     }
 
-    void BillboardRenderer::removeRenderComponent(sg::BillboardNode *billboardNode)
+    void BillboardRenderer::removeRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_renderBillboards.remove(billboardNode);
+      m_renderBillboards.remove(&billboard);
     }
 
     void BillboardRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(sg::BillboardNode *node)>(util::EventManager::OnAddBillboardNode);
-      eventManager->addSlotToSignal<BillboardRenderer, void (*)(sg::BillboardNode *node), void (BillboardRenderer::*)(sg::BillboardNode *node)>(this, &BillboardRenderer::addRenderComponent, util::EventManager::OnAddBillboardNode);
+      eventManager->addNewSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode);
+      eventManager->addSlotToSignal<BillboardRenderer, void (*)(xBar::BillboardContainer& billboard), void (BillboardRenderer::*)(xBar::BillboardContainer& billboard)>(this, &BillboardRenderer::addRenderComponent, util::EventManager::OnAddBillboardNode);
 
-      eventManager->addNewSignal<void (*)(sg::BillboardNode *node)>(util::EventManager::OnRemoveBillboardNode);
-      eventManager->addSlotToSignal<BillboardRenderer, void (*)(sg::BillboardNode *node), void (BillboardRenderer::*)(sg::BillboardNode *node)>(this, &BillboardRenderer::removeRenderComponent, util::EventManager::OnRemoveBillboardNode);
+      eventManager->addNewSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode);
+      eventManager->addSlotToSignal<BillboardRenderer, void (*)(xBar::BillboardContainer& billboard), void (BillboardRenderer::*)(xBar::BillboardContainer& billboard)>(this, &BillboardRenderer::removeRenderComponent, util::EventManager::OnRemoveBillboardNode);
     }
 	}
 }

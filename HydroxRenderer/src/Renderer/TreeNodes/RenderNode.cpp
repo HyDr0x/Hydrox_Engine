@@ -6,10 +6,13 @@
 
 #include "Renderer/Traverser/InsertGeometryTraverser.h"
 
-#include "Renderer/TreeNodes/RenderNodeTemplates//ArrayDrawCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/ArrayDrawCommand.h"
 #include "Renderer/TreeNodes/RenderNodeTemplates/IndexedDrawCommand.h"
-#include "Renderer/TreeNodes/RenderNodeTemplates/StaticGeometryRenderCommand.h"
-#include "Renderer/TreeNodes/RenderNodeTemplates/SkinnedGeometryRenderCommand.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/StaticMatrixBuffer.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/SkinnedMatrixBuffer.h"
+
+#include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
 
 namespace he
 {
@@ -22,7 +25,9 @@ namespace he
       m_materialCount(0), 
       m_vboSize(0), 
       m_iboSize(0), 
-      m_instanceNumber(0)
+      m_instanceNumber(0),
+      m_drawCommand(nullptr),
+      m_matrixBuffer(nullptr)
     {
       GLuint size = sizeof(Material::MaterialData) * m_maxMaterials;
       m_materialBuffer.createBuffer(size, GL_STATIC_DRAW);
@@ -30,6 +35,15 @@ namespace he
 
     RenderNode::~RenderNode()
     {
+      if(m_drawCommand != nullptr)
+      {
+        delete m_drawCommand;
+      }
+
+      if(m_matrixBuffer != nullptr)
+      {
+        delete m_matrixBuffer;
+      }
     }
 
     bool RenderNode::preTraverse(Traverser* traverser)
@@ -42,61 +56,59 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    void RenderNode::initialize(sg::GeoNode *node, util::SingletonManager *singletonManager, util::ResourceHandle frustumCullingShaderHandle)
+    void RenderNode::initialize(bool skinned, bool indexed, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
       m_materialManager = singletonManager->getService<MaterialManager>();
       m_modelManager = singletonManager->getService<ModelManager>();
 
-      Mesh *mesh = m_modelManager->getObject(node->getMeshHandle());
-      m_primitiveType = mesh->getPrimitiveType();
-      unsigned int vertexStride = mesh->getVertexStride();
+      m_primitiveType = primitiveType;
 
-      if(mesh->getIndexCount() == 0)
-      {
-        m_drawCommand = new ArrayDrawCommand(m_primitiveType, vertexStride);
-      }
-      else
+      if(indexed)
       {
         m_drawCommand = new IndexedDrawCommand(m_primitiveType, vertexStride, GLINDEXTYPE);
       }
-
-      if(dynamic_cast<sg::AnimatedGeoNode*>(node) != nullptr)
+      else
       {
-        m_geometryCommand = new SkinnedGeometryRenderCommand(m_maxBones);
+        m_drawCommand = new ArrayDrawCommand(m_primitiveType, vertexStride);
+      }
+
+      if(skinned)
+      {
+        m_matrixBuffer = new SkinnedMatrixBuffer(m_maxBones);
       }
       else
       {
-        m_geometryCommand = new StaticGeometryRenderCommand();
+        m_matrixBuffer = new StaticMatrixBuffer();
       }
 
-      m_frustumCulling.initialize(singletonManager->getService<ComputeShaderManager>(), frustumCullingShaderHandle, m_maxGeometry);
+      m_frustumCulling.initialize(m_maxGeometry);
     }
 
-    bool RenderNode::insertGeometry(sg::GeoNode *node)
+    bool RenderNode::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      Mesh *mesh = m_modelManager->getObject(node->getMeshHandle());
+      Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
       if(m_instanceNumber >= m_maxGeometry || m_primitiveType != mesh->getPrimitiveType())
       {
         return false;
       }
 
-      if(!m_materialHandles.count(node->getMaterialHandle().getID()))
+      if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
         if(m_materialCount >= m_maxMaterials)
         {
           return false;
         }
 
-        m_materialHandles[node->getMaterialHandle().getID()] = m_materialCount;
+        m_materialHandles[geometryContainer.getMaterialHandle()] = m_materialCount;
 
-        Material *material = m_materialManager->getObject(node->getMaterialHandle());
+        Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
         m_materialBuffer.setData(&material->getMaterialData(), m_materialCount * sizeof(Material::MaterialData), sizeof(Material::MaterialData));
 
         m_materialCount++;
       }
 
-      if(m_meshHandles[node->getMeshHandle()].size() != 0)
+      if(m_meshHandles[geometryContainer.getMeshHandle()].size() != 0)
       {
         m_instanceNumberChanged = true;
       }
@@ -108,32 +120,41 @@ namespace he
         m_iboSize += mesh->getIndexCount() * sizeof(GLuint);
       }
 
-      m_meshHandles[node->getMeshHandle()].push_back(node);
+      m_meshHandles[geometryContainer.getMeshHandle()].push_back(geometryContainer.clone());
       m_instanceNumber++;
 
       return true;
     }
 
-    bool RenderNode::removeGeometry(sg::GeoNode *node)
+    bool RenderNode::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      unsigned int preDeleteSize = m_meshHandles[node->getMeshHandle()].size();
+      unsigned int preDeleteSize = m_meshHandles[geometryContainer.getMeshHandle()].size();
 
-      m_meshHandles[node->getMeshHandle()].remove(node);
+      std::list<xBar::StaticGeometryContainer*>& geometryList = m_meshHandles[geometryContainer.getMeshHandle()];
+      for(std::list<xBar::StaticGeometryContainer*>::const_iterator geometryIterator = geometryList.begin(); geometryIterator != geometryList.end(); geometryIterator++)
+      {
+        if(**geometryIterator == geometryContainer)
+        {
+          delete *geometryIterator;
+          geometryList.erase(geometryIterator);
+          break;
+        }
+      }
 
-      if(preDeleteSize == m_meshHandles[node->getMeshHandle()].size())//the node wasnt in the list --> wrong render node
+      if(preDeleteSize == m_meshHandles[geometryContainer.getMeshHandle()].size())//the node wasnt in the list --> wrong render node
       {
         return false;
       }
 
       m_instanceNumberChanged = true;
 
-      if(m_meshHandles[node->getMeshHandle()].size() == 0)
+      if(m_meshHandles[geometryContainer.getMeshHandle()].size() == 0)
       {
         m_geometryChanged = true;
 
-        m_meshHandles.erase(node->getMeshHandle());
+        m_meshHandles.erase(geometryContainer.getMeshHandle());
 
-        Mesh *mesh = m_modelManager->getObject(node->getMeshHandle());
+        Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
         m_vboSize -= mesh->getVBOSize();
         m_iboSize -= mesh->getIndexCount() * sizeof(GLuint);
@@ -173,7 +194,7 @@ namespace he
     {
       updateBuffer();
 
-      m_geometryCommand->bindTransformationMatrixBuffer();
+      m_matrixBuffer->bindTransformationMatrixBuffer();
 
       m_materialIndexBuffer.bindBuffer(1);
       m_materialBuffer.bindBuffer(1);
@@ -183,7 +204,7 @@ namespace he
       m_materialBuffer.unBindBuffer();
       m_materialIndexBuffer.unbindBuffer(1);
 
-      m_geometryCommand->unbindTransformationMatrixBuffer();
+      m_matrixBuffer->unbindTransformationMatrixBuffer();
     }
 
     void RenderNode::updateBuffer()
@@ -197,15 +218,15 @@ namespace he
       }
 
       unsigned int instanceIndex = 0;
-      for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
+      for(std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
       {
-        for(std::list<sg::GeoNode*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
+        for(std::list<xBar::StaticGeometryContainer*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
         {
-          m_geometryCommand->fillCaches(*geometryIterator, instanceIndex);
+          m_matrixBuffer->fillCaches(*geometryIterator, instanceIndex);
         }
       }
 
-      m_geometryCommand->fillBuffer(instanceIndex);
+      m_matrixBuffer->fillBuffer(instanceIndex);
     }
 
     void RenderNode::resizeBuffer()
@@ -215,7 +236,7 @@ namespace he
         m_drawCommand->createBuffer(m_meshHandles.size(), m_vboSize, m_iboSize);
 
         unsigned int commandIndex = 0;
-        for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, commandIndex++)
+        for(std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, commandIndex++)
         {
           m_drawCommand->fillCaches(commandIndex, meshIterator->second.size(), m_modelManager->getObject(meshIterator->first));
         }
@@ -225,24 +246,24 @@ namespace he
       else if(m_instanceNumberChanged)
       {
         unsigned int commandIndex = 0;
-        for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator commandIterator = m_meshHandles.begin(); commandIterator != m_meshHandles.end(); commandIterator++, commandIndex++)
+        for(std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, commandIndex++)
         {
-          m_drawCommand->updateCommandBuffer(commandIndex, commandIterator->second.size());
+          m_drawCommand->updateCommandBuffer(commandIndex, meshIterator->second.size());
         }
       }
 
-      m_geometryCommand->resizeMatrixBuffer(m_instanceNumber);
+      m_matrixBuffer->resizeMatrixBuffer(m_instanceNumber);
       
       std::vector<GLuint> meshIndices(m_instanceNumber);
       std::vector<GLuint> materialIndexData(m_instanceNumber);
 
       unsigned int meshIndex = 0;
       unsigned int instanceIndex = 0;
-      for(std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshIndex++)
+      for(std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer*>, Less>::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshIndex++)
       {
-        for(std::list<sg::GeoNode*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
+        for(std::list<xBar::StaticGeometryContainer*>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
         {
-          materialIndexData[instanceIndex] = m_materialHandles[(*geometryIterator)->getMaterialHandle().getID()];
+          materialIndexData[instanceIndex] = m_materialHandles[(*geometryIterator)->getMaterialHandle()];
           meshIndices[instanceIndex] = meshIndex;
         }
       }

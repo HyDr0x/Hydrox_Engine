@@ -8,17 +8,21 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Signals/EventManager.h>
 
-#include <SceneGraph/TreeNodes/GeoNode.h>
-
 #include "Renderer/Resources/ResourceManager.hpp"
-
-#include "Renderer/TreeNodes/GroupNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
 
 namespace he
 {
+  namespace xBar
+  {
+    class StaticGeometryContainer;
+    class SkinnedGeometryContainer;
+  }
+
 	namespace renderer
 	{
+    class GroupNode;
+    class RenderNode;
+
     class GeometryRenderer
     {
     public:
@@ -30,8 +34,10 @@ namespace he
 
       void rasterizeGeometry();
 
-      void addRenderComponent(sg::GeoNode *node);
-      void removeRenderComponent(sg::GeoNode *node);
+      void addRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
+      void addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
+      void removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
 
     private:
 

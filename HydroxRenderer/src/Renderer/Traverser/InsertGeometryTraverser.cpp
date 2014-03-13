@@ -9,33 +9,30 @@
 
 #include "Renderer/Resources/Mesh.h"
 
+#include "Renderer/xBarContainer/StaticGeometryContainer.h"
+#include "Renderer/xBarContainer/SkinnedGeometryContainer.h"
+
 namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, util::ResourceHandle frustumShaderHandle) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer, bool skinned) : 
       m_maxMaterials(maxMaterials),
       m_maxGeometry(maxGeometry),
       m_maxBones(maxBones),
       m_singletonManager(singletonManager),
       m_renderNodes(renderNodes),
-      m_frustumShaderHandle(frustumShaderHandle),
-      m_node(nullptr),
+      m_geometryContainer(geometryContainer),
+      m_skinned(skinned),
       m_inserted(false)
     {
-    }
+      Mesh* mesh = m_singletonManager->getService<ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
+      m_vertexDeclaration = mesh->getVertexDeclarationFlags();
+      m_indexed = mesh->getIndexCount() > 0;
+      m_primitiveType = mesh->getPrimitiveType();
+      m_vertexStride = mesh->getVertexStride();
 
-    InsertGeometryTraverser::~InsertGeometryTraverser()
-    {
-    }
-
-    void InsertGeometryTraverser::setNode(sg::GeoNode *node)
-    {
-      m_node = node;
-
-      m_vertexDeclaration = m_singletonManager->getService<ModelManager>()->getObject(m_node->getMeshHandle())->getVertexDeclarationFlags();
-
-      Material *material = m_singletonManager->getService<MaterialManager>()->getObject(m_node->getMaterialHandle());
+      Material *material = m_singletonManager->getService<MaterialManager>()->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
       m_textureHandles.resize(4);
@@ -71,6 +68,10 @@ namespace he
       {
         m_textureHandles[Material::DISPLACEMENTTEX][i] = material->getTextureHandle(Material::DISPLACEMENTTEX, i);
       }
+    }
+
+    InsertGeometryTraverser::~InsertGeometryTraverser()
+    {
     }
 
     bool InsertGeometryTraverser::preTraverse(GroupNode* treeNode)
@@ -150,7 +151,7 @@ namespace he
     bool InsertGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
       m_inserted = false;
-      if(treeNode->insertGeometry(m_node))
+      if(treeNode->insertGeometry(m_geometryContainer))
       {
         m_stopTraversal = true;
         m_inserted = true;
@@ -202,7 +203,7 @@ namespace he
     {
       RenderNode *treeNode = new RenderNode(m_maxMaterials, m_maxGeometry, m_maxBones);
 
-      treeNode->initialize(m_node, m_singletonManager, m_frustumShaderHandle);
+      treeNode->initialize(m_skinned, m_indexed, m_primitiveType, m_vertexStride, m_singletonManager);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -244,7 +245,7 @@ namespace he
     void InsertGeometryTraverser::createNewSibling(RenderNode* sibling)
     {
       RenderNode *treeNode = new RenderNode(m_maxMaterials, m_maxGeometry, m_maxBones);
-      treeNode->initialize(m_node, m_singletonManager, m_frustumShaderHandle);
+      treeNode->initialize(m_skinned, m_indexed, m_primitiveType, m_vertexStride, m_singletonManager);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

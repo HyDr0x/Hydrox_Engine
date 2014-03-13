@@ -57,17 +57,12 @@ namespace he
 	    util::Matrix<float, 3> getTexTransformationMatrix();
 	    util::ResourceHandle getTextureID() const;
 
-      util::Matrix<float, 4> getTransformationMatrix() const;
-      void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
-
       void setRenderable(bool renderable);
 	    bool getRenderable() const;
 
     private:
 
       util::EventManager *m_eventManager;
-
-      util::Matrix<float, 4> m_trfMatrix;//the tranformation util::Matrix
 
       util::Vector<unsigned int, 2> m_animNumber;
 	    util::Vector<unsigned int, 2> m_animCount;

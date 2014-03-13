@@ -1,5 +1,11 @@
 #include "Renderer/Pipeline/RenderManager.h"
 
+#include <XBar/BillboardContainer.h>
+#include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
+#include <XBar/LightContainer.h>
+#include <XBar/ParticleContainer.h>
+
 namespace he
 {
 	namespace renderer
@@ -74,252 +80,79 @@ namespace he
       m_spriteRenderer.render();
     }
 
-    void RenderManager::oldRenderPath(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
-    {/*
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-      util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-      util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
-
-      ////////////////////////////////////////////CULL 3D Objects////////////////////////////////////////////
-
-      Mesh *renderMesh;
-      Material *renderMaterial;
-      RenderShader *renderShader;
-      Texture *renderTexture;
-
-      std::vector<util::Matrix<float, 4>> transformMatrices(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      std::vector<util::Vector<float, 4>> bbMin(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      std::vector<util::Vector<float, 4>> bbMax(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      std::vector<unsigned int> culledAABB;
-
-      unsigned int k = 0;
-
-      //collect culling data for static 3D Objects
-      for(std::list<sg::GeoNode*>::const_iterator geometryIterator = m_renderGeometry.begin(); geometryIterator != m_renderGeometry.end(); geometryIterator++, k++)
-      {
-        renderMesh = m_modelManager->getObject((*geometryIterator)->getMeshHandle());//SAVE ALLE MESHES, NO NEED TO CALL IT THEN ANYMORE, REPLACE THE OBSERVER THROUGH A ONE ELEMENT 
-
-        transformMatrices[k] = (*geometryIterator)->getTransformationMatrix();
-        memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
-        memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-      }
-      //collect culling data for skinned 3D Objects
-      for(std::list<sg::AnimatedGeoNode*>::const_iterator animatedGeometryIterator = m_renderAnimatedGeometry.begin(); animatedGeometryIterator != m_renderAnimatedGeometry.end(); animatedGeometryIterator++, k++)
-      {
-        renderMesh = m_modelManager->getObject((*animatedGeometryIterator)->getMeshHandle());
-
-        transformMatrices[k] = (*animatedGeometryIterator)->getTransformationMatrix();
-        memcpy(&bbMin[k][0], &renderMesh->getBBMin()[0], sizeof(util::Vector<float, 3>));//USE INSTANCING HERE, NEED BBOXES ONLY ONCE PER MESH
-        memcpy(&bbMax[k][0], &renderMesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-      }
-
-      culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size());
-      m_frustumCullingGPU.cullAABB(transformMatrices, bbMin, bbMax, culledAABB);
-      //culledAABB.resize(m_renderGeometry.size() + m_renderAnimatedGeometry.size(), 1);
-
-	    ////////////////////////////////////////////RENDER BILLBOARDS////////////////////////////////////////////
-      Billboard *renderBillboard;
-
-	    glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-      glEnableVertexAttribArray(RenderShader::SPECIAL0);
- 
-      RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardShaderHandle);
-	    billboardShader->useShader();
-
-      billboardShader->setUniform(1, GL_FLOAT_MAT4, &viewMatrix[0][0]);
-      billboardShader->setUniform(2, GL_FLOAT_MAT4, &projectionMatrix[0][0]);
-
-	    for(std::list<sg::BillboardNode*>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
-	    {
-        renderBillboard = m_billboardManager->getObject((*billboarditerator)->getBillboardIndex());
-        if(renderBillboard->getRenderable())
-        {
-          renderTexture = m_textureManager->getObject(renderBillboard->getTextureID());
-
-          renderTexture->setTexture(6, 0);
-
-          util::Matrix<float, 4> worldMatrix = (*billboarditerator)->getTransformationMatrix();
-		      util::Matrix<float, 3> tmpTexTrfMatrix = renderBillboard->getTexTransformationMatrix();
-          util::Vector<float, 2> scale = renderBillboard->getScale();
-		      util::Vector<float, 3> translate = renderBillboard->getPosition();
-          billboardShader->setUniform(0, GL_FLOAT_MAT4, &worldMatrix[0][0]);
-		      billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
-		      billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
-		      billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
-
-          glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
-          glDrawArrays(GL_POINTS, 0, 1);
-        }
-	    }
-    
-      glDisable(GL_BLEND);
-
-	    ////////////////////////////////////////////RENDER OPAQUE 2D Sprites////////////////////////////////////////////
-
-      glClear(GL_DEPTH_BUFFER_BIT);
-
-      Sprite *renderSprite;
-
-      RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
-	    spriteShader->useShader();
-
-	    for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_opaqueSpriteIDs.begin(); spriteIDIterator != m_opaqueSpriteIDs.end(); spriteIDIterator++)
-      {
-        renderSprite = m_spriteManager->getObject(*spriteIDIterator);
-        if(renderSprite->getRenderable())
-        {
-          renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
-
-          renderTexture->setTexture(3, 0);
-		
-		      util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
-		      util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-          float z = renderSprite->getLayer() / (const float)m_maxLayer;
-		      spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		      spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-          spriteShader->setUniform(2, GL_FLOAT, &z);
-
-          glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
-		      glDrawArrays(GL_POINTS, 0, 1);
-        }
-	    }
-
-      ////////////////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
-
-      for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)//resort all sprites according to their layer if their layer has been changed
-      {
-        for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
-        {
-          renderSprite = m_spriteManager->getObject(*spriteIDIterator);
-          if(renderSprite->getLayerChanged())
-          {
-            m_transparentSpriteIDs[renderSprite->getLayer()].push_back(*spriteIDIterator);
-            renderSprite->spriteSorted();
-            spriteIDIterator = m_transparentSpriteIDs[i].erase(spriteIDIterator);
-
-            if(spriteIDIterator == m_transparentSpriteIDs[i].end())
-            {
-              break;
-            }
-          }
-        }
-      }
-
-      glDepthMask(GL_FALSE);
-
-      glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-      for(unsigned int i = 0; i < m_transparentSpriteIDs.size(); i++)
-      {
-        for(std::list<util::ResourceHandle>::iterator spriteIDIterator = m_transparentSpriteIDs[i].begin(); spriteIDIterator != m_transparentSpriteIDs[i].end(); spriteIDIterator++)
-        {
-          renderSprite = m_spriteManager->getObject(*spriteIDIterator);
-          if(renderSprite->getRenderable())
-          {
-            renderTexture = m_textureManager->getObject(renderSprite->getTextureID());
-
-            renderTexture->setTexture(3, 0);
-		
-		        util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
-		        util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-            float z = renderSprite->getLayer() / (const float)m_maxLayer;
-		        spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		        spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-            spriteShader->setUniform(2, GL_FLOAT, &z);
-
-            glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
-		        glDrawArrays(GL_POINTS, 0, 1);
-          }
-	      }
-      }
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glDisableVertexAttribArray(RenderShader::SPECIAL0);
-
-      glDisable(GL_BLEND);
-
-      glDepthMask(GL_TRUE);
-
-      m_cameraParameterUBO.unBindBuffer();*/
-    }
-
-    void RenderManager::addRenderComponent(Sprite* sprite)
+    void RenderManager::addRenderComponent(Sprite *sprite)
     {
       m_spriteRenderer.addRenderComponent(sprite);
     }
 
-    void RenderManager::addRenderComponent(sg::BillboardNode *billboardNode)
+    void RenderManager::addRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_billboardRenderer.addRenderComponent(billboardNode);
+      m_billboardRenderer.addRenderComponent(billboard);
     }
 
-    void RenderManager::addRenderComponent(sg::GeoNode *geoNode)
+    void RenderManager::addRenderComponent(xBar::StaticGeometryContainer& staticGeometry)
     {
-      m_geometryRasterizer.addRenderComponent(geoNode);
+      m_geometryRasterizer.addRenderComponent(staticGeometry);
     }
 
-    void RenderManager::addRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
+    void RenderManager::addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry)
     {
-      m_geometryRasterizer.addRenderComponent(animatedGeoNode);
+      m_geometryRasterizer.addRenderComponent(skinnedGeometry);
     }
 
-    void RenderManager::addRenderComponent(sg::LightNode *lightNode)
+    void RenderManager::addRenderComponent(xBar::LightContainer& light)
     {
-      m_renderLight.push_back(lightNode);
+      m_renderLight.push_back(light.clone());
     }
 
-    void RenderManager::addRenderComponent(sg::ParticleNode *particleNode)
+    void RenderManager::addRenderComponent(xBar::ParticleContainer& particle)
     {
-      m_renderParticle.push_back(particleNode);
+      m_renderParticle.push_back(particle.clone());
     }
 
-    void RenderManager::removeRenderComponent(sg::BillboardNode *billboardNode)
-    {
-      m_billboardRenderer.removeRenderComponent(billboardNode);
-    }
-
-    void RenderManager::removeRenderComponent(Sprite* sprite)
+    void RenderManager::removeRenderComponent(Sprite *sprite)
     {
       m_spriteRenderer.removeRenderComponent(sprite);
     }
 
-    void RenderManager::removeRenderComponent(sg::GeoNode *geoNode)
+    void RenderManager::removeRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_geometryRasterizer.removeRenderComponent(geoNode);
+      m_billboardRenderer.removeRenderComponent(billboard);
     }
 
-    void RenderManager::removeRenderComponent(sg::AnimatedGeoNode *animatedGeoNode)
+    void RenderManager::removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry)
     {
-      m_geometryRasterizer.removeRenderComponent(animatedGeoNode);
+      m_geometryRasterizer.removeRenderComponent(staticGeometry);
     }
 
-    void RenderManager::removeRenderComponent(sg::LightNode *lightNode)
+    void RenderManager::removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry)
     {
-      m_renderLight.remove(lightNode);
+      m_geometryRasterizer.removeRenderComponent(skinnedGeometry);
     }
 
-    void RenderManager::removeRenderComponent(sg::ParticleNode *particleNode)
+    void RenderManager::removeRenderComponent(xBar::LightContainer& light)
     {
-      m_renderParticle.remove(particleNode);
+      m_renderLight.remove(light.clone());
+    }
+
+    void RenderManager::removeRenderComponent(xBar::ParticleContainer& particle)
+    {
+      m_renderParticle.remove(particle.clone());
     }
 
     void RenderManager::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(sg::LightNode *node)>(util::EventManager::OnAddLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(sg::LightNode *node), void (RenderManager::*)(sg::LightNode *node)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
+      eventManager->addNewSignal<void (*)(xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::LightContainer& light), void (RenderManager::*)(xBar::LightContainer& light)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
 
-      eventManager->addNewSignal<void (*)(sg::ParticleNode *node)>(util::EventManager::OnAddParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(sg::ParticleNode *node), void (RenderManager::*)(sg::ParticleNode *node)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
+      eventManager->addNewSignal<void (*)(xBar::ParticleContainer& particle)>(util::EventManager::OnAddParticleTransmitterNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::ParticleContainer& particle), void (RenderManager::*)(xBar::ParticleContainer& particle)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
 
-      eventManager->addNewSignal<void (*)(sg::LightNode *node)>(util::EventManager::OnRemoveLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(sg::LightNode *node), void (RenderManager::*)(sg::LightNode *node)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
+      eventManager->addNewSignal<void (*)(xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::LightContainer& light), void (RenderManager::*)(xBar::LightContainer& light)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
 
-      eventManager->addNewSignal<void (*)(sg::ParticleNode *node)>(util::EventManager::OnRemoveParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(sg::ParticleNode *node), void (RenderManager::*)(sg::ParticleNode *node)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
+      eventManager->addNewSignal<void (*)(xBar::ParticleContainer& particle)>(util::EventManager::OnRemoveParticleTransmitterNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::ParticleContainer& particle), void (RenderManager::*)(xBar::ParticleContainer& particle)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
     }
 	}
 }

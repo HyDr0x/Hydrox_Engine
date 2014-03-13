@@ -3,9 +3,6 @@
 
 #include <vector>
 
-#include <SceneGraph/TreeNodes/GeoNode.h>
-#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 

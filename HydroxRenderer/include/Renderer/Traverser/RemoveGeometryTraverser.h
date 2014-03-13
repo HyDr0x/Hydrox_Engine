@@ -3,9 +3,6 @@
 
 #include <vector>
 
-#include <SceneGraph/TreeNodes/GeoNode.h>
-#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
@@ -15,15 +12,16 @@
 
 namespace he
 {
+  namespace xBar  {    class StaticGeometryContainer;
+    class SkinnedGeometryContainer;  }
+
 	namespace renderer
 	{    class RemoveGeometryTraverser : public Traverser
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer);
       virtual ~RemoveGeometryTraverser();
-
-      void setNode(sg::GeoNode *node);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
       virtual void postTraverse(VertexDeclarationNode* treeNode);
@@ -48,7 +46,7 @@ namespace he
 
       std::list<RenderNode*>& m_renderNodes;
 
-      sg::GeoNode *m_node;
+      xBar::StaticGeometryContainer& m_geometryContainer;
 
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;

@@ -1,23 +1,23 @@
-#ifndef SKINNEDGEOMETRYRENDERCOMMAND_H_
-#define SKINNEDGEOMETRYRENDERCOMMAND_H_
+#ifndef SKINNEDMATRIXBUFFER_H_
+#define SKINNEDMATRIXBUFFER_H_
 
 #include <vector>
 
-#include "Renderer/TreeNodes/RenderNodeTemplates/GeometryCommandInterface.h"
+#include "Renderer/TreeNodes/RenderNodeTemplates/MatrixBufferInterface.h"
 
 namespace he
 {
 	namespace renderer
 	{
-    class SkinnedGeometryRenderCommand : public GeometryCommandInterface
+    class SkinnedMatrixBuffer : public MatrixBufferInterface
     {
     public:
 
-      SkinnedGeometryRenderCommand(unsigned int maxBones);
-      ~SkinnedGeometryRenderCommand();
+      SkinnedMatrixBuffer(unsigned int maxBones);
+      ~SkinnedMatrixBuffer();
 
       void resizeMatrixBuffer(unsigned int numInstances);
-      void fillCaches(sg::GeoNode *geoNode, unsigned int instanceCounter);
+      void fillCaches(xBar::StaticGeometryContainer *geometryContainer, unsigned int instanceCounter);
       void fillBuffer(unsigned int numInstances);
       void bindTransformationMatrixBuffer();
       void bindBBoxMatrixBuffer();

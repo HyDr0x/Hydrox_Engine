@@ -7,6 +7,7 @@
 
 #include "SceneGraph/Traverser/TransformTraverser.h"
 #include "SceneGraph/Traverser/DeleteTraverser.h"
+#include "SceneGraph/Traverser/RemoveNodesTraverser.h"
 
 #include "SceneGraph/TreeNodes/TransformNode.h"
 
@@ -24,6 +25,7 @@ namespace he
 
     RenderScene::~RenderScene()
     {
+      m_sceneCacheManager.removeSubTree(m_rootNode);
     }
 
     GroupNode* RenderScene::addParentNode(unsigned int eventID, TreeNode* destinationNode, GroupNode* sourceNode)

@@ -4,6 +4,8 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
+#include <XBar/StaticGeometryContainer.h>
+
 namespace he
 {
 	namespace sg
@@ -77,7 +79,17 @@ namespace he
 
     void GeoNode::setMeshHandle(util::ResourceHandle meshHandle)
     {
+      if(m_renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+      }
+
       m_meshHandle = meshHandle;
+
+      if(m_renderable)
+      {
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+      }
     }
 
     util::ResourceHandle GeoNode::getMeshHandle() const
@@ -89,14 +101,14 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnRemoveGeometryNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_materialHandle = materialHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnAddGeometryNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -119,11 +131,11 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnAddGeometryNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(GeoNode *node)>(util::EventManager::OnRemoveGeometryNode)->execute(this);
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_renderable = renderable;

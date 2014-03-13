@@ -224,7 +224,8 @@ namespace he
 
     bool TransformTraverser::preTraverse(BillboardNode* treeNode)
     {
-      treeNode->setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      treeNode->setTranslation(m_translateStack.top());
+      treeNode->setScale(m_scaleStack.top());
 
       return true;
     }

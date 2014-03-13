@@ -8,9 +8,6 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <SceneGraph/TreeNodes/GeoNode.h>
-#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
-
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include "Renderer/Buffer/GPUBuffer.h"
@@ -22,11 +19,17 @@
 
 namespace he
 {
+  namespace xBar
+  {
+    class SkinnedGeometryContainer;
+    class StaticGeometryContainer;
+  }
+
 	namespace renderer
 	{
     class Traverser;
     class DrawCommandInterface;
-    class GeometryCommandInterface;
+    class MatrixBufferInterface;
 
     class RenderNode : public TreeNode
     {
@@ -38,10 +41,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      void initialize(sg::GeoNode *node, util::SingletonManager *singletonManager, util::ResourceHandle frustumCullingShaderHandle);
+      void initialize(bool skinned, bool indexed, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
-      bool insertGeometry(sg::GeoNode *node);
-      bool removeGeometry(sg::GeoNode *node);
+      bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       bool isEmpty();
 
@@ -56,7 +59,7 @@ namespace he
       MaterialManager *m_materialManager;
       ModelManager *m_modelManager;
 
-      GeometryCommandInterface *m_geometryCommand;
+      MatrixBufferInterface *m_matrixBuffer;
       DrawCommandInterface *m_drawCommand;
 
       FrustumCullingGPU m_frustumCulling;
@@ -91,8 +94,8 @@ namespace he
         }
       };
 
-      std::map<unsigned int, unsigned int> m_materialHandles;
-      std::map<util::ResourceHandle, std::list<sg::GeoNode*>, Less> m_meshHandles;
+      std::map<util::ResourceHandle, unsigned int, Less> m_materialHandles;
+      std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer*>, Less> m_meshHandles;
     };
 	}
 }

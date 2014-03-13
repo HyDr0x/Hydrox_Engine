@@ -32,16 +32,16 @@ namespace he
 
       virtual bool isGeoNode();
 
-      void setMeshHandle(util::ResourceHandle meshHandle);
+      virtual void setMeshHandle(util::ResourceHandle meshHandle);
       util::ResourceHandle getMeshHandle() const;
 
-      void setMaterialHandle(util::ResourceHandle materialHandle);
+      virtual void setMaterialHandle(util::ResourceHandle materialHandle);
       util::ResourceHandle getMaterialHandle() const;
 
       util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
 
-      void setRenderable(bool renderable);
+      virtual void setRenderable(bool renderable);
 	    bool getRenderable() const;
 
 	    bool getTransparency() const;

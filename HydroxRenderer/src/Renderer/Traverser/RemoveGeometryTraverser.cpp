@@ -7,47 +7,23 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 #include "Renderer/TreeNodes/RenderNode.h"
 
+#include "Renderer/xBarContainer/StaticGeometryContainer.h"
+#include "Renderer/xBarContainer/SkinnedGeometryContainer.h"
+
 namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes) : m_renderNodes(renderNodes), m_node(nullptr)
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer) : 
+      m_renderNodes(renderNodes), 
+      m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<ModelManager>();
       m_materialManager = singletonManager->getService<MaterialManager>();
-    }
 
-    RemoveGeometryTraverser::~RemoveGeometryTraverser()
-    {
-    }
+      m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
 
-    void RemoveGeometryTraverser::doTraverseDown(TreeNode* treeNode)
-    {
-      while(treeNode != nullptr)
-      {
-        if(treeNode->preTraverse(this))
-        {
-          doTraverseDown(treeNode->getFirstChild());
-        }
-
-        TreeNode *node = treeNode->getNextSibling();
-        treeNode->postTraverse(this);
-        treeNode = node;
-
-        if(m_stopTraversal)
-        {
-          return;
-        }
-      }
-    }
-
-    void RemoveGeometryTraverser::setNode(sg::GeoNode *node)
-    {
-      m_node = node;
-
-      m_vertexDeclaration = m_modelManager->getObject(m_node->getMeshHandle())->getVertexDeclarationFlags();
-
-      Material *material = m_materialManager->getObject(m_node->getMaterialHandle());
+      Material *material = m_materialManager->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
       m_textureHandles.resize(4);
@@ -82,6 +58,30 @@ namespace he
       for(unsigned int i = 0; i < texNum; i++)
       {
         m_textureHandles[Material::DISPLACEMENTTEX][i] = material->getTextureHandle(Material::DISPLACEMENTTEX, i);
+      }
+    }
+
+    RemoveGeometryTraverser::~RemoveGeometryTraverser()
+    {
+    }
+
+    void RemoveGeometryTraverser::doTraverseDown(TreeNode* treeNode)
+    {
+      while(treeNode != nullptr)
+      {
+        if(treeNode->preTraverse(this))
+        {
+          doTraverseDown(treeNode->getFirstChild());
+        }
+
+        TreeNode *node = treeNode->getNextSibling();
+        treeNode->postTraverse(this);
+        treeNode = node;
+
+        if(m_stopTraversal)
+        {
+          return;
+        }
       }
     }
 
@@ -126,7 +126,7 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
-      return treeNode->removeGeometry(m_node);
+      return treeNode->removeGeometry(m_geometryContainer);
     }
 
     void RemoveGeometryTraverser::postTraverse(RenderNode* treeNode)
