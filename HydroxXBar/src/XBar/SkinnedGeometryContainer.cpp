@@ -24,11 +24,6 @@ namespace he
       return new SkinnedGeometryContainer(m_boneTransformMatrices, m_inverseBindPoseMatrices, m_trfMatrix, m_materialHandle, m_meshHandle);
     }
 
-    bool SkinnedGeometryContainer::operator ==(const SkinnedGeometryContainer& o)
-    {
-      return m_inverseBindPoseMatrices == o.m_inverseBindPoseMatrices && m_boneTransformMatrices == o.m_boneTransformMatrices && StaticGeometryContainer::operator==(o);
-    }
-
     std::vector<util::Matrix<float, 4>> SkinnedGeometryContainer::getSkinningMatrices()
     {
       std::vector<util::Matrix<float, 4>> skinningMatrices;
@@ -40,6 +35,24 @@ namespace he
       }
 
       return skinningMatrices;
+    }
+
+    void SkinnedGeometryContainer::createHash()
+    {
+      std::vector<unsigned char> data(sizeof(void*) * 3 + sizeof(unsigned int) * 2);
+
+      unsigned int id;
+
+      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 1], &m_boneTransformMatrices, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 2], &m_inverseBindPoseMatrices, sizeof(void*));
+      id = m_materialHandle.getID();
+      memcpy(&data[sizeof(void*) * 3], &id, sizeof(unsigned int));
+      id = m_meshHandle.getID();
+      memcpy(&data[sizeof(void*) * 3 + sizeof(unsigned int)], &id, sizeof(unsigned int));
+      
+
+      m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }
 }

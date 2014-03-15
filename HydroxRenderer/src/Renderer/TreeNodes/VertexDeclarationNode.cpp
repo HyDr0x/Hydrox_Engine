@@ -1,6 +1,6 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
-#include "Renderer/Traverser/InsertGeometryTraverser.h"
+#include "Renderer/Traverser/Traverser.h"
 
 namespace he
 {

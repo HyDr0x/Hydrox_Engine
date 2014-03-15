@@ -1,6 +1,6 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 
-#include "Renderer/Traverser/InsertGeometryTraverser.h"
+#include "Renderer/Traverser/Traverser.h"
 
 #include "Renderer/Resources/Material.h"
 

@@ -24,11 +24,11 @@ namespace he
 
       SkinnedGeometryContainer* clone();
 
-      bool operator ==(const SkinnedGeometryContainer& o);
-
       std::vector<util::Matrix<float, 4>> getSkinningMatrices();
 
     private:
+
+      void createHash();
 
       std::vector<util::Matrix<float, 4>> *m_boneTransformMatrices;
       std::vector<util::Matrix<float, 4>> *m_inverseBindPoseMatrices;

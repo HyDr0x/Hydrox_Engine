@@ -6,11 +6,13 @@
 
 #include "XBar/DLLExport.h"
 
+#include "XBar/AContainer.h"
+
 namespace he
 {
 	namespace xBar
 	{
-    class GRAPHICAPI BillboardContainer
+    class GRAPHICAPI BillboardContainer : public AContainer
     {
     public:
 
@@ -26,8 +28,6 @@ namespace he
 
       BillboardContainer* clone();
 
-      bool operator ==(const BillboardContainer& o);
-
       util::ResourceHandle getTextureHandle() const;
 
       util::Vector<float, 3> getPosition();
@@ -36,6 +36,8 @@ namespace he
       util::Matrix<float, 3> getTexTransformationMatrix();
 
     private:
+
+      void createHash();
 
       util::Vector<unsigned int, 2>& m_animNumber;
 	    util::Vector<unsigned int, 2>& m_animCount;

@@ -1,36 +1,58 @@
 #include "Renderer/Traverser/InsertGeometryTraverser.h"
 
+#include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 #include "Renderer/TreeNodes/GroupNode.h"
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+//#include "Renderer/TreeNodes/RenderNodeDecorator/RenderNode.h"
 
 #include "Renderer/Resources/Mesh.h"
-
-#include "Renderer/xBarContainer/StaticGeometryContainer.h"
-#include "Renderer/xBarContainer/SkinnedGeometryContainer.h"
 
 namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer, bool skinned) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer, bool skinned) : 
       m_maxMaterials(maxMaterials),
       m_maxGeometry(maxGeometry),
       m_maxBones(maxBones),
       m_singletonManager(singletonManager),
       m_renderNodes(renderNodes),
       m_geometryContainer(geometryContainer),
-      m_skinned(skinned),
       m_inserted(false)
     {
       Mesh* mesh = m_singletonManager->getService<ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
-      m_indexed = mesh->getIndexCount() > 0;
       m_primitiveType = mesh->getPrimitiveType();
       m_vertexStride = mesh->getVertexStride();
+
+      if(mesh->getIndexCount() > 0)
+      {
+        if(skinned)
+        {
+          m_nodeType = SkinnedIndexedNode;
+        }
+        else
+        {
+          m_nodeType = NonSkinnedIndexedNode;
+        }
+      }
+      else
+      {
+        if(skinned)
+        {
+          m_nodeType = SkinnedNonIndexedNode;
+        }
+        else
+        {
+          m_nodeType = NonSkinnedNonIndexedNode;
+        }
+      }
 
       Material *material = m_singletonManager->getService<MaterialManager>()->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
@@ -148,7 +170,7 @@ namespace he
       }
     }
 
-    bool InsertGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool InsertGeometryTraverser::preTraverse(IRenderNode* treeNode)
     {
       m_inserted = false;
       if(treeNode->insertGeometry(m_geometryContainer))
@@ -160,7 +182,7 @@ namespace he
       return false;
     }
 
-    void InsertGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void InsertGeometryTraverser::postTraverse(IRenderNode* treeNode)
     {
       if(!m_inserted && treeNode->getNextSibling() == nullptr)
       {
@@ -201,9 +223,7 @@ namespace he
 
     void InsertGeometryTraverser::createNewChildNode(VertexDeclarationNode* parent)
     {
-      RenderNode *treeNode = new RenderNode(m_maxMaterials, m_maxGeometry, m_maxBones);
-
-      treeNode->initialize(m_skinned, m_indexed, m_primitiveType, m_vertexStride, m_singletonManager);
+      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -242,10 +262,9 @@ namespace he
       treeNode->setParent(sibling->getParent());
     }
 
-    void InsertGeometryTraverser::createNewSibling(RenderNode* sibling)
+    void InsertGeometryTraverser::createNewSibling(IRenderNode* sibling)
     {
-      RenderNode *treeNode = new RenderNode(m_maxMaterials, m_maxGeometry, m_maxBones);
-      treeNode->initialize(m_skinned, m_indexed, m_primitiveType, m_vertexStride, m_singletonManager);
+      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

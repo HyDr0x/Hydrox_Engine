@@ -5,7 +5,7 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
 {
@@ -219,14 +219,15 @@ namespace he
       }
     }
 
-    bool RenderGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(IRenderNode* treeNode)
     {
+      treeNode->updateBuffer();
       treeNode->rasterizeGeometry();
 
       return true;
     }
 
-    void RenderGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderGeometryTraverser::postTraverse(IRenderNode* treeNode)
     {
     }
 	}

@@ -4,7 +4,7 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
-#include "SceneGraph/XBarContainer/ParticleContainer.h"
+#include <XBar/ParticleContainer.h>
 
 namespace he
 {

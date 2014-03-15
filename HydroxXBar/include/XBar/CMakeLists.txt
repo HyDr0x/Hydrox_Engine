@@ -1,6 +1,7 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/LightContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleContainer.h 

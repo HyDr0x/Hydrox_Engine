@@ -30,11 +30,6 @@ namespace he
       return new BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle);
     }
 
-    bool BillboardContainer::operator ==(const BillboardContainer& o)
-    {
-      return m_translate == o.m_translate && m_scale == o.m_scale && m_animNumber == o.m_animNumber && m_animCount == o.m_animCount && m_texStart == o.m_texStart && m_texEnd == o.m_texEnd && m_textureHandle == o.m_textureHandle;
-    }
-
     util::ResourceHandle BillboardContainer::getTextureHandle() const
     {
       return m_textureHandle;
@@ -58,6 +53,23 @@ namespace he
       return util::Matrix<float,3>(width/m_animNumber[0],0.0f,(static_cast<float>(m_animCount[0])/static_cast<float>(m_animNumber[0]))*width+m_texStart[0], 
 					      0.0f,height/m_animNumber[1],(static_cast<float>(m_animCount[1])/static_cast<float>(m_animNumber[1]))*height+m_texStart[1], 
 					      0.0f,0.0f,1.0f);
+    }
+
+    void BillboardContainer::createHash()
+    {
+      std::vector<unsigned char> data(sizeof(void*) * 6 + sizeof(unsigned int));
+
+      unsigned int id = m_textureHandle.getID();;
+
+      memcpy(&data[0], &m_animNumber, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 1], &m_animCount, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 2], &m_texStart, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 3], &m_texEnd, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 4], &m_scale, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 5], &m_translate, sizeof(void*));
+      memcpy(&data[sizeof(void*) * 6], &id, sizeof(unsigned int));
+
+      m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }
 }

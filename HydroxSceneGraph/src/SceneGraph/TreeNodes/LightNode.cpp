@@ -4,7 +4,7 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
-#include "SceneGraph/XBarContainer/LightContainer.h"
+#include <XBar/LightContainer.h>
 
 namespace he
 {

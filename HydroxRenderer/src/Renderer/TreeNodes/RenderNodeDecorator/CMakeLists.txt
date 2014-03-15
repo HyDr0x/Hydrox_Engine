@@ -1,0 +1,13 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ARenderNodeDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/MaterialDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderNode.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderNodeFactory.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryDecorator.cpp 
+	PARENT_SCOPE 
+)

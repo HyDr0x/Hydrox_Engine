@@ -20,11 +20,6 @@ namespace he
       return new StaticGeometryContainer(m_trfMatrix, m_materialHandle, m_meshHandle);
     }
 
-    bool StaticGeometryContainer::operator ==(const StaticGeometryContainer& o)
-    {
-      return m_materialHandle == o.m_materialHandle && m_meshHandle == o.m_meshHandle && m_trfMatrix == o.m_trfMatrix;
-    }
-
     util::ResourceHandle StaticGeometryContainer::getMaterialHandle()
     {
       return m_materialHandle;
@@ -38,6 +33,21 @@ namespace he
     util::Matrix<float, 4> StaticGeometryContainer::getTransformationMatrix()
     {
       return *m_trfMatrix;
+    }
+
+    void StaticGeometryContainer::createHash()
+    {
+      std::vector<unsigned char> data(sizeof(void*) + sizeof(unsigned int) * 2);
+
+      unsigned int id;
+
+      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+      id = m_materialHandle.getID();
+      memcpy(&data[sizeof(void*)], &id, sizeof(unsigned int));
+      id = m_meshHandle.getID();
+      memcpy(&data[sizeof(void*) + sizeof(unsigned int)], &id, sizeof(unsigned int));
+
+      m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }
 }

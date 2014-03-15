@@ -1,0 +1,14 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ARenderNodeDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IRenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/MaterialDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderNodeFactory.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryDecorator.h 
+	PARENT_SCOPE 
+)

@@ -1,20 +1,21 @@
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
 
+#include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
-
-#include "Renderer/xBarContainer/StaticGeometryContainer.h"
-#include "Renderer/xBarContainer/SkinnedGeometryContainer.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+//#include "Renderer/TreeNodes/RenderNodeDecorator/RenderNode.h"
 
 namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer) : 
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer) : 
       m_renderNodes(renderNodes), 
       m_geometryContainer(geometryContainer)
     {
@@ -124,12 +125,12 @@ namespace he
       }
     }
 
-    bool RemoveGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RemoveGeometryTraverser::preTraverse(IRenderNode* treeNode)
     {
       return treeNode->removeGeometry(m_geometryContainer);
     }
 
-    void RemoveGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RemoveGeometryTraverser::postTraverse(IRenderNode* treeNode)
     {
       if(treeNode->isEmpty())
       {

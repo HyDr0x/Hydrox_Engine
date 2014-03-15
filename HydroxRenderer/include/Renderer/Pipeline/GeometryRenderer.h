@@ -21,7 +21,7 @@ namespace he
 	namespace renderer
 	{
     class GroupNode;
-    class RenderNode;
+    class IRenderNode;
 
     class GeometryRenderer
     {
@@ -45,7 +45,7 @@ namespace he
 
       void frustumCulling();
 
-      std::list<RenderNode*> m_renderNodes;
+      std::list<IRenderNode*> m_renderNodes;
       util::ResourceHandle m_frustumCullingShaderHandle;
 
       GLuint m_meshVAO;

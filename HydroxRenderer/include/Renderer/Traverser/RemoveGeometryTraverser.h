@@ -16,11 +16,11 @@ namespace he
     class SkinnedGeometryContainer;  }
 
 	namespace renderer
-	{    class RemoveGeometryTraverser : public Traverser
+	{    class IRenderNode;    class RenderNode;    class RemoveGeometryTraverser : public Traverser
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer);
       virtual ~RemoveGeometryTraverser();
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
@@ -32,8 +32,8 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual void postTraverse(IRenderNode* treeNode);
 
     private:
 
@@ -44,7 +44,7 @@ namespace he
       ModelManager *m_modelManager;
 	    MaterialManager *m_materialManager;
 
-      std::list<RenderNode*>& m_renderNodes;
+      std::list<IRenderNode*>& m_renderNodes;
 
       xBar::StaticGeometryContainer& m_geometryContainer;
 

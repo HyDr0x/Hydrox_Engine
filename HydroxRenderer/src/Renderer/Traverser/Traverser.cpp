@@ -3,6 +3,8 @@
 #include "Renderer/TreeNodes/TreeNode.h"
 #include "Renderer/TreeNodes/GroupNode.h"
 
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+
 namespace he
 {
 	namespace renderer
@@ -88,12 +90,12 @@ namespace he
     {
     }
 
-    bool Traverser::preTraverse(RenderNode* treeNode)
+    bool Traverser::preTraverse(IRenderNode* treeNode)
     {
       return true;
     }
 
-    void Traverser::postTraverse(RenderNode* treeNode)
+    void Traverser::postTraverse(IRenderNode* treeNode)
     {
     }
 	}

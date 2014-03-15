@@ -5,11 +5,13 @@
 
 #include "XBar/DLLExport.h"
 
+#include "XBar/AContainer.h"
+
 namespace he
 {
 	namespace xBar
 	{
-    class GRAPHICAPI LightContainer
+    class GRAPHICAPI LightContainer : public AContainer
     {
     public:
 
@@ -18,13 +20,13 @@ namespace he
 
       LightContainer* clone();
 
-      bool operator ==(const LightContainer& o);
-
       util::Matrix<float, 4> getTransformationMatrix();
 
     private:
 
-      util::Matrix<float, 4> m_trfMatrix;
+      void createHash();
+
+      util::Matrix<float, 4> *m_trfMatrix;
     };
   }
 }

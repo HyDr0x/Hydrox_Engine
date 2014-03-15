@@ -11,7 +11,7 @@
 #include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/TreeNodes/GroupNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
 {
@@ -136,7 +136,7 @@ namespace he
       ComputeShader *frustumCullingShader = m_singletonManager->getService<ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
 
-      for(std::list<RenderNode*>::const_iterator nodeIterator = m_renderNodes.begin(); nodeIterator != m_renderNodes.end(); nodeIterator++)
+      for(std::list<IRenderNode*>::const_iterator nodeIterator = m_renderNodes.begin(); nodeIterator != m_renderNodes.end(); nodeIterator++)
       {
         (*nodeIterator)->frustumCulling();
       }

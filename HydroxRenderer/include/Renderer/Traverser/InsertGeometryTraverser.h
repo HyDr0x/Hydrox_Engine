@@ -10,17 +10,19 @@
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
+#include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
+
 namespace he
 {
   namespace xBar  {    class StaticGeometryContainer;
     class SkinnedGeometryContainer;  }
 
 	namespace renderer
-	{    class InsertGeometryTraverser : public Traverser
+	{    class IRenderNode;    class RenderNode;    class InsertGeometryTraverser : public Traverser
     {
     public:
 
-      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<RenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned);
+      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned);
       virtual ~InsertGeometryTraverser();
 
       virtual bool preTraverse(GroupNode* treeNode);
@@ -35,8 +37,8 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual void postTraverse(IRenderNode* treeNode);
 
       void createNewChildNode(TreeNode* parent);
       void createNewChildNode(GroupNode* parent);
@@ -48,13 +50,13 @@ namespace he
       void createNewSibling(VertexDeclarationNode* sibling);
       void createNewSibling(ShaderNode* sibling);
       void createNewSibling(TextureNode* sibling);
-      void createNewSibling(RenderNode* sibling);
+      void createNewSibling(IRenderNode* sibling);
 
     private:
 
       util::SingletonManager *m_singletonManager;
 
-      std::list<RenderNode*>& m_renderNodes;
+      std::list<IRenderNode*>& m_renderNodes;
 
       bool m_inserted;
 
@@ -64,8 +66,7 @@ namespace he
       unsigned int m_maxGeometry;
       unsigned int m_maxBones;
 
-      bool m_skinned;
-      bool m_indexed;
+      RenderNodeType m_nodeType;
       GLenum m_primitiveType;
       GLuint m_vertexStride;
       unsigned int m_vertexDeclaration;

@@ -17,14 +17,18 @@ namespace he
       return new LightContainer();
     }
 
-    bool LightContainer::operator ==(const LightContainer& o)
-    {
-      return true;
-    }
-
     util::Matrix<float, 4> LightContainer::getTransformationMatrix()
     {
-      return m_trfMatrix;
+      return *m_trfMatrix;
+    }
+
+    void LightContainer::createHash()
+    {
+      std::vector<unsigned char> data(sizeof(void*));
+
+      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+
+      m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }
 }

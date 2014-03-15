@@ -11,7 +11,7 @@ namespace he
     class VertexDeclarationNode;
     class ShaderNode;
     class TextureNode;
-    class RenderNode;
+    class IRenderNode;
 
     class Traverser
     {
@@ -37,8 +37,8 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual void postTraverse(IRenderNode* treeNode);
 
     protected:
 

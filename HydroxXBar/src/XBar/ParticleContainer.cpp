@@ -17,14 +17,18 @@ namespace he
       return new ParticleContainer();
     }
 
-    bool ParticleContainer::operator ==(const ParticleContainer& o)
-    {
-      return true;
-    }
-
     util::Matrix<float, 4> ParticleContainer::getTransformationMatrix()
     {
-      return m_trfMatrix;
+      return *m_trfMatrix;
+    }
+
+    void ParticleContainer::createHash()
+    {
+      std::vector<unsigned char> data(sizeof(void*));
+
+      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+
+      m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }
 }

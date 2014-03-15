@@ -3,7 +3,7 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
 {
@@ -70,12 +70,12 @@ namespace he
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(RenderNode* treeNode)
+    bool DeleteTraverser::preTraverse(IRenderNode* treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(RenderNode* treeNode)
+    void DeleteTraverser::postTraverse(IRenderNode* treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
