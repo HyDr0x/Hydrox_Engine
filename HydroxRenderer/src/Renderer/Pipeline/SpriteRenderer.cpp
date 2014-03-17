@@ -67,9 +67,9 @@ namespace he
 		      util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		      util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
           float z = renderSprite->getLayer() / (const float)m_maxLayer;
-		      spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		      spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-          spriteShader->setUniform(2, GL_FLOAT, &z);
+		      RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		      RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+          RenderShader::setUniform(2, GL_FLOAT, &z);
 
 		      glDrawArrays(GL_POINTS, 0, 1);
         }

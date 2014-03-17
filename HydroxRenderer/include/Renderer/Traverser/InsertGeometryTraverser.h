@@ -18,7 +18,7 @@ namespace he
     class SkinnedGeometryContainer;  }
 
 	namespace renderer
-	{    class IRenderNode;    class RenderNode;    class InsertGeometryTraverser : public Traverser
+	{    class IRenderNode;    class InsertGeometryTraverser : public Traverser
     {
     public:
 

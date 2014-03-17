@@ -43,7 +43,6 @@ namespace he
 
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
-      glFrontFace(GL_CCW);
 
 	    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	    glClearDepth(0.0f);

@@ -9,7 +9,6 @@
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
-//#include "Renderer/TreeNodes/RenderNodeDecorator/RenderNode.h"
 
 namespace he
 {

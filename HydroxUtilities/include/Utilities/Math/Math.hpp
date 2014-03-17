@@ -113,7 +113,6 @@ namespace he
                               -z[0],-z[1],-z[2], 0,
                                0.0f, 0.0f, 0.0f, 1.0f);
 
-
         rotMat[3] = rotMat[0] * -camPos[0] + rotMat[1] * -camPos[1] + rotMat[2] * -camPos[2] + rotMat[3];
 
         return rotMat;
