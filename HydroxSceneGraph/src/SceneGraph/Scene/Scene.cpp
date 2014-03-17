@@ -22,7 +22,7 @@ namespace he
 
     Scene::Scene(Scene& object)
     {
-      addSubTree(object, m_rootNode, "");
+      addSubTree(object, m_rootNode, he::util::Vector<float, 3>::identity(), "");
     }
 
     Scene::~Scene()
@@ -170,7 +170,7 @@ namespace he
       delete node;
     }
 
-    GroupNode* Scene::addSubTree(Scene& subTree, GroupNode* parentNode, std::string namePrefix)
+    GroupNode* Scene::addSubTree(Scene& subTree, GroupNode* parentNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix)
     {
       CopyTraverser traverser(namePrefix);
       traverser.doTraverse(subTree.getRootNode());

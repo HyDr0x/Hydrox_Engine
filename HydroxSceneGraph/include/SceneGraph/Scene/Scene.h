@@ -34,7 +34,7 @@ namespace he
       virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
       virtual void removeNode(TreeNode *node);
 
-      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, std::string namePrefix);
+      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix);
       virtual void removeSubTree(TreeNode *rootNode);
 
       template<class CLASS> CLASS* getNode(const std::string& nodeName)

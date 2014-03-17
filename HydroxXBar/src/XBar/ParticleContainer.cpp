@@ -6,6 +6,7 @@ namespace he
 	{
     ParticleContainer::ParticleContainer()
     {
+      createHash();
     }
 
     ParticleContainer::~ParticleContainer()

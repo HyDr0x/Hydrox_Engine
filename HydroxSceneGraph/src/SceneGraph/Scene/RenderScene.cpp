@@ -63,7 +63,7 @@ namespace he
 
     GroupNode* RenderScene::addSubTree(Scene& subScene, GroupNode* sceneNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix)
     {
-      GroupNode* copiedRootNode = Scene::addSubTree(subScene, sceneNode, namePrefix);
+      GroupNode* copiedRootNode = Scene::addSubTree(subScene, sceneNode, cameraPosition, namePrefix);
 
       TransformTraverser transformTraverser;
       transformTraverser.doAscend(copiedRootNode);

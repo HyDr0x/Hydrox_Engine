@@ -6,6 +6,7 @@ namespace he
 	{
     LightContainer::LightContainer()
     {
+      createHash();
     }
 
     LightContainer::~LightContainer()

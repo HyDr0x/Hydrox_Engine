@@ -19,6 +19,7 @@ namespace he
                                           m_translate(translation),
                                           m_textureHandle(textureHandle)
     {
+      createHash();
     }
 
     BillboardContainer::~BillboardContainer()

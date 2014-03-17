@@ -13,6 +13,7 @@ namespace he
       m_boneTransformMatrices(boneTransformMatrices),
       m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
+      createHash();
     }
 
     SkinnedGeometryContainer::~SkinnedGeometryContainer()
@@ -43,7 +44,7 @@ namespace he
 
       unsigned int id;
 
-      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+      memcpy(&data[0], &m_trfMatrix, sizeof(void*));
       memcpy(&data[sizeof(void*) * 1], &m_boneTransformMatrices, sizeof(void*));
       memcpy(&data[sizeof(void*) * 2], &m_inverseBindPoseMatrices, sizeof(void*));
       id = m_materialHandle.getID();
@@ -51,7 +52,6 @@ namespace he
       id = m_meshHandle.getID();
       memcpy(&data[sizeof(void*) * 3 + sizeof(unsigned int)], &id, sizeof(unsigned int));
       
-
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }

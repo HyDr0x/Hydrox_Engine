@@ -9,6 +9,7 @@ namespace he
       m_meshHandle(meshHandle),
       m_materialHandle(materialHandle)
     {
+      createHash();
     }
 
     StaticGeometryContainer::~StaticGeometryContainer()
@@ -41,7 +42,7 @@ namespace he
 
       unsigned int id;
 
-      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+      memcpy(&data[0], &m_trfMatrix, sizeof(void*));
       id = m_materialHandle.getID();
       memcpy(&data[sizeof(void*)], &id, sizeof(unsigned int));
       id = m_meshHandle.getID();

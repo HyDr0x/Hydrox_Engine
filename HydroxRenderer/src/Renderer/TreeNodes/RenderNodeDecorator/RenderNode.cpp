@@ -89,8 +89,6 @@ namespace he
         m_meshes.erase(geometryContainer.getMeshHandle());
       }
 
-      m_instanceNumber--;
-
       return true;
     }
 
