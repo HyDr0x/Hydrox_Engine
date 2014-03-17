@@ -58,8 +58,6 @@ namespace he
 	    {
 		    file.close();
 
-		    std::cout << "Error: couldn't open shader source file " << filename << "." << std::endl;
-
         return std::string();
 	    }
 

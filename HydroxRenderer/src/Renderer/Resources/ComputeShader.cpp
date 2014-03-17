@@ -22,7 +22,7 @@ namespace he
       m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
 
       GLuint computeShader;
-      createShader(GL_COMPUTE_SHADER, shaderName, computeShaderSource, computeShader);
+      computeShader = createShader(GL_COMPUTE_SHADER, shaderName, computeShaderSource);
       createProgram(shaderName, computeShader);
     }
 

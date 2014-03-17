@@ -108,28 +108,26 @@ namespace he
 	    glUseProgram(0);
     }
 
-    bool Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource, GLuint& shader)
+    GLuint Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource)
     {
       if(shaderSource.empty())
       {
-        shader = 0;
-        return false;
+        return 0;
       }
 
       const GLchar *include = shaderSource.c_str();
 
-      shader = glCreateShader(shaderType);
+      GLuint shader = glCreateShader(shaderType);
       glShaderSource(shader, 1, &include, nullptr );
       glCompileShader(shader);
 
       if(!checkShaderStatus(shader, shaderName))
 	    {
 		    glDeleteShader(shader);
-        shader = 0;
-        return false;
+        return 0;
       }
 
-      return true;
+      return shader;
     }
 
     bool Shader::checkShaderStatus(GLuint shader, std::string shaderName) const

@@ -11,25 +11,10 @@ namespace he
   {
     RenderShaderLoader::RenderShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_renderShaderManager(m_singletonManager->getService<renderer::RenderShaderManager>())
     {
-      m_fragmentShaderProgram = false;
-      m_geometryShaderProgram = false;
-      m_tesselationControlShaderProgram = false;
-      m_tesselationEvalShaderProgram = false;
     }
 
     RenderShaderLoader::~RenderShaderLoader()
     {
-    }
-
-    void RenderShaderLoader::setUsedShaderPrograms(bool fragmentShaderProgram,
-                                                   bool geometryShaderProgram,
-                                                   bool tesselationControlShaderProgram,
-                                                   bool tesselationEvalShaderProgram)
-    {
-      m_fragmentShaderProgram = fragmentShaderProgram;
-      m_geometryShaderProgram = geometryShaderProgram;
-      m_tesselationControlShaderProgram = tesselationControlShaderProgram;
-      m_tesselationEvalShaderProgram = tesselationEvalShaderProgram;
     }
 
     util::ResourceHandle RenderShaderLoader::loadResource(std::string filename)
@@ -37,18 +22,14 @@ namespace he
       std::string vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource;
 
       vertexShaderSource = loadShaderSource(filename + ".vert");
-      if(m_fragmentShaderProgram) fragmentShaderSource = loadShaderSource(filename + ".frag");
-      if(m_geometryShaderProgram) geometryShaderSource = loadShaderSource(filename + ".geom");
-      if(m_tesselationControlShaderProgram) tesselationCTRLShaderSource = loadShaderSource(filename + ".control");
-      if(m_tesselationEvalShaderProgram) tesselationEVALShaderSource = loadShaderSource(filename + ".eval");
+      fragmentShaderSource = loadShaderSource(filename + ".frag");
+      geometryShaderSource = loadShaderSource(filename + ".geom");
+      tesselationCTRLShaderSource = loadShaderSource(filename + ".control");
+      tesselationEVALShaderSource = loadShaderSource(filename + ".eval");
 
       util::ResourceHandle shaderHandle;
 
-      if(vertexShaderSource == std::string() || 
-        (m_fragmentShaderProgram && fragmentShaderSource == std::string()) || 
-        (m_geometryShaderProgram && geometryShaderSource == std::string()) || 
-        (m_tesselationControlShaderProgram && tesselationCTRLShaderSource == std::string()) || 
-        (m_tesselationEvalShaderProgram && tesselationEVALShaderSource == std::string()))
+      if(vertexShaderSource == std::string())
       {
         std::cout << "ERROR, couldn't open file: " << filename << std::endl;
 

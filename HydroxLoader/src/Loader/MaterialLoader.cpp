@@ -174,7 +174,6 @@ namespace he
 		    }
 
         RenderShaderLoader renderShaderLoader(m_singletonManager);
-        renderShaderLoader.setUsedShaderPrograms(shaderPrograms[0], shaderPrograms[1], shaderPrograms[2], shaderPrograms[3]);
         util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(shaderFilename);
 
         ILDevilLoader textureLoader(m_singletonManager);

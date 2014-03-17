@@ -28,11 +28,11 @@ namespace he
       GLuint geometryShader; 
       GLuint fragmentShader;
   
-      createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource, vertexShader);
-      createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource, tesselationControlShader);
-      createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource, tesselationEvaluationShader);
-      createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource, geometryShader);
-      createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource, fragmentShader);
+      vertexShader = createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource);
+      tesselationControlShader = createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource);
+      tesselationEvaluationShader = createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource);
+      geometryShader = createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource);
+      fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource);
 
       createProgram(shaderName, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
     }
