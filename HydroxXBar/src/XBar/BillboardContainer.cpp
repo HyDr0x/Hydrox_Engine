@@ -26,9 +26,9 @@ namespace he
     {
     }
 
-    BillboardContainer* BillboardContainer::clone()
+    bool BillboardContainer::operator == (const BillboardContainer& o)
     {
-      return new BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle);
+      return m_hash == o.m_hash;
     }
 
     util::ResourceHandle BillboardContainer::getTextureHandle() const

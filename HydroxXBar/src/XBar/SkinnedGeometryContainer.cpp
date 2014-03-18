@@ -20,9 +20,9 @@ namespace he
     {
     }
 
-    SkinnedGeometryContainer* SkinnedGeometryContainer::clone()
+    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& o)
     {
-      return new SkinnedGeometryContainer(m_boneTransformMatrices, m_inverseBindPoseMatrices, m_trfMatrix, m_materialHandle, m_meshHandle);
+      return m_hash == o.m_hash;
     }
 
     std::vector<util::Matrix<float, 4>> SkinnedGeometryContainer::getSkinningMatrices()

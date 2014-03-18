@@ -7,6 +7,8 @@
 
 #include <Renderer/Resources/ResourceManager.hpp>
 
+#include <XBar/BillboardContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 
 #include "Renderer/Resources/RenderShader.h"
@@ -17,11 +19,6 @@
 
 namespace he
 {
-  namespace xBar
-  {
-    class BillboardContainer;
-  }
-
 	namespace renderer
 	{
     class BillboardRenderer
@@ -49,7 +46,7 @@ namespace he
 
       util::ResourceHandle m_billboardShaderHandle;
 
-      std::list<xBar::BillboardContainer*> m_renderBillboards;
+      std::list<xBar::BillboardContainer> m_renderBillboards;
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;

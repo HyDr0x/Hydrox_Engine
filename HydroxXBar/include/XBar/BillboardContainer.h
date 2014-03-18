@@ -26,7 +26,7 @@ namespace he
 
       ~BillboardContainer();
 
-      BillboardContainer* clone();
+      bool operator == (const BillboardContainer& o);
 
       util::ResourceHandle getTextureHandle() const;
 

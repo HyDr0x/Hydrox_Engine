@@ -22,7 +22,7 @@ namespace he
     {
     public:
 
-      DrawElementsDecorator(IRenderNode *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      DrawElementsDecorator(IRenderNode *renderNode, bool instanced, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       ~DrawElementsDecorator();
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
@@ -44,7 +44,6 @@ namespace he
       ModelManager *m_modelManager;
 
       std::vector<DrawElementsIndirectCommand> m_commandCache;
-      std::vector<util::Vector<unsigned int, 4>> m_cullingCommandCache;
       std::vector<util::Vector<float, 4>> m_boundingBoxCache;
 
       //per mesh buffer
@@ -52,11 +51,13 @@ namespace he
       GPUBuffer m_meshVertexBuffer;
       GPUBuffer m_meshIndexBuffer;
       GPUBuffer m_bboxesBuffer;
-      GPUBuffer m_cullingCommandBuffer;
 
       GLenum m_primitiveType;
 
-      unsigned int m_primitiveCount;
+      bool m_instanced;
+
+      unsigned int m_instanceNumber;
+      unsigned int m_meshNumber;
       GLuint m_vertexStride;
 
       GLenum m_indexType;

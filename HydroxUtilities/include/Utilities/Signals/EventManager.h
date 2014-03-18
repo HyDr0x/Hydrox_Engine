@@ -24,6 +24,8 @@ namespace he
         OnAddBillboardNode,
         OnAddGeometryNode,
         OnAddSkinnedGeometryNode,
+        OnAddInstancedGeometryNode,
+        OnAddInstancedSkinnedGeometryNode,
         OnAddLightNode,
         OnAddParticleTransmitterNode,
         OnRemoveSprite,

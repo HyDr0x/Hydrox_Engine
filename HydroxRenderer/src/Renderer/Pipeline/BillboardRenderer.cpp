@@ -1,7 +1,5 @@
 #include "Renderer/Pipeline/BillboardRenderer.h"
 
-#include <XBar/BillboardContainer.h>
-
 namespace he
 {
 	namespace renderer
@@ -47,15 +45,15 @@ namespace he
       RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardShaderHandle);
 	    billboardShader->useShader();
 
-	    for(std::list<xBar::BillboardContainer*>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
+	    for(std::list<xBar::BillboardContainer>::iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
 	    {
-        renderTexture = m_textureManager->getObject((*billboarditerator)->getTextureHandle());
+        renderTexture = m_textureManager->getObject((*billboarditerator).getTextureHandle());
 
         renderTexture->setTexture(6, 0);
 
-		    util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator)->getTexTransformationMatrix();
-        util::Vector<float, 2> scale = (*billboarditerator)->getScale();
-		    util::Vector<float, 3> translate = (*billboarditerator)->getPosition();
+		    util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator).getTexTransformationMatrix();
+        util::Vector<float, 2> scale = (*billboarditerator).getScale();
+		    util::Vector<float, 3> translate = (*billboarditerator).getPosition();
 		    billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
 		    billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
 		    billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
@@ -71,12 +69,12 @@ namespace he
 
     void BillboardRenderer::addRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_renderBillboards.push_back(billboard.clone());
+      m_renderBillboards.push_back(billboard);
     }
 
     void BillboardRenderer::removeRenderComponent(xBar::BillboardContainer& billboard)
     {
-      m_renderBillboards.remove(&billboard);
+      m_renderBillboards.remove(billboard);
     }
 
     void BillboardRenderer::registerRenderComponentSlots(util::EventManager *eventManager)

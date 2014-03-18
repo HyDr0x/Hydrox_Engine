@@ -39,4 +39,4 @@ add_subdirectory(HydroxLoader)
 add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
 
 add_subdirectory(Sandbox) 
-add_dependencies(Sandbox Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
+add_dependencies(Sandbox Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer)

@@ -16,9 +16,9 @@ namespace he
     {
     }
 
-    StaticGeometryContainer* StaticGeometryContainer::clone()
+    bool StaticGeometryContainer::operator == (const StaticGeometryContainer& o)
     {
-      return new StaticGeometryContainer(m_trfMatrix, m_materialHandle, m_meshHandle);
+      return m_hash == o.m_hash;
     }
 
     util::ResourceHandle StaticGeometryContainer::getMaterialHandle()

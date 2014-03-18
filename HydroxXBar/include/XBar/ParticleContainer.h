@@ -18,7 +18,7 @@ namespace he
       ParticleContainer();
       ~ParticleContainer();
 
-      ParticleContainer* clone();
+      bool operator == (const ParticleContainer& o);
 
       util::Matrix<float, 4> getTransformationMatrix();
 

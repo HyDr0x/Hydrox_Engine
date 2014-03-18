@@ -36,6 +36,10 @@ namespace he
 
       void addRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
       void addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
+
+      void addInstancedRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
+      void addInstancedRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
+
       void removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
       void removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
 

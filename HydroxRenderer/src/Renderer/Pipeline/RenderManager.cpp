@@ -3,8 +3,6 @@
 #include <XBar/BillboardContainer.h>
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
-#include <XBar/LightContainer.h>
-#include <XBar/ParticleContainer.h>
 
 namespace he
 {
@@ -102,12 +100,12 @@ namespace he
 
     void RenderManager::addRenderComponent(xBar::LightContainer& light)
     {
-      m_renderLight.push_back(light.clone());
+      m_renderLight.push_back(light);
     }
 
     void RenderManager::addRenderComponent(xBar::ParticleContainer& particle)
     {
-      m_renderParticle.push_back(particle.clone());
+      m_renderParticle.push_back(particle);
     }
 
     void RenderManager::removeRenderComponent(Sprite *sprite)
@@ -132,12 +130,12 @@ namespace he
 
     void RenderManager::removeRenderComponent(xBar::LightContainer& light)
     {
-      m_renderLight.remove(light.clone());
+      m_renderLight.remove(light);
     }
 
     void RenderManager::removeRenderComponent(xBar::ParticleContainer& particle)
     {
-      m_renderParticle.remove(particle.clone());
+      m_renderParticle.remove(particle);
     }
 
     void RenderManager::registerRenderComponentSlots(util::EventManager *eventManager)

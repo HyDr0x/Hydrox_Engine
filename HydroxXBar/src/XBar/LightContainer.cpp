@@ -13,9 +13,9 @@ namespace he
     {
     }
 
-    LightContainer* LightContainer::clone()
+    bool LightContainer::operator == (const LightContainer& o)
     {
-      return new LightContainer();
+      return m_hash == o.m_hash;
     }
 
     util::Matrix<float, 4> LightContainer::getTransformationMatrix()

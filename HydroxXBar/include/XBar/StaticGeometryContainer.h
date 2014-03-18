@@ -19,7 +19,7 @@ namespace he
       StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
       ~StaticGeometryContainer();
 
-      virtual StaticGeometryContainer* clone();
+      bool operator == (const StaticGeometryContainer& o);
 
       util::ResourceHandle getMaterialHandle();
 

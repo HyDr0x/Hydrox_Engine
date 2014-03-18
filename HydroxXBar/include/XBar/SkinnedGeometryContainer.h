@@ -22,7 +22,7 @@ namespace he
                                util::ResourceHandle meshHandle);
       ~SkinnedGeometryContainer();
 
-      SkinnedGeometryContainer* clone();
+      bool operator == (const SkinnedGeometryContainer& o);
 
       std::vector<util::Matrix<float, 4>> getSkinningMatrices();
 

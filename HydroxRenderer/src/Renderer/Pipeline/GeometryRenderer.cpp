@@ -79,13 +79,25 @@ namespace he
 
     void GeometryRenderer::addRenderComponent(xBar::StaticGeometryContainer &staticGeometry)
     {
-      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, staticGeometry, false);
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, staticGeometry, false, false);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRenderer::addRenderComponent(xBar::SkinnedGeometryContainer &skinnedGeometry)
     {
-      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, skinnedGeometry, true);
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, skinnedGeometry, true, false);
+      insertTraverser.doTraverse(m_renderRootNode);
+    }
+
+    void GeometryRenderer::addInstancedRenderComponent(xBar::StaticGeometryContainer &staticGeometry)
+    {
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, staticGeometry, false, true);
+      insertTraverser.doTraverse(m_renderRootNode);
+    }
+
+    void GeometryRenderer::addInstancedRenderComponent(xBar::SkinnedGeometryContainer &skinnedGeometry)
+    {
+      InsertGeometryTraverser insertTraverser(m_maxMaterials, m_maxGeometry, m_maxBones, m_singletonManager, m_renderNodes, skinnedGeometry, true, true);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
@@ -122,6 +134,12 @@ namespace he
 
       eventManager->addNewSignal<void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode);
       eventManager->addSlotToSignal<GeometryRenderer, void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry), void (GeometryRenderer::*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(this, &GeometryRenderer::addRenderComponent, util::EventManager::OnAddSkinnedGeometryNode);
+      
+      eventManager->addNewSignal<void (*)(xBar::StaticGeometryContainer &staticGeometry)>(util::EventManager::OnAddInstancedGeometryNode);
+      eventManager->addSlotToSignal<GeometryRenderer, void (*)(xBar::StaticGeometryContainer &staticGeometry), void (GeometryRenderer::*)(xBar::StaticGeometryContainer &staticGeometry)>(this, &GeometryRenderer::addInstancedRenderComponent, util::EventManager::OnAddInstancedGeometryNode);
+
+      eventManager->addNewSignal<void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(util::EventManager::OnAddInstancedSkinnedGeometryNode);
+      eventManager->addSlotToSignal<GeometryRenderer, void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry), void (GeometryRenderer::*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(this, &GeometryRenderer::addInstancedRenderComponent, util::EventManager::OnAddInstancedSkinnedGeometryNode);
 
       eventManager->addNewSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode);
       eventManager->addSlotToSignal<GeometryRenderer, void (*)(xBar::StaticGeometryContainer& staticGeometry), void (GeometryRenderer::*)(xBar::StaticGeometryContainer& staticGeometry)>(this, &GeometryRenderer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);

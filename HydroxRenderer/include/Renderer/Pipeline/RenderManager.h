@@ -5,18 +5,21 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Signals/EventManager.h>
+
+#include <XBar/LightContainer.h>
+#include <XBar/ParticleContainer.h>
+
 #include "Renderer/DLLExport.h"
 
-#include <Renderer/Resources/ResourceManager.hpp>
+#include "Renderer/Resources/ResourceManager.hpp"
 #include "Renderer/Pipeline/FrustumCullingGPU.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"
 
 #include "Renderer/Buffer/UBO.h"
-
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
-#include <Utilities/Signals/EventManager.h>
 
 namespace he
 {
@@ -25,8 +28,6 @@ namespace he
     class SkinnedGeometryContainer;
     class StaticGeometryContainer;
     class BillboardContainer;
-    class ParticleContainer;
-    class LightContainer;
   }
 
 	namespace renderer
@@ -81,8 +82,8 @@ namespace he
       BillboardRenderer m_billboardRenderer;
       SpriteRenderer m_spriteRenderer;
 
-      std::list<xBar::LightContainer*> m_renderLight;
-      std::list<xBar::ParticleContainer*> m_renderParticle;
+      std::list<xBar::LightContainer> m_renderLight;
+      std::list<xBar::ParticleContainer> m_renderParticle;
 
       GLfloat m_aspectRatio;
     };

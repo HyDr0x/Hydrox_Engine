@@ -16,7 +16,8 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer, bool skinned) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer, bool skinned, bool instanced) : 
+      m_instanced(instanced),
       m_maxMaterials(maxMaterials),
       m_maxGeometry(maxGeometry),
       m_maxBones(maxBones),
@@ -222,7 +223,7 @@ namespace he
 
     void InsertGeometryTraverser::createNewChildNode(VertexDeclarationNode* parent)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
+      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_instanced, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -263,7 +264,7 @@ namespace he
 
     void InsertGeometryTraverser::createNewSibling(IRenderNode* sibling)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
+      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_instanced, m_maxMaterials, m_maxGeometry, m_maxBones, m_primitiveType, m_vertexStride, m_singletonManager);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

@@ -26,7 +26,7 @@ namespace he
     {
     public:
 
-      static IRenderNode* createRenderNode(RenderNodeType nodeType, unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      static IRenderNode* createRenderNode(RenderNodeType nodeType, bool instanced, unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
     private:
 

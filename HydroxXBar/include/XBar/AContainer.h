@@ -15,8 +15,6 @@ namespace he
     {
     public:
 
-      virtual AContainer* clone() = 0;
-
       uint64_t getHash()
       {
         return m_hash;

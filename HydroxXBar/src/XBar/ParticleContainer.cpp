@@ -13,9 +13,9 @@ namespace he
     {
     }
 
-    ParticleContainer* ParticleContainer::clone()
+    bool ParticleContainer::operator == (const ParticleContainer& o)
     {
-      return new ParticleContainer();
+      return m_hash == o.m_hash;
     }
 
     util::Matrix<float, 4> ParticleContainer::getTransformationMatrix()

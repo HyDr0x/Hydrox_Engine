@@ -21,7 +21,7 @@ namespace he
     {
     public:
 
-      DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      DrawArrayDecorator(IRenderNode *renderNode, bool instanced, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       ~DrawArrayDecorator();
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
@@ -45,18 +45,19 @@ namespace he
       /////////////////////////DRAWING-INDEXED-NONINDEXED///////////////////////////
 
       std::vector<DrawArraysIndirectCommand> m_commandCache;
-      std::vector<util::Vector<unsigned int, 4>> m_cullingCommandCache;
       std::vector<util::Vector<float, 4>> m_boundingBoxCache;
 
       //per mesh buffer
       GPUBuffer m_commandBuffer;
       GPUBuffer m_meshVertexBuffer;
       GPUBuffer m_bboxesBuffer;
-      GPUBuffer m_cullingCommandBuffer;
 
       GLenum m_primitiveType;
 
-      unsigned int m_primitiveCount;
+      bool m_instanced;
+
+      unsigned int m_instanceNumber;
+      unsigned int m_meshNumber;
       GLuint m_vertexStride;
 
       unsigned int m_vboSize;

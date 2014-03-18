@@ -18,7 +18,7 @@ namespace he
       LightContainer();
       ~LightContainer();
 
-      LightContainer* clone();
+      bool operator == (const LightContainer& o);
 
       util::Matrix<float, 4> getTransformationMatrix();
 

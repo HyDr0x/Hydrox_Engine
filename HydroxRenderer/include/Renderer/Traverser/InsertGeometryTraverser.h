@@ -22,7 +22,7 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned);
+      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned, bool instanced);
       virtual ~InsertGeometryTraverser();
 
       virtual bool preTraverse(GroupNode* treeNode);
@@ -62,6 +62,7 @@ namespace he
 
       xBar::StaticGeometryContainer& m_geometryContainer;
 
+      bool m_instanced;
       unsigned int m_maxMaterials;
       unsigned int m_maxGeometry;
       unsigned int m_maxBones;

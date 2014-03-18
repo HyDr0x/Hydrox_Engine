@@ -8,11 +8,13 @@ namespace he
 {
 	namespace renderer
 	{
-    DrawArrayDecorator::DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
+    DrawArrayDecorator::DrawArrayDecorator(IRenderNode *renderNode, bool instanced, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
+      m_instanced(instanced),
       m_primitiveType(primitiveType),
       m_vertexStride(vertexStride),
-      m_primitiveCount(0),
+      m_instanceNumber(0),
+      m_meshNumber(0),
       m_vboSize(0)
     {
       m_modelManager = singletonManager->getService<ModelManager>();
@@ -33,15 +35,12 @@ namespace he
 
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()])
-        {
-          
-        }
-        else if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()] == 0)
+        if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()] == 0)
         {
           m_vboSize += mesh->getVBOSize();
         }
 
+        m_instanceNumber++;
         m_instanceNumberPerMesh[geometryContainer.getMeshHandle()]++;
 
         return true;
@@ -54,6 +53,7 @@ namespace he
     {
       if(m_renderNode->removeGeometry(geometryContainer))
       {
+        m_instanceNumber--;
         m_instanceNumberPerMesh[geometryContainer.getMeshHandle()]--;
 
         if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()] == 0)
@@ -76,7 +76,7 @@ namespace he
       m_commandBuffer.bindBuffer();
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
 
-      glMultiDrawArraysIndirect(m_primitiveType, nullptr, m_primitiveCount, 0);
+      glMultiDrawArraysIndirect(m_primitiveType, nullptr, m_meshNumber, 0);
 
       m_meshVertexBuffer.unbindVertexBuffer(0);
       m_commandBuffer.unbindBuffer();
@@ -94,7 +94,7 @@ namespace he
 
     void DrawArrayDecorator::resizeBuffer()
     {
-      m_primitiveCount = m_instanceNumberPerMesh.size();
+      m_meshNumber = m_instanceNumberPerMesh.size();
 
       if(hasGeometryChanged())
       {
@@ -110,14 +110,21 @@ namespace he
 
     void DrawArrayDecorator::createBuffer()
     {
-      m_commandCache.resize(m_primitiveCount);
-      m_cullingCommandCache.resize(m_primitiveCount);
-      m_boundingBoxCache.resize(m_primitiveCount * 2);
-
       m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_STATIC_DRAW, nullptr);
-      m_cullingCommandBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_primitiveCount, 0, GL_STATIC_DRAW, nullptr);
-      m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_primitiveCount * 2, 0, GL_STATIC_DRAW, nullptr);
-      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand) * m_primitiveCount, 0, GL_STATIC_DRAW, nullptr);
+      m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshNumber * 2, 0, GL_STATIC_DRAW, nullptr);
+
+      if(m_instanced)
+      {
+        m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand) * m_meshNumber, 0, GL_STATIC_DRAW, nullptr);
+        m_commandCache.resize(m_meshNumber);
+      }
+      else
+      {
+        m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand) * m_instanceNumber, 0, GL_STATIC_DRAW, nullptr);
+        m_commandCache.resize(m_instanceNumber);
+      }
+
+      m_boundingBoxCache.resize(m_meshNumber * 2);
 
       m_vertexOffset = 0;
       m_vertexCount = 0;
@@ -127,39 +134,63 @@ namespace he
     {
       unsigned int instanceCounter = 0;
       unsigned int commandIndex = 0;
-      for(std::map<util::ResourceHandle, unsigned int, Less>::const_iterator meshIterator = m_instanceNumberPerMesh.begin(); meshIterator != m_instanceNumberPerMesh.end(); meshIterator++, commandIndex++)
+      unsigned int meshIndex = 0;
+      for(std::map<util::ResourceHandle, unsigned int, Less>::const_iterator meshIterator = m_instanceNumberPerMesh.begin(); meshIterator != m_instanceNumberPerMesh.end(); meshIterator++, meshIndex++)
       {
         Mesh *mesh = m_modelManager->getObject(meshIterator->first);
 
         m_meshVertexBuffer.setData(m_vertexOffset, mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
         m_vertexOffset += mesh->getVBOSize();
 
-        DrawArraysIndirectCommand command;
-        command.count = mesh->getVertexCount();
-        command.instanceCount = meshIterator->second;
-        command.baseVertex = m_vertexCount;
-        command.baseInstance = instanceCounter;
+        if(m_instanced)
+        {
+          DrawArraysIndirectCommand command;
+          command.count = mesh->getVertexCount();
+          command.instanceCount = meshIterator->second;
+          command.baseVertex = m_vertexCount;
+          command.baseInstance = instanceCounter;
 
-        m_commandCache[commandIndex] = command;
+          m_commandCache[commandIndex] = command;
 
-        m_cullingCommandCache[commandIndex][0] = command.count;
-        m_cullingCommandCache[commandIndex][1] = command.baseVertex;
-        m_cullingCommandCache[commandIndex][2] = command.baseInstance;
+          commandIndex++;
+        }
+        else
+        {
+          for(unsigned int i = 0; i < meshIterator->second; i++)
+          {
+            DrawArraysIndirectCommand command;
+            command.count = mesh->getVertexCount();
+            command.instanceCount = 1;
+            command.baseVertex = m_vertexCount;
+            command.baseInstance = instanceCounter + i;
+
+            m_commandCache[commandIndex + i] = command;
+          }
+
+          commandIndex += meshIterator->second;
+        }
 
         m_vertexCount += mesh->getVertexCount();
         instanceCounter += meshIterator->second;
 
         //update bbox data
-        memcpy(&m_boundingBoxCache[2 * commandIndex + 0][0], &mesh->getBBMin()[0], sizeof(util::Vector<float, 3>));
-        memcpy(&m_boundingBoxCache[2 * commandIndex + 1][0], &mesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
+        memcpy(&m_boundingBoxCache[2 * meshIndex + 0][0], &mesh->getBBMin()[0], sizeof(util::Vector<float, 3>));
+        memcpy(&m_boundingBoxCache[2 * meshIndex + 1][0], &mesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
       }
     }
 
     void DrawArrayDecorator::fillBuffer()
     {
-      m_bboxesBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_primitiveCount * 2, &m_boundingBoxCache[0]);
-      m_cullingCommandBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_primitiveCount, &m_cullingCommandCache[0]);
-      m_commandBuffer.setData(0, sizeof(DrawArraysIndirectCommand) * m_primitiveCount, &m_commandCache[0]);
+      m_bboxesBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_meshNumber * 2, &m_boundingBoxCache[0]);
+
+      if(m_instanced)
+      {
+        m_commandBuffer.setData(0, sizeof(DrawArraysIndirectCommand) * m_meshNumber, &m_commandCache[0]);
+      }
+      else
+      {
+        m_commandBuffer.setData(0, sizeof(DrawArraysIndirectCommand) * m_instanceNumber, &m_commandCache[0]);
+      }
     }
 
     void DrawArrayDecorator::updateCommandBuffer()
