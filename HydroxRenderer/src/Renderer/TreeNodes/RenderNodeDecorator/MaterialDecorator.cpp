@@ -80,13 +80,13 @@ namespace he
 
     void MaterialDecorator::rasterizeGeometry()
     {
-      m_materialIndexBuffer.bindBuffer(1);
+      m_materialIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_materialBuffer.bindBuffer(1);
 
       m_renderNode->rasterizeGeometry();
 
       m_materialBuffer.unBindBuffer();
-      m_materialIndexBuffer.unbindBuffer(1);
+      m_materialIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
     void MaterialDecorator::updateBuffer()

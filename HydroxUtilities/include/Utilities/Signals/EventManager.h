@@ -40,6 +40,8 @@ namespace he
         OnRemoveLODNode,
         OnRemoveTransformNode,
         OnRemoveAnimatedTransformNode,
+
+        EVENTSTARTCOUNTER
 	    };
 
       EventManager();

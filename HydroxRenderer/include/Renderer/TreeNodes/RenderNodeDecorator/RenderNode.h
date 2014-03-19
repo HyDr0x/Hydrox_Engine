@@ -11,8 +11,6 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 
-#include "Renderer/Pipeline/FrustumCullingGPU.h"
-
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
@@ -37,6 +35,8 @@ namespace he
       bool hasGeometryChanged();
 
       bool hasInstanceNumberChanged();
+
+      bool isInstanced();
 
       bool isEmpty();
 

@@ -57,6 +57,11 @@ namespace he
       return m_renderNode->hasInstanceNumberChanged();
     }
 
+    bool ARenderNodeDecorator::isInstanced()
+    {
+      return m_renderNode->isInstanced();
+    }
+
     bool ARenderNodeDecorator::isEmpty()
     {
       return m_renderNode->isEmpty();

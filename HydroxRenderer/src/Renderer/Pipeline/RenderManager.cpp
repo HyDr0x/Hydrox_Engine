@@ -76,6 +76,8 @@ namespace he
       m_geometryRasterizer.rasterizeGeometry();
       m_billboardRenderer.render();
       m_spriteRenderer.render();
+
+      m_cameraParameterUBO.unBindBuffer();
     }
 
     void RenderManager::addRenderComponent(Sprite *sprite)

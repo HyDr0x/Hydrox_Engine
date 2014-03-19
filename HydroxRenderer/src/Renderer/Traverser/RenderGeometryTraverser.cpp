@@ -155,36 +155,36 @@ namespace he
     {
       std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
-      size_t slotOffset = 0;
+      GLuint slotOffset = 0;
 
       for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
       {
         Texture *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
-        texture->setTexture(slotOffset + j, slotOffset + j);
+        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
-      slotOffset += textureHandles[Material::DIFFUSETEX].size();
+      slotOffset += static_cast<GLuint>(textureHandles[Material::DIFFUSETEX].size());
 
       for(unsigned int j = 0; j < textureHandles[Material::NORMALTEX].size(); j++)
       {
         Texture *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
-        texture->setTexture(slotOffset + j, slotOffset + j);
+        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
-      slotOffset += textureHandles[Material::NORMALTEX].size();
+      slotOffset += static_cast<GLuint>(textureHandles[Material::NORMALTEX].size());
 
       for(unsigned int j = 0; j < textureHandles[Material::SPECULARTEX].size(); j++)
       {
         Texture *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
-        texture->setTexture(slotOffset + j, slotOffset + j);
+        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
-      slotOffset += textureHandles[Material::SPECULARTEX].size();
+      slotOffset += static_cast<GLuint>(textureHandles[Material::SPECULARTEX].size());
 
       for(unsigned int j = 0; j < textureHandles[Material::DISPLACEMENTTEX].size(); j++)
       {
         Texture *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
-        texture->setTexture(slotOffset + j, slotOffset + j);
+        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
       return true;
@@ -221,7 +221,6 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(IRenderNode* treeNode)
     {
-      treeNode->updateBuffer();
       treeNode->rasterizeGeometry();
 
       return true;

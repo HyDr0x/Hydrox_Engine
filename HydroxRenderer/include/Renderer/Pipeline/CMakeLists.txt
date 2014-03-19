@@ -2,7 +2,6 @@ set(
 	HEADER 
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingGPU.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.h 

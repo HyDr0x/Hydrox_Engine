@@ -14,7 +14,6 @@
 #include "Renderer/DLLExport.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
-#include "Renderer/Pipeline/FrustumCullingGPU.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"

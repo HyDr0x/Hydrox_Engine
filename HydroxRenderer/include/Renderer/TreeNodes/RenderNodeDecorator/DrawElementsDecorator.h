@@ -28,6 +28,10 @@ namespace he
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
       virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
+      virtual bool isInstanced();
+
+      virtual void frustumCulling();
+
       virtual void rasterizeGeometry();
 
       virtual void updateBuffer();
@@ -45,18 +49,19 @@ namespace he
 
       std::vector<DrawElementsIndirectCommand> m_commandCache;
       std::vector<util::Vector<float, 4>> m_boundingBoxCache;
+      std::vector<GLuint> m_meshInstanceIndexCache;
 
       //per mesh buffer
       GPUBuffer m_commandBuffer;
       GPUBuffer m_meshVertexBuffer;
       GPUBuffer m_meshIndexBuffer;
       GPUBuffer m_bboxesBuffer;
+      GPUBuffer m_meshInstanceIndexBuffer;
 
       GLenum m_primitiveType;
 
       bool m_instanced;
 
-      unsigned int m_instanceNumber;
       unsigned int m_meshNumber;
       GLuint m_vertexStride;
 

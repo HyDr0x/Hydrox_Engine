@@ -12,8 +12,6 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 
-#include "Renderer/Pipeline/FrustumCullingGPU.h"
-
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
@@ -49,6 +47,8 @@ namespace he
 
       virtual bool hasInstanceNumberChanged();
 
+      virtual bool isInstanced();
+
       virtual bool isEmpty();
 
       virtual void frustumCulling();
@@ -56,8 +56,6 @@ namespace he
       virtual void rasterizeGeometry();
 
       virtual void updateBuffer();
-
-      FrustumCullingGPU m_frustumCulling;
 
       IRenderNode *m_renderNode;
     };

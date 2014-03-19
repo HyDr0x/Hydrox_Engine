@@ -115,7 +115,7 @@ namespace he
 
     void GeometryRenderer::rasterizeGeometry()
     {  
-      //frustumCulling();
+      frustumCulling();
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -155,7 +155,12 @@ namespace he
 
       for(std::list<IRenderNode*>::const_iterator nodeIterator = m_renderNodes.begin(); nodeIterator != m_renderNodes.end(); nodeIterator++)
       {
-        (*nodeIterator)->frustumCulling();
+        (*nodeIterator)->updateBuffer();
+
+        if(!(*nodeIterator)->isInstanced())
+        {
+          (*nodeIterator)->frustumCulling();
+        }
       }
 
       frustumCullingShader->useNoShader();

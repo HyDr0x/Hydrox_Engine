@@ -32,6 +32,8 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() = 0;
 
+      virtual bool isInstanced() = 0;
+
       virtual bool isEmpty() = 0;
 
       virtual void frustumCulling() = 0;

@@ -107,6 +107,11 @@ namespace he
       return m_instanceNumberChanged;
     }
 
+    bool RenderNode::isInstanced()
+    {
+      return false;
+    }
+
     bool RenderNode::isEmpty()
     {
       return true;
@@ -114,22 +119,9 @@ namespace he
 
     void RenderNode::frustumCulling()
     {
-      //updateBuffer();
+      ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_instanceNumber);
 
-      //getTransformationMatrixBuffer().bindBuffer(0);
-      //m_bboxesBuffer.bindBuffer(1);
-      //m_commandBuffer.bindBuffer(3);
-      //m_cullingCommandBuffer.bindBuffer(4);
-      //m_meshInstanceIndexBuffer.bindBuffer(5);
-
-      //std::vector<GLuint> culledAABB(m_maxGeometry);
-      //m_frustumCulling.cullAABB(culledAABB, m_instanceCounter);
-
-      //getTransformationMatrixBuffer().unbindBuffer(0);
-      //m_bboxesBuffer.unbindBuffer(1);
-      //m_commandBuffer.unbindBuffer(3);
-      //m_cullingCommandBuffer.unbindBuffer(4);
-      //m_meshInstanceIndexBuffer.unbindBuffer(5);
+      ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 
     void RenderNode::rasterizeGeometry()

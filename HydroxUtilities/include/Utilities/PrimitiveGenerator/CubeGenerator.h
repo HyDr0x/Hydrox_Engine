@@ -18,10 +18,8 @@ namespace he
       CubeGenerator();
       ~CubeGenerator();
 
+      static void generateCube(std::vector<Vector<float, 3>>& position);
       static void generateCube(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index);
-
-    private:
-
     };
 	}
 }

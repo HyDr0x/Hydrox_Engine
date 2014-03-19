@@ -55,24 +55,24 @@ namespace he
       glBindBuffer(m_target, 0);
     }
 
-    void GPUBuffer::bindBuffer()
+    void GPUBuffer::bindBuffer(GLenum target)
     {
-      glBindBuffer(m_target, m_bufferIndex);
+      glBindBuffer(target, m_bufferIndex);
     }
 
-    void GPUBuffer::unbindBuffer()
+    void GPUBuffer::unbindBuffer(GLenum target)
     {
-      glBindBuffer(m_target, 0);
+      glBindBuffer(target, 0);
     }
 
-    void GPUBuffer::bindBuffer(GLuint bufferBindingPoint)
+    void GPUBuffer::bindBuffer(GLenum target, GLuint bufferBindingPoint)
     {
-      glBindBufferBase(m_target, bufferBindingPoint, m_bufferIndex);
+      glBindBufferBase(target, bufferBindingPoint, m_bufferIndex);
     }
 
-    void GPUBuffer::unbindBuffer(GLuint bufferBindingPoint)
+    void GPUBuffer::unbindBuffer(GLenum target, GLuint bufferBindingPoint)
     {
-      glBindBufferBase(m_target, bufferBindingPoint, 0);
+      glBindBufferBase(target, bufferBindingPoint, 0);
     }
 
     void GPUBuffer::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride)

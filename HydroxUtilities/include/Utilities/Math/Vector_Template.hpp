@@ -1,3 +1,5 @@
+#define MIN(a, b) a < b ? a : b
+
 namespace he
 {
 	namespace util
@@ -14,13 +16,25 @@ namespace he
         VECTOR_INIT
         m_vertexcounter++;
       }
+
       Vector(const Vector<TYPE, VECTOR_NUM_ARGS>& v)
       { 
         VECTOR_INIT_VEC
         m_vertexcounter++; 
       }
 
-      ~Vector(){m_vertexcounter--;};
+      template<unsigned int DIM2> Vector(const Vector<TYPE, DIM2>& v)
+      { 
+        unsigned int b = MIN(VECTOR_NUM_ARGS, DIM2);
+        for(unsigned int i = 0; i < b; i++)
+        {
+          m_x[i] = v[i];
+        }
+
+        m_vertexcounter++; 
+      }
+
+      ~Vector(){ m_vertexcounter--; }
 
       static Vector identity() { return Vector(VECTOR_IDENTITY); }
 
@@ -52,6 +66,7 @@ namespace he
       inline bool operator <= (const Vector &v) { return VECTOR_COMP_EQ_LS }
 
       inline TYPE& operator [] (unsigned int i) { return m_x[i]; }
+      inline const TYPE& operator [] (unsigned int i) const { return m_x[i]; }
 
       inline double length() 
       { 
@@ -109,3 +124,5 @@ namespace he
     }
 	}
 }
+
+#undef MIN

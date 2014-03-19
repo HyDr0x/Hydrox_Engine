@@ -59,20 +59,20 @@ namespace he
 
     void StaticGeometryDecorator::frustumCulling()
     {
-      m_matrixBuffer.bindBuffer(0);
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       m_renderNode->frustumCulling();
 
-      m_matrixBuffer.unbindBuffer(0);
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     void StaticGeometryDecorator::rasterizeGeometry()
     {
-      m_matrixBuffer.bindBuffer(0);
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       m_renderNode->rasterizeGeometry();
 
-      m_matrixBuffer.unbindBuffer(0);
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     bool StaticGeometryDecorator::isEmpty()

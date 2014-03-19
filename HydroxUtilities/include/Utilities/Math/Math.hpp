@@ -99,23 +99,24 @@ namespace he
                                 0.0f,                  0.0f,                   0.0f,                   1.0f);
       }
 
-      inline Matrix<float, 4> createLookAt(Vector<float,3> camPos, Vector<float, 3> aimPos, Vector<float, 3> upVektor)
+      inline Matrix<float, 4> createLookAt(Vector<float, 3> camPos, Vector<float, 3> forwardVector, Vector<float, 3> upVektor)
       {
-        Vector<float, 3> z = aimPos - camPos;
+        Vector<float, 3> z = forwardVector;
+
         z.normalize();
         upVektor.normalize();
-        Vector<float, 3> x = cross(z, upVektor);
+        Vector<float, 3> x = cross(upVektor, z);
         x.normalize();
-        Vector<float, 3> y = cross(x, z);
+        Vector<float, 3> y = cross(z, x);
 
-        Matrix<float,4> rotMat(x[0], x[1], x[2], 0,
-                               y[0], y[1], y[2], 0,
-                              -z[0],-z[1],-z[2], 0,
-                               0.0f, 0.0f, 0.0f, 1.0f);
+        Matrix<float, 4> rotMat(x[0], x[1], x[2], 0.0f,
+                                y[0], y[1], y[2], 0.0f,
+                                z[0], z[1], z[2], 0.0f,
+                                0.0f, 0.0f, 0.0f, 1.0f);
 
         rotMat[3] = rotMat[0] * -camPos[0] + rotMat[1] * -camPos[1] + rotMat[2] * -camPos[2] + rotMat[3];
 
-        return rotMat;
+        return rotMat; 
       }
 
       template<typename Type> Matrix<Type,4> rotAxis(Matrix<Type, 4> m, float angle, Vector<Type, 3>& v)

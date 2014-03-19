@@ -68,7 +68,7 @@ namespace he
         {
           if(m_list.empty())
           {
-            unsigned int oldSize = m_objectsCache.size();
+            unsigned int oldSize = static_cast<unsigned int>(m_objectsCache.size());
             unsigned int size = static_cast<unsigned int>(m_objectsCache.size() + m_BLOCKSIZE);
             m_objectsCache.resize(size);
             m_referenceCounterList.push_back(std::vector<unsigned int>(size, 0));

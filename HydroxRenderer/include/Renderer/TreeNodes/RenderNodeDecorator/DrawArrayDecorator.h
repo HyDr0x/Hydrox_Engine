@@ -15,6 +15,7 @@ namespace he
       GLuint instanceCount;//the number of instances
       GLuint baseVertex;//offset which adds to every index value
       GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
+      GLuint padding;//padding, so array and elements command buffer can have the same size in the frustum culling shader
     };
 
     class DrawArrayDecorator : public ARenderNodeDecorator
@@ -26,6 +27,10 @@ namespace he
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
       virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+
+      virtual bool isInstanced();
+
+      virtual void frustumCulling();
 
       virtual void rasterizeGeometry();
 
@@ -46,17 +51,18 @@ namespace he
 
       std::vector<DrawArraysIndirectCommand> m_commandCache;
       std::vector<util::Vector<float, 4>> m_boundingBoxCache;
+      std::vector<GLuint> m_meshInstanceIndexCache;
 
       //per mesh buffer
       GPUBuffer m_commandBuffer;
       GPUBuffer m_meshVertexBuffer;
       GPUBuffer m_bboxesBuffer;
+      GPUBuffer m_meshInstanceIndexBuffer;
 
       GLenum m_primitiveType;
 
       bool m_instanced;
 
-      unsigned int m_instanceNumber;
       unsigned int m_meshNumber;
       GLuint m_vertexStride;
 

@@ -25,11 +25,11 @@ namespace he
       void setData(GLuint offset, GLuint size, const void *data);
       void getData(GLuint offset, GLuint size, void *data);
 
-      void bindBuffer();
-      void unbindBuffer();
+      void bindBuffer(GLenum target);
+      void unbindBuffer(GLenum target);
 
-      void bindBuffer(GLuint bufferBindingPoint);
-      void unbindBuffer(GLuint bufferBindingPoint);
+      void bindBuffer(GLenum target, GLuint bufferBindingPoint);
+      void unbindBuffer(GLenum target, GLuint bufferBindingPoint);
 
       void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride);
       void unbindVertexBuffer(GLuint bufferBindingPoint);
