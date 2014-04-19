@@ -2,12 +2,15 @@
 
 #include <assert.h>
 
+#include <algorithm>
+
 #include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
 {
 	namespace sg
-	{
+	{
+
     LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
     GroupNode(nodeName, parent, nextSibling, firstChild),
       m_lodLevel(lodLevel),
