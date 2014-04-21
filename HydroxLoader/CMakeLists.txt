@@ -18,7 +18,11 @@ add_library(Hydrox_Loader SHARED ${SOURCE} ${HEADER})
 find_package(GLEW)
 find_package(OPENGL)
 find_package(DevIL)
-find_package(Assimp)
+
+if(ASSIMP_FOUND) # bad assimp find_package workaround
+else()
+  find_package(Assimp)
+endif()
 
 set(
 	INCLUDES 
