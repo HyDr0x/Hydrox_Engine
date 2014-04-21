@@ -26,27 +26,29 @@ namespace he
       position[3] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
       position[4] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
       position[5] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
+
       //back
       position[6] = Vector<float, 3>(-0.5f, -0.5f,  0.5f);
       position[7] = Vector<float, 3>( 0.5f, -0.5f,  0.5f);
       position[8] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
 
-      position[9] = Vector<float, 3>(-0.5f, -0.5f,  0.5f);
-      position[10] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
+      position[9]  = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
+      position[10] = Vector<float, 3>( 0.5f, 0.5f,  0.5f);
       position[11] = Vector<float, 3>(-0.5f, 0.5f,  0.5f);
 
       //right
-      position[12] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[13] = Vector<float, 3>(-0.5f, -0.5f,  0.5f);
-      position[14] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
+      position[12] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
+      position[13] = Vector<float, 3>(-0.5f, 0.5f, -0.5f);
+      position[14] = Vector<float, 3>(-0.5f, -0.5f, -0.5f); 
 
-      position[15] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
-      position[16] = Vector<float, 3>(-0.5f, -0.5f,  0.5f);
-      position[17] = Vector<float, 3>(-0.5f,  0.5f,  0.5f);
+      position[15] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
+      position[16] = Vector<float, 3>(-0.5f, 0.5f, 0.5f);
+      position[17] = Vector<float, 3>(-0.5f, 0.5f, -0.5f);
+
       //left
-      position[18] = Vector<float, 3>( 0.5f, -0.5f, -0.5f);
-      position[19] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
-      position[20] = Vector<float, 3>( 0.5f, -0.5f,  0.5f);
+      position[18] = Vector<float, 3>(0.5f, 0.5f, -0.5f);
+      position[19] = Vector<float, 3>(0.5f, -0.5f, 0.5f);
+      position[20] = Vector<float, 3>(0.5f, -0.5f, -0.5f);
 
       position[21] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
       position[22] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);

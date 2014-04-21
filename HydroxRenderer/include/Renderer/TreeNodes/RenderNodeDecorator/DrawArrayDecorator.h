@@ -3,6 +3,8 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
+#include "Renderer/Buffer/GPUImmutableBuffer.h"
+
 namespace he
 {
 	namespace renderer
@@ -18,6 +20,13 @@ namespace he
       GLuint padding;//padding, so array and elements command buffer can have the same size in the frustum culling shader
     };
 
+    struct ArrayGeometry
+    {
+      unsigned int meshIndex;
+      unsigned int vertexOffset;
+      unsigned int instanceCount;
+    };
+
     class DrawArrayDecorator : public ARenderNodeDecorator
     {
     public:
@@ -26,9 +35,7 @@ namespace he
       ~DrawArrayDecorator();
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
-
-      virtual bool isInstanced();
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
@@ -38,42 +45,28 @@ namespace he
 
     protected:
 
-      void resizeBuffer();
-
       void createBuffer();
-      void fillCaches();
       void fillBuffer();
       void updateCommandBuffer();
 
       ModelManager *m_modelManager;
 
-      /////////////////////////DRAWING-INDEXED-NONINDEXED///////////////////////////
-
-      std::vector<DrawArraysIndirectCommand> m_commandCache;
-      std::vector<util::Vector<float, 4>> m_boundingBoxCache;
-      std::vector<GLuint> m_meshInstanceIndexCache;
-
       //per mesh buffer
-      GPUBuffer m_commandBuffer;
-      GPUBuffer m_meshVertexBuffer;
-      GPUBuffer m_bboxesBuffer;
-      GPUBuffer m_meshInstanceIndexBuffer;
+      GPUImmutableBuffer m_meshVertexBuffer;
+      GPUImmutableBuffer m_bboxesBuffer;
+      GPUImmutableBuffer m_commandBuffer;
+      GPUImmutableBuffer m_meshInstanceIndexBuffer;
 
       GLenum m_primitiveType;
 
-      bool m_instanced;
-
-      unsigned int m_meshNumber;
       GLuint m_vertexStride;
+
+      bool m_meshNumberChanged;
 
       unsigned int m_vboSize;
 
-      unsigned int m_vertexOffset;
-      unsigned int m_vertexCount;
-
-      std::map<util::ResourceHandle, unsigned int, Less> m_instanceNumberPerMesh;
-
-      ////////////////////////////////////////////////////////////////
+      std::map<util::ResourceHandle, ArrayGeometry, Less> m_meshes;
+      std::list<util::ResourceHandle> m_geometry;
     };
   }
 }

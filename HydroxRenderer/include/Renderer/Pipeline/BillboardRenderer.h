@@ -12,7 +12,7 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 
 #include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Texture.h"
+#include "Renderer/Resources/Texture2D.h"
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>

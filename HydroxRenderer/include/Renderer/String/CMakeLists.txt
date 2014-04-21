@@ -1,0 +1,7 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/StringTexture2D.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StringTexture3D.h 
+	PARENT_SCOPE 
+)

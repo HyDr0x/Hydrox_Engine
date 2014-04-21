@@ -44,6 +44,7 @@ namespace he
       m_angle = o.m_angle;
 
       m_renderable = o.m_renderable;
+      m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
       m_layerChanged = o.m_layerChanged;
@@ -70,6 +71,7 @@ namespace he
       m_angle = o.m_angle;
 
       m_renderable = o.m_renderable;
+      m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
       m_layerChanged = o.m_layerChanged;
@@ -95,14 +97,33 @@ namespace he
       m_renderable = renderable;
     }
 
-	  bool Sprite::getTransparency() const
-    {
-      return m_transparency;
-    }
-
     bool Sprite::getRenderable() const
     {
       return m_renderable;
+    }
+
+    void Sprite::setTransparency(bool transparency)
+    {
+      if (m_renderable)
+      {
+        if ((!m_transparency && transparency) || (m_transparency && !transparency))
+        {
+          m_eventManager->raiseSignal<void(*)(Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+
+          m_transparency = transparency;
+
+          m_eventManager->raiseSignal<void(*)(Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+        }
+      }
+      else
+      {
+        m_transparency = transparency;
+      }
+    }
+
+	  bool Sprite::getTransparency() const
+    {
+      return m_transparency;
     }
 
     void Sprite::setAnimation(unsigned int number)

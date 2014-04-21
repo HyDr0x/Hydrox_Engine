@@ -49,7 +49,7 @@ namespace he
     }
 
 
-    void Renderquad::setRenderTarget(int count, Texture *tex[])
+    void Renderquad::setRenderTarget(int count, Texture2D *tex[])
     {
 	    assert(count > 1);
 	    m_count = count;
@@ -87,7 +87,7 @@ namespace he
 	    va_list texList;
 	    va_start(texList, count);
 
-	    Texture *tex = va_arg(texList, Texture*);
+	    Texture2D *tex = va_arg(texList, Texture2D*);
 
 	    m_width  = tex->getResolution()[0];
 	    m_height = tex->getResolution()[1];
@@ -109,7 +109,7 @@ namespace he
 		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->m_texIndex, 0);
 		    for(unsigned int i = 1; i != m_count; i++)
 		    {
-			    tex = va_arg(texList, Texture*);
+			    tex = va_arg(texList, Texture2D*);
 			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex->m_texIndex, 0);
 		    }
 		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTex, 0);

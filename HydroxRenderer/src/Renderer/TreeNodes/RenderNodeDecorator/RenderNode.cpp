@@ -15,8 +15,7 @@ namespace he
 	{
     RenderNode::RenderNode(unsigned int maxGeometry) : 
       m_instanceNumber(0), 
-      m_maxGeometry(maxGeometry), 
-      m_geometryChanged(false),
+      m_maxGeometry(maxGeometry),
       m_instanceNumberChanged(false)
     {
     }
@@ -42,79 +41,49 @@ namespace he
         return false;
       }
 
-      if(m_meshes[geometryContainer.getMeshHandle()].size() != 0)
-      {
-        m_instanceNumberChanged = true;
-      }
-      else
-      {
-        m_geometryChanged = true;
-      }
+      m_instanceNumberChanged = true;
 
-      m_meshes[geometryContainer.getMeshHandle()].push_back(geometryContainer.getHash());
+      m_instances.push_back(geometryContainer.getHash());
 
       m_instanceNumber++;
 
       return true;
     }
 
-    bool RenderNode::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int RenderNode::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      bool isContained = false;
-
-      std::list<uint64_t>& geometryList = m_meshes[geometryContainer.getMeshHandle()];
-      for(std::list<uint64_t>::const_iterator geometryIterator = geometryList.begin(); geometryIterator != geometryList.end(); geometryIterator++)
+      bool deleted = false;
+      unsigned int instanceIndex = 0;
+      for(std::list<uint64_t>::const_iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++, instanceIndex++)
       {
-        if(*geometryIterator == geometryContainer.getHash())
+        if(*instanceIterator == geometryContainer.getHash())
         {
-          geometryList.erase(geometryIterator);
-          isContained = true;
+          m_instances.erase(instanceIterator);
+          deleted = true;
           break;
         }
       }
 
-      if(!isContained)//the node wasnt in the list --> wrong render node
+      if(!deleted)//the node wasnt in the list --> wrong render node
       {
-        return false;
+        return ~0;
       }
 
       m_instanceNumber--;
 
       m_instanceNumberChanged = true;
 
-      if(m_meshes[geometryContainer.getMeshHandle()].size() == 0)
-      {
-        m_geometryChanged = true;
-
-        m_meshes.erase(geometryContainer.getMeshHandle());
-      }
-
-      return true;
+      return instanceIndex;
     }
 
-    unsigned int RenderNode::getInstanceCount()
+    unsigned int RenderNode::getInstanceNumber()
     {
       return m_instanceNumber;
-    }
-
-    bool RenderNode::hasGeometryChanged()
-    {
-      return m_geometryChanged;
     }
 
     bool RenderNode::hasInstanceNumberChanged()
     {
       return m_instanceNumberChanged;
-    }
-
-    bool RenderNode::isInstanced()
-    {
-      return false;
-    }
-
-    bool RenderNode::isEmpty()
-    {
-      return true;
     }
 
     void RenderNode::frustumCulling()
@@ -130,7 +99,6 @@ namespace he
 
     void RenderNode::updateBuffer()
     {
-      m_geometryChanged = false;
       m_instanceNumberChanged = false;
     }
 	}

@@ -24,7 +24,7 @@ namespace he
     {
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        m_meshHandles[geometryContainer.getMeshHandle()].push_back(dynamic_cast<xBar::SkinnedGeometryContainer&>(geometryContainer));
+        m_geometryContainer.push_back(dynamic_cast<xBar::SkinnedGeometryContainer&>(geometryContainer));
 
         return true;
       }    
@@ -32,29 +32,23 @@ namespace he
       return false;
     }
 
-    bool SkinnedGeometryDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int SkinnedGeometryDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_renderNode->removeGeometry(geometryContainer))
+      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
+      if(instanceIndex != ~0)
       {
-        std::list<xBar::SkinnedGeometryContainer>& geometryList = m_meshHandles[geometryContainer.getMeshHandle()];
-        for(std::list<xBar::SkinnedGeometryContainer>::iterator geometryIterator = geometryList.begin(); geometryIterator != geometryList.end(); geometryIterator++)
+        unsigned int index = 0;
+        for(std::list<xBar::SkinnedGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, index++)
         {
-          if(geometryIterator->getHash() == geometryContainer.getHash())
+          if(index == instanceIndex)
           {
-            geometryList.erase(geometryIterator);
+            m_geometryContainer.erase(geometryIterator);
             break;
           }
         }
-
-        if(m_meshHandles[geometryContainer.getMeshHandle()].size() == 0)
-        {
-          m_meshHandles.erase(geometryContainer.getMeshHandle());
-        }
-
-        return true;
       }
 
-      return false;
+      return instanceIndex;
     }
 
     void SkinnedGeometryDecorator::frustumCulling()
@@ -77,57 +71,48 @@ namespace he
 
     bool SkinnedGeometryDecorator::isEmpty()
     {
-      return m_meshHandles.size() == 0;
+      return m_geometryContainer.size() == 0;
     }
 
     void SkinnedGeometryDecorator::updateBuffer()
     {
-      unsigned int instanceNumber = getInstanceCount();
+      unsigned int instanceNumber = getInstanceNumber();
 
-      if(hasGeometryChanged() || hasInstanceNumberChanged())
+      if(hasInstanceNumberChanged())
       {
         resizeBuffer(instanceNumber);
       }
 
-      unsigned int instanceIndex = 0;
-      for(std::map<util::ResourceHandle, std::list<xBar::SkinnedGeometryContainer>, Less>::iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
-      {
-        for(std::list<xBar::SkinnedGeometryContainer>::iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
-        {
-          fillCaches(*geometryIterator, instanceIndex);
-        }
-      }
+      m_matrixBuffer.setMemoryFence();
+      m_bboxMatrixBuffer.setMemoryFence();
 
-      fillBuffer(instanceNumber);
+      fillBuffer();
 
       m_renderNode->updateBuffer();
+
+      m_bboxMatrixBuffer.syncWithFence();
+      m_matrixBuffer.syncWithFence();
     }
 
     void SkinnedGeometryDecorator::resizeBuffer(unsigned int instanceNumber)
     {
-      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * instanceNumber * m_maxBones);
-      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_matrixCache.size(), 0, GL_DYNAMIC_DRAW, nullptr);
-
-      m_bboxMatrixCache.resize(sizeof(util::Matrix<float, 4>) * instanceNumber);
-      m_bboxMatrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_bboxMatrixCache.size(), 0, GL_DYNAMIC_DRAW, nullptr);
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_maxBones * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_bboxMatrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
-    void SkinnedGeometryDecorator::fillCaches(xBar::SkinnedGeometryContainer& geometryContainer, unsigned int instanceCounter)
+    void SkinnedGeometryDecorator::fillBuffer()
     {
-      std::vector<util::Matrix<float, 4>>& skinningMatrices = geometryContainer.getSkinningMatrices();
+      unsigned int instanceIndex = 0;
+      for (std::list<xBar::SkinnedGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, instanceIndex++)
+      {
+        std::vector<util::Matrix<float, 4>>& skinningMatrices = geometryIterator->getSkinningMatrices();
 
-      unsigned int size = sizeof(util::Matrix<float, 4>) * skinningMatrices.size();
-      unsigned int offset = sizeof(util::Matrix<float, 4>) * m_maxBones * instanceCounter;
+        unsigned int size = sizeof(util::Matrix<float, 4>) * skinningMatrices.size();
+        unsigned int offset = sizeof(util::Matrix<float, 4>) * m_maxBones * instanceIndex;
 
-      memcpy(&m_matrixCache[offset], &(skinningMatrices[0][0][0]), size);
-
-      memcpy(&m_bboxMatrixCache[instanceCounter * sizeof(util::Matrix<float, 4>)], &geometryContainer.getTransformationMatrix()[0], sizeof(util::Matrix<float, 4>));
-    }
-
-    void SkinnedGeometryDecorator::fillBuffer(unsigned int instanceNumber)
-    {
-      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * m_maxBones * instanceNumber, &m_matrixCache[0]);
-      m_bboxMatrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * instanceNumber, &m_bboxMatrixCache[0]);
+        m_matrixBuffer.setData(offset, size, &(skinningMatrices[0][0][0]));
+        m_bboxMatrixBuffer.setData(instanceIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &geometryIterator->getTransformationMatrix()[0][0]);
+      }
     }
 	}
 }

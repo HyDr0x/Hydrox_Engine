@@ -46,7 +46,7 @@ namespace he
 
         m_materialHandles[geometryContainer.getMaterialHandle()] = m_materialCount;
 
-        m_meshHandles[geometryContainer.getMeshHandle()].push_back(std::pair<uint64_t, unsigned int>(geometryContainer.getHash(), m_materialCount));
+        m_meshHandles.push_back(m_materialCount);
 
         Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
         m_materialBuffer.setData(&material->getMaterialData(), m_materialCount * sizeof(Material::MaterialData), sizeof(Material::MaterialData));
@@ -57,7 +57,7 @@ namespace he
       {
         if(m_renderNode->insertGeometry(geometryContainer))
         {
-          m_meshHandles[geometryContainer.getMeshHandle()].push_back(std::pair<uint64_t, unsigned int>(geometryContainer.getHash(), m_materialHandles[geometryContainer.getMaterialHandle()]));
+          m_meshHandles.push_back(m_materialHandles[geometryContainer.getMaterialHandle()]);
 
           return true;
         }
@@ -66,16 +66,23 @@ namespace he
       }
     }
 
-    bool MaterialDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int MaterialDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_renderNode->removeGeometry(geometryContainer))
+      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
+      if(instanceIndex != ~0)
       {
-        m_meshHandles[geometryContainer.getMeshHandle()].remove(std::pair<uint64_t, unsigned int>(geometryContainer.getHash(), m_materialHandles[geometryContainer.getMaterialHandle()]));
-
-        return true;
+        unsigned int index = 0;
+        for(std::list<unsigned int>::const_iterator instanceIterator = m_meshHandles.begin(); instanceIterator != m_meshHandles.end(); instanceIterator++, index++)
+        {
+          if(index == instanceIndex)
+          {
+            m_meshHandles.erase(instanceIterator);
+            break;
+          }
+        }
       }
 
-      return false;
+      return instanceIndex;
     }
 
     void MaterialDecorator::rasterizeGeometry()
@@ -91,7 +98,7 @@ namespace he
 
     void MaterialDecorator::updateBuffer()
     {
-      if(hasGeometryChanged() || hasInstanceNumberChanged())
+      if(hasInstanceNumberChanged())
       {
         resizeBuffer();
       }
@@ -101,18 +108,14 @@ namespace he
 
     void MaterialDecorator::resizeBuffer()
     {
-      unsigned int instanceNumber = getInstanceCount();
+      unsigned int instanceNumber = getInstanceNumber();
 
       std::vector<GLuint> materialIndexData(instanceNumber);
 
-      unsigned int meshIndex = 0;
-      unsigned int instanceIndex = 0;
-      for(MeshMaterialHandles::const_iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++, meshIndex++)
+      unsigned int index = 0;
+      for(std::list<unsigned int>::const_iterator instanceIterator = m_meshHandles.begin(); instanceIterator != m_meshHandles.end(); instanceIterator++, index++)
       {
-        for(std::list<std::pair<uint64_t, unsigned int>>::const_iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
-        {
-          materialIndexData[instanceIndex] = geometryIterator->second;
-        }
+        materialIndexData[index] = *instanceIterator;
       }
 
       m_materialIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * instanceNumber, 0, GL_STATIC_DRAW, &materialIndexData[0]);

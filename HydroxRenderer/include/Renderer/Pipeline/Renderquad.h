@@ -7,7 +7,7 @@
 
 #include "Renderer/DLLExport.h"
 
-#include "Renderer/Resources/Texture.h"
+#include "Renderer/Resources/Texture2D.h"
 
 namespace he
 {
@@ -20,7 +20,7 @@ namespace he
 	    Renderquad();
 	    ~Renderquad();
 
-	    void setRenderTarget(int count, Texture *tex[]);
+	    void setRenderTarget(int count, Texture2D *tex[]);
 	    void setRenderTarget(int count, ...);
 	    void render(bool direct);
 

@@ -3,6 +3,8 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
+#include "Renderer/Buffer/GPUImmutableBuffer.h"
+
 namespace he
 {
 	namespace renderer
@@ -15,7 +17,7 @@ namespace he
       ~StaticGeometryDecorator();
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
@@ -27,14 +29,9 @@ namespace he
 
     protected:
 
-      void resizeBuffer(unsigned int instanceNumber);
-      void fillCaches(xBar::StaticGeometryContainer& geometryContainer, unsigned int instanceCounter);
-      void fillBuffer(unsigned int instanceNumber);
+      GPUImmutableBuffer m_matrixBuffer;
 
-      GPUBuffer m_matrixBuffer;
-      std::vector<GLubyte> m_matrixCache;
-
-      std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer>, Less> m_meshHandles;
+      std::list<xBar::StaticGeometryContainer> m_geometryContainer;
     };
 	}
 }

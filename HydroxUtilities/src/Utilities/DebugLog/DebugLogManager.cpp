@@ -63,16 +63,16 @@ namespace he
 
     void DebugLogManager::printSystemInformation()
     {
-      std::cout << "Graphics Card Vendor: " << m_vendorName.c_str() << std::endl;
-      std::cout << "Graphics Card: " << m_graphicCardName.c_str() << std::endl;
-      std::cout << "OpenGL Version: " << m_openGLMajorVersion << "." << m_openGLMinorVersion << std::endl;
-      std::cout << "Shader Version: " << m_shadingVersion.c_str() << std::endl;
-      std::cout << "---------------------------------------------------------" << std::endl;
+      std::clog << "Graphics Card Vendor: " << m_vendorName.c_str() << std::endl;
+      std::clog << "Graphics Card: " << m_graphicCardName.c_str() << std::endl;
+      std::clog << "OpenGL Version: " << m_openGLMajorVersion << "." << m_openGLMinorVersion << std::endl;
+      std::clog << "Shader Version: " << m_shadingVersion.c_str() << std::endl;
+      std::clog << "---------------------------------------------------------" << std::endl;
     }
 
     void DebugLogManager::printSupportedExtensions()
     {
-      std::cout << "Extensions:\n" << m_extensions.c_str() << std::endl;
+      std::clog << "Extensions:\n" << m_extensions.c_str() << std::endl;
     }
 
     unsigned int DebugLogManager::getMajorOpenGLVersion()

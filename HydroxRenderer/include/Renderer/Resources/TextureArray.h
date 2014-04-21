@@ -1,5 +1,5 @@
-#ifndef TEXTURE2D_H_
-#define TEXTURE2D_H_
+#ifndef TEXTUREARRAY_H_
+#define TEXTUREARRAY_H_
 
 #include <list>
 
@@ -16,16 +16,16 @@ namespace he
 {
 	namespace renderer
 	{
-    class GRAPHICAPI Texture2D : public ManagedResource
+    class GRAPHICAPI TextureArray : public ManagedResource
     {
     public:
 
-      Texture2D() {}
-      Texture2D(const Texture2D&);
+      TextureArray() {}
+      TextureArray(const TextureArray&);
 
-	    Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
-      Texture2D& operator=(const Texture2D& o);
-	    ~Texture2D();
+	    TextureArray(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
+      TextureArray& operator=(const TextureArray& o);
+	    ~TextureArray();
 
       void free();
 
@@ -34,9 +34,9 @@ namespace he
 
       void activateMipMapping(bool mipmapping);
 
-	    void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
+      void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter);
 
-	    util::Vector<unsigned int, 2> getResolution();
+	    util::Vector<unsigned int, 3> getResolution();
 	    GLenum getTarget();
       GLenum getInternalFormat();
       GLenum getFormat();
@@ -50,7 +50,7 @@ namespace he
 
     private:
 
-	    GLsizei m_width, m_height;
+	    GLsizei m_width, m_height, m_depth;
 	    GLuint m_texIndex;
 	    GLenum m_target;
       GLenum m_internalFormat;

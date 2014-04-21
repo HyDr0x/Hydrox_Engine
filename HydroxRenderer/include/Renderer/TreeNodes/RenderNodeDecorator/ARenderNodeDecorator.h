@@ -9,9 +9,6 @@
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
-#include "Renderer/Buffer/GPUBuffer.h"
-#include "Renderer/Buffer/UBO.h"
-
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
 namespace he
@@ -39,17 +36,11 @@ namespace he
       virtual void postTraverse(Traverser* traverser);
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
-      virtual unsigned int getInstanceCount();
-
-      virtual bool hasGeometryChanged();
+      virtual unsigned int getInstanceNumber();
 
       virtual bool hasInstanceNumberChanged();
-
-      virtual bool isInstanced();
-
-      virtual bool isEmpty();
 
       virtual void frustumCulling();
 

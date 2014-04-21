@@ -131,7 +131,7 @@ namespace he
 
     void RemoveGeometryTraverser::postTraverse(IRenderNode* treeNode)
     {
-      if(treeNode->isEmpty())
+      if(treeNode->getInstanceNumber() == 0)
       {
         m_renderNodes.remove(treeNode);
         deleteNode(treeNode);

@@ -15,7 +15,8 @@
 #include "Renderer/Resources/Material.h"
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/ComputeShader.h"
-#include "Renderer/Resources/Texture.h"
+#include "Renderer/Resources/Texture2D.h"
+#include "Renderer/Resources/TextureArray.h"
 
 namespace he
 {
@@ -55,7 +56,7 @@ namespace he
         return dynamic_cast<CLASS*>(&m_objectsCache[handle.getID()]);
       }
 
-      bool isAlreadyCached(CLASS& object)
+      bool isCached(CLASS& object)
       {
         return m_objectHash.count(object.getHash());
       }
@@ -143,13 +144,15 @@ namespace he
     template class GRAPHICAPI ResourceManager<Material>;
     template class GRAPHICAPI ResourceManager<RenderShader>;
     template class GRAPHICAPI ResourceManager<ComputeShader>;
-    template class GRAPHICAPI ResourceManager<Texture>;
+    template class GRAPHICAPI ResourceManager<Texture2D>;
+    template class GRAPHICAPI ResourceManager<TextureArray>;
 
     typedef ResourceManager<Mesh> ModelManager;
     typedef ResourceManager<Material> MaterialManager;
     typedef ResourceManager<RenderShader> RenderShaderManager;
     typedef ResourceManager<ComputeShader> ComputeShaderManager;
-    typedef ResourceManager<Texture> TextureManager;
+    typedef ResourceManager<Texture2D> TextureManager;
+    typedef ResourceManager<TextureArray> TextureArrayManager;
 	}
 }
 

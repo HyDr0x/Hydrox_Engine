@@ -33,7 +33,7 @@ namespace he
 
     void BillboardRenderer::render()
     {
-      Texture *renderTexture;
+      Texture2D *renderTexture;
 
 	    glEnable(GL_BLEND);
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -5,6 +5,9 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
+#include "Renderer/Buffer/GPUBuffer.h"
+#include "Renderer/Buffer/UBO.h"
+
 namespace he
 {
 	namespace renderer
@@ -20,7 +23,7 @@ namespace he
       virtual void postTraverse(Traverser* traverser);
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void rasterizeGeometry();
 
@@ -40,8 +43,7 @@ namespace he
 
       std::map<util::ResourceHandle, unsigned int, Less> m_materialHandles;
 
-      typedef std::map<util::ResourceHandle, std::list<std::pair<uint64_t, unsigned int>>, Less> MeshMaterialHandles;
-      MeshMaterialHandles m_meshHandles;
+      std::list<unsigned int> m_meshHandles;
     };
   }
 }

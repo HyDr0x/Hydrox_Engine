@@ -10,12 +10,12 @@ namespace he
 	{
     DrawElementsDecorator::DrawElementsDecorator(IRenderNode *renderNode, bool instanced, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
-      m_instanced(instanced),
       m_indexType(indexType), 
       m_primitiveType(primitiveType),
       m_vertexStride(vertexStride),
       m_vboSize(0),
-      m_iboSize(0)
+      m_iboSize(0),
+      m_meshNumberChanged(false)
     {
       m_modelManager = singletonManager->getService<ModelManager>();
     }
@@ -35,13 +35,18 @@ namespace he
 
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()] == 0)
+        if(!m_meshes.count(geometryContainer.getMeshHandle()))
         {
+          m_meshNumberChanged = true;
+
+          m_meshes[geometryContainer.getMeshHandle()].instanceCount = 0;
+
           m_vboSize += mesh->getVBOSize();
-          m_iboSize += mesh->getIndexCount() * sizeof(GLuint);
+          m_iboSize += mesh->getIndexCount() * sizeof(GLINDEXTYPE);
         }
 
-        m_instanceNumberPerMesh[geometryContainer.getMeshHandle()]++;
+        m_meshes[geometryContainer.getMeshHandle()].instanceCount++;
+        m_geometry.push_back(geometryContainer.getMeshHandle());
 
         return true;
       }
@@ -49,31 +54,37 @@ namespace he
      return false;
     }
 
-    bool DrawElementsDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int DrawElementsDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_renderNode->removeGeometry(geometryContainer))
+      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
+      if(instanceIndex != ~0)
       {
-        m_instanceNumberPerMesh[geometryContainer.getMeshHandle()]--;
-
-        if(m_instanceNumberPerMesh[geometryContainer.getMeshHandle()] == 0)
+        unsigned int instanceCounter = 0;
+        for(std::list<util::ResourceHandle>::const_iterator meshIterator = m_geometry.begin(); meshIterator != m_geometry.end(); meshIterator++, instanceCounter++)
         {
-          m_instanceNumberPerMesh.erase(geometryContainer.getMeshHandle());
+          if(instanceCounter == instanceIndex)
+          {
+            m_geometry.erase(meshIterator);
+            break;
+          }
+        }
+
+        m_meshes[geometryContainer.getMeshHandle()].instanceCount--;
+
+        if(!m_meshes[geometryContainer.getMeshHandle()].instanceCount)
+        {
+          m_meshNumberChanged = true;
 
           Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
           m_vboSize -= mesh->getVBOSize();
           m_iboSize -= mesh->getIndexCount() * sizeof(GLuint);
-        }
 
-        return true;
+          m_meshes.erase(geometryContainer.getMeshHandle());
+        }
       }
 
-      return false;
-    }
-
-    bool DrawElementsDecorator::isInstanced()
-    {
-      return m_instanced;
+      return instanceIndex;
     }
 
     void DrawElementsDecorator::frustumCulling()
@@ -97,14 +108,10 @@ namespace he
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
       m_meshIndexBuffer.bindBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
-      if(m_instanced)
-      {
-        glMultiDrawElementsIndirect(m_primitiveType, m_indexType, nullptr, m_meshNumber, 0);
-      }
-      else
-      {
-        glMultiDrawElementsIndirect(m_primitiveType, m_indexType, nullptr, getInstanceCount(), 0);
-      }
+      std::vector<DrawElementsIndirectCommand> tmpTest(getInstanceNumber());
+      m_commandBuffer.getData(0, sizeof(DrawElementsIndirectCommand)* getInstanceNumber(), &tmpTest[0]);
+
+      glMultiDrawElementsIndirect(m_primitiveType, m_indexType, nullptr, getInstanceNumber(), 0);
 
       m_meshIndexBuffer.unbindBuffer(GL_ELEMENT_ARRAY_BUFFER);
       m_meshVertexBuffer.unbindVertexBuffer(0);
@@ -113,135 +120,91 @@ namespace he
 
     void DrawElementsDecorator::updateBuffer()
     {
-      if(hasGeometryChanged() || hasInstanceNumberChanged())
+      if (m_meshNumberChanged)
       {
-        resizeBuffer();
+        createBuffer();
+        fillBuffer();
+
+        m_meshVertexBuffer.syncWithFence();
+        m_meshIndexBuffer.syncWithFence();
+        m_bboxesBuffer.syncWithFence();
+        m_commandBuffer.syncWithFence();
+        m_meshInstanceIndexBuffer.syncWithFence();
+
+        m_meshNumberChanged = false;
       }
+      //else if(hasInstanceNumberChanged())
+      //{
+      //  updateCommandBuffer();
+      //}
 
       m_renderNode->updateBuffer();
     }
 
-    void DrawElementsDecorator::resizeBuffer()
-    {
-      m_meshNumber = m_instanceNumberPerMesh.size();
-
-      if(hasGeometryChanged())
-      {
-        createBuffer();
-        fillCaches();
-        fillBuffer();
-      }
-      else if(hasInstanceNumberChanged())
-      {
-        updateCommandBuffer();
-      }
-    }
-
     void DrawElementsDecorator::createBuffer()
     {
-      m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_STATIC_DRAW, nullptr);
-      m_meshIndexBuffer.createBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboSize, 0, GL_STATIC_DRAW, nullptr);
+      m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_meshIndexBuffer.createBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
-      if(m_instanced)
-      {
-        m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * m_meshNumber, 0, GL_STATIC_DRAW, nullptr);
-        m_commandCache.resize(m_meshNumber);
-      }
-      else
-      {
-        unsigned int instanceCount = getInstanceCount();
+      unsigned int instanceCount = getInstanceNumber();
 
-        m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshNumber * 2, 0, GL_STATIC_DRAW, nullptr);
-        m_meshInstanceIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * instanceCount, 0, GL_STATIC_DRAW, nullptr);
-        m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * instanceCount, 0, GL_STATIC_DRAW, nullptr);
-
-        m_boundingBoxCache.resize(m_meshNumber * 2);
-        m_commandCache.resize(instanceCount);
-        m_meshInstanceIndexCache.resize(instanceCount);
-      }
-
-      m_vertexOffset = 0;
-      m_indexOffset = 0;
-      m_vertexCount = 0;
-      m_indexCount = 0;
-    }
-
-    void DrawElementsDecorator::fillCaches()
-    {
-      unsigned int instanceCounter = 0;
-      unsigned int commandIndex = 0;
-      unsigned int meshIndex = 0;
-      for(std::map<util::ResourceHandle, unsigned int, Less>::const_iterator meshIterator = m_instanceNumberPerMesh.begin(); meshIterator != m_instanceNumberPerMesh.end(); meshIterator++, meshIndex++)
-      {
-        Mesh *mesh = m_modelManager->getObject(meshIterator->first);
-
-        m_meshVertexBuffer.setData(m_vertexOffset, mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
-        m_vertexOffset += mesh->getVBOSize();
-
-        m_meshIndexBuffer.setData(m_indexOffset, mesh->getIndexCount() * sizeof(GLuint), &(mesh->getIndexBuffer()[0]));
-        m_indexOffset += mesh->getIndexCount() * sizeof(GLuint);
-
-        if(m_instanced)
-        {
-          DrawElementsIndirectCommand command;
-          command.count = mesh->getIndexCount();
-          command.instanceCount = meshIterator->second;
-          command.firstIndex = m_indexCount;
-          command.baseVertex = m_vertexCount;
-          command.baseInstance = instanceCounter;
-
-          m_commandCache[commandIndex] = command;
-
-          commandIndex++;
-        }
-        else
-        {
-          for(unsigned int i = 0; i < meshIterator->second; i++)
-          {
-            DrawElementsIndirectCommand command;
-            command.count = mesh->getIndexCount();
-            command.instanceCount = 1;
-            command.firstIndex = m_indexCount;
-            command.baseVertex = m_vertexCount;
-            command.baseInstance = instanceCounter + i;
-
-            m_commandCache[commandIndex + i] = command;
-            m_meshInstanceIndexCache[commandIndex + i] = meshIndex;
-          }
-
-          commandIndex += meshIterator->second;
-
-          //update bbox data
-          memcpy(&m_boundingBoxCache[2 * meshIndex + 0][0], &mesh->getBBMin()[0], sizeof(util::Vector<float, 3>));
-          memcpy(&m_boundingBoxCache[2 * meshIndex + 1][0], &mesh->getBBMax()[0], sizeof(util::Vector<float, 3>));
-        }
-
-        m_indexCount += mesh->getIndexCount();
-        m_vertexCount += mesh->getVertexCount();
-        instanceCounter += meshIterator->second;
-      }
+      m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshes.size() * 2, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_meshInstanceIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
     void DrawElementsDecorator::fillBuffer()
     {
-      if(m_instanced)
-      {
-        m_commandBuffer.setData(0, sizeof(DrawElementsIndirectCommand) * m_meshNumber, &m_commandCache[0]);
-      }
-      else
-      {
-        unsigned int instanceCount = getInstanceCount();
+      m_meshVertexBuffer.setMemoryFence();
+      m_meshIndexBuffer.setMemoryFence();
 
-        m_bboxesBuffer.setData(0, sizeof(util::Vector<float, 4>) * m_meshNumber * 2, &m_boundingBoxCache[0]);
-        m_meshInstanceIndexBuffer.setData(0, sizeof(GLuint) * instanceCount, &m_meshInstanceIndexCache[0]);
-        m_commandBuffer.setData(0, sizeof(DrawElementsIndirectCommand) * instanceCount, &m_commandCache[0]);
+      unsigned int meshIndex = 0;
+      unsigned int vertexOffset = 0;
+      unsigned int indexOffset = 0;
+      for(std::map<util::ResourceHandle, ElementGeometry, Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, meshIndex++)
+      {
+        Mesh *mesh = m_modelManager->getObject(meshIterator->first);
+
+        m_meshVertexBuffer.setData(vertexOffset * mesh->getVertexStride(), mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
+        m_meshIndexBuffer.setData(indexOffset * sizeof(GLINDEXTYPE), mesh->getIndexCount() * sizeof(GLINDEXTYPE), &(mesh->getIndexBuffer()[0]));
+
+        meshIterator->second.meshIndex = meshIndex;
+        meshIterator->second.vertexOffset = vertexOffset;
+        meshIterator->second.indexOffset = indexOffset;
+
+        vertexOffset += mesh->getVertexCount();
+        indexOffset += mesh->getIndexCount();
+      }
+
+      m_bboxesBuffer.setMemoryFence();
+      m_meshInstanceIndexBuffer.setMemoryFence();
+      m_commandBuffer.setMemoryFence();
+
+      unsigned int instanceCounter = 0;
+      for(std::list<util::ResourceHandle>::const_iterator meshIterator = m_geometry.begin(); meshIterator != m_geometry.end(); meshIterator++, instanceCounter++)
+      {
+        Mesh *mesh = m_modelManager->getObject(*meshIterator);
+
+        DrawElementsIndirectCommand command;
+        command.count = mesh->getIndexCount();
+        command.instanceCount = 1;
+        command.firstIndex = m_meshes[*meshIterator].indexOffset;
+        command.baseVertex = m_meshes[*meshIterator].vertexOffset;
+        command.baseInstance = instanceCounter;
+
+        m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
+        m_meshInstanceIndexBuffer.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[*meshIterator].meshIndex);
+
+        //update bbox data
+        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].meshIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
+        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].meshIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
       }
     }
 
     void DrawElementsDecorator::updateCommandBuffer()
     {
       unsigned int commandIndex = 0;
-      for(std::map<util::ResourceHandle, unsigned int, Less>::const_iterator meshIterator = m_instanceNumberPerMesh.begin(); meshIterator != m_instanceNumberPerMesh.end(); meshIterator++, commandIndex++)
+      for(std::map<util::ResourceHandle, ElementGeometry, Less>::const_iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, commandIndex++)
       {
         m_commandBuffer.setData(commandIndex * sizeof(DrawElementsIndirectCommand) + sizeof(GLuint), sizeof(GLuint), &meshIterator->second);
       }

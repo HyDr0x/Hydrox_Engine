@@ -5,6 +5,8 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
+#include "Renderer/Buffer/GPUImmutableBuffer.h"
+
 namespace he
 {
 	namespace renderer
@@ -17,7 +19,7 @@ namespace he
       ~SkinnedGeometryDecorator();
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
@@ -30,18 +32,14 @@ namespace he
     protected:
 
       void resizeBuffer(unsigned int instanceNumber);
-      void fillCaches(xBar::SkinnedGeometryContainer& geometryContainer, unsigned int instanceCounter);
-      void fillBuffer(unsigned int instanceNumber);
+      void fillBuffer();
 
-      GPUBuffer m_matrixBuffer;
-      GPUBuffer m_bboxMatrixBuffer;
-
-      std::vector<GLubyte> m_matrixCache;
-      std::vector<GLubyte> m_bboxMatrixCache;
+      GPUImmutableBuffer m_matrixBuffer;
+      GPUImmutableBuffer m_bboxMatrixBuffer;
 
       unsigned int m_maxBones;
 
-      std::map<util::ResourceHandle, std::list<xBar::SkinnedGeometryContainer>, Less> m_meshHandles;
+      std::list<xBar::SkinnedGeometryContainer> m_geometryContainer;
     };
 	}
 }

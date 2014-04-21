@@ -159,7 +159,8 @@ namespace he
 
       for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
+        texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
         texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
@@ -167,7 +168,7 @@ namespace he
 
       for(unsigned int j = 0; j < textureHandles[Material::NORMALTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
         texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
@@ -175,7 +176,7 @@ namespace he
 
       for(unsigned int j = 0; j < textureHandles[Material::SPECULARTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
         texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
@@ -183,7 +184,7 @@ namespace he
 
       for(unsigned int j = 0; j < textureHandles[Material::DISPLACEMENTTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
         texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
       }
 
@@ -196,25 +197,25 @@ namespace he
 
       for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
         texture->unsetTexture();
       }
 
       for(unsigned int j = 0; j < textureHandles[Material::NORMALTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
         texture->unsetTexture();
       }
 
       for(unsigned int j = 0; j < textureHandles[Material::SPECULARTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
         texture->unsetTexture();
       }
 
       for(unsigned int j = 0; j < textureHandles[Material::DISPLACEMENTTEX].size(); j++)
       {
-        Texture *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
+        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
         texture->unsetTexture();
       }
     }

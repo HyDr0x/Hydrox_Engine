@@ -1,4 +1,4 @@
-#include "Renderer/Resources/Texture2D.h"
+#include "Renderer/Resources/TextureArray.h"
 
 #include <assert.h>
 
@@ -8,9 +8,10 @@ namespace he
 	{
 	
 
-    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
+    TextureArray::TextureArray(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
+      m_depth(depth),
       m_type(type),
       m_internalFormat(internalFormat),
       m_format(format),
@@ -47,17 +48,18 @@ namespace he
         components = 4;
       }
 
-      unsigned int length = m_width * m_height * bytesPerPixel;
+      unsigned int length = m_width * m_height * m_depth * bytesPerPixel;
       m_hash = MurmurHash64A(data, length, 0);
 
       glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
       glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-      glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, data);
+      glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, data);
 
       if (mipmapping)
       {
@@ -66,10 +68,11 @@ namespace he
 	    glBindTexture(m_target, 0);
     }
 
-    Texture2D::Texture2D(const Texture2D& o)
+    TextureArray::TextureArray(const TextureArray& o)
     {
       m_hash = o.m_hash;
       m_width = o.m_width;
+      m_depth = o.m_depth;
       m_height = o.m_height;
 	    m_texIndex = o.m_texIndex;
 	    m_target = o.m_target;
@@ -79,11 +82,12 @@ namespace he
 	    m_slot = o.m_slot;
     }
 
-    Texture2D& Texture2D::operator=(const Texture2D& o)
+    TextureArray& TextureArray::operator=(const TextureArray& o)
     {
       m_hash = o.m_hash;
       m_width = o.m_width;
       m_height = o.m_height;
+      m_depth = o.m_depth;
 	    m_texIndex = o.m_texIndex;
 	    m_target = o.m_target;
       m_internalFormat = o.m_internalFormat;
@@ -94,16 +98,16 @@ namespace he
       return *this;
     }
 
-    Texture2D::~Texture2D()
+    TextureArray::~TextureArray()
     {
     }
 
-    void Texture2D::free()
+    void TextureArray::free()
     {
       glDeleteTextures(1, &m_texIndex);
     }
 
-    void Texture2D::setTexture(GLint location, GLuint slot)
+    void TextureArray::setTexture(GLint location, GLuint slot)
     {
       assert(slot < 31 && "ERROR, texture slot too high\n");
 
@@ -114,48 +118,49 @@ namespace he
       glUniform1i(location, slot);
     }
 
-    void Texture2D::unsetTexture()
+    void TextureArray::unsetTexture()
     {
 	    glActiveTexture(GL_TEXTURE0 + m_slot);
 	    glBindTexture(m_target, 0);
     }
 
-    void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter)
+    void TextureArray::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter)
     {
 	    glBindTexture(m_target, m_texIndex);
 		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
 		    glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_R, edgeModeR);
 		    glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
 		    glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
 	    glBindTexture(m_target, 0);
     }
 
-    util::Vector<unsigned int, 2> Texture2D::getResolution()
+    util::Vector<unsigned int, 3> TextureArray::getResolution()
     {
-	    return util::Vector<unsigned int, 2>(m_width, m_height);
+	    return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
     }
 
-    GLenum Texture2D::getTarget()
+    GLenum TextureArray::getTarget()
     {
 	    return m_target;
     }
 
-    GLenum Texture2D::getInternalFormat()
+    GLenum TextureArray::getInternalFormat()
     {
       return m_internalFormat;
     }
 
-    GLenum Texture2D::getFormat()
+    GLenum TextureArray::getFormat()
     {
       return m_format;
     }
 
-    GLenum Texture2D::getType()
+    GLenum TextureArray::getType()
     {
       return m_type;
     }
 
-    unsigned int Texture2D::getTextureSize()
+    unsigned int TextureArray::getTextureSize()
     {
       unsigned int bytesPerPixel;
 
@@ -181,10 +186,10 @@ namespace he
         bytesPerPixel = 4;
       }
 
-      return m_width * m_height * bytesPerPixel;
+      return m_width * m_height * m_depth * bytesPerPixel;
     }
 
-    void Texture2D::getTextureData(GLvoid* data)
+    void TextureArray::getTextureData(GLvoid* data)
     {
       glBindTexture(m_target, m_texIndex);
       glGetTexImage(m_target, 0, m_format, m_type, data);

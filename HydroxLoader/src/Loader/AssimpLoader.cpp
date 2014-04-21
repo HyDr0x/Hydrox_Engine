@@ -15,7 +15,7 @@
 
 #include <SceneGraph/Scene/Scene.h>
 
-#include <Renderer/Resources/Texture.h>
+#include <Renderer/Resources/Texture2D.h>
 #include <Renderer/Resources/Material.h>
 #include <Renderer/Resources/Mesh.h>
 

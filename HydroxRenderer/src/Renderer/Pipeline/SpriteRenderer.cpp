@@ -1,5 +1,12 @@
 #include "Renderer/Pipeline/SpriteRenderer.h"
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Signals/EventManager.h>
+
+#include "Renderer/Resources/Sprite.h"
+#include "Renderer/Resources/RenderShader.h"
+#include "Renderer/Resources/Texture2D.h"
+
 namespace he
 {
 	namespace renderer
@@ -16,21 +23,16 @@ namespace he
       m_transparentSprites.clear();
     }
 
-    const size_t SpriteRenderer::getMaxSpriteLayer() const
-    {
-      return m_maxLayer;
-    }
-
-    void SpriteRenderer::initialize(util::SingletonManager *singletonManager, size_t maxSpriteLayer, util::ResourceHandle spriteShaderHandle)
+    void SpriteRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer)
     {
       m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
       m_textureManager = singletonManager->getService<TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_maxLayer = maxSpriteLayer;
-
       m_spriteShaderHandle = spriteShaderHandle;
+
+      m_maxLayer = maxLayer;
 
       m_transparentSprites.resize(m_maxLayer);
 
@@ -50,7 +52,7 @@ namespace he
       glClear(GL_DEPTH_BUFFER_BIT);
 
       Sprite *renderSprite;
-      Texture *renderTexture;
+      Texture2D *renderTexture;
       RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
 
 	    spriteShader->useShader();
@@ -66,7 +68,7 @@ namespace he
 		      
 		      util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		      util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-          float z = renderSprite->getLayer() / (const float)m_maxLayer;
+          float z = renderSprite->getLayer() / (float)m_maxLayer;
 		      RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		      RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
           RenderShader::setUniform(2, GL_FLOAT, &z);
@@ -114,7 +116,7 @@ namespace he
 		
 		        util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		        util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-            float z = renderSprite->getLayer() / (const float)m_maxLayer;
+            float z = renderSprite->getLayer() / (float)m_maxLayer;
 		        spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
 		        spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
             spriteShader->setUniform(2, GL_FLOAT, &z);

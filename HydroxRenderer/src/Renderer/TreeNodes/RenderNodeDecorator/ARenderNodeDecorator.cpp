@@ -37,34 +37,19 @@ namespace he
      return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int ARenderNodeDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
       return m_renderNode->removeGeometry(geometryContainer);
     }
 
-    unsigned int ARenderNodeDecorator::getInstanceCount()
+    unsigned int ARenderNodeDecorator::getInstanceNumber()
     {
-      return m_renderNode->getInstanceCount();
-    }
-
-    bool ARenderNodeDecorator::hasGeometryChanged()
-    {
-      return m_renderNode->hasGeometryChanged();
+      return m_renderNode->getInstanceNumber();
     }
 
     bool ARenderNodeDecorator::hasInstanceNumberChanged()
     {
       return m_renderNode->hasInstanceNumberChanged();
-    }
-
-    bool ARenderNodeDecorator::isInstanced()
-    {
-      return m_renderNode->isInstanced();
-    }
-
-    bool ARenderNodeDecorator::isEmpty()
-    {
-      return m_renderNode->isEmpty();
     }
 
     void ARenderNodeDecorator::frustumCulling()

@@ -28,17 +28,11 @@ namespace he
       virtual void postTraverse(Traverser* traverser);
 
       bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
-      unsigned int getInstanceCount();
-
-      bool hasGeometryChanged();
+      unsigned int getInstanceNumber();
 
       bool hasInstanceNumberChanged();
-
-      bool isInstanced();
-
-      bool isEmpty();
 
       void frustumCulling();
 
@@ -48,13 +42,12 @@ namespace he
 
     protected:
 
-      bool m_geometryChanged;
       bool m_instanceNumberChanged;
 
       unsigned int m_maxGeometry;
       unsigned int m_instanceNumber;
 
-      std::map<util::ResourceHandle, std::list<uint64_t>, Less> m_meshes;
+      std::list<uint64_t> m_instances;
     };
 	}
 }

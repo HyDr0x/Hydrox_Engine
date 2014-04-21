@@ -1,6 +1,6 @@
 #include "Loader/ILDevilLoader.h"
 
-#include <Renderer/Resources/Texture.h>
+#include <Renderer/Resources/Texture2D.h>
 
 namespace he
 {
@@ -66,7 +66,7 @@ namespace he
           int bytesPerPixel = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
           bytesPerPixel = ilGetInteger(IL_FORMAT_MODE);
         
-          tmpTextureID = m_textureManager->addObject(renderer::Texture(width, height, m_target, type, internalFormat, format, ilGetData()));
+          tmpTextureID = m_textureManager->addObject(renderer::Texture2D(width, height, m_target, type, internalFormat, format, ilGetData()));
         }
       }
       ilBindImage(0);
@@ -78,7 +78,7 @@ namespace he
     util::ResourceHandle ILDevilLoader::getDefaultResource()
     {
       util::Vector<float, 3> textureData = util::Vector<float, 3>(0.0f, 1.0f, 0.0f);
-      return m_textureManager->addObject(renderer::Texture(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));
+      return m_textureManager->addObject(renderer::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));
     }
 
     void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components)

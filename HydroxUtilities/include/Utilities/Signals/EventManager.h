@@ -20,6 +20,7 @@ namespace he
 
       enum Events
 	    {
+        OnAddStringTexture2D,
         OnAddSprite,
         OnAddBillboardNode,
         OnAddGeometryNode,
@@ -28,6 +29,7 @@ namespace he
         OnAddInstancedSkinnedGeometryNode,
         OnAddLightNode,
         OnAddParticleTransmitterNode,
+        OnRemoveStringTexture2D,
         OnRemoveSprite,
         OnRemoveBillboardNode,
         OnRemoveGeometryNode,

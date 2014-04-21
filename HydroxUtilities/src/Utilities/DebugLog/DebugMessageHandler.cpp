@@ -12,12 +12,12 @@ namespace he
                                     const GLchar* message,
                                     GLvoid* userParam)
     {
-      std::cout << "Source: " << getStringForSource(source) << std::endl;
-      std::cout << "Type: " << getStringForType(type) << std::endl;
-      std::cout << "Severity: " << getStringForSeverity(severity) << std::endl;
-      std::cout << message << std::endl;
-      std::cout << "---------------------------------------------------------" << std::endl;
-      std::cout << std::endl;
+      std::cerr << "Source: " << getStringForSource(source) << std::endl;
+      std::cerr << "Type: " << getStringForType(type) << std::endl;
+      std::cerr << "Severity: " << getStringForSeverity(severity) << std::endl;
+      std::cerr << message << std::endl;
+      std::cerr << "---------------------------------------------------------" << std::endl;
+      std::cerr << std::endl;
     }
 
     std::string getStringForType(GLenum type)

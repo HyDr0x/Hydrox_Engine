@@ -8,7 +8,7 @@ namespace he
 {
 	namespace renderer
 	{
-    RenderManager::RenderManager()
+    RenderManager::RenderManager() : m_skyboxRendering(false)
     {
     }
 
@@ -45,16 +45,29 @@ namespace he
       }
     }
 
-    void RenderManager::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, size_t maxSpriteLayer, 
+    void RenderManager::enableSkybox(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6])
+    {
+      m_skyboxRendering = true;
+      m_skyboxRenderer.initialize(singletonManager, skyboxShaderHandle, skyboxTextureHandles);
+    }
+
+    void RenderManager::disableSkybox()
+    {
+      m_skyboxRendering = false;
+    }
+
+    void RenderManager::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
       util::ResourceHandle billboardShaderHandle, 
       util::ResourceHandle spriteShaderHandle, 
+      util::ResourceHandle stringShaderHandle,
       util::ResourceHandle frustumCullingShaderHandle)
     {
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_geometryRasterizer.initialize(maxMaterials, maxGeometry, maxBones, singletonManager, frustumCullingShaderHandle);
       m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
-      m_spriteRenderer.initialize(singletonManager, maxSpriteLayer, spriteShaderHandle);
+      m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
+      m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);
 
       m_aspectRatio = aspectRatio;
 
@@ -75,7 +88,14 @@ namespace he
 
       m_geometryRasterizer.rasterizeGeometry();
       m_billboardRenderer.render();
+
+      if (m_skyboxRendering)
+      {
+        m_skyboxRenderer.render();
+      }
+
       m_spriteRenderer.render();
+      m_stringRenderer.render();
 
       m_cameraParameterUBO.unBindBuffer();
     }
@@ -83,6 +103,11 @@ namespace he
     void RenderManager::addRenderComponent(Sprite *sprite)
     {
       m_spriteRenderer.addRenderComponent(sprite);
+    }
+
+    void RenderManager::addRenderComponent(StringTexture2D *string)
+    {
+      m_stringRenderer.addRenderComponent(string);
     }
 
     void RenderManager::addRenderComponent(xBar::BillboardContainer& billboard)
@@ -113,6 +138,11 @@ namespace he
     void RenderManager::removeRenderComponent(Sprite *sprite)
     {
       m_spriteRenderer.removeRenderComponent(sprite);
+    }
+
+    void RenderManager::removeRenderComponent(StringTexture2D *string)
+    {
+      m_stringRenderer.removeRenderComponent(string);
     }
 
     void RenderManager::removeRenderComponent(xBar::BillboardContainer& billboard)

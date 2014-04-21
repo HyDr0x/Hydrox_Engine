@@ -6,21 +6,20 @@
 
 #include <GL/glew.h>
 
-#include <Renderer/Resources/ResourceManager.hpp>
-
-#include "Renderer/Buffer/GPUBuffer.h"
-
-#include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Texture.h"
-#include "Renderer/Resources/Sprite.h"
-
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
-#include <Utilities/Signals/EventManager.h>
+#include "Renderer/Resources/ResourceManager.hpp"
 
 namespace he
 {
+  namespace util
+  {
+    class SingletonManager;
+    class EventManager;
+  }
+
 	namespace renderer
 	{
+    class Sprite;
+
     class SpriteRenderer
     {
     public:
@@ -30,7 +29,7 @@ namespace he
 
       const size_t getMaxSpriteLayer() const;
 
-      void initialize(util::SingletonManager *singletonManager, size_t maxSpriteLayer, util::ResourceHandle spriteShaderHandle);
+      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer);
 
 	    void render();
 
@@ -47,7 +46,8 @@ namespace he
 
       util::ResourceHandle m_spriteShaderHandle;
 
-      size_t m_maxLayer;
+      unsigned char m_maxLayer;
+
       std::list<Sprite*> m_opaqueSprites;
       std::vector<std::list<Sprite*>> m_transparentSprites;
 

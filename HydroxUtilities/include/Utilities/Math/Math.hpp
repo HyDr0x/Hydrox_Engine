@@ -77,7 +77,7 @@ namespace he
       {
         return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left), 0.0f,
                                  0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
-                                 0.0f,                           0.0f,                            (cfar + cnear) / (cfar - cnear), (2.0f * cfar * cnear) / (cfar - cnear),
+                                 0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
                                  0.0f,                           0.0f,                            -1.0f,                           0.0f);
       }
 
@@ -87,7 +87,7 @@ namespace he
 
         return Matrix<float,4>(f / aspectRatio,             0.0f,                       0.0f,                               0.0f,
                                0.0f,                        f,                          0.0f,                               0.0f,
-                               0.0f,                        0.0f,                       (cfar + cnear) / (cfar - cnear),    (2.0f * cfar * cnear) / (cfar - cnear),
+                               0.0f,                        0.0f,                       -(cfar + cnear) / (cfar - cnear),    -(2.0f * cfar * cnear) / (cfar - cnear),
                                0.0f,                        0.0f,                       -1.0f,                              0.0f);
       }
 

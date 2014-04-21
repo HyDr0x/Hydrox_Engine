@@ -39,13 +39,12 @@ namespace he
 
       glEnable(GL_DEPTH_TEST);
 	    glDepthMask(GL_TRUE);
-	    glDepthFunc(GL_GREATER);
+	    glDepthFunc(GL_LESS);
+      glClearDepth(1.0f);
 
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
-
 	    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	    glClearDepth(0.0f);
 
       m_renderRootNode = new GroupNode();
 
@@ -157,10 +156,7 @@ namespace he
       {
         (*nodeIterator)->updateBuffer();
 
-        if(!(*nodeIterator)->isInstanced())
-        {
-          (*nodeIterator)->frustumCulling();
-        }
+        (*nodeIterator)->frustumCulling();
       }
 
       frustumCullingShader->useNoShader();

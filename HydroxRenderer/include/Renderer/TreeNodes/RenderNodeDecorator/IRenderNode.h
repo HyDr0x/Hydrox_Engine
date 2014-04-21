@@ -24,17 +24,11 @@ namespace he
       virtual void postTraverse(Traverser* traverser) = 0;
 
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer) = 0;
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer) = 0;
+      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer) = 0;
 
-      virtual unsigned int getInstanceCount() = 0;
-
-      virtual bool hasGeometryChanged() = 0;
+      virtual unsigned int getInstanceNumber() = 0;
 
       virtual bool hasInstanceNumberChanged() = 0;
-
-      virtual bool isInstanced() = 0;
-
-      virtual bool isEmpty() = 0;
 
       virtual void frustumCulling() = 0;
 

@@ -24,7 +24,7 @@ namespace he
     {
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        m_meshHandles[geometryContainer.getMeshHandle()].push_back(dynamic_cast<xBar::StaticGeometryContainer&>(geometryContainer));
+        m_geometryContainer.push_back(geometryContainer);
 
         return true;
       }    
@@ -32,29 +32,23 @@ namespace he
       return false;
     }
 
-    bool StaticGeometryDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    unsigned int StaticGeometryDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_renderNode->removeGeometry(geometryContainer))
+      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
+      if(instanceIndex != ~0)
       {
-        std::list<xBar::StaticGeometryContainer>& geometryList = m_meshHandles[geometryContainer.getMeshHandle()];
-        for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = geometryList.begin(); geometryIterator != geometryList.end(); geometryIterator++)
+        unsigned int index = 0;
+        for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, index++)
         {
-          if(geometryIterator->getHash() == geometryContainer.getHash())
+          if(index == instanceIndex)
           {
-            geometryList.erase(geometryIterator);
+            m_geometryContainer.erase(geometryIterator);
             break;
           }
         }
-
-        if(m_meshHandles[geometryContainer.getMeshHandle()].size() == 0)
-        {
-          m_meshHandles.erase(geometryContainer.getMeshHandle());
-        }
-
-        return true;
       }
 
-      return false;
+      return instanceIndex;
     }
 
     void StaticGeometryDecorator::frustumCulling()
@@ -77,46 +71,29 @@ namespace he
 
     bool StaticGeometryDecorator::isEmpty()
     {
-      return m_meshHandles.size() == 0;
+      return m_geometryContainer.size() == 0;
     }
 
     void StaticGeometryDecorator::updateBuffer()
     {
-      unsigned int instanceNumber = getInstanceCount();
+      unsigned int instanceNumber = getInstanceNumber();
 
-      if(hasGeometryChanged() || hasInstanceNumberChanged())
+      if(hasInstanceNumberChanged())
       {
-        resizeBuffer(instanceNumber);
+        m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       }
+
+      m_matrixBuffer.setMemoryFence();
 
       unsigned int instanceIndex = 0;
-      for(std::map<util::ResourceHandle, std::list<xBar::StaticGeometryContainer>, Less>::iterator meshIterator = m_meshHandles.begin(); meshIterator != m_meshHandles.end(); meshIterator++)
+      for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, instanceIndex++)
       {
-        for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = meshIterator->second.begin(); geometryIterator != meshIterator->second.end(); geometryIterator++, instanceIndex++)
-        {
-          fillCaches(*geometryIterator, instanceIndex);
-        }
+        m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &geometryIterator->getTransformationMatrix()[0][0]);
       }
 
-      fillBuffer(instanceNumber);
-
       m_renderNode->updateBuffer();
-    }
 
-    void StaticGeometryDecorator::resizeBuffer(unsigned int instanceNumber)
-    {
-      m_matrixCache.resize(sizeof(util::Matrix<float, 4>) * instanceNumber);
-      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * instanceNumber, 0, GL_DYNAMIC_DRAW, nullptr);
-    }
-
-    void StaticGeometryDecorator::fillCaches(xBar::StaticGeometryContainer& geometryContainer, unsigned int instanceCounter)
-    {
-      memcpy(&m_matrixCache[instanceCounter * sizeof(util::Matrix<float, 4>)], &geometryContainer.getTransformationMatrix()[0], sizeof(util::Matrix<float, 4>));
-    }
-
-    void StaticGeometryDecorator::fillBuffer(unsigned int instanceNumber)
-    {
-      m_matrixBuffer.setData(0, sizeof(util::Matrix<float, 4>) * instanceNumber, &m_matrixCache[0]);
+      m_matrixBuffer.syncWithFence();
     }
 	}
 }
