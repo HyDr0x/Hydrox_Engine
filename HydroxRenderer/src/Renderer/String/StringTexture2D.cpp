@@ -21,7 +21,10 @@ namespace he
     {
       m_eventManager = eventManager;
 
-      generateBuffer(text, width, height);
+      glGenBuffers(1, &m_vertexBufferIndex);
+      glGenBuffers(1, &m_indexBufferIndex);
+
+      fillBuffer(text, width, height);
     }
 
     StringTexture2D::StringTexture2D(const StringTexture2D& o)
@@ -106,6 +109,11 @@ namespace he
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
       return *this;
+    }
+
+    void StringTexture2D::editString(std::string text, float width, float height)
+    {
+      fillBuffer(text, width, height);
     }
 
     void StringTexture2D::setRenderable(bool renderable)
@@ -273,6 +281,11 @@ namespace he
       return m_font;
     }
 
+    std::string StringTexture2D::getText()
+    {
+      return m_text;
+    }
+
     void StringTexture2D::render()
     {
       glBindVertexBuffer(0, m_vertexBufferIndex, 0, sizeof(util::Vector<float, 2>) * 2);
@@ -282,7 +295,7 @@ namespace he
       glBindVertexBuffer(0, 0, 0, 0);
     }
 
-    void StringTexture2D::generateBuffer(std::string text, float width, float height)
+    void StringTexture2D::fillBuffer(std::string text, float width, float height)
     {
       unsigned int letterNumber = text.size();
       
@@ -293,8 +306,8 @@ namespace he
       height *= 0.5f;
       float offsetX = (-static_cast<int>(letterNumber) * width * 0.5f);
 
-      float texWidth = 1.0f / m_font.width;
-      float texHeight = 1.0f / m_font.height;
+      float texWidth = 1.0f / m_font.letterNumberX;
+      float texHeight = 1.0f / m_font.letterNumberY;
 
       util::Vector<float, 2> position;
       util::Vector<float, 2> texCoord;
@@ -306,7 +319,7 @@ namespace he
 
         unsigned int decodedChar = m_font.lut[(unsigned char)text[i]];
         
-        texCoord = util::Vector<float, 2>((decodedChar % m_font.width) * texWidth, unsigned int(decodedChar * texWidth) * texHeight);
+        texCoord = util::Vector<float, 2>((decodedChar % m_font.letterNumberX) * texWidth, unsigned int(decodedChar * texWidth) * texHeight);
 
         memcpy(&geometryData[(4 * i + 0) * 4], &position[0], sizeof(util::Vector<float, 2>));
         memcpy(&geometryData[(4 * i + 0) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
@@ -340,7 +353,6 @@ namespace he
         memcpy(&geometryData[(4 * i + 3) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
       }
 
-      glGenBuffers(1, &m_vertexBufferIndex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, &geometryData[0], GL_STATIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -359,7 +371,6 @@ namespace he
         indices[i * 6 + 5] = i * 4 + 3;
       }
 
-      glGenBuffers(1, &m_indexBufferIndex);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferIndex);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * m_triangleNumber * 3, &indices[0], GL_STATIC_DRAW);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

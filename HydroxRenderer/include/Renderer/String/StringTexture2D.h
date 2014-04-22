@@ -19,8 +19,8 @@ namespace he
     struct GRAPHICAPI Font
     {
       std::vector<unsigned int> lut;
-      unsigned int width;
-      unsigned int height;
+      unsigned int letterNumberX;
+      unsigned int letterNumberY;
       util::ResourceHandle fontHandle;
     };
 
@@ -33,6 +33,8 @@ namespace he
       ~StringTexture2D();
 
       StringTexture2D& operator=(const StringTexture2D& o);
+
+      void editString(std::string text, float width, float height);
 
       void setRenderable(bool renderable);
       bool getRenderable() const;
@@ -71,11 +73,13 @@ namespace he
 
       const Font& getFont();
 
+      std::string getText();
+
       void render();
 
     private:
 
-      void generateBuffer(std::string text, float width, float height);
+      void fillBuffer(std::string text, float width, float height);
 
       util::EventManager *m_eventManager;
 
