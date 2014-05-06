@@ -57,12 +57,12 @@ namespace he
       m_bufferData = new GLubyte[m_bufferSize];
     }
 
-    void UBO::setData(GLvoid *data, unsigned int offset, const GLuint size)
+    void UBO::setData(GLuint offset, GLuint size, void *data)
     {
       std::copy((GLubyte*)data, (GLubyte*)data + size, m_bufferData + offset);
     }
 
-    void UBO::getData(void *data, GLuint offset, GLuint size)
+    void UBO::getData(GLuint offset, GLuint size, void *data)
     {
       glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
       glGetBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);

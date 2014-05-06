@@ -22,10 +22,10 @@ namespace he
 
     struct ElementGeometry
     {
-      unsigned int meshIndex;
+      unsigned int bufferIndex;
       unsigned int vertexOffset;
       unsigned int indexOffset;
-      unsigned int instanceCount;
+      unsigned int instanceNumber;
     };
 
     class DrawElementsDecorator : public ARenderNodeDecorator
@@ -57,7 +57,7 @@ namespace he
       GPUImmutableBuffer m_meshIndexBuffer;
       GPUImmutableBuffer m_bboxesBuffer;
       GPUImmutableBuffer m_commandBuffer;
-      GPUImmutableBuffer m_meshInstanceIndexBuffer;
+      GPUImmutableBuffer m_meshInstanceBufferIndex;
 
       GLenum m_primitiveType;
 

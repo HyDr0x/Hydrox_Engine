@@ -18,8 +18,8 @@ namespace he
 
       void createBuffer(GLuint size, GLenum usage, GLenum format, void *data = nullptr);
 
-      void setData(void *data, GLuint offset, GLuint size);
-      void getData(void *data, GLuint offset, GLuint size);
+      void setData(GLuint offset, GLuint size, void *data);
+      void getData(GLuint offset, GLuint size, void *data);
 
       void bindBuffer(GLenum slot);
       void unBindBuffer() const;

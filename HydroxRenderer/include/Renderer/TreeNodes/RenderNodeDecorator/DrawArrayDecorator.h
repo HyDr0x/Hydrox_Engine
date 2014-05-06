@@ -22,9 +22,9 @@ namespace he
 
     struct ArrayGeometry
     {
-      unsigned int meshIndex;
+      unsigned int bufferIndex;
       unsigned int vertexOffset;
-      unsigned int instanceCount;
+      unsigned int instanceNumber;
     };
 
     class DrawArrayDecorator : public ARenderNodeDecorator
@@ -55,7 +55,7 @@ namespace he
       GPUImmutableBuffer m_meshVertexBuffer;
       GPUImmutableBuffer m_bboxesBuffer;
       GPUImmutableBuffer m_commandBuffer;
-      GPUImmutableBuffer m_meshInstanceIndexBuffer;
+      GPUImmutableBuffer m_meshInstanceBufferIndex;
 
       GLenum m_primitiveType;
 

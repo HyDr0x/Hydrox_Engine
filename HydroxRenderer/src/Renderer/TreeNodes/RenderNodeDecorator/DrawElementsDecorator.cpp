@@ -39,13 +39,13 @@ namespace he
         {
           m_meshNumberChanged = true;
 
-          m_meshes[geometryContainer.getMeshHandle()].instanceCount = 0;
+          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
 
           m_vboSize += mesh->getVBOSize();
           m_iboSize += mesh->getIndexCount() * sizeof(GLINDEXTYPE);
         }
 
-        m_meshes[geometryContainer.getMeshHandle()].instanceCount++;
+        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
         m_geometry.push_back(geometryContainer.getMeshHandle());
 
         return true;
@@ -69,9 +69,9 @@ namespace he
           }
         }
 
-        m_meshes[geometryContainer.getMeshHandle()].instanceCount--;
+        m_meshes[geometryContainer.getMeshHandle()].instanceNumber--;
 
-        if(!m_meshes[geometryContainer.getMeshHandle()].instanceCount)
+        if(!m_meshes[geometryContainer.getMeshHandle()].instanceNumber)
         {
           m_meshNumberChanged = true;
 
@@ -91,11 +91,11 @@ namespace he
     {
       m_bboxesBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_commandBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
-      m_meshInstanceIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
 
       m_renderNode->frustumCulling();
 
-      m_meshInstanceIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
       m_commandBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_bboxesBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
@@ -129,7 +129,7 @@ namespace he
         m_meshIndexBuffer.syncWithFence();
         m_bboxesBuffer.syncWithFence();
         m_commandBuffer.syncWithFence();
-        m_meshInstanceIndexBuffer.syncWithFence();
+        m_meshInstanceBufferIndex.syncWithFence();
 
         m_meshNumberChanged = false;
       }
@@ -149,7 +149,7 @@ namespace he
       unsigned int instanceCount = getInstanceNumber();
 
       m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshes.size() * 2, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_meshInstanceIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
@@ -158,17 +158,17 @@ namespace he
       m_meshVertexBuffer.setMemoryFence();
       m_meshIndexBuffer.setMemoryFence();
 
-      unsigned int meshIndex = 0;
+      unsigned int bufferIndex = 0;
       unsigned int vertexOffset = 0;
       unsigned int indexOffset = 0;
-      for(std::map<util::ResourceHandle, ElementGeometry, Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, meshIndex++)
+      for(std::map<util::ResourceHandle, ElementGeometry, Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, bufferIndex++)
       {
         Mesh *mesh = m_modelManager->getObject(meshIterator->first);
 
         m_meshVertexBuffer.setData(vertexOffset * mesh->getVertexStride(), mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
         m_meshIndexBuffer.setData(indexOffset * sizeof(GLINDEXTYPE), mesh->getIndexCount() * sizeof(GLINDEXTYPE), &(mesh->getIndexBuffer()[0]));
 
-        meshIterator->second.meshIndex = meshIndex;
+        meshIterator->second.bufferIndex = bufferIndex;
         meshIterator->second.vertexOffset = vertexOffset;
         meshIterator->second.indexOffset = indexOffset;
 
@@ -177,7 +177,7 @@ namespace he
       }
 
       m_bboxesBuffer.setMemoryFence();
-      m_meshInstanceIndexBuffer.setMemoryFence();
+      m_meshInstanceBufferIndex.setMemoryFence();
       m_commandBuffer.setMemoryFence();
 
       unsigned int instanceCounter = 0;
@@ -193,11 +193,11 @@ namespace he
         command.baseInstance = instanceCounter;
 
         m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
-        m_meshInstanceIndexBuffer.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[*meshIterator].meshIndex);
+        m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[*meshIterator].bufferIndex);
 
         //update bbox data
-        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].meshIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
-        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].meshIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
+        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
+        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
       }
     }
 

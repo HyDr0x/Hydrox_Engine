@@ -28,14 +28,14 @@ namespace he
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
-    void TBO::setData(void *data, GLuint offset, GLuint size)
+    void TBO::setData(GLuint offset, GLuint size, void *data)
     {
       glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
       glBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
-    void TBO::getData(void *data, GLuint offset, GLuint size)
+    void TBO::getData(GLuint offset, GLuint size, void *data)
     {
       glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
       glGetBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);

@@ -8,7 +8,7 @@ namespace he
 	{
     GPUImmutableBuffer::GPUImmutableBuffer()
     {
-      glGenBuffers(1, &m_immutableBufferIndex);
+      m_immutableBufferIndex = 0;
     }
 
     GPUImmutableBuffer::~GPUImmutableBuffer()
@@ -28,6 +28,9 @@ namespace he
     void GPUImmutableBuffer::resizeBuffer(GLuint size, const GLvoid *data)
     {
       m_currentBufferSize = (size / m_bufferBlockSize + 1) * m_bufferBlockSize;
+
+      glDeleteBuffers(1, &m_immutableBufferIndex);//necessary because of immutable storage
+      glGenBuffers(1, &m_immutableBufferIndex);
 
       glBindBuffer(m_target, m_immutableBufferIndex);
       glBufferStorage(m_target, m_currentBufferSize, data, m_flags);

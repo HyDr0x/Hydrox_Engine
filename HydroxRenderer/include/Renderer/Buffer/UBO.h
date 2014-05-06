@@ -48,8 +48,8 @@ namespace he
 		    }
 	    }
 
-      void setData(GLvoid *data, unsigned int offset, const GLuint size);//standard layout
-      void getData(GLvoid *data, GLuint offset, GLuint size);
+      void setData(GLuint offset, GLuint size, void *data);//standard layout
+      void getData(GLuint offset, GLuint size, void *data);
 
 	    void uploadData() const;
 

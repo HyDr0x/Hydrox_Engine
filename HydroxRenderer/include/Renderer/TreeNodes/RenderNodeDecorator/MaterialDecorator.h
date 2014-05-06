@@ -5,13 +5,19 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
-#include "Renderer/Buffer/GPUBuffer.h"
+#include "Renderer/Buffer/GPUImmutableBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 
 namespace he
 {
 	namespace renderer
 	{
+    struct MaterialMemoryManager
+    {
+      unsigned int bufferIndex;
+      unsigned int instanceNumber;
+    };
+
     class MaterialDecorator : public ARenderNodeDecorator
     {
     public:
@@ -31,19 +37,21 @@ namespace he
 
     protected:
 
-      void resizeBuffer();
+      void resizeMaterialBuffer();
+      void resizeMaterialIndexBuffer();
 
       MaterialManager *m_materialManager;
 
       UBO m_materialBuffer;
-      GPUBuffer m_materialIndexBuffer;
+      GPUImmutableBuffer m_materialIndexBuffer;
+
+      bool m_materialNumberChanged;
 
       unsigned int m_maxMaterials;
       unsigned int m_materialCount;
 
-      std::map<util::ResourceHandle, unsigned int, Less> m_materialHandles;
-
-      std::list<unsigned int> m_meshHandles;
+      std::map<util::ResourceHandle, MaterialMemoryManager, Less> m_materialHandles;
+      std::list<util::ResourceHandle> m_materialHandlesPerInstance;
     };
   }
 }
