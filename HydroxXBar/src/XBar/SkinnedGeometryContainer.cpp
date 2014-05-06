@@ -40,17 +40,21 @@ namespace he
 
     void SkinnedGeometryContainer::createHash()
     {
-      std::vector<unsigned char> data(sizeof(void*) * 3 + sizeof(unsigned int) * 2);
-
       unsigned int id;
 
-      memcpy(&data[0], &m_trfMatrix, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 1], &m_boneTransformMatrices, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 2], &m_inverseBindPoseMatrices, sizeof(void*));
+      std::vector<unsigned char> data(sizeof(m_trfMatrix) + sizeof(id) + sizeof(id) + sizeof(m_boneTransformMatrices) + sizeof(m_inverseBindPoseMatrices));
+
+      std::copy((unsigned char*)&m_trfMatrix, (unsigned char*)&m_trfMatrix + sizeof(m_trfMatrix), &data[0]);
+
       id = m_materialHandle.getID();
-      memcpy(&data[sizeof(void*) * 3], &id, sizeof(unsigned int));
+
+      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix));
+
       id = m_meshHandle.getID();
-      memcpy(&data[sizeof(void*) * 3 + sizeof(unsigned int)], &id, sizeof(unsigned int));
+
+      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix) + sizeof(id));
+      std::copy((unsigned char*)m_boneTransformMatrices, (unsigned char*)m_boneTransformMatrices + sizeof(m_boneTransformMatrices), &data[0] + sizeof(m_trfMatrix) + sizeof(id) + sizeof(id));
+      std::copy((unsigned char*)m_inverseBindPoseMatrices, (unsigned char*)m_inverseBindPoseMatrices + sizeof(m_inverseBindPoseMatrices), &data[0] + sizeof(m_trfMatrix) + sizeof(id) + sizeof(id) + sizeof(m_boneTransformMatrices));
       
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

@@ -12,17 +12,17 @@ namespace he
     {
       unsigned int length = sizeof(MaterialData) + sizeof(unsigned int);
       std::vector<unsigned char> data(length);
-      memcpy(&data[0], &materialData, sizeof(MaterialData));
+      std::copy(&materialData, &materialData + 1, (MaterialData*)&data[0]);
       unsigned int id = shader.getID();
-      memcpy(&data[sizeof(MaterialData)], &id, sizeof(unsigned int));
+      std::copy(&id, &id + 1, &data[sizeof(MaterialData)]);
 
       for(size_t i = 0; i < textureIndices.size(); i++)
       {
         for(size_t j = 0; j < textureIndices[i].size(); j++)
         {
           data.resize(data.size() + sizeof(unsigned int));
-          unsigned int id = textureIndices[i][j].getID();
-          memcpy(&data[length], &id, sizeof(unsigned int));
+          id = textureIndices[i][j].getID();
+          std::copy(&id, &id + 1, &data[length]);
           length += sizeof(unsigned int);
         }
       }
@@ -44,20 +44,24 @@ namespace he
       m_shaderHandle = o.m_shaderHandle;
     }
 
-    Material& Material::operator=(const Material& o)
-    {
-      m_hash = o.m_hash;
-
-      m_materialData = o.m_materialData; 
-
-      m_textureHandles = o.m_textureHandles;
-      m_shaderHandle = o.m_shaderHandle;
-
-      return *this;
-    }
-
     Material::~Material()
     { 
+    }
+
+    //copy swap idiom
+    Material& Material::operator=(Material o)//CTor of o called for auto construction
+    {
+      swap(o);//swap both
+
+      return *this;
+    }//DTor of o called, for auto cleaning
+
+    void Material::swap(Material& o)
+    {
+      std::swap(m_hash, o.m_hash);
+      std::swap(m_materialData, o.m_materialData);
+      std::swap(m_textureHandles, o.m_textureHandles);
+      std::swap(m_shaderHandle, o.m_shaderHandle);
     }
 
     void Material::free()

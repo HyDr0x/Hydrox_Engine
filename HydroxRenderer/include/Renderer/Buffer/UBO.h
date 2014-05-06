@@ -48,8 +48,8 @@ namespace he
 		    }
 	    }
 
-      void setData(void *data, unsigned int offset, const GLuint size);//standard layout
-      void getData(void *data, GLuint offset, GLuint size);
+      void setData(GLvoid *data, unsigned int offset, const GLuint size);//standard layout
+      void getData(GLvoid *data, GLuint offset, GLuint size);
 
 	    void uploadData() const;
 
@@ -66,7 +66,7 @@ namespace he
       std::vector<GLint> m_arrayStrides; 
       std::vector<GLint> m_matrixStrides;
 
-      unsigned char *m_bufferData;
+      GLubyte *m_bufferData;
 	    GLuint m_bufferIndex;
 	    GLuint m_bufferSize;
 	    GLuint m_bufferDataOffset;

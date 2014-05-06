@@ -15,6 +15,10 @@ namespace he
     {
     public:
 
+      AContainer() : m_hash(0)
+      {
+      }
+
       uint64_t getHash()
       {
         return m_hash;

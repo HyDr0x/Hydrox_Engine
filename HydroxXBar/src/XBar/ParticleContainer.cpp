@@ -25,9 +25,9 @@ namespace he
 
     void ParticleContainer::createHash()
     {
-      std::vector<unsigned char> data(sizeof(void*));
+      std::vector<unsigned char> data(sizeof(m_trfMatrix));
 
-      memcpy(&data[0], m_trfMatrix, sizeof(void*));
+      std::copy((unsigned char*)&m_trfMatrix, (unsigned char*)&m_trfMatrix + sizeof(m_trfMatrix), &data[0]);
 
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

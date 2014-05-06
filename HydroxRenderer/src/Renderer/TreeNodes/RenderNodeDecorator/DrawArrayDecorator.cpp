@@ -175,7 +175,7 @@ namespace he
         command.baseVertex = m_meshes[*meshIterator].vertexOffset;
         command.baseInstance = instanceCounter;
 
-        m_commandBuffer.setData(sizeof(DrawArraysIndirectCommand)* instanceCounter, sizeof(DrawArraysIndirectCommand), &command);
+        m_commandBuffer.setData(sizeof(DrawArraysIndirectCommand) * instanceCounter, sizeof(DrawArraysIndirectCommand), &command);
 
         m_meshInstanceIndexBuffer.setData(sizeof(unsigned int)* instanceCounter, sizeof(unsigned int), &m_meshes[*meshIterator].meshIndex);
 

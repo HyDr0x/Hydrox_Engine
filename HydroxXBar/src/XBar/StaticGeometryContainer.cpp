@@ -38,15 +38,19 @@ namespace he
 
     void StaticGeometryContainer::createHash()
     {
-      std::vector<unsigned char> data(sizeof(void*) + sizeof(unsigned int) * 2);
-
       unsigned int id;
 
-      memcpy(&data[0], &m_trfMatrix, sizeof(void*));
+      std::vector<unsigned char> data(sizeof(m_trfMatrix) + sizeof(id) + sizeof(id));
+
+      std::copy((unsigned char*)&m_trfMatrix, (unsigned char*)&m_trfMatrix + sizeof(m_trfMatrix), &data[0]);
+
       id = m_materialHandle.getID();
-      memcpy(&data[sizeof(void*)], &id, sizeof(unsigned int));
+
+      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix));
+
       id = m_meshHandle.getID();
-      memcpy(&data[sizeof(void*) + sizeof(unsigned int)], &id, sizeof(unsigned int));
+
+      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix) + sizeof(id));
 
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

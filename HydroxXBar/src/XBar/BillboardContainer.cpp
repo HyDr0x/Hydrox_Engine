@@ -58,17 +58,17 @@ namespace he
 
     void BillboardContainer::createHash()
     {
-      std::vector<unsigned char> data(sizeof(void*) * 6 + sizeof(unsigned int));
+      unsigned int id = m_textureHandle.getID();
 
-      unsigned int id = m_textureHandle.getID();;
+      std::vector<unsigned char> data(sizeof(m_animNumber) + sizeof(m_animCount) + sizeof(m_texStart) + sizeof(m_texEnd) + sizeof(m_scale) + sizeof(m_translate) + sizeof(id));
 
-      memcpy(&data[0], &m_animNumber, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 1], &m_animCount, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 2], &m_texStart, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 3], &m_texEnd, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 4], &m_scale, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 5], &m_translate, sizeof(void*));
-      memcpy(&data[sizeof(void*) * 6], &id, sizeof(unsigned int));
+      std::copy((unsigned char*)&m_animNumber, (unsigned char*)&m_animNumber + sizeof(m_animNumber), &data[0]);
+      std::copy((unsigned char*)&m_animCount, (unsigned char*)&m_animCount + sizeof(m_animCount), &data[0] + sizeof(m_animNumber));
+      std::copy((unsigned char*)&m_texStart, (unsigned char*)&m_texStart + sizeof(m_texStart), &data[0] + sizeof(m_animNumber) + sizeof(m_animCount));
+      std::copy((unsigned char*)&m_texEnd, (unsigned char*)&m_texEnd + sizeof(m_texEnd), &data[0] + sizeof(m_animNumber) + sizeof(m_animCount) + sizeof(m_texStart));
+      std::copy((unsigned char*)&m_scale, (unsigned char*)&m_scale + sizeof(m_scale), &data[0] + sizeof(m_animNumber) + sizeof(m_animCount) + sizeof(m_texStart) + sizeof(m_texEnd));
+      std::copy((unsigned char*)&m_translate, (unsigned char*)&m_translate + sizeof(m_translate), &data[0] + sizeof(m_animNumber) + sizeof(m_animCount) + sizeof(m_texStart) + sizeof(m_texEnd) + sizeof(m_scale));
+      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_animNumber) + sizeof(m_animCount) + sizeof(m_texStart) + sizeof(m_texEnd) + sizeof(m_scale) + sizeof(m_translate));
 
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

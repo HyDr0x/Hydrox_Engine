@@ -23,6 +23,8 @@ namespace he
       Scene(Scene& object);
       virtual ~Scene();
 
+      Scene& operator=(Scene& other);
+
       GroupNode* getRootNode();
       const GroupNode* const getRootNode() const;
 

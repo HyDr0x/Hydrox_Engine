@@ -16,7 +16,7 @@ namespace he
       glDeleteBuffers(1, &m_immutableBufferIndex);
     }
 
-    void GPUImmutableBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const void *data)
+    void GPUImmutableBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data)
     {
       m_target = target;
       m_flags = flags;
@@ -25,7 +25,7 @@ namespace he
       resizeBuffer(size, data);
     }
 
-    void GPUImmutableBuffer::resizeBuffer(GLuint size, const void *data)
+    void GPUImmutableBuffer::resizeBuffer(GLuint size, const GLvoid *data)
     {
       m_currentBufferSize = (size / m_bufferBlockSize + 1) * m_bufferBlockSize;
 
@@ -51,16 +51,16 @@ namespace he
       glClientWaitSync(m_memoryFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000);
     }
     
-    void GPUImmutableBuffer::setData(GLuint offset, GLuint size, const void *data)
+    void GPUImmutableBuffer::setData(GLuint offset, GLuint size, const GLvoid *data)
     {
       assert(offset + size <= m_currentBufferSize);
 
-      memcpy(((GLubyte*)m_bufferPointer) + offset, data, size);
+      std::copy((GLubyte*)data, (GLubyte*)data + size, (GLubyte*)m_bufferPointer + offset);
     }
 
     void GPUImmutableBuffer::getData(GLuint offset, GLuint size, GLvoid *data)
     {
-      memcpy(data, ((GLubyte*)m_bufferPointer) + offset, size);
+      std::copy((GLubyte*)m_bufferPointer, (GLubyte*)m_bufferPointer + size, (GLubyte*)data + offset);
     }
 
     void GPUImmutableBuffer::bindBuffer(GLenum target)

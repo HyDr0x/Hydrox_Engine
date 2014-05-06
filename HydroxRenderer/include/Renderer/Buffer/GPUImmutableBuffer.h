@@ -17,16 +17,16 @@ namespace he
       GPUImmutableBuffer();
       ~GPUImmutableBuffer();
 
-      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const void *data);
+      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data);
 
-      void resizeBuffer(GLuint size, const void *data);
+      void resizeBuffer(GLuint size, const GLvoid *data);
       bool isEnoughSpace(GLuint size);
 
       void setMemoryFence();
       void syncWithFence();
 
-      void setData(GLuint offset, GLuint size, const void *data);
-      void getData(GLuint offset, GLuint size, void *data);
+      void setData(GLuint offset, GLuint size, const GLvoid *data);
+      void getData(GLuint offset, GLuint size, GLvoid *data);
 
       void bindBuffer(GLenum target);
       void unbindBuffer(GLenum target);

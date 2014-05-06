@@ -61,16 +61,16 @@ namespace he
 
       GLuint texStride[4];
 
-      GLuint posStride         = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0]             = m_vertexDeclarationFlags & MODEL_TEXTURE0      ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1]             = m_vertexDeclarationFlags & MODEL_TEXTURE1      ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2]             = m_vertexDeclarationFlags & MODEL_TEXTURE2      ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3]             = m_vertexDeclarationFlags & MODEL_TEXTURE3      ? sizeof(util::Vector<float, 2>) : 0;
-      GLuint normalStride      = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint binormalStride    = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint boneWeightStride  = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::Vector<float, 4>) : 0;
-      GLuint boneIndexStride   = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(util::Vector<float, 4>) : 0;
-      GLuint vertexColorStride = m_vertexDeclarationFlags & MODEL_COLOR         ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint posStride          = m_vertexDeclarationFlags & MODEL_POSITION     ? sizeof(positions[0]) : 0;
+      texStride[0]              = m_vertexDeclarationFlags & MODEL_TEXTURE0     ? sizeof(textureCoords[0][0]) : 0;
+      texStride[1]              = m_vertexDeclarationFlags & MODEL_TEXTURE1     ? sizeof(textureCoords[1][0]) : 0;
+      texStride[2]              = m_vertexDeclarationFlags & MODEL_TEXTURE2     ? sizeof(textureCoords[2][0]) : 0;
+      texStride[3]              = m_vertexDeclarationFlags & MODEL_TEXTURE3     ? sizeof(textureCoords[3][0]) : 0;
+      GLuint normalStride       = m_vertexDeclarationFlags & MODEL_NORMAL       ? sizeof(normals[0]) : 0;
+      GLuint binormalStride     = m_vertexDeclarationFlags & MODEL_BINORMAL     ? sizeof(binormals[0]) : 0;
+      GLuint boneWeightStride   = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS ? sizeof(boneWeights[0]) : 0;
+      GLuint boneIndexStride    = m_vertexDeclarationFlags & MODEL_BONE_INDICES ? sizeof(boneIndices[0]) : 0;
+      GLuint vertexColorStride  = m_vertexDeclarationFlags & MODEL_COLOR        ? sizeof(vertexColors[0]) : 0;
 
       m_vertexStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride + boneWeightStride + boneIndexStride + vertexColorStride;
 
@@ -83,7 +83,7 @@ namespace he
 
       for(unsigned int i = 0; i < positions.size(); i++)
 		  {
-        memcpy((&m_geometryData[0] + lokalStride + m_vertexStride * i), &positions[i], sizeof(util::Vector<float, 3>));
+        std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + sizeof(positions[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += posStride;
 
@@ -91,38 +91,38 @@ namespace he
       {
         for(unsigned int i = 0; i < textureCoords[j].size(); i++)
 		    {
-		      memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &textureCoords[j][i], sizeof(util::Vector<float, 2>));
+          std::copy((GLubyte*)&textureCoords[j][i], (GLubyte*)&textureCoords[j][i] + sizeof(textureCoords[0][0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
         }
         lokalStride += texStride[j];
       }
 
       for(unsigned int i = 0; i < normals.size(); i++)
 		  {
-		    memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &normals[i], sizeof(util::Vector<float, 3>));
+        std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + sizeof(normals[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += normalStride;
 
       for(unsigned int i = 0; i < binormals.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &binormals[i], sizeof(util::Vector<float, 3>));
+        std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + sizeof(binormals[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += binormalStride;
 
       for(unsigned int i = 0; i < boneWeights.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &boneWeights[i], sizeof(util::Vector<float, 4>));
+        std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + sizeof(boneWeights[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += boneWeightStride;
 
       for(unsigned int i = 0; i < boneIndices.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &boneIndices[i], sizeof(util::Vector<float, 4>));
+        std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + sizeof(boneIndices[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += boneIndexStride;
 
       for(unsigned int i = 0; i < vertexColors.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &vertexColors[i], sizeof(util::Vector<float, 4>));
+        std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + sizeof(vertexColors[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += vertexColorStride;
 
@@ -183,7 +183,7 @@ namespace he
 
       for(unsigned int i = 0; i < positions.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + m_vertexStride * i, &positions[i], sizeof(positions[0]));
+        std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + sizeof(positions[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 
@@ -205,7 +205,7 @@ namespace he
       {
         for(unsigned int i = 0; i < textureCoords[j].size(); i++)
 		    {
-          memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &textureCoords[j][i], sizeof(textureCoords[0][0]));
+          std::copy((GLubyte*)&textureCoords[i], (GLubyte*)&textureCoords[i] + sizeof(textureCoords[0]), &m_geometryData[0] + m_vertexStride * i);
         }
         lokalStride += texStride[j];
       }
@@ -227,7 +227,7 @@ namespace he
 
       for(unsigned int i = 0; i < normals.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride +  m_vertexStride * i, &normals[i], sizeof(normals[0]));
+        std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + sizeof(normals[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 
@@ -237,7 +237,7 @@ namespace he
 
       GLuint texStride[4];
 
-      GLuint posStride     = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
       texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
       texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
       texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
@@ -248,7 +248,7 @@ namespace he
 
       for(unsigned int i = 0; i < binormals.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &binormals[i], sizeof(binormals[0]));
+        std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + sizeof(binormals[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 
@@ -270,7 +270,7 @@ namespace he
 
       for(unsigned int i = 0; i < boneWeights.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &boneWeights[i], sizeof(boneWeights[0]));
+        std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + sizeof(boneWeights[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 
@@ -293,7 +293,7 @@ namespace he
 
       for(unsigned int i = 0; i < boneIndices.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &boneIndices[i], sizeof(boneIndices[0]));
+        std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + sizeof(boneIndices[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 
@@ -317,7 +317,7 @@ namespace he
 
       for(unsigned int i = 0; i < vertexColors.size(); i++)
 		  {
-        memcpy(&m_geometryData[0] + lokalStride + m_vertexStride * i, &vertexColors[i], sizeof(vertexColors[0]));
+        std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + sizeof(vertexColors[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
 

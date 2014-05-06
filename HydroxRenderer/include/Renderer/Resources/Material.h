@@ -51,7 +51,7 @@ namespace he
       Material();
       Material(const Material& o);
       Material(MaterialData& materialData, std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader);
-      Material& operator=(const Material& o);
+      Material& operator=(Material o);
 	    ~Material();
 
       void free();
@@ -69,6 +69,8 @@ namespace he
       MaterialData& getMaterialData();
 
     private:
+
+      void swap(Material& o);
 
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
       util::ResourceHandle m_shaderHandle;//specifies the Shader of the submesh in the Shadermanager for the renderpass

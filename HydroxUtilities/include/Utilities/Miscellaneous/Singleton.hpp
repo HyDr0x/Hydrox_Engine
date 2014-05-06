@@ -13,27 +13,23 @@ namespace he
     {
     public:
 
-      static T* getInstance()
+      inline static T* getInstance()
       {
         if(m_instance == nullptr) m_instance = new T;
         return m_instance;
       }
 
-      static void deleteInstance()
+      inline static void deleteInstance()
       {
-        assert(m_instance != nullptr);
         delete m_instance;
-      }
-
-    protected:
-
-      Singleton(){}
-      virtual ~Singleton(){} 
+      }       
 
     private:
 
-      Singleton(const Singleton&);
-      Singleton& operator=(const Singleton&);
+      Singleton(){}
+      virtual ~Singleton(){}
+      Singleton(const Singleton<T>&);
+      Singleton& operator=(const Singleton<T>&);
 
       static T* m_instance;
     };

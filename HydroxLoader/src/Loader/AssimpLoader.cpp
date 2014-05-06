@@ -248,7 +248,7 @@ namespace he
 
         for(unsigned int i = 0; i < mesh->mNumBones; i++)
 		    {
-          memcpy(&(tmpBoneMatrix[0][0]), &(mesh->mBones[i]->mOffsetMatrix[0][0]), sizeof(util::Matrix<float, 4>));
+          std::copy(&mesh->mBones[i]->mOffsetMatrix[0][0], &mesh->mBones[i]->mOffsetMatrix[0][0] + 16, &tmpBoneMatrix[0][0]);
           tmpBoneMatrix = tmpBoneMatrix.transpose();
 
           m_inverseBindPoseTable[meshIndex][i] = tmpBoneMatrix;
@@ -328,7 +328,7 @@ namespace he
       else
       {
         util::Matrix<float, 4> tmpTransformationMatrix;
-        memcpy(&(tmpTransformationMatrix[0][0]), &(node->mTransformation[0][0]), sizeof(util::Matrix<float, 4>));
+        std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + 16, &tmpTransformationMatrix[0][0]);
         tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
         transformNode = new sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);

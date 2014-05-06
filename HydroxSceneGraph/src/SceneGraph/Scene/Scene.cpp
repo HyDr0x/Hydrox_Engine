@@ -31,6 +31,13 @@ namespace he
       deleteTraverser.doTraverse(m_rootNode);
     }
 
+    Scene& Scene::operator=(Scene& other)
+    {
+      addSubTree(other, m_rootNode, he::util::Vector<float, 3>::identity(), "");
+
+      return *this;
+    }
+
     GroupNode* Scene::getRootNode()
     {
       return m_rootNode;

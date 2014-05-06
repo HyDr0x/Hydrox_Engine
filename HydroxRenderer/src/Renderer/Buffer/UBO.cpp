@@ -42,7 +42,7 @@ namespace he
 
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	    m_bufferData = new unsigned char[bufferSize];
+      m_bufferData = new GLubyte[bufferSize];
     }
 
     void UBO::createBuffer(const GLuint bufferSize, GLenum usage)//std140 layout
@@ -54,12 +54,12 @@ namespace he
 	    glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, NULL, usage);
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-      m_bufferData = new unsigned char[m_bufferSize];
+      m_bufferData = new GLubyte[m_bufferSize];
     }
 
-    void UBO::setData(void *data, unsigned int offset, const GLuint size)
+    void UBO::setData(GLvoid *data, unsigned int offset, const GLuint size)
     {
-      memcpy(m_bufferData + offset, data, size);
+      std::copy((GLubyte*)data, (GLubyte*)data + size, m_bufferData + offset);
     }
 
     void UBO::getData(void *data, GLuint offset, GLuint size)

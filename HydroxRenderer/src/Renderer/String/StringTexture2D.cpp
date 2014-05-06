@@ -321,8 +321,9 @@ namespace he
         
         texCoord = util::Vector<float, 2>((decodedChar % m_font.letterNumberX) * texWidth, unsigned int(decodedChar * texWidth) * texHeight);
 
-        memcpy(&geometryData[(4 * i + 0) * 4], &position[0], sizeof(util::Vector<float, 2>));
-        memcpy(&geometryData[(4 * i + 0) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
+        int z = sizeof(util::Vector<float, 2>);
+        std::copy(&position[0], &position[0] + 2, geometryData.begin() + (4 * i + 0) * 4);
+        std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 0) * 4 + 2);
 
         //second
         position[0] = offsetX + i * width;
@@ -330,8 +331,8 @@ namespace he
 
         texCoord[1] += texHeight;
 
-        memcpy(&geometryData[(4 * i + 1) * 4], &position[0], sizeof(util::Vector<float, 2>));
-        memcpy(&geometryData[(4 * i + 1) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
+        std::copy(&position[0], &position[0] + 2, geometryData.begin() + (4 * i + 1) * 4);
+        std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 1) * 4 + 2);
 
         //third
         position[0] = offsetX + (i + 1) * width;
@@ -340,8 +341,8 @@ namespace he
         texCoord[0] += texWidth;
         texCoord[1] -= texHeight;
 
-        memcpy(&geometryData[(4 * i + 2) * 4], &position[0], sizeof(util::Vector<float, 2>));
-        memcpy(&geometryData[(4 * i + 2) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
+        std::copy(&position[0], &position[0] + 2, geometryData.begin() + (4 * i + 2) * 4);
+        std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 2) * 4 + 2);
 
         //fourth
         position[0] = offsetX + (i + 1) * width;
@@ -349,8 +350,8 @@ namespace he
 
         texCoord[1] += texHeight;
 
-        memcpy(&geometryData[(4 * i + 3) * 4], &position[0], sizeof(util::Vector<float, 2>));
-        memcpy(&geometryData[(4 * i + 3) * 4 + 2], &texCoord[0], sizeof(util::Vector<float, 2>));
+        std::copy(&position[0], &position[0] + 2, geometryData.begin() + (4 * i + 3) * 4);
+        std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 3) * 4 + 2);
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
