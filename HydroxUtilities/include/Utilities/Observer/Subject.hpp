@@ -15,14 +15,14 @@ namespace he
 
     Subject(){}
 
-    Subject(const Subject& o)
+    Subject(const Subject& other)
     {
-      m_observer = o.m_observer;
+      m_observer = other.m_observer;
     }
 
-    Subject& operator=(const Subject& o)
+    Subject& operator=(const Subject& other)
     {
-      m_observer = o.m_observer;
+      m_observer = other.m_observer;
 
       return *this;
     }

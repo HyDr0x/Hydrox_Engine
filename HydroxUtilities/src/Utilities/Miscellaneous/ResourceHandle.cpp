@@ -4,60 +4,44 @@ namespace he
 {
 	namespace util
 	{
-    ResourceHandle::ResourceHandle()
+    ResourceHandle::ResourceHandle() : m_id(~0), m_referenceCounter(nullptr)
     {
-      m_referenceCounter = nullptr;
-      m_id = ~0;
     }
 
-    ResourceHandle::ResourceHandle(unsigned int id, unsigned int *referenceCounter)
+    ResourceHandle::ResourceHandle(unsigned int id) : m_id(id), m_referenceCounter(new unsigned int)
     {
-      m_referenceCounter = referenceCounter;
-      (*m_referenceCounter)++;
-      m_id = id;
+      *m_referenceCounter = 1;
     }
 
-    ResourceHandle::ResourceHandle(const ResourceHandle& o) : m_referenceCounter(o.m_referenceCounter), m_id(o.m_id)
+    ResourceHandle::ResourceHandle(const ResourceHandle& other) : Subject(other), m_id(other.m_id), m_referenceCounter(other.m_referenceCounter)
     {
-      m_observer = o.m_observer;
-
       if(m_referenceCounter != nullptr)
       {
-		    (*m_referenceCounter)++;
+        (*m_referenceCounter)++;
       }
-    }
-
-    ResourceHandle& ResourceHandle::operator=(const ResourceHandle& o)
-    {
-      if(*this == o)
-      {
-        return *this;
-      }
-
-      if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
-      {
-        notify(this);
-      }
-
-      m_referenceCounter = o.m_referenceCounter;
-      m_id = o.m_id;
-      m_observer = o.m_observer;
-
-      if(m_referenceCounter != nullptr)
-      {
-		    (*m_referenceCounter)++;
-      }
-
-      return *this;
     }
 
     ResourceHandle::~ResourceHandle()
     {
-      if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
+      free();
+    }
+
+    ResourceHandle& ResourceHandle::operator=(ResourceHandle other)
+    {
+      if(*this == other)
       {
-        notify(this);
-        m_referenceCounter = nullptr;
+        return *this;
       }
+
+      swap(other);
+
+      return *this;
+    }
+
+    void ResourceHandle::swap(ResourceHandle& other)
+    {
+      std::swap(m_id, other.m_id);
+      std::swap(m_referenceCounter, other.m_referenceCounter);
     }
 
     bool ResourceHandle::operator==(const ResourceHandle& o)

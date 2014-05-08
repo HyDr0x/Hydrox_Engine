@@ -14,18 +14,20 @@ namespace he
     public:
 
       ResourceHandle();
-      ResourceHandle(unsigned int id, unsigned int *referenceCounter);
-      ResourceHandle(const ResourceHandle& o);
-      ResourceHandle& operator=(const ResourceHandle& o);
+      ResourceHandle(unsigned int id);
+      ResourceHandle(const ResourceHandle& other);
+      ResourceHandle& operator=(ResourceHandle other);
       ~ResourceHandle();
 
-      inline bool operator==(const ResourceHandle& o);
+      inline bool operator==(const ResourceHandle& other);
 
       void free();
 
       unsigned int getID() const;
 
     private:
+
+      void swap(ResourceHandle& other);
 
       unsigned int m_id;
       unsigned int *m_referenceCounter;

@@ -28,7 +28,7 @@ namespace he
     {
       if(filename == std::string())
       {
-        return util::ResourceHandle(~0, nullptr);
+        return util::ResourceHandle();
       }
 
       util::ResourceHandle materialHandle;
