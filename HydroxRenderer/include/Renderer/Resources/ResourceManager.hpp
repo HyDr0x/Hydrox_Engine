@@ -16,7 +16,7 @@
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/ComputeShader.h"
 #include "Renderer/Resources/Texture2D.h"
-#include "Renderer/Resources/TextureArray.h"
+#include "Renderer/Resources/Texture3D.h"
 
 namespace he
 {
@@ -145,14 +145,14 @@ namespace he
     template class GRAPHICAPI ResourceManager<RenderShader>;
     template class GRAPHICAPI ResourceManager<ComputeShader>;
     template class GRAPHICAPI ResourceManager<Texture2D>;
-    template class GRAPHICAPI ResourceManager<TextureArray>;
+    template class GRAPHICAPI ResourceManager<Texture3D>;
 
     typedef ResourceManager<Mesh> ModelManager;
     typedef ResourceManager<Material> MaterialManager;
     typedef ResourceManager<RenderShader> RenderShaderManager;
     typedef ResourceManager<ComputeShader> ComputeShaderManager;
     typedef ResourceManager<Texture2D> TextureManager;
-    typedef ResourceManager<TextureArray> TextureArrayManager;
+    typedef ResourceManager<Texture3D> TextureArrayManager;
 	}
 }
 

@@ -10,12 +10,11 @@ namespace he
 {
 	namespace sg
 	{
-    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, bool instanced, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
+    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                                                                                                                           m_eventManager(eventManager),
                                                                                                                                                                                                                           m_meshHandle(meshHandle),
                                                                                                                                                                                                                           m_materialHandle(materialHandle),
                                                                                                                                                                                                                           m_transparency(transparency),
-                                                                                                                                                                                                                          m_instanced(instanced),
                                                                                                                                                                                                                           m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
@@ -51,7 +50,7 @@ namespace he
 
     TreeNode* GeoNode::clone() const
     {
-      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_transparency, m_instanced, m_nodeName);
+      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_transparency, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 
@@ -89,14 +88,7 @@ namespace he
 
       if(m_renderable)
       {
-        if(m_instanced)
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddInstancedGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
-        else
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -116,14 +108,7 @@ namespace he
 
       if(m_renderable)
       {
-        if(m_instanced)
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddInstancedGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
-        else
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -146,14 +131,7 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        if(m_instanced)
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddInstancedGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
-        else
-        {
-          m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
-        }
+        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
       else if(m_renderable && !renderable)
       {

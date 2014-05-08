@@ -1,6 +1,7 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawElementsDecorator.h"
 
 #include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/Resources/Mesh.h"
 
@@ -8,7 +9,7 @@ namespace he
 {
 	namespace renderer
 	{
-    DrawElementsDecorator::DrawElementsDecorator(IRenderNode *renderNode, bool instanced, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
+    DrawElementsDecorator::DrawElementsDecorator(IRenderNode *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
       m_indexType(indexType), 
       m_primitiveType(primitiveType),
@@ -22,6 +23,35 @@ namespace he
 
     DrawElementsDecorator::~DrawElementsDecorator()
     {
+    }
+
+    bool DrawElementsDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    {
+      Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+
+      if(m_primitiveType != mesh->getPrimitiveType())
+      {
+        return false;
+      }
+
+      if(m_renderNode->insertGeometry(geometryContainer))
+      {
+        if(!m_meshes.count(geometryContainer.getMeshHandle()))
+        {
+          m_meshNumberChanged = true;
+
+          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
+
+          m_vboSize += mesh->getVBOSize();
+          m_iboSize += mesh->getIndexCount() * sizeof(GLINDEXTYPE);
+        }
+
+        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
+
+        return true;
+      }
+
+     return false;
     }
 
     bool DrawElementsDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
@@ -46,7 +76,6 @@ namespace he
         }
 
         m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
-        m_geometry.push_back(geometryContainer.getMeshHandle());
 
         return true;
       }
@@ -54,21 +83,11 @@ namespace he
      return false;
     }
 
-    unsigned int DrawElementsDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
-      if(instanceIndex != ~0)
+      bool deleted = m_renderNode->removeGeometry(geometryContainer);
+      if(deleted)
       {
-        unsigned int instanceCounter = 0;
-        for(std::list<util::ResourceHandle>::const_iterator meshIterator = m_geometry.begin(); meshIterator != m_geometry.end(); meshIterator++, instanceCounter++)
-        {
-          if(instanceCounter == instanceIndex)
-          {
-            m_geometry.erase(meshIterator);
-            break;
-          }
-        }
-
         m_meshes[geometryContainer.getMeshHandle()].instanceNumber--;
 
         if(!m_meshes[geometryContainer.getMeshHandle()].instanceNumber)
@@ -84,7 +103,7 @@ namespace he
         }
       }
 
-      return instanceIndex;
+      return deleted;
     }
 
     void DrawElementsDecorator::frustumCulling()
@@ -181,23 +200,23 @@ namespace he
       m_commandBuffer.setMemoryFence();
 
       unsigned int instanceCounter = 0;
-      for(std::list<util::ResourceHandle>::const_iterator meshIterator = m_geometry.begin(); meshIterator != m_geometry.end(); meshIterator++, instanceCounter++)
+      for(std::list<xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, instanceCounter++)
       {
-        Mesh *mesh = m_modelManager->getObject(*meshIterator);
+        Mesh *mesh = m_modelManager->getObject((*instanceIterator)->getMeshHandle());
 
         DrawElementsIndirectCommand command;
         command.count = mesh->getIndexCount();
         command.instanceCount = 1;
-        command.firstIndex = m_meshes[*meshIterator].indexOffset;
-        command.baseVertex = m_meshes[*meshIterator].vertexOffset;
+        command.firstIndex = m_meshes[(*instanceIterator)->getMeshHandle()].indexOffset;
+        command.baseVertex = m_meshes[(*instanceIterator)->getMeshHandle()].vertexOffset;
         command.baseInstance = instanceCounter;
 
         m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
-        m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[*meshIterator].bufferIndex);
+        m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex);
 
         //update bbox data
-        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
-        m_bboxesBuffer.setData((2 * m_meshes[*meshIterator].bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
+        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
+        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
       }
     }
 

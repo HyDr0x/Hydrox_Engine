@@ -4,11 +4,13 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
+#include "Renderer/Pipeline/RenderingOptions.h"
+
 namespace he
 {
 	namespace renderer
 	{
-    RenderManager::RenderManager() : m_skyboxRendering(false)
+    RenderManager::RenderManager() : m_geometryRasterizer(m_options), m_skyboxRendering(false)
     {
     }
 
@@ -56,15 +58,17 @@ namespace he
       m_skyboxRendering = false;
     }
 
-    void RenderManager::initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
+    void RenderManager::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
       util::ResourceHandle billboardShaderHandle, 
       util::ResourceHandle spriteShaderHandle, 
       util::ResourceHandle stringShaderHandle,
       util::ResourceHandle frustumCullingShaderHandle)
     {
+      m_options = options;
+
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_geometryRasterizer.initialize(maxMaterials, maxGeometry, maxBones, singletonManager, frustumCullingShaderHandle);
+      m_geometryRasterizer.initialize(singletonManager, frustumCullingShaderHandle);
       m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
       m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);

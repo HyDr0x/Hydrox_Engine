@@ -17,7 +17,7 @@ namespace he
     public:
 
       StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
-      ~StaticGeometryContainer();
+      virtual ~StaticGeometryContainer();
 
       bool operator == (const StaticGeometryContainer& o);
 

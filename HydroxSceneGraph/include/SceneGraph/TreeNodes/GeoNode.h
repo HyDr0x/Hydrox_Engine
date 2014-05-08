@@ -19,7 +19,7 @@ namespace he
     {
     public:
 
-      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, bool instanced, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       GeoNode& operator=(const GeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
       virtual ~GeoNode();
@@ -57,7 +57,6 @@ namespace he
 
       bool m_renderable;//boolean which decides if the mesh is being drawn or not
       bool m_transparency;
-      bool m_instanced;
     };
 	}
 }

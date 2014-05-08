@@ -12,6 +12,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Sprite.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Texture2D.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/TextureArray.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Texture3D.cpp 
 	PARENT_SCOPE 
 )

@@ -3,6 +3,8 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Miscellaneous/Flags.hpp>
+
 namespace he
 {
   namespace util
@@ -13,20 +15,19 @@ namespace he
 	namespace renderer
 	{
     class IRenderNode;
+    struct RenderOptions;
 
     enum RenderNodeType
     {
-      SkinnedIndexedNode,
-      NonSkinnedIndexedNode,
-      SkinnedNonIndexedNode,
-      NonSkinnedNonIndexedNode,
+      SKINNEDNODE = 1,
+      INDEXEDNODE = 2,
     };
 
     class RenderNodeFactory
     {
     public:
 
-      static IRenderNode* createRenderNode(RenderNodeType nodeType, bool instanced, unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      static IRenderNode* createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
     private:
 

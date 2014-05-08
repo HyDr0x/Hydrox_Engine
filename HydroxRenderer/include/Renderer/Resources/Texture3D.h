@@ -1,5 +1,5 @@
-#ifndef TEXTUREARRAY_H_
-#define TEXTUREARRAY_H_
+#ifndef TEXTURE3D_H_
+#define TEXTURE3D_H_
 
 #include <list>
 
@@ -16,16 +16,16 @@ namespace he
 {
 	namespace renderer
 	{
-    class GRAPHICAPI TextureArray : public ManagedResource
+    class GRAPHICAPI Texture3D : public ManagedResource
     {
     public:
 
-      TextureArray() {}
-      TextureArray(const TextureArray&);
+      Texture3D() {}
+      Texture3D(const Texture3D&);
 
-	    TextureArray(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
-      TextureArray& operator=(const TextureArray& o);
-	    ~TextureArray();
+	    Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
+      Texture3D& operator=(const Texture3D& o);
+	    ~Texture3D();
 
       void free();
 

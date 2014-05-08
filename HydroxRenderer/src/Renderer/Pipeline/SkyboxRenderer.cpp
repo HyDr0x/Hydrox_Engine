@@ -36,7 +36,7 @@ namespace he
         texture->getTextureData(&data[i * size]);
       }
 
-      m_arrayTextureHandle = m_textureArrayManager->addObject(TextureArray(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), &data[0]));
+      m_arrayTextureHandle = m_textureArrayManager->addObject(Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), &data[0]));
 
       std::vector<util::Vector<float, 3>> positions;
 
@@ -94,7 +94,7 @@ namespace he
 
       glBindVertexArray(m_skyBoxVAO);
 
-      TextureArray *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
+      Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
       RenderShader *skyboxShader = m_renderShaderManager->getObject(m_skyboxShaderHandle);
 
       skyboxShader->useShader();

@@ -15,17 +15,12 @@ namespace he
     {
     public:
 
-      SkinnedGeometryDecorator(IRenderNode *renderNode, unsigned int maxBones);
+      SkinnedGeometryDecorator(IRenderNode *renderNode);
       ~SkinnedGeometryDecorator();
-
-      virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
       virtual void rasterizeGeometry();
-
-      virtual bool isEmpty();
 
       virtual void updateBuffer();
 
@@ -36,10 +31,6 @@ namespace he
 
       GPUImmutableBuffer m_matrixBuffer;
       GPUImmutableBuffer m_bboxMatrixBuffer;
-
-      unsigned int m_maxBones;
-
-      std::list<xBar::SkinnedGeometryContainer> m_geometryContainer;
     };
 	}
 }

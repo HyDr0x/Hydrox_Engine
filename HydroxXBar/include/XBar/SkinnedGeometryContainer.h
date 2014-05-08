@@ -20,15 +20,16 @@ namespace he
                                util::Matrix<float, 4> *trfMatrix, 
                                util::ResourceHandle materialHandle, 
                                util::ResourceHandle meshHandle);
-      ~SkinnedGeometryContainer();
+      virtual ~SkinnedGeometryContainer();
 
       bool operator == (const SkinnedGeometryContainer& o);
 
-      std::vector<util::Matrix<float, 4>> getSkinningMatrices();
+      std::vector<util::Matrix<float, 4>>* getBoneTransformMatrices();
+      std::vector<util::Matrix<float, 4>>* getInverseBindPoseTransformMatrices();
 
     private:
 
-      void createHash();
+      virtual void createHash();
 
       std::vector<util::Matrix<float, 4>> *m_boneTransformMatrices;
       std::vector<util::Matrix<float, 4>> *m_inverseBindPoseMatrices;

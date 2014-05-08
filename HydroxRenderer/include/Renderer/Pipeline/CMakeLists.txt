@@ -3,6 +3,7 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderingOptions.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.h 

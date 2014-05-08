@@ -20,37 +20,6 @@ namespace he
     {
     }
 
-    bool StaticGeometryDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
-    {
-      if(m_renderNode->insertGeometry(geometryContainer))
-      {
-        m_geometryContainer.push_back(geometryContainer);
-
-        return true;
-      }    
-
-      return false;
-    }
-
-    unsigned int StaticGeometryDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
-    {
-      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
-      if(instanceIndex != ~0)
-      {
-        unsigned int index = 0;
-        for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, index++)
-        {
-          if(index == instanceIndex)
-          {
-            m_geometryContainer.erase(geometryIterator);
-            break;
-          }
-        }
-      }
-
-      return instanceIndex;
-    }
-
     void StaticGeometryDecorator::frustumCulling()
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -69,11 +38,6 @@ namespace he
       m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    bool StaticGeometryDecorator::isEmpty()
-    {
-      return m_geometryContainer.size() == 0;
-    }
-
     void StaticGeometryDecorator::updateBuffer()
     {
       unsigned int instanceNumber = getInstanceNumber();
@@ -86,9 +50,9 @@ namespace he
       m_matrixBuffer.setMemoryFence();
 
       unsigned int instanceIndex = 0;
-      for(std::list<xBar::StaticGeometryContainer>::iterator geometryIterator = m_geometryContainer.begin(); geometryIterator != m_geometryContainer.end(); geometryIterator++, instanceIndex++)
+      for(std::list<xBar::StaticGeometryContainer*>::iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
       {
-        m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &geometryIterator->getTransformationMatrix()[0][0]);
+        m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &(*geometryIterator)->getTransformationMatrix()[0][0]);
       }
 
       m_renderNode->updateBuffer();

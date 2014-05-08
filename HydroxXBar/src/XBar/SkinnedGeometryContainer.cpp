@@ -25,17 +25,14 @@ namespace he
       return m_hash == o.m_hash;
     }
 
-    std::vector<util::Matrix<float, 4>> SkinnedGeometryContainer::getSkinningMatrices()
+    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getBoneTransformMatrices()
     {
-      std::vector<util::Matrix<float, 4>> skinningMatrices;
-      skinningMatrices.resize(m_inverseBindPoseMatrices->size());
+      return m_boneTransformMatrices;
+    }
 
-      for(unsigned int i = 0; i < skinningMatrices.size(); i++)
-      {
-        skinningMatrices[i] = (*m_boneTransformMatrices)[i] * (*m_inverseBindPoseMatrices)[i];
-      }
-
-      return skinningMatrices;
+    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getInverseBindPoseTransformMatrices()
+    {
+      return m_inverseBindPoseMatrices;
     }
 
     void SkinnedGeometryContainer::createHash()

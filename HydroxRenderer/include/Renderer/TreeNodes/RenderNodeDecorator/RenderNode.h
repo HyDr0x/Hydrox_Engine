@@ -17,37 +17,48 @@ namespace he
 {
 	namespace renderer
 	{
+    struct RenderOptions;
+
     class RenderNode : public IRenderNode
     {
     public:
 
-      RenderNode(unsigned int maxGeometry);
+      RenderNode(const RenderOptions& options);
       virtual ~RenderNode();
 
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer);
 
-      unsigned int getInstanceNumber();
+      virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
-      bool hasInstanceNumberChanged();
+      virtual std::list<xBar::StaticGeometryContainer*>& getInstances();
 
-      void frustumCulling();
+      virtual unsigned int getInstanceNumber();
 
-      void rasterizeGeometry();
+      virtual bool hasInstanceNumberChanged();
 
-      void updateBuffer();
+      virtual void frustumCulling();
+
+      virtual void rasterizeGeometry();
+
+      virtual void updateBuffer();
+
+      virtual unsigned int getMaxGeometry();
+      virtual unsigned int getMaxMaterials();
+      virtual unsigned int getMaxBones();
 
     protected:
 
       bool m_instanceNumberChanged;
 
-      unsigned int m_maxGeometry;
+      const RenderOptions& m_options;
+
       unsigned int m_instanceNumber;
 
-      std::list<uint64_t> m_instances;
+      std::list<xBar::StaticGeometryContainer*> m_instances;
     };
 	}
 }

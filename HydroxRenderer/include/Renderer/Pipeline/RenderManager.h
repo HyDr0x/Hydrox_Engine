@@ -19,6 +19,7 @@
 #include "Renderer/Pipeline/SkyboxRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"
 #include "Renderer/Pipeline/StringRenderer2D.h"
+#include "Renderer/Pipeline/RenderingOptions.h"
 
 #include "Renderer/Buffer/UBO.h"
 
@@ -53,7 +54,7 @@ namespace he
       void enableSkybox(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
       void disableSkybox();
 
-      void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
+      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
         util::ResourceHandle billboardShaderHandle, 
         util::ResourceHandle spriteShaderHandle, 
         util::ResourceHandle stringShaderHandle, 
@@ -79,13 +80,15 @@ namespace he
 
     private:
 
-	    RenderManager(const RenderManager&){}
+	    RenderManager(const RenderManager&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
       UBO m_cameraParameterUBO;
 
       bool m_skyboxRendering;
+
+      RenderOptions m_options;
 
       GeometryRenderer m_geometryRasterizer;
       BillboardRenderer m_billboardRenderer;

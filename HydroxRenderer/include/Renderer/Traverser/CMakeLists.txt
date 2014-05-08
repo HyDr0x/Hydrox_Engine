@@ -3,6 +3,8 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertSkinnedGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertStaticGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 

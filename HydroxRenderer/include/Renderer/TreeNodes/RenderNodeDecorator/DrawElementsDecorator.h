@@ -32,11 +32,13 @@ namespace he
     {
     public:
 
-      DrawElementsDecorator(IRenderNode *renderNode, bool instanced, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      DrawElementsDecorator(IRenderNode *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       ~DrawElementsDecorator();
 
+      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer);
+
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
@@ -71,7 +73,6 @@ namespace he
       unsigned int m_iboSize;
 
       std::map<util::ResourceHandle, ElementGeometry, Less> m_meshes;
-      std::list<util::ResourceHandle> m_geometry;
     };
   }
 }

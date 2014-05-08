@@ -22,14 +22,16 @@ namespace he
     {
     public:
 
-      MaterialDecorator(IRenderNode *renderNode, unsigned int maxMaterials, util::SingletonManager *singletonManager);
+      MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager);
       ~MaterialDecorator();
 
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer);
+
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void rasterizeGeometry();
 
@@ -47,11 +49,9 @@ namespace he
 
       bool m_materialNumberChanged;
 
-      unsigned int m_maxMaterials;
       unsigned int m_materialCount;
 
       std::map<util::ResourceHandle, MaterialMemoryManager, Less> m_materialHandles;
-      std::list<util::ResourceHandle> m_materialHandlesPerInstance;
     };
   }
 }

@@ -1,4 +1,4 @@
-#include "Renderer/Resources/TextureArray.h"
+#include "Renderer/Resources/Texture3D.h"
 
 #include <assert.h>
 
@@ -8,7 +8,7 @@ namespace he
 	{
 	
 
-    TextureArray::TextureArray(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
+    Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
       m_depth(depth),
@@ -68,7 +68,7 @@ namespace he
 	    glBindTexture(m_target, 0);
     }
 
-    TextureArray::TextureArray(const TextureArray& o)
+    Texture3D::Texture3D(const Texture3D& o)
     {
       m_hash = o.m_hash;
       m_width = o.m_width;
@@ -82,7 +82,7 @@ namespace he
 	    m_slot = o.m_slot;
     }
 
-    TextureArray& TextureArray::operator=(const TextureArray& o)
+    Texture3D& Texture3D::operator=(const Texture3D& o)
     {
       m_hash = o.m_hash;
       m_width = o.m_width;
@@ -98,16 +98,16 @@ namespace he
       return *this;
     }
 
-    TextureArray::~TextureArray()
+    Texture3D::~Texture3D()
     {
     }
 
-    void TextureArray::free()
+    void Texture3D::free()
     {
       glDeleteTextures(1, &m_texIndex);
     }
 
-    void TextureArray::setTexture(GLint location, GLuint slot)
+    void Texture3D::setTexture(GLint location, GLuint slot)
     {
       assert(slot < 31 && "ERROR, texture slot too high\n");
 
@@ -118,13 +118,13 @@ namespace he
       glUniform1i(location, slot);
     }
 
-    void TextureArray::unsetTexture()
+    void Texture3D::unsetTexture()
     {
 	    glActiveTexture(GL_TEXTURE0 + m_slot);
 	    glBindTexture(m_target, 0);
     }
 
-    void TextureArray::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter)
+    void Texture3D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter)
     {
 	    glBindTexture(m_target, m_texIndex);
 		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
@@ -135,32 +135,32 @@ namespace he
 	    glBindTexture(m_target, 0);
     }
 
-    util::Vector<unsigned int, 3> TextureArray::getResolution()
+    util::Vector<unsigned int, 3> Texture3D::getResolution()
     {
 	    return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
     }
 
-    GLenum TextureArray::getTarget()
+    GLenum Texture3D::getTarget()
     {
 	    return m_target;
     }
 
-    GLenum TextureArray::getInternalFormat()
+    GLenum Texture3D::getInternalFormat()
     {
       return m_internalFormat;
     }
 
-    GLenum TextureArray::getFormat()
+    GLenum Texture3D::getFormat()
     {
       return m_format;
     }
 
-    GLenum TextureArray::getType()
+    GLenum Texture3D::getType()
     {
       return m_type;
     }
 
-    unsigned int TextureArray::getTextureSize()
+    unsigned int Texture3D::getTextureSize()
     {
       unsigned int bytesPerPixel;
 
@@ -189,7 +189,7 @@ namespace he
       return m_width * m_height * m_depth * bytesPerPixel;
     }
 
-    void TextureArray::getTextureData(GLvoid* data)
+    void Texture3D::getTextureData(GLvoid* data)
     {
       glBindTexture(m_target, m_texIndex);
       glGetTexImage(m_target, 0, m_format, m_type, data);

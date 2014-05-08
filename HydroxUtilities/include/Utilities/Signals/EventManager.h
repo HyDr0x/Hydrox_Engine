@@ -25,8 +25,6 @@ namespace he
         OnAddBillboardNode,
         OnAddGeometryNode,
         OnAddSkinnedGeometryNode,
-        OnAddInstancedGeometryNode,
-        OnAddInstancedSkinnedGeometryNode,
         OnAddLightNode,
         OnAddParticleTransmitterNode,
         OnRemoveStringTexture2D,

@@ -1,6 +1,7 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/MaterialDecorator.h"
 
 #include <XBar/StaticGeometryContainer.h>
+#include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/Resources/Material.h"
 
@@ -10,15 +11,14 @@ namespace he
 {
 	namespace renderer
 	{
-    MaterialDecorator::MaterialDecorator(IRenderNode *renderNode, unsigned int maxMaterials, util::SingletonManager *singletonManager) : 
+    MaterialDecorator::MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
-      m_maxMaterials(maxMaterials),
       m_materialCount(0),
       m_materialNumberChanged(false)
     {
       m_materialManager = singletonManager->getService<MaterialManager>();
 
-      m_materialBuffer.createBuffer(sizeof(Material::MaterialData) * maxMaterials, GL_STATIC_DRAW);
+      m_materialBuffer.createBuffer(sizeof(Material::MaterialData) * getMaxMaterials(), GL_STATIC_DRAW);
     }
 
     MaterialDecorator::~MaterialDecorator()
@@ -35,16 +35,15 @@ namespace he
       return traverser->postTraverse(this);
     }
 
-    bool MaterialDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
     {
       if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
-        if(m_materialCount < m_maxMaterials && m_renderNode->insertGeometry(geometryContainer))
+        if(m_materialCount < getMaxMaterials() && m_renderNode->insertGeometry(geometryContainer))
         {
           m_materialNumberChanged = true;
 
           m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber = 1;
-          m_materialHandlesPerInstance.push_back(geometryContainer.getMaterialHandle());
 
           m_materialCount++;
 
@@ -56,7 +55,6 @@ namespace he
         if(m_renderNode->insertGeometry(geometryContainer))
         {
           m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber++;
-          m_materialHandlesPerInstance.push_back(geometryContainer.getMaterialHandle());
 
           return true;
         }
@@ -65,15 +63,42 @@ namespace he
       return false;
     }
 
-    unsigned int MaterialDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      unsigned int instanceIndex = m_renderNode->removeGeometry(geometryContainer);
-      if(instanceIndex != ~0)
+      if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
-        unsigned int index = 0;
-        for(std::list<util::ResourceHandle>::const_iterator instanceIterator = m_materialHandlesPerInstance.begin(); instanceIterator != m_materialHandlesPerInstance.end(); instanceIterator++, index++)
+        if(m_materialCount < getMaxMaterials() && m_renderNode->insertGeometry(geometryContainer))
         {
-          if(index == instanceIndex)
+          m_materialNumberChanged = true;
+
+          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber = 1;
+
+          m_materialCount++;
+
+          return true;
+        }
+      }
+      else
+      {
+        if(m_renderNode->insertGeometry(geometryContainer))
+        {
+          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber++;
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    bool MaterialDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    {
+      bool deleted = m_renderNode->removeGeometry(geometryContainer);
+      if(deleted)
+      {
+        for(std::list<xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++)
+        {
+          if(geometryContainer == (**instanceIterator))
           {
             m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber--;
             
@@ -84,14 +109,12 @@ namespace he
 
               m_materialCount--;
             }
-
-            m_materialHandlesPerInstance.erase(instanceIterator);
             break;
           }
         }
       }
 
-      return instanceIndex;
+      return deleted;
     }
 
     void MaterialDecorator::rasterizeGeometry()
@@ -147,9 +170,9 @@ namespace he
       m_materialIndexBuffer.setMemoryFence();
 
       unsigned int index = 0;
-      for(std::list<util::ResourceHandle>::iterator instanceIterator = m_materialHandlesPerInstance.begin(); instanceIterator != m_materialHandlesPerInstance.end(); instanceIterator++, index++)
+      for(std::list<xBar::StaticGeometryContainer*>::iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, index++)
       {
-        m_materialIndexBuffer.setData(sizeof(GLuint) * index, sizeof(GLuint), &m_materialHandles[*instanceIterator].bufferIndex);
+        m_materialIndexBuffer.setData(sizeof(GLuint) * index, sizeof(GLuint), &m_materialHandles[(*instanceIterator)->getMeshHandle()].bufferIndex);
       }
 
       m_materialIndexBuffer.syncWithFence();

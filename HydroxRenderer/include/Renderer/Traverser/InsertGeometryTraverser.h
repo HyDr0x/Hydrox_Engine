@@ -5,12 +5,15 @@
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Miscellaneous/Flags.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
+
+#include "Renderer/Pipeline/RenderingOptions.h"
 
 namespace he
 {
@@ -22,8 +25,8 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic, xBar::StaticGeometryContainer& geometryContainer, bool skinned, bool instanced);
-      virtual ~InsertGeometryTraverser();
+      InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic);
+      virtual ~InsertGeometryTraverser() = 0;
 
       virtual bool preTraverse(GroupNode* treeNode);
       virtual void postTraverse(GroupNode* treeNode);
@@ -37,7 +40,7 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(IRenderNode* treeNode) = 0;
       virtual void postTraverse(IRenderNode* treeNode);
 
       void createNewChildNode(TreeNode* parent);
@@ -52,7 +55,9 @@ namespace he
       void createNewSibling(TextureNode* sibling);
       void createNewSibling(IRenderNode* sibling);
 
-    private:
+    protected:
+
+      void initialize(Mesh* mesh, util::ResourceHandle materialHandle);
 
       util::SingletonManager *m_singletonManager;
 
@@ -60,14 +65,10 @@ namespace he
 
       bool m_inserted;
 
-      xBar::StaticGeometryContainer& m_geometryContainer;
-
       bool m_instanced;
-      unsigned int m_maxMaterials;
-      unsigned int m_maxGeometry;
-      unsigned int m_maxBones;
+      const RenderOptions& m_options;
 
-      RenderNodeType m_nodeType;
+      util::Flags<RenderNodeType> m_nodeType;
       GLenum m_primitiveType;
       GLuint m_vertexStride;
       unsigned int m_vertexDeclaration;

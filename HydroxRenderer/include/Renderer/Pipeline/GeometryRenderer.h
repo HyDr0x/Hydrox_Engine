@@ -22,23 +22,21 @@ namespace he
 	{
     class GroupNode;
     class IRenderNode;
+    struct RenderOptions;
 
     class GeometryRenderer
     {
     public:
 
-      GeometryRenderer();
+      GeometryRenderer(RenderOptions& options);
       ~GeometryRenderer();
 
-      void initialize(unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
+      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
 
       void rasterizeGeometry();
 
       void addRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
       void addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
-
-      void addInstancedRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
-      void addInstancedRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
 
       void removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
       void removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
@@ -54,9 +52,7 @@ namespace he
 
       GLuint m_meshVAO;
 
-      unsigned int m_maxMaterials;
-      unsigned int m_maxGeometry;
-      unsigned int m_maxBones;
+      RenderOptions& m_options;
 
       GroupNode *m_renderRootNode;
 

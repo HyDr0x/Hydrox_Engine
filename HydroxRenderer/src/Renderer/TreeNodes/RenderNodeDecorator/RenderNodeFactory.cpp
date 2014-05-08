@@ -2,6 +2,8 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
+#include "Renderer/Pipeline/RenderingOptions.h"
+
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawArrayDecorator.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawElementsDecorator.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/SkinnedGeometryDecorator.h"
@@ -14,22 +16,21 @@ namespace he
 {
 	namespace renderer
 	{
-    IRenderNode* RenderNodeFactory::createRenderNode(RenderNodeType nodeType, bool instanced, unsigned int maxMaterials, unsigned int maxGeometry, unsigned int maxBones, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
+    IRenderNode* RenderNodeFactory::createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
-      switch(nodeType)
+      switch(nodeType.toInt())
       {
-      case SkinnedIndexedNode:
-        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new RenderNode(maxGeometry), instanced, GLINDEXTYPE, primitiveType, vertexStride, singletonManager), maxBones), maxMaterials, singletonManager);
+      case SKINNEDNODE | INDEXEDNODE:
+        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new RenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager);
         break;
-      case NonSkinnedIndexedNode:
-        return new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new RenderNode(maxGeometry), instanced, GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), maxMaterials, singletonManager);
+      case INDEXEDNODE:
+        return new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new RenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager);
         break;
-      case SkinnedNonIndexedNode:
-        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new RenderNode(maxGeometry), instanced, GLINDEXTYPE, primitiveType, vertexStride, singletonManager), maxBones), maxMaterials, singletonManager);
+      case SKINNEDNODE:
+        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new RenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager);
         break;
       default:
-      case NonSkinnedNonIndexedNode:
-        return new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new RenderNode(maxGeometry), instanced, primitiveType, vertexStride, singletonManager)), maxMaterials, singletonManager);
+        return new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new RenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager);
         break;
       };
     }

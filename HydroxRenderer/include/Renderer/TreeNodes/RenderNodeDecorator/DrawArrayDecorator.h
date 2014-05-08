@@ -31,11 +31,13 @@ namespace he
     {
     public:
 
-      DrawArrayDecorator(IRenderNode *renderNode, bool instanced, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       ~DrawArrayDecorator();
 
+      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer);
+
       virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual unsigned int removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
 
       virtual void frustumCulling();
 
@@ -66,7 +68,6 @@ namespace he
       unsigned int m_vboSize;
 
       std::map<util::ResourceHandle, ArrayGeometry, Less> m_meshes;
-      std::list<util::ResourceHandle> m_geometry;
     };
   }
 }

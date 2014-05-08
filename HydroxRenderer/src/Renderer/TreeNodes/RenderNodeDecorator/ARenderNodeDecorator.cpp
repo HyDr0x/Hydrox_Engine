@@ -32,14 +32,24 @@ namespace he
       m_renderNode->postTraverse(traverser);
     }
 
+    bool ARenderNodeDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    {
+      return m_renderNode->insertGeometry(geometryContainer);
+    }
+
     bool ARenderNodeDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
      return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    unsigned int ARenderNodeDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
       return m_renderNode->removeGeometry(geometryContainer);
+    }
+
+    std::list<xBar::StaticGeometryContainer*>& ARenderNodeDecorator::getInstances()
+    {
+      return m_renderNode->getInstances();
     }
 
     unsigned int ARenderNodeDecorator::getInstanceNumber()
@@ -65,6 +75,21 @@ namespace he
     void ARenderNodeDecorator::updateBuffer()
     {
       m_renderNode->updateBuffer();
+    }
+
+    unsigned int ARenderNodeDecorator::getMaxGeometry()
+    {
+      return m_renderNode->getMaxGeometry();
+    }
+
+    unsigned int ARenderNodeDecorator::getMaxMaterials()
+    {
+      return m_renderNode->getMaxMaterials();
+    }
+
+    unsigned int ARenderNodeDecorator::getMaxBones()
+    {
+      return m_renderNode->getMaxBones();
     }
 	}
 }
