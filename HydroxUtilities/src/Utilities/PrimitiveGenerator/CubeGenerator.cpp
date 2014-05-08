@@ -7,14 +7,6 @@ namespace he
 {
 	namespace util
 	{
-    CubeGenerator::CubeGenerator()
-    {
-    }
-
-    CubeGenerator::~CubeGenerator()
-    {
-    }
-
     void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position)
     {
       position.resize(36);
