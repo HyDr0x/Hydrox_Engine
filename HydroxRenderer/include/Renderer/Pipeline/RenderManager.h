@@ -54,7 +54,7 @@ namespace he
       void enableSkybox(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
       void disableSkybox();
 
-      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
+      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, unsigned char maxLayer,
         util::ResourceHandle billboardShaderHandle, 
         util::ResourceHandle spriteShaderHandle, 
         util::ResourceHandle stringShaderHandle, 

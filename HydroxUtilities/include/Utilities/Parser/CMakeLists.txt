@@ -1,9 +1,0 @@
-set(
-	HEADER 
-	${HEADER} 
-	${CMAKE_CURRENT_SOURCE_DIR}/Parser.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/ParserMaterial.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/ParserModel.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/ParserRenderPass.h 
-	PARENT_SCOPE 
-)

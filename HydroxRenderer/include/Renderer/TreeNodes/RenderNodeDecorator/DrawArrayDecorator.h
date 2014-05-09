@@ -47,9 +47,8 @@ namespace he
 
     protected:
 
-      void createBuffer();
-      void fillBuffer();
-      void updateCommandBuffer();
+      void updatePerMeshBuffer();
+      void updatePerInstanceBuffer();
 
       ModelManager *m_modelManager;
 

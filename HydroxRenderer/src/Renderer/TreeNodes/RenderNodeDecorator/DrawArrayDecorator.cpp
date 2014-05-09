@@ -129,40 +129,34 @@ namespace he
 
     void DrawArrayDecorator::updateBuffer()
     {
-      if (m_meshNumberChanged)
+      if(m_meshNumberChanged)
       {
-        createBuffer();
-        fillBuffer();
+        updatePerMeshBuffer();
 
         m_meshVertexBuffer.syncWithFence();
         m_bboxesBuffer.syncWithFence();
-        m_commandBuffer.syncWithFence();
-        m_meshInstanceBufferIndex.syncWithFence();
 
         m_meshNumberChanged = false;
       }
-      //else if(hasInstanceNumberChanged())
-      //{
-      //  updateCommandBuffer();
-      //}
+      
+      if(hasInstanceNumberChanged())
+      {
+        updatePerInstanceBuffer();
+
+        m_commandBuffer.syncWithFence();
+        m_meshInstanceBufferIndex.syncWithFence();
+      }
 
       m_renderNode->updateBuffer();
     }
 
-    void DrawArrayDecorator::createBuffer()
+    void DrawArrayDecorator::updatePerMeshBuffer()
     {
       m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      
-      unsigned int instanceCount = getInstanceNumber();
-
       m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshes.size() * 2, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-    }
 
-    void DrawArrayDecorator::fillBuffer()
-    {
       m_meshVertexBuffer.setMemoryFence();
+      m_bboxesBuffer.setMemoryFence();
 
       unsigned int bufferIndex = 0;
       unsigned int vertexOffset = 0;
@@ -176,10 +170,20 @@ namespace he
         meshIterator->second.vertexOffset = vertexOffset;
 
         vertexOffset += mesh->getVertexCount();
+
+        //update bbox data
+        m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
+        m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
       }
+    }
+
+    void DrawArrayDecorator::updatePerInstanceBuffer()
+    {
+      unsigned int instanceCount = getInstanceNumber();
+      m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
       m_commandBuffer.setMemoryFence();
-      m_bboxesBuffer.setMemoryFence();
       m_meshInstanceBufferIndex.setMemoryFence();
 
       unsigned int instanceCounter = 0;
@@ -196,19 +200,6 @@ namespace he
         m_commandBuffer.setData(sizeof(DrawArraysIndirectCommand) * instanceCounter, sizeof(DrawArraysIndirectCommand), &command);
 
         m_meshInstanceBufferIndex.setData(sizeof(unsigned int) * instanceCounter, sizeof(unsigned int), &m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex);
-
-        //update bbox data
-        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
-        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
-      }
-    }
-
-    void DrawArrayDecorator::updateCommandBuffer()
-    {
-      unsigned int commandIndex = 0;
-      for(std::map<util::ResourceHandle, ArrayGeometry, Less>::const_iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, commandIndex++)
-      {
-        m_commandBuffer.setData(commandIndex * sizeof(DrawArraysIndirectCommand) + sizeof(GLuint), sizeof(GLuint), &meshIterator->second);
       }
     }
   }

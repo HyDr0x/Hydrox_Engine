@@ -58,7 +58,7 @@ namespace he
       m_skyboxRendering = false;
     }
 
-    void RenderManager::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, GLfloat aspectRatio, unsigned char maxLayer,
+    void RenderManager::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, unsigned char maxLayer,
       util::ResourceHandle billboardShaderHandle, 
       util::ResourceHandle spriteShaderHandle, 
       util::ResourceHandle stringShaderHandle,
@@ -72,8 +72,6 @@ namespace he
       m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
       m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);
-
-      m_aspectRatio = aspectRatio;
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
     }

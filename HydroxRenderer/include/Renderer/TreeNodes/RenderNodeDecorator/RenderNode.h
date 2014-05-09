@@ -56,8 +56,6 @@ namespace he
 
       const RenderOptions& m_options;
 
-      unsigned int m_instanceNumber;
-
       std::list<xBar::StaticGeometryContainer*> m_instances;
     };
 	}

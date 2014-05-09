@@ -138,41 +138,35 @@ namespace he
     {
       if (m_meshNumberChanged)
       {
-        createBuffer();
-        fillBuffer();
+        updatePerMeshBuffer();
 
         m_meshVertexBuffer.syncWithFence();
         m_meshIndexBuffer.syncWithFence();
         m_bboxesBuffer.syncWithFence();
-        m_commandBuffer.syncWithFence();
-        m_meshInstanceBufferIndex.syncWithFence();
 
         m_meshNumberChanged = false;
       }
-      //else if(hasInstanceNumberChanged())
-      //{
-      //  updateCommandBuffer();
-      //}
+
+      if(hasInstanceNumberChanged())
+      {
+        updatePerInstanceBuffer();
+
+        m_commandBuffer.syncWithFence();
+        m_meshInstanceBufferIndex.syncWithFence();
+      }
 
       m_renderNode->updateBuffer();
     }
 
-    void DrawElementsDecorator::createBuffer()
+    void DrawElementsDecorator::updatePerMeshBuffer()
     {
       m_meshVertexBuffer.createBuffer(GL_ARRAY_BUFFER, m_vboSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_meshIndexBuffer.createBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-
-      unsigned int instanceCount = getInstanceNumber();
-
       m_bboxesBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Vector<float, 4>) * m_meshes.size() * 2, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand)* instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-    }
 
-    void DrawElementsDecorator::fillBuffer()
-    {
       m_meshVertexBuffer.setMemoryFence();
       m_meshIndexBuffer.setMemoryFence();
+      m_bboxesBuffer.setMemoryFence();
 
       unsigned int bufferIndex = 0;
       unsigned int vertexOffset = 0;
@@ -190,9 +184,19 @@ namespace he
 
         vertexOffset += mesh->getVertexCount();
         indexOffset += mesh->getIndexCount();
-      }
 
-      m_bboxesBuffer.setMemoryFence();
+        //update bbox data
+        m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
+        m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
+      }
+    }
+
+    void DrawElementsDecorator::updatePerInstanceBuffer()
+    {
+      unsigned int instanceCount = getInstanceNumber();
+      m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * instanceCount, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+
       m_meshInstanceBufferIndex.setMemoryFence();
       m_commandBuffer.setMemoryFence();
 
@@ -210,19 +214,6 @@ namespace he
 
         m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
         m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex);
-
-        //update bbox data
-        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 0) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMin()[0]);
-        m_bboxesBuffer.setData((2 * m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex + 1) * sizeof(util::Vector<float, 4>), sizeof(util::Vector<float, 3>), &mesh->getBBMax()[0]);
-      }
-    }
-
-    void DrawElementsDecorator::updateCommandBuffer()
-    {
-      unsigned int commandIndex = 0;
-      for(std::map<util::ResourceHandle, ElementGeometry, Less>::const_iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, commandIndex++)
-      {
-        m_commandBuffer.setData(commandIndex * sizeof(DrawElementsIndirectCommand) + sizeof(GLuint), sizeof(GLuint), &meshIterator->second);
       }
     }
   }

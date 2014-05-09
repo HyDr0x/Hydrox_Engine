@@ -15,8 +15,7 @@ namespace he
 {
 	namespace renderer
 	{
-    RenderNode::RenderNode(const RenderOptions& options) : 
-      m_instanceNumber(0), 
+    RenderNode::RenderNode(const RenderOptions& options) :  
       m_options(options),
       m_instanceNumberChanged(false)
     {
@@ -38,7 +37,7 @@ namespace he
 
     bool RenderNode::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
     {
-      if(m_instanceNumber >= m_options.m_maxGeometry)
+      if(m_instances.size() >= m_options.m_maxGeometry)
       {
         return false;
       }
@@ -52,7 +51,7 @@ namespace he
 
     bool RenderNode::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_instanceNumber >= m_options.m_maxGeometry)
+      if(m_instances.size() >= m_options.m_maxGeometry)
       {
         return false;
       }
@@ -100,7 +99,8 @@ namespace he
 
     void RenderNode::frustumCulling()
     {
-      ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_instanceNumber);
+      unsigned int instanceNumber = m_instances.size();
+      ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
 
       ComputeShader::dispatchComputeShader(256, 1, 1);
     }
