@@ -24,7 +24,7 @@ namespace he
     void Shader::getUniformParameters(const char **uniformNames, const GLuint uniformCount, std::vector<GLuint> *uniformIndices, 
                                                                                             std::vector<GLint> *uniformOffsets, 
                                                                                             std::vector<GLint> *arrayStrides, 
-                                                                                            std::vector<GLint> *matrixStrides)
+                                                                                            std::vector<GLint> *matrixStrides) const
     {
       glGetUniformIndices  ( m_program, uniformCount, uniformNames, &(*uniformIndices)[0]);
 	    glGetActiveUniformsiv( m_program, uniformCount, &(*uniformIndices)[0], GL_UNIFORM_OFFSET,        &(*uniformOffsets)[0]);
@@ -108,7 +108,7 @@ namespace he
 	    glUseProgram(0);
     }
 
-    GLuint Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource)
+    GLuint Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource) const
     {
       if(shaderSource.empty())
       {

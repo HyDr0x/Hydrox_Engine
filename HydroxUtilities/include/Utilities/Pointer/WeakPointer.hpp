@@ -18,7 +18,10 @@ namespace he
 	    WeakPointer(const WeakPointer& o) : m_obj(o.m_obj)
 	    {}
 
-	    WeakPointer& operator=(const WeakPointer& o)
+	    ~WeakPointer()
+	    {}
+
+      WeakPointer& operator=(const WeakPointer& o)
 	    {
 		    if(o.m_obj == m_obj) 
         {
@@ -35,10 +38,7 @@ namespace he
 		    return *this;
 	    }
 
-	    ~WeakPointer()
-	    {}
-
-      bool operator==(const WeakPointer& o)
+      bool operator==(const WeakPointer& o) const
       {
         return reinterpret_cast<unsigned int>(m_obj) == reinterpret_cast<unsigned int>(o.m_obj);
       }

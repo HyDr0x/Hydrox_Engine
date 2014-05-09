@@ -33,12 +33,12 @@ namespace he
       SceneCacheManager(util::EventManager& eventManager);
       ~SceneCacheManager();
 
-      void setLODRanges(std::vector<float> lodRanges);
+      void setLODRanges(const std::vector<float>& lodRanges);
 
-      void addSubTree(TreeNode* rootNode, util::Vector<float, 3>& cameraPosition);
+      void addSubTree(TreeNode* rootNode, const util::Vector<float, 3>& cameraPosition);
       void removeSubTree(TreeNode* rootNode);
 
-      void updateCaches(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
+      void updateCaches(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
       void addNodeToCache(sg::LODNode *lodNode);
       void addNodeToCache(sg::TransformNode *transformNode);
@@ -59,7 +59,7 @@ namespace he
       void updateAnimationTime(float currentTime, bool isTimeRelative);
       void updateAnimatedTransformNodes();
       void updateTransformNodes();
-      void updateLODNodes(util::Vector<float, 3>& cameraPosition);
+      void updateLODNodes(const util::Vector<float, 3>& cameraPosition);
 
       util::EventManager& m_eventManager;
 

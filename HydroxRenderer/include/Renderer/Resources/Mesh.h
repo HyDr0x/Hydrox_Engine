@@ -42,22 +42,21 @@ namespace he
       typedef GLuint indexType;
 
       Mesh();
-	    Mesh(const Mesh& o);
-
 	    Mesh(GLenum primitiveType,
-           std::vector<util::Vector<float, 3>> positions, 
-           std::vector<indexType> indices = std::vector<indexType>(),
-           std::vector<std::vector<util::Vector<float, 2>>> textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
-           std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 
-           std::vector<util::Vector<float, 3>> binormals = std::vector<util::Vector<float, 3>>(), 
-           std::vector<util::Vector<float, 4>> boneWeights = std::vector<util::Vector<float, 4>>(),
-           std::vector<util::Vector<float, 4>> boneIndices = std::vector<util::Vector<float, 4>>(),
-           std::vector<util::Vector<float, 4>> vertexColors = std::vector<util::Vector<float, 4>>()
+           const std::vector<util::Vector<float, 3>>& positions, 
+           const std::vector<indexType>& indices = std::vector<indexType>(),
+           const std::vector<std::vector<util::Vector<float, 2>>>& textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
+           const std::vector<util::Vector<float, 3>>& normals = std::vector<util::Vector<float, 3>>(), 
+           const std::vector<util::Vector<float, 3>>& binormals = std::vector<util::Vector<float, 3>>(), 
+           const std::vector<util::Vector<float, 4>>& boneWeights = std::vector<util::Vector<float, 4>>(),
+           const std::vector<util::Vector<float, 4>>& boneIndices = std::vector<util::Vector<float, 4>>(),
+           const std::vector<util::Vector<float, 4>>& vertexColors = std::vector<util::Vector<float, 4>>()
            );
-    
-      Mesh& operator=(const Mesh& o);
+      Mesh(const Mesh& o);
 
 	    ~Mesh();
+
+      Mesh& operator=(const Mesh& o);
 
       void free();
 
@@ -72,17 +71,17 @@ namespace he
       GLuint getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
 
-      util::Vector<float, 3> getBBMin();
-      util::Vector<float, 3> getBBMax();
+      util::Vector<float, 3> getBBMin() const;
+      util::Vector<float, 3> getBBMax() const;
 
-      std::vector<GLubyte>& getVBOBuffer();
-      GLuint getVertexStride();
-      GLuint getVertexCount();
-      GLuint getVBOSize();
+      const std::vector<GLubyte>& getVBOBuffer() const;
+      GLuint getVertexStride() const;
+      GLuint getVertexCount() const;
+      GLuint getVBOSize() const;
 
-      std::vector<GLuint>& getIndexBuffer();
-      GLuint getIndexCount();
-      GLuint getPrimitiveCount();
+      const std::vector<GLuint>& getIndexBuffer() const;
+      GLuint getIndexCount() const;
+      GLuint getPrimitiveCount() const;
 
     private:
 

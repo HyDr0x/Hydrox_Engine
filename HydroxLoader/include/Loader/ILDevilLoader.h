@@ -17,14 +17,16 @@ namespace he
 
       ILDevilLoader(util::SingletonManager *singletonManager);
       ILDevilLoader(const ILDevilLoader& o);
-      ILDevilLoader& operator=(const ILDevilLoader& o);
+      
       ~ILDevilLoader();
+
+      ILDevilLoader& operator=(const ILDevilLoader& o);
 
       void setTarget(GLenum target);
 
       util::ResourceHandle loadResource(std::string filename);
 
-      util::ResourceHandle getDefaultResource();
+      util::ResourceHandle getDefaultResource() const;
 
     private:
 

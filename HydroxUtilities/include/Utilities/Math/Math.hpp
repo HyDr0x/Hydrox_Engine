@@ -38,37 +38,37 @@ namespace he
         return angle / PI * 180.0f;
       }
 
-	    template<typename Type> inline Vector<Type, 4> abs(Vector<Type, 4>& v1)
+	    template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
       {
         return Vector<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));
       }
 
-      template<typename Type> inline Vector<Type, 3> abs(Vector<Type, 3>& v1)
+      template<typename Type> inline Vector<Type, 3> abs(const Vector<Type, 3>& v1)
       {
         return Vector<Type,3>(abs(v1[0]), abs(v1[1]), abs(v1[2]));
       }
 
-      template<typename Type> inline Vector<Type, 2> abs(Vector<Type, 2>& v1)
+      template<typename Type> inline Vector<Type, 2> abs(const Vector<Type, 2>& v1)
       {
         return Vector<Type,2>(abs(v1[0]),abs(v1[1]));
       }
 
-      template<typename Type> inline Vector<Type, 3> cross(Vector<Type, 3>& v1, Vector<Type, 3>& v2)
+      template<typename Type> inline Vector<Type, 3> cross(const Vector<Type, 3>& v1, const Vector<Type, 3>& v2)
       {
         return Vector<Type,3>(v1[1]*v2[2]-v2[1]*v1[2], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]);
       }
 
-      template<typename CastType, typename Type> inline Vector<CastType, 4> vector_cast(Vector<Type, 4>& v)
+      template<typename CastType, typename Type> inline Vector<CastType, 4> vector_cast(const Vector<Type, 4>& v)
       {
         return Vector<CastType, 4>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]), static_cast<CastType>(v[3]));
       }
 
-      template<typename CastType, typename Type> inline Vector<CastType, 3> vector_cast(Vector<Type, 3>& v)
+      template<typename CastType, typename Type> inline Vector<CastType, 3> vector_cast(const Vector<Type, 3>& v)
       {
         return Vector<CastType, 3>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]), static_cast<CastType>(v[2]));
       }
 
-      template<typename CastType, typename Type> inline Vector<CastType, 2> vector_cast(Vector<Type, 2>& v)
+      template<typename CastType, typename Type> inline Vector<CastType, 2> vector_cast(const Vector<Type, 2>& v)
       {
         return Vector<CastType, 2>(static_cast<CastType>(v[0]), static_cast<CastType>(v[1]));
       }
@@ -99,14 +99,11 @@ namespace he
                                 0.0f,                  0.0f,                   0.0f,                   1.0f);
       }
 
-      inline Matrix<float, 4> createLookAt(Vector<float, 3> camPos, Vector<float, 3> forwardVector, Vector<float, 3> upVektor)
+      inline Matrix<float, 4> createLookAt(const Vector<float, 3>& camPos, const Vector<float, 3>& forwardVector, const Vector<float, 3>& upVektor)
       {
-        Vector<float, 3> z = forwardVector;
+        Vector<float, 3> z = forwardVector.normalize();
 
-        z.normalize();
-        upVektor.normalize();
-        Vector<float, 3> x = cross(upVektor, z);
-        x.normalize();
+        Vector<float, 3> x = cross(upVektor.normalize(), z).normalize();
         Vector<float, 3> y = cross(z, x);
 
         Matrix<float, 4> rotMat(x[0], x[1], x[2], 0.0f,
@@ -119,17 +116,19 @@ namespace he
         return rotMat; 
       }
 
-      template<typename Type> Matrix<Type,4> rotAxis(Matrix<Type, 4> m, float angle, Vector<Type, 3>& v)
+      template<typename Type> Matrix<Type,4> rotAxis(const Matrix<Type, 4>& m, float angle, const Vector<Type, 3>& v)
       {
         angle = degToRad(angle);
         const float sinAngle = sinf(angle);
         const float cosAngle = cosf(angle);
-        v.normalize();
-        Vector<Type, 3> vTmp = v * (1.0f - cosAngle);
 
-        Matrix<Type, 4> rotMat( cosAngle + vTmp[0] * v[0]                  , 0.0f + vTmp[0] * v[1] + sinAngle * v[2], 0.0f + vTmp[0] * v[2] - sinAngle * v[1], 0.0f,
-                                0.0f     + vTmp[1] * v[0] - sinAngle * v[2], cosAngle + vTmp[1] * v[1]              , 0.0f + vTmp[1] * v[2] + sinAngle * v[0], 0.0f,
-                                0.0f     + vTmp[2] * v[0] + sinAngle * v[1], 0.0f + vTmp[2] * v[1] - sinAngle * v[0], cosAngle + vTmp[2] * v[2]              , 0.0f,
+        Vector<Type, 3> axis = v.normalize();
+
+        Vector<Type, 3> vTmp = axis * (1.0f - cosAngle);
+
+        Matrix<Type, 4> rotMat( cosAngle + vTmp[0] * axis[0]                  , 0.0f + vTmp[0] * axis[1] + sinAngle * axis[2], 0.0f + vTmp[0] * axis[2] - sinAngle * axis[1], 0.0f,
+                                0.0f     + vTmp[1] * axis[0] - sinAngle * axis[2], cosAngle + vTmp[1] * axis[1]              , 0.0f + vTmp[1] * axis[2] + sinAngle * axis[0], 0.0f,
+                                0.0f     + vTmp[2] * axis[0] + sinAngle * axis[1], 0.0f + vTmp[2] * axis[1] - sinAngle * axis[0], cosAngle + vTmp[2] * axis[2]              , 0.0f,
                                 0.0f                                       , 0.0f                                   , 0.0f                                   , 1.0f);
 
         Matrix<Type, 4> result;
@@ -141,7 +140,7 @@ namespace he
         return result;
       }
 
-      template<typename Type> void decomposeMatrix(Matrix<Type, 4> matrix, Vector<Type, 3>& angle, Vector<Type, 3>& position, Vector<Type, 3>& scale)
+      template<typename Type> void decomposeMatrix(Matrix<Type, 4>& matrix, Vector<Type, 3>& angle, Vector<Type, 3>& position, Vector<Type, 3>& scale)
       {
         scale[0] = sqrt(matrix[0][0] * matrix[0][0] + matrix[0][1] * matrix[0][1] + matrix[0][2] * matrix[0][2]);
         scale[1] = sqrt(matrix[1][0] * matrix[1][0] + matrix[1][1] * matrix[1][1] + matrix[1][2] * matrix[1][2]);
@@ -214,7 +213,7 @@ namespace he
         return Quaternion<Type>(cosf(angle), axis[0], axis[1], axis[2]);
       }
 
-      inline Matrix<float, 4> createTransformationMatrix(Vector<float, 3> translation, float scale, Quaternion<float> rotation)
+      inline Matrix<float, 4> createTransformationMatrix(const Vector<float, 3>& translation, float scale, const Quaternion<float>& rotation)
       {
         Matrix<float, 4> trfMatrix;
 

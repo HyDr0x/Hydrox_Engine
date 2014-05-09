@@ -26,9 +26,9 @@ namespace he
 
       void initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles);
 
-      bool isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles);
+      bool isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles) const;
 
-      std::vector< std::vector<util::ResourceHandle> >& getTextureHandles();
+      const std::vector< std::vector<util::ResourceHandle> >& getTextureHandles() const;
 
     private:
 

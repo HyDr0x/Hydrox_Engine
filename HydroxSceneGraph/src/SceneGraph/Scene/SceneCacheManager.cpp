@@ -33,14 +33,14 @@ namespace he
       m_activeLODs.clear();
     }
 
-    void SceneCacheManager::setLODRanges(std::vector<float> lodRanges)
+    void SceneCacheManager::setLODRanges(const std::vector<float>& lodRanges)
     {
       assert(lodRanges.size() > 1 && lodRanges[0] <= lodRanges[1]);
 
       m_lodRanges = lodRanges;
     }
 
-    void SceneCacheManager::addSubTree(TreeNode* rootNode, util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::addSubTree(TreeNode* rootNode, const util::Vector<float, 3>& cameraPosition)
     {
       InsertObserverTraverser insertObserverTraverser(this);
       insertObserverTraverser.doTraverse(rootNode);//insert this scene as an observer to every Transform node
@@ -55,7 +55,7 @@ namespace he
       removeRenderNodesTraverser.doTraverse(rootNode);
     }
 
-    void SceneCacheManager::updateCaches(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
+    void SceneCacheManager::updateCaches(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
     {
       updateAnimationTime(currentTime, isTimeRelative);
       updateTransformNodes();
@@ -164,7 +164,7 @@ namespace he
       m_dirtyTransforms.clear();
     }
 
-    void SceneCacheManager::updateLODNodes(util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::updateLODNodes(const util::Vector<float, 3>& cameraPosition)
     {
       for(std::list<LODNode*>::iterator lit = m_activeLODs.begin(); lit != m_activeLODs.end(); lit++)
       {

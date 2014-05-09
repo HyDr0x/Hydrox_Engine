@@ -18,7 +18,7 @@ namespace he
     {
     }
 
-    void RenderManager::setClearColor(he::util::Vector<float, 4> color)
+    void RenderManager::setClearColor(he::util::Vector<float, 4> color) const
     {
 	    glClearColor(color[0], color[1], color[2], color[3]);
     }
@@ -30,12 +30,12 @@ namespace he
       glViewport(0, 0, width, height);
     }
 
-    void RenderManager::setBackfaceCulling(GLenum cullingMode)
+    void RenderManager::setBackfaceCulling(GLenum cullingMode) const
     {
       glFrontFace(cullingMode);
     }
 
-    void RenderManager::setWireframe(bool wireFrame)
+    void RenderManager::setWireframe(bool wireFrame) const
     {
       if(wireFrame)
       {
@@ -76,7 +76,7 @@ namespace he
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
+    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
@@ -99,92 +99,92 @@ namespace he
       m_spriteRenderer.render();
       m_stringRenderer.render();
 
-      m_cameraParameterUBO.unBindBuffer();
+      m_cameraParameterUBO.unBindBuffer(0);
     }
 
-    void RenderManager::addRenderComponent(Sprite *sprite)
+    void RenderManager::addRenderComponent(const Sprite *sprite)
     {
       m_spriteRenderer.addRenderComponent(sprite);
     }
 
-    void RenderManager::addRenderComponent(StringTexture2D *string)
+    void RenderManager::addRenderComponent(const StringTexture2D *string)
     {
       m_stringRenderer.addRenderComponent(string);
     }
 
-    void RenderManager::addRenderComponent(xBar::BillboardContainer& billboard)
+    void RenderManager::addRenderComponent(const xBar::BillboardContainer& billboard)
     {
       m_billboardRenderer.addRenderComponent(billboard);
     }
 
-    void RenderManager::addRenderComponent(xBar::StaticGeometryContainer& staticGeometry)
+    void RenderManager::addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry)
     {
       m_geometryRasterizer.addRenderComponent(staticGeometry);
     }
 
-    void RenderManager::addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry)
+    void RenderManager::addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry)
     {
       m_geometryRasterizer.addRenderComponent(skinnedGeometry);
     }
 
-    void RenderManager::addRenderComponent(xBar::LightContainer& light)
+    void RenderManager::addRenderComponent(const xBar::LightContainer& light)
     {
       m_renderLight.push_back(light);
     }
 
-    void RenderManager::addRenderComponent(xBar::ParticleContainer& particle)
+    void RenderManager::addRenderComponent(const xBar::ParticleContainer& particle)
     {
       m_renderParticle.push_back(particle);
     }
 
-    void RenderManager::removeRenderComponent(Sprite *sprite)
+    void RenderManager::removeRenderComponent(const Sprite *sprite)
     {
       m_spriteRenderer.removeRenderComponent(sprite);
     }
 
-    void RenderManager::removeRenderComponent(StringTexture2D *string)
+    void RenderManager::removeRenderComponent(const StringTexture2D *string)
     {
       m_stringRenderer.removeRenderComponent(string);
     }
 
-    void RenderManager::removeRenderComponent(xBar::BillboardContainer& billboard)
+    void RenderManager::removeRenderComponent(const xBar::BillboardContainer& billboard)
     {
       m_billboardRenderer.removeRenderComponent(billboard);
     }
 
-    void RenderManager::removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry)
+    void RenderManager::removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry)
     {
       m_geometryRasterizer.removeRenderComponent(staticGeometry);
     }
 
-    void RenderManager::removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry)
+    void RenderManager::removeRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry)
     {
       m_geometryRasterizer.removeRenderComponent(skinnedGeometry);
     }
 
-    void RenderManager::removeRenderComponent(xBar::LightContainer& light)
+    void RenderManager::removeRenderComponent(const xBar::LightContainer& light)
     {
       m_renderLight.remove(light);
     }
 
-    void RenderManager::removeRenderComponent(xBar::ParticleContainer& particle)
+    void RenderManager::removeRenderComponent(const xBar::ParticleContainer& particle)
     {
       m_renderParticle.remove(particle);
     }
 
     void RenderManager::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::LightContainer& light), void (RenderManager::*)(xBar::LightContainer& light)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
+      eventManager->addNewSignal<void (*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::LightContainer& light), void (RenderManager::*)(const xBar::LightContainer& light)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
 
-      eventManager->addNewSignal<void (*)(xBar::ParticleContainer& particle)>(util::EventManager::OnAddParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::ParticleContainer& particle), void (RenderManager::*)(xBar::ParticleContainer& particle)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
+      eventManager->addNewSignal<void (*)(const xBar::ParticleContainer& particle)>(util::EventManager::OnAddParticleTransmitterNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::ParticleContainer& particle), void (RenderManager::*)(const xBar::ParticleContainer& particle)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
 
-      eventManager->addNewSignal<void (*)(xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::LightContainer& light), void (RenderManager::*)(xBar::LightContainer& light)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
+      eventManager->addNewSignal<void (*)(const xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::LightContainer& light), void (RenderManager::*)(const xBar::LightContainer& light)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
 
-      eventManager->addNewSignal<void (*)(xBar::ParticleContainer& particle)>(util::EventManager::OnRemoveParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(xBar::ParticleContainer& particle), void (RenderManager::*)(xBar::ParticleContainer& particle)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
+      eventManager->addNewSignal<void (*)(const xBar::ParticleContainer& particle)>(util::EventManager::OnRemoveParticleTransmitterNode);
+      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::ParticleContainer& particle), void (RenderManager::*)(const xBar::ParticleContainer& particle)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
     }
 	}
 }

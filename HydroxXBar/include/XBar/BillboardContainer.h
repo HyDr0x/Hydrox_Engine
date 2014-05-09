@@ -17,23 +17,23 @@ namespace he
     public:
 
       BillboardContainer(util::Vector<float, 3>& translation, 
-                        util::Vector<float, 2>& scale, 
-                        util::Vector<unsigned int, 2>& animNumber, 
-                        util::Vector<unsigned int, 2>& animCount, 
-                        util::Vector<float, 2>& texStart, 
-                        util::Vector<float, 2>& texEnd, 
-                        util::ResourceHandle textureHandle);
+                         util::Vector<float, 2>& scale, 
+                         util::Vector<unsigned int, 2>& animNumber, 
+                         util::Vector<unsigned int, 2>& animCount, 
+                         util::Vector<float, 2>& texStart, 
+                         util::Vector<float, 2>& texEnd, 
+                         util::ResourceHandle textureHandle);
 
       ~BillboardContainer();
 
-      bool operator == (const BillboardContainer& o);
+      bool operator == (const BillboardContainer& o) const;
 
       util::ResourceHandle getTextureHandle() const;
 
-      util::Vector<float, 3> getPosition();
-	    util::Vector<float, 2> getScale();
+      util::Vector<float, 3> getPosition() const;
+	    util::Vector<float, 2> getScale() const;
 
-      util::Matrix<float, 3> getTexTransformationMatrix();
+      util::Matrix<float, 3> getTexTransformationMatrix() const;
 
     private:
 

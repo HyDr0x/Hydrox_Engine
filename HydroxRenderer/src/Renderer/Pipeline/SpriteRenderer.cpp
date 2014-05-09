@@ -43,7 +43,7 @@ namespace he
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void SpriteRenderer::render()
+    void SpriteRenderer::render() const
     {
       glEnableVertexAttribArray(RenderShader::SPECIAL0);
 
@@ -51,13 +51,13 @@ namespace he
 
       glClear(GL_DEPTH_BUFFER_BIT);
 
-      Sprite *renderSprite;
+      const Sprite *renderSprite;
       Texture2D *renderTexture;
       RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
 
 	    spriteShader->useShader();
 
-	    for(std::list<Sprite*>::iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
+	    for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
       {
         renderSprite = (*spriteIDIterator);
         if(renderSprite->getRenderable())
@@ -79,25 +79,6 @@ namespace he
 
       ////////////////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
 
-      for(unsigned int i = 0; i < m_transparentSprites.size(); i++)//resort all sprites according to their layer if their layer has been changed
-      {
-        for(std::list<Sprite*>::iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
-        {
-          renderSprite = (*spriteIDIterator);
-          if(renderSprite->getLayerChanged())
-          {
-            m_transparentSprites[renderSprite->getLayer()].push_back(*spriteIDIterator);
-            renderSprite->spriteSorted();
-            spriteIDIterator = m_transparentSprites[i].erase(spriteIDIterator);
-
-            if(spriteIDIterator == m_transparentSprites[i].end())
-            {
-              break;
-            }
-          }
-        }
-      }
-
       glDepthMask(GL_FALSE);
 
       glEnable(GL_BLEND);
@@ -105,7 +86,7 @@ namespace he
 
       for(unsigned int i = 0; i < m_transparentSprites.size(); i++)
       {
-        for(std::list<Sprite*>::iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
+        for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
         {
           renderSprite = (*spriteIDIterator);
           if(renderSprite->getRenderable())
@@ -117,9 +98,9 @@ namespace he
 		        util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
 		        util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
             float z = renderSprite->getLayer() / (float)m_maxLayer;
-		        spriteShader->setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		        spriteShader->setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-            spriteShader->setUniform(2, GL_FLOAT, &z);
+		        RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+		        RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            RenderShader::setUniform(2, GL_FLOAT, &z);
 
 		        glDrawArrays(GL_POINTS, 0, 1);
           }
@@ -135,7 +116,7 @@ namespace he
       glDepthMask(GL_TRUE);
     }
 
-    void SpriteRenderer::addRenderComponent(Sprite* sprite)
+    void SpriteRenderer::addRenderComponent(const Sprite* sprite)
     {
       if(sprite->getTransparency())
       {
@@ -147,7 +128,7 @@ namespace he
       }
     }
 
-    void SpriteRenderer::removeRenderComponent(Sprite* sprite)
+    void SpriteRenderer::removeRenderComponent(const Sprite* sprite)
     {
       if(sprite->getTransparency())
       {
@@ -161,11 +142,11 @@ namespace he
 
     void SpriteRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(Sprite* sprite)>(util::EventManager::OnAddSprite);
-      eventManager->addSlotToSignal<SpriteRenderer, void (*)(Sprite* sprite), void (SpriteRenderer::*)(Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);
+      eventManager->addNewSignal<void (*)(const Sprite* sprite)>(util::EventManager::OnAddSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const Sprite* sprite), void (SpriteRenderer::*)(const Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);
 
-      eventManager->addNewSignal<void (*)(Sprite* sprite)>(util::EventManager::OnRemoveSprite);
-      eventManager->addSlotToSignal<SpriteRenderer, void (*)(Sprite* sprite), void (SpriteRenderer::*)(Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
+      eventManager->addNewSignal<void (*)(const Sprite* sprite)>(util::EventManager::OnRemoveSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const Sprite* sprite), void (SpriteRenderer::*)(const Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
     }
 	}
 }

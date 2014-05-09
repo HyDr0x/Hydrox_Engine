@@ -48,7 +48,7 @@ namespace he
       return m_rootNode;
     }
 
-    TreeNode* Scene::searchNode(const std::string& nodeName)
+    TreeNode* Scene::searchNode(const std::string& nodeName) const
     {
       NodeSearchTraverser traverser(nodeName);
 
@@ -57,7 +57,7 @@ namespace he
       return traverser.getDiscoveredNode();
     }
 
-    TreeNode* Scene::searchNode(const std::string& nodeName, TreeNode *searchRootNode)
+    TreeNode* Scene::searchNode(const std::string& nodeName, TreeNode *searchRootNode) const
     {
       NodeSearchTraverser traverser(nodeName);
 
@@ -66,7 +66,7 @@ namespace he
       return traverser.getDiscoveredNode(); 
     }
 
-    GroupNode* Scene::addParentNode(TreeNode *destinationNode, GroupNode *sourceNode)
+    GroupNode* Scene::addParentNode(TreeNode *destinationNode, const GroupNode *sourceNode)
     {
       GroupNode *oldParent = destinationNode->getParent();
       GroupNode *newParent = sourceNode->clone();
@@ -103,7 +103,7 @@ namespace he
       return newParent;
     }
 
-    TreeNode* Scene::addChildNode(GroupNode *destinationNode, TreeNode *sourceNode)
+    TreeNode* Scene::addChildNode(GroupNode *destinationNode, const TreeNode *sourceNode)
     {
       TreeNode* oldFirstChild = destinationNode->getFirstChild();
       TreeNode* newFirstChild = sourceNode->clone();
@@ -115,7 +115,7 @@ namespace he
       return newFirstChild;
     }
 
-    void Scene::removeNode(TreeNode *node)
+    void Scene::removeNode(const TreeNode *node)
     {
       TreeNode *sibling = node->getNextSibling();
       GroupNode *parent = node->getParent();
@@ -177,7 +177,7 @@ namespace he
       delete node;
     }
 
-    GroupNode* Scene::addSubTree(Scene& subTree, GroupNode* parentNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix)
+    GroupNode* Scene::addSubTree(Scene& subTree, GroupNode* parentNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
     {
       CopyTraverser traverser(namePrefix);
       traverser.doTraverse(subTree.getRootNode());

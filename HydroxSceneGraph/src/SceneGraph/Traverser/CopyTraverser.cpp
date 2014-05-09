@@ -135,7 +135,7 @@ namespace he
       ascendingTreeNode(treeNode);
     }
 
-    GroupNode* CopyTraverser::getCopiedRootNode()
+    GroupNode* CopyTraverser::getCopiedRootNode() const
     {
       return m_rootNode;
     }

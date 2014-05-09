@@ -21,30 +21,31 @@ namespace he
     public:
 
       Texture3D() {}
+	    Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = nullptr, bool mipmapping = true);
       Texture3D(const Texture3D&);
 
-	    Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
-      Texture3D& operator=(const Texture3D& o);
 	    ~Texture3D();
+
+      Texture3D& operator=(const Texture3D& o);
 
       void free();
 
 	    void setTexture(GLint location, GLuint slot);
-	    void unsetTexture();
+	    void unsetTexture() const;
 
-      void activateMipMapping(bool mipmapping);
+      void generateMipMapps() const;
 
-      void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter);
+      void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter) const;
 
-	    util::Vector<unsigned int, 3> getResolution();
-	    GLenum getTarget();
-      GLenum getInternalFormat();
-      GLenum getFormat();
-      GLenum getType();
+	    util::Vector<unsigned int, 3> getResolution() const;
+	    GLenum getTarget() const;
+      GLenum getInternalFormat() const;
+      GLenum getFormat() const;
+      GLenum getType() const;
 
-      unsigned int getTextureSize();
+      unsigned int getTextureSize() const;
 
-      void getTextureData(GLvoid* data);
+      void getTextureData(GLvoid* data) const;
 
 	    friend class Renderquad;
 

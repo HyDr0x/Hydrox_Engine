@@ -1,7 +1,6 @@
 add_subdirectory(DebugLog)
 add_subdirectory(Miscellaneous)
 add_subdirectory(PrimitiveGenerator)
-add_subdirectory(Signals)
 add_subdirectory(Timer)
 
 set(

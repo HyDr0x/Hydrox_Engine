@@ -20,7 +20,7 @@ namespace he
     {
     }
 
-    void StaticGeometryDecorator::frustumCulling()
+    void StaticGeometryDecorator::frustumCulling() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -29,7 +29,7 @@ namespace he
       m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    void StaticGeometryDecorator::rasterizeGeometry()
+    void StaticGeometryDecorator::rasterizeGeometry() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -50,7 +50,7 @@ namespace he
       m_matrixBuffer.setMemoryFence();
 
       unsigned int instanceIndex = 0;
-      for(std::list<xBar::StaticGeometryContainer*>::iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
+      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
       {
         m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &(*geometryIterator)->getTransformationMatrix()[0][0]);
       }

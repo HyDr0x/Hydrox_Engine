@@ -24,6 +24,10 @@ namespace he
       m_currentRotationKey = 0;
     }
 
+    AnimatedTransformNode::~AnimatedTransformNode()
+    {
+    }
+
     AnimatedTransformNode& AnimatedTransformNode::operator=(const AnimatedTransformNode& sourceNode)
     {
       TransformNode::operator=(sourceNode);
@@ -56,10 +60,6 @@ namespace he
       AnimatedTransformNode::operator=(copyNode);
 
       return *this;
-    }
-
-    AnimatedTransformNode::~AnimatedTransformNode()
-    {
     }
 
     GroupNode* AnimatedTransformNode::clone() const
@@ -105,7 +105,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool AnimatedTransformNode::isAnimatedTransformNode()
+    bool AnimatedTransformNode::isAnimatedTransformNode() const
     {
       return true;
     }
@@ -115,7 +115,7 @@ namespace he
       m_boneIndex = boneIndex;
     }
 
-    unsigned int AnimatedTransformNode::getBoneIndex()
+    unsigned int AnimatedTransformNode::getBoneIndex() const
     {
       return m_boneIndex;
     }
@@ -125,7 +125,7 @@ namespace he
       m_animatedMesh = animatedMesh;
     }
 
-    AnimatedGeoNode* AnimatedTransformNode::getSkinnedMesh()
+    AnimatedGeoNode* AnimatedTransformNode::getSkinnedMesh() const
     {
       return m_animatedMesh;
     }
@@ -143,7 +143,7 @@ namespace he
       m_currentScaleKey = 0;
     }
 
-    unsigned int AnimatedTransformNode::getCurrentAnimationTrack()
+    unsigned int AnimatedTransformNode::getCurrentAnimationTrack() const
     {
       return m_currentTrack;
     }
@@ -173,7 +173,7 @@ namespace he
       m_pauseAnimation = pauseAnimation;
     }
 
-    bool AnimatedTransformNode::getPauseAnimation()
+    bool AnimatedTransformNode::getPauseAnimation() const
     {
       return m_pauseAnimation;
     }
@@ -229,17 +229,17 @@ namespace he
       return traverser.getGlobalScale() * m_animatedScale * m_scale;
     }
 
-    util::Vector<float, 3> AnimatedTransformNode::getLocalPosition()
+    util::Vector<float, 3> AnimatedTransformNode::getLocalPosition() const
     {
       return m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale);
     }
 
-    util::Quaternion<float> AnimatedTransformNode::getLocalRotation()
+    util::Quaternion<float> AnimatedTransformNode::getLocalRotation() const
     {
       return m_animatedRotation * m_rotation;
     }
 
-    float AnimatedTransformNode::getLocalScale()
+    float AnimatedTransformNode::getLocalScale() const
     {
       return m_animatedScale * m_scale;
     }

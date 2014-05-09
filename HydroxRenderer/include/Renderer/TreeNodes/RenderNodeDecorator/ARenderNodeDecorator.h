@@ -35,26 +35,26 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer);
 
-      virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer);
 
-      virtual std::list<xBar::StaticGeometryContainer*>& getInstances();
+      virtual const std::list<const xBar::StaticGeometryContainer*>& getInstances() const;
 
-      virtual unsigned int getInstanceNumber();
+      virtual unsigned int getInstanceNumber() const;
 
-      virtual bool hasInstanceNumberChanged();
+      virtual bool hasInstanceNumberChanged() const;
 
-      virtual void frustumCulling();
+      virtual void frustumCulling() const;
 
-      virtual void rasterizeGeometry();
+      virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();
 
-      unsigned int getMaxGeometry();
-      unsigned int getMaxMaterials();
-      unsigned int getMaxBones();
+      unsigned int getMaxGeometry() const;
+      unsigned int getMaxMaterials() const;
+      unsigned int getMaxBones() const;
 
     protected:
 

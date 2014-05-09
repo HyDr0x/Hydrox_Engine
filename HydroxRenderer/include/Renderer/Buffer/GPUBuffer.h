@@ -20,21 +20,24 @@ namespace he
       void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const void *data);
 
       void resizeBuffer(GLuint size, const void *data);
-      bool isEnoughSpace(GLuint size);
+      bool isEnoughSpace(GLuint size) const;
 
-      void setData(GLuint offset, GLuint size, const void *data);
-      void getData(GLuint offset, GLuint size, void *data);
+      void setData(GLuint offset, GLuint size, const void *data) const;
+      void getData(GLuint offset, GLuint size, void *data) const;
 
-      void bindBuffer(GLenum target);
-      void unbindBuffer(GLenum target);
+      void bindBuffer(GLenum target) const;
+      void unbindBuffer(GLenum target) const;
 
-      void bindBuffer(GLenum target, GLuint bufferBindingPoint);
-      void unbindBuffer(GLenum target, GLuint bufferBindingPoint);
+      void bindBuffer(GLenum target, GLuint bufferBindingPoint) const;
+      void unbindBuffer(GLenum target, GLuint bufferBindingPoint) const;
 
-      void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride);
-      void unbindVertexBuffer(GLuint bufferBindingPoint);
+      void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const;
+      void unbindVertexBuffer(GLuint bufferBindingPoint) const;
 
     private:
+
+      GPUBuffer(const GPUBuffer&);
+	    GPUBuffer& operator=(const GPUBuffer&);
 
       GLuint m_bufferIndex;
       

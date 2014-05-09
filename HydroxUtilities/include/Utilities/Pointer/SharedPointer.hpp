@@ -26,7 +26,17 @@ namespace he
         }
 	    }
 
-	    SharedPointer& operator=(const SharedPointer<T>& o)
+	    ~SharedPointer()
+	    {
+		    if(m_referenceNumber != nullptr && --(*m_referenceNumber) == 0)
+		    {
+			    delete m_obj;
+			    delete m_referenceNumber;
+          m_referenceNumber = nullptr;
+		    }
+	    }
+
+      SharedPointer& operator=(const SharedPointer<T>& o)
 	    {
 		    if(o.m_obj == m_obj) 
         {
@@ -50,22 +60,12 @@ namespace he
 		    return *this;
 	    }
 
-	    ~SharedPointer()
-	    {
-		    if(m_referenceNumber != nullptr && --(*m_referenceNumber) == 0)
-		    {
-			    delete m_obj;
-			    delete m_referenceNumber;
-          m_referenceNumber = nullptr;
-		    }
-	    }
-
-      bool operator==(const SharedPointer& o)
+      bool operator==(const SharedPointer& o) const
       {
         return reinterpret_cast<unsigned int>(m_obj) == reinterpret_cast<unsigned int>(o.m_obj);
       }
 
-      template<typename F> SharedPointer<F> cast()
+      template<typename F> SharedPointer<F> cast() const
       {
         SharedPointer<F> ptr = SharedPointer<F>(dynamic_cast<F>(m_obj));
         ptr.m_referenceNumber = m_referenceNumber;
@@ -73,7 +73,7 @@ namespace he
         return ptr;
       }
 
-      bool isNullptr()
+      bool isNullptr() const
       {
         return m_obj == nullptr;
       }

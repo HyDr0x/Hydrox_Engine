@@ -45,7 +45,7 @@ namespace he
       glBindVertexArray(0);
     }
 
-    void StringRenderer2D::render()
+    void StringRenderer2D::render() const
     {
       glBindVertexArray(m_stringVAO);
 
@@ -54,13 +54,13 @@ namespace he
       glEnable(GL_ALPHA_TEST);
       glAlphaFunc(GL_GREATER, 0.0f);
 
-      StringTexture2D *renderString;
+      const StringTexture2D *renderString;
       Texture2D *renderTexture;
       RenderShader *stringShader = m_renderShaderManager->getObject(m_stringShaderHandle);
 
       stringShader->useShader();
 
-      for (std::list<StringTexture2D*>::iterator stringIDIterator = m_opaqueStrings.begin(); stringIDIterator != m_opaqueStrings.end(); stringIDIterator++)
+      for (std::list<const StringTexture2D*>::const_iterator stringIDIterator = m_opaqueStrings.begin(); stringIDIterator != m_opaqueStrings.end(); stringIDIterator++)
       {
         renderString = (*stringIDIterator);
         if (renderString->getRenderable())
@@ -79,25 +79,6 @@ namespace he
 
       ////////////////////////////////////////////RENDER TRANSPARENT 2D StringTextures////////////////////////////////////////////
 
-      for(unsigned int i = 0; i < m_transparentStrings.size(); i++)//resort all StringTextures according to their layer if their layer has been changed
-      {
-        for (std::list<StringTexture2D*>::iterator stringIDIterator = m_transparentStrings[i].begin(); stringIDIterator != m_transparentStrings[i].end(); stringIDIterator++)
-        {
-          renderString = (*stringIDIterator);
-          if (renderString->getLayerChanged())
-          {
-            m_transparentStrings[renderString->getLayer()].push_back(renderString);
-            renderString->stringSorted();
-            stringIDIterator = m_transparentStrings[i].erase(stringIDIterator);
-
-            if (stringIDIterator == m_transparentStrings[i].end())
-            {
-              break;
-            }
-          }
-        }
-      }
-
       glDepthMask(GL_FALSE);
 
       glEnable(GL_BLEND);
@@ -105,7 +86,7 @@ namespace he
 
       for(unsigned int i = 0; i < m_transparentStrings.size(); i++)
       {
-        for (std::list<StringTexture2D*>::iterator stringIDIterator = m_transparentStrings[i].begin(); stringIDIterator != m_transparentStrings[i].end(); stringIDIterator++)
+        for (std::list<const StringTexture2D*>::const_iterator stringIDIterator = m_transparentStrings[i].begin(); stringIDIterator != m_transparentStrings[i].end(); stringIDIterator++)
         {
           renderString = (*stringIDIterator);
           if (renderString->getRenderable())
@@ -133,7 +114,7 @@ namespace he
       glDepthMask(GL_TRUE);
     }
 
-    void StringRenderer2D::addRenderComponent(StringTexture2D* StringTexture2D)
+    void StringRenderer2D::addRenderComponent(const StringTexture2D* StringTexture2D)
     {
       if(StringTexture2D->getTransparency())
       {
@@ -145,7 +126,7 @@ namespace he
       }
     }
 
-    void StringRenderer2D::removeRenderComponent(StringTexture2D* StringTexture2D)
+    void StringRenderer2D::removeRenderComponent(const StringTexture2D* StringTexture2D)
     {
       if(StringTexture2D->getTransparency())
       {
@@ -159,11 +140,11 @@ namespace he
 
     void StringRenderer2D::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(StringTexture2D* StringTexture2D)>(util::EventManager::OnAddStringTexture2D);
-      eventManager->addSlotToSignal<StringRenderer2D, void (*)(StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::addRenderComponent, util::EventManager::OnAddStringTexture2D);
+      eventManager->addNewSignal<void (*)(const StringTexture2D* StringTexture2D)>(util::EventManager::OnAddStringTexture2D);
+      eventManager->addSlotToSignal<StringRenderer2D, void (*)(const StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(const StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::addRenderComponent, util::EventManager::OnAddStringTexture2D);
 
-      eventManager->addNewSignal<void (*)(StringTexture2D* StringTexture2D)>(util::EventManager::OnRemoveStringTexture2D);
-      eventManager->addSlotToSignal<StringRenderer2D, void (*)(StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::removeRenderComponent, util::EventManager::OnRemoveStringTexture2D);
+      eventManager->addNewSignal<void (*)(const StringTexture2D* StringTexture2D)>(util::EventManager::OnRemoveStringTexture2D);
+      eventManager->addSlotToSignal<StringRenderer2D, void (*)(const StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(const StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::removeRenderComponent, util::EventManager::OnRemoveStringTexture2D);
     }
 	}
 }

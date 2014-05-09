@@ -24,14 +24,14 @@ namespace he
     {
     public:
 
-      InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& soptions, util::SingletonManager *singletonManager);
+      InsertSkinnedGeometryTraverser(const xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& soptions, util::SingletonManager *singletonManager);
       virtual ~InsertSkinnedGeometryTraverser();
 
       virtual bool preTraverse(IRenderNode* treeNode);
 
     private:
 
-      xBar::SkinnedGeometryContainer& m_geometryContainer;
+      const xBar::SkinnedGeometryContainer& m_geometryContainer;
     };
 	}
 }

@@ -6,20 +6,20 @@ namespace he
 {
 	namespace renderer
 	{
-    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd) : m_eventManager(eventManager),
-                                                                                                                                                                                                                                         m_textureHandle(textureHandle), 
-                                                                                                                                                                                                                                         m_renderable(renderable), 
-                                                                                                                                                                                                                                         m_transparency(transparency),
-                                                                                                                                                                                                                                         m_animNumber(animNumber), 
-                                                                                                                                                                                                                                         m_animCount(util::Vector<unsigned int, 2>(0, 0)),
-                                                                                                                                                                                                                                         m_texStart(texStart),
-                                                                                                                                                                                                                                         m_texEnd(texEnd),
-                                                                                                                                                                                                                                         m_angle(0.0f),
-                                                                                                                                                                                                                                         m_rtMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                                                                                                         m_tlMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                                                                                                         m_scMatrix(util::Matrix<float, 3>::identity()),
-                                                                                                                                                                                                                                         m_layer(0),
-                                                                                                                                                                                                                                         m_layerChanged(false)
+    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd) : 
+      m_eventManager(eventManager),
+      m_textureHandle(textureHandle), 
+      m_renderable(renderable), 
+      m_transparency(transparency),
+      m_animNumber(animNumber), 
+      m_animCount(util::Vector<unsigned int, 2>(0, 0)),
+      m_texStart(texStart),
+      m_texEnd(texEnd),
+      m_angle(0.0f),
+      m_rtMatrix(util::Matrix<float, 3>::identity()),
+      m_tlMatrix(util::Matrix<float, 3>::identity()),
+      m_scMatrix(util::Matrix<float, 3>::identity()),
+      m_layer(0)
     {
     }
 
@@ -47,7 +47,10 @@ namespace he
       m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
-      m_layerChanged = o.m_layerChanged;
+    }
+
+    Sprite::~Sprite()
+    {
     }
 
     Sprite& Sprite::operator=(const Sprite& o)
@@ -74,24 +77,19 @@ namespace he
       m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
-      m_layerChanged = o.m_layerChanged;
 
       return *this;
-    }
-
-    Sprite::~Sprite()
-    {
     }
 
     void Sprite::setRenderable(bool renderable)
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+        m_eventManager->raiseSignal<void (*)(const Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+        m_eventManager->raiseSignal<void (*)(const Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
       }
 
       m_renderable = renderable;
@@ -106,13 +104,13 @@ namespace he
     {
       if (m_renderable)
       {
-        if ((!m_transparency && transparency) || (m_transparency && !transparency))
+        if (m_transparency != transparency)
         {
-          m_eventManager->raiseSignal<void(*)(Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+          m_eventManager->raiseSignal<void(*)(const Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
 
           m_transparency = transparency;
 
-          m_eventManager->raiseSignal<void(*)(Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+          m_eventManager->raiseSignal<void(*)(const Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
         }
       }
       else
@@ -131,23 +129,23 @@ namespace he
 	    m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
-    void Sprite::setAnimation(util::Vector<unsigned int, 2> number)
+    void Sprite::setAnimation(const util::Vector<unsigned int, 2>& number)
     {
 	    m_animCount = number;
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
 
-    util::Vector<unsigned int, 2> Sprite::getAnimationNumber()
+    util::Vector<unsigned int, 2> Sprite::getAnimationNumber() const
     {
 	    return m_animNumber;
     }
 
-    util::Vector<unsigned int, 2> Sprite::getAnimationCount()
+    util::Vector<unsigned int, 2> Sprite::getAnimationCount() const
     {
 	    return m_animCount;
     }
 
-    void Sprite::setTranslation(util::Vector<float, 2> v)
+    void Sprite::setTranslation(const util::Vector<float, 2>& v)
     {
 	    m_tlMatrix[2][0] = v[0];
 	    m_tlMatrix[2][1] = v[1];
@@ -159,7 +157,7 @@ namespace he
 	    m_tlMatrix[2][1] = y;
     }
 
-    void Sprite::addTranslation(util::Vector<float, 2> v)
+    void Sprite::addTranslation(const util::Vector<float, 2>& v)
     {
 	    m_tlMatrix[2][0] += v[0];
 	    m_tlMatrix[2][1] += v[1];
@@ -183,7 +181,7 @@ namespace he
 	    m_scMatrix[1][1] += s;
     }
 
-    void Sprite::setScale(util::Vector<float, 2> s)
+    void Sprite::setScale(const util::Vector<float, 2>& s)
     {
 	    m_scMatrix[0][0] = s[0];
 	    m_scMatrix[1][1] = s[1];
@@ -195,7 +193,7 @@ namespace he
 	    m_scMatrix[1][1] = sy;
     }
 
-    void Sprite::addScale(util::Vector<float, 2> s)
+    void Sprite::addScale(const util::Vector<float, 2>& s)
     {
 	    m_scMatrix[0][0] += s[0];
 	    m_scMatrix[1][1] += s[1];
@@ -223,48 +221,51 @@ namespace he
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
     }
 
-    util::Vector<float, 2> Sprite::getPosition()
+    util::Vector<float, 2> Sprite::getPosition() const
     {
       return util::Vector<float, 2>(m_tlMatrix[2][0], m_tlMatrix[2][1]);
     }
 
-    float Sprite::getRotation()
+    float Sprite::getRotation() const
     {
       return m_angle;
     }
 
-    util::Vector<float, 2> Sprite::getScale()
+    util::Vector<float, 2> Sprite::getScale() const
     {
       return util::Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
     }
 
     void Sprite::setLayer(unsigned char layer)
     {
-      m_layer = layer;
-      m_layerChanged = true;
+      if(m_renderable && m_transparency)
+      {
+        if(m_layer != layer)
+        {
+          m_eventManager->raiseSignal<void(*)(const Sprite *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+
+          m_layer = layer;
+
+          m_eventManager->raiseSignal<void(*)(const Sprite *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+        }
+      }
+      else
+      {
+        m_layer = layer;
+      }
     }
 
-    unsigned char Sprite::getLayer()
+    unsigned char Sprite::getLayer() const
     {
       return m_layer;
     }
 
-    void Sprite::spriteSorted()
-    {
-      m_layerChanged = false;
-    }
-
-    bool Sprite::getLayerChanged()
-    {
-      return m_layerChanged;
-    }
-
-    util::Matrix<float,3> Sprite::getTransformationMatrix()
+    util::Matrix<float,3> Sprite::getTransformationMatrix() const
     {
 	    return m_tlMatrix * m_rtMatrix * m_scMatrix;
     }
 
-    util::Matrix<float,3> Sprite::getTexTransformationMatrix()
+    util::Matrix<float,3> Sprite::getTexTransformationMatrix() const
     {
 	    float width  = m_texEnd[0] - m_texStart[0];
 	    float height = m_texEnd[1] - m_texStart[1];

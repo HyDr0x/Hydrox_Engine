@@ -37,7 +37,7 @@ namespace he
       return shaderHandle;
     }
 
-    util::ResourceHandle ComputeShaderLoader::getDefaultResource()
+    util::ResourceHandle ComputeShaderLoader::getDefaultResource() const
     {
       std::string computeSource = "#version 430 core\n\
                                   \n\

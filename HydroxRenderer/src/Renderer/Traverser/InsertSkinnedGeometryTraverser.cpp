@@ -16,7 +16,7 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertSkinnedGeometryTraverser::InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) : 
+    InsertSkinnedGeometryTraverser::InsertSkinnedGeometryTraverser(const xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) : 
       InsertGeometryTraverser(options, singletonManager),
       m_geometryContainer(geometryContainer)
     {

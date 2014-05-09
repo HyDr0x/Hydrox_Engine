@@ -28,13 +28,13 @@ namespace he
     {
     public:
 
-      StringTexture2D(util::EventManager *eventManager, const Font& font, std::string text, float width, float height);
+      StringTexture2D(util::EventManager *eventManager, const Font& font, const std::string& text, float width, float height);
       StringTexture2D(const StringTexture2D& o);
       ~StringTexture2D();
 
       StringTexture2D& operator=(const StringTexture2D& o);
 
-      void editString(std::string text, float width, float height);
+      void editString(const std::string& text, float width, float height);
 
       void setRenderable(bool renderable);
       bool getRenderable() const;
@@ -42,40 +42,37 @@ namespace he
       void setTransparency(bool transparency);
       bool getTransparency() const;
 
-      void stringSorted();
-      bool getLayerChanged();
-
       void setLayer(unsigned char layer);
-      unsigned char getLayer();
+      unsigned char getLayer() const;
 
-      void setTranslation(util::Vector<float, 2> v);
+      void setTranslation(const util::Vector<float, 2>& v);
       void setTranslation(float x, float y);
 
-      void addTranslation(util::Vector<float, 2> v);
+      void addTranslation(const util::Vector<float, 2>& v);
       void addTranslation(float x, float y);
 
       void setScale(float s);
       void addScale(float s);
 
-      void setScale(util::Vector<float, 2> s);
+      void setScale(const util::Vector<float, 2>& s);
       void setScale(float sx, float sy);
-      void addScale(util::Vector<float, 2> s);
+      void addScale(const util::Vector<float, 2>& s);
       void addScale(float sx, float sy);
 
       void setRotation(float angle);
       void addRotation(float angle);
 
-      util::Vector<float, 2> getPosition();
-      float getRotation();
-      util::Vector<float, 2> getScale();
+      util::Vector<float, 2> getPosition() const;
+      float getRotation() const;
+      util::Vector<float, 2> getScale() const;
 
-      util::Matrix<float, 3> getTransformationMatrix();
+      util::Matrix<float, 3> getTransformationMatrix() const;
 
-      const Font& getFont();
+      Font getFont() const;
 
-      std::string getText();
+      std::string getText() const;
 
-      void render();
+      void render() const;
 
     private:
 
@@ -98,7 +95,6 @@ namespace he
       util::Matrix<float, 3> m_tlMatrix;
       util::Matrix<float, 3> m_scMatrix;
 
-      bool m_layerChanged;
       unsigned char m_layer;
       std::string m_text;
     };

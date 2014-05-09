@@ -16,22 +16,22 @@ namespace he
     {
     }
 
-    bool StaticGeometryContainer::operator == (const StaticGeometryContainer& o)
+    bool StaticGeometryContainer::operator == (const StaticGeometryContainer& o) const
     {
       return m_hash == o.m_hash;
     }
 
-    util::ResourceHandle StaticGeometryContainer::getMaterialHandle()
+    util::ResourceHandle StaticGeometryContainer::getMaterialHandle() const
     {
       return m_materialHandle;
     }
 
-    util::ResourceHandle StaticGeometryContainer::getMeshHandle()
+    util::ResourceHandle StaticGeometryContainer::getMeshHandle() const
     {
       return m_meshHandle;
     }
 
-    util::Matrix<float, 4> StaticGeometryContainer::getTransformationMatrix()
+    util::Matrix<float, 4> StaticGeometryContainer::getTransformationMatrix() const
     {
       return *m_trfMatrix;
     }

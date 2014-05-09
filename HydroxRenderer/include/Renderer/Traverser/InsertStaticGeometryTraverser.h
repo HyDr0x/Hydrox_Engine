@@ -24,14 +24,14 @@ namespace he
     {
     public:
 
-      InsertStaticGeometryTraverser(xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
+      InsertStaticGeometryTraverser(const xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
       virtual ~InsertStaticGeometryTraverser();
 
       virtual bool preTraverse(IRenderNode* treeNode);
 
     private:
 
-      xBar::StaticGeometryContainer& m_geometryContainer;
+      const xBar::StaticGeometryContainer& m_geometryContainer;
     };
 	}
 }

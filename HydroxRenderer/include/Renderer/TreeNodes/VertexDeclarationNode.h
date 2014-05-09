@@ -27,9 +27,9 @@ namespace he
 
       void initialize(GLuint vertexDeclaration);
 
-      bool isMesh(GLuint vertexDeclaration);
+      bool isMesh(GLuint vertexDeclaration) const;
 
-      GLuint getVertexDeclaration();
+      GLuint getVertexDeclaration() const;
 
     private:
 

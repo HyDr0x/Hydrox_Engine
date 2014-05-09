@@ -14,7 +14,7 @@ namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, xBar::StaticGeometryContainer& geometryContainer) : 
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::StaticGeometryContainer& geometryContainer) : 
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<ModelManager>();

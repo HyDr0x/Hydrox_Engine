@@ -43,7 +43,7 @@ namespace he
       return shaderHandle;
     }
 
-    util::ResourceHandle RenderShaderLoader::getDefaultResource()
+    util::ResourceHandle RenderShaderLoader::getDefaultResource() const
     {
       std::string vertexSource = "#version 440 core\n\
                                   #extension ARB_shader_draw_parameters : enable\n\

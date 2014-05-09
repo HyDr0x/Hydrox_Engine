@@ -43,7 +43,7 @@ namespace he
         return &m_objectsCache[handle.getID()];
       }
 
-      bool isCached(CLASS& object)
+      bool isCached(CLASS& object) const
       {
         return m_objectHash.count(object.getHash());
       }
@@ -98,7 +98,8 @@ namespace he
 
     private:
 
-	    ResourceManager(const ResourceManager&){}
+	    ResourceManager(const ResourceManager&);
+      ResourceManager& operator=(const ResourceManager&);
 
       static const unsigned int m_BLOCKSIZE = 64;
 

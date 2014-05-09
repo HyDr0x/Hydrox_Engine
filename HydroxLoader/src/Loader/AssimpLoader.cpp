@@ -45,6 +45,10 @@ namespace he
       m_defaultMaterial = o.m_defaultMaterial;
     }
 
+    AssimpLoader::~AssimpLoader()
+    {
+    }
+
     AssimpLoader& AssimpLoader::operator=(const AssimpLoader& o)
     {
       m_modelManager = o.m_modelManager;
@@ -54,10 +58,6 @@ namespace he
       m_defaultMaterial = o.m_defaultMaterial;
 
       return *this;
-    }
-
-    AssimpLoader::~AssimpLoader()
-    {
     }
 
     void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
@@ -80,7 +80,7 @@ namespace he
       }
     }
 
-    AssimpLoader::AnimationTimeUnit AssimpLoader::getAnimationTimeUnit()
+    AssimpLoader::AnimationTimeUnit AssimpLoader::getAnimationTimeUnit() const
     {
       return m_animationTimeUnit;
     }
@@ -123,7 +123,7 @@ namespace he
 	    return scene;
     }
 
-    sg::Scene* AssimpLoader::loadDefaultSceneGraph()
+    sg::Scene* AssimpLoader::loadDefaultSceneGraph() const
     {
       sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube"));
 
@@ -306,7 +306,7 @@ namespace he
         vertexColors));
     }
 
-    sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<util::ResourceHandle>& meshes)
+    sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, const std::vector<util::ResourceHandle>& meshes)
     {
       sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), filename);
       sceneRootNode->setFirstChild(createSceneNodes(scene, scene->mRootNode, meshes, sceneRootNode, nullptr));
@@ -314,7 +314,7 @@ namespace he
       return sceneRootNode;
     }
 
-    sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
     {
       sg::TransformNode *transformNode = nullptr;
 

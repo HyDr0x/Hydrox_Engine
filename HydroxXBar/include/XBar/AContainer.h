@@ -19,7 +19,7 @@ namespace he
       {
       }
 
-      uint64_t getHash()
+      uint64_t getHash() const
       {
         return m_hash;
       }

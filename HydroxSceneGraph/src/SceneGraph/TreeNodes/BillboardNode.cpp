@@ -11,21 +11,26 @@ namespace he
 	namespace sg
 	{
     BillboardNode::BillboardNode(util::EventManager *eventManager,
-                                util::ResourceHandle textureHandle,
-                                util::Vector<unsigned int, 2> animNumber, 
-                                util::Vector<float, 2> texStart, 
-                                util::Vector<float, 2> texEnd, 
-                                const std::string& nodeName, 
-                                GroupNode* parent, 
-                                TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                         m_eventManager(eventManager),
-                                                         m_textureHandle(textureHandle),
-                                                         m_animNumber(animNumber), 
-                                                         m_texStart(texStart), 
-                                                         m_texEnd(texEnd),
-                                                         m_translate(util::Vector<float, 3>::identity()),
-                                                         m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
-                                                         m_renderable(false)
+                                 util::ResourceHandle textureHandle,
+                                 util::Vector<unsigned int, 2> animNumber, 
+                                 util::Vector<float, 2> texStart, 
+                                 util::Vector<float, 2> texEnd, 
+                                 const std::string& nodeName, 
+                                 GroupNode* parent, 
+                                 TreeNode* nextSibling) : 
+    TreeNode(nodeName, parent, nextSibling),
+    m_eventManager(eventManager),
+    m_textureHandle(textureHandle),
+    m_animNumber(animNumber), 
+    m_texStart(texStart), 
+    m_texEnd(texEnd),
+    m_translate(util::Vector<float, 3>::identity()),
+    m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
+    m_renderable(false)
+    {
+    }
+
+    BillboardNode::~BillboardNode()
     {
     }
 
@@ -59,10 +64,6 @@ namespace he
       return *this;
     }
 
-    BillboardNode::~BillboardNode()
-    {
-    }
-
     TreeNode* BillboardNode::clone() const
     {
       BillboardNode *newNode = new BillboardNode(m_eventManager, m_textureHandle, m_animNumber, m_texStart, m_texEnd, m_nodeName);
@@ -88,7 +89,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool BillboardNode::isBillboardNode()
+    bool BillboardNode::isBillboardNode() const
     {
       return true;
     }
@@ -104,18 +105,18 @@ namespace he
       m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
     }
 
-    void BillboardNode::setAnimation(util::Vector<unsigned int, 2> number)
+    void BillboardNode::setAnimation(const util::Vector<unsigned int, 2>& number)
     {
       assert(number[1] < m_animNumber[1] && number[0] < m_animNumber[0]);
       m_animCount = number;
     }
 
-    util::Vector<unsigned int, 2> BillboardNode::getAnimationNumber()
+    util::Vector<unsigned int, 2> BillboardNode::getAnimationNumber() const
     {
       return m_animNumber;
     }
 
-    util::Vector<unsigned int, 2> BillboardNode::getAnimationCount()
+    util::Vector<unsigned int, 2> BillboardNode::getAnimationCount() const
     {
       return m_animCount;
     }
@@ -127,7 +128,7 @@ namespace he
 	    m_translate[2] = z;
     }
 
-    void BillboardNode::setTranslation(util::Vector<float, 3> v)
+    void BillboardNode::setTranslation(const util::Vector<float, 3>& v)
     {
 	    m_translate = v;
     }
@@ -139,7 +140,7 @@ namespace he
 	    m_translate[2] += z;
     }
 
-    void BillboardNode::addTranslation(util::Vector<float, 3> v)
+    void BillboardNode::addTranslation(const util::Vector<float, 3>& v)
     {
 	    m_translate = v;
     }
@@ -156,7 +157,7 @@ namespace he
 	    m_scale[1] += s;
     }
 
-    void BillboardNode::setScale(util::Vector<float, 2> s)
+    void BillboardNode::setScale(const util::Vector<float, 2>& s)
     {
 	    m_scale = s;
     }
@@ -167,7 +168,7 @@ namespace he
 	    m_scale[1] = sy;
     }
 
-    void BillboardNode::addScale(util::Vector<float, 2> s)
+    void BillboardNode::addScale(const util::Vector<float, 2>& s)
     {
 	    m_scale = s;
     }
@@ -178,17 +179,17 @@ namespace he
 	    m_scale[1] += sy;
     }
 
-    util::Vector<float, 3> BillboardNode::getPosition()
+    util::Vector<float, 3> BillboardNode::getPosition() const
     {
 	    return m_translate;
     }
 
-    util::Vector<float, 2> BillboardNode::getScale()
+    util::Vector<float, 2> BillboardNode::getScale() const
     {
 	    return m_scale;
     }
 
-    util::Matrix<float, 3> BillboardNode::getTexTransformationMatrix()
+    util::Matrix<float, 3> BillboardNode::getTexTransformationMatrix() const
     {
 	    float width  = m_texEnd[0] - m_texStart[0];
 	    float height = m_texEnd[1] - m_texStart[1];
@@ -202,11 +203,11 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
       }
 
       m_renderable = renderable;

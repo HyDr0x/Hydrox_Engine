@@ -18,9 +18,9 @@ namespace he
       LightContainer();
       ~LightContainer();
 
-      bool operator == (const LightContainer& o);
+      bool operator == (const LightContainer& o) const;
 
-      util::Matrix<float, 4> getTransformationMatrix();
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 

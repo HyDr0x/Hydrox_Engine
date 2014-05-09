@@ -40,22 +40,22 @@ namespace he
         return static_cast<int_t>(m_flag);
       }
 
-      Flags operator&(const Flags& other)
+      Flags operator&(const Flags& other) const
       {
         return Flags(toInt() & other.toInt);
       }
 
-      Flags operator|(const Flags& other)
+      Flags operator|(const Flags& other) const
       {
         return Flags(toInt() | other.toInt);
       }
 
-      Flags operator^(const Flags& other)
+      Flags operator^(const Flags& other) const
       {
         return Flags(toInt() ^ other.toInt);
       }
 
-      Flags operator~()
+      Flags operator~() const
       {
         return Flags(~toInt());
       }

@@ -50,9 +50,10 @@ namespace he
 
       Material();
       Material(const Material& o);
-      Material(MaterialData& materialData, std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader);
-      Material& operator=(Material o);
+      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader);
 	    ~Material();
+
+      Material& operator=(Material o);
 
       void free();
 
@@ -65,8 +66,8 @@ namespace he
       void setShaderHandle(util::ResourceHandle shaderHandle);
       util::ResourceHandle getShaderHandle() const;
 
-      void setMaterialData(MaterialData& material);
-      MaterialData& getMaterialData();
+      void setMaterialData(const MaterialData& material);
+      const MaterialData& getMaterialData() const;
 
     private:
 

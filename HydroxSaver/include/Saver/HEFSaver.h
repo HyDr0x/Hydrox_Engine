@@ -5,7 +5,7 @@
 
 namespace he
 {
-	namespace util
+	namespace saver
 	{
     class GRAPHICAPI HEFSaver
     {

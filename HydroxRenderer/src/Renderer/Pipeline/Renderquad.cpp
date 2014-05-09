@@ -116,7 +116,7 @@ namespace he
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    void Renderquad::render(bool direct)
+    void Renderquad::render(bool direct) const
     {
 	    if(!direct)
 	    {

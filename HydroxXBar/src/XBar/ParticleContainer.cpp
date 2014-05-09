@@ -13,12 +13,12 @@ namespace he
     {
     }
 
-    bool ParticleContainer::operator == (const ParticleContainer& o)
+    bool ParticleContainer::operator == (const ParticleContainer& o) const
     {
       return m_hash == o.m_hash;
     }
 
-    util::Matrix<float, 4> ParticleContainer::getTransformationMatrix()
+    util::Matrix<float, 4> ParticleContainer::getTransformationMatrix() const
     {
       return *m_trfMatrix;
     }

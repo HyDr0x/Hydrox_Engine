@@ -48,18 +48,18 @@ namespace he
 		    }
 	    }
 
-      void setData(GLuint offset, GLuint size, void *data);//standard layout
-      void getData(GLuint offset, GLuint size, void *data);
+      void setData(GLuint offset, GLuint size, const void *data) const;//standard layout
+      void getData(GLuint offset, GLuint size, void *data) const;
 
 	    void uploadData() const;
 
-	    void bindBuffer(GLuint bindingPoint);
-      void unBindBuffer() const;
+	    void bindBuffer(GLuint bufferBindingPoint) const;
+      void unBindBuffer(GLuint bufferBindingPoint) const;
 
     private:
 
-	    UBO(const UBO&){}
-	    UBO& operator=(const UBO&){ return *this; }
+	    UBO(const UBO&);
+	    UBO& operator=(const UBO&);
 
       std::vector<GLuint> m_uniformIndices; 
       std::vector<GLint> m_uniformOffsets;

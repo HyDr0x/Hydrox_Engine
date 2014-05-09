@@ -42,7 +42,7 @@ namespace he
       virtual bool preTraverse(LightNode* treeNode);
       virtual void postTraverse(LightNode* treeNode);
 
-      GroupNode* getCopiedRootNode();
+      GroupNode* getCopiedRootNode() const;
 
     protected:
 

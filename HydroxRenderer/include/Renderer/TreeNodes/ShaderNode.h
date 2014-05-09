@@ -26,9 +26,9 @@ namespace he
 
       void initialize(util::ResourceHandle shaderHandle);
 
-      bool isShader(util::ResourceHandle shaderHandle);
+      bool isShader(util::ResourceHandle shaderHandle) const;
 
-      util::ResourceHandle getShaderHandle();
+      util::ResourceHandle getShaderHandle() const;
 
     private:
 

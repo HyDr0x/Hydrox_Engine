@@ -29,12 +29,12 @@ namespace he
       m_shaderHandle = shaderHandle;
     }
 
-    bool ShaderNode::isShader(util::ResourceHandle shaderHandle)
+    bool ShaderNode::isShader(util::ResourceHandle shaderHandle) const
     {
       return m_shaderHandle == shaderHandle;
     }
 
-    util::ResourceHandle ShaderNode::getShaderHandle()
+    util::ResourceHandle ShaderNode::getShaderHandle() const
     {
       return m_shaderHandle;
     }

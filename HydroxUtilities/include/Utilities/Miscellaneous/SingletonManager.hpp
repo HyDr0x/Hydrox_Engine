@@ -14,10 +14,10 @@ namespace he
     class SingletonManager
     {
     public:
-	    SingletonManager(){}
-	    ~SingletonManager(){}
 
-	    template<class T> void addService(T* service)
+      SingletonManager(){}
+
+      template<class T> void addService(T* service)
 	    {
 		    m_serviceMap[std::string(typeid(service).name())] = service;
 	    }
@@ -29,8 +29,8 @@ namespace he
 
     private:
 
-	    SingletonManager(const SingletonManager&){}
-	    SingletonManager& operator=(const SingletonManager&){}
+	    SingletonManager(const SingletonManager&);
+	    SingletonManager& operator=(const SingletonManager&);
 
 	    std::map<std::string, SingletonBehaviour*> m_serviceMap;
     };

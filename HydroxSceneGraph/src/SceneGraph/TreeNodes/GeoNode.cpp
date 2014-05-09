@@ -9,7 +9,7 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                                                                                                                           m_eventManager(eventManager),
                                                                                                                                                                                                                           m_meshHandle(meshHandle),
@@ -18,6 +18,10 @@ namespace he
                                                                                                                                                                                                                           m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
+    }
+
+    GeoNode::~GeoNode()
+    {
     }
 
     GeoNode& GeoNode::operator=(const GeoNode& sourceNode)
@@ -44,10 +48,6 @@ namespace he
       return *this;
     }
 
-    GeoNode::~GeoNode()
-    {
-    }
-
     TreeNode* GeoNode::clone() const
     {
       GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_transparency, m_nodeName);
@@ -72,7 +72,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool GeoNode::isGeoNode()
+    bool GeoNode::isGeoNode() const
     {
       return true;
     }
@@ -81,14 +81,14 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_meshHandle = meshHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -101,14 +101,14 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_materialHandle = materialHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -117,25 +117,25 @@ namespace he
       return m_materialHandle;
     }
 
-    util::Matrix<float,4> GeoNode::getTransformationMatrix() const
-    {
-      return m_trfMatrix;
-    }
-
     void GeoNode::setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix)
     {
       m_trfMatrix = trfMatrix;
+    }
+
+    util::Matrix<float,4> GeoNode::getTransformationMatrix() const
+    {
+      return m_trfMatrix;
     }
 
     void GeoNode::setRenderable(bool renderable)
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::StaticGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(&m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_renderable = renderable;

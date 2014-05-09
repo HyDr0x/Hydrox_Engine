@@ -18,9 +18,10 @@ namespace he
       ComputeShader();
       ComputeShader(std::string shaderName, std::string computeShaderSource);
 	    ComputeShader(const ComputeShader& o);
-      ComputeShader& operator=(const ComputeShader& o);
 
 	    ~ComputeShader();
+
+      ComputeShader& operator=(const ComputeShader& o);
 
       static void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ);
       static void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset);

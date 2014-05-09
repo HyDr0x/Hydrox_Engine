@@ -19,13 +19,13 @@ namespace he
       StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
       virtual ~StaticGeometryContainer();
 
-      bool operator == (const StaticGeometryContainer& o);
+      bool operator == (const StaticGeometryContainer& o) const;
 
-      util::ResourceHandle getMaterialHandle();
+      util::ResourceHandle getMaterialHandle() const;
 
-      util::ResourceHandle getMeshHandle();
+      util::ResourceHandle getMeshHandle() const;
 
-      util::Matrix<float, 4> getTransformationMatrix();
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
     protected:
 

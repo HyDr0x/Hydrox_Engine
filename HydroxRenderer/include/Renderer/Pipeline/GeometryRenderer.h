@@ -33,15 +33,18 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
 
-      void rasterizeGeometry();
+      void rasterizeGeometry() const;
 
-      void addRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
-      void addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
+      void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
 
-      void removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
-      void removeRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
+      void removeRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
 
     private:
+
+      GeometryRenderer(const GeometryRenderer&);
+      GeometryRenderer& operator=(const GeometryRenderer&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 

@@ -26,16 +26,16 @@ namespace he
       createProgram(shaderName, computeShader);
     }
 
+    ComputeShader::~ComputeShader()
+    {
+    }
+
     ComputeShader& ComputeShader::operator=(const ComputeShader& o)
     {
       m_hash = o.m_hash;
 	    m_program = o.m_program;
 
       return *this;
-    }
-
-    ComputeShader::~ComputeShader()
-    {
     }
 
     void ComputeShader::dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ)

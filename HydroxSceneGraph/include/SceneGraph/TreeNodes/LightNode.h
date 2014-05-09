@@ -17,9 +17,10 @@ namespace he
     public:
 
       LightNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      virtual ~LightNode();
+
       LightNode& operator=(const LightNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~LightNode();
 
       virtual TreeNode* clone() const;
 
@@ -27,10 +28,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isLightNode();
+      virtual bool isLightNode() const;
 
-      util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 

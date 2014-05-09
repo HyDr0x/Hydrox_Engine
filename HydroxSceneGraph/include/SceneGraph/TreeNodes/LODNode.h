@@ -19,9 +19,10 @@ namespace he
     public:
 
       LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      virtual ~LODNode();
+
       LODNode& operator=(const LODNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~LODNode();
 
       virtual GroupNode* clone() const;
 
@@ -29,12 +30,12 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isLODNode();
+      virtual bool isLODNode() const;
 
-      unsigned int getLODLevel();
-      bool getLOD(util::Vector<float, 3> camPos, const std::vector<float>& lodRanges);
+      unsigned int getLODLevel() const;
+      bool getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const;
 
-      void transformPosition(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
+      void transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation);
 
     private:
 

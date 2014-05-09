@@ -6,7 +6,7 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
                                                                                                 m_nextSibling(nextSibling),
                                                                                                 m_nodeName(nodeName)
@@ -28,52 +28,52 @@ namespace he
       m_parent = nullptr;
     }
 
-    bool TreeNode::isTreeNode()
+    bool TreeNode::isTreeNode() const
     {
       return true;
     }
 
-    bool TreeNode::isTransformNode()
+    bool TreeNode::isTransformNode() const
     {
       return false;
     }
 
-    bool TreeNode::isParticleNode()
+    bool TreeNode::isParticleNode() const
     {
       return false;
     }
 
-    bool TreeNode::isLODNode()
+    bool TreeNode::isLODNode() const
     {
       return false;
     }
 
-    bool TreeNode::isLightNode()
+    bool TreeNode::isLightNode() const
     {
       return false;
     }
 
-    bool TreeNode::isGroupNode()
+    bool TreeNode::isGroupNode() const
     {
       return false;
     }
 
-    bool TreeNode::isGeoNode()
+    bool TreeNode::isGeoNode() const
     {
       return false;
     }
 
-    bool TreeNode::isBillboardNode()
+    bool TreeNode::isBillboardNode() const
     {
       return false;
     }
 
-    bool TreeNode::isAnimatedTransformNode()
+    bool TreeNode::isAnimatedTransformNode() const
     {
       return false;
     }
 
-    bool TreeNode::isAnimatedGeoNode()
+    bool TreeNode::isAnimatedGeoNode() const
     {
       return false;
     }
@@ -108,7 +108,7 @@ namespace he
       m_nodeName = nodeName;
     }
 
-    const std::string& TreeNode::getNodeName()
+    const std::string& TreeNode::getNodeName() const
     {
       return m_nodeName;
     }

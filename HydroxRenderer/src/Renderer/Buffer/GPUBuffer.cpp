@@ -34,12 +34,12 @@ namespace he
       glBindBuffer(m_target, 0);
     }
 
-    bool GPUBuffer::isEnoughSpace(GLuint size)
+    bool GPUBuffer::isEnoughSpace(GLuint size) const
     {
       return size < m_currentBufferSize;
     }
 
-    void GPUBuffer::setData(GLuint offset, GLuint size, const void *data)
+    void GPUBuffer::setData(GLuint offset, GLuint size, const void *data) const
     {
       assert(offset + size <= m_currentBufferSize);
 
@@ -48,39 +48,39 @@ namespace he
       glBindBuffer(m_target, 0);
     }
 
-    void GPUBuffer::getData(GLuint offset, GLuint size, GLvoid *data)
+    void GPUBuffer::getData(GLuint offset, GLuint size, GLvoid *data) const
     {
       glBindBuffer(m_target, m_bufferIndex);
       glGetBufferSubData(m_target, offset, size, data);
       glBindBuffer(m_target, 0);
     }
 
-    void GPUBuffer::bindBuffer(GLenum target)
+    void GPUBuffer::bindBuffer(GLenum target) const
     {
       glBindBuffer(target, m_bufferIndex);
     }
 
-    void GPUBuffer::unbindBuffer(GLenum target)
+    void GPUBuffer::unbindBuffer(GLenum target) const
     {
       glBindBuffer(target, 0);
     }
 
-    void GPUBuffer::bindBuffer(GLenum target, GLuint bufferBindingPoint)
+    void GPUBuffer::bindBuffer(GLenum target, GLuint bufferBindingPoint) const
     {
       glBindBufferBase(target, bufferBindingPoint, m_bufferIndex);
     }
 
-    void GPUBuffer::unbindBuffer(GLenum target, GLuint bufferBindingPoint)
+    void GPUBuffer::unbindBuffer(GLenum target, GLuint bufferBindingPoint) const
     {
       glBindBufferBase(target, bufferBindingPoint, 0);
     }
 
-    void GPUBuffer::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride)
+    void GPUBuffer::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const
     {
       glBindVertexBuffer(bufferBindingPoint, m_bufferIndex, offset, stride);
     }
 
-    void GPUBuffer::unbindVertexBuffer(GLuint bufferBindingPoint)
+    void GPUBuffer::unbindVertexBuffer(GLuint bufferBindingPoint) const
     {
       glBindVertexBuffer(bufferBindingPoint, 0, 0, 0);
     }

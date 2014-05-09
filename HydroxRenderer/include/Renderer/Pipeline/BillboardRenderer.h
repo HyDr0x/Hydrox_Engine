@@ -30,15 +30,15 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle billboardShaderHandle);
 
-	    void render();
+	    void render() const;
 
-      void addRenderComponent(xBar::BillboardContainer& billboard);
+      void addRenderComponent(const xBar::BillboardContainer& billboard);
 
-      void removeRenderComponent(xBar::BillboardContainer& billboard);
+      void removeRenderComponent(const xBar::BillboardContainer& billboard);
 
     private:
 
-	    BillboardRenderer(const BillboardRenderer&){}
+	    BillboardRenderer(const BillboardRenderer&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 

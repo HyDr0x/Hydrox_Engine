@@ -19,11 +19,12 @@ namespace he
 
       ResourceLoader(util::SingletonManager *singletonManager);
       ResourceLoader(const ResourceLoader& o);
+
       virtual ~ResourceLoader() = 0;
 
       virtual util::ResourceHandle loadResource(std::string filename) = 0;
 
-      virtual util::ResourceHandle getDefaultResource() = 0;
+      virtual util::ResourceHandle getDefaultResource() const = 0;
 
     protected:
 

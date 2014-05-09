@@ -8,14 +8,13 @@ namespace he
 {
   namespace renderer
   {
-    StringTexture2D::StringTexture2D(util::EventManager *eventManager, const Font& font, std::string text, float width, float height) :
+    StringTexture2D::StringTexture2D(util::EventManager *eventManager, const Font& font, const std::string& text, float width, float height) :
       m_font(font),
       m_layer(0),
       m_angle(0.0f),
       m_rtMatrix(util::Matrix<float, 3>::identity()),
       m_tlMatrix(util::Matrix<float, 3>::identity()),
       m_scMatrix(util::Matrix<float, 3>::identity()),
-      m_layerChanged(false),
       m_renderable(true),
       m_transparency(false)
     {
@@ -47,7 +46,6 @@ namespace he
       m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
-      m_layerChanged = o.m_layerChanged;
 
       glGenBuffers(1, &m_vertexBufferIndex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
@@ -92,7 +90,6 @@ namespace he
       m_transparency = o.m_transparency;
 
       m_layer = o.m_layer;
-      m_layerChanged = o.m_layerChanged;
 
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
@@ -111,7 +108,7 @@ namespace he
       return *this;
     }
 
-    void StringTexture2D::editString(std::string text, float width, float height)
+    void StringTexture2D::editString(const std::string& text, float width, float height)
     {
       fillBuffer(text, width, height);
     }
@@ -120,11 +117,11 @@ namespace he
     {
       if (!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void(*)(StringTexture2D *sprite)>(util::EventManager::OnAddSprite)->execute(this);
+        m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnAddStringTexture2D)->execute(this);
       }
       else if (m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void(*)(StringTexture2D *sprite)>(util::EventManager::OnRemoveSprite)->execute(this);
+        m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnRemoveStringTexture2D)->execute(this);
       }
 
       m_renderable = renderable;
@@ -139,13 +136,13 @@ namespace he
     {
       if (m_renderable)
       {
-        if ((!m_transparency && transparency) || (m_transparency && !transparency))
+        if (m_transparency != transparency)
         {
-          m_eventManager->raiseSignal<void(*)(StringTexture2D *sprite)>(util::EventManager::OnRemoveStringTexture2D)->execute(this);
+          m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnRemoveStringTexture2D)->execute(this);
 
           m_transparency = transparency;
 
-          m_eventManager->raiseSignal<void(*)(StringTexture2D *sprite)>(util::EventManager::OnRemoveStringTexture2D)->execute(this);
+          m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnAddStringTexture2D)->execute(this);
         }
       }
       else
@@ -159,28 +156,31 @@ namespace he
       return m_transparency;
     }
 
-    void StringTexture2D::stringSorted()
-    {
-      m_layerChanged = false;
-    }
-
-    bool StringTexture2D::getLayerChanged()
-    {
-      return m_layerChanged;
-    }
-
     void StringTexture2D::setLayer(unsigned char layer)
     {
-      m_layer = layer;
-      m_layerChanged = true;
+      if (m_renderable && m_transparency)
+      {
+        if (m_layer != layer)
+        {
+          m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnRemoveStringTexture2D)->execute(this);
+
+          m_layer = layer;
+
+          m_eventManager->raiseSignal<void(*)(const StringTexture2D *stringTexture2D)>(util::EventManager::OnAddStringTexture2D)->execute(this);
+        }
+      }
+      else
+      {
+        m_layer = layer;
+      }
     }
 
-    unsigned char StringTexture2D::getLayer()
+    unsigned char StringTexture2D::getLayer() const
     {
       return m_layer;
     }
 
-    void StringTexture2D::setTranslation(util::Vector<float, 2> v)
+    void StringTexture2D::setTranslation(const util::Vector<float, 2>& v)
     {
       m_tlMatrix[2][0] = v[0];
       m_tlMatrix[2][1] = v[1];
@@ -192,7 +192,7 @@ namespace he
       m_tlMatrix[2][1] = y;
     }
 
-    void StringTexture2D::addTranslation(util::Vector<float, 2> v)
+    void StringTexture2D::addTranslation(const util::Vector<float, 2>& v)
     {
       m_tlMatrix[2][0] += v[0];
       m_tlMatrix[2][1] += v[1];
@@ -216,7 +216,7 @@ namespace he
       m_scMatrix[1][1] += s;
     }
 
-    void StringTexture2D::setScale(util::Vector<float, 2> s)
+    void StringTexture2D::setScale(const util::Vector<float, 2>& s)
     {
       m_scMatrix[0][0] = s[0];
       m_scMatrix[1][1] = s[1];
@@ -228,7 +228,7 @@ namespace he
       m_scMatrix[1][1] = sy;
     }
 
-    void StringTexture2D::addScale(util::Vector<float, 2> s)
+    void StringTexture2D::addScale(const util::Vector<float, 2>& s)
     {
       m_scMatrix[0][0] += s[0];
       m_scMatrix[1][1] += s[1];
@@ -256,37 +256,37 @@ namespace he
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
     }
 
-    util::Vector<float, 2> StringTexture2D::getPosition()
+    util::Vector<float, 2> StringTexture2D::getPosition() const
     {
       return util::Vector<float, 2>(m_tlMatrix[2][0], m_tlMatrix[2][1]);
     }
 
-    float StringTexture2D::getRotation()
+    float StringTexture2D::getRotation() const
     {
       return m_angle;
     }
 
-    util::Vector<float, 2> StringTexture2D::getScale()
+    util::Vector<float, 2> StringTexture2D::getScale() const
     {
       return util::Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
     }
 
-    util::Matrix<float, 3> StringTexture2D::getTransformationMatrix()
+    util::Matrix<float, 3> StringTexture2D::getTransformationMatrix() const
     {
       return m_tlMatrix * m_rtMatrix * m_scMatrix;
     }
 
-    const Font& StringTexture2D::getFont()
+    Font StringTexture2D::getFont() const
     {
       return m_font;
     }
 
-    std::string StringTexture2D::getText()
+    std::string StringTexture2D::getText() const
     {
       return m_text;
     }
 
-    void StringTexture2D::render()
+    void StringTexture2D::render() const
     {
       glBindVertexBuffer(0, m_vertexBufferIndex, 0, sizeof(util::Vector<float, 2>) * 2);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferIndex);

@@ -38,9 +38,10 @@ namespace he
       AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
         GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
 
+      virtual ~AnimatedTransformNode();
+
       AnimatedTransformNode& operator=(const AnimatedTransformNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~AnimatedTransformNode();
 
       virtual GroupNode* clone() const;
 
@@ -48,22 +49,22 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isAnimatedTransformNode();
+      virtual bool isAnimatedTransformNode() const;
 
       void setBoneIndex(unsigned int boneIndex);
-      unsigned int getBoneIndex();
+      unsigned int getBoneIndex() const;
 
       void setSkinnedMesh(AnimatedGeoNode* animatedMesh);
-      AnimatedGeoNode* getSkinnedMesh();
+      AnimatedGeoNode* getSkinnedMesh() const;
 
       void setCurrentAnimationTrack(unsigned int currentTrack);
-      unsigned int getCurrentAnimationTrack();
+      unsigned int getCurrentAnimationTrack() const;
 
       void setCurrentAnimationTime(float time);
       void addCurrentAnimationTime(float time);
 
       void setPauseAnimation(bool pauseAnimation);
-      bool getPauseAnimation();
+      bool getPauseAnimation() const;
 
       void stopAnimation();
 
@@ -73,9 +74,9 @@ namespace he
       util::Quaternion<float> getGlobalRotation();
 	    float getGlobalScale();
 
-      util::Vector<float, 3> getLocalPosition();
-	    util::Quaternion<float> getLocalRotation();
-	    float getLocalScale();
+      util::Vector<float, 3> getLocalPosition() const;
+	    util::Quaternion<float> getLocalRotation() const;
+	    float getLocalScale() const;
 
     private:
 

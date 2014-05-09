@@ -31,14 +31,15 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer);
 
-	    void render();
+	    void render() const;
 
-      void addRenderComponent(Sprite* sprite);
-      void removeRenderComponent(Sprite* sprite);
+      void addRenderComponent(const Sprite* sprite);
+      void removeRenderComponent(const Sprite* sprite);
 
     private:
 
-	    SpriteRenderer(const SpriteRenderer&){}
+	    SpriteRenderer(const SpriteRenderer&);
+      SpriteRenderer& operator=(const SpriteRenderer&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
@@ -48,8 +49,8 @@ namespace he
 
       unsigned char m_maxLayer;
 
-      std::list<Sprite*> m_opaqueSprites;
-      std::vector<std::list<Sprite*>> m_transparentSprites;
+      std::list<const Sprite*> m_opaqueSprites;
+      std::vector<std::list<const Sprite*>> m_transparentSprites;
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;

@@ -22,20 +22,20 @@ namespace he
 
       void gatherSystemInformation();
 
-      void initDebugMode();
+      void initDebugMode() const;
 
-      void printSystemInformation();
-      void printSupportedExtensions();
+      void printSystemInformation() const;
+      void printSupportedExtensions() const;
 
-      unsigned int getMajorOpenGLVersion();
-      unsigned int getMinorOpenGLVersion();
+      unsigned int getMajorOpenGLVersion() const;
+      unsigned int getMinorOpenGLVersion() const;
 
-      void enableDebugMode();
-      void disableDebugMode();
+      void enableDebugMode() const;
+      void disableDebugMode() const;
 
-      void setEventSeverity(GLenum severity, bool enable);
-      void setEventType(GLenum type, bool enable);
-      void setEventSource(GLenum source, bool enable);
+      void setEventSeverity(GLenum severity, bool enable) const;
+      void setEventType(GLenum type, bool enable) const;
+      void setEventSource(GLenum source, bool enable) const;
 
     private:
 

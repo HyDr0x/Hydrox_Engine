@@ -19,9 +19,10 @@ namespace he
     public:
 
       BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      virtual ~BillboardNode();
+
       BillboardNode& operator=(const BillboardNode& o);
       virtual TreeNode& operator=(const TreeNode& o);
-      virtual ~BillboardNode();
 
       virtual TreeNode* clone() const;
 
@@ -29,32 +30,32 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isBillboardNode();
+      virtual bool isBillboardNode() const;
 
       util::ResourceHandle getTextureHandle() const;
 
       void setAnimation(unsigned int number);
-	    void setAnimation(util::Vector<unsigned int, 2> number);
-	    util::Vector<unsigned int, 2> getAnimationNumber();
-	    util::Vector<unsigned int, 2> getAnimationCount();
+	    void setAnimation(const util::Vector<unsigned int, 2>& number);
+	    util::Vector<unsigned int, 2> getAnimationNumber() const;
+	    util::Vector<unsigned int, 2> getAnimationCount() const;
 
-	    void setTranslation(util::Vector<float, 3> v);
+	    void setTranslation(const util::Vector<float, 3>& v);
 	    void setTranslation(float x, float y, float z);
-	    void addTranslation(util::Vector<float,3> v);
+	    void addTranslation(const util::Vector<float, 3>& v);
 	    void addTranslation(float x, float y, float z);
 	
 	    void setScale(float s);
 	    void addScale(float s);
 
-	    void setScale(util::Vector<float, 2> s);
+	    void setScale(const util::Vector<float, 2>& s);
 	    void setScale(float sx, float sy);
-	    void addScale(util::Vector<float, 2> s);
+	    void addScale(const util::Vector<float, 2>& s);
 	    void addScale(float sx, float sy);
 
-	    util::Vector<float, 3> getPosition();
-	    util::Vector<float, 2> getScale();
+	    util::Vector<float, 3> getPosition() const;
+	    util::Vector<float, 2> getScale() const;
 
-	    util::Matrix<float, 3> getTexTransformationMatrix();
+	    util::Matrix<float, 3> getTexTransformationMatrix() const;
 	    util::ResourceHandle getTextureID() const;
 
       void setRenderable(bool renderable);

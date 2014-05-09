@@ -14,11 +14,11 @@ namespace he
     public:
 
       AABB();
-      AABB(std::vector<util::Vector<float, 3>> positions);
+      AABB(const std::vector<util::Vector<float, 3>>& positions);
       ~AABB();
 
-      util::Vector<float, 3> getBBMax();
-      util::Vector<float, 3> getBBMin();
+      util::Vector<float, 3> getBBMax() const;
+      util::Vector<float, 3> getBBMin() const;
 
     private:
 

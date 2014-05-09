@@ -10,7 +10,6 @@ namespace he
 {
 	namespace sg
 	{
-
     LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
     GroupNode(nodeName, parent, nextSibling, firstChild),
       m_lodLevel(lodLevel),
@@ -18,6 +17,10 @@ namespace he
     {
       m_dirtyFlag |= LOD_INRANGE;
       m_transformedPosition = m_position;
+    }
+
+    LODNode::~LODNode()
+    {
     }
 
     LODNode& LODNode::operator=(const LODNode& sourceNode)
@@ -39,10 +42,6 @@ namespace he
       LODNode::operator=(copyNode);
 
       return *this;
-    }
-
-    LODNode::~LODNode()
-    {
     }
 
     GroupNode* LODNode::clone() const
@@ -72,24 +71,24 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool LODNode::isLODNode()
+    bool LODNode::isLODNode() const
     {
       return true;
     }
 
-    unsigned int LODNode::getLODLevel()
+    unsigned int LODNode::getLODLevel() const
     {
       return m_lodLevel;
     }
 
-    bool LODNode::getLOD(util::Vector<float, 3> camPos, const std::vector<float>& lodRanges)
+    bool LODNode::getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const
     {
       float distance = static_cast<float>((m_transformedPosition - camPos).length());
 
 	    return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
     }
 
-    void LODNode::transformPosition(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation)
+    void LODNode::transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation)
     {
       m_transformedPosition = translation + rotation.apply(m_position * scale);
     }

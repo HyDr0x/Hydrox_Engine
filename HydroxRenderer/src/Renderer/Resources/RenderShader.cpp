@@ -10,12 +10,12 @@ namespace he
     {
     }
 
-    RenderShader::RenderShader(std::string shaderName,
-                               std::string vertexShaderSource, 
-			                         std::string fragmentShaderSource, 
-			                         std::string geometryShaderSource, 
-			                         std::string tesselationCTRLShaderSource, 
-                               std::string tesselationEVALShaderSource)
+    RenderShader::RenderShader(const std::string& shaderName,
+                               const std::string& vertexShaderSource, 
+			                         const std::string& fragmentShaderSource, 
+			                         const std::string& geometryShaderSource, 
+			                         const std::string& tesselationCTRLShaderSource, 
+                               const std::string& tesselationEVALShaderSource)
     {
       std::string data = std::string();
       data += vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource;
@@ -43,6 +43,10 @@ namespace he
       m_program = o.m_program;
     }
 
+    RenderShader::~RenderShader()
+    {
+    }
+
     RenderShader& RenderShader::operator=(const RenderShader& o)
     {
       m_hash = o.m_hash;
@@ -51,9 +55,6 @@ namespace he
       return *this;
     }
 
-    RenderShader::~RenderShader()
-    {
-    }
 
     void RenderShader::enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const
     {

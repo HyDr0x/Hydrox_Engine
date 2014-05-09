@@ -29,12 +29,12 @@ namespace he
       m_vertexDeclaration = vertexDeclaration;
     }
 
-    bool VertexDeclarationNode::isMesh(GLuint vertexDeclaration)
+    bool VertexDeclarationNode::isMesh(GLuint vertexDeclaration) const
     {
       return vertexDeclaration == m_vertexDeclaration;
     }
 
-    GLuint VertexDeclarationNode::getVertexDeclaration()
+    GLuint VertexDeclarationNode::getVertexDeclaration() const
     {
       return m_vertexDeclaration;
     }

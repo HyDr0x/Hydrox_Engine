@@ -17,9 +17,10 @@ namespace he
     public:
 
       ParticleNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      virtual ~ParticleNode();
+
       ParticleNode& operator=(const ParticleNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~ParticleNode();
 
       virtual TreeNode* clone() const;
 
@@ -27,10 +28,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isParticleNode();
+      virtual bool isParticleNode() const;
 
-      util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 

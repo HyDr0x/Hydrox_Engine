@@ -15,15 +15,15 @@ namespace he
       m_hash = o.m_hash;
     }
 
+    ManagedResource::~ManagedResource()
+    {
+    }
+
     ManagedResource& ManagedResource::operator=(const ManagedResource& o)
     {
       m_hash = o.m_hash;
 
       return *this;
-    }
-
-    ManagedResource::~ManagedResource()
-    {
     }
 
     const uint64_t ManagedResource::getHash() const

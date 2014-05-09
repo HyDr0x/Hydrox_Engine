@@ -7,8 +7,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     class GRAPHICAPI Particle
     {
     public:

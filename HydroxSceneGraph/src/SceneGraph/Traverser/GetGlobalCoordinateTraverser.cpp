@@ -68,17 +68,17 @@ namespace he
       return true;
     }
 
-    float GetGlobalCoordinateTraverser::getGlobalScale()
+    float GetGlobalCoordinateTraverser::getGlobalScale() const
     {
       return m_globalScale;
     }
 
-    util::Vector<float, 3> GetGlobalCoordinateTraverser::getGlobalTranslation()
+    util::Vector<float, 3> GetGlobalCoordinateTraverser::getGlobalTranslation() const
     {
       return m_globalTranslation;
     }
 
-    util::Quaternion<float> GetGlobalCoordinateTraverser::getGlobalRotation()
+    util::Quaternion<float> GetGlobalCoordinateTraverser::getGlobalRotation() const
     {
       return m_globalRotation;
     }

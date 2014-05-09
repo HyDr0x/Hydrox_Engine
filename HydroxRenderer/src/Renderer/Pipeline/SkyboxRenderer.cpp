@@ -88,7 +88,7 @@ namespace he
       glBindVertexArray(0);
     }
 
-    void SkyboxRenderer::render()
+    void SkyboxRenderer::render() const
     {
       glDepthFunc(GL_LEQUAL);
 

@@ -31,11 +31,12 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
 
-	    void render();
+	    void render() const;
 
     private:
 
-      SkyboxRenderer(const SkyboxRenderer&){}
+      SkyboxRenderer(const SkyboxRenderer&);
+      SkyboxRenderer& operator=(const SkyboxRenderer&);
 
       util::ResourceHandle m_skyboxShaderHandle;
       util::ResourceHandle m_arrayTextureHandle;

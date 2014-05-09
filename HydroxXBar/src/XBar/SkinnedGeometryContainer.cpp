@@ -20,17 +20,17 @@ namespace he
     {
     }
 
-    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& o)
+    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& o) const
     {
       return m_hash == o.m_hash;
     }
 
-    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getBoneTransformMatrices()
+    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getBoneTransformMatrices() const
     {
       return m_boneTransformMatrices;
     }
 
-    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getInverseBindPoseTransformMatrices()
+    std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getInverseBindPoseTransformMatrices() const
     {
       return m_inverseBindPoseMatrices;
     }

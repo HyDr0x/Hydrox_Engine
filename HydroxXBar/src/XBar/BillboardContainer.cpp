@@ -26,7 +26,7 @@ namespace he
     {
     }
 
-    bool BillboardContainer::operator == (const BillboardContainer& o)
+    bool BillboardContainer::operator == (const BillboardContainer& o) const
     {
       return m_hash == o.m_hash;
     }
@@ -36,17 +36,17 @@ namespace he
       return m_textureHandle;
     }
 
-    util::Vector<float, 3> BillboardContainer::getPosition()
+    util::Vector<float, 3> BillboardContainer::getPosition() const
     {
 	    return m_translate;
     }
 
-    util::Vector<float, 2> BillboardContainer::getScale()
+    util::Vector<float, 2> BillboardContainer::getScale() const
     {
 	    return m_scale;
     }
 
-    util::Matrix<float, 3> BillboardContainer::getTexTransformationMatrix()
+    util::Matrix<float, 3> BillboardContainer::getTexTransformationMatrix() const
     {
       float width  = m_texEnd[0] - m_texStart[0];
 	    float height = m_texEnd[1] - m_texStart[1];

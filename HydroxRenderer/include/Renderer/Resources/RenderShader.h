@@ -11,8 +11,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     class GRAPHICAPI RenderShader : public Shader
     {
     public:
@@ -38,16 +36,17 @@ namespace he
 	    };
 
       RenderShader();
-      RenderShader(std::string shaderName,
-                   std::string vertexShaderSource, 
-			             std::string fragmentShaderSource = std::string(), 
-			             std::string geometryShaderSource = std::string(), 
-			             std::string tesselationCTRLShaderSource = std::string(), 
-                   std::string tesselationEVALShaderSource = std::string());
+      RenderShader(const std::string& shaderName,
+                   const std::string& vertexShaderSource, 
+			             const std::string& fragmentShaderSource = std::string(), 
+			             const std::string& geometryShaderSource = std::string(), 
+			             const std::string& tesselationCTRLShaderSource = std::string(), 
+                   const std::string& tesselationEVALShaderSource = std::string());
 	    RenderShader(const RenderShader& o);
-      RenderShader& operator=(const RenderShader& o);
 
 	    ~RenderShader();
+
+      RenderShader& operator=(const RenderShader& o);
 
 	    void enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const;
 

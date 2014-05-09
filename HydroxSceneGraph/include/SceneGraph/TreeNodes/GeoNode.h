@@ -20,9 +20,10 @@ namespace he
     public:
 
       GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      virtual ~GeoNode();
+
       GeoNode& operator=(const GeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~GeoNode();
 
       virtual TreeNode* clone() const;
 
@@ -30,7 +31,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isGeoNode();
+      virtual bool isGeoNode() const;
 
       virtual void setMeshHandle(util::ResourceHandle meshHandle);
       util::ResourceHandle getMeshHandle() const;
@@ -38,8 +39,8 @@ namespace he
       virtual void setMaterialHandle(util::ResourceHandle materialHandle);
       util::ResourceHandle getMaterialHandle() const;
 
-      util::Matrix<float, 4> getTransformationMatrix() const;
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
       virtual void setRenderable(bool renderable);
 	    bool getRenderable() const;

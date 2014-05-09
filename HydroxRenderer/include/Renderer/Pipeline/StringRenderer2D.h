@@ -33,14 +33,15 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle stringShaderHandle, unsigned char maxLayer);
 
-	    void render();
+	    void render() const;
 
-      void addRenderComponent(StringTexture2D* sprite);
-      void removeRenderComponent(StringTexture2D* sprite);
+      void addRenderComponent(const StringTexture2D* sprite);
+      void removeRenderComponent(const StringTexture2D* sprite);
 
     private:
 
-      StringRenderer2D(const StringRenderer2D&){}
+      StringRenderer2D(const StringRenderer2D&);
+      StringRenderer2D& operator=(const StringRenderer2D&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
@@ -50,8 +51,8 @@ namespace he
 
       unsigned char m_maxLayer;
 
-      std::list<StringTexture2D*> m_opaqueStrings;
-      std::vector<std::list<StringTexture2D*>> m_transparentStrings;
+      std::list<const StringTexture2D*> m_opaqueStrings;
+      std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
 	    RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;

@@ -28,23 +28,23 @@ namespace he
       GroupNode* getRootNode();
       const GroupNode* const getRootNode() const;
 
-      TreeNode* searchNode(const std::string& nodeName);
+      TreeNode* searchNode(const std::string& nodeName) const;
 
-      TreeNode* searchNode(const std::string& nodeName, TreeNode *searchRootNode);
+      TreeNode* searchNode(const std::string& nodeName, TreeNode *searchRootNode) const;
 
-      virtual GroupNode* addParentNode(TreeNode *destinationNode, GroupNode *sourceNode);
-      virtual TreeNode* addChildNode(GroupNode *destinationNode, TreeNode *sourceNode);
-      virtual void removeNode(TreeNode *node);
+      virtual GroupNode* addParentNode(TreeNode *destinationNode, const GroupNode *sourceNode);
+      virtual TreeNode* addChildNode(GroupNode *destinationNode, const TreeNode *sourceNode);
+      virtual void removeNode(const TreeNode *node);
 
-      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix);
+      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix);
       virtual void removeSubTree(TreeNode *rootNode);
 
-      template<class CLASS> CLASS* getNode(const std::string& nodeName)
+      template<class CLASS> CLASS* getNode(const std::string& nodeName) const
       {
         return dynamic_cast<CLASS*>(searchNode(nodeName));
       }
 
-      template<class CLASS> CLASS* getNode(const std::string& nodeName, TreeNode *searchRootNode)
+      template<class CLASS> CLASS* getNode(const std::string& nodeName, const TreeNode *searchRootNode) const
       {
         return dynamic_cast<CLASS*>(searchNode(nodeName, searchRootNode));
       }

@@ -49,7 +49,7 @@ namespace he
       glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_maxCombinedTextureUnits);
     }
 
-    void DebugLogManager::initDebugMode()
+    void DebugLogManager::initDebugMode() const
     {
       /*if(m_debugMode)
       {
@@ -61,7 +61,7 @@ namespace he
       glDebugMessageCallback(callback, nullptr);
     }
 
-    void DebugLogManager::printSystemInformation()
+    void DebugLogManager::printSystemInformation() const
     {
       std::clog << "Graphics Card Vendor: " << m_vendorName.c_str() << std::endl;
       std::clog << "Graphics Card: " << m_graphicCardName.c_str() << std::endl;
@@ -70,42 +70,42 @@ namespace he
       std::clog << "---------------------------------------------------------" << std::endl;
     }
 
-    void DebugLogManager::printSupportedExtensions()
+    void DebugLogManager::printSupportedExtensions() const
     {
       std::clog << "Extensions:\n" << m_extensions.c_str() << std::endl;
     }
 
-    unsigned int DebugLogManager::getMajorOpenGLVersion()
+    unsigned int DebugLogManager::getMajorOpenGLVersion() const
     {
       return m_openGLMajorVersion;
     }
 
-    unsigned int DebugLogManager::getMinorOpenGLVersion()
+    unsigned int DebugLogManager::getMinorOpenGLVersion() const
     {
       return m_openGLMinorVersion;
     }
 
-    void DebugLogManager::enableDebugMode()
+    void DebugLogManager::enableDebugMode() const
     {
       glEnable(GL_DEBUG_OUTPUT);
     }
 
-    void DebugLogManager::disableDebugMode()
+    void DebugLogManager::disableDebugMode() const
     {
       glDisable(GL_DEBUG_OUTPUT);
     }
 
-    void DebugLogManager::setEventSeverity(GLenum severity, bool enable)
+    void DebugLogManager::setEventSeverity(GLenum severity, bool enable) const
     {
       glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, severity, 0, nullptr, enable);
     }
 
-    void DebugLogManager::setEventType(GLenum type, bool enable)
+    void DebugLogManager::setEventType(GLenum type, bool enable) const
     {
       glDebugMessageControl(GL_DONT_CARE, type, GL_DONT_CARE, 0, nullptr, enable);
     }
 
-    void DebugLogManager::setEventSource(GLenum source, bool enable)
+    void DebugLogManager::setEventSource(GLenum source, bool enable) const
     {
       glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
     }

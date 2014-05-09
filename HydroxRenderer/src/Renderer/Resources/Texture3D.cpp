@@ -6,8 +6,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
@@ -118,13 +116,20 @@ namespace he
       glUniform1i(location, slot);
     }
 
-    void Texture3D::unsetTexture()
+    void Texture3D::unsetTexture() const
     {
 	    glActiveTexture(GL_TEXTURE0 + m_slot);
 	    glBindTexture(m_target, 0);
     }
 
-    void Texture3D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter)
+    void Texture3D::generateMipMapps() const
+    {
+      glBindTexture(m_target, m_texIndex);
+        glGenerateMipmap(m_target);
+      glBindTexture(m_target, 0);
+    }
+
+    void Texture3D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter) const
     {
 	    glBindTexture(m_target, m_texIndex);
 		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
@@ -135,32 +140,32 @@ namespace he
 	    glBindTexture(m_target, 0);
     }
 
-    util::Vector<unsigned int, 3> Texture3D::getResolution()
+    util::Vector<unsigned int, 3> Texture3D::getResolution() const
     {
 	    return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
     }
 
-    GLenum Texture3D::getTarget()
+    GLenum Texture3D::getTarget() const
     {
 	    return m_target;
     }
 
-    GLenum Texture3D::getInternalFormat()
+    GLenum Texture3D::getInternalFormat() const
     {
       return m_internalFormat;
     }
 
-    GLenum Texture3D::getFormat()
+    GLenum Texture3D::getFormat() const
     {
       return m_format;
     }
 
-    GLenum Texture3D::getType()
+    GLenum Texture3D::getType() const
     {
       return m_type;
     }
 
-    unsigned int Texture3D::getTextureSize()
+    unsigned int Texture3D::getTextureSize() const
     {
       unsigned int bytesPerPixel;
 
@@ -189,7 +194,7 @@ namespace he
       return m_width * m_height * m_depth * bytesPerPixel;
     }
 
-    void Texture3D::getTextureData(GLvoid* data)
+    void Texture3D::getTextureData(GLvoid* data) const
     {
       glBindTexture(m_target, m_texIndex);
       glGetTexImage(m_target, 0, m_format, m_type, data);

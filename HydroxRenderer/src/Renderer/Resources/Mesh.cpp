@@ -15,14 +15,14 @@ namespace he
     }
 
     Mesh::Mesh(GLenum primitiveType,
-               std::vector<util::Vector<float, 3>> positions,
-               std::vector<indexType> indices,
-               std::vector<std::vector<util::Vector<float, 2>>> textureCoords, 
-               std::vector<util::Vector<float, 3>> normals, 
-               std::vector<util::Vector<float, 3>> binormals, 
-               std::vector<util::Vector<float, 4>> boneWeights,
-               std::vector<util::Vector<float, 4>> boneIndices, 
-               std::vector<util::Vector<float, 4>> vertexColors) : m_boundingVolume(positions)
+           const std::vector<util::Vector<float, 3>>& positions, 
+           const std::vector<indexType>& indices,
+           const std::vector<std::vector<util::Vector<float, 2>>>& textureCoords, 
+           const std::vector<util::Vector<float, 3>>& normals, 
+           const std::vector<util::Vector<float, 3>>& binormals, 
+           const std::vector<util::Vector<float, 4>>& boneWeights,
+           const std::vector<util::Vector<float, 4>>& boneIndices,
+           const std::vector<util::Vector<float, 4>>& vertexColors) : m_boundingVolume(positions)
     {
       assert(textureCoords.size() == 4);
 
@@ -151,6 +151,10 @@ namespace he
       m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
     }
 
+    Mesh::~Mesh()
+    {
+    }
+
     Mesh& Mesh::operator=(const Mesh& o)
     {
       m_hash = o.m_hash;
@@ -165,10 +169,6 @@ namespace he
       m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
 
       return *this;
-    }
-
-    Mesh::~Mesh()
-    {
     }
 
     void Mesh::free()
@@ -331,47 +331,47 @@ namespace he
       return m_primitiveType;
     }
 
-    util::Vector<float, 3> Mesh::getBBMin()
+    util::Vector<float, 3> Mesh::getBBMin() const
     {
       return m_boundingVolume.getBBMin();
     }
 
-    util::Vector<float, 3> Mesh::getBBMax()
+    util::Vector<float, 3> Mesh::getBBMax() const
     {
       return m_boundingVolume.getBBMax();
     }
 
-    std::vector<GLubyte>& Mesh::getVBOBuffer()
+    const std::vector<GLubyte>& Mesh::getVBOBuffer() const
     {
       return m_geometryData;
     }
 
-    GLuint Mesh::getVertexStride()
+    GLuint Mesh::getVertexStride() const
     {
       return m_vertexStride;
     }
 
-    GLuint Mesh::getVertexCount()
+    GLuint Mesh::getVertexCount() const
     {
       return m_vertexCount;
     }
 
-    GLuint Mesh::getVBOSize()
+    GLuint Mesh::getVBOSize() const
     {
       return m_vertexCount * m_vertexStride;
     }
 
-    std::vector<GLuint>& Mesh::getIndexBuffer()
+    const std::vector<GLuint>& Mesh::getIndexBuffer() const
     {
       return m_indexData;
     }
 
-    GLuint Mesh::getIndexCount()
+    GLuint Mesh::getIndexCount() const
     {
       return m_indexData.size();
     }
 
-    GLuint Mesh::getPrimitiveCount()
+    GLuint Mesh::getPrimitiveCount() const
     {
       return m_primitiveCount;
     }

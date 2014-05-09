@@ -33,7 +33,7 @@ namespace he
       void getUniformParameters(const char **uniformNames, const GLuint uniformCount, std::vector<GLuint> *uniformIndices, 
                                                                                       std::vector<GLint> *uniformOffsets, 
                                                                                       std::vector<GLint> *arrayStrides, 
-                                                                                      std::vector<GLint> *matrixStrides);
+                                                                                      std::vector<GLint> *matrixStrides) const;
 
 	    static void setUniform(GLint location, int type, const GLfloat* val);
       static void setUniform(GLint location, int type, const GLuint* val);
@@ -44,7 +44,7 @@ namespace he
 
     protected:
 
-      GLuint createShader(GLenum shaderType, std::string shaderName, std::string shaderSource);
+      GLuint createShader(GLenum shaderType, std::string shaderName, std::string shaderSource) const;
 	    bool checkShaderStatus(GLuint shader, std::string shaderName) const;
 
 	    GLuint m_program;

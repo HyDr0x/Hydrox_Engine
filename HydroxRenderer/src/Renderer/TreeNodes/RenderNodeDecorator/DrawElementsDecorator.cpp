@@ -25,7 +25,7 @@ namespace he
     {
     }
 
-    bool DrawElementsDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
     {
       Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
@@ -54,7 +54,7 @@ namespace he
      return false;
     }
 
-    bool DrawElementsDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
@@ -83,7 +83,7 @@ namespace he
      return false;
     }
 
-    bool DrawElementsDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
@@ -106,7 +106,7 @@ namespace he
       return deleted;
     }
 
-    void DrawElementsDecorator::frustumCulling()
+    void DrawElementsDecorator::frustumCulling() const
     {
       m_bboxesBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_commandBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
@@ -119,7 +119,7 @@ namespace he
       m_bboxesBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
-    void DrawElementsDecorator::rasterizeGeometry()
+    void DrawElementsDecorator::rasterizeGeometry() const
     {
       glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
@@ -201,7 +201,7 @@ namespace he
       m_commandBuffer.setMemoryFence();
 
       unsigned int instanceCounter = 0;
-      for(std::list<xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, instanceCounter++)
+      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, instanceCounter++)
       {
         Mesh *mesh = m_modelManager->getObject((*instanceIterator)->getMeshHandle());
 

@@ -16,10 +16,11 @@ namespace he
       ResourceHandle();
       ResourceHandle(unsigned int id);
       ResourceHandle(const ResourceHandle& other);
-      ResourceHandle& operator=(ResourceHandle other);
       ~ResourceHandle();
 
-      inline bool operator==(const ResourceHandle& other);
+      ResourceHandle& operator=(ResourceHandle other);
+
+      inline bool operator==(const ResourceHandle& other) const;
 
       void free();
 

@@ -35,7 +35,7 @@ namespace he
       return traverser->postTraverse(this);
     }
 
-    bool MaterialDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
     {
       if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
@@ -63,7 +63,7 @@ namespace he
       return false;
     }
 
-    bool MaterialDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
@@ -91,12 +91,12 @@ namespace he
       return false;
     }
 
-    bool MaterialDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool MaterialDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        for(std::list<xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++)
+        for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++)
         {
           if(geometryContainer == (**instanceIterator))
           {
@@ -117,14 +117,14 @@ namespace he
       return deleted;
     }
 
-    void MaterialDecorator::rasterizeGeometry()
+    void MaterialDecorator::rasterizeGeometry() const
     {
       m_materialIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_materialBuffer.bindBuffer(1);
 
       m_renderNode->rasterizeGeometry();
 
-      m_materialBuffer.unBindBuffer();
+      m_materialBuffer.unBindBuffer(1);
       m_materialIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
@@ -170,7 +170,7 @@ namespace he
       m_materialIndexBuffer.setMemoryFence();
 
       unsigned int index = 0;
-      for(std::list<xBar::StaticGeometryContainer*>::iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, index++)
+      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, index++)
       {
         m_materialIndexBuffer.setData(sizeof(GLuint) * index, sizeof(GLuint), &m_materialHandles[(*instanceIterator)->getMeshHandle()].bufferIndex);
       }

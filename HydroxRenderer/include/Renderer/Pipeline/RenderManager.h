@@ -41,13 +41,13 @@ namespace he
       RenderManager();
 	    ~RenderManager();
 
-      void setClearColor(he::util::Vector<float, 4> color);
+      void setClearColor(he::util::Vector<float, 4> color) const;
 
       void resizeRenderWindow(unsigned int width, unsigned int height);
 
-      void setBackfaceCulling(GLenum cullingMode);
+      void setBackfaceCulling(GLenum cullingMode) const;
 
-      void setWireframe(bool wireFrame);
+      void setWireframe(bool wireFrame) const;
 
       const size_t getMaxSpriteLayer() const;
 
@@ -60,27 +60,28 @@ namespace he
         util::ResourceHandle stringShaderHandle, 
         util::ResourceHandle frustumCullingShaderHandle);
 
-	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
+	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const;
 
-      void addRenderComponent(Sprite* sprite);
-      void addRenderComponent(StringTexture2D* string);
-      void addRenderComponent(xBar::BillboardContainer& billboard);
-      void addRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
-      void addRenderComponent(xBar::SkinnedGeometryContainer& skinnedGeometry);
-      void addRenderComponent(xBar::LightContainer& light);
-      void addRenderComponent(xBar::ParticleContainer& particle);
+      void addRenderComponent(const Sprite* sprite);
+      void addRenderComponent(const StringTexture2D* string);
+      void addRenderComponent(const xBar::BillboardContainer& billboard);
+      void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
+      void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void addRenderComponent(const xBar::LightContainer& light);
+      void addRenderComponent(const xBar::ParticleContainer& particle);
 
-      void removeRenderComponent(Sprite* sprite);
-      void removeRenderComponent(StringTexture2D* string);
-      void removeRenderComponent(xBar::BillboardContainer& billboard);
-      void removeRenderComponent(xBar::StaticGeometryContainer& staticGeometry);
-      void removeRenderComponent(xBar::SkinnedGeometryContainer& staticGeometry);
-      void removeRenderComponent(xBar::LightContainer& light);
-      void removeRenderComponent(xBar::ParticleContainer& particle);
+      void removeRenderComponent(const Sprite* sprite);
+      void removeRenderComponent(const StringTexture2D* string);
+      void removeRenderComponent(const xBar::BillboardContainer& billboard);
+      void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
+      void removeRenderComponent(const xBar::SkinnedGeometryContainer& staticGeometry);
+      void removeRenderComponent(const xBar::LightContainer& light);
+      void removeRenderComponent(const xBar::ParticleContainer& particle);
 
     private:
 
 	    RenderManager(const RenderManager&);
+      RenderManager& operator=(const RenderManager&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 

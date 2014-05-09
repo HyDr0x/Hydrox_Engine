@@ -21,9 +21,9 @@ namespace he
       virtual bool ascendTraverse(AnimatedTransformNode* treeNode);
       virtual bool ascendTraverse(TransformNode* treeNode);
 
-      float getGlobalScale();
-      util::Vector<float, 3> getGlobalTranslation();
-      util::Quaternion<float> getGlobalRotation();
+      float getGlobalScale() const;
+      util::Vector<float, 3> getGlobalTranslation() const;
+      util::Quaternion<float> getGlobalRotation() const;
 
     protected:
 

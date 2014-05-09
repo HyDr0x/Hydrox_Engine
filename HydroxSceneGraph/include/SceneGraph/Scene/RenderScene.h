@@ -34,24 +34,24 @@ namespace he
     {
     public:
 
-	    RenderScene(GroupNode* rootNode, util::EventManager& eventManger, util::Vector<float, 3>& cameraPosition);
+	    RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition);
 	    ~RenderScene();
 
-      GroupNode* addParentNode(unsigned int eventID, TreeNode* destinationNode, GroupNode* sourceNode);
-      TreeNode* addChildNode(unsigned int eventID, GroupNode* destinationNode, TreeNode* sourceNode);
-      void removeNode(TreeNode& node);
+      GroupNode* addParentNode(unsigned int eventID, TreeNode* destinationNode, const GroupNode* sourceNode);
+      TreeNode* addChildNode(unsigned int eventID, GroupNode* destinationNode, const TreeNode* sourceNode);
+      void removeNode(TreeNode* node);
 
-	    GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
+	    GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
       void removeSubTree(TreeNode* sceneNode);
 
-      void setLODRanges(std::vector<float> lodRanges);
-      void updateScene(util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
+      void setLODRanges(const std::vector<float>& lodRanges);
+      void updateScene(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
     private:
  
-	    RenderScene() : Scene(new GroupNode("")), m_eventManager(util::EventManager()), m_sceneCacheManager(SceneCacheManager(util::EventManager())) {}
-      RenderScene(const RenderScene& object) : Scene(object.m_rootNode), m_eventManager(object.m_eventManager), m_sceneCacheManager(object.m_sceneCacheManager) {}
-	    RenderScene& operator=(const RenderScene&){ return *this; }
+	    RenderScene();
+      RenderScene(const RenderScene& object);
+	    RenderScene& operator=(const RenderScene&);
 
       SceneCacheManager m_sceneCacheManager;
 

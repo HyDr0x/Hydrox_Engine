@@ -16,9 +16,10 @@ namespace he
     public:
 
       AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      virtual ~AnimatedGeoNode();
+
       AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~AnimatedGeoNode();
 
       virtual TreeNode* clone() const;
 
@@ -26,7 +27,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isAnimatedGeoNode();
+      virtual bool isAnimatedGeoNode() const;
 
       void setMeshHandle(util::ResourceHandle meshHandle);
       void setMaterialHandle(util::ResourceHandle materialHandle);
@@ -34,7 +35,7 @@ namespace he
 
       void setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 
-      std::vector<util::Matrix<float, 4>> getSkinningMatrices();
+      std::vector<util::Matrix<float, 4>> getSkinningMatrices() const;
 
     private:
 

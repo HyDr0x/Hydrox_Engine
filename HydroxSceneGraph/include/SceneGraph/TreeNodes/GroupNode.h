@@ -25,9 +25,10 @@ namespace he
       };
 
       GroupNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      virtual ~GroupNode();
+
       GroupNode& operator=(const GroupNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
-      virtual ~GroupNode();
 
       virtual GroupNode* clone() const;
 
@@ -35,7 +36,7 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool isGroupNode();
+      virtual bool isGroupNode() const;
 
       TreeNode* getFirstChild() const;
 

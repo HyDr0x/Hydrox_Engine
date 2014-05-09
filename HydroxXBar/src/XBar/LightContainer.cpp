@@ -13,12 +13,12 @@ namespace he
     {
     }
 
-    bool LightContainer::operator == (const LightContainer& o)
+    bool LightContainer::operator == (const LightContainer& o) const
     {
       return m_hash == o.m_hash;
     }
 
-    util::Matrix<float, 4> LightContainer::getTransformationMatrix()
+    util::Matrix<float, 4> LightContainer::getTransformationMatrix() const
     {
       return *m_trfMatrix;
     }

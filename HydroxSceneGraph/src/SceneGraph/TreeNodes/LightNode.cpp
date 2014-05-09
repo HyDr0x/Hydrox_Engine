@@ -9,8 +9,12 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     LightNode::LightNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling)
+    {
+    }
+
+    LightNode::~LightNode()
     {
     }
 
@@ -31,10 +35,6 @@ namespace he
       LightNode::operator=(copyNode);
 
       return *this;
-    }
-
-    LightNode::~LightNode()
-    {
     }
 
     TreeNode* LightNode::clone() const
@@ -63,19 +63,19 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool LightNode::isLightNode()
+    bool LightNode::isLightNode() const
     {
       return true;
-    }
-
-    util::Matrix<float,4> LightNode::getTransformationMatrix() const
-    {
-      return m_trfMatrix;
     }
 
     void LightNode::setTransformationMatrix(const util::Matrix<float,4>& trfMatrix)
     {
       m_trfMatrix = trfMatrix;
+    }
+
+    util::Matrix<float,4> LightNode::getTransformationMatrix() const
+    {
+      return m_trfMatrix;
     }
 	}
 }

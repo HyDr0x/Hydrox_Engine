@@ -13,6 +13,10 @@ namespace he
     {
     }
 
+    ParticleNode::~ParticleNode()
+    {
+    }
+
     ParticleNode& ParticleNode::operator=(const ParticleNode& sourceNode)
     {
       TreeNode::operator=(sourceNode);
@@ -30,10 +34,6 @@ namespace he
       ParticleNode::operator=(copyNode);
 
       return *this;
-    }
-
-    ParticleNode::~ParticleNode()
-    {
     }
 
     TreeNode* ParticleNode::clone() const
@@ -62,19 +62,19 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool ParticleNode::isParticleNode()
+    bool ParticleNode::isParticleNode() const
     {
       return true;
-    }
-
-    util::Matrix<float,4> ParticleNode::getTransformationMatrix() const
-    {
-      return m_trfMatrix;
     }
 
     void ParticleNode::setTransformationMatrix(const util::Matrix<float,4>& trfMatrix)
     {
       m_trfMatrix = trfMatrix;
+    }
+
+    util::Matrix<float,4> ParticleNode::getTransformationMatrix() const
+    {
+      return m_trfMatrix;
     }
 	}
 }

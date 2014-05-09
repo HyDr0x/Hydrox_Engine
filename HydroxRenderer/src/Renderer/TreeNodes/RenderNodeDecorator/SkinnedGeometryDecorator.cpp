@@ -20,7 +20,7 @@ namespace he
     {
     }
 
-    void SkinnedGeometryDecorator::frustumCulling()
+    void SkinnedGeometryDecorator::frustumCulling() const
     {
       m_bboxMatrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -29,7 +29,7 @@ namespace he
       m_bboxMatrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    void SkinnedGeometryDecorator::rasterizeGeometry()
+    void SkinnedGeometryDecorator::rasterizeGeometry() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -67,9 +67,9 @@ namespace he
     void SkinnedGeometryDecorator::fillBuffer()
     {
       unsigned int instanceIndex = 0;
-      for (std::list<xBar::StaticGeometryContainer*>::iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
+      for (std::list<const xBar::StaticGeometryContainer*>::const_iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
       {
-        xBar::SkinnedGeometryContainer *skinnedGeometryContainer = dynamic_cast<xBar::SkinnedGeometryContainer*>(*geometryIterator);
+        const xBar::SkinnedGeometryContainer *skinnedGeometryContainer = dynamic_cast<const xBar::SkinnedGeometryContainer*>(*geometryIterator);
 
         std::vector<util::Matrix<float, 4>>* boneTransformMatrices = skinnedGeometryContainer->getBoneTransformMatrices();
         std::vector<util::Matrix<float, 4>>* inverseBindPoseTransformMatrices = skinnedGeometryContainer->getInverseBindPoseTransformMatrices();

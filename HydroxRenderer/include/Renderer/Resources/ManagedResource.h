@@ -15,8 +15,9 @@ namespace he
 
       ManagedResource();
       ManagedResource(const ManagedResource& o);
-      ManagedResource& operator=(const ManagedResource& o);
       virtual ~ManagedResource() = 0;
+
+      ManagedResource& operator=(const ManagedResource& o);
 
       virtual void free() = 0;
 

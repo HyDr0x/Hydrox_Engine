@@ -32,42 +32,42 @@ namespace he
       m_renderNode->postTraverse(traverser);
     }
 
-    bool ARenderNodeDecorator::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
     {
       return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
      return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       return m_renderNode->removeGeometry(geometryContainer);
     }
 
-    std::list<xBar::StaticGeometryContainer*>& ARenderNodeDecorator::getInstances()
+    const std::list<const xBar::StaticGeometryContainer*>& ARenderNodeDecorator::getInstances() const
     {
       return m_renderNode->getInstances();
     }
 
-    unsigned int ARenderNodeDecorator::getInstanceNumber()
+    unsigned int ARenderNodeDecorator::getInstanceNumber() const
     {
       return m_renderNode->getInstanceNumber();
     }
 
-    bool ARenderNodeDecorator::hasInstanceNumberChanged()
+    bool ARenderNodeDecorator::hasInstanceNumberChanged() const
     {
       return m_renderNode->hasInstanceNumberChanged();
     }
 
-    void ARenderNodeDecorator::frustumCulling()
+    void ARenderNodeDecorator::frustumCulling() const
     {
       m_renderNode->frustumCulling();
     }
 
-    void ARenderNodeDecorator::rasterizeGeometry()
+    void ARenderNodeDecorator::rasterizeGeometry() const
     {
       m_renderNode->rasterizeGeometry();
     }
@@ -77,17 +77,17 @@ namespace he
       m_renderNode->updateBuffer();
     }
 
-    unsigned int ARenderNodeDecorator::getMaxGeometry()
+    unsigned int ARenderNodeDecorator::getMaxGeometry() const
     {
       return m_renderNode->getMaxGeometry();
     }
 
-    unsigned int ARenderNodeDecorator::getMaxMaterials()
+    unsigned int ARenderNodeDecorator::getMaxMaterials() const
     {
       return m_renderNode->getMaxMaterials();
     }
 
-    unsigned int ARenderNodeDecorator::getMaxBones()
+    unsigned int ARenderNodeDecorator::getMaxBones() const
     {
       return m_renderNode->getMaxBones();
     }

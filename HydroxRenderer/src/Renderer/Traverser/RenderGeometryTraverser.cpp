@@ -153,7 +153,7 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
+      const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
       GLuint slotOffset = 0;
 
@@ -193,7 +193,7 @@ namespace he
 
     void RenderGeometryTraverser::postTraverse(TextureNode* treeNode)
     {
-      std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
+      const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
       for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
       {

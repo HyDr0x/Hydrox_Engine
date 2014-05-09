@@ -20,24 +20,28 @@ namespace he
       void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data);
 
       void resizeBuffer(GLuint size, const GLvoid *data);
-      bool isEnoughSpace(GLuint size);
+      bool isEnoughSpace(GLuint size) const;
 
       void setMemoryFence();
-      void syncWithFence();
+      void syncWithFence() const;
 
-      void setData(GLuint offset, GLuint size, const GLvoid *data);
-      void getData(GLuint offset, GLuint size, GLvoid *data);
+      void setData(GLuint offset, GLuint size, const GLvoid *data) const;
+      void getData(GLuint offset, GLuint size, GLvoid *data) const;
 
-      void bindBuffer(GLenum target);
-      void unbindBuffer(GLenum target);
+      void bindBuffer(GLenum target) const;
+      void unbindBuffer(GLenum target) const;
 
-      void bindBuffer(GLenum target, GLuint bufferBindingPoint);
-      void unbindBuffer(GLenum target, GLuint bufferBindingPoint);
+      void bindBuffer(GLenum target, GLuint bufferBindingPoint) const;
+      void unbindBuffer(GLenum target, GLuint bufferBindingPoint) const;
 
-      void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride);
-      void unbindVertexBuffer(GLuint bufferBindingPoint);
+      void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const;
+      void unbindVertexBuffer(GLuint bufferBindingPoint) const;
 
     private:
+
+      GPUImmutableBuffer(const GPUImmutableBuffer&);
+	    GPUImmutableBuffer& operator=(const GPUImmutableBuffer&);
+
 
       GLvoid *m_bufferPointer;
       GLsync m_memoryFence;

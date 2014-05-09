@@ -41,23 +41,25 @@ namespace he
 
       AssimpLoader(util::SingletonManager *singletonManager);
       AssimpLoader(const AssimpLoader& o);
-      AssimpLoader& operator=(const AssimpLoader& o);
+
       ~AssimpLoader();
 
+      AssimpLoader& operator=(const AssimpLoader& o);
+
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
-      AnimationTimeUnit getAnimationTimeUnit();
+      AnimationTimeUnit getAnimationTimeUnit() const;
 
       sg::Scene* load(std::string path, std::string filename, bool yAxisFlipped = true);
 
-      sg::Scene* loadDefaultSceneGraph();
+      sg::Scene* loadDefaultSceneGraph() const;
 
     private:
 
       void loadMeshesFromAssimp(std::vector<util::ResourceHandle>& out_meshes, const aiScene *scene, bool yAxisFlipped);
       util::ResourceHandle loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped);
       void loadAnimatedSkeleton(const aiScene *scene);
-      sg::GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, std::vector<util::ResourceHandle>& meshes);
-      sg::TreeNode* createSceneNodes(const aiScene *scene, const aiNode *node, std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling);
+      sg::GroupNode* loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, const std::vector<util::ResourceHandle>& meshes);
+      sg::TreeNode* createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling);
       void attachBonesToSkinnedMesh();    
 
       AnimationTimeUnit m_animationTimeUnit;

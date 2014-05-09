@@ -16,18 +16,18 @@ namespace he
       TBO();
       ~TBO();
 
-      void createBuffer(GLuint size, GLenum usage, GLenum format, void *data = nullptr);
+      void createBuffer(GLuint size, GLenum usage, GLenum format, void *data = nullptr) const;
 
-      void setData(GLuint offset, GLuint size, void *data);
-      void getData(GLuint offset, GLuint size, void *data);
+      void setData(GLuint offset, GLuint size, void *data) const;
+      void getData(GLuint offset, GLuint size, void *data) const;
 
       void bindBuffer(GLenum slot);
       void unBindBuffer() const;
 
     private:
 
-      TBO(const TBO&){}
-	    TBO& operator=(const TBO&){ return *this; }
+      TBO(const TBO&);
+	    TBO& operator=(const TBO&);
 
       GLuint m_bufferIndex;
       GLuint m_textureIndex;

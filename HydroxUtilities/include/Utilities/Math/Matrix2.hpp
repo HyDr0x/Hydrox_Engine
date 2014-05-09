@@ -14,17 +14,17 @@ namespace he
       Matrix()
       {}
 
-      Matrix(const Matrix<Type, 2>& M)
+      Matrix(const Matrix<Type, 2>& m)
       {
-        m[0] = M.m[0];
-        m[1] = M.m[1];
+        m_m[0] = m.m_m[0];
+        m_m[1] = m.m_m[1];
       }
 
 
-      Matrix(Vector<Type, 2>& v0, Vector<Type, 2>& v1)
+      Matrix(const Vector<Type, 2>& v0, const Vector<Type, 2>& v1)
       {
-        m[0][0]=v0[0];  m[1][0]=v0[1];
-        m[0][1]=v1[0];  m[1][1]=v1[1];
+        m_m[0][0]=v0[0];  m_m[1][0]=v0[1];
+        m_m[0][1]=v1[0];  m_m[1][1]=v1[1];
       }
 
       Matrix(const Type *a)
@@ -33,158 +33,158 @@ namespace he
         {
           for(int j = 0; j < 2; j++)
           {
-            m[i][j] = a[4 * i + j];
+            m_m[i][j] = a[4 * i + j];
           }
         }
       }
 
       Matrix(Type m_11,  Type m_21,
-          Type m_12,  Type m_22)
+             Type m_12,  Type m_22)
       {
-        m[0][0]=m_11;  m[1][0]=m_21;
-        m[0][1]=m_12;  m[1][1]=m_22;
+        m_m[0][0]=m_11;  m_m[1][0]=m_21;
+        m_m[0][1]=m_12;  m_m[1][1]=m_22;
       }
-
-	    ~Matrix(){}
 
       static inline Matrix identity()
       {
         return Matrix<Type, 2>(1.0f,  0.0f,
-                            0.0f,  1.0f);
+                               0.0f,  1.0f);
       }
 
       inline Vector<Type, 2>& operator [](unsigned int i)
 	    {
-	      return m[i];
+	      return m_m[i];
 	    }
 
-	    inline Type detMat(void)
+      inline const Vector<Type, 2>& operator [](unsigned int i) const
 	    {
-	      return m[0][0] * m[1][1] - m[1][0] * m[0][1];
+	      return m_m[i];
 	    }
 
-	    inline Matrix invert(void)
+	    inline Type detMat() const
 	    {
-		    Type invDetM=detMat();
+	      return m_m[0][0] * m_m[1][1] - m_m[1][0] * m_m[0][1];
+	    }
+
+	    inline Matrix invert() const
+	    {
+		    Type invDetM = detMat();
         Matrix invM;
 
 		    if(invDetM)
 		    {
-			    invDetM=1.0f/invDetM;
+			    invDetM = 1.0f / invDetM;
 
-          invM[0][0] = m[1][1];
-          invM[1][0] =-m[0][1];
-          invM[0][1] =-m[1][0];
-          invM[1][1] = m[0][0];
+          invM[0][0] = m_m[1][1];
+          invM[1][0] =-m_m[0][1];
+          invM[0][1] =-m_m[1][0];
+          invM[1][1] = m_m[0][0];
 
           invM *= invDetM;
-
-          return invM;
 		    }
 
 		    return invM;
 	    }
 
-      inline  Matrix transpose(void)
+      inline Matrix transpose() const
       {
-        return Matrix<Type, 2>(m[0][0], m[0][1],
-                            m[1][0], m[1][1]);
+        return Matrix<Type, 2>(m_m[0][0], m_m[0][1],
+                               m_m[1][0], m_m[1][1]);
       }
 
-      inline Vector<Type, 2> operator * ( Vector<Type,2>& v )
+      inline Matrix operator + (const Matrix& m) const
+      {
+        Matrix result;
+
+        result[0] = m_m[0] + m[0];
+        result[1] = m_m[1] + m[1];
+
+        return result;
+      }
+
+      inline Matrix operator - (const Matrix& m) const
+      {
+		    Matrix result;
+
+        result[0] = m_m[0] - m[0];
+        result[1] = m_m[1] - m[1];
+
+        return result;
+      }
+
+      inline Matrix operator * (const Matrix<Type, 2>& m) const
+      {
+        Matrix<Type, 2> result;
+
+        result[0][0] = m_m[0][0] * m[0][0] + m_m[1][0] * m[0][1];
+        result[0][1] = m_m[0][1] * m[0][0] + m_m[1][1] * m[0][1];
+
+        result[1][0] = m_m[0][0] * m[1][0] + m_m[1][0] * m[1][1];
+        result[1][1] = m_m[0][1] * m[1][0] + m_m[1][1] * m[1][1];
+
+        return result;
+      }
+
+      inline Matrix operator * (Type s) const
+      {
+        Matrix result;
+
+        result[0] = m_m[0] * s;
+        result[1] = m_m[1] * s;
+
+        return result;
+      }
+
+      inline Vector<Type, 2> operator * (const Vector<Type,2>& v) const
       {
         Vector<Type, 2> vErg;
 
-        vErg[0] = m[0][0] * v[0] + m[1][0] * v[1];
-        vErg[1] = m[0][1] * v[0] + m[1][1] * v[1];
+        vErg[0] = m_m[0][0] * v[0] + m_m[1][0] * v[1];
+        vErg[1] = m_m[0][1] * v[0] + m_m[1][1] * v[1];
 
         return vErg;
       }
 
-      inline  Matrix operator * ( Type s )
+      inline Matrix& operator += (const Matrix& m)
       {
-        Matrix erg;
-
-        erg[0] = m[0] * s;
-        erg[1] = m[1] * s;
-
-        return erg;
-      }
-
-      inline const Matrix& operator *= ( Type s )
-      {
-        m[0] *= s;
-        m[1] *= s;
+		    m_m[0] += m[0];
+        m_m[1] += m[1];
 
         return *this;
       }
 
-      inline Matrix operator + (const Matrix& M)
+      inline Matrix& operator -= (const Matrix& m)
       {
-        Matrix erg;
-
-        erg[0] = m[0] + M[0];
-        erg[1] = m[1] + M[1];
-
-        return erg;
-      }
-
-      inline Matrix operator - (const Matrix& M)
-      {
-		    Matrix erg;
-
-        erg[0] = m[0] - M[0];
-        erg[1] = m[1] - M[1];
-
-        return erg;
-      }
-
-      inline const Matrix& operator += (const Matrix& M)
-      {
-		    m[0] += M[0];
-        m[1] += M[1];
+		    m_m[0] -= m[0];
+        m_m[1] -= m[1];
 
         return *this;
       }
 
-      inline  Matrix& operator -= ( Matrix& M)
+      inline Matrix& operator *= (const Matrix<Type, 2>& m)
       {
-		    m[0] -= M[0];
-        m[1] -= M[1];
+        Matrix<Type, 2> tmpMat = *this;
+
+		    m_m[0][0] = tmpMat[0][0] * m[0][0] + tmpMat[1][0] * m[0][1];
+        m_m[0][1] = tmpMat[0][1] * m[0][0] + tmpMat[1][1] * m[0][1];
+
+        m_m[1][0] = tmpMat[0][0] * m[1][0] + tmpMat[1][0] * m[1][1];
+        m_m[1][1] = tmpMat[0][1] * m[1][0] + tmpMat[1][1] * m[1][1];
 
         return *this;
       }
 
-
-      inline Matrix<Type,2> operator * (Matrix<Type, 2>& M1)
+      inline Matrix& operator *= (Type s)
       {
-        Matrix<Type, 2> erg;
-
-        erg[0][0] = m[0][0] * M1[0][0] + m[1][0] * M1[0][1];
-        erg[0][1] = m[0][1] * M1[0][0] + m[1][1] * M1[0][1];
-
-        erg[1][0] = m[0][0] * M1[1][0] + m[1][0] * M1[1][1];
-        erg[1][1] = m[0][1] * M1[1][0] + m[1][1] * M1[1][1];
-
-        return erg;
-      }
-
-      inline const Matrix<Type,2>& operator *= ( Matrix<Type, 2>& M1)
-      {
-        Matrix<Type, 2> M0 = *this;
-
-		    m[0][0] = M0[0][0] * M1[0][0] + M0[1][0] * M1[0][1];
-        m[0][1] = M0[0][1] * M1[0][0] + M0[1][1] * M1[0][1];
-
-        m[1][0] = M0[0][0] * M1[1][0] + M0[1][0] * M1[1][1];
-        m[1][1] = M0[0][1] * M1[1][0] + M0[1][1] * M1[1][1];
+        m_m[0] *= s;
+        m_m[1] *= s;
 
         return *this;
       }
 
     private:
 
-      Vector<Type, 2> m[2];
+      Vector<Type, 2> m_m[2];
     };
 	}
 }

@@ -16,15 +16,15 @@ namespace he
       m_target = o.m_target;
     }
 
+    ILDevilLoader::~ILDevilLoader()
+    {
+    }
+
     ILDevilLoader& ILDevilLoader::operator=(const ILDevilLoader& o)
     {
       m_textureManager = o.m_textureManager;
 
       return *this;
-    }
-
-    ILDevilLoader::~ILDevilLoader()
-    {
     }
 
     void ILDevilLoader::setTarget(GLenum target)
@@ -75,7 +75,7 @@ namespace he
       return tmpTextureID;
     }
 
-    util::ResourceHandle ILDevilLoader::getDefaultResource()
+    util::ResourceHandle ILDevilLoader::getDefaultResource() const
     {
       util::Vector<float, 3> textureData = util::Vector<float, 3>(0.0f, 1.0f, 0.0f);
       return m_textureManager->addObject(renderer::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));

@@ -14,7 +14,7 @@ namespace he
       m_bbMax = util::Vector<float, 3>(FLT_MIN, FLT_MIN, FLT_MIN);
     }
 
-    AABB::AABB(std::vector<util::Vector<float, 3>> positions)
+    AABB::AABB(const std::vector<util::Vector<float, 3>>& positions)
     {
       m_bbMin = util::Vector<float, 3>(FLT_MAX, FLT_MAX, FLT_MAX);
       m_bbMax = util::Vector<float, 3>(FLT_MIN, FLT_MIN, FLT_MIN);
@@ -41,12 +41,12 @@ namespace he
 
     }
 
-    util::Vector<float, 3> AABB::getBBMax()
+    util::Vector<float, 3> AABB::getBBMax() const
     {
       return m_bbMax;
     }
 
-    util::Vector<float, 3> AABB::getBBMin()
+    util::Vector<float, 3> AABB::getBBMin() const
     {
       return m_bbMin;
     }

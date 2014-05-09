@@ -8,7 +8,7 @@ namespace he
     {
     }
 
-    Material::Material(MaterialData& materialData, std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader)
+    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader)
     {
       unsigned int length = sizeof(MaterialData) + sizeof(unsigned int);
       std::vector<unsigned char> data(length);
@@ -113,12 +113,12 @@ namespace he
       return m_shaderHandle;
     }
 
-    void Material::setMaterialData(Material::MaterialData& material)
+    void Material::setMaterialData(const Material::MaterialData& material)
     {
       m_materialData = material;
     }
 
-    Material::MaterialData& Material::getMaterialData()
+    const Material::MaterialData& Material::getMaterialData() const
     {
       return m_materialData;
     }

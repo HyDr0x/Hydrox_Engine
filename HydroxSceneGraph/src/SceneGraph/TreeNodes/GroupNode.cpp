@@ -7,11 +7,16 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     GroupNode::GroupNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                         m_firstChild(firstChild)
     {
       m_dirtyFlag = DEFAULT;
+    }
+
+    GroupNode::~GroupNode()
+    {
+      m_firstChild = nullptr;
     }
 
     GroupNode& GroupNode::operator=(const GroupNode& sourceNode)
@@ -32,11 +37,6 @@ namespace he
       GroupNode::operator=(copyNode);
 
       return *this;
-    }
-
-    GroupNode::~GroupNode()
-    {
-      m_firstChild = nullptr;
     }
 
     GroupNode* GroupNode::clone() const
@@ -64,7 +64,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool GroupNode::isGroupNode()
+    bool GroupNode::isGroupNode() const
     {
       return true;
     }

@@ -23,7 +23,7 @@ namespace he
       StringTexture3D(util::SingletonManager *singletonManager, std::string text);
       ~StringTexture3D();
 
-      void render();
+      void render() const;
 
     private:
 

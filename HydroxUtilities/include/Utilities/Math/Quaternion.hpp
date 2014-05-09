@@ -19,14 +19,13 @@ namespace he
 
       Quaternion(TYPE w, TYPE x, TYPE y, TYPE z) : m_coord(w, x, y, z)
       {}
-      ~Quaternion(){}
 
       static inline Quaternion identity()
       {
         return Quaternion<TYPE>(1.0f, 0.0f, 0.0f, 0.0f);
       }
 
-      Matrix<TYPE, 4> toMatrix()
+      Matrix<TYPE, 4> toMatrix() const
       {
         TYPE xx = m_coord[1] * m_coord[1];
         TYPE xy = m_coord[1] * m_coord[2];
@@ -48,51 +47,37 @@ namespace he
           );
       }
 
-      inline Quaternion conjugate()
+      inline Quaternion conjugate() const
       {
         return Quaternion(m_coord[0], -m_coord[1], -m_coord[2], -m_coord[3]);
       }
 
-      inline TYPE length()
+      inline TYPE length() const
       {
         return sqrt(m_coord[0] * m_coord[0] + m_coord[1] * m_coord[1] + m_coord[2] * m_coord[2] + m_coord[3] * m_coord[3]);
       }
 
-      inline void normalize()
+      inline Quaternion normalize() const
       {
-        *this /= length();
+        return *this / length();
       }
 
-      inline Quaternion invert()
+      inline Quaternion invert() const
       {
         return conjugate() / dot(*this, *this);
       }
 
-      inline Quaternion operator + (const Quaternion& q)
+      inline Quaternion operator + (const Quaternion& q) const
       {
         return Quaternion(m_coord + q.m_coord);
       }
 
-      inline Quaternion operator - (const Quaternion& q)
+      inline Quaternion operator - (const Quaternion& q) const
       {
         return Quaternion(m_coord - q.m_coord);
       }
 
-      inline const Quaternion& operator += (const Quaternion& q)
-      {
-        m_coord += q.m_coord;
-
-        return *this;
-      }
-
-      inline const Quaternion& operator -= (const Quaternion& q)
-      {
-        m_coord -= q.m_coord;
-
-        return *this;
-      }
-
-      inline Quaternion operator * (Quaternion& q)
+      inline Quaternion operator * (const Quaternion& q) const
       {
         return Quaternion(  q.m_coord[0] * m_coord[0]
                           - q.m_coord[1] * m_coord[1]
@@ -112,7 +97,31 @@ namespace he
                           + q.m_coord[3] * m_coord[0]);
       }
 
-      inline const Quaternion& operator *= (Quaternion& q)
+      inline Quaternion operator * (TYPE s) const
+      {
+        return Quaternion(s * m_coord[0], s * m_coord[1], s * m_coord[2], s * m_coord[3]);
+      }
+
+      inline Quaternion operator / (TYPE s) const
+      {
+        return Quaternion(m_coord[0] / s, m_coord[1] / s, m_coord[2] / s, m_coord[3] / s);
+      }
+
+      inline Quaternion& operator += (const Quaternion& q)
+      {
+        m_coord += q.m_coord;
+
+        return *this;
+      }
+
+      inline Quaternion& operator -= (const Quaternion& q)
+      {
+        m_coord -= q.m_coord;
+
+        return *this;
+      }
+
+      inline Quaternion& operator *= (const Quaternion& q)
       {
         Vector<TYPE, 4> tmpErg;
 
@@ -138,12 +147,7 @@ namespace he
         return *this;
       }
 
-      inline Quaternion operator * (TYPE s)
-      {
-        return Quaternion(s * m_coord[0], s * m_coord[1], s * m_coord[2], s * m_coord[3]);
-      }
-
-      inline const Quaternion& operator *= (TYPE s)
+      inline Quaternion& operator *= (TYPE s)
       {
         m_coord[0] *= s;
         m_coord[1] *= s;
@@ -153,12 +157,7 @@ namespace he
         return *this;
       }
 
-      inline Quaternion operator / (TYPE s)
-      {
-        return Quaternion(m_coord[0] / s, m_coord[1] / s, m_coord[2] / s, m_coord[3] / s);
-      }
-
-      inline const Quaternion& operator /= (TYPE s)
+      inline Quaternion& operator /= (TYPE s)
       {
         m_coord[0] /= s;
         m_coord[1] /= s;
@@ -169,6 +168,11 @@ namespace he
       }
 
       inline TYPE& operator [] (unsigned int i) 
+      { 
+        return m_coord[i]; 
+      }
+
+      inline const TYPE& operator [] (unsigned int i) const
       { 
         return m_coord[i]; 
       }
@@ -193,19 +197,19 @@ namespace he
                             v[2] * (a00 - a11 - a22 + a33) + 2.0f * (a13 * v[0] + a23 * v[1] - a02 * v[0] + a01 * v[1]));
       }*/
 
-      inline Vector<TYPE, 3> apply(Vector<TYPE, 3> v)
+      inline Vector<TYPE, 3> apply(const Vector<TYPE, 3>& v) const
       {
         Vector<TYPE, 3> pureQuad = Vector<TYPE, 3>(m_coord[1], m_coord[2], m_coord[3]);
         Vector<TYPE, 3> t = math::cross<TYPE>(v, pureQuad) * 2.0f;
         return v + t * m_coord[0] + math::cross<TYPE>(t, pureQuad);
       }
 
-      static inline TYPE dot(Quaternion<TYPE> a, Quaternion<TYPE> b)
+      static inline TYPE dot(const Quaternion<TYPE>& a, const Quaternion<TYPE>& b)
       {
         return a.m_coord[0] * b.m_coord[0] + a.m_coord[1] * b.m_coord[1] + a.m_coord[2] * b.m_coord[2] + a.m_coord[3] * b.m_coord[3];
       }
 
-      static inline Quaternion<TYPE> slerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)
+      static inline Quaternion<TYPE> slerp(const Quaternion<TYPE>& a, const Quaternion<TYPE>& b, TYPE t)
       {
         float cosTheta = Quaternion<TYPE>::dot(a, b);
         if(cosTheta > 0.9995f)
@@ -217,8 +221,8 @@ namespace he
           float theta = acosf(math::clamp(cosTheta, -1.0f, 1.0f));
           float thetap = theta * t;
 
-          Quaternion<float> qperp = b - a * cosTheta;
-          qperp.normalize();
+          Quaternion<float> qperp = (b - a * cosTheta).normalize();
+          //qperp.normalize();
 
           //Quaternion<float> result = (a * sinf((1.0f - t) * theta) + b * sinf(t * theta)) / sinf(theta);
 
@@ -226,12 +230,11 @@ namespace he
         }
       }
 
-      static inline Quaternion<TYPE> nlerp(Quaternion<TYPE> a, Quaternion<TYPE> b, TYPE t)
+      static inline Quaternion<TYPE> nlerp(const Quaternion<TYPE>& a, const Quaternion<TYPE>& b, TYPE t)
       {
         Quaternion<TYPE> result = (a * (1.0f - t) + b * t);
-        result.normalize();//quaternion needs to be normailzed after linear interpolation
 
-        return result;
+        return result.normalize();//quaternion needs to be normailzed after linear interpolation
       }
 
     private:

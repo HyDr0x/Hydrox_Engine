@@ -44,7 +44,7 @@ namespace he
       std::swap(m_referenceCounter, other.m_referenceCounter);
     }
 
-    bool ResourceHandle::operator==(const ResourceHandle& o)
+    bool ResourceHandle::operator==(const ResourceHandle& o) const
     {
       return m_id == o.m_id && m_referenceCounter == o.m_referenceCounter;
     }

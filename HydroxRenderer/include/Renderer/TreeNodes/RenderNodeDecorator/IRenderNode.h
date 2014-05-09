@@ -23,26 +23,26 @@ namespace he
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
 
-      virtual bool insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer) = 0;
+      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer) = 0;
 
-      virtual bool insertGeometry(xBar::StaticGeometryContainer& geometryContainer) = 0;
-      virtual bool removeGeometry(xBar::StaticGeometryContainer& geometryContainer) = 0;
+      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer) = 0;
+      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer) = 0;
 
-      virtual std::list<xBar::StaticGeometryContainer*>& getInstances() = 0;
+      virtual const std::list<const xBar::StaticGeometryContainer*>& getInstances() const = 0;
 
-      virtual unsigned int getInstanceNumber() = 0;
+      virtual unsigned int getInstanceNumber() const = 0;
 
-      virtual bool hasInstanceNumberChanged() = 0;
+      virtual bool hasInstanceNumberChanged() const = 0;
 
-      virtual void frustumCulling() = 0;
+      virtual void frustumCulling() const = 0;
 
-      virtual void rasterizeGeometry() = 0;
+      virtual void rasterizeGeometry() const = 0;
 
       virtual void updateBuffer() = 0;
 
-      virtual unsigned int getMaxGeometry() = 0;
-      virtual unsigned int getMaxMaterials() = 0;
-      virtual unsigned int getMaxBones() = 0;
+      virtual unsigned int getMaxGeometry() const = 0;
+      virtual unsigned int getMaxMaterials() const = 0;
+      virtual unsigned int getMaxBones() const = 0;
 
     protected:
 

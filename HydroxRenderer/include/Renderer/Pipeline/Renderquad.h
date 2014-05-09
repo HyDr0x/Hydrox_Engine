@@ -22,12 +22,13 @@ namespace he
 
 	    void setRenderTarget(int count, Texture2D *tex[]);
 	    void setRenderTarget(int count, ...);
-	    void render(bool direct);
+
+	    void render(bool direct) const;
 
     private:
 
-	    Renderquad(const Renderquad&){}
-	    Renderquad& operator=(const Renderquad&){ return *this; }
+	    Renderquad(const Renderquad&);
+	    Renderquad& operator=(const Renderquad&);
 
 	    unsigned int m_count;
 

@@ -4,7 +4,7 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     class TreeNode;
     class GroupNode;
 

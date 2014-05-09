@@ -35,7 +35,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool RenderNode::insertGeometry(xBar::SkinnedGeometryContainer& geometryContainer)
+    bool RenderNode::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
     {
       if(m_instances.size() >= m_options.m_maxGeometry)
       {
@@ -49,7 +49,7 @@ namespace he
       return true;
     }
 
-    bool RenderNode::insertGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool RenderNode::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       if(m_instances.size() >= m_options.m_maxGeometry)
       {
@@ -63,11 +63,11 @@ namespace he
       return true;
     }
 
-    bool RenderNode::removeGeometry(xBar::StaticGeometryContainer& geometryContainer)
+    bool RenderNode::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
       bool deleted = false;
 
-      for(std::list<xBar::StaticGeometryContainer*>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
+      for(std::list<const xBar::StaticGeometryContainer*>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
       {
         if((**instanceIterator) == geometryContainer)
         {
@@ -82,22 +82,22 @@ namespace he
       return deleted;
     }
 
-    std::list<xBar::StaticGeometryContainer*>& RenderNode::getInstances()
+    const std::list<const xBar::StaticGeometryContainer*>& RenderNode::getInstances() const
     {
       return m_instances;
     }
 
-    unsigned int RenderNode::getInstanceNumber()
+    unsigned int RenderNode::getInstanceNumber() const
     {
       return m_instances.size();
     }
 
-    bool RenderNode::hasInstanceNumberChanged()
+    bool RenderNode::hasInstanceNumberChanged() const
     {
       return m_instanceNumberChanged;
     }
 
-    void RenderNode::frustumCulling()
+    void RenderNode::frustumCulling() const
     {
       unsigned int instanceNumber = m_instances.size();
       ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
@@ -105,7 +105,7 @@ namespace he
       ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 
-    void RenderNode::rasterizeGeometry()
+    void RenderNode::rasterizeGeometry() const
     {
     }
 
@@ -114,17 +114,17 @@ namespace he
       m_instanceNumberChanged = false;
     }
 
-    unsigned int RenderNode::getMaxGeometry()
+    unsigned int RenderNode::getMaxGeometry() const
     {
       return m_options.m_maxGeometry;
     }
 
-    unsigned int RenderNode::getMaxMaterials()
+    unsigned int RenderNode::getMaxMaterials() const
     {
       return m_options.m_maxMaterials;
     }
 
-    unsigned int RenderNode::getMaxBones()
+    unsigned int RenderNode::getMaxBones() const
     {
       return m_options.m_maxBones;
     }

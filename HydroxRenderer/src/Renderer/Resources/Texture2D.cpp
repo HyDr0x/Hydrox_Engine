@@ -6,8 +6,6 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
@@ -59,7 +57,7 @@ namespace he
 
       glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, data);
 
-      if (mipmapping)
+      if(mipmapping)
       {
         glGenerateMipmap(m_target);
       }
@@ -79,6 +77,10 @@ namespace he
 	    m_slot = o.m_slot;
     }
 
+    Texture2D::~Texture2D()
+    {
+    }
+
     Texture2D& Texture2D::operator=(const Texture2D& o)
     {
       m_hash = o.m_hash;
@@ -92,10 +94,6 @@ namespace he
 	    m_slot = o.m_slot;
 
       return *this;
-    }
-
-    Texture2D::~Texture2D()
-    {
     }
 
     void Texture2D::free()
@@ -114,13 +112,20 @@ namespace he
       glUniform1i(location, slot);
     }
 
-    void Texture2D::unsetTexture()
+    void Texture2D::unsetTexture() const
     {
 	    glActiveTexture(GL_TEXTURE0 + m_slot);
 	    glBindTexture(m_target, 0);
     }
 
-    void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter)
+    void Texture2D::generateMipMapps() const
+    {
+      glBindTexture(m_target, m_texIndex);
+        glGenerateMipmap(m_target);
+      glBindTexture(m_target, 0);
+    }
+
+    void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter) const
     {
 	    glBindTexture(m_target, m_texIndex);
 		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
@@ -130,32 +135,32 @@ namespace he
 	    glBindTexture(m_target, 0);
     }
 
-    util::Vector<unsigned int, 2> Texture2D::getResolution()
+    util::Vector<unsigned int, 2> Texture2D::getResolution() const
     {
 	    return util::Vector<unsigned int, 2>(m_width, m_height);
     }
 
-    GLenum Texture2D::getTarget()
+    GLenum Texture2D::getTarget() const
     {
 	    return m_target;
     }
 
-    GLenum Texture2D::getInternalFormat()
+    GLenum Texture2D::getInternalFormat() const
     {
       return m_internalFormat;
     }
 
-    GLenum Texture2D::getFormat()
+    GLenum Texture2D::getFormat() const
     {
       return m_format;
     }
 
-    GLenum Texture2D::getType()
+    GLenum Texture2D::getType() const
     {
       return m_type;
     }
 
-    unsigned int Texture2D::getTextureSize()
+    unsigned int Texture2D::getTextureSize() const
     {
       unsigned int bytesPerPixel;
 
@@ -184,7 +189,7 @@ namespace he
       return m_width * m_height * bytesPerPixel;
     }
 
-    void Texture2D::getTextureData(GLvoid* data)
+    void Texture2D::getTextureData(GLvoid* data) const
     {
       glBindTexture(m_target, m_texIndex);
       glGetTexImage(m_target, 0, m_format, m_type, data);

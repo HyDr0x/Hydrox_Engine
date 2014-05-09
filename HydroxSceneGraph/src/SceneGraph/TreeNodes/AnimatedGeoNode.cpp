@@ -9,11 +9,15 @@
 namespace he
 {
 	namespace sg
-	{
+	{
     AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
       : GeoNode(eventManager, meshHandle, materialHandle, transparency, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
       m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
+    }
+
+    AnimatedGeoNode::~AnimatedGeoNode()
+    {
     }
 
     AnimatedGeoNode& AnimatedGeoNode::operator=(const AnimatedGeoNode& sourceNode)
@@ -34,10 +38,6 @@ namespace he
       AnimatedGeoNode::operator=(copyNode);
 
       return *this;
-    }
-
-    AnimatedGeoNode::~AnimatedGeoNode()
-    {
     }
 
     TreeNode* AnimatedGeoNode::clone() const
@@ -66,7 +66,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    bool AnimatedGeoNode::isAnimatedGeoNode()
+    bool AnimatedGeoNode::isAnimatedGeoNode() const
     {
       return true;
     }
@@ -75,14 +75,14 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_meshHandle = meshHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -90,14 +90,14 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_materialHandle = materialHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
     }
 
@@ -105,11 +105,11 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::SkinnedGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, &m_trfMatrix, m_materialHandle, m_meshHandle));
       }
 
       m_renderable = renderable;
@@ -120,7 +120,7 @@ namespace he
       m_boneTransformMatrices[boneIndex] = boneTransform;
     }
 
-    std::vector<util::Matrix<float, 4>> AnimatedGeoNode::getSkinningMatrices()
+    std::vector<util::Matrix<float, 4>> AnimatedGeoNode::getSkinningMatrices() const
     {
       std::vector<util::Matrix<float, 4>> skinningMatrices;
       skinningMatrices.resize(m_inverseBindPoseMatrices.size());

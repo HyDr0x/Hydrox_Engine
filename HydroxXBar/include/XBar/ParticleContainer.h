@@ -18,9 +18,9 @@ namespace he
       ParticleContainer();
       ~ParticleContainer();
 
-      bool operator == (const ParticleContainer& o);
+      bool operator == (const ParticleContainer& o) const;
 
-      util::Matrix<float, 4> getTransformationMatrix();
+      util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 

@@ -44,8 +44,10 @@ namespace he
         EVENTSTARTCOUNTER
 	    };
 
-      EventManager();
-	    ~EventManager();
+	    ~EventManager()
+      {
+	      m_sigMap.clear();
+      }
 
 	    template<typename Signature> void addNewSignal(unsigned int eventID)
 	    {
@@ -83,7 +85,7 @@ namespace he
 		    return dynamic_cast<Signal<Signature>*>(m_sigMap[eventID]);
 	    }
 
-	    template<typename Signature> unsigned int getSlotNumber(unsigned int eventID)
+	    template<typename Signature> unsigned int getSlotNumber(unsigned int eventID) const
 	    {
 		    return dynamic_cast<Signal<Signature>*>(m_sigMap[eventID])->getSlotNumber();
 	    }

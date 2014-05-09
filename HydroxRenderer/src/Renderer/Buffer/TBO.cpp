@@ -16,7 +16,7 @@ namespace he
       glDeleteTextures(1, &m_textureIndex);
     }
 
-    void TBO::createBuffer(GLuint size, GLenum usage, GLenum format, void *data)
+    void TBO::createBuffer(GLuint size, GLenum usage, GLenum format, void *data) const
     {
       glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
       glBufferData(GL_TEXTURE_BUFFER, size, data, usage);
@@ -28,14 +28,14 @@ namespace he
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
-    void TBO::setData(GLuint offset, GLuint size, void *data)
+    void TBO::setData(GLuint offset, GLuint size, void *data) const
     {
       glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
       glBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
-    void TBO::getData(GLuint offset, GLuint size, void *data)
+    void TBO::getData(GLuint offset, GLuint size, void *data) const
     {
       glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
       glGetBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);

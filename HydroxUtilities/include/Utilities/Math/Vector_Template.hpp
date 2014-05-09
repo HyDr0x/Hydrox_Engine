@@ -40,23 +40,23 @@ namespace he
 
       unsigned int giveVertexNumber(void);
 
-      inline const Vector& operator = (const Vector  &v) { VECTOR_ASSIGNEMENT_OP return *this; }
+      inline Vector& operator = (const Vector  &v) { VECTOR_ASSIGNEMENT_OP return *this; }
 
-	    inline Vector operator + (const Vector &v) { return Vector( VECTOR_PLUS_OP ); }
-      inline Vector operator - (const Vector &v) { return Vector( VECTOR_MINUS_OP ); }
+	    inline Vector operator + (const Vector &v) const { return Vector( VECTOR_PLUS_OP ); }
+      inline Vector operator - (const Vector &v) const { return Vector( VECTOR_MINUS_OP ); }
 
-      inline Vector operator * (const Vector &v) { return Vector( VECTOR_MULTIPLY_OP ); }
-      inline Vector operator * (const TYPE &s) { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
+      inline Vector operator * (const Vector &v) const { return Vector( VECTOR_MULTIPLY_OP ); }
+      inline Vector operator * (const TYPE &s) const { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
 
-      inline Vector operator / (const Vector &v) { return Vector( VECTOR_DIVIDE_OP ); }
-	    inline Vector operator / (const TYPE &s) { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
+      inline Vector operator / (const Vector &v) const { return Vector( VECTOR_DIVIDE_OP ); }
+	    inline Vector operator / (const TYPE &s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
 
-      inline const Vector& operator += (const Vector &v) { VECTOR_EQ_PLUS_OP return *this; }
-      inline const Vector& operator -= (const Vector &v) { VECTOR_EQ_MINUS_OP return *this; }
-      inline const Vector& operator *= (const Vector &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
-      inline const Vector& operator *= (const TYPE &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
-      inline const Vector& operator /= (const Vector &v) { VECTOR_EQ_DIVIDE_OP return *this; }
-      inline const Vector& operator /= (const TYPE &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
+      inline Vector& operator += (const Vector &v) { VECTOR_EQ_PLUS_OP return *this; }
+      inline Vector& operator -= (const Vector &v) { VECTOR_EQ_MINUS_OP return *this; }
+      inline Vector& operator *= (const Vector &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
+      inline Vector& operator *= (const TYPE &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
+      inline Vector& operator /= (const Vector &v) { VECTOR_EQ_DIVIDE_OP return *this; }
+      inline Vector& operator /= (const TYPE &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
 
       inline bool operator == (const Vector &v) { return VECTOR_COMP_EQ }
       inline bool operator != (const Vector &v) { return VECTOR_COMP_UQ }
@@ -68,7 +68,7 @@ namespace he
       inline TYPE& operator [] (unsigned int i) { return m_x[i]; }
       inline const TYPE& operator [] (unsigned int i) const { return m_x[i]; }
 
-      inline double length() 
+      inline double length() const
       { 
         double length = 0;
 
@@ -79,17 +79,21 @@ namespace he
         return sqrt(length); 
       }
 
-      inline void normalize() 
+      inline Vector normalize() const
       { 
+        Vector<TYPE, VECTOR_NUM_ARGS> result;
+
         double l = 1.0 / length();
 
         for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
         {
-          m_x[i] *= static_cast<float>(l);
+          result[i] = m_x[i] * static_cast<float>(l);
         }
+
+        return result;
       }
 
-      inline static TYPE dot(Vector<TYPE, VECTOR_NUM_ARGS> a, Vector<TYPE, VECTOR_NUM_ARGS> b)
+      inline static TYPE dot(const Vector<TYPE, VECTOR_NUM_ARGS>& a, const Vector<TYPE, VECTOR_NUM_ARGS>& b)
       {
         TYPE sum = 0;
 
@@ -101,7 +105,7 @@ namespace he
         return sum;
       }
 
-      inline static Vector<TYPE, VECTOR_NUM_ARGS> lerp(Vector<TYPE, VECTOR_NUM_ARGS> a, Vector<TYPE, VECTOR_NUM_ARGS> b, TYPE t)
+      inline static Vector<TYPE, VECTOR_NUM_ARGS> lerp(const Vector<TYPE, VECTOR_NUM_ARGS>& a, const Vector<TYPE, VECTOR_NUM_ARGS>& b, TYPE t)
       {
         return a * (1.0f - t) + b * t;
       }

@@ -31,7 +31,7 @@ namespace he
       m_textureHandles = textureHandles;
     }
 
-    bool TextureNode::isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles)
+    bool TextureNode::isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles) const
     {
       if(m_textureHandles[Material::DIFFUSETEX].size() != textureHandles[Material::DIFFUSETEX].size())
       {
@@ -88,7 +88,7 @@ namespace he
       return true;
     }
 
-    std::vector< std::vector<util::ResourceHandle> >& TextureNode::getTextureHandles()
+    const std::vector< std::vector<util::ResourceHandle> >& TextureNode::getTextureHandles() const
     {
       return m_textureHandles;
     }
