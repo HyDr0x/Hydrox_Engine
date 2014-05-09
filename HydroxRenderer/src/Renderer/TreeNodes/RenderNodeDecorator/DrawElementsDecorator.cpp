@@ -127,9 +127,6 @@ namespace he
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
       m_meshIndexBuffer.bindBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
-      std::vector<DrawElementsIndirectCommand> tmpTest(getInstanceNumber());
-      m_commandBuffer.getData(0, sizeof(DrawElementsIndirectCommand)* getInstanceNumber(), &tmpTest[0]);
-
       glMultiDrawElementsIndirect(m_primitiveType, m_indexType, nullptr, getInstanceNumber(), 0);
 
       m_meshIndexBuffer.unbindBuffer(GL_ELEMENT_ARRAY_BUFFER);

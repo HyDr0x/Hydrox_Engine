@@ -16,10 +16,9 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertGeometryTraverser::InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager) : 
       m_options(options),
       m_singletonManager(singletonManager),
-      m_renderNodes(renderNodes),
       m_inserted(false)
     {
     }
@@ -191,8 +190,6 @@ namespace he
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
-
-      m_renderNodes.push_back(treeNode);
     }
 
     void InsertGeometryTraverser::createNewSibling(TreeNode* sibling)
@@ -232,8 +229,6 @@ namespace he
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());
-
-      m_renderNodes.push_back(treeNode);
     }
 	}
 }

@@ -133,7 +133,7 @@ namespace he
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(positions, GL_TRIANGLES, indices)), materialLoader.getDefaultResource(), false, std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), false, std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);
@@ -294,8 +294,9 @@ namespace he
 		    }
 	    }
 
-      return m_modelManager->addObject(renderer::Mesh(positions,
+      return m_modelManager->addObject(renderer::Mesh(
         primitiveType,
+        positions,
         indices,
         textureCoords,
         normals,

@@ -24,7 +24,7 @@ namespace he
     {
     public:
 
-      InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& soptions, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic);
+      InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& soptions, util::SingletonManager *singletonManager);
       virtual ~InsertSkinnedGeometryTraverser();
 
       virtual bool preTraverse(IRenderNode* treeNode);

@@ -24,7 +24,7 @@ namespace he
     {
     public:
 
-      InsertStaticGeometryTraverser(xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic);
+      InsertStaticGeometryTraverser(xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
       virtual ~InsertStaticGeometryTraverser();
 
       virtual bool preTraverse(IRenderNode* treeNode);

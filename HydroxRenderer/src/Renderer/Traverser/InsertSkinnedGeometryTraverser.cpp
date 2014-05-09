@@ -16,8 +16,8 @@ namespace he
 {
 	namespace renderer
 	{
-    InsertSkinnedGeometryTraverser::InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes) : 
-      InsertGeometryTraverser(options, singletonManager, renderNodes),
+    InsertSkinnedGeometryTraverser::InsertSkinnedGeometryTraverser(xBar::SkinnedGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) : 
+      InsertGeometryTraverser(options, singletonManager),
       m_geometryContainer(geometryContainer)
     {
       Mesh* mesh = m_singletonManager->getService<ModelManager>()->getObject(m_geometryContainer.getMeshHandle());

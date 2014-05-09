@@ -45,9 +45,6 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      void frustumCulling();
-
-      std::list<IRenderNode*> m_renderNodes;
       util::ResourceHandle m_frustumCullingShaderHandle;
 
       GLuint m_meshVAO;

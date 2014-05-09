@@ -25,7 +25,7 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodesStatic);
+      InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager);
       virtual ~InsertGeometryTraverser() = 0;
 
       virtual bool preTraverse(GroupNode* treeNode);
@@ -61,11 +61,8 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      std::list<IRenderNode*>& m_renderNodes;
-
       bool m_inserted;
 
-      bool m_instanced;
       const RenderOptions& m_options;
 
       util::Flags<RenderNodeType> m_nodeType;

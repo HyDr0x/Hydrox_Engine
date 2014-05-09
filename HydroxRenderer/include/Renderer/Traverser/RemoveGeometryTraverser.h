@@ -20,7 +20,7 @@ namespace he
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager, xBar::StaticGeometryContainer& geometryContainer);
       virtual ~RemoveGeometryTraverser();
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
@@ -43,8 +43,6 @@ namespace he
 
       ModelManager *m_modelManager;
 	    MaterialManager *m_materialManager;
-
-      std::list<IRenderNode*>& m_renderNodes;
 
       xBar::StaticGeometryContainer& m_geometryContainer;
 

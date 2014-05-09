@@ -11,6 +11,7 @@
 #include "Renderer/Traverser/InsertSkinnedGeometryTraverser.h"
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
+#include "Renderer/Traverser/FrustumCullingTraverser.h"
 #include "Renderer/Traverser/DeleteTraverser.h"
 
 #include "Renderer/TreeNodes/GroupNode.h"
@@ -77,31 +78,36 @@ namespace he
 
     void GeometryRenderer::addRenderComponent(xBar::StaticGeometryContainer &staticGeometry)
     {
-      InsertStaticGeometryTraverser insertTraverser(staticGeometry, m_options, m_singletonManager, m_renderNodes);
+      InsertStaticGeometryTraverser insertTraverser(staticGeometry, m_options, m_singletonManager);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRenderer::addRenderComponent(xBar::SkinnedGeometryContainer &skinnedGeometry)
     {
-      InsertSkinnedGeometryTraverser insertTraverser(skinnedGeometry, m_options, m_singletonManager, m_renderNodes);
+      InsertSkinnedGeometryTraverser insertTraverser(skinnedGeometry, m_options, m_singletonManager);
       insertTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRenderer::removeRenderComponent(xBar::StaticGeometryContainer &staticGeometry)
     {
-      RemoveGeometryTraverser removeTraverser(m_singletonManager, m_renderNodes, staticGeometry);
+      RemoveGeometryTraverser removeTraverser(m_singletonManager, staticGeometry);
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRenderer::removeRenderComponent(xBar::SkinnedGeometryContainer &skinnedGeometry)
     {
-      RemoveGeometryTraverser removeTraverser(m_singletonManager, m_renderNodes, skinnedGeometry);
+      RemoveGeometryTraverser removeTraverser(m_singletonManager, skinnedGeometry);
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
     void GeometryRenderer::rasterizeGeometry()
     {  
-      frustumCulling();
+      FrustumCullingTraverser frustumCullingTraverser;
+
+      ComputeShader *frustumCullingShader = m_singletonManager->getService<ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
+      frustumCullingShader->useShader();
+      frustumCullingTraverser.doTraverse(m_renderRootNode);
+      frustumCullingShader->useNoShader();
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -126,21 +132,6 @@ namespace he
 
       eventManager->addNewSignal<void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(util::EventManager::OnRemoveSkinnedGeometryNode);
       eventManager->addSlotToSignal<GeometryRenderer, void (*)(xBar::SkinnedGeometryContainer &skinnedGeometry), void (GeometryRenderer::*)(xBar::SkinnedGeometryContainer &skinnedGeometry)>(this, &GeometryRenderer::removeRenderComponent, util::EventManager::OnRemoveSkinnedGeometryNode);
-    }
-
-    void GeometryRenderer::frustumCulling()
-    {
-      ComputeShader *frustumCullingShader = m_singletonManager->getService<ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
-      frustumCullingShader->useShader();
-
-      for(std::list<IRenderNode*>::const_iterator nodeIterator = m_renderNodes.begin(); nodeIterator != m_renderNodes.end(); nodeIterator++)
-      {
-        (*nodeIterator)->updateBuffer();
-
-        (*nodeIterator)->frustumCulling();
-      }
-
-      frustumCullingShader->useNoShader();
     }
   }
 }

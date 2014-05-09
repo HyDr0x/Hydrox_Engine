@@ -14,8 +14,7 @@ namespace he
 {
 	namespace renderer
 	{
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, std::list<IRenderNode*>& renderNodes, xBar::StaticGeometryContainer& geometryContainer) : 
-      m_renderNodes(renderNodes), 
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, xBar::StaticGeometryContainer& geometryContainer) : 
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<ModelManager>();
@@ -133,7 +132,6 @@ namespace he
     {
       if(treeNode->getInstanceNumber() == 0)
       {
-        m_renderNodes.remove(treeNode);
         deleteNode(treeNode);
       }
     }

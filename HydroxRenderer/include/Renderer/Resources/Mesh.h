@@ -44,8 +44,8 @@ namespace he
       Mesh();
 	    Mesh(const Mesh& o);
 
-	    Mesh(std::vector<util::Vector<float, 3>> positions, 
-           GLenum primitiveType = GL_TRIANGLES,
+	    Mesh(GLenum primitiveType,
+           std::vector<util::Vector<float, 3>> positions, 
            std::vector<indexType> indices = std::vector<indexType>(),
            std::vector<std::vector<util::Vector<float, 2>>> textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
            std::vector<util::Vector<float, 3>> normals = std::vector<util::Vector<float, 3>>(), 

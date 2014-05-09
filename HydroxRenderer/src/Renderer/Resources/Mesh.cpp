@@ -14,8 +14,8 @@ namespace he
       m_verticesPerPrimitive = 3;
     }
 
-    Mesh::Mesh(std::vector<util::Vector<float, 3>> positions, 
-               GLenum primitiveType,
+    Mesh::Mesh(GLenum primitiveType,
+               std::vector<util::Vector<float, 3>> positions,
                std::vector<indexType> indices,
                std::vector<std::vector<util::Vector<float, 2>>> textureCoords, 
                std::vector<util::Vector<float, 3>> normals, 

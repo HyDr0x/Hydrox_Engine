@@ -2,6 +2,7 @@ set(
 	HEADER 
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertSkinnedGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertStaticGeometryTraverser.h 
