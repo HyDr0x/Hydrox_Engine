@@ -8,7 +8,6 @@ namespace he
 	{
     UBO::UBO() : m_bufferData(nullptr), 
                  m_bufferDataOffset(0), 
-                 m_bufferBindingPoint(0), 
                  m_bufferSize(0), 
                  m_uniformCount(0)
     {
@@ -19,10 +18,7 @@ namespace he
     {
       glDeleteBuffers(1, &m_bufferIndex);
 
-      if(m_bufferData != nullptr)
-      {
-	      delete[] m_bufferData;
-      }
+	    delete[] m_bufferData;
     }
 
     void UBO::createBuffer(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames)//shared layout
@@ -42,6 +38,7 @@ namespace he
 
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+      delete[] m_bufferData;
       m_bufferData = new GLubyte[bufferSize];
     }
 
@@ -54,6 +51,7 @@ namespace he
 	    glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, NULL, usage);
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+      delete[] m_bufferData;
       m_bufferData = new GLubyte[m_bufferSize];
     }
 

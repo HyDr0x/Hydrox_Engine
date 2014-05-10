@@ -26,10 +26,10 @@ namespace he
 	    template<class T> void setData(const GLuint index, T *data, const GLuint count = 1)//shared layout
 	    {
 		    m_bufferDataOffset = m_uniformOffsets[index];
-		    for( int i = 0; i != count ; i++ )
+		    for(unsigned int i = 0; i != count; i++)
 		    {
-			    assert( m_bufferDataOffset <= m_bufferSize );
-			    *reinterpret_cast<T*>( m_bufferData + m_bufferDataOffset ) = data[i];
+			    assert(m_bufferDataOffset <= m_bufferSize);
+			    *reinterpret_cast<T*>(m_bufferData + m_bufferDataOffset) = data[i];
 			    m_bufferDataOffset += m_arrayStrides[index];
 		    }
 	    }
@@ -37,13 +37,13 @@ namespace he
 	    template<class T> void setMatrixData(const GLuint index, T *data, const GLuint rows, const GLuint columns)//shared layout
 	    {
         m_bufferDataOffset = m_uniformOffsets[index];
-        for(int i = 0; i != rows; i++ )
+        for(unsigned  int i = 0; i != rows; i++)
 		    {
-			    for( int j = 0; j != columns; j++ )
+			    for(unsigned  int j = 0; j != columns; j++)
 			    {
-				    assert( m_bufferDataOffset <= m_bufferSize );
+				    assert(m_bufferDataOffset <= m_bufferSize);
 				    *reinterpret_cast<T*>( m_bufferData + m_bufferDataOffset ) = data[i * columns + j];
-				    m_bufferDataOffset += sizeof( data[0] );
+				    m_bufferDataOffset += sizeof(data[0]);
 			    }
 		    }
 	    }
@@ -70,8 +70,6 @@ namespace he
 	    GLuint m_bufferIndex;
 	    GLuint m_bufferSize;
 	    GLuint m_bufferDataOffset;
-	
-      GLuint m_bufferBindingPoint;
 
 	    GLuint m_uniformCount;
     };

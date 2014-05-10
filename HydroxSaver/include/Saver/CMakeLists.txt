@@ -3,5 +3,8 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/DLLExport.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/HEFSaver.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeExtractionTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeLinkTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeStructs.h 
 	PARENT_SCOPE 
 )

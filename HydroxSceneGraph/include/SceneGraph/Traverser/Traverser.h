@@ -1,6 +1,8 @@
 #ifndef TRAVERSER_H_
 #define TRAVERSER_H_
 
+#include "SceneGraph/DLLExport.h"
+
 namespace he
 {
 	namespace sg
@@ -17,7 +19,7 @@ namespace he
     class ParticleNode;
     class LightNode;
 
-    class Traverser
+    class GRAPHICAPI Traverser
     {
     public:
 
