@@ -7,12 +7,12 @@
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
-#include <SceneGraph\TreeNodes\GeoNode.h>
-#include <SceneGraph\TreeNodes\AnimatedGeoNode.h>
-#include <SceneGraph\TreeNodes\TransformNode.h>
-#include <SceneGraph\TreeNodes\AnimatedTransformNode.h>
-#include <SceneGraph\TreeNodes\LODNode.h>
-#include <SceneGraph\TreeNodes\BillboardNode.h>
+#include <SceneGraph/TreeNodes/GeoNode.h>
+#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
+#include <SceneGraph/TreeNodes/TransformNode.h>
+#include <SceneGraph/TreeNodes/AnimatedTransformNode.h>
+#include <SceneGraph/TreeNodes/LODNode.h>
+#include <SceneGraph/TreeNodes/BillboardNode.h>
 
 #include "Saver/DLLExport.h"
 

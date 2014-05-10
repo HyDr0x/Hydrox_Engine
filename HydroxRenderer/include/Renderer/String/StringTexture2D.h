@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Signals/EventManager.h>

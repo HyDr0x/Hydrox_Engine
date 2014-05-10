@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <Utilities\Miscellaneous\ResourceHandle.h>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "Renderer/DLLExport.h"
 

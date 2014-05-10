@@ -1,7 +1,7 @@
 #include "Renderer/Pipeline/SkyboxRenderer.h"
 
 #include <vector>
-#include <Utilities\PrimitiveGenerator\CubeGenerator.h>
+#include <Utilities/PrimitiveGenerator/CubeGenerator.h>
 
 namespace he
 {

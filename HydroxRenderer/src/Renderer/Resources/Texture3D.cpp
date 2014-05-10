@@ -107,7 +107,7 @@ namespace he
 
     void Texture3D::setTexture(GLint location, GLuint slot)
     {
-      assert(slot < 31 && "ERROR, texture slot too high\n");
+      assert(slot < 31 && "ERROR, texture slot too high/n");
 
 	    m_slot = slot;
 

@@ -93,7 +93,7 @@ namespace he
 
 	    if(!assimpScene)
       {
-		    printf("%s\n", importer.GetErrorString());
+		    printf("%s/n", importer.GetErrorString());
 
         scene = loadDefaultSceneGraph();
       }

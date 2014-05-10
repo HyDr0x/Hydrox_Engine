@@ -42,7 +42,7 @@ namespace he
       std::string computeSource = "#version 430 core\n\
                                   \n\
                                   layout(local_size_x = 1) in;\n\
-                                  \n\
+                                  /n\
                                   void main()\n\
                                   {\n\
                                   }";

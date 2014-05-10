@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 #include "Utilities/DLLExport.h"
 

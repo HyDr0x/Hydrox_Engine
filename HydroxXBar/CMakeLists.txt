@@ -48,7 +48,7 @@ target_link_libraries(Hydrox_XBar ${DEBUG_LIBRARIES})
 target_link_libraries(Hydrox_XBar ${RELEASE_LIBRARIES})
 target_link_libraries(Hydrox_XBar ${GENERAL_LIBRARIES})
 
-#source_group("Header Files\\Graphics" FILES ${HEADER})
+#source_group("Header Files//Graphics" FILES ${HEADER})
 
 MACRO( source_group_tree )
         FILE( GLOB all_files ${ARGV1}/* )
@@ -61,7 +61,7 @@ MACRO( source_group_tree )
         ENDFOREACH()
         LIST( LENGTH files files_len )
         IF( ${files_len} GREATER 0 )
-                STRING( REPLACE "/" "\\\\" group_name ${ARGV0} )
+                STRING( REPLACE "/" "////" group_name ${ARGV0} )
                 SOURCE_GROUP("${group_name}" FILES ${files})
         ENDIF()
                 

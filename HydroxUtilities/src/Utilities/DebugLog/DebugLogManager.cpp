@@ -40,7 +40,7 @@ namespace he
       {
         const char* extensionName = (const char*)glGetStringi(GL_EXTENSIONS, i);
 
-        m_extensions += std::string(extensionName) + std::string("\n");
+        m_extensions += std::string(extensionName) + std::string("/n");
       }
 
       glGetIntegerv(GL_MAX_TEXTURE_UNITS, &m_maxTextureUnits);
@@ -72,7 +72,7 @@ namespace he
 
     void DebugLogManager::printSupportedExtensions() const
     {
-      std::clog << "Extensions:\n" << m_extensions.c_str() << std::endl;
+      std::clog << "Extensions:/n" << m_extensions.c_str() << std::endl;
     }
 
     unsigned int DebugLogManager::getMajorOpenGLVersion() const

@@ -1,8 +1,8 @@
-#include "Renderer\String\StringTexture2D.h"
+#include "Renderer/String/StringTexture2D.h"
 
 #include <vector>
 
-#include <Utilities\Math\Math.hpp>
+#include <Utilities/Math/Math.hpp>
 
 namespace he
 {

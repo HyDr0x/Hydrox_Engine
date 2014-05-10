@@ -60,7 +60,7 @@ namespace he
           //success = ilConvertImage(format, type);
 		      //if(!success)
           //{
-		      //	printf("ERROR, couldn't convert file %s\n", filename);
+		      //	printf("ERROR, couldn't convert file %s/n", filename);
           //}
 
           int bytesPerPixel = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
