@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
@@ -60,6 +61,21 @@ namespace he
     }
 
     void GroupNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool GroupNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool GroupNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void GroupNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

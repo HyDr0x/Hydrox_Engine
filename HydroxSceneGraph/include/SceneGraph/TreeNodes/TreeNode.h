@@ -8,7 +8,7 @@
 namespace he
 {
 	namespace sg
-	{
+	{    class ConstTraverser;
     class Traverser;
     class GroupNode;
 
@@ -22,10 +22,14 @@ namespace he
       virtual TreeNode& operator=(const TreeNode& sourceNode);
   
       virtual TreeNode* clone() const = 0;
-
+      
       virtual bool ascendTraverse(Traverser* traverser) = 0;
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
+
+      virtual bool ascendTraverse(ConstTraverser* traverser) const = 0;
+      virtual bool preTraverse(ConstTraverser* traverser) const = 0;
+      virtual void postTraverse(ConstTraverser* traverser) const = 0;
 
       virtual bool isTreeNode() const;
       virtual bool isTransformNode() const;

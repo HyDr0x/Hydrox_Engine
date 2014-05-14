@@ -23,8 +23,6 @@ namespace he
       renderer::MaterialManager *m_materialManager;
       renderer::TextureManager *m_textureManager;
       renderer::RenderShaderManager *m_renderShaderManager;
-
-      const unsigned int m_texNumber;
     };
   }
 }

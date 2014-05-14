@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 #include <XBar/BillboardContainer.h>
@@ -85,6 +86,21 @@ namespace he
     }
 
     void BillboardNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool BillboardNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool BillboardNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void BillboardNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }
@@ -187,6 +203,16 @@ namespace he
     util::Vector<float, 2> BillboardNode::getScale() const
     {
 	    return m_scale;
+    }
+
+    util::Vector<float, 2> BillboardNode::getTextureStart() const
+    {
+      return m_texStart;
+    }
+
+    util::Vector<float, 2> BillboardNode::getTextureEnd() const
+    {
+      return m_texEnd;
     }
 
     util::Matrix<float, 3> BillboardNode::getTexTransformationMatrix() const

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 namespace he
@@ -71,6 +72,21 @@ namespace he
       traverser->postTraverse(this);
     }
 
+    bool LODNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool LODNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void LODNode::postTraverse(ConstTraverser* traverser) const
+    {
+      traverser->postTraverse(this);
+    }
+
     bool LODNode::isLODNode() const
     {
       return true;
@@ -91,6 +107,11 @@ namespace he
     void LODNode::transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation)
     {
       m_transformedPosition = translation + rotation.apply(m_position * scale);
+    }
+
+    util::Vector<float, 3> LODNode::getPosition() const
+    {
+      return m_position;
     }
 	}
 }

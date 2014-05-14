@@ -50,6 +50,8 @@ namespace he
 
 	    void enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const;
 
+      std::vector<std::string> getShaderSources() const;
+
     private:
 
       bool createProgram(std::string shaderName, GLuint vertexShader, 
@@ -57,6 +59,8 @@ namespace he
                                                  GLuint tesselationEvaluationShader, 
                                                  GLuint geometryShader, 
                                                  GLuint fragmentShader);
+
+      std::vector<std::string> m_shaderSources;
     };
 
 	}

@@ -20,7 +20,7 @@ namespace he
     public:
 
       Scene(GroupNode* rootNode);
-      Scene(Scene& object);
+      Scene(const Scene& object);
       virtual ~Scene();
 
       Scene& operator=(Scene& other);
@@ -36,8 +36,8 @@ namespace he
       virtual TreeNode* addChildNode(GroupNode *destinationNode, const TreeNode *sourceNode);
       virtual void removeNode(const TreeNode *node);
 
-      virtual GroupNode* addSubTree(Scene& subTree, GroupNode *parentNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix);
-      virtual void removeSubTree(TreeNode *rootNode);
+      virtual GroupNode* addSubTree(const Scene& subTree, GroupNode *parentNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix);
+      virtual void removeSubTree(const TreeNode *rootNode);
 
       template<class CLASS> CLASS* getNode(const std::string& nodeName) const
       {

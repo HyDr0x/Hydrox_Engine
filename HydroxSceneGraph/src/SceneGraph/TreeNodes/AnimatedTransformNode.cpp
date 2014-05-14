@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 #include "SceneGraph/Traverser/GetGlobalCoordinateTraverser.h"
 
@@ -90,7 +91,7 @@ namespace he
       return newNode;
     }
 
-    bool AnimatedTransformNode::ascendTraverse(Traverser* traverser)
+   bool AnimatedTransformNode::ascendTraverse(Traverser* traverser)
     {
       return traverser->ascendTraverse(this);
     }
@@ -101,6 +102,21 @@ namespace he
     }
 
     void AnimatedTransformNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool AnimatedTransformNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool AnimatedTransformNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void AnimatedTransformNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }
@@ -146,6 +162,11 @@ namespace he
     unsigned int AnimatedTransformNode::getCurrentAnimationTrack() const
     {
       return m_currentTrack;
+    }
+
+    const std::vector<AnimationTrack>& AnimatedTransformNode::getAnimationTracks() const
+    {
+      return m_animationTracks;
     }
 
     void AnimatedTransformNode::setCurrentAnimationTime(float time)

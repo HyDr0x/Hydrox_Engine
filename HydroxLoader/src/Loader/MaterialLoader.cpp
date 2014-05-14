@@ -15,8 +15,7 @@ namespace he
     MaterialLoader::MaterialLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager),
                                                                                m_materialManager(singletonManager->getService<renderer::MaterialManager>()),
                                                                                m_textureManager(singletonManager->getService<renderer::TextureManager>()),
-                                                                               m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>()),
-                                                                               m_texNumber(4)
+                                                                               m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>())
     {
     }
 
@@ -35,7 +34,12 @@ namespace he
 
       std::string shaderFilename;
       std::vector<bool> shaderPrograms(4, false);
-      std::vector<std::string> diffuseFilename(m_texNumber), normalFilename(m_texNumber), specularFilename(m_texNumber), displacementFilename(m_texNumber);
+      std::vector<std::vector<std::string>> textureFilenames(renderer::Material::TEXTURETYPENUM);
+      std::vector<std::string> textureTypes(renderer::Material::TEXTURETYPENUM);
+      textureTypes[0] = "Diffuse Color";
+      textureTypes[1] = "Normal Map";
+      textureTypes[2] = "Specular Map";
+      textureTypes[3] = "Displacement Map";
 
       std::ifstream file(filename);
 	    std::string line;
@@ -81,50 +85,17 @@ namespace he
           }
 
           /////////////////////////TEXTURES/////////////////////////
-          if(line.find("Diffuse Color") != std::string::npos)
+          for(unsigned int i = 0; i < textureFilenames.size(); i++)
           {
-            for(unsigned int i = 0; i < m_texNumber; i++)
+            if(line.find(textureTypes[i]) != std::string::npos)
             {
-              std::getline(file, line);
-              if(line != std::string("NULL"))
+              for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
               {
-                diffuseFilename[i] = line;
-              }
-            }
-          }
-
-          if(line.find("Normal Map") != std::string::npos)
-          {
-            for(unsigned int i = 0; i < m_texNumber; i++)
-            {
-              std::getline(file, line);
-              if(line != std::string("NULL"))
-              {
-                normalFilename[i] = line;
-              }
-            }
-          }
-
-          if(line.find("Specular Map") != std::string::npos)
-          {
-            for(unsigned int i = 0; i < m_texNumber; i++)
-            {
-              std::getline(file, line);
-              if(line != std::string("NULL"))
-              {
-                specularFilename[i] = line;
-              }
-            }
-          }
-
-          if(line.find("Displacement Map") != std::string::npos)
-          {
-            for(unsigned int i = 0; i < m_texNumber; i++)
-            {
-              std::getline(file, line);
-              if(line != std::string("NULL"))
-              {
-                displacementFilename[i] = line;
+                std::getline(file, line);
+                if(line != std::string("NULL"))
+                {
+                  textureFilenames[i].push_back(line);
+                }
               }
             }
           }
@@ -178,36 +149,16 @@ namespace he
 
         ILDevilLoader textureLoader(m_singletonManager);
 
-        std::vector<std::vector<util::ResourceHandle>> textureHandles(4);
-        for(unsigned int j = 0; j < m_texNumber; j++)
-        {
-          if(diffuseFilename[j] != std::string())
-          {
-            textureHandles[0].push_back(textureLoader.loadResource(diffuseFilename[j]));
-          }
-        }
+        std::vector<std::vector<util::ResourceHandle>> textureHandles(textureFilenames.size());
 
-        for(unsigned int j = 0; j < m_texNumber; j++)
+        for(unsigned int i = 0; i < textureFilenames.size(); i++)
         {
-          if(normalFilename[j] != std::string())
+          for(unsigned int j = 0; j < textureFilenames[i].size(); j++)
           {
-            textureHandles[1].push_back(textureLoader.loadResource(normalFilename[j]));
-          }
-        }
-
-        for(unsigned int j = 0; j < m_texNumber; j++)
-        {
-          if(specularFilename[j] != std::string())
-          {
-            textureHandles[2].push_back(textureLoader.loadResource(specularFilename[j]));
-          }
-        }
-
-        for(unsigned int j = 0; j < m_texNumber; j++)
-        {
-          if(displacementFilename[j] != std::string())
-          {
-            textureHandles[3].push_back(textureLoader.loadResource(displacementFilename[j]));
+            if(textureFilenames[i][j] != std::string())
+            {
+              textureHandles[i].push_back(textureLoader.loadResource(textureFilenames[i][j]));
+            }
           }
         }
 
@@ -230,7 +181,7 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(4), renderShaderLoader.getDefaultResource()));
+      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(renderer::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource()));
     }
   }
 }

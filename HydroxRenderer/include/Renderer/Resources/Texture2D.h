@@ -21,7 +21,7 @@ namespace he
     public:
 
       Texture2D(){}
-	    Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = nullptr, bool mipmapping = true);
+	    Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data = nullptr, bool mipmapping = true);
       Texture2D(const Texture2D&);
 
 	    ~Texture2D();
@@ -42,6 +42,8 @@ namespace he
       GLenum getInternalFormat() const;
       GLenum getFormat() const;
       GLenum getType() const;
+      GLuint getChannelNumber() const;
+      GLuint getBitsPerPixel() const;
 
       unsigned int getTextureSize() const;
 
@@ -58,6 +60,8 @@ namespace he
       GLenum m_format;
       GLenum m_type;
 	    GLuint m_slot;
+      GLuint m_channelNumber;
+      GLuint m_bitsPerPixel;
     };
 	}
 }

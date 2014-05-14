@@ -12,17 +12,18 @@ namespace he
     {
       m_hash = o.m_hash;
       m_program = o.m_program;
+      m_shaderSource = o.m_shaderSource;
     }
 
     ComputeShader::ComputeShader(std::string shaderName, std::string computeShaderSource)
     {
-      std::string data = std::string();
-      data = computeShaderSource;
-
-      m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
+      m_hash = MurmurHash64A(computeShaderSource.c_str(), computeShaderSource.size(), 0);
 
       GLuint computeShader;
       computeShader = createShader(GL_COMPUTE_SHADER, shaderName, computeShaderSource);
+
+      m_shaderSource = computeShaderSource;
+
       createProgram(shaderName, computeShader);
     }
 
@@ -34,6 +35,7 @@ namespace he
     {
       m_hash = o.m_hash;
 	    m_program = o.m_program;
+      m_shaderSource = o.m_shaderSource;
 
       return *this;
     }
@@ -48,6 +50,11 @@ namespace he
       glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, dispatchBuffer);
       glDispatchComputeIndirect(offset);
       glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
+    }
+
+    std::string ComputeShader::getShaderSource() const
+    {
+      return m_shaderSource;
     }
 
     bool ComputeShader::createProgram(std::string shaderName, GLuint computeShader)

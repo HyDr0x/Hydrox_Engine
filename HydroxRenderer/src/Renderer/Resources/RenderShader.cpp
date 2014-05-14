@@ -27,12 +27,18 @@ namespace he
       GLuint tesselationEvaluationShader;
       GLuint geometryShader; 
       GLuint fragmentShader;
-  
+
       vertexShader = createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource);
       tesselationControlShader = createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource);
       tesselationEvaluationShader = createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource);
       geometryShader = createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource);
       fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource);
+
+      m_shaderSources.push_back(vertexShaderSource);
+      m_shaderSources.push_back(tesselationCTRLShaderSource);
+      m_shaderSources.push_back(tesselationEVALShaderSource);
+      m_shaderSources.push_back(geometryShaderSource);
+      m_shaderSources.push_back(fragmentShaderSource);
 
       createProgram(shaderName, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
     }
@@ -41,6 +47,7 @@ namespace he
     {
       m_hash = o.m_hash;
       m_program = o.m_program;
+      m_shaderSources = o.m_shaderSources;
     }
 
     RenderShader::~RenderShader()
@@ -51,10 +58,10 @@ namespace he
     {
       m_hash = o.m_hash;
 	    m_program = o.m_program;
+      m_shaderSources = o.m_shaderSources;
 
       return *this;
     }
-
 
     void RenderShader::enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const
     {
@@ -82,6 +89,11 @@ namespace he
 	    }
     }
 
+    std::vector<std::string> RenderShader::getShaderSources() const
+    {
+      return m_shaderSources;
+    }
+
     bool RenderShader::createProgram(std::string shaderName, GLuint vertexShader, 
                                                              GLuint tesselationControlShader, 
                                                              GLuint tesselationEvaluationShader, 
@@ -98,16 +110,22 @@ namespace he
 		    glAttachShader(m_program, fragmentShader);
         glDeleteShader(fragmentShader);
       }
+
 	    if(geometryShader != 0)
       {
 		    glAttachShader(m_program, geometryShader);
         glDeleteShader(geometryShader);
       }
+
 	    if(tesselationControlShader != 0)
 	    {
 		    glAttachShader(m_program, tesselationControlShader);
-		    glAttachShader(m_program, tesselationEvaluationShader);
         glDeleteShader(tesselationControlShader);
+      }
+
+      if(tesselationEvaluationShader != 0)
+	    {
+        glAttachShader(m_program, tesselationEvaluationShader);
 		    glDeleteShader(tesselationEvaluationShader);
 	    }
 

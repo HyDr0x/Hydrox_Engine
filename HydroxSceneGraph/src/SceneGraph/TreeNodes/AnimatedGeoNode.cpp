@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 #include <XBar/SkinnedGeometryContainer.h>
@@ -62,6 +63,21 @@ namespace he
     }
 
     void AnimatedGeoNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool AnimatedGeoNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool AnimatedGeoNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void AnimatedGeoNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }
@@ -131,6 +147,11 @@ namespace he
       }
 
       return skinningMatrices;
+    }
+
+    std::vector<util::Matrix<float, 4>> AnimatedGeoNode::getInverseBindPoseMatrices() const
+    {
+      return m_inverseBindPoseMatrices;
     }
 	}
 }

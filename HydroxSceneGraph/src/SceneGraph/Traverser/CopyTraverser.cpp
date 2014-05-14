@@ -21,7 +21,7 @@ namespace he
     {
     }
 
-    bool CopyTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool CopyTraverser::preTraverse(const AnimatedTransformNode* treeNode)
     {
       AnimatedTransformNode *newTransformNode = (AnimatedTransformNode*)cloneGroupNode(treeNode);
 
@@ -42,34 +42,34 @@ namespace he
       return true;
     }
 
-    void CopyTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void CopyTraverser::postTraverse(const AnimatedTransformNode* treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(TransformNode* treeNode)
+    bool CopyTraverser::preTraverse(const TransformNode* treeNode)
     {
       cloneGroupNode(treeNode);
       return true;
     }
 
-    void CopyTraverser::postTraverse(TransformNode* treeNode)
+    void CopyTraverser::postTraverse(const TransformNode* treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(LODNode* treeNode)
+    bool CopyTraverser::preTraverse(const LODNode* treeNode)
     {
       cloneGroupNode(treeNode);
       return true;
     }
 
-    void CopyTraverser::postTraverse(LODNode* treeNode)
+    void CopyTraverser::postTraverse(const LODNode* treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool CopyTraverser::preTraverse(const AnimatedGeoNode* treeNode)
     {
       AnimatedGeoNode *newGeoNode = (AnimatedGeoNode*)cloneTreeNode(treeNode);
       m_newGeoNodeTable[treeNode] = newGeoNode;
@@ -86,51 +86,51 @@ namespace he
       return false;
     }
 
-    void CopyTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void CopyTraverser::postTraverse(const AnimatedGeoNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(GeoNode* treeNode)
+    bool CopyTraverser::preTraverse(const GeoNode* treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(GeoNode* treeNode)
+    void CopyTraverser::postTraverse(const GeoNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(BillboardNode* treeNode)
+    bool CopyTraverser::preTraverse(const BillboardNode* treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(BillboardNode* treeNode)
+    void CopyTraverser::postTraverse(const BillboardNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(ParticleNode* treeNode)
+    bool CopyTraverser::preTraverse(const ParticleNode* treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(ParticleNode* treeNode)
+    void CopyTraverser::postTraverse(const ParticleNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(LightNode* treeNode)
+    bool CopyTraverser::preTraverse(const LightNode* treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(LightNode* treeNode)
+    void CopyTraverser::postTraverse(const LightNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }
@@ -140,7 +140,7 @@ namespace he
       return m_rootNode;
     }
 
-    GroupNode* CopyTraverser::cloneGroupNode(GroupNode* treeNode)
+    GroupNode* CopyTraverser::cloneGroupNode(const GroupNode* treeNode)
     {
       GroupNode* newNode = treeNode->clone();
 
@@ -173,7 +173,7 @@ namespace he
       return newNode;
     }
 
-    TreeNode* CopyTraverser::cloneTreeNode(TreeNode* treeNode)
+    TreeNode* CopyTraverser::cloneTreeNode(const TreeNode* treeNode)
     {
       TreeNode* newNode = treeNode->clone();
 
@@ -198,7 +198,7 @@ namespace he
       return newNode;
     }
 
-    void CopyTraverser::ascendingGroupNode(TreeNode* treeNode)
+    void CopyTraverser::ascendingGroupNode(const TreeNode* treeNode)
     {
       if(treeNode->getNextSibling() == nullptr)
       {
@@ -211,7 +211,7 @@ namespace he
       }
     }
 
-    void CopyTraverser::ascendingTreeNode(TreeNode* treeNode)
+    void CopyTraverser::ascendingTreeNode(const TreeNode* treeNode)
     {
       if(treeNode->getNextSibling() == nullptr)
       {

@@ -26,9 +26,13 @@ namespace he
       static void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ);
       static void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset);
 
+      std::string getShaderSource() const;
+
     private:
 
       bool createProgram(std::string shaderName, GLuint computeShader);
+
+      std::string m_shaderSource;
     };
 	}
 }

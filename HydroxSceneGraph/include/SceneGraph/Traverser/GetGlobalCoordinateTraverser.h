@@ -3,13 +3,13 @@
 
 #include <stack>
 
-#include "SceneGraph/Traverser/Traverser.h"
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include <Utilities/Math/Math.hpp>
 
 namespace he
 {
 	namespace sg
-	{    class GetGlobalCoordinateTraverser : public Traverser
+	{    class GetGlobalCoordinateTraverser : public ConstTraverser
     {
     public:
 
@@ -18,8 +18,8 @@ namespace he
 
       void clearStacks();
 
-      virtual bool ascendTraverse(AnimatedTransformNode* treeNode);
-      virtual bool ascendTraverse(TransformNode* treeNode);
+      virtual bool ascendTraverse(const AnimatedTransformNode* treeNode);
+      virtual bool ascendTraverse(const TransformNode* treeNode);
 
       float getGlobalScale() const;
       util::Vector<float, 3> getGlobalTranslation() const;

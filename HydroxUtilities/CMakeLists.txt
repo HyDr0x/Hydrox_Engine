@@ -58,7 +58,7 @@ MACRO( source_group_tree )
         ENDFOREACH()
         LIST( LENGTH files files_len )
         IF( ${files_len} GREATER 0 )
-                STRING( REPLACE "/" "////" group_name ${ARGV0} )
+                STRING( REPLACE "/" "\\\\" group_name ${ARGV0} )
                 SOURCE_GROUP("${group_name}" FILES ${files})
         ENDIF()
                 

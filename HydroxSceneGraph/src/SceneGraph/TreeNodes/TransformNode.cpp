@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 #include "SceneGraph/Traverser/GetGlobalCoordinateTraverser.h"
 
@@ -79,6 +80,21 @@ namespace he
     }
 
     void TransformNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool TransformNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool TransformNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void TransformNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

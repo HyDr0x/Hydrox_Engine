@@ -30,6 +30,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool ascendTraverse(ConstTraverser* traverser) const;
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       virtual bool isBillboardNode() const;
 
       util::ResourceHandle getTextureHandle() const;
@@ -54,6 +58,9 @@ namespace he
 
 	    util::Vector<float, 3> getPosition() const;
 	    util::Vector<float, 2> getScale() const;
+
+      util::Vector<float, 2> getTextureStart() const;
+      util::Vector<float, 2> getTextureEnd() const;
 
 	    util::Matrix<float, 3> getTexTransformationMatrix() const;
 	    util::ResourceHandle getTextureID() const;

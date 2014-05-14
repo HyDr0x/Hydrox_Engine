@@ -5,57 +5,57 @@
 #include <list>
 #include <string>
 
-#include "SceneGraph/Traverser/Traverser.h"
+#include "SceneGraph/Traverser/ConstTraverser.h"
 
 namespace he
 {
 	namespace sg
 	{
-    class CopyTraverser : public Traverser
+    class CopyTraverser : public ConstTraverser
     {
     public:
 
       CopyTraverser(std::string namePrefix);
       virtual ~CopyTraverser();
 
-      virtual bool preTraverse(AnimatedTransformNode* treeNode);
-      virtual void postTraverse(AnimatedTransformNode* treeNode);
+      virtual bool preTraverse(const AnimatedTransformNode* treeNode);
+      virtual void postTraverse(const AnimatedTransformNode* treeNode);
 
-      virtual bool preTraverse(TransformNode* treeNode);
-      virtual void postTraverse(TransformNode* treeNode);
+      virtual bool preTraverse(const TransformNode* treeNode);
+      virtual void postTraverse(const TransformNode* treeNode);
 
-      virtual bool preTraverse(LODNode* treeNode);
-      virtual void postTraverse(LODNode* treeNode);
+      virtual bool preTraverse(const LODNode* treeNode);
+      virtual void postTraverse(const LODNode* treeNode);
 
-      virtual bool preTraverse(AnimatedGeoNode* treeNode);
-      virtual void postTraverse(AnimatedGeoNode* treeNode);
+      virtual bool preTraverse(const AnimatedGeoNode* treeNode);
+      virtual void postTraverse(const AnimatedGeoNode* treeNode);
 
-      virtual bool preTraverse(GeoNode* treeNode);
-      virtual void postTraverse(GeoNode* treeNode);
+      virtual bool preTraverse(const GeoNode* treeNode);
+      virtual void postTraverse(const GeoNode* treeNode);
 
-      virtual bool preTraverse(BillboardNode* treeNode);
-      virtual void postTraverse(BillboardNode* treeNode);
+      virtual bool preTraverse(const BillboardNode* treeNode);
+      virtual void postTraverse(const BillboardNode* treeNode);
 
-      virtual bool preTraverse(ParticleNode* treeNode);
-      virtual void postTraverse(ParticleNode* treeNode);
+      virtual bool preTraverse(const ParticleNode* treeNode);
+      virtual void postTraverse(const ParticleNode* treeNode);
 
-      virtual bool preTraverse(LightNode* treeNode);
-      virtual void postTraverse(LightNode* treeNode);
+      virtual bool preTraverse(const LightNode* treeNode);
+      virtual void postTraverse(const LightNode* treeNode);
 
       GroupNode* getCopiedRootNode() const;
 
     protected:
 
-      GroupNode* cloneGroupNode(GroupNode* treeNode);
-      TreeNode* cloneTreeNode(TreeNode* treeNode);
-      void ascendingGroupNode(TreeNode* treeNode);
-      void ascendingTreeNode(TreeNode* treeNode);
+      GroupNode* cloneGroupNode(const GroupNode* treeNode);
+      TreeNode* cloneTreeNode(const TreeNode* treeNode);
+      void ascendingGroupNode(const TreeNode* treeNode);
+      void ascendingTreeNode(const TreeNode* treeNode);
 
       void addChild(GroupNode* parent, TreeNode* newNode);
       void addSibling(TreeNode* sibling, TreeNode* newNode);
 
-      std::map<AnimatedGeoNode*, std::list<AnimatedTransformNode*>> m_oldGeoNodeTable;
-      std::map<AnimatedGeoNode*, AnimatedGeoNode*> m_newGeoNodeTable;
+      std::map<const AnimatedGeoNode*, std::list<AnimatedTransformNode*>> m_oldGeoNodeTable;
+      std::map<const AnimatedGeoNode*, AnimatedGeoNode*> m_newGeoNodeTable;
 
       std::string m_namePrefix;
 

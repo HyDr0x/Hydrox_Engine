@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 #include <XBar/StaticGeometryContainer.h>
@@ -68,6 +69,21 @@ namespace he
     }
 
     void GeoNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool GeoNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool GeoNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void GeoNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

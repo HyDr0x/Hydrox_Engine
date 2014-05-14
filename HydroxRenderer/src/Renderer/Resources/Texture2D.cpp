@@ -6,45 +6,18 @@ namespace he
 {
 	namespace renderer
 	{
-    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
+    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
       m_type(type),
       m_internalFormat(internalFormat),
       m_format(format),
+      m_channelNumber(channelNumber),
+      m_bitsPerPixel(bitsPerPixel),
       m_slot(0)
     {
-      unsigned int bytesPerPixel;
-      unsigned int components = 0;
-
-      switch (m_internalFormat)
-      {
-      case GL_RGB16:
-        bytesPerPixel = 6;
-        components = 3;
-        break;
-      case GL_RGB32F:
-        bytesPerPixel = 12;
-        components = 3;
-        break;
-      case GL_RGB8:
-        bytesPerPixel = 3;
-        components = 3;
-        break;
-      case GL_RGBA16:
-        bytesPerPixel = 8;
-        components = 4;
-        break;
-      case GL_RGBA32F:
-        bytesPerPixel = 16;
-        components = 4;
-        break;
-      case GL_RGBA8:
-      default:
-        bytesPerPixel = 4;
-        components = 4;
-      }
-
+      unsigned int bytesPerPixel = bitsPerPixel / 8;
+      
       unsigned int length = m_width * m_height * bytesPerPixel;
       m_hash = MurmurHash64A(data, length, 0);
 
@@ -75,6 +48,8 @@ namespace he
       m_format = o.m_format;
       m_type = o.m_type;
 	    m_slot = o.m_slot;
+      m_bitsPerPixel = o.m_bitsPerPixel;
+      m_channelNumber = o.m_channelNumber;
     }
 
     Texture2D::~Texture2D()
@@ -92,6 +67,8 @@ namespace he
       m_format = o.m_format;
       m_type = o.m_type;
 	    m_slot = o.m_slot;
+      m_bitsPerPixel = o.m_bitsPerPixel;
+      m_channelNumber = o.m_channelNumber;
 
       return *this;
     }
@@ -160,31 +137,19 @@ namespace he
       return m_type;
     }
 
+    GLuint Texture2D::getChannelNumber() const
+    {
+      return m_channelNumber;
+    }
+
+    GLuint Texture2D::getBitsPerPixel() const
+    {
+      return m_bitsPerPixel;
+    }
+
     unsigned int Texture2D::getTextureSize() const
     {
-      unsigned int bytesPerPixel;
-
-      switch (m_internalFormat)
-      {
-      case GL_RGB16:
-        bytesPerPixel = 6;
-        break;
-      case GL_RGB32F:
-        bytesPerPixel = 12;
-        break;
-      case GL_RGB8:
-        bytesPerPixel = 3;
-        break;
-      case GL_RGBA16:
-        bytesPerPixel = 8;
-        break;
-      case GL_RGBA32F:
-        bytesPerPixel = 16;
-        break;
-      case GL_RGBA8:
-      default:
-        bytesPerPixel = 4;
-      }
+      unsigned int bytesPerPixel= m_bitsPerPixel / 8;
 
       return m_width * m_height * bytesPerPixel;
     }

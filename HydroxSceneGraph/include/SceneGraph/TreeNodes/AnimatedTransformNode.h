@@ -49,6 +49,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool ascendTraverse(ConstTraverser* traverser) const;
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       virtual bool isAnimatedTransformNode() const;
 
       void setBoneIndex(unsigned int boneIndex);
@@ -59,6 +63,8 @@ namespace he
 
       void setCurrentAnimationTrack(unsigned int currentTrack);
       unsigned int getCurrentAnimationTrack() const;
+
+      const std::vector<AnimationTrack>& getAnimationTracks() const;
 
       void setCurrentAnimationTime(float time);
       void addCurrentAnimationTime(float time);

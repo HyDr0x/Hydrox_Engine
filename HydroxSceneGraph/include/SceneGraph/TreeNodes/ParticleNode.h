@@ -28,6 +28,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool ascendTraverse(ConstTraverser* traverser) const;
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       virtual bool isParticleNode() const;
 
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);

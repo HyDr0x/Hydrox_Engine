@@ -23,7 +23,7 @@ namespace he
 {
   namespace loader
   {
-    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_texNumber(4), m_singletonManager(singletonManager), m_animationTimeUnit(Seconds)
+    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_singletonManager(singletonManager), m_animationTimeUnit(Seconds)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<renderer::ModelManager>();
@@ -36,7 +36,7 @@ namespace he
       setAnimationTimeUnit(m_animationTimeUnit);
     }
 
-    AssimpLoader::AssimpLoader(const AssimpLoader& o) : m_texNumber(o.m_texNumber)
+    AssimpLoader::AssimpLoader(const AssimpLoader& o)
     {
       m_modelManager = o.m_modelManager;
       m_materialManager = o.m_materialManager;
@@ -156,7 +156,7 @@ namespace he
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
     {
       std::vector<util::Vector<float, 3>> positions;   
-      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(4);
+      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(renderer::Material::TEXTURETYPENUM);
       std::vector<util::Vector<float, 3>> normals;
       std::vector<util::Vector<float, 3>> binormals;
       std::vector<util::Vector<float, 4>> boneIndices;

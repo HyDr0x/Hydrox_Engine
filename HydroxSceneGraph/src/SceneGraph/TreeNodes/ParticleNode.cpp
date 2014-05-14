@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
 #include <XBar/ParticleContainer.h>
@@ -58,6 +59,21 @@ namespace he
     }
 
     void ParticleNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool ParticleNode::ascendTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->ascendTraverse(this);
+    }
+
+    bool ParticleNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void ParticleNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

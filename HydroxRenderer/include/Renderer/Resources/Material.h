@@ -25,8 +25,11 @@ namespace he
 		    DIFFUSETEX,
 		    NORMALTEX,
 		    DISPLACEMENTTEX,
-		    SPECULARTEX
+		    SPECULARTEX,
+        TEXTURETYPENUM
 	    };
+
+      static const unsigned int TEXTURENUMBER = 4;
 
       struct MaterialData
       {

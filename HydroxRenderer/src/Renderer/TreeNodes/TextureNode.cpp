@@ -33,55 +33,19 @@ namespace he
 
     bool TextureNode::isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles) const
     {
-      if(m_textureHandles[Material::DIFFUSETEX].size() != textureHandles[Material::DIFFUSETEX].size())
+      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
       {
-        return false;
-      }
-
-      for(unsigned int j = 0; j < m_textureHandles[Material::DIFFUSETEX].size(); j++)
-      {
-        if(!(m_textureHandles[Material::DIFFUSETEX][j] == textureHandles[Material::DIFFUSETEX][j]))
+        if(m_textureHandles[i].size() != textureHandles[i].size())
         {
           return false;
         }
-      }
 
-      if(m_textureHandles[Material::NORMALTEX].size() != textureHandles[Material::NORMALTEX].size())
-      {
-        return false;
-      }
-
-      for(unsigned int j = 0; j < m_textureHandles[Material::NORMALTEX].size(); j++)
-      {
-        if(!(m_textureHandles[Material::NORMALTEX][j] == textureHandles[Material::NORMALTEX][j]))
+        for(unsigned int j = 0; j < m_textureHandles[i].size(); j++)
         {
-          return false;
-        }
-      }
-
-      if(m_textureHandles[Material::SPECULARTEX].size() != textureHandles[Material::SPECULARTEX].size())
-      {
-        return false;
-      }
-
-      for(unsigned int j = 0; j < m_textureHandles[Material::SPECULARTEX].size(); j++)
-      {
-        if(!(m_textureHandles[Material::SPECULARTEX][j] == textureHandles[Material::SPECULARTEX][j]))
-        {
-          return false;
-        }
-      }
-
-      if(m_textureHandles[Material::DISPLACEMENTTEX].size() != textureHandles[Material::DISPLACEMENTTEX].size())
-      {
-        return false;
-      }
-
-      for(unsigned int j = 0; j < m_textureHandles[Material::DISPLACEMENTTEX].size(); j++)
-      {
-        if(!(m_textureHandles[Material::DISPLACEMENTTEX][j] == textureHandles[Material::DISPLACEMENTTEX][j]))
-        {
-          return false;
+          if(!(m_textureHandles[i][j] == textureHandles[i][j]))
+          {
+            return false;
+          }
         }
       }
 

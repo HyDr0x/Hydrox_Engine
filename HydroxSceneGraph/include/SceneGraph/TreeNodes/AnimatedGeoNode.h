@@ -27,6 +27,10 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool ascendTraverse(ConstTraverser* traverser) const;
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       virtual bool isAnimatedGeoNode() const;
 
       void setMeshHandle(util::ResourceHandle meshHandle);
@@ -36,6 +40,7 @@ namespace he
       void setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 
       std::vector<util::Matrix<float, 4>> getSkinningMatrices() const;
+      std::vector<util::Matrix<float, 4>> getInverseBindPoseMatrices() const;
 
     private:
 

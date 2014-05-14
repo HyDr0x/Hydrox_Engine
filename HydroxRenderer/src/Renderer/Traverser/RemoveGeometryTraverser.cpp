@@ -25,38 +25,17 @@ namespace he
       Material *material = m_materialManager->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
-      m_textureHandles.resize(4);
+      m_textureHandles.resize(Material::TEXTURETYPENUM);
 
-      unsigned int texNum = material->getTextureNumber(Material::DIFFUSETEX);
-      m_textureHandles[Material::DIFFUSETEX].resize(texNum);
-
-      for(unsigned int i = 0; i < texNum; i++)
+      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
       {
-        m_textureHandles[Material::DIFFUSETEX][i] = material->getTextureHandle(Material::DIFFUSETEX, i);
-      }
+        unsigned int texNum = material->getTextureNumber((Material::TextureType)i);
+        m_textureHandles[i].resize(texNum);
 
-      texNum = material->getTextureNumber(Material::NORMALTEX);
-      m_textureHandles[Material::NORMALTEX].resize(texNum);
-
-      for(unsigned int i = 0; i < texNum; i++)
-      {
-        m_textureHandles[Material::NORMALTEX][i] = material->getTextureHandle(Material::NORMALTEX, i);
-      }
-
-      texNum = material->getTextureNumber(Material::SPECULARTEX);
-      m_textureHandles[Material::SPECULARTEX].resize(texNum);
-
-      for(unsigned int i = 0; i < texNum; i++)
-      {
-        m_textureHandles[Material::SPECULARTEX][i] = material->getTextureHandle(Material::SPECULARTEX, i);
-      }
-
-      texNum = material->getTextureNumber(Material::DISPLACEMENTTEX);
-      m_textureHandles[Material::DISPLACEMENTTEX].resize(texNum);
-
-      for(unsigned int i = 0; i < texNum; i++)
-      {
-        m_textureHandles[Material::DISPLACEMENTTEX][i] = material->getTextureHandle(Material::DISPLACEMENTTEX, i);
+        for(unsigned int j = 0; j < texNum; j++)
+        {
+          m_textureHandles[i][j] = material->getTextureHandle((Material::TextureType)i, j);
+        }
       }
     }
 

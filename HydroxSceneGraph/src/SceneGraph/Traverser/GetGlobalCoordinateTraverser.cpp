@@ -50,7 +50,7 @@ namespace he
       m_globalRotation = trfRotation;
     }
 
-    bool GetGlobalCoordinateTraverser::ascendTraverse(AnimatedTransformNode* treeNode)
+    bool GetGlobalCoordinateTraverser::ascendTraverse(const AnimatedTransformNode* treeNode)
     {
       m_translateStack.push(treeNode->getLocalPosition());
       m_scaleStack.push(treeNode->getLocalScale());
@@ -59,7 +59,7 @@ namespace he
       return true;
     }
 
-    bool GetGlobalCoordinateTraverser::ascendTraverse(TransformNode* treeNode)
+    bool GetGlobalCoordinateTraverser::ascendTraverse(const TransformNode* treeNode)
     {
       m_translateStack.push(treeNode->getLocalPosition());
       m_scaleStack.push(treeNode->getLocalScale());

@@ -30,12 +30,18 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool ascendTraverse(ConstTraverser* traverser) const;
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       virtual bool isLODNode() const;
 
       unsigned int getLODLevel() const;
       bool getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const;
 
       void transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation);
+
+      util::Vector<float, 3> getPosition() const;
 
     private:
 

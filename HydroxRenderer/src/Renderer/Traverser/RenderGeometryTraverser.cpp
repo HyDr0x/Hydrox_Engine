@@ -157,35 +157,16 @@ namespace he
 
       GLuint slotOffset = 0;
 
-      for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
+      for(unsigned int i = 0; i < textureHandles.size(); i++)
       {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
-        texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
-        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
-      }
+        for(unsigned int j = 0; j < textureHandles[i].size(); j++)
+        {
+          Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
+          texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
+          texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
+        }
 
-      slotOffset += static_cast<GLuint>(textureHandles[Material::DIFFUSETEX].size());
-
-      for(unsigned int j = 0; j < textureHandles[Material::NORMALTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
-        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
-      }
-
-      slotOffset += static_cast<GLuint>(textureHandles[Material::NORMALTEX].size());
-
-      for(unsigned int j = 0; j < textureHandles[Material::SPECULARTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
-        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
-      }
-
-      slotOffset += static_cast<GLuint>(textureHandles[Material::SPECULARTEX].size());
-
-      for(unsigned int j = 0; j < textureHandles[Material::DISPLACEMENTTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
-        texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
+        slotOffset += static_cast<GLuint>(textureHandles[i].size());
       }
 
       return true;
@@ -195,28 +176,13 @@ namespace he
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
-      for(unsigned int j = 0; j < textureHandles[Material::DIFFUSETEX].size(); j++)
+      for(unsigned int i = 0; i < textureHandles.size(); i++)
       {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DIFFUSETEX][j]);
-        texture->unsetTexture();
-      }
-
-      for(unsigned int j = 0; j < textureHandles[Material::NORMALTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::NORMALTEX][j]);
-        texture->unsetTexture();
-      }
-
-      for(unsigned int j = 0; j < textureHandles[Material::SPECULARTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::SPECULARTEX][j]);
-        texture->unsetTexture();
-      }
-
-      for(unsigned int j = 0; j < textureHandles[Material::DISPLACEMENTTEX].size(); j++)
-      {
-        Texture2D *texture = m_textureManager->getObject(textureHandles[Material::DISPLACEMENTTEX][j]);
-        texture->unsetTexture();
+        for(unsigned int j = 0; j < textureHandles[i].size(); j++)
+        {
+          Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
+          texture->unsetTexture();
+        }
       }
     }
 

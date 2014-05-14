@@ -39,6 +39,8 @@ namespace he
       GLenum internalFormat;
       GLenum format;
       GLenum type;
+      GLuint channelNumber;
+      GLuint bitsPerPixel;
 
       ILuint tex;
 	    ilGenImages(1, &tex);
@@ -54,19 +56,15 @@ namespace he
         }
         else
         {
-          GLuint componentNumber = 0;
-          getImageInformations(width, height, internalFormat, format, type, componentNumber);
+          getImageInformations(width, height, internalFormat, format, type, channelNumber, bitsPerPixel);
 
           //success = ilConvertImage(format, type);
 		      //if(!success)
           //{
 		      //	printf("ERROR, couldn't convert file %s/n", filename);
           //}
-
-          int bytesPerPixel = ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
-          bytesPerPixel = ilGetInteger(IL_FORMAT_MODE);
         
-          tmpTextureID = m_textureManager->addObject(renderer::Texture2D(width, height, m_target, type, internalFormat, format, ilGetData()));
+          tmpTextureID = m_textureManager->addObject(renderer::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerPixel, ilGetData()));
         }
       }
       ilBindImage(0);
@@ -78,13 +76,14 @@ namespace he
     util::ResourceHandle ILDevilLoader::getDefaultResource() const
     {
       util::Vector<float, 3> textureData = util::Vector<float, 3>(0.0f, 1.0f, 0.0f);
-      return m_textureManager->addObject(renderer::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, &textureData[0]));
+      return m_textureManager->addObject(renderer::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, 3, 24, &textureData[0]));
     }
 
-    void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& components)
+    void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerPixel)
     {
       width = ilGetInteger(IL_IMAGE_WIDTH);
       height = ilGetInteger(IL_IMAGE_HEIGHT);
+      bitsPerPixel = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
 
       switch(ilGetInteger(IL_IMAGE_FORMAT))
       {
@@ -108,8 +107,9 @@ namespace he
       {
       case GL_RGB:
       case GL_BGR:
-        components = 3;
-        switch(ilGetInteger(IL_IMAGE_BITS_PER_PIXEL))
+        channelNumber = 3;
+        
+        switch(bitsPerPixel)
         {
         case 48:
           internalFormat = GL_RGB16;
@@ -124,8 +124,9 @@ namespace he
         break;
       case GL_RGBA:
       case GL_BGRA:
-        components = 4;
-        switch(ilGetInteger(IL_IMAGE_BITS_PER_PIXEL))
+        channelNumber = 4;
+
+        switch(bitsPerPixel)
         {
         case 64:
           internalFormat = GL_RGBA16;

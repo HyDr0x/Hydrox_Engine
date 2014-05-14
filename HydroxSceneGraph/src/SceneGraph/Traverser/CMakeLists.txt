@@ -3,6 +3,7 @@ set(
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/AddNodesTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GetGlobalCoordinateTraverser.cpp 
