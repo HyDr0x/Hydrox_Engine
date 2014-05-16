@@ -52,6 +52,17 @@ namespace he
            const std::vector<util::Vector<float, 4>>& boneIndices = std::vector<util::Vector<float, 4>>(),
            const std::vector<util::Vector<float, 4>>& vertexColors = std::vector<util::Vector<float, 4>>()
            );
+
+      Mesh(AABB boundingVolume,
+           GLenum primitiveType,
+           unsigned int primitiveCount,
+           unsigned int vertexCount,
+           GLuint vertexStride,
+           GLuint vertexDeclarationFlags,
+           const std::vector<GLubyte>& vboBuffer, 
+           const std::vector<indexType>& indices = std::vector<indexType>()
+           );
+
       Mesh(const Mesh& o);
 
 	    ~Mesh();
@@ -79,7 +90,7 @@ namespace he
       GLuint getVertexCount() const;
       GLuint getVBOSize() const;
 
-      const std::vector<GLuint>& getIndexBuffer() const;
+      const std::vector<indexType>& getIndexBuffer() const;
       GLuint getIndexCount() const;
       GLuint getPrimitiveCount() const;
 
@@ -88,14 +99,13 @@ namespace he
       AABB m_boundingVolume;
 
       GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
-      GLuint m_verticesPerPrimitive;
 
 	    ////////////GEOMETRY////////////
 	    unsigned int m_primitiveCount;
       unsigned int m_vertexCount;
       GLuint m_vertexStride;
       std::vector<GLubyte> m_geometryData;
-      std::vector<GLuint> m_indexData;
+      std::vector<indexType> m_indexData;
       GLuint m_vertexDeclarationFlags;
 	    ////////////////////////////////
     };

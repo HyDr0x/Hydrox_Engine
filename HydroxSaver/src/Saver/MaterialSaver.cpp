@@ -12,12 +12,107 @@
 #include "Saver/NodeWrapper.h"
 #include "Saver/NodeWrapperMapper.h"
 
+#include "Saver/RenderShaderSaver.h"
+#include "Saver/ILDevilSaver.h"
+
 namespace he
 {
 	namespace saver
-	{    MaterialSaver::MaterialSaver(util::SingletonManager *singletonManager)    {      m_textureManager = singletonManager->getService<renderer::TextureManager>();      m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();    }    void MaterialSaver::saveMaterial(std::string fileName, const renderer::Material* material)
+	{    void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
     {
+      std::map<MaterialFileKeywords, std::string> materialFileKeywords;
+      materialFileKeywords[DIFFUSESTRENGTH] = "Diffuse Strength";
+      materialFileKeywords[SPECULARSTRENGTH] = "Specular Strength";
+      materialFileKeywords[AMBIENTSTRENGTH] = "Ambient Strength";
+      materialFileKeywords[SPECULAREXPONENT] = "Specular Exponent";
 
+      materialFileKeywords[DIFFUSETEXTURE] = "Diffuse Map";
+      materialFileKeywords[NORMALMAP] = "Normal Map";
+      materialFileKeywords[SPECULARMAP] = "Specular Map";
+      materialFileKeywords[DISPLACEMENTMAP] = "Displacement Map";
+
+      materialFileKeywords[SHADERNAME] = "Shader Name";
+
+      materialFileKeywords[FRAGMENTSHADER] = "Fragment Shader";
+      materialFileKeywords[GEOMETRYSHADER] = "Geometry Shader";
+      materialFileKeywords[TESSCONTROLSHADER] = "Tesselation Control Shader";
+      materialFileKeywords[TESSEVALSHADER] = "Tesselation Evaluation Shader";
+
+      renderer::TextureManager *textureManager = singletonManager->getService<renderer::TextureManager>();      renderer::RenderShaderManager *renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
+      renderer::MaterialManager *materialManager = singletonManager->getService<renderer::MaterialManager>();
+
+      renderer::Material *material = materialManager->getObject(materialHandle);
+
+      std::ofstream fileStream;
+      fileStream.open(path + filename + std::string(".material"), std::ofstream::out | std::ofstream::trunc);
+
+      /////////////////////////MATERIAL DATA/////////////////////////
+      fileStream << materialFileKeywords[DIFFUSESTRENGTH] << std::endl;
+      fileStream << material->getMaterialData().diffuseStrength << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[SPECULARSTRENGTH] << std::endl;
+      fileStream << material->getMaterialData().specularStrength << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[AMBIENTSTRENGTH] << std::endl;
+      fileStream << material->getMaterialData().ambientStrength << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[SPECULAREXPONENT] << std::endl;
+      fileStream << material->getMaterialData().specularExponent << std::endl;
+      fileStream << std::endl;
+
+      /////////////////////////TEXTURES/////////////////////////
+      for(unsigned int i = 0; i < renderer::Material::TEXTURETYPENUM; i++)
+      {
+        fileStream << materialFileKeywords[MaterialFileKeywords(i + TEXTUREOFFSET + 1)] << std::endl;
+        for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+        {
+          if(j < material->getTextureNumber((renderer::Material::TextureType)i))
+          {
+            renderer::Texture2D *texture = textureManager->getObject(material->getTextureHandle((renderer::Material::TextureType)i, j));
+            std::stringstream textureFilename; 
+            textureFilename << filename << materialFileKeywords[MaterialFileKeywords(i + TEXTUREOFFSET + 1)] << j;
+
+            ILDevilSaver::save(path, textureFilename.str(), material->getTextureHandle((renderer::Material::TextureType)i, j), singletonManager);
+
+            fileStream << path << textureFilename.str() << std::string(".png") << std::endl;
+          }
+          else
+          {
+            fileStream << "NULL" << std::endl;
+          }
+        }
+        fileStream << std::endl;
+      }
+
+      /////////////////////////SHADER/////////////////////////
+      fileStream << materialFileKeywords[SHADERNAME] << std::endl;
+      std::stringstream shaderFilename;
+
+      shaderFilename << filename << "_shader";
+      fileStream << path << shaderFilename.str() << std::endl;
+
+      fileStream << std::endl;
+
+      RenderShaderSaver::save(path, shaderFilename.str(), material->getShaderHandle(), singletonManager);
+
+      renderer::RenderShader *renderShader = renderShaderManager->getObject(material->getShaderHandle());
+      std::vector<std::string> shaderSources = renderShader->getShaderSources();
+
+      for(unsigned int i = 1; i < shaderSources.size(); i++)
+      {
+        fileStream << materialFileKeywords[MaterialFileKeywords(i + SHADEROFFSET)] << std::endl;
+        if(shaderSources[i].empty())
+        {
+          fileStream << "FALSE" << std::endl;
+        }
+        else
+        {
+          fileStream << "TRUE" << std::endl;
+        }
+        fileStream << std::endl;
+      }
+      
+      fileStream.close();
     }
 	}
 }

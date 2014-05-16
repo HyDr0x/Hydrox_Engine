@@ -3,10 +3,11 @@
 
 #include <vector>
 
-#include "SceneGraph/DLLExport.h"
-
 #include <Utilities/Math/Math.hpp>
+
+#include "SceneGraph/DLLExport.h"
 #include "SceneGraph/TreeNodes/TransformNode.h"
+#include "SceneGraph/TreeNodes/AnimationTrack.h"
 
 namespace he
 {
@@ -14,22 +15,6 @@ namespace he
 	{
     class Traverser;
     class AnimatedGeoNode;
-
-    struct AnimationTrack//an animation track, each track represents all the keys for one animation in one node
-    {
-      std::string m_animationName;
-      float m_duration;
-      float m_animationTicksPerSecond;
-
-      std::vector<util::Vector<float, 3>> m_positions;
-      std::vector<float> m_positionsTime;
-
-      std::vector<util::Quaternion<float>> m_rotations;
-      std::vector<float> m_rotationsTime;
-
-      std::vector<float> m_scales;
-      std::vector<float> m_scalesTime;
-    };
 
     class GRAPHICAPI AnimatedTransformNode : public TransformNode
     {

@@ -18,7 +18,7 @@ namespace he
                                const std::string& tesselationEVALShaderSource)
     {
       std::string data = std::string();
-      data += vertexShaderSource + fragmentShaderSource + geometryShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource;
+      data += vertexShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + geometryShaderSource + fragmentShaderSource;
 
       m_hash = MurmurHash64A(data.c_str(), data.size(), 0);
 
@@ -105,18 +105,6 @@ namespace he
 	    glAttachShader(m_program, vertexShader);
       glDeleteShader(vertexShader);
 
-	    if(fragmentShader != 0)
-      {
-		    glAttachShader(m_program, fragmentShader);
-        glDeleteShader(fragmentShader);
-      }
-
-	    if(geometryShader != 0)
-      {
-		    glAttachShader(m_program, geometryShader);
-        glDeleteShader(geometryShader);
-      }
-
 	    if(tesselationControlShader != 0)
 	    {
 		    glAttachShader(m_program, tesselationControlShader);
@@ -128,6 +116,18 @@ namespace he
         glAttachShader(m_program, tesselationEvaluationShader);
 		    glDeleteShader(tesselationEvaluationShader);
 	    }
+
+      if(geometryShader != 0)
+      {
+		    glAttachShader(m_program, geometryShader);
+        glDeleteShader(geometryShader);
+      }
+
+      if(fragmentShader != 0)
+      {
+		    glAttachShader(m_program, fragmentShader);
+        glDeleteShader(fragmentShader);
+      }
 
       glLinkProgram(m_program);
 

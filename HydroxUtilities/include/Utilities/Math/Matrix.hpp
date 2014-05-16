@@ -1,11 +1,13 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+#include "Vector.h"
+
 namespace he
 {
 	namespace util
 	{
-    template< typename Type, unsigned int Dim> class Matrix;
+    template<typename Type, unsigned int Dim> class Matrix;
 	}
 }
 

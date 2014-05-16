@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <Renderer/Resources/ComputeShader.h>
 
 namespace he

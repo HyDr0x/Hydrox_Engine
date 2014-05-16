@@ -1,6 +1,9 @@
 set(
 	SOURCE 
 	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedGeoNode.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedTransformNode.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimationTrack.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeoNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GroupNode.cpp 
@@ -9,7 +12,5 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedGeoNode.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedTransformNode.cpp 
 	PARENT_SCOPE 
 )

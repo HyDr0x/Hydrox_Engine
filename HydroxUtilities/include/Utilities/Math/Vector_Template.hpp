@@ -4,9 +4,9 @@ namespace he
 {
 	namespace util
 	{
-    template< typename TYPE, unsigned int DIM> class Vector;
+    template<typename Type, unsigned int Dim> class Vector;
 
-    template< typename TYPE> class Vector<TYPE, VECTOR_NUM_ARGS>
+    template<typename Type> class Vector<Type, VECTOR_NUM_ARGS>
     {
       public:
 
@@ -17,13 +17,13 @@ namespace he
         m_vertexcounter++;
       }
 
-      Vector(const Vector<TYPE, VECTOR_NUM_ARGS>& v)
+      Vector(const Vector<Type, VECTOR_NUM_ARGS>& v)
       { 
         VECTOR_INIT_VEC
         m_vertexcounter++; 
       }
 
-      template<unsigned int DIM2> Vector(const Vector<TYPE, DIM2>& v)
+      template<unsigned int DIM2> Vector(const Vector<Type, DIM2>& v)
       { 
         unsigned int b = MIN(VECTOR_NUM_ARGS, DIM2);
         for(unsigned int i = 0; i < b; i++)
@@ -46,17 +46,17 @@ namespace he
       inline Vector operator - (const Vector &v) const { return Vector( VECTOR_MINUS_OP ); }
 
       inline Vector operator * (const Vector &v) const { return Vector( VECTOR_MULTIPLY_OP ); }
-      inline Vector operator * (const TYPE &s) const { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
+      inline Vector operator * (Type s) const { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
 
       inline Vector operator / (const Vector &v) const { return Vector( VECTOR_DIVIDE_OP ); }
-	    inline Vector operator / (const TYPE &s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
+	    inline Vector operator / (Type s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
 
       inline Vector& operator += (const Vector &v) { VECTOR_EQ_PLUS_OP return *this; }
       inline Vector& operator -= (const Vector &v) { VECTOR_EQ_MINUS_OP return *this; }
       inline Vector& operator *= (const Vector &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
-      inline Vector& operator *= (const TYPE &s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
+      inline Vector& operator *= (Type s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
       inline Vector& operator /= (const Vector &v) { VECTOR_EQ_DIVIDE_OP return *this; }
-      inline Vector& operator /= (const TYPE &s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
+      inline Vector& operator /= (Type s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
 
       inline bool operator == (const Vector &v) { return VECTOR_COMP_EQ }
       inline bool operator != (const Vector &v) { return VECTOR_COMP_UQ }
@@ -65,8 +65,8 @@ namespace he
 	    inline bool operator >= (const Vector &v) { return VECTOR_COMP_EQ_GR }
       inline bool operator <= (const Vector &v) { return VECTOR_COMP_EQ_LS }
 
-      inline TYPE& operator [] (unsigned int i) { return m_x[i]; }
-      inline const TYPE& operator [] (unsigned int i) const { return m_x[i]; }
+      inline Type& operator [] (unsigned int i) { return m_x[i]; }
+      inline const Type& operator [] (unsigned int i) const { return m_x[i]; }
 
       inline double length() const
       { 
@@ -81,7 +81,7 @@ namespace he
 
       inline Vector normalize() const
       { 
-        Vector<TYPE, VECTOR_NUM_ARGS> result;
+        Vector<Type, VECTOR_NUM_ARGS> result;
 
         double l = 1.0 / length();
 
@@ -93,9 +93,9 @@ namespace he
         return result;
       }
 
-      inline static TYPE dot(const Vector<TYPE, VECTOR_NUM_ARGS>& a, const Vector<TYPE, VECTOR_NUM_ARGS>& b)
+      inline static Type dot(const Vector<Type, VECTOR_NUM_ARGS>& a, const Vector<Type, VECTOR_NUM_ARGS>& b)
       {
-        TYPE sum = 0;
+        Type sum = 0;
 
         for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
         {
@@ -105,7 +105,7 @@ namespace he
         return sum;
       }
 
-      inline static Vector<TYPE, VECTOR_NUM_ARGS> lerp(const Vector<TYPE, VECTOR_NUM_ARGS>& a, const Vector<TYPE, VECTOR_NUM_ARGS>& b, TYPE t)
+      inline static Vector lerp(const Vector<Type, VECTOR_NUM_ARGS>& a, const Vector<Type, VECTOR_NUM_ARGS>& b, Type t)
       {
         return a * (1.0f - t) + b * t;
       }
@@ -114,17 +114,45 @@ namespace he
 
       private:
 
-      TYPE m_x[VECTOR_NUM_ARGS];
+      Type m_x[VECTOR_NUM_ARGS];
 
       static unsigned int m_vertexcounter;
     };
 
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator * (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector( VECTOR_MULTIPLY_OP_SCALAR_LEFT ); }
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator / (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector( VECTOR_DIVIDE_OP_SCALAR_LEFT ); }
 
-    template< typename TYPE> unsigned int Vector<TYPE, VECTOR_NUM_ARGS>::m_vertexcounter=0;
-
-    template< typename TYPE> unsigned int Vector<TYPE, VECTOR_NUM_ARGS>::giveVertexNumber(void)
+    template<typename Type> std::ostream& operator <<(std::ostream& stream, const Vector<Type, VECTOR_NUM_ARGS>& v)
     {
-        return m_vertexcounter;
+      for(unsigned int i = 0; i < VECTOR_NUM_ARGS; i++)
+      {
+        stream << v[i];
+        if(i + 1 != VECTOR_NUM_ARGS)
+        {
+          stream << ',';
+        }
+      }
+      stream << std::endl;
+
+      return stream;
+    }
+
+    template<typename Type> std::istream& operator >>(std::istream& stream, Vector<Type, VECTOR_NUM_ARGS>& v)
+    {
+      for(unsigned int i = 0; i < VECTOR_NUM_ARGS; i++)
+      {
+        stream >> v[i];
+        stream.ignore(1, ',');//ignores the next char or  ','
+      }
+
+      return stream;
+    }
+
+    template<typename Type> unsigned int Vector<Type, VECTOR_NUM_ARGS>::m_vertexcounter = 0;
+
+    template<typename Type> unsigned int Vector<Type, VECTOR_NUM_ARGS>::giveVertexNumber()
+    {
+      return m_vertexcounter;
     }
 	}
 }

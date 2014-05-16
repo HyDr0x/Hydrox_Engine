@@ -1,5 +1,5 @@
-#ifndef NODEWRAPPER_H_
-#define NODEWRAPPER_H_
+#ifndef LOADERNODEWRAPPER_H_
+#define LOADERNODEWRAPPER_H_
 
 
 #include <Utilities/Math/Math.hpp>
@@ -9,7 +9,7 @@
 
 namespace he
 {
-  namespace saver
+  namespace loader
   {
     enum NodeType
     {
@@ -95,15 +95,15 @@ namespace he
       util::Matrix<float, 4> trfMatrix;
     };
 
-    std::ofstream& operator <<(std::ofstream& stream, const TreeNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const GeoNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const AnimatedGeoNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const TransformNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const AnimatedTransformNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const LODNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const BillboardNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const LightNodeData& node);
-    std::ofstream& operator <<(std::ofstream& stream, const ParticleNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, TreeNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, GeoNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, AnimatedGeoNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, TransformNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, AnimatedTransformNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, LODNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, BillboardNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, LightNodeData& node);
+    std::ifstream& operator >>(std::ifstream& stream, ParticleNodeData& node);
   }
 }
 

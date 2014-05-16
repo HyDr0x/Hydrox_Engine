@@ -6,12 +6,14 @@ namespace he
 {
 	namespace renderer
 	{
-	
-
     AABB::AABB()
     {
       m_bbMin = util::Vector<float, 3>(FLT_MAX, FLT_MAX, FLT_MAX);
       m_bbMax = util::Vector<float, 3>(FLT_MIN, FLT_MIN, FLT_MIN);
+    }
+
+    AABB::AABB(util::Vector<float, 3> min, util::Vector<float, 3> max) : m_bbMax(max), m_bbMin(min)
+    {
     }
 
     AABB::AABB(const std::vector<util::Vector<float, 3>>& positions)

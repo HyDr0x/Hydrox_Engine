@@ -7,8 +7,10 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/HEFLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ILDevilLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialLoader.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/ResourceLoader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeWrapper.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeWrapperMapper.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderLoader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ResourceLoader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderLoader.h 
 	PARENT_SCOPE 
 )

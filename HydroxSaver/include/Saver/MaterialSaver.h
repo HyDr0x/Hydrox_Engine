@@ -5,7 +5,10 @@
 #include <vector>
 
 #include <Renderer/Resources/ResourceManager.hpp>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Math/Math.hpp>
+
+#include "Saver/DLLExport.h"
 
 namespace he
 {
@@ -25,14 +28,27 @@ namespace he
     {
     public:
 
-      MaterialSaver(util::SingletonManager *singletonManager);
+      enum MaterialFileKeywords
+      {
+        DEFAULT,
+        DIFFUSESTRENGTH,
+        SPECULARSTRENGTH,
+        AMBIENTSTRENGTH,
+        SPECULAREXPONENT,
+        TEXTUREOFFSET,
+        DIFFUSETEXTURE,
+        NORMALMAP,
+        SPECULARMAP,
+        DISPLACEMENTMAP,
+        SHADERNAME,
+        SHADEROFFSET,
+        TESSCONTROLSHADER,
+        TESSEVALSHADER,
+        GEOMETRYSHADER,
+        FRAGMENTSHADER,
+      };
 
-      static void saveMaterial(std::string fileName, const renderer::Material* material);
-
-    private:
-
-      renderer::TextureManager *m_textureManager;
-      renderer::RenderShaderManager *m_renderShaderManager;
+      static void save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager);
     };
 	}
 }

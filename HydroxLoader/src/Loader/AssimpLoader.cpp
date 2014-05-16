@@ -2,22 +2,23 @@
 
 #include <sstream>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/PrimitiveGenerator/CubeGenerator.h>
+
 #include <SceneGraph/TreeNodes/GroupNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/LODNode.h>
 #include <SceneGraph/TreeNodes/TransformNode.h>
-
-#include "Loader/ILDevilLoader.h"
-#include "Loader/RenderShaderLoader.h"
-#include "Loader/MaterialLoader.h"
-#include <Utilities/PrimitiveGenerator/CubeGenerator.h>
-
 #include <SceneGraph/Scene/Scene.h>
 
 #include <Renderer/Resources/Texture2D.h>
 #include <Renderer/Resources/Material.h>
 #include <Renderer/Resources/Mesh.h>
+
+#include "Loader/ILDevilLoader.h"
+#include "Loader/RenderShaderLoader.h"
+#include "Loader/MaterialLoader.h"
 
 namespace he
 {

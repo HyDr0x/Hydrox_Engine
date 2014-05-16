@@ -1,8 +1,6 @@
 #ifndef MATRIX3_H_
 #define MATRIX3_H_
 
-#include "Vector.h"
-
 namespace he
 {
 	namespace util
@@ -218,6 +216,27 @@ namespace he
 
       Vector<Type, 3> m_m[3];
     };
+
+    template<typename Type> std::ofstream& operator<<(std::ofstream& stream, const Matrix<Type, 3>& matrix)
+    {
+      for(unsigned int i = 0; i < 3; i++)
+      {
+        stream << matrix[i];
+      }
+      stream << std::endl;
+
+      return stream;
+    }
+
+    template<typename Type> std::ifstream& operator>>(std::ifstream& stream, Matrix<Type, 3>& matrix)
+    {
+      for(unsigned int i = 0; i < 3; i++)
+      {
+        stream >> matrix[i];
+      }
+
+      return stream;
+    }
 	}
 }
 

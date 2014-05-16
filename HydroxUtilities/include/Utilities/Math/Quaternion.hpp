@@ -241,6 +241,32 @@ namespace he
 
       Vector<TYPE, 4> m_coord;
     };
+
+    template<typename Type> std::ofstream& operator<<(std::ofstream& stream, const Quaternion<Type>& q)
+    {
+      for(unsigned int i = 0; i < 4; i++)
+      {
+        stream << q[i];
+        if(i + 1 != 4)
+        {
+          stream << ',';
+        }
+      }
+      stream << std::endl;
+
+      return stream;
+    }
+
+    template<typename Type> std::ifstream& operator>>(std::ifstream& stream, Quaternion<Type>& q)
+    {
+      for(unsigned int i = 0; i < 4; i++)
+      {
+        stream >> q[i];
+        stream.ignore(1, ',');//ignores the next char or  ','
+      }
+
+      return stream;
+    }
 	}
 }
 

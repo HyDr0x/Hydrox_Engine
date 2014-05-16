@@ -12,7 +12,6 @@
 #include "Loader/DLLExport.h"
 
 #include <Utilities/Signals/EventManager.h>
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <Renderer/Resources/ResourceManager.hpp>
 
@@ -21,9 +20,17 @@
 
 namespace he
 {
-  class sg::GroupNode;
-  class sg::TreeNode;
-  class sg::AnimatedGeoNode;
+  namespace util
+  {
+    class SingletonManager;
+  }
+
+  namespace sg
+  {
+    class GroupNode;
+    class TreeNode;
+    class AnimatedGeoNode;
+  }
 
   namespace loader
   {

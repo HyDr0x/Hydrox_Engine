@@ -1,8 +1,6 @@
 #ifndef MATRIX2_H_
 #define MATRIX2_H_
 
-#include "Vector.h"
-
 namespace he
 {
 	namespace util
@@ -186,6 +184,27 @@ namespace he
 
       Vector<Type, 2> m_m[2];
     };
+
+    template<typename Type> std::ofstream& operator<<(std::ofstream& stream, const Matrix<Type, 2>& matrix)
+    {
+      for(unsigned int i = 0; i < 2; i++)
+      {
+        stream << matrix[i];
+      }
+      stream << std::endl;
+
+      return stream;
+    }
+
+    template<typename Type> std::ifstream& operator>>(std::ifstream& stream, Matrix<Type, 2>& matrix)
+    {
+      for(unsigned int i = 0; i < 2; i++)
+      {
+        stream >> matrix[i];
+      }
+
+      return stream;
+    }
 	}
 }
 

@@ -1,5 +1,7 @@
 #include "Loader/ILDevilLoader.h"
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <Renderer/Resources/Texture2D.h>
 
 namespace he

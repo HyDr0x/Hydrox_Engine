@@ -6,6 +6,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialSaver.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/NodeExtractionTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/NodeLinkTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeWrapper.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderSaver.cpp 
 	PARENT_SCOPE 
 )

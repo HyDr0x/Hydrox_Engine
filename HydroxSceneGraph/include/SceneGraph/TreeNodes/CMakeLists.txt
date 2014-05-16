@@ -1,6 +1,9 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedGeoNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedTransformNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/AnimationTrack.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeoNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GroupNode.h 
@@ -9,7 +12,5 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedGeoNode.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/AnimatedTransformNode.h 
 	PARENT_SCOPE 
 )

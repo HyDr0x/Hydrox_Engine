@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <Renderer/Resources/RenderShader.h>
 
 namespace he
@@ -29,7 +31,7 @@ namespace he
 
       util::ResourceHandle shaderHandle;
 
-      if(vertexShaderSource == std::string())
+      if(vertexShaderSource.empty())
       {
         std::cout << "ERROR, couldn't open file: " << filename << std::endl;
 

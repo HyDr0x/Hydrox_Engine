@@ -46,6 +46,16 @@ namespace he
     bool NodeLinkTraverser::preTraverse(sg::AnimatedTransformNode* treeNode)
     {
       AnimatedTransformNodeData& data = m_wrapperMapper.animatedTransformNodes[m_wrapperMapper.animatedTransformNodeMap[treeNode]];
+
+      if(treeNode->getSkinnedMesh() != nullptr)
+      {
+        data.animatedMeshIndex = m_wrapperMapper.animatedGeoNodeMap[treeNode->getSkinnedMesh()];
+      }
+      else
+      {
+        data.animatedMeshIndex = ~0;
+      }
+
       findNodeIndex(treeNode->getFirstChild(), data.firstChildIndex, data.firstChildNodeType);
       findNodeIndex(treeNode->getNextSibling(), data.nextSiblingIndex, data.nextSiblingNodeType);
       findNodeIndex(treeNode->getParent(), data.parentIndex, data.parentNodeType);
@@ -117,25 +127,25 @@ namespace he
     {
       if(treeNode != nullptr)
       {
-        if(treeNode->isGeoNode())
-        {
-          index = m_wrapperMapper.geoNodeMap[dynamic_cast<sg::GeoNode*>(treeNode)];
-          nodeType = GEONODE;
-        }
-        else if(treeNode->isAnimatedGeoNode())
+        if(treeNode->isAnimatedGeoNode())
         {
           index = m_wrapperMapper.animatedGeoNodeMap[dynamic_cast<sg::AnimatedGeoNode*>(treeNode)];
           nodeType = ANIMATEDGEONODE;
         }
-        else if(treeNode->isTransformNode())
+        else if(treeNode->isGeoNode())
         {
-          index = m_wrapperMapper.transformNodeMap[dynamic_cast<sg::TransformNode*>(treeNode)];
-          nodeType = TRANSFORMNODE;
+          index = m_wrapperMapper.geoNodeMap[dynamic_cast<sg::GeoNode*>(treeNode)];
+          nodeType = GEONODE;
         }
         else if(treeNode->isAnimatedTransformNode())
         {
           index = m_wrapperMapper.animatedTransformNodeMap[dynamic_cast<sg::AnimatedTransformNode*>(treeNode)];
           nodeType = ANIMATEDTRANSFORMNODE;
+        }
+        else if(treeNode->isTransformNode())
+        {
+          index = m_wrapperMapper.transformNodeMap[dynamic_cast<sg::TransformNode*>(treeNode)];
+          nodeType = TRANSFORMNODE;
         }
         else if(treeNode->isBillboardNode())
         {

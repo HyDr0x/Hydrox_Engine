@@ -11,7 +11,6 @@ namespace he
       m_vertexStride = 0;
       m_vertexDeclarationFlags = 0;
       m_primitiveType = GL_TRIANGLES;
-      m_verticesPerPrimitive = 3;
     }
 
     Mesh::Mesh(GLenum primitiveType,
@@ -28,21 +27,22 @@ namespace he
 
       m_primitiveType = primitiveType;
 
+      unsigned int verticesPerPrimitive;
       switch(m_primitiveType)
       {
       case GL_POINTS:
-        m_verticesPerPrimitive = 1;
+        verticesPerPrimitive = 1;
         break;
       case GL_LINES:
-        m_verticesPerPrimitive = 2;
+        verticesPerPrimitive = 2;
         break;
       case GL_TRIANGLES:
       default:
-        m_verticesPerPrimitive = 3;
+        verticesPerPrimitive = 3;
         break;
       }
 
-      m_primitiveCount = static_cast<unsigned int>(indices.size()) / m_verticesPerPrimitive;
+      m_primitiveCount = static_cast<unsigned int>(indices.size()) / verticesPerPrimitive;
 
       m_vertexCount = static_cast<unsigned int>(positions.size());
 
@@ -137,12 +137,31 @@ namespace he
 	    //tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
     }
 
+    Mesh::Mesh(AABB boundingVolume,
+               GLenum primitiveType,
+               unsigned int primitiveCount,
+               unsigned int vertexCount,
+               GLuint vertexStride,
+               GLuint vertexDeclarationFlags,
+               const std::vector<GLubyte>& vboBuffer, 
+               const std::vector<indexType>& indices
+               ) :
+               m_boundingVolume(boundingVolume),
+               m_primitiveType(primitiveType),
+               m_primitiveCount(primitiveCount),
+               m_vertexCount(vertexCount),
+               m_vertexStride(vertexStride),
+               m_vertexDeclarationFlags(vertexDeclarationFlags),
+               m_geometryData(vboBuffer), 
+               m_indexData(indices)
+    {
+    }
+
     Mesh::Mesh(const Mesh& o)
     {
       m_hash = o.m_hash;
       m_boundingVolume = o.m_boundingVolume;
       m_primitiveType = o.m_primitiveType;
-      m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	    m_primitiveCount = o.m_primitiveCount;
       m_vertexCount = o.m_vertexCount;
       m_vertexStride = o.m_vertexStride;
@@ -160,7 +179,6 @@ namespace he
       m_hash = o.m_hash;
       m_boundingVolume = o.m_boundingVolume;
       m_primitiveType = o.m_primitiveType;
-      m_verticesPerPrimitive = o.m_verticesPerPrimitive;
 	    m_primitiveCount = o.m_primitiveCount;
       m_vertexCount = o.m_vertexCount;
       m_vertexStride = o.m_vertexStride;
@@ -361,7 +379,7 @@ namespace he
       return m_vertexCount * m_vertexStride;
     }
 
-    const std::vector<GLuint>& Mesh::getIndexBuffer() const
+    const std::vector<Mesh::indexType>& Mesh::getIndexBuffer() const
     {
       return m_indexData;
     }

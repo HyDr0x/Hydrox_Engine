@@ -7,10 +7,14 @@
 
 #include <Renderer/Resources/ResourceManager.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 namespace he
 {
+  namespace util
+  {
+    class SingletonManager;
+  }
+
   namespace loader
   {
     class GRAPHICAPI ResourceLoader

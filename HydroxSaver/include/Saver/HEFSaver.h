@@ -1,12 +1,6 @@
 #ifndef HEFSAVER_H_
 #define HEFSAVER_H_
 
-#include <vector>
-#include <string>
-#include <map>
-
-#include <Utilities/Miscellaneous/ResourceHandle.h>
-
 #include "Saver/DLLExport.h"
 
 #include "Saver/NodeWrapper.h"
@@ -33,6 +27,8 @@ namespace he
       void save(std::string path, std::string filename, sg::Scene* scene, util::SingletonManager *singletonManager);
 
     private:
+
+      void writeToFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
 
       NodeWrapperMapper m_wrapperMapper;
     };

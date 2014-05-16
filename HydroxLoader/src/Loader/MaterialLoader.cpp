@@ -4,7 +4,10 @@
 #include <fstream>
 #include <iostream>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <Renderer/Resources/Material.h>
+
 #include "Loader/RenderShaderLoader.h"
 #include "Loader/ILDevilLoader.h"
 
@@ -17,6 +20,22 @@ namespace he
                                                                                m_textureManager(singletonManager->getService<renderer::TextureManager>()),
                                                                                m_renderShaderManager(singletonManager->getService<renderer::RenderShaderManager>())
     {
+      m_materialFileKeywords["Diffuse Strength"] = DIFFUSESTRENGTH;
+      m_materialFileKeywords["Specular Strength"] = SPECULARSTRENGTH;
+      m_materialFileKeywords["Ambient Strength"] = AMBIENTSTRENGTH;
+      m_materialFileKeywords["Specular Exponent"] = SPECULAREXPONENT;
+
+      m_materialFileKeywords["Diffuse Map"] = DIFFUSETEXTURE;
+      m_materialFileKeywords["Normal Map"] = NORMALMAP;
+      m_materialFileKeywords["Specular Map"] = SPECULARMAP;
+      m_materialFileKeywords["Displacement Map"] = DISPLACEMENTMAP;
+
+      m_materialFileKeywords["Shader Name"] = SHADERNAME;
+
+      m_materialFileKeywords["Fragment Shader"] = FRAGMENTSHADER;
+      m_materialFileKeywords["Geometry Shader"] = GEOMETRYSHADER;
+      m_materialFileKeywords["Tesselation Control Shader"] = TESSCONTROLSHADER;
+      m_materialFileKeywords["Tesselation Evaluation Shader"] = TESSEVALSHADER;
     }
 
     MaterialLoader::~MaterialLoader()
@@ -35,11 +54,6 @@ namespace he
       std::string shaderFilename;
       std::vector<bool> shaderPrograms(4, false);
       std::vector<std::vector<std::string>> textureFilenames(renderer::Material::TEXTURETYPENUM);
-      std::vector<std::string> textureTypes(renderer::Material::TEXTURETYPENUM);
-      textureTypes[0] = "Diffuse Color";
-      textureTypes[1] = "Normal Map";
-      textureTypes[2] = "Specular Map";
-      textureTypes[3] = "Displacement Map";
 
       std::ifstream file(filename);
 	    std::string line;
@@ -56,91 +70,99 @@ namespace he
             continue;
           }
 
-          if(line.find("Diffuse Strength") != std::string::npos)
+          switch(m_materialFileKeywords[line])
           {
+          case DIFFUSESTRENGTH:
             std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.diffuseStrength;
-          }
-
-          if(line.find("Specular Strength") != std::string::npos)
-          {
+            materialData.diffuseStrength = std::strtol(line.c_str(), nullptr, 0);
+            break;
+          case SPECULARSTRENGTH:
             std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.specularStrength;
-          }
-
-          if(line.find("Ambient Strength") != std::string::npos)
-          {
+            materialData.specularStrength = std::strtol(line.c_str(), nullptr, 0);
+            break;
+          case AMBIENTSTRENGTH:
             std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.ambientStrength;
-          }
-
-          if(line.find("Specular Exponent") != std::string::npos)
-          {
+            materialData.ambientStrength = std::strtol(line.c_str(), nullptr, 0);
+            break;
+          case SPECULAREXPONENT:
             std::getline(file, line);
-            std::stringstream stream(line);
-            stream >> materialData.specularExponent;
-          }
-
-          /////////////////////////TEXTURES/////////////////////////
-          for(unsigned int i = 0; i < textureFilenames.size(); i++)
-          {
-            if(line.find(textureTypes[i]) != std::string::npos)
+            materialData.specularExponent = std::strtol(line.c_str(), nullptr, 0);
+            break;
+          case DIFFUSETEXTURE:
+            for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
             {
-              for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+              std::getline(file, line);
+              if(line != std::string("NULL"))
               {
-                std::getline(file, line);
-                if(line != std::string("NULL"))
-                {
-                  textureFilenames[i].push_back(line);
-                }
+                textureFilenames[0].push_back(line);
               }
             }
-          }
-
-          /////////////////////////SHADER/////////////////////////
-          if(line.find("Shader Name") != std::string::npos)
-          {
+            break;
+          case NORMALMAP:
+            for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+            {
+              std::getline(file, line);
+              if(line != std::string("NULL"))
+              {
+                textureFilenames[1].push_back(line);
+              }
+            }
+            break;
+          case SPECULARMAP:
+            for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+            {
+              std::getline(file, line);
+              if(line != std::string("NULL"))
+              {
+                textureFilenames[2].push_back(line);
+              }
+            }
+            break;
+          case DISPLACEMENTMAP:
+            for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+            {
+              std::getline(file, line);
+              if(line != std::string("NULL"))
+              {
+                textureFilenames[3].push_back(line);
+              }
+            }
+            break;
+          case SHADERNAME:
             std::getline(file, line);
             shaderFilename = line;
-          }
-
-          if(line.find("Fragment Shader") != std::string::npos)
-          {
+            break;
+          case FRAGMENTSHADER:
             std::getline(file, line);
             if(line == std::string("TRUE"))
             {
               shaderPrograms[0] = true;
             }
-          }
-
-          if(line.find("Geometry Shader") != std::string::npos)
-          {
+            break;
+          case GEOMETRYSHADER:
             std::getline(file, line);
             if(line == std::string("TRUE"))
             {
               shaderPrograms[1] = true;
             }
-          }
-
-          if(line.find("Tesselation Control Shader") != std::string::npos)
-          {
+            break;
+          case TESSCONTROLSHADER:
             std::getline(file, line);
             if(line == std::string("TRUE"))
             {
               shaderPrograms[2] = true;
             }
-          }
-
-          if(line.find("Tesselation Evaluation Shader") != std::string::npos)
-          {
+            break;
+          case TESSEVALSHADER:
             std::getline(file, line);
             if(line == std::string("TRUE"))
             {
               shaderPrograms[3] = true;
             }
+            break;
+          case DEFAULT:
+          default:
+            continue;//unknown command
           }
 		    }
 
