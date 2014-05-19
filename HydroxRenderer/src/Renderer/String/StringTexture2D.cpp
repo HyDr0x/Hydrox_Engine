@@ -303,9 +303,6 @@ namespace he
 
       std::vector<float> geometryData(m_vertexNumber * 4);
 
-      height *= 0.5f;
-      float offsetX = (-static_cast<int>(letterNumber) * width * 0.5f);
-
       float texWidth = 1.0f / m_font.letterNumberX;
       float texHeight = 1.0f / m_font.letterNumberY;
 
@@ -314,7 +311,7 @@ namespace he
       for (unsigned int i = 0; i < letterNumber; i++)
       {
         //first
-        position[0] = offsetX + i * width;
+        position[0] = i * width;
         position[1] = height;
 
         unsigned int decodedChar = m_font.lut[(unsigned char)text[i]];
@@ -326,8 +323,8 @@ namespace he
         std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 0) * 4 + 2);
 
         //second
-        position[0] = offsetX + i * width;
-        position[1] = -height;
+        position[0] = i * width;
+        position[1] = 0;
 
         texCoord[1] += texHeight;
 
@@ -335,7 +332,7 @@ namespace he
         std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 1) * 4 + 2);
 
         //third
-        position[0] = offsetX + (i + 1) * width;
+        position[0] = (i + 1) * width;
         position[1] = height;
 
         texCoord[0] += texWidth;
@@ -345,8 +342,8 @@ namespace he
         std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 2) * 4 + 2);
 
         //fourth
-        position[0] = offsetX + (i + 1) * width;
-        position[1] = -height;
+        position[0] = (i + 1) * width;
+        position[1] = 0;
 
         texCoord[1] += texHeight;
 

@@ -53,7 +53,7 @@ namespace he
 
     std::ofstream& operator <<(std::ofstream& stream, const AnimatedTransformNodeData& node)
     {
-      stream << (const TransformNodeData&)node;
+      stream << (const TreeNodeData&)node;
 
       stream << node.animationTracks.size() << std::endl;
       for(unsigned int i = 0; i < node.animationTracks.size(); i++)

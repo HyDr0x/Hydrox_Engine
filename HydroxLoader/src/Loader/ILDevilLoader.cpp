@@ -44,6 +44,9 @@ namespace he
       GLuint channelNumber;
       GLuint bitsPerPixel;
 
+      ilEnable(IL_ORIGIN_SET);
+      ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+
       ILuint tex;
 	    ilGenImages(1, &tex);
 	    ilBindImage(tex);

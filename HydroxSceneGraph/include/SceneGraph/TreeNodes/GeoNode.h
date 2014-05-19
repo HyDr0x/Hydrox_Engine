@@ -19,7 +19,7 @@ namespace he
     {
     public:
 
-      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~GeoNode();
 
       GeoNode& operator=(const GeoNode& sourceNode);
@@ -49,8 +49,6 @@ namespace he
       virtual void setRenderable(bool renderable);
 	    bool getRenderable() const;
 
-	    bool getTransparency() const;
-
     protected:
 
       util::EventManager *m_eventManager;
@@ -61,7 +59,6 @@ namespace he
       util::ResourceHandle m_meshHandle;//index which points into the array of the modelmanager
 
       bool m_renderable;//boolean which decides if the mesh is being drawn or not
-      bool m_transparency;
     };
 	}
 }

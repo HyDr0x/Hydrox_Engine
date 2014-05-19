@@ -155,6 +155,7 @@ namespace he
                m_geometryData(vboBuffer), 
                m_indexData(indices)
     {
+      m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
     }
 
     Mesh::Mesh(const Mesh& o)

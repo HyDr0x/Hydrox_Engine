@@ -7,6 +7,8 @@
 
 #include "Utilities/DLLExport.h"
 
+#define MICROSIGN unsigned short (0xC2B5) 
+
 namespace he
 {
 	namespace util

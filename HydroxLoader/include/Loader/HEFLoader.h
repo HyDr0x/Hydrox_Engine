@@ -11,6 +11,7 @@ namespace he
   namespace util
   {
     class SingletonManager;
+    class EventManager;
   }
 
   namespace sg
@@ -24,13 +25,19 @@ namespace he
     {
     public:
 
-      sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager);
+      sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager, util::EventManager *eventManager);
 
     private:
 
       void readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
+      void createSceneNodes(util::EventManager *eventManager);
+      void linkSceneNodes();
+      void findRootNode();
+      void findNode(sg::TreeNode **treeNode, unsigned int index, NodeType nodeType);
+      void findNode(sg::GroupNode **groupNode, unsigned int index, NodeType nodeType);
 
       loader::NodeWrapperMapper m_wrapperMapper;
+      sg::GroupNode *m_rootNode;
     };
 	}
 }

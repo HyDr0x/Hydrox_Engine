@@ -8,7 +8,7 @@ namespace he
     {
     }
 
-    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader)
+    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, bool transparency) : m_transparency(transparency)
     {
       unsigned int length = sizeof(MaterialData) + sizeof(unsigned int);
       std::vector<unsigned char> data(length);
@@ -123,5 +123,9 @@ namespace he
       return m_materialData;
     }
 
+    bool Material::getTransparency() const
+    {
+      return m_transparency;
+    }
 	}
 }

@@ -61,7 +61,7 @@ namespace he
 
     std::ifstream& operator >>(std::ifstream& stream, AnimatedTransformNodeData& node)
     {
-      stream >> (TransformNodeData&)node;
+      stream >> (TreeNodeData&)node;
 
       unsigned int animationTracksSize;
       stream >> animationTracksSize;

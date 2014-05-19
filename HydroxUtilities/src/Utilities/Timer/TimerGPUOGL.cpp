@@ -29,7 +29,7 @@ namespace he
       glEndQuery(GL_TIME_ELAPSED);
       glGetQueryObjectuiv(m_query, GL_QUERY_RESULT, &m_openGLTime);
       glDeleteQueries(1, &m_query);
-      m_openGLTime /= 1000000;
+      m_openGLTime /= 1000;
 
       m_showTimerWhenDying = false;
 

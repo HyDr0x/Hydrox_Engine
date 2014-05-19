@@ -26,23 +26,14 @@ namespace he
   {
     struct NodeWrapperMapper
     {
-      class Less
-      {
-      public:
-        inline bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
-        {
-          return o1.getID() < o2.getID();
-        }
-      };
-
-      std::map<sg::GeoNode*, unsigned int> geoNodeMap;
-      std::map<sg::AnimatedGeoNode*, unsigned int> animatedGeoNodeMap;
-      std::map<sg::TransformNode*, unsigned int> transformNodeMap;
-      std::map<sg::AnimatedTransformNode*, unsigned int> animatedTransformNodeMap;
-      std::map<sg::LODNode*, unsigned int> lodNodeMap;
-      std::map<sg::BillboardNode*, unsigned int> billboardNodeMap;
-      std::map<sg::LightNode*, unsigned int> lightNodeMap;
-      std::map<sg::ParticleNode*, unsigned int> particleNodeMap;
+      std::map<unsigned int, sg::GeoNode*> geoNodeMap;
+      std::map<unsigned int, sg::AnimatedGeoNode*> animatedGeoNodeMap;
+      std::map<unsigned int, sg::TransformNode*> transformNodeMap;
+      std::map<unsigned int, sg::AnimatedTransformNode*> animatedTransformNodeMap;
+      std::map<unsigned int, sg::BillboardNode*> billboardNodeMap;
+      std::map<unsigned int, sg::LODNode*> lodNodeMap;
+      std::map<unsigned int, sg::LightNode*> lightNodeMap;
+      std::map<unsigned int, sg::ParticleNode*> particleNodeMap;
 
       std::vector<GeoNodeData> geoNodes;
       std::vector<AnimatedGeoNodeData> animatedGeoNodes;
@@ -53,9 +44,9 @@ namespace he
       std::vector<LightNodeData> lightNodes;
       std::vector<ParticleNodeData> particleNodes;
 
-      std::map<unsigned int, util::ResourceHandle, Less> meshMap;
-      std::map<unsigned int, util::ResourceHandle, Less> materialMap;
-      std::map<unsigned int, util::ResourceHandle, Less> billboardTextureMap;
+      std::map<unsigned int, util::ResourceHandle> meshMap;
+      std::map<unsigned int, util::ResourceHandle> materialMap;
+      std::map<unsigned int, util::ResourceHandle> billboardTextureMap;
     };
   }
 }

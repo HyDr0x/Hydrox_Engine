@@ -23,7 +23,7 @@ namespace he
       texture->getTextureData(&imageData[0]);
       ilTexImage(texture->getResolution()[0], texture->getResolution()[1], 0, texture->getChannelNumber(), texture->getFormat(), texture->getType(), &imageData[0]);
 
-      ilSaveImage((path + filename + std::string(".png")).c_str());
+      ilSave(IL_PNG, (path + filename + std::string(".png")).c_str());
 
       ilBindImage(0);
       ilDeleteImages(1, &tex);

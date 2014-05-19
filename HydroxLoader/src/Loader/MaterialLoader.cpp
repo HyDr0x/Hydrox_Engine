@@ -184,7 +184,7 @@ namespace he
           }
         }
 
-        materialHandle = m_materialManager->addObject(renderer::Material(materialData, textureHandles, shaderHandle));
+        materialHandle = m_materialManager->addObject(renderer::Material(materialData, textureHandles, shaderHandle, false));
       }
 	    else//wrong filename or file does not exist
 	    {
@@ -203,7 +203,7 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(renderer::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource()));
+      return m_materialManager->addObject(renderer::Material(renderer::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(renderer::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource(), false));
     }
   }
 }

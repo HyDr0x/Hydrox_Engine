@@ -58,7 +58,7 @@ namespace he
       float scale;
     };
 
-    struct AnimatedTransformNodeData : public TransformNodeData
+    struct AnimatedTransformNodeData : public TreeNodeData
     {
       std::vector<sg::AnimationTrack> animationTracks;
       unsigned int animatedMeshIndex;

@@ -23,7 +23,7 @@ namespace he
         m_cpuTime = double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency; 
 
         std::cout << m_timerName << std::endl;
-        std::cout << "CPU Time: " << m_cpuTime << " m" << unsigned char (230) << std::endl;
+        std::cout << "CPU Time: " << m_cpuTime << " m" << MICROSIGN << std::endl;
       }
     }
 

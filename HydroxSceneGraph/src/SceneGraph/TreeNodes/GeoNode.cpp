@@ -11,12 +11,12 @@ namespace he
 {
 	namespace sg
 	{
-    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, bool transparency, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : TreeNode(nodeName, parent, nextSibling),
-                                                                                                                                                                                                                          m_eventManager(eventManager),
-                                                                                                                                                                                                                          m_meshHandle(meshHandle),
-                                                                                                                                                                                                                          m_materialHandle(materialHandle),
-                                                                                                                                                                                                                          m_transparency(transparency),
-                                                                                                                                                                                                                          m_renderable(false)
+    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : 
+      TreeNode(nodeName, parent, nextSibling),
+      m_eventManager(eventManager),
+      m_meshHandle(meshHandle),
+      m_materialHandle(materialHandle),
+      m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
     }
@@ -34,7 +34,6 @@ namespace he
       m_trfMatrix = sourceNode.m_trfMatrix;
       m_meshHandle = sourceNode.m_meshHandle;
       m_renderable = sourceNode.m_renderable;
-      m_transparency = sourceNode.m_transparency;
 
       return *this;
     }
@@ -51,7 +50,7 @@ namespace he
 
     TreeNode* GeoNode::clone() const
     {
-      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_transparency, m_nodeName);
+      GeoNode *newNode = new GeoNode(m_eventManager, m_meshHandle, m_materialHandle, m_nodeName);
 
       newNode->m_trfMatrix = m_trfMatrix;
 
@@ -160,11 +159,6 @@ namespace he
     bool GeoNode::getRenderable() const
     {
       return m_renderable;
-    }
-
-    bool GeoNode::getTransparency() const
-    {
-      return m_transparency;
     }
 	}
 }

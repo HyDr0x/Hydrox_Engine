@@ -1,6 +1,7 @@
 set(
 	SOURCE 
 	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/CreateDirectory.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/HEFSaver.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ILDevilSaver.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialSaver.cpp 
