@@ -31,14 +31,13 @@ namespace he
         stream << animationTrack.m_scalesTime[i] << std::endl;
       }
 
-      stream << std::endl;
-
       return stream;
     }
 
     std::ifstream& operator>>(std::ifstream& stream, AnimationTrack& animationTrack)
     {
-      stream >> animationTrack.m_animationName;
+      std::getline(stream, animationTrack.m_animationName);//getline because of white spaces
+      std::getline(stream, animationTrack.m_animationName);
       stream >> animationTrack.m_duration;
       stream >> animationTrack.m_animationTicksPerSecond;
 

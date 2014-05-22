@@ -58,48 +58,56 @@ namespace he
       }
 
       fileStream << m_wrapperMapper.geoNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.geoNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.geoNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.animatedGeoNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.animatedGeoNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.animatedGeoNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.transformNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.transformNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.transformNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.animatedTransformNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.animatedTransformNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.animatedTransformNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.billboardNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.billboardNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.billboardNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.lodNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.lodNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.lodNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.lightNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.lightNodes[i] << std::endl;
       }
 
       fileStream << m_wrapperMapper.particleNodes.size() << std::endl;
+      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.particleNodes[i] << std::endl;
@@ -111,8 +119,8 @@ namespace he
       for(unsigned int i = 0; i < m_wrapperMapper.meshes.size(); i++)
       {
         renderer::Mesh& mesh = m_wrapperMapper.meshes[i];
-        fileStream << mesh.getBBMax();
-        fileStream << mesh.getBBMin();
+        fileStream << mesh.getBBMax() << std::endl;
+        fileStream << mesh.getBBMin() << std::endl;
         fileStream << mesh.getPrimitiveType() << std::endl;
         fileStream << mesh.getPrimitiveCount() << std::endl;
         fileStream << mesh.getIndexCount() << std::endl;

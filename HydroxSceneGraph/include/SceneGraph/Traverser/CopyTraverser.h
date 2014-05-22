@@ -48,7 +48,7 @@ namespace he
 
       GroupNode* cloneGroupNode(const GroupNode* treeNode);
       TreeNode* cloneTreeNode(const TreeNode* treeNode);
-      void ascendingGroupNode(const TreeNode* treeNode);
+      void ascendingGroupNode(const GroupNode* treeNode);
       void ascendingTreeNode(const TreeNode* treeNode);
 
       void addChild(GroupNode* parent, TreeNode* newNode);

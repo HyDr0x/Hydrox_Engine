@@ -132,7 +132,6 @@ namespace he
           stream << ',';
         }
       }
-      stream << std::endl;
 
       return stream;
     }

@@ -190,19 +190,15 @@ namespace he
 
       m_sibling = newNode;
 
-      if(treeNode->getFirstChild() != nullptr)
-      {
-        m_childNode = true;
-      }
-
       return newNode;
     }
 
-    void CopyTraverser::ascendingGroupNode(const TreeNode* treeNode)
+    void CopyTraverser::ascendingGroupNode(const GroupNode* treeNode)
     {
+      m_childNode = false;
+
       if(treeNode->getNextSibling() == nullptr)
       {
-        m_childNode = false;
         m_sibling = m_parent;
         if(m_parent != nullptr)
         {
@@ -213,10 +209,15 @@ namespace he
 
     void CopyTraverser::ascendingTreeNode(const TreeNode* treeNode)
     {
+      m_childNode = false;
+
       if(treeNode->getNextSibling() == nullptr)
       {
-        m_childNode = false;
         m_sibling = m_parent;
+        if(m_parent != nullptr)
+        {
+          m_parent = m_parent->getParent();
+        }
       }
     }
 

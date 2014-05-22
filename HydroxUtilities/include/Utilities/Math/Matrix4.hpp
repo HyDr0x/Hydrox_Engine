@@ -261,9 +261,8 @@ namespace he
     {
       for(unsigned int i = 0; i < 4; i++)
       {
-        stream << matrix[i];
+        stream << matrix[i] << std::endl;
       }
-      stream << std::endl;
 
       return stream;
     }

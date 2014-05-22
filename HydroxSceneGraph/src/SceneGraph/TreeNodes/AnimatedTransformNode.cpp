@@ -14,7 +14,7 @@ namespace he
 	{
     AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
       GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
-      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTime(0.0f), m_pauseAnimation(false)
+      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTimeInSeconds(0.0f), m_pauseAnimation(false)
     {
       m_animatedTranslation = util::Vector<float, 3>::identity();
       m_animatedRotation = util::Quaternion<float>::identity();
@@ -39,7 +39,7 @@ namespace he
 
       m_animationTracks = sourceNode.m_animationTracks;
       m_currentTrack = sourceNode.m_currentTrack;
-      m_currentAnimationTime = sourceNode.m_currentAnimationTime;
+      m_currentAnimationTimeInSeconds = sourceNode.m_currentAnimationTimeInSeconds;
 
       m_currentScaleKey = sourceNode.m_currentScaleKey;
       m_currentPositionKey = sourceNode.m_currentPositionKey;
@@ -78,7 +78,7 @@ namespace he
       newNode->m_animatedScale = m_animatedScale;
 
       newNode->m_currentTrack = m_currentTrack;
-      newNode->m_currentAnimationTime = m_currentAnimationTime;
+      newNode->m_currentAnimationTimeInSeconds = m_currentAnimationTimeInSeconds;
       newNode->m_pauseAnimation = m_pauseAnimation;
 
       newNode->m_currentScaleKey = m_currentScaleKey;
@@ -175,7 +175,7 @@ namespace he
       {
         addDirtyFlag(ANIM_DIRTY);
 
-        m_currentAnimationTime = time;
+        m_currentAnimationTimeInSeconds = time;
       }
     }
 
@@ -185,7 +185,7 @@ namespace he
       {
         addDirtyFlag(ANIM_DIRTY);
 
-        m_currentAnimationTime += time;
+        m_currentAnimationTimeInSeconds += time;
       }
     }
 
@@ -204,7 +204,7 @@ namespace he
       addDirtyFlag(ANIM_DIRTY);
 
       m_pauseAnimation = true;
-      m_currentAnimationTime = 0.0f;
+      m_currentAnimationTimeInSeconds = 0.0f;
     }
 
     void AnimatedTransformNode::calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation)
@@ -267,7 +267,7 @@ namespace he
 
     void AnimatedTransformNode::interpolateKeyFrames(AnimationTrack& currentTrack)
     {
-      float timeInTicks = fmod(m_currentAnimationTime * currentTrack.m_animationTicksPerSecond, m_animationTracks[m_currentTrack].m_duration);
+      float timeInTicks = fmod(m_currentAnimationTimeInSeconds * currentTrack.m_animationTicksPerSecond, m_animationTracks[m_currentTrack].m_duration);
 
       if(currentTrack.m_scalesTime[m_currentScaleKey] > timeInTicks)
       {

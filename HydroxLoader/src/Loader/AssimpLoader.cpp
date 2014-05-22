@@ -99,14 +99,12 @@ namespace he
         scene = loadDefaultSceneGraph();
       }
       else
-      {
-        std::vector<util::ResourceHandle> meshes;//contains the mesh id's of the scene
-    
-        loadMeshesFromAssimp(meshes, assimpScene, yAxisFlipped);
+      {  
+        loadMeshesFromAssimp(assimpScene, yAxisFlipped);
 
         loadAnimatedSkeleton(assimpScene);
 
-        sg::GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene, meshes);
+        sg::GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene);
 
         attachBonesToSkinnedMesh();
 
@@ -140,9 +138,9 @@ namespace he
       return new sg::Scene(sceneRootNode);
     }
 
-    void AssimpLoader::loadMeshesFromAssimp(std::vector<util::ResourceHandle>& out_meshes, const aiScene *scene, bool yAxisFlipped)
+    void AssimpLoader::loadMeshesFromAssimp(const aiScene *scene, bool yAxisFlipped)
     {
-      out_meshes.resize(scene->mNumMeshes);
+      m_meshes.resize(scene->mNumMeshes);
       m_inverseBindPoseTable.resize(scene->mNumMeshes);
       m_boneNameTable.resize(scene->mNumMeshes);
 
@@ -150,7 +148,7 @@ namespace he
 
 	    for(unsigned int i = 0; i != scene->mNumMeshes; i++)
 	    {
-        out_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
+        m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
 	    }
     }
 
@@ -307,15 +305,15 @@ namespace he
         vertexColors));
     }
 
-    sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene, const std::vector<util::ResourceHandle>& meshes)
+    sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene)
     {
       sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), filename);
-      sceneRootNode->setFirstChild(createSceneNodes(scene, scene->mRootNode, meshes, sceneRootNode, nullptr));
+      sceneRootNode->setFirstChild(createTransformNodes(scene->mRootNode, sceneRootNode, nullptr));
 
       return sceneRootNode;
     }
 
-    sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    sg::TreeNode* AssimpLoader::createTransformNodes(const aiNode *node, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
     {
       sg::TransformNode *transformNode = nullptr;
 
@@ -330,51 +328,122 @@ namespace he
       else
       {
         util::Matrix<float, 4> tmpTransformationMatrix;
-        std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + 16, &tmpTransformationMatrix[0][0]);
+        int size = sizeof(node->mTransformation) / sizeof(node->mTransformation[0][0]);
+        std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + size, &tmpTransformationMatrix[0][0]);
         tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
         transformNode = new sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
         transformNode->addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
       }
 
-      parentNode = transformNode;
       nextSibling = nullptr;
 
-      std::stringstream stream;
-      sg::GeoNode *geoNode = nullptr;
-      util::Matrix<float, 4> tmpBoneMatrix;
-
-      for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
+      if(node->mNumMeshes)
       {
-        unsigned int meshIndex = node->mMeshes[i];
+        sg::GeoNode *geoNode = nullptr;
 
-        stream << i;
-        if(!m_inverseBindPoseTable[meshIndex].empty())
+        for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
         {
-          geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
-          m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
+          nextSibling = createGeoNodes(std::string(node->mName.C_Str()), node->mMeshes[i], transformNode, nextSibling);
         }
-        else
-        {
-          geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
-        }
-      
-        stream.str("");
-        nextSibling = geoNode;
+
+        transformNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
       }
 
-      for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
+      if(node->mNumChildren)
       {
-        nextSibling = createSceneNodes(scene, node->mChildren[i], meshes, parentNode, nextSibling);
-      }
+        for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
+        {
+          nextSibling = createTransformNodes(node->mChildren[i], transformNode, nextSibling);
+        }
 
-      if(node->mNumMeshes != 0 || node->mNumChildren != 0)
-      {
-        parentNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
+        transformNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
       }
 
       return transformNode;
     }
+
+    sg::TreeNode* AssimpLoader::createGeoNodes(std::string meshName, unsigned int meshIndex, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    {
+      std::stringstream stream;
+      sg::GeoNode *geoNode = nullptr;
+
+      stream << 0;
+      if(!m_inverseBindPoseTable[meshIndex].empty())
+      {
+        geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+        m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
+      }
+      else
+      {
+        geoNode = new sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+      }
+      
+      stream.str("");
+
+      return geoNode;
+    }
+
+    //sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    //{
+    //  sg::TransformNode *transformNode = nullptr;
+
+    //  std::map<std::string, std::vector<sg::AnimationTrack>>::iterator mit = m_animationTracks.find(std::string(node->mName.C_Str()));
+
+    //  if(mit != m_animationTracks.end())
+    //  {
+    //    transformNode = new sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+    //    m_boneTable[transformNode->getNodeName()] = dynamic_cast<sg::AnimatedTransformNode*>(transformNode);
+    //    transformNode->addDirtyFlag(sg::GroupNode::ANIM_DIRTY);//animations need to be updated
+    //  }
+    //  else
+    //  {
+    //    util::Matrix<float, 4> tmpTransformationMatrix;
+    //    std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + 16, &tmpTransformationMatrix[0][0]);
+    //    tmpTransformationMatrix = tmpTransformationMatrix.transpose();
+
+    //    transformNode = new sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
+    //    transformNode->addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
+    //  }
+
+    //  parentNode = transformNode;
+    //  nextSibling = nullptr;
+
+    //  std::stringstream stream;
+    //  sg::GeoNode *geoNode = nullptr;
+    //  util::Matrix<float, 4> tmpBoneMatrix;
+
+    //  for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
+    //  {
+    //    unsigned int meshIndex = node->mMeshes[i];
+
+    //    stream << i;
+    //    if(!m_inverseBindPoseTable[meshIndex].empty())
+    //    {
+    //      geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+    //      m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
+    //    }
+    //    else
+    //    {
+    //      geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+    //    }
+    //  
+    //    stream.str("");
+    //    nextSibling = geoNode;
+    //  }
+
+    //  for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
+    //  {
+    //    nextSibling = createSceneNodes(scene, node->mChildren[i], meshes, parentNode, nextSibling);
+    //  }
+
+    //  if(node->mNumMeshes != 0 || node->mNumChildren != 0)
+    //  {
+    //    parentNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
+    //  }
+
+    //  return transformNode;
+    //}
 
     void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
     {
@@ -405,7 +474,7 @@ namespace he
 
           animationTrack.m_animationName = animationName;
           animationTrack.m_duration = scene->mAnimations[i]->mDuration;
-          animationTrack.m_animationTicksPerSecond = scene->mAnimations[i]->mTicksPerSecond == 0.0 ? m_animationTimeUnitConvert : scene->mAnimations[i]->mTicksPerSecond / m_animationTimeUnitConvert;
+          animationTrack.m_animationTicksPerSecond = scene->mAnimations[i]->mTicksPerSecond == 0.0 ? m_animationTimeUnitConvert : scene->mAnimations[i]->mTicksPerSecond * m_animationTimeUnitConvert;
 
           for(unsigned int k = 0; k < channel->mNumPositionKeys; k++)
           {

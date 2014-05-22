@@ -58,7 +58,7 @@ namespace he
       stream << node.animationTracks.size() << std::endl;
       for(unsigned int i = 0; i < node.animationTracks.size(); i++)
       {
-        stream << node.animationTracks[i] << std::endl;
+        stream << node.animationTracks[i];
       }
       stream << node.animatedMeshIndex << std::endl;
       stream << node.boneIndex << std::endl;

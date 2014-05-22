@@ -10,7 +10,9 @@ namespace he
     {
       unsigned int nodeTypes;
 
-      stream >> node.nodeName;
+      std::getline(stream, node.nodeName);//getline because of white spaces
+      std::getline(stream, node.nodeName);
+      std::getline(stream, node.nodeName);
       stream >> nodeTypes;
       node.parentNodeType = (NodeType)nodeTypes;
       stream >> node.parentIndex;

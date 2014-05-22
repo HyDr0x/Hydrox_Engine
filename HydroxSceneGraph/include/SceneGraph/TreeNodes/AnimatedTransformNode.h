@@ -85,7 +85,7 @@ namespace he
       unsigned int m_currentRotationKey;
       unsigned int m_currentPositionKey;
 
-      float m_currentAnimationTime;
+      float m_currentAnimationTimeInSeconds;
       unsigned int m_currentTrack;
       unsigned int m_boneIndex;//index into the bone vector of the animatedGeoNode if it is skinned
       bool m_pauseAnimation;

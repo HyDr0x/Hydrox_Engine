@@ -133,8 +133,8 @@ namespace he
         GLuint vertexStride;
         GLuint vboSize;
 
-        fileStream >> bbMin;
         fileStream >> bbMax;
+        fileStream >> bbMin;
         fileStream >> primitiveType;
         fileStream >> primitiveCount;
         fileStream >> indexCount;
@@ -162,24 +162,26 @@ namespace he
 
       unsigned int materialMapSize;
       fileStream >> materialMapSize;
-
+      std::getline(fileStream, std::string());
       MaterialLoader materialLoader(singletonManager);
       for(unsigned int i = 0; i < materialMapSize; i++)
       {
         std::string materialFilename;
-        fileStream >> materialFilename;
+        
+        std::getline(fileStream, materialFilename);
         
         m_wrapperMapper.materialMap[i] = materialLoader.loadResource(path + materialFilename);
       }
 
       unsigned int billboardTextureMapSize;
       fileStream >> billboardTextureMapSize;
-
+      std::getline(fileStream, std::string());
       ILDevilLoader ilDevilLoader(singletonManager);
       for(unsigned int i = 0; i < billboardTextureMapSize; i++)
       {
         std::string billboardTextureFilename;
-        fileStream >> billboardTextureFilename;
+        
+        std::getline(fileStream, billboardTextureFilename);
 
         m_wrapperMapper.billboardTextureMap[i] = ilDevilLoader.loadResource(billboardTextureFilename);
       }
@@ -284,7 +286,10 @@ namespace he
       {
         AnimatedTransformNodeData& data = m_wrapperMapper.animatedTransformNodes[i];
 
-        m_wrapperMapper.animatedTransformNodeMap[i]->setSkinnedMesh(m_wrapperMapper.animatedGeoNodeMap[data.animatedMeshIndex]);
+        if(data.animatedMeshIndex != ~0)
+        {
+          m_wrapperMapper.animatedTransformNodeMap[i]->setSkinnedMesh(m_wrapperMapper.animatedGeoNodeMap[data.animatedMeshIndex]);
+        }
 
         findNode(&treeNode, data.firstChildIndex, data.firstChildNodeType);
         m_wrapperMapper.animatedTransformNodeMap[i]->setFirstChild(treeNode);
