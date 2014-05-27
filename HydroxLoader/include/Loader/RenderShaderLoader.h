@@ -17,10 +17,6 @@ namespace he
       util::ResourceHandle loadResource(std::string filename);
 
       util::ResourceHandle getDefaultResource() const;
-
-    private:
-
-      renderer::RenderShaderManager *m_renderShaderManager;
     };
   }
 }

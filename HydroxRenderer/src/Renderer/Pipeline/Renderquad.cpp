@@ -139,6 +139,20 @@ namespace he
 
 		  GLenum windowBuff[] = { GL_BACK_LEFT };//switching to back buffer (LEFT/RIGHT --> for stereoscopic rendering, default is LEFT)
 		  glDrawBuffers(1, windowBuff);
+
+      //glBindTexture(GL_TEXTURE_2D, m_depthTexture->m_texIndex);
+      //std::vector<float> depth(1024 * 768);
+      //glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &depth[0]);
+      //glBindTexture(GL_TEXTURE_2D, 0);
+
+      //float u;
+      //for(unsigned int i = 0; i < depth.size(); i++)
+      //{
+      //  if(depth[i] != 1.0f)
+      //  {
+      //    u = depth[i];
+      //  }
+      //}
     }
 
     void Renderquad::render(util::ResourceHandle shaderHandle) const

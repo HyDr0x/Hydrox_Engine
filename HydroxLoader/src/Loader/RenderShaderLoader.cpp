@@ -11,7 +11,7 @@ namespace he
 {
   namespace loader
   {
-    RenderShaderLoader::RenderShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_renderShaderManager(m_singletonManager->getService<renderer::RenderShaderManager>())
+    RenderShaderLoader::RenderShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager)
     {
     }
 
@@ -39,7 +39,7 @@ namespace he
       }
       else
       {
-        shaderHandle = m_renderShaderManager->addObject(renderer::RenderShader(filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
+        shaderHandle = m_singletonManager->getService<renderer::RenderShaderManager>()->addObject(renderer::RenderShader(filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
       }
 
       return shaderHandle;
@@ -80,7 +80,7 @@ namespace he
 	                                    color = vec4(1,1,1,1);\n\
                                     }";
 
-      return m_renderShaderManager->addObject(renderer::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
+      return m_singletonManager->getService<renderer::RenderShaderManager>()->addObject(renderer::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
     }
   }
 }
