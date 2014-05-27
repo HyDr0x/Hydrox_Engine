@@ -20,10 +20,37 @@ namespace he
 {
 	namespace saver
 	{
+    HEFSaver::~HEFSaver()
+    {
+      m_wrapperMapper.geoNodeMap.clear();
+      m_wrapperMapper.animatedGeoNodeMap.clear();
+      m_wrapperMapper.transformNodeMap.clear();
+      m_wrapperMapper.animatedTransformNodeMap.clear();
+      m_wrapperMapper.billboardNodeMap.clear();
+      m_wrapperMapper.lodNodeMap.clear();
+      m_wrapperMapper.lightNodeMap.clear();
+      m_wrapperMapper.particleNodeMap.clear();
+
+      m_wrapperMapper.geoNodes.clear();
+      m_wrapperMapper.animatedGeoNodes.clear();
+      m_wrapperMapper.transformNodes.clear();
+      m_wrapperMapper.animatedTransformNodes.clear();
+      m_wrapperMapper.billboardNodes.clear();
+      m_wrapperMapper.lodNodes.clear();
+      m_wrapperMapper.lightNodes.clear();
+      m_wrapperMapper.particleNodes.clear();
+
+      m_wrapperMapper.meshMap.clear();
+      m_wrapperMapper.materialMap.clear();
+      m_wrapperMapper.billboardTextureMap.clear();
+
+      m_wrapperMapper.meshes.clear();
+      m_wrapperMapper.materialFileNames.clear();
+      m_wrapperMapper.billboardTextureFileNames.clear();
+    }
+
     void HEFSaver::save(std::string path, std::string filename, sg::Scene* scene, util::SingletonManager *singletonManager)
     {
-      m_wrapperMapper = NodeWrapperMapper();
-
       std::string filenameWithoutEnding = filename.substr(0, filename.size() - 4);
       NodeExtractionTraverser extractionTraverser(filenameWithoutEnding, m_wrapperMapper, singletonManager);
       extractionTraverser.doTraverse(scene->getRootNode());
@@ -42,7 +69,7 @@ namespace he
       }
 
       std::ofstream fileStream;
-      fileStream.open(path + filename, std::ofstream::out | std::ofstream::trunc);
+      fileStream.open(path + filename, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
 
       if(!fileStream.is_open())
       {
@@ -57,86 +84,80 @@ namespace he
         }
       }
 
-      fileStream << m_wrapperMapper.geoNodes.size() << std::endl;
+      NodeNumbers nodeNumbers;
+
+      nodeNumbers.geoNodeSize = m_wrapperMapper.geoNodes.size();
+      nodeNumbers.animatedGeoNodeSize = m_wrapperMapper.animatedGeoNodes.size();
+      nodeNumbers.transformNodeSize = m_wrapperMapper.transformNodes.size();
+      nodeNumbers.animatedTransformNodeSize = m_wrapperMapper.animatedTransformNodes.size();
+      nodeNumbers.billboardNodeSize = m_wrapperMapper.billboardNodes.size();
+      nodeNumbers.lodNodeSize = m_wrapperMapper.lodNodes.size();
+      nodeNumbers.lightNodeSize = m_wrapperMapper.lightNodes.size();
+      nodeNumbers.particleNodeSize = m_wrapperMapper.particleNodes.size();
+
+      fileStream.write((char*)&nodeNumbers, sizeof(nodeNumbers));
+
       fileStream << std::endl;
+
       for(unsigned int i = 0; i < m_wrapperMapper.geoNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.geoNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.geoNodes[i];
       }
 
-      fileStream << m_wrapperMapper.animatedGeoNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.animatedGeoNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.animatedGeoNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.animatedGeoNodes[i];
       }
 
-      fileStream << m_wrapperMapper.transformNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.transformNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.transformNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.transformNodes[i];
       }
 
-      fileStream << m_wrapperMapper.animatedTransformNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.animatedTransformNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.animatedTransformNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.animatedTransformNodes[i];
       }
 
-      fileStream << m_wrapperMapper.billboardNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.billboardNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.billboardNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.billboardNodes[i];
       }
 
-      fileStream << m_wrapperMapper.lodNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.lodNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.lodNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.lodNodes[i];
       }
 
-      fileStream << m_wrapperMapper.lightNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
-        fileStream << m_wrapperMapper.lightNodes[i] << std::endl;
+        fileStream << m_wrapperMapper.lightNodes[i];
       }
 
-      fileStream << m_wrapperMapper.particleNodes.size() << std::endl;
-      fileStream << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.particleNodes[i] << std::endl;
       }
 
-      fileStream << std::endl;
-
       fileStream << m_wrapperMapper.meshes.size() << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.meshes.size(); i++)
       {
         renderer::Mesh& mesh = m_wrapperMapper.meshes[i];
-        fileStream << mesh.getBBMax() << std::endl;
-        fileStream << mesh.getBBMin() << std::endl;
-        fileStream << mesh.getPrimitiveType() << std::endl;
-        fileStream << mesh.getPrimitiveCount() << std::endl;
-        fileStream << mesh.getIndexCount() << std::endl;
-        fileStream << mesh.getVertexCount() << std::endl;
-        fileStream << mesh.getVertexDeclarationFlags() << std::endl;
-        fileStream << mesh.getVertexStride() << std::endl;
-        fileStream << mesh.getVBOSize() << std::endl;
-        for(unsigned int i = 0; i < mesh.getIndexCount(); i++)
-        {
-          fileStream << mesh.getIndexBuffer()[i] << std::endl;
-        }
-        for(unsigned int i = 0; i < mesh.getVBOSize(); i++)
-        {
-          fileStream << GLuint(mesh.getVBOBuffer()[i]) << std::endl;
-        }
-        fileStream << std::endl;
+
+        MeshMetaData meshData;
+        meshData.bbMax = mesh.getBBMax();
+        meshData.bbMin = mesh.getBBMin();
+        meshData.primitiveType = mesh.getPrimitiveType();
+        meshData.primitiveCount = mesh.getPrimitiveCount();
+        meshData.indexCount = mesh.getIndexCount();
+        meshData.vertexCount = mesh.getVertexCount();
+        meshData.vertexDeclaration = mesh.getVertexDeclarationFlags();
+        meshData.vertexStride = mesh.getVertexStride();
+        meshData.vboSize = mesh.getVBOSize();
+        
+        fileStream.write((char*)&meshData, sizeof(meshData));
+        fileStream.write((char*)&mesh.getIndexBuffer()[0], sizeof(mesh.getIndexBuffer()[0]) * mesh.getIndexCount());
+        fileStream.write((char*)&mesh.getVBOBuffer()[0], sizeof(mesh.getVBOBuffer()[0]) * mesh.getVBOSize());
       }
 
       fileStream << std::endl;

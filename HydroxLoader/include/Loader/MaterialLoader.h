@@ -25,10 +25,6 @@ namespace he
         SPECULARMAP,
         DISPLACEMENTMAP,
         SHADERNAME,
-        FRAGMENTSHADER,
-        GEOMETRYSHADER,
-        TESSCONTROLSHADER,
-        TESSEVALSHADER,
       };
 
       MaterialLoader(util::SingletonManager *singletonManager);

@@ -30,9 +30,33 @@ namespace he
 {
   namespace loader
   {
+    HEFLoader::~HEFLoader()
+    {
+      m_wrapperMapper.geoNodeMap.clear();
+      m_wrapperMapper.animatedGeoNodeMap.clear();
+      m_wrapperMapper.transformNodeMap.clear();
+      m_wrapperMapper.animatedTransformNodeMap.clear();
+      m_wrapperMapper.billboardNodeMap.clear();
+      m_wrapperMapper.lodNodeMap.clear();
+      m_wrapperMapper.lightNodeMap.clear();
+      m_wrapperMapper.particleNodeMap.clear();
+
+      m_wrapperMapper.geoNodes.clear();
+      m_wrapperMapper.animatedGeoNodes.clear();
+      m_wrapperMapper.transformNodes.clear();
+      m_wrapperMapper.animatedTransformNodes.clear();
+      m_wrapperMapper.billboardNodes.clear();
+      m_wrapperMapper.lodNodes.clear();
+      m_wrapperMapper.lightNodes.clear();
+      m_wrapperMapper.particleNodes.clear();
+
+      m_wrapperMapper.meshMap.clear();
+      m_wrapperMapper.materialMap.clear();
+      m_wrapperMapper.billboardTextureMap.clear();
+    }
+
     sg::Scene* HEFLoader::load(std::string path, std::string filename, util::SingletonManager *singletonManager, util::EventManager *eventManager)
     {
-      m_wrapperMapper = NodeWrapperMapper();
       m_rootNode = nullptr;
 
       readFromFile(path, filename, singletonManager);
@@ -54,65 +78,60 @@ namespace he
 
       std::ifstream fileStream;
 
-      fileStream.open(path + filename, std::ifstream::in);
+      fileStream.open(path + filename, std::ifstream::in | std::ofstream::binary);
 
       if(fileStream.fail())
       {
         return;
       }
 
-      unsigned int vectorSize;
-      fileStream >> vectorSize;
-      m_wrapperMapper.geoNodes.resize(vectorSize);
+      NodeNumbers nodeNumbers;
+      fileStream.read((char*)&nodeNumbers, sizeof(nodeNumbers));
+
+      m_wrapperMapper.geoNodes.resize(nodeNumbers.geoNodeSize);
+      m_wrapperMapper.animatedGeoNodes.resize(nodeNumbers.animatedGeoNodeSize);
+      m_wrapperMapper.transformNodes.resize(nodeNumbers.transformNodeSize);
+      m_wrapperMapper.animatedTransformNodes.resize(nodeNumbers.animatedTransformNodeSize);
+      m_wrapperMapper.billboardNodes.resize(nodeNumbers.billboardNodeSize);
+      m_wrapperMapper.lodNodes.resize(nodeNumbers.lodNodeSize);
+      m_wrapperMapper.lightNodes.resize(nodeNumbers.lightNodeSize);
+      m_wrapperMapper.particleNodes.resize(nodeNumbers.particleNodeSize);
+
       for(unsigned int i = 0; i < m_wrapperMapper.geoNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.geoNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.animatedGeoNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.animatedGeoNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.animatedGeoNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.transformNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.transformNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.transformNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.animatedTransformNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.animatedTransformNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.animatedTransformNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.billboardNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.billboardNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.billboardNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.lodNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.lodNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.lodNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.lightNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.lightNodes[i];
       }
 
-      fileStream >> vectorSize;
-      m_wrapperMapper.particleNodes.resize(vectorSize);
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.particleNodes[i];
@@ -120,44 +139,20 @@ namespace he
 
       unsigned int meshMapSize;
       fileStream >> meshMapSize;
+      std::getline(fileStream, std::string());
 
       for(unsigned int i = 0; i < meshMapSize; i++)
       {
-        util::Vector<float, 3> bbMin;
-        util::Vector<float, 3> bbMax;
-        GLuint primitiveType;
-        GLuint primitiveCount;
-        GLuint indexCount;
-        GLuint vertexCount;
-        GLuint vertexDeclarationFlags;
-        GLuint vertexStride;
-        GLuint vboSize;
+        MeshMetaData meshData;
+        fileStream.read((char*)&meshData, sizeof(meshData));
 
-        fileStream >> bbMax;
-        fileStream >> bbMin;
-        fileStream >> primitiveType;
-        fileStream >> primitiveCount;
-        fileStream >> indexCount;
-        fileStream >> vertexCount;
-        fileStream >> vertexDeclarationFlags;
-        fileStream >> vertexStride;
-        fileStream >> vboSize;
+        std::vector<renderer::Mesh::indexType> indexData(meshData.indexCount);
+        std::vector<GLubyte> geometryData(meshData.vboSize);
 
-        std::vector<renderer::Mesh::indexType> indexData(indexCount);
-        for(unsigned int j = 0; j < indexData.size(); j++)
-        {
-          fileStream >> indexData[j];
-        }
+        fileStream.read((char*)&indexData[0], sizeof(indexData[0]) * meshData.indexCount);
+        fileStream.read((char*)&geometryData[0], sizeof(geometryData[0]) * meshData.vboSize);
 
-        std::vector<GLubyte> geometryData(vboSize);
-        for(unsigned int j = 0; j < geometryData.size(); j++)
-        {
-          GLuint t;
-          fileStream >> t;
-          geometryData[j] = (GLubyte)t;
-        }
-
-        m_wrapperMapper.meshMap[i] = modelManager->addObject(renderer::Mesh(renderer::AABB(bbMin, bbMax), primitiveType, primitiveCount, vertexCount, vertexStride, vertexDeclarationFlags, geometryData, indexData));
+        m_wrapperMapper.meshMap[i] = modelManager->addObject(renderer::Mesh(renderer::AABB(meshData.bbMin, meshData.bbMax), meshData.primitiveType, meshData.primitiveCount, meshData.vertexCount, meshData.vertexStride, meshData.vertexDeclaration, geometryData, indexData));
       }
 
       unsigned int materialMapSize;

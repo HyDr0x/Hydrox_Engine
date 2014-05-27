@@ -16,10 +16,16 @@ namespace he
       m_bitsPerPixel(bitsPerPixel),
       m_slot(0)
     {
-      unsigned int bytesPerPixel = bitsPerPixel / 8;
-      
-      unsigned int length = m_width * m_height * bytesPerPixel;
-      m_hash = MurmurHash64A(data, length, 0);
+      if(data != nullptr)
+      {
+        unsigned int bytesPerPixel = bitsPerPixel / 8;
+        unsigned int length = m_width * m_height * bytesPerPixel;
+        m_hash = MurmurHash64A(data, length, 0);
+      }
+      else
+      {
+        m_hash = 0;
+      }
 
       glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);

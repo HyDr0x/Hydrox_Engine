@@ -4,13 +4,13 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Pipeline/RenderingOptions.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
 	namespace renderer
 	{
-    RenderManager::RenderManager() : m_geometryRasterizer(m_options), m_skyboxRendering(false)
+    RenderManager::RenderManager() : m_skyboxRendering(false)
     {
     }
 
@@ -62,18 +62,26 @@ namespace he
       util::ResourceHandle billboardShaderHandle, 
       util::ResourceHandle spriteShaderHandle, 
       util::ResourceHandle stringShaderHandle,
-      util::ResourceHandle frustumCullingShaderHandle)
+      util::ResourceHandle frustumCullingShaderHandle,
+      util::ResourceHandle gBufferShaderHandle)
     {
       m_options = options;
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_geometryRasterizer.initialize(singletonManager, frustumCullingShaderHandle);
+      m_geometryRasterizer.initialize(m_options, singletonManager, frustumCullingShaderHandle);
+      m_gBuffer.initialize(m_options, singletonManager, gBufferShaderHandle);
       m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
       m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);
 
-      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>), GL_DYNAMIC_DRAW);
+      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>) + sizeof(float) * 2, GL_DYNAMIC_DRAW);
+    }
+
+    void RenderManager::setNearFarPlane(float near, float far)
+    {
+      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>), sizeof(float), &near);
+      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + sizeof(float), sizeof(float), &far);
     }
 
     void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const
@@ -88,13 +96,25 @@ namespace he
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
-      m_geometryRasterizer.rasterizeGeometry();
-      m_billboardRenderer.render();
-
-      if (m_skyboxRendering)
       {
-        m_skyboxRenderer.render();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_gBuffer.clear();
+
+        m_gBuffer.setGBuffer();
+
+        m_geometryRasterizer.rasterizeGeometry();
+        m_billboardRenderer.render();
+
+        if (m_skyboxRendering)
+        {
+          m_skyboxRenderer.render();
+        }
+
+        m_gBuffer.unsetGBuffer();
       }
+
+      m_gBuffer.render();
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

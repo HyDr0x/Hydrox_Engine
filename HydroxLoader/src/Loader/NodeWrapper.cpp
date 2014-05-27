@@ -10,9 +10,8 @@ namespace he
     {
       unsigned int nodeTypes;
 
+      std::getline(stream, node.nodeName);
       std::getline(stream, node.nodeName);//getline because of white spaces
-      std::getline(stream, node.nodeName);
-      std::getline(stream, node.nodeName);
       stream >> nodeTypes;
       node.parentNodeType = (NodeType)nodeTypes;
       stream >> node.parentIndex;
@@ -42,10 +41,10 @@ namespace he
       unsigned int inverseBindPoseMatricesSize;
       stream >> inverseBindPoseMatricesSize;
       node.inverseBindPoseMatrices.resize(inverseBindPoseMatricesSize);
-
-      for(unsigned int i = 0; i < node.inverseBindPoseMatrices.size(); i++)
+      if(node.inverseBindPoseMatrices.size()) 
       {
-        stream >> node.inverseBindPoseMatrices[i];
+        std::getline(stream, std::string());
+        stream.read((char*)&node.inverseBindPoseMatrices[0][0][0], sizeof(node.inverseBindPoseMatrices[0]) * node.inverseBindPoseMatrices.size());
       }
 
       return stream;

@@ -1,46 +1,27 @@
 #include "Renderer/Pipeline/Renderquad.h"
 
+#include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
+#include "Renderer/Resources/ResourceManager.hpp"
+#include "Renderer/Resources/RenderShader.h"
+
 namespace he
 {
   namespace renderer
   {
-    Renderquad::Renderquad()
+    Renderquad::Renderquad() : m_fboIndex(~0), m_depthTexture(nullptr)
     {
-	    m_fboIndex = m_depthTex = ~0;
-
-	    float v[] = {-1,-1, 1,-1, -1,1, 1,1};
-
-	    float texVec[] = {0,0, 1,0, 0,1, 1,1};
-
-	    glGenVertexArrays(1, &m_vaoIndex);
-	    glBindVertexArray(m_vaoIndex);
-
-		    glGenBuffers(1, &m_vboindex);
-		    glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
-			    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-			    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		    glGenBuffers(1, &m_texIndex);
-		    glBindBuffer(GL_ARRAY_BUFFER, m_texIndex);
-			    glBufferData(GL_ARRAY_BUFFER, sizeof(texVec), texVec, GL_STATIC_DRAW);
-			    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		    glEnableVertexAttribArray(0);
-		    glEnableVertexAttribArray(1);
-	    glBindVertexArray(0);	
+	    glGenBuffers(1, &m_vboindex);
+      glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
+      glVertexAttribPointer(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
+      glBindBuffer(GL_ARRAY_BUFFER, 0);    
     }
 
     Renderquad::~Renderquad()
     {
-      glDeleteVertexArrays(1, &m_vaoIndex);
       glDeleteBuffers(1, &m_vboindex);
-      glDeleteBuffers(1, &m_texIndex);
-
-	    if(m_depthTex != ~0)
-      {
-        glDeleteTextures(1, &m_depthTex);
-      }
 
 	    if(m_fboIndex != ~0)
       {
@@ -48,22 +29,18 @@ namespace he
       }
     }
 
-
-    void Renderquad::setRenderTarget(int count, Texture2D *tex[])
+    void Renderquad::initialize(util::SingletonManager *singletonManager)
     {
-	    assert(count > 1);
-	    m_count = count;
+      m_singletonManager = singletonManager;
+    }
 
-	    m_width  = tex[0]->getResolution()[0];
-	    m_height = tex[0]->getResolution()[1];
+    void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, std::vector<util::SharedPointer<Texture2D>> textures)
+    {
+	    assert(textures.size() > 0 || !m_depthTexture.isNullptr());
 
-	    if(m_depthTex == ~0)
-	    {
-		    glGenTextures(1, &m_depthTex);
-		    glBindTexture(GL_TEXTURE_2D, m_depthTex);
-			    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		    glBindTexture(GL_TEXTURE_2D, 0);
-	    }
+      m_depthTexture = depthTexture;
+
+      m_textures = textures;
 
 	    if(m_fboIndex == ~0)
       {
@@ -71,77 +48,168 @@ namespace he
       }
 
 	    glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
-		    for(unsigned int i = 0; i != m_count; i++)
+		    for(unsigned int i = 0; i < m_textures.size(); i++)
         {
-			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex[i]->m_texIndex, 0);
+			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
         }
-		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTex, 0);
+		    if(!m_depthTexture.isNullptr()) glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
+
+        GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+        if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
+        {
+          std::cerr << "Error, framebuffer corrupted." << std::endl;
+        }
 	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    void Renderquad::setRenderTarget(int count, ...)
+    void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, int count, ...)
     {
-	    assert(count > 1);
-	    m_count = count;
+      assert(count > 0 || !m_depthTexture.isNullptr());
 
-	    va_list texList;
-	    va_start(texList, count);
+      m_depthTexture = depthTexture;
 
-	    Texture2D *tex = va_arg(texList, Texture2D*);
+	    m_textures.resize(count);
 
-	    m_width  = tex->getResolution()[0];
-	    m_height = tex->getResolution()[1];
-
-	    if(m_depthTex == -1)
-	    {
-		    glGenTextures(1, &m_depthTex);
-		    glBindTexture(GL_TEXTURE_2D, m_depthTex);
-			    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		    glBindTexture(GL_TEXTURE_2D, 0);
-	    }
-
-	    if(m_fboIndex == -1)
+	    if(m_fboIndex == ~0)
       {
         glGenFramebuffers(1, &m_fboIndex);
       }
 
+      va_list texList;
+	    va_start(texList, count);
+
 	    glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
-		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->m_texIndex, 0);
-		    for(unsigned int i = 1; i != m_count; i++)
+		    for(unsigned int i = 0; i < m_textures.size(); i++)
 		    {
-			    tex = va_arg(texList, Texture2D*);
-			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, tex->m_texIndex, 0);
+          m_textures[i] = va_arg(texList, util::SharedPointer<Texture2D>);
+			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
 		    }
-		    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTex, 0);
-	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		    if(!m_depthTexture.isNullptr()) 
+          glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
+
+        GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+        switch(fboStatus)
+        {
+        case GL_FRAMEBUFFER_COMPLETE:
+          break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+          std::cerr << "Error, framebuffer incomplete attachment." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+          std::cerr << "Error, framebuffer missing attachment." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+          std::cerr << "Error, framebuffer incomplete draw buffer." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+          std::cerr << "Error, framebuffer incomplete read buffer." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+          std::cerr << "Error, framebuffer unsupported." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+          std::cerr << "Error, framebuffer incomplete multisample." << std::endl;
+          break;
+        case GL_FRAMEBUFFER_UNDEFINED:
+        default:
+          std::cerr << "Unknown error, framebuffer corrupted." << std::endl;
+          break;
+        }
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+  
+    void Renderquad::setWriteFrameBuffer() const
+    {
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboIndex);
+
+      std::vector<GLenum> fboBuffer(m_textures.size());
+		  for(unsigned int i = 0; i < m_textures.size(); i++)
+      {
+			  fboBuffer[i] = GL_COLOR_ATTACHMENT0 + i;
+      }
+		  glDrawBuffers(fboBuffer.size(), &fboBuffer[0]);
     }
 
-    void Renderquad::render(bool direct) const
+    void Renderquad::unsetWriteFrameBuffer() const
     {
-	    if(!direct)
-	    {
-		    glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		    GLenum *fboBuffer = new GLenum[m_count];
-		    for(unsigned int i = 0; i != m_count; i++)
-        {
-			    fboBuffer[i] = GL_COLOR_ATTACHMENT0 + i;
-        }
-		    glDrawBuffers(m_count, fboBuffer);
-		    delete[] fboBuffer;
-	    }
+		  GLenum windowBuff[] = { GL_BACK_LEFT };//switching to back buffer (LEFT/RIGHT --> for stereoscopic rendering, default is LEFT)
+		  glDrawBuffers(1, windowBuff);
+    }
 
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	    glBindVertexArray(m_vaoIndex);
-	    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    void Renderquad::render(util::ResourceHandle shaderHandle) const
+    {
+      RenderShader *shader = m_singletonManager->getService<RenderShaderManager>()->getObject(shaderHandle);
+      glDepthFunc(GL_ALWAYS);
+      shader->useShader();
 
-	    if(!direct)
-	    {
-		    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	    glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
 
-		    GLenum windowBuff[] = { GL_FRONT_LEFT };
-		    glDrawBuffers(1, windowBuff);
-	    }
+	    glDrawArrays(GL_POINTS, 0, 1);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glDisableVertexAttribArray(RenderShader::SPECIAL0);
+
+      shader->useNoShader();
+      glDepthFunc(GL_LESS);
+    }
+
+    void Renderquad::renderReadFromTextures(util::ResourceHandle shaderHandle) const
+    {
+      RenderShader *shader = m_singletonManager->getService<RenderShaderManager>()->getObject(shaderHandle);
+
+      shader->useShader();
+
+      unsigned int depthTextureOffset = 0;
+      if(!m_depthTexture.isNullptr())
+      {
+        m_depthTexture->setTexture(0, 0);
+        depthTextureOffset = 1;
+      }
+      
+      for(unsigned int i = 0; i < m_textures.size(); i++)
+      {
+        m_textures[i]->setTexture(i + depthTextureOffset, i + depthTextureOffset);
+      }
+
+	    glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
+
+	    glDrawArrays(GL_POINTS, 0, 1);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glDisableVertexAttribArray(RenderShader::SPECIAL0);
+
+      for(unsigned int i = 0; i < m_textures.size(); i++)
+      {
+        m_textures[i]->unsetTexture();
+      }
+
+      if(!m_depthTexture.isNullptr())
+      {
+        m_depthTexture->unsetTexture();
+      }
+
+      shader->useNoShader();
+    }
+
+    void Renderquad::clearTargets(float clearDepthValue, std::vector<util::Vector<float, 4>>& clearColors) const
+    {
+      setWriteFrameBuffer();
+
+      glClearBufferfv(GL_DEPTH, 0, &clearDepthValue);
+
+      for(unsigned int i = 0; i < clearColors.size(); i++)
+		  {
+        glClearBufferfv(GL_COLOR, i, &clearColors[i][0]);
+		  }
+
+      unsetWriteFrameBuffer();
     }
   }
 }

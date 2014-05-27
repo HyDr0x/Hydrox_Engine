@@ -27,7 +27,7 @@ namespace he
 
       if(computeShaderSource == std::string())
       {
-        std::cout << "ERROR, couldn't open file: " << filename << std::endl;
+        std::cerr << "ERROR, couldn't open file: " << filename << std::endl;
 
         shaderHandle = getDefaultResource();
       }

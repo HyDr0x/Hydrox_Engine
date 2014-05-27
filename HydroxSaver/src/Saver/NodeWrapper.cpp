@@ -33,9 +33,10 @@ namespace he
       stream << (const GeoNodeData&)node;
 
       stream << node.inverseBindPoseMatrices.size() << std::endl;
-      for(unsigned int i = 0; i < node.inverseBindPoseMatrices.size(); i++)
+      if(node.inverseBindPoseMatrices.size()) 
       {
-        stream << node.inverseBindPoseMatrices[i];
+        stream.write((char*)&node.inverseBindPoseMatrices[0][0][0], sizeof(node.inverseBindPoseMatrices[0]) * node.inverseBindPoseMatrices.size());
+        stream << std::endl;
       }
 
       return stream;

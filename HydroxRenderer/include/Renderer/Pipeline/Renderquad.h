@@ -1,9 +1,13 @@
 #ifndef RENDERQUAD_H_
 #define RENDERQUAD_H_
 
+#include <vector>
 #include <iostream>
 #include <stdarg.h>
 #include <assert.h>
+
+#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Pointer/SharedPointer.hpp>
 
 #include "Renderer/DLLExport.h"
 
@@ -11,6 +15,11 @@
 
 namespace he
 {
+  namespace util
+  {
+    class SingletonManager;
+  }
+
 	namespace renderer
 	{
     class GRAPHICAPI Renderquad
@@ -20,24 +29,33 @@ namespace he
 	    Renderquad();
 	    ~Renderquad();
 
-	    void setRenderTarget(int count, Texture2D *tex[]);
-	    void setRenderTarget(int count, ...);
+      void initialize(util::SingletonManager *singletonManager);
 
-	    void render(bool direct) const;
+	    void setRenderTargets(util::SharedPointer<Texture2D> depthTexture, std::vector<util::SharedPointer<Texture2D>> textures);
+	    void setRenderTargets(util::SharedPointer<Texture2D> depthTexture, int count, ...);
+
+      void setWriteFrameBuffer() const;
+      void unsetWriteFrameBuffer() const;
+
+	    void render(util::ResourceHandle shaderHandle) const;
+      void renderReadFromTextures(util::ResourceHandle shaderHandle) const;
+
+      void clearTargets(float clearDepthValue, std::vector<util::Vector<float, 4>>& clearColors) const;
 
     private:
 
 	    Renderquad(const Renderquad&);
 	    Renderquad& operator=(const Renderquad&);
 
-	    unsigned int m_count;
+      util::SharedPointer<Texture2D> m_depthTexture;
+      std::vector<util::SharedPointer<Texture2D>> m_textures;
 
-	    GLuint m_vaoIndex;
+      GLuint m_color_tex;
+      GLuint m_rboIndex;
 	    GLuint m_vboindex;
-      GLuint m_texIndex;
-	    GLuint m_depthTex;
 	    GLuint m_fboIndex;
-	    GLuint m_width,m_height;
+
+      util::SingletonManager *m_singletonManager;
     };
 	}
 }

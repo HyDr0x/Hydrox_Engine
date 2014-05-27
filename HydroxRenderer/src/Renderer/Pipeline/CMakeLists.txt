@@ -2,6 +2,7 @@ set(
 	SOURCE 
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 

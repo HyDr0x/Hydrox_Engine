@@ -1,4 +1,4 @@
-#include "Utilities/DebugLogger/DebugMessageHandler.h"
+#include "Renderer/OpenGLDebugLogger/DebugMessageHandler.h"
 
 namespace he
 {

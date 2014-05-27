@@ -20,9 +20,36 @@ namespace he
 
 	namespace saver
 	{
+    struct NodeNumbers
+    {
+      unsigned int geoNodeSize;
+      unsigned int animatedGeoNodeSize;
+      unsigned int transformNodeSize;
+      unsigned int animatedTransformNodeSize;
+      unsigned int billboardNodeSize;
+      unsigned int lodNodeSize;
+      unsigned int lightNodeSize;
+      unsigned int particleNodeSize;
+    };
+
+    struct MeshMetaData
+    {
+      util::Vector<float, 3> bbMax;
+      util::Vector<float, 3> bbMin;
+      GLuint primitiveType;
+      GLuint primitiveCount;
+      GLuint indexCount;
+      GLuint vertexCount;
+      GLuint vertexDeclaration;
+      GLuint vertexStride;
+      GLuint vboSize;
+    };
+
     class GRAPHICAPI HEFSaver
     {
     public:
+
+      ~HEFSaver();
 
       void save(std::string path, std::string filename, sg::Scene* scene, util::SingletonManager *singletonManager);
 

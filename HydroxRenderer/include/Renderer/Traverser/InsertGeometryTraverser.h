@@ -13,7 +13,7 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
 
-#include "Renderer/Pipeline/RenderingOptions.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {

@@ -2,7 +2,7 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include "Renderer/Pipeline/RenderingOptions.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawArrayDecorator.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawElementsDecorator.h"

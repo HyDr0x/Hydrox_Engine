@@ -75,8 +75,13 @@ namespace he
 
       inline Matrix<float, 4> createPerspective(float left, float right, float bottom, float top, float cnear, float cfar)
       {
-        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left), 0.0f,
-                                 0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
+        //return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left), 0.0f,
+        //                         0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
+        //                         0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
+        //                         0.0f,                           0.0f,                            -1.0f,                           0.0f);
+
+        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            0.0f, 0.0f,
+                                 0.0f,                           (2.0f * cnear) / (top - bottom), 0.0f, 0.0f,
                                  0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
                                  0.0f,                           0.0f,                            -1.0f,                           0.0f);
       }

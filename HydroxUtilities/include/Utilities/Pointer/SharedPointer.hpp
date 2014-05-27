@@ -18,7 +18,7 @@ namespace he
 	    SharedPointer(T* obj) : m_obj(obj), m_referenceNumber(new unsigned int(1))
 	    {}
 
-	    SharedPointer(const SharedPointer& o) : m_referenceNumber(o.m_referenceNumber), m_obj(o.m_obj)
+	    SharedPointer(const SharedPointer& other) : m_referenceNumber(other.m_referenceNumber), m_obj(other.m_obj)
 	    {
         if(m_referenceNumber != nullptr)
         {
@@ -36,33 +36,21 @@ namespace he
 		    }
 	    }
 
-      SharedPointer& operator=(const SharedPointer<T>& o)
+      SharedPointer& operator=(SharedPointer<T> other)
 	    {
-		    if(o.m_obj == m_obj) 
+        if(*this == other)
         {
           return *this;
         }
 
-		    if(m_referenceNumber != nullptr && --(*m_referenceNumber) == 0)
-		    {
-			    delete m_obj;
-			    delete m_referenceNumber;
-		    }
-
-		    m_referenceNumber = o.m_referenceNumber;
-		    m_obj = o.m_obj;
-
-        if(m_referenceNumber != nullptr)
-        {
-		      (*m_referenceNumber)++;
-        }
+        swap(other);
 
 		    return *this;
 	    }
 
-      bool operator==(const SharedPointer& o) const
+      bool operator==(const SharedPointer& other) const
       {
-        return reinterpret_cast<unsigned int>(m_obj) == reinterpret_cast<unsigned int>(o.m_obj);
+        return m_referenceNumber == other.m_referenceNumber && m_obj == other.m_obj;
       }
 
       template<typename F> SharedPointer<F> cast() const
@@ -84,6 +72,12 @@ namespace he
 	    }
 
     private:
+
+      void swap(SharedPointer<T>& other)
+      {
+        std::swap(m_referenceNumber, other.m_referenceNumber);
+        std::swap(m_obj, other.m_obj);
+      }
 
 	    unsigned int *m_referenceNumber;
 	    T* m_obj;

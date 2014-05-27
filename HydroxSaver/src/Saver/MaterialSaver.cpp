@@ -33,11 +33,6 @@ namespace he
 
       materialFileKeywords[SHADERNAME] = "Shader Name";
 
-      materialFileKeywords[FRAGMENTSHADER] = "Fragment Shader";
-      materialFileKeywords[GEOMETRYSHADER] = "Geometry Shader";
-      materialFileKeywords[TESSCONTROLSHADER] = "Tesselation Control Shader";
-      materialFileKeywords[TESSEVALSHADER] = "Tesselation Evaluation Shader";
-
       renderer::TextureManager *textureManager = singletonManager->getService<renderer::TextureManager>();      renderer::RenderShaderManager *renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
       renderer::MaterialManager *materialManager = singletonManager->getService<renderer::MaterialManager>();
 
@@ -94,23 +89,6 @@ namespace he
       fileStream << std::endl;
 
       RenderShaderSaver::save(path, shaderFilename.str(), material->getShaderHandle(), singletonManager);
-
-      renderer::RenderShader *renderShader = renderShaderManager->getObject(material->getShaderHandle());
-      std::vector<std::string> shaderSources = renderShader->getShaderSources();
-
-      for(unsigned int i = 1; i < shaderSources.size(); i++)
-      {
-        fileStream << materialFileKeywords[MaterialFileKeywords(i + SHADEROFFSET)] << std::endl;
-        if(shaderSources[i].empty())
-        {
-          fileStream << "FALSE" << std::endl;
-        }
-        else
-        {
-          fileStream << "TRUE" << std::endl;
-        }
-        fileStream << std::endl;
-      }
       
       fileStream.close();
     }

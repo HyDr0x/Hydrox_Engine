@@ -9,6 +9,7 @@
 #include <Utilities/Signals/EventManager.h>
 
 #include "Renderer/Resources/ResourceManager.hpp"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -22,16 +23,15 @@ namespace he
 	{
     class GroupNode;
     class IRenderNode;
-    struct RenderOptions;
 
     class GeometryRenderer
     {
     public:
 
-      GeometryRenderer(RenderOptions& options);
+      GeometryRenderer();
       ~GeometryRenderer();
 
-      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
+      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
 
       void rasterizeGeometry() const;
 
@@ -52,7 +52,7 @@ namespace he
 
       GLuint m_meshVAO;
 
-      RenderOptions& m_options;
+      RenderOptions m_options;
 
       GroupNode *m_renderRootNode;
 

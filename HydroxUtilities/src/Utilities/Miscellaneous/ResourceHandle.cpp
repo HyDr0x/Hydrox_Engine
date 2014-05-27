@@ -8,9 +8,8 @@ namespace he
     {
     }
 
-    ResourceHandle::ResourceHandle(unsigned int id) : m_id(id), m_referenceCounter(new unsigned int)
+    ResourceHandle::ResourceHandle(unsigned int id) : m_id(id), m_referenceCounter(new unsigned int(1))
     {
-      *m_referenceCounter = 1;
     }
 
     ResourceHandle::ResourceHandle(const ResourceHandle& other) : Subject(other), m_id(other.m_id), m_referenceCounter(other.m_referenceCounter)

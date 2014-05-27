@@ -3,8 +3,6 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Pipeline/RenderingOptions.h"
-
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
 #include "Renderer/Traverser/InsertStaticGeometryTraverser.h"
@@ -21,7 +19,7 @@ namespace he
 {
 	namespace renderer
 	{
-    GeometryRenderer::GeometryRenderer(RenderOptions& options) : m_renderRootNode(nullptr), m_options(options)
+    GeometryRenderer::GeometryRenderer() : m_renderRootNode(nullptr)
     {
     }
 
@@ -35,8 +33,10 @@ namespace he
       glDeleteVertexArrays(1, &m_meshVAO);
     }
 
-    void GeometryRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize)
+    void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize)
     {
+      m_options = options;
+
       glEnable(GL_DEPTH_TEST);
 	    glDepthMask(GL_TRUE);
 	    glDepthFunc(GL_LESS);
@@ -108,8 +108,6 @@ namespace he
       frustumCullingShader->useShader();
       frustumCullingTraverser.doTraverse(m_renderRootNode);
       frustumCullingShader->useNoShader();
-
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       glBindVertexArray(m_meshVAO);
 

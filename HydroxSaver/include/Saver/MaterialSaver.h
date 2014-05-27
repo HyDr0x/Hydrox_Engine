@@ -41,11 +41,6 @@ namespace he
         SPECULARMAP,
         DISPLACEMENTMAP,
         SHADERNAME,
-        SHADEROFFSET,
-        TESSCONTROLSHADER,
-        TESSEVALSHADER,
-        GEOMETRYSHADER,
-        FRAGMENTSHADER,
       };
 
       static void save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager);

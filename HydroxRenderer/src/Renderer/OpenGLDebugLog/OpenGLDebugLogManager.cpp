@@ -1,6 +1,6 @@
-#include "Utilities/DebugLogger/DebugLogManager.h"
+#include "Renderer/OpenGLDebugLogger/OpenGLDebugLogManager.h"
 
-#include "Utilities/DebugLogger/DebugMessageHandler.h"
+#include "Renderer/OpenGLDebugLogger/DebugMessageHandler.h"
 
 #include <iostream>
 #include <sstream>
@@ -9,15 +9,15 @@ namespace he
 {
 	namespace util
 	{
-    DebugLogManager::DebugLogManager()
+    OpenGLDebugLogManager::OpenGLDebugLogManager()
     {
     }
 
-    DebugLogManager::~DebugLogManager()
+    OpenGLDebugLogManager::~OpenGLDebugLogManager()
     {
     }
 
-    void DebugLogManager::gatherSystemInformation()
+    void OpenGLDebugLogManager::gatherSystemInformation()
     {
       m_vendorName = (const char*)glGetString(GL_VENDOR);
       m_graphicCardName = (const char*)glGetString(GL_RENDERER);
@@ -49,7 +49,7 @@ namespace he
       glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_maxCombinedTextureUnits);
     }
 
-    void DebugLogManager::initDebugMode() const
+    void OpenGLDebugLogManager::initDebugMode() const
     {
       /*if(m_debugMode)
       {
@@ -61,7 +61,7 @@ namespace he
       glDebugMessageCallback(callback, nullptr);
     }
 
-    void DebugLogManager::printSystemInformation() const
+    void OpenGLDebugLogManager::printSystemInformation() const
     {
       std::clog << "Graphics Card Vendor: " << m_vendorName.c_str() << std::endl;
       std::clog << "Graphics Card: " << m_graphicCardName.c_str() << std::endl;
@@ -70,42 +70,42 @@ namespace he
       std::clog << "---------------------------------------------------------" << std::endl;
     }
 
-    void DebugLogManager::printSupportedExtensions() const
+    void OpenGLDebugLogManager::printSupportedExtensions() const
     {
       std::clog << "Extensions:/n" << m_extensions.c_str() << std::endl;
     }
 
-    unsigned int DebugLogManager::getMajorOpenGLVersion() const
+    unsigned int OpenGLDebugLogManager::getMajorOpenGLVersion() const
     {
       return m_openGLMajorVersion;
     }
 
-    unsigned int DebugLogManager::getMinorOpenGLVersion() const
+    unsigned int OpenGLDebugLogManager::getMinorOpenGLVersion() const
     {
       return m_openGLMinorVersion;
     }
 
-    void DebugLogManager::enableDebugMode() const
+    void OpenGLDebugLogManager::enableDebugMode() const
     {
       glEnable(GL_DEBUG_OUTPUT);
     }
 
-    void DebugLogManager::disableDebugMode() const
+    void OpenGLDebugLogManager::disableDebugMode() const
     {
       glDisable(GL_DEBUG_OUTPUT);
     }
 
-    void DebugLogManager::setEventSeverity(GLenum severity, bool enable) const
+    void OpenGLDebugLogManager::setEventSeverity(GLenum severity, bool enable) const
     {
       glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, severity, 0, nullptr, enable);
     }
 
-    void DebugLogManager::setEventType(GLenum type, bool enable) const
+    void OpenGLDebugLogManager::setEventType(GLenum type, bool enable) const
     {
       glDebugMessageControl(GL_DONT_CARE, type, GL_DONT_CARE, 0, nullptr, enable);
     }
 
-    void DebugLogManager::setEventSource(GLenum source, bool enable) const
+    void OpenGLDebugLogManager::setEventSource(GLenum source, bool enable) const
     {
       glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
     }

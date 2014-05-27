@@ -9,7 +9,7 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Pipeline/RenderingOptions.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -37,7 +37,7 @@ namespace he
 
     bool RenderNode::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
     {
-      if(m_instances.size() >= m_options.m_maxGeometry)
+      if(m_instances.size() >= m_options.maxGeometry)
       {
         return false;
       }
@@ -51,7 +51,7 @@ namespace he
 
     bool RenderNode::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
     {
-      if(m_instances.size() >= m_options.m_maxGeometry)
+      if(m_instances.size() >= m_options.maxGeometry)
       {
         return false;
       }
@@ -116,17 +116,17 @@ namespace he
 
     unsigned int RenderNode::getMaxGeometry() const
     {
-      return m_options.m_maxGeometry;
+      return m_options.maxGeometry;
     }
 
     unsigned int RenderNode::getMaxMaterials() const
     {
-      return m_options.m_maxMaterials;
+      return m_options.maxMaterials;
     }
 
     unsigned int RenderNode::getMaxBones() const
     {
-      return m_options.m_maxBones;
+      return m_options.maxBones;
     }
 	}
 }

@@ -31,11 +31,6 @@ namespace he
       m_materialFileKeywords["Displacement Map"] = DISPLACEMENTMAP;
 
       m_materialFileKeywords["Shader Name"] = SHADERNAME;
-
-      m_materialFileKeywords["Fragment Shader"] = FRAGMENTSHADER;
-      m_materialFileKeywords["Geometry Shader"] = GEOMETRYSHADER;
-      m_materialFileKeywords["Tesselation Control Shader"] = TESSCONTROLSHADER;
-      m_materialFileKeywords["Tesselation Evaluation Shader"] = TESSEVALSHADER;
     }
 
     MaterialLoader::~MaterialLoader()
@@ -52,7 +47,6 @@ namespace he
       util::ResourceHandle materialHandle;
 
       std::string shaderFilename;
-      std::vector<bool> shaderPrograms(4, false);
       std::vector<std::vector<std::string>> textureFilenames(renderer::Material::TEXTURETYPENUM);
 
       std::ifstream file(filename);
@@ -132,34 +126,6 @@ namespace he
             std::getline(file, line);
             shaderFilename = line;
             break;
-          case FRAGMENTSHADER:
-            std::getline(file, line);
-            if(line == std::string("TRUE"))
-            {
-              shaderPrograms[0] = true;
-            }
-            break;
-          case GEOMETRYSHADER:
-            std::getline(file, line);
-            if(line == std::string("TRUE"))
-            {
-              shaderPrograms[1] = true;
-            }
-            break;
-          case TESSCONTROLSHADER:
-            std::getline(file, line);
-            if(line == std::string("TRUE"))
-            {
-              shaderPrograms[2] = true;
-            }
-            break;
-          case TESSEVALSHADER:
-            std::getline(file, line);
-            if(line == std::string("TRUE"))
-            {
-              shaderPrograms[3] = true;
-            }
-            break;
           case DEFAULT:
           default:
             continue;//unknown command
@@ -190,7 +156,7 @@ namespace he
 	    {
 		    file.close();
 
-		    std::cout << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
+		    std::cerr << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
 
         return getDefaultResource();
 	    }

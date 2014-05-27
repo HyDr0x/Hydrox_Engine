@@ -94,7 +94,7 @@ namespace he
 
 	    if(!assimpScene)
       {
-		    printf("%s/n", importer.GetErrorString());
+		    std::cerr << importer.GetErrorString() << std::endl;
 
         scene = loadDefaultSceneGraph();
       }

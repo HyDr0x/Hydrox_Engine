@@ -1,4 +1,3 @@
-add_subdirectory(DebugLogger)
 add_subdirectory(Math)
 add_subdirectory(Miscellaneous)
 add_subdirectory(Observer)

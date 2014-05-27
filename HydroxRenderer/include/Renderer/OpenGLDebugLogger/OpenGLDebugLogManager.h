@@ -13,12 +13,12 @@ namespace he
 {
 	namespace util
 	{
-    class GRAPHICAPI DebugLogManager : public SingletonBehaviour
+    class GRAPHICAPI OpenGLDebugLogManager : public SingletonBehaviour
     {
     public:
 
-      DebugLogManager();
-      ~DebugLogManager();
+      OpenGLDebugLogManager();
+      ~OpenGLDebugLogManager();
 
       void gatherSystemInformation();
 

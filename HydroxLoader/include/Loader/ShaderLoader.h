@@ -19,6 +19,7 @@ namespace he
     protected:
 
       std::string loadShaderSource(std::string filename);
+      void preprocessShaderSource(std::string& source, std::string path);
 
       std::vector<std::string> m_dynamicDefines;
     };

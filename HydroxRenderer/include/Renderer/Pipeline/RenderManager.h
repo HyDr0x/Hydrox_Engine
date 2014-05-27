@@ -14,12 +14,13 @@
 #include "Renderer/DLLExport.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
+#include "Renderer/Pipeline/GBuffer.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
 #include "Renderer/Pipeline/SkyboxRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"
 #include "Renderer/Pipeline/StringRenderer2D.h"
-#include "Renderer/Pipeline/RenderingOptions.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 #include "Renderer/Buffer/UBO.h"
 
@@ -58,7 +59,10 @@ namespace he
         util::ResourceHandle billboardShaderHandle, 
         util::ResourceHandle spriteShaderHandle, 
         util::ResourceHandle stringShaderHandle, 
-        util::ResourceHandle frustumCullingShaderHandle);
+        util::ResourceHandle frustumCullingShaderHandle,
+        util::ResourceHandle gBufferShaderHandle);
+
+      void setNearFarPlane(float near, float far);
 
 	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const;
 
@@ -91,6 +95,7 @@ namespace he
 
       RenderOptions m_options;
 
+      GBuffer m_gBuffer;
       GeometryRenderer m_geometryRasterizer;
       BillboardRenderer m_billboardRenderer;
       SkyboxRenderer m_skyboxRenderer;

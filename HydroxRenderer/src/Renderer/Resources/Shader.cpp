@@ -144,7 +144,7 @@ namespace he
         GLchar *errorLog = new GLchar[length];
         glGetShaderInfoLog(shader, length, nullptr, errorLog);
 
-		    std::cout << "Error compiling " << shaderName << " because of " << errorLog << std::endl;
+		    std::cerr << "Error compiling " << shaderName << " because of " << errorLog << std::endl;
 
         delete[] errorLog;
 
