@@ -36,7 +36,7 @@ namespace he
 
     void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, std::vector<util::SharedPointer<Texture2D>> textures)
     {
-	    assert(textures.size() > 0 || !m_depthTexture.isNullptr());
+	    assert(textures.size() > 0 || m_depthTexture);
 
       m_depthTexture = depthTexture;
 
@@ -52,7 +52,7 @@ namespace he
         {
 			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
         }
-		    if(!m_depthTexture.isNullptr()) glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
+		    if(m_depthTexture) glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
 
         GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -65,7 +65,7 @@ namespace he
 
     void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, int count, ...)
     {
-      assert(count > 0 || !m_depthTexture.isNullptr());
+      assert(count > 0 || m_depthTexture);
 
       m_depthTexture = depthTexture;
 
@@ -86,7 +86,7 @@ namespace he
 			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
 		    }
 
-		    if(!m_depthTexture.isNullptr()) 
+		    if(m_depthTexture) 
           glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
 
         GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -180,7 +180,7 @@ namespace he
       shader->useShader();
 
       unsigned int depthTextureOffset = 0;
-      if(!m_depthTexture.isNullptr())
+      if(m_depthTexture)
       {
         m_depthTexture->setTexture(0, 0);
         depthTextureOffset = 1;
@@ -204,7 +204,7 @@ namespace he
         m_textures[i]->unsetTexture();
       }
 
-      if(!m_depthTexture.isNullptr())
+      if(m_depthTexture)
       {
         m_depthTexture->unsetTexture();
       }

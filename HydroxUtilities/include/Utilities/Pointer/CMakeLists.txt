@@ -1,7 +1,11 @@
 set(
 	HEADER 
 	${HEADER} 
-	${CMAKE_CURRENT_SOURCE_DIR}/SharedPointer.hpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/WeakPointer.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SharedPointer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SharedPointer.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/UniquePointer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/UniquePointer.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/WeakPointer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/WeakPointer.inl 
 	PARENT_SCOPE 
 )

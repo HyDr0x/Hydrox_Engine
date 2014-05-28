@@ -28,9 +28,9 @@ namespace he
 
     void GBuffer::initialize(const RenderOptions& renderingOptions, util::SingletonManager *singletonManager, util::ResourceHandle gBufferShaderHandle)
     {
-      m_depthTexture = new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32, nullptr, false);
-      m_colorTexture = new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA8, GL_RGBA, 4, 32, nullptr, false);
-      m_normalTexture = new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA8, GL_RGBA, 4, 32, nullptr, false);
+      m_depthTexture = util::SharedPointer<Texture2D>(new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32, nullptr, false));
+      m_colorTexture = util::SharedPointer<Texture2D>(new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA8, GL_RGBA, 4, 32, nullptr, false));
+      m_normalTexture = util::SharedPointer<Texture2D>(new Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA8, GL_RGBA, 4, 32, nullptr, false));
       
       m_gBufferShaderHandle = gBufferShaderHandle;
 
