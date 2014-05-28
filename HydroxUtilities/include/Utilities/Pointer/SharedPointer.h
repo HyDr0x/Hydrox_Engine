@@ -1,6 +1,8 @@
 #ifndef SHAREDPOINTER_HPP_
 #define SHAREDPOINTER_HPP_
 
+#include "Utilities/Pointer/WeakPointer.h"
+
 namespace he
 {
 	namespace util
@@ -11,7 +13,8 @@ namespace he
 
       SharedPointer();
 	    explicit SharedPointer(T* obj);
-	    SharedPointer(const SharedPointer& other);
+	    SharedPointer(const SharedPointer<T>& other);
+      SharedPointer(const WeakPointer<T>& other);
 
 	    ~SharedPointer();
 
@@ -54,7 +57,8 @@ namespace he
 
       SharedPointer();
 	    explicit SharedPointer(T[] obj);
-	    SharedPointer(const SharedPointer& other);
+	    SharedPointer(const SharedPointer<T[]>& other);
+      SharedPointer(const WeakPointer<T[]>& other);
 
 	    ~SharedPointer();
 

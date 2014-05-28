@@ -13,7 +13,15 @@ namespace he
 	  template<typename T> explicit SharedPointer<T>::SharedPointer(T* obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
 	  {}
 
-	  template<typename T> SharedPointer<T>::SharedPointer(const SharedPointer& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+	  template<typename T> SharedPointer<T>::SharedPointer(const SharedPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+	  {
+      if(m_referenceNumber != nullptr)
+      {
+		    (*m_referenceNumber)++;
+      }
+	  }
+
+    template<typename T> SharedPointer<T>::SharedPointer(const WeakPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
 	  {
       if(m_referenceNumber != nullptr)
       {
@@ -135,7 +143,15 @@ namespace he
 	  template<typename T> explicit SharedPointer<T[]>::SharedPointer(T[] obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
 	  {}
 
-	  template<typename T> SharedPointer<T[]>::SharedPointer(const SharedPointer& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+	  template<typename T> SharedPointer<T[]>::SharedPointer(const SharedPointer<T[]>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+	  {
+      if(m_referenceNumber != nullptr)
+      {
+		    (*m_referenceNumber)++;
+      }
+	  }
+
+    template<typename T> SharedPointer<T>::SharedPointer(const WeakPointer<T[]>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
 	  {
       if(m_referenceNumber != nullptr)
       {
