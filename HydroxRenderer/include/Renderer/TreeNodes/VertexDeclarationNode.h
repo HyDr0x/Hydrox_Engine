@@ -27,12 +27,14 @@ namespace he
 
       void initialize(GLuint vertexDeclaration);
 
-      bool isMesh(GLuint vertexDeclaration) const;
+      void setVertexArray() const;
+      void unsetVertexArray() const;
 
-      GLuint getVertexDeclaration() const;
+      bool isMesh(GLuint vertexDeclaration) const;
 
     private:
 
+      GLuint m_vaoIndex;
       GLuint m_vertexDeclaration;
     };
 	}

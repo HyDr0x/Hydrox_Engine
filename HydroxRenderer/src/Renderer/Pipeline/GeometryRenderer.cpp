@@ -29,8 +29,6 @@ namespace he
       deleteTraverser.doTraverse(m_renderRootNode);
 
       delete m_renderRootNode;
-
-      glDeleteVertexArrays(1, &m_meshVAO);
     }
 
     void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize)
@@ -51,27 +49,6 @@ namespace he
       m_singletonManager = singletonManager;
 
       m_frustumCullingShaderHandle = cullingShaderHandle;
-
-      glGenVertexArrays(1, &m_meshVAO);
-      glBindVertexArray(m_meshVAO);
-
-      glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
-      glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-      glVertexAttribFormat(RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(util::Vector<float, 4>) + 3 * sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
-
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::TEXTURE0, 0);
-      glVertexAttribBinding(RenderShader::NORMAL, 0);
-      glVertexAttribBinding(RenderShader::BINORMAL, 0);
-      glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
-      glVertexAttribBinding(RenderShader::BONEINDICES, 0);
-      glVertexAttribBinding(RenderShader::COLOR, 0);
-
-      glBindVertexArray(0);
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
@@ -109,12 +86,8 @@ namespace he
       frustumCullingTraverser.doTraverse(m_renderRootNode);
       frustumCullingShader->useNoShader();
 
-      glBindVertexArray(m_meshVAO);
-
       RenderGeometryTraverser renderTraverser(m_singletonManager);
       renderTraverser.doTraverse(m_renderRootNode);
-
-      glBindVertexArray(0);
     }
 
     void GeometryRenderer::registerRenderComponentSlots(util::EventManager *eventManager)

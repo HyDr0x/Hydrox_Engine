@@ -25,114 +25,14 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
     {
-      GLuint vertexDeclaration = treeNode->getVertexDeclaration();
-
-      if(vertexDeclaration & Mesh::MODEL_POSITION)
-      {
-        glEnableVertexAttribArray(RenderShader::POSITION);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE0)
-      {
-        glEnableVertexAttribArray(RenderShader::TEXTURE0);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE1)
-      {
-        glEnableVertexAttribArray(RenderShader::TEXTURE1);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE2)
-      {
-        glEnableVertexAttribArray(RenderShader::TEXTURE2);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE3)
-      {
-        glEnableVertexAttribArray(RenderShader::TEXTURE3);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_NORMAL)
-      {
-        glEnableVertexAttribArray(RenderShader::NORMAL);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BINORMAL)
-      {
-        glEnableVertexAttribArray(RenderShader::BINORMAL);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BONE_INDICES)
-      {
-        glEnableVertexAttribArray(RenderShader::BONEINDICES);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS)
-      {
-        glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_COLOR)
-      {
-        glEnableVertexAttribArray(RenderShader::COLOR);
-      }
+      treeNode->setVertexArray();
 
       return true;
     }
 
     void RenderGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
-      GLuint vertexDeclaration = treeNode->getVertexDeclaration();
-
-      if(vertexDeclaration & Mesh::MODEL_POSITION)
-      {
-        glDisableVertexAttribArray(RenderShader::POSITION);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE0)
-      {
-        glDisableVertexAttribArray(RenderShader::TEXTURE0);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE1)
-      {
-        glDisableVertexAttribArray(RenderShader::TEXTURE1);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE2)
-      {
-        glDisableVertexAttribArray(RenderShader::TEXTURE2);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_TEXTURE3)
-      {
-        glDisableVertexAttribArray(RenderShader::TEXTURE3);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_NORMAL)
-      {
-        glDisableVertexAttribArray(RenderShader::NORMAL);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BINORMAL)
-      {
-        glDisableVertexAttribArray(RenderShader::BINORMAL);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BONE_INDICES)
-      {
-        glDisableVertexAttribArray(RenderShader::BONEINDICES);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS)
-      {
-        glDisableVertexAttribArray(RenderShader::BONEWEIGHTS);
-      }
-
-      if(vertexDeclaration & Mesh::MODEL_COLOR)
-      {
-        glDisableVertexAttribArray(RenderShader::COLOR);
-      }
+      treeNode->unsetVertexArray();
     }
 
     bool RenderGeometryTraverser::preTraverse(ShaderNode* treeNode)

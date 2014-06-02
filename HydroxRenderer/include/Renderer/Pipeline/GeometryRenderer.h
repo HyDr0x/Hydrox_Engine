@@ -50,8 +50,6 @@ namespace he
 
       util::ResourceHandle m_frustumCullingShaderHandle;
 
-      GLuint m_meshVAO;
-
       RenderOptions m_options;
 
       GroupNode *m_renderRootNode;
