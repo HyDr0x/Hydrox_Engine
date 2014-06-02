@@ -1,12 +1,12 @@
 #ifndef WEAKPOINTER_HPP_
 #define WEAKPOINTER_HPP_
 
-#include "Utilities/Pointer/SharedPointer.h"
-
 namespace he
 {
 	namespace util
 	{
+    template<typename F> class SharedPointer;
+
     template<typename T> class WeakPointer
     {
     public:

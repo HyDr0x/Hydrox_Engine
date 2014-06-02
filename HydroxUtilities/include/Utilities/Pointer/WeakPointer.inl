@@ -1,5 +1,7 @@
 #include "Utilities/Pointer/WeakPointer.h"
 
+//#include "Utilities/Pointer/SharedPointer.h"
+
 namespace he
 {
 	namespace util
@@ -48,7 +50,7 @@ namespace he
       m_referenceNumber = nullptr;
     }
 
-    template<typename T, typename F> void WeakPointer<T>::reset(F *ptr)
+    template<typename T> template<typename F> void WeakPointer<T>::reset(F *ptr)
     {
       WeakPointer<T> other = static_cast<T*>(ptr);
       swap(other);

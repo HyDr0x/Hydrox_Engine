@@ -1,5 +1,7 @@
 #include "Utilities/Pointer/SharedPointer.h"
 
+//#include "Utilities/Pointer/WeakPointer.h"
+
 namespace he
 {
 	namespace util
@@ -10,7 +12,7 @@ namespace he
       m_referenceNumber = nullptr;
     }
 
-	  template<typename T> explicit SharedPointer<T>::SharedPointer(T* obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
+	  template<typename T> SharedPointer<T>::SharedPointer(T *obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
 	  {}
 
 	  template<typename T> SharedPointer<T>::SharedPointer(const SharedPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
@@ -34,7 +36,7 @@ namespace he
 		  ownDelete();
 	  }
 
-    template<typename T> SharedPointer<T>::SharedPointer& operator=(SharedPointer<T> other)
+    template<typename T> SharedPointer<T>& SharedPointer<T>::operator=(SharedPointer<T> other)
 	  {
       if(*this == other)
       {
@@ -46,12 +48,12 @@ namespace he
 		  return *this;
 	  }
 
-    template<typename T> bool SharedPointer<T>::operator==(const SharedPointer& other) const
+    template<typename T> bool SharedPointer<T>::operator==(const SharedPointer<T>& other) const
     {
       return m_referenceNumber == other.m_referenceNumber && m_ptr == other.m_ptr;
     }
 
-    template<typename T, typename F> SharedPointer<F> SharedPointer<T>::static_pointer_cast() const
+    template<typename T> template<typename F> SharedPointer<F> SharedPointer<T>::static_pointer_cast()
     {
       SharedPointer<F> other = SharedPointer<F>(static_cast<F*>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
@@ -59,7 +61,7 @@ namespace he
       return other;
     }
 
-    template<typename T, typename F> SharedPointer<F> SharedPointer<T>::dynamic_pointer_cast() const
+    template<typename T> template<typename F> SharedPointer<F> SharedPointer<T>::dynamic_pointer_cast()
     {
       SharedPointer<F> other = SharedPointer<F>(dynamic_cast<F*>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
@@ -80,7 +82,7 @@ namespace he
       ownDelete();
     }
 
-    template<typename T, typename F> void SharedPointer<T>::reset(F *ptr)
+    template<typename T> template<typename F> void SharedPointer<T>::reset(F *ptr)
     {
       SharedPointer<T> other = static_cast<T*>(ptr);
       swap(other);
@@ -133,14 +135,14 @@ namespace he
     //                             ARRAY SPECIALIZATION                               //
     //                                                                                //
     ////////////////////////////////////////////////////////////////////////////////////
-
+    
     template<typename T> SharedPointer<T[]>::SharedPointer()
     {
       m_ptr = nullptr;
       m_referenceNumber = nullptr;
     }
 
-	  template<typename T> explicit SharedPointer<T[]>::SharedPointer(T[] obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
+	  template<typename T> SharedPointer<T[]>::SharedPointer(T *obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
 	  {}
 
 	  template<typename T> SharedPointer<T[]>::SharedPointer(const SharedPointer<T[]>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
@@ -151,7 +153,7 @@ namespace he
       }
 	  }
 
-    template<typename T> SharedPointer<T>::SharedPointer(const WeakPointer<T[]>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+    template<typename T> SharedPointer<T[]>::SharedPointer(const WeakPointer<T[]>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
 	  {
       if(m_referenceNumber != nullptr)
       {
@@ -164,7 +166,7 @@ namespace he
 		  ownDelete();
 	  }
 
-    template<typename T> SharedPointer<T[]>::SharedPointer& operator=(SharedPointer<T[]> other)
+    template<typename T> SharedPointer<T[]>& SharedPointer<T[]>::operator=(SharedPointer<T[]> other)
 	  {
       if(*this == other)
       {
@@ -176,12 +178,12 @@ namespace he
 		  return *this;
 	  }
 
-    template<typename T> bool SharedPointer<T[]>::operator==(const SharedPointer& other) const
+    template<typename T> bool SharedPointer<T[]>::operator==(const SharedPointer<T[]>& other) const
     {
       return m_referenceNumber == other.m_referenceNumber && m_ptr == other.m_ptr;
     }
 
-    template<typename T, typename F> SharedPointer<F[]> SharedPointer<T[]>::static_pointer_cast() const
+    template<typename T> template<typename F> SharedPointer<F[]> SharedPointer<T[]>::static_pointer_cast() const
     {
       SharedPointer<F[]> other = SharedPointer<F[]>(static_cast<F[]>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
@@ -189,7 +191,7 @@ namespace he
       return other;
     }
 
-    template<typename T, typename F> SharedPointer<F[]> SharedPointer<T[]>::dynamic_pointer_cast() const
+    template<typename T> template<typename F> SharedPointer<F[]> SharedPointer<T[]>::dynamic_pointer_cast() const
     {
       SharedPointer<F[]> other = SharedPointer<F[]>(dynamic_cast<F[]>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
@@ -210,7 +212,7 @@ namespace he
       ownDelete();
     }
 
-    template<typename T, typename F> void SharedPointer<T[]>::reset(F *ptr)
+    template<typename T> template<typename F> void SharedPointer<T[]>::reset(F *ptr)
     {
       SharedPointer<T[]> other = static_cast<T*>(ptr);
       swap(other);

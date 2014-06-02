@@ -9,14 +9,26 @@ namespace he
 	{
     void PlaneGenerator::generatePlane(std::vector<Vector<float, 3>>& position, unsigned int levelOfDetail)
     {
-      
+      generateNonIndexedPositions(position, levelOfDetail);
+    }
+
+    void PlaneGenerator::generatePlane(std::vector<Vector<float, 3>>& position, std::vector<Vector<float, 3>>& normal, unsigned int levelOfDetail)
+    {
+      generateNonIndexedPositions(position, levelOfDetail);
+      generateNonIndexedNormals(position, normal);
     }
 
     void PlaneGenerator::generatePlane(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail)
     {
-      
+      generateIndexedPositions(position, index, levelOfDetail);
     }
 
+    void PlaneGenerator::generatePlane(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, std::vector<Vector<float, 3>>& normal, unsigned int levelOfDetail)
+    {
+      generateIndexedPositions(position, index, levelOfDetail);
+      generateIndexedNormals(position, index, normal);
+    }
+    
     void PlaneGenerator::generateIndexedPositions(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail)
     {
       unsigned int quadNumber = levelOfDetail + 1;
@@ -80,10 +92,10 @@ namespace he
       }
     }
       
-    void PlaneGenerator::generateIndexedNormals(const std::vector<Vector<float, 3>>& position, std::vector<Vector<float, 3>>& normal)
+    void PlaneGenerator::generateIndexedNormals(const std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, std::vector<Vector<float, 3>>& normal)
     {
-      Vector<float, 3> a = position[1] - position[0];
-      Vector<float, 3> b = position[2] - position[0];
+      Vector<float, 3> a = position[index[1]] - position[index[0]];
+      Vector<float, 3> b = position[index[2]] - position[index[0]];
 
       Vector<float, 3> n = math::cross(a, b).normalize();
 

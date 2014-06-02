@@ -9,7 +9,7 @@ namespace he
       m_ptr = nullptr;
     }
 
-	  template<typename T> explicit UniquePointer<T>::UniquePointer(T* obj) : m_ptr(obj)
+	  template<typename T> UniquePointer<T>::UniquePointer(T* obj) : m_ptr(obj)
 	  {}
 
 	  template<typename T> UniquePointer<T>::~UniquePointer()
@@ -30,7 +30,7 @@ namespace he
       m_ptr = nullptr;
     }
 
-    template<typename T, typename F> void UniquePointer<T>::reset(F *ptr)
+    template<typename T> template<typename F> void UniquePointer<T>::reset(F *ptr)
     {
       UniquePointer<T> other = static_cast<T*>(ptr);
       swap(other);
@@ -72,7 +72,7 @@ namespace he
       m_ptr = nullptr;
     }
 
-	  template<typename T> explicit UniquePointer<T[]>::UniquePointer(T[] obj) : m_ptr(obj)
+	  template<typename T> UniquePointer<T[]>::UniquePointer(T[] obj) : m_ptr(obj)
 	  {}
 
 	  template<typename T> UniquePointer<T[]>::~UniquePointer()
@@ -93,7 +93,7 @@ namespace he
       m_ptr = nullptr;
     }
 
-    template<typename T, typename F> void UniquePointer<T[]>::reset(F *ptr)
+    template<typename T> template<typename F> void UniquePointer<T[]>::reset(F *ptr)
     {
       UniquePointer<T[]> other = static_cast<T*>(ptr);
       swap(other);

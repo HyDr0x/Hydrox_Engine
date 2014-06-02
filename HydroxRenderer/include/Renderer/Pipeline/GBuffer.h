@@ -6,7 +6,7 @@
 #include <Utilities/Math/Math.hpp>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
-#include <Utilities/Pointer/SharedPointer.hpp>
+#include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Signals/EventManager.h>
 
 #include "Renderer/Pipeline/Renderquad.h"

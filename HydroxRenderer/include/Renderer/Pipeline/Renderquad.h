@@ -7,7 +7,7 @@
 #include <assert.h>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
-#include <Utilities/Pointer/SharedPointer.hpp>
+#include <Utilities/Pointer/SharedPointer.h>
 
 #include "Renderer/DLLExport.h"
 
