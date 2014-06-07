@@ -10,15 +10,14 @@
 
 namespace he
 {
-	namespace sg
-	{    class GRAPHICAPI AnimatedGeoNode : public GeoNode
+  namespace sg
+  {    class GRAPHICAPI AnimatedGeoNode : public GeoNode
     {
     public:
 
       AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~AnimatedGeoNode();
 
-      AnimatedGeoNode& operator=(const AnimatedGeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual TreeNode* clone() const;
@@ -47,7 +46,7 @@ namespace he
       std::vector<util::Matrix<float, 4>> m_inverseBindPoseMatrices;
       std::vector<util::Matrix<float, 4>> m_boneTransformMatrices;
     };
-	}
+  }
 }
 
 #endif

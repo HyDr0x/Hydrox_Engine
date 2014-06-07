@@ -23,8 +23,8 @@
 
 namespace he
 {
-	namespace saver
-	{    NodeExtractionTraverser::NodeExtractionTraverser(std::string fileName, NodeWrapperMapper& wrapperMapper, util::SingletonManager *singletonManager) : m_wrapperMapper(wrapperMapper), m_fileName(fileName)
+  namespace saver
+  {    NodeExtractionTraverser::NodeExtractionTraverser(std::string fileName, NodeWrapperMapper& wrapperMapper, util::SingletonManager *singletonManager) : m_wrapperMapper(wrapperMapper), m_fileName(fileName)
     {
       m_modelManager = singletonManager->getService<renderer::ModelManager>();
       m_materialManager = singletonManager->getService<renderer::MaterialManager>();
@@ -248,5 +248,5 @@ namespace he
 
       return true;
     }
-	}
+  }
 }

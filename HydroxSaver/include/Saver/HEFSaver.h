@@ -18,8 +18,8 @@ namespace he
     class Scene;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     struct NodeNumbers
     {
       unsigned int geoNodeSize;
@@ -59,7 +59,7 @@ namespace he
 
       NodeWrapperMapper m_wrapperMapper;
     };
-	}
+  }
 }
 
 #endif

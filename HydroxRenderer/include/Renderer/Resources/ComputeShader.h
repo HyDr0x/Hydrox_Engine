@@ -9,19 +9,19 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI ComputeShader : public Shader
     {
     public:
 
       ComputeShader();
       ComputeShader(std::string shaderName, std::string computeShaderSource);
-	    ComputeShader(const ComputeShader& o);
+      ComputeShader(const ComputeShader& other);
 
-	    ~ComputeShader();
+      ~ComputeShader();
 
-      ComputeShader& operator=(const ComputeShader& o);
+      ComputeShader& operator=(const ComputeShader& other);
 
       static void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ);
       static void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset);
@@ -34,7 +34,7 @@ namespace he
 
       std::string m_shaderSource;
     };
-	}
+  }
 }
 
 #endif

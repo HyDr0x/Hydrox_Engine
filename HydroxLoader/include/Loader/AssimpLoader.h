@@ -47,11 +47,11 @@ namespace he
       };
 
       AssimpLoader(util::SingletonManager *singletonManager);
-      AssimpLoader(const AssimpLoader& o);
+      AssimpLoader(const AssimpLoader& other);
 
       ~AssimpLoader();
 
-      AssimpLoader& operator=(const AssimpLoader& o);
+      AssimpLoader& operator=(const AssimpLoader& other);
 
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
       AnimationTimeUnit getAnimationTimeUnit() const;

@@ -8,8 +8,8 @@
 
 namespace he
 {
-	namespace sg
-	{    class GetGlobalCoordinateTraverser : public ConstTraverser
+  namespace sg
+  {    class GetGlobalCoordinateTraverser : public ConstTraverser
     {
     public:
 
@@ -37,7 +37,7 @@ namespace he
       util::Vector<float, 3> m_globalTranslation;
       util::Quaternion<float> m_globalRotation;
     };
-	}
+  }
 }
 
 #endif

@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace renderer
-	{    class IRenderNode;
+  namespace renderer
+  {    class IRenderNode;
 
     class DeleteTraverser : public Traverser
     {
@@ -31,7 +31,7 @@ namespace he
 
       void doTraverseDown(TreeNode* treeNode);
     };
-	}
+  }
 }
 
 #endif

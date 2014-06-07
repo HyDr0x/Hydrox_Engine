@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     SkinnedGeometryContainer::SkinnedGeometryContainer(std::vector<util::Matrix<float, 4>> *boneTransformMatrices, 
                                                        std::vector<util::Matrix<float, 4>> *inverseBindPoseMatrices, 
                                                        util::Matrix<float, 4> *trfMatrix, 
@@ -20,9 +20,9 @@ namespace he
     {
     }
 
-    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& o) const
+    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& other) const
     {
-      return m_hash == o.m_hash;
+      return m_hash == other.m_hash;
     }
 
     std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getBoneTransformMatrices() const
@@ -41,18 +41,15 @@ namespace he
 
       std::vector<unsigned char> data(sizeof(m_trfMatrix) + sizeof(id) + sizeof(id) + sizeof(m_boneTransformMatrices) + sizeof(m_inverseBindPoseMatrices));
 
-      std::copy((unsigned char*)&m_trfMatrix, (unsigned char*)&m_trfMatrix + sizeof(m_trfMatrix), &data[0]);
-
-      id = m_materialHandle.getID();
-
-      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix));
-
+      unsigned int offset = 0;
+      offset = convertToRawData(m_trfMatrix, &data[0], offset);
       id = m_meshHandle.getID();
+      offset = convertToRawData(id, &data[0], offset);
+      id = m_materialHandle.getID();
+      offset = convertToRawData(id, &data[0], offset);
+      offset = convertToRawData(m_boneTransformMatrices, &data[0], offset);
+      offset = convertToRawData(m_inverseBindPoseMatrices, &data[0], offset);
 
-      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix) + sizeof(id));
-      std::copy((unsigned char*)m_boneTransformMatrices, (unsigned char*)m_boneTransformMatrices + sizeof(m_boneTransformMatrices), &data[0] + sizeof(m_trfMatrix) + sizeof(id) + sizeof(id));
-      std::copy((unsigned char*)m_inverseBindPoseMatrices, (unsigned char*)m_inverseBindPoseMatrices + sizeof(m_inverseBindPoseMatrices), &data[0] + sizeof(m_trfMatrix) + sizeof(id) + sizeof(id) + sizeof(m_boneTransformMatrices));
-      
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }
   }

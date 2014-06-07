@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class TreeNode;
     class GroupNode;
 
@@ -46,7 +46,7 @@ namespace he
 
       bool m_stopTraversal;
     };
-	}
+  }
 }
 
 #endif

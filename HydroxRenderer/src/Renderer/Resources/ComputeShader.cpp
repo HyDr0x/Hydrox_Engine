@@ -2,17 +2,17 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     ComputeShader::ComputeShader()
     {
       m_program = 0;
     }
-    ComputeShader::ComputeShader(const ComputeShader& o)
+    ComputeShader::ComputeShader(const ComputeShader& other)
     {
-      m_hash = o.m_hash;
-      m_program = o.m_program;
-      m_shaderSource = o.m_shaderSource;
+      m_hash = other.m_hash;
+      m_program = other.m_program;
+      m_shaderSource = other.m_shaderSource;
     }
 
     ComputeShader::ComputeShader(std::string shaderName, std::string computeShaderSource)
@@ -31,11 +31,11 @@ namespace he
     {
     }
 
-    ComputeShader& ComputeShader::operator=(const ComputeShader& o)
+    ComputeShader& ComputeShader::operator=(const ComputeShader& other)
     {
-      m_hash = o.m_hash;
-	    m_program = o.m_program;
-      m_shaderSource = o.m_shaderSource;
+      m_hash = other.m_hash;
+      m_program = other.m_program;
+      m_shaderSource = other.m_shaderSource;
 
       return *this;
     }
@@ -75,18 +75,18 @@ namespace he
         GLsizei length;
         glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length);
 
-	      GLchar *errorLog = new GLchar[length];
-	      glGetProgramInfoLog(m_program, length, nullptr, errorLog);
+        GLchar *errorLog = new GLchar[length];
+        glGetProgramInfoLog(m_program, length, nullptr, errorLog);
 
         std::cout << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
 
         delete[] errorLog;
-	      glDeleteProgram(m_program);
+        glDeleteProgram(m_program);
 
         return false;
       }
 
       return true;
     }
-	}
+  }
 }

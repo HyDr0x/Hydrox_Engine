@@ -17,16 +17,16 @@
 
 namespace he
 {
-	namespace renderer
-	{
-	
+  namespace renderer
+  {
+  
 
     class GRAPHICAPI Shader : public ManagedResource
     {
     public:
 
       Shader();
-	    virtual ~Shader() = 0;
+      virtual ~Shader() = 0;
 
       void free();
 
@@ -35,22 +35,22 @@ namespace he
                                                                                       std::vector<GLint> *arrayStrides, 
                                                                                       std::vector<GLint> *matrixStrides) const;
 
-	    static void setUniform(GLint location, int type, const GLfloat* val);
+      static void setUniform(GLint location, int type, const GLfloat* val);
       static void setUniform(GLint location, int type, const GLuint* val);
-	    static void setUniform(GLint location, int type, const GLint* val);
+      static void setUniform(GLint location, int type, const GLint* val);
 
-	    void useShader() const;
-	    void useNoShader() const;
+      void useShader() const;
+      void useNoShader() const;
 
     protected:
 
       GLuint createShader(GLenum shaderType, std::string shaderName, std::string shaderSource) const;
-	    bool checkShaderStatus(GLuint shader, std::string shaderName) const;
+      bool checkShaderStatus(GLuint shader, std::string shaderName) const;
 
-	    GLuint m_program;
+      GLuint m_program;
     };
 
-	}
+  }
 }
 
 #endif

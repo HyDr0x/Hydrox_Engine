@@ -9,15 +9,15 @@
 
 namespace he
 {
-	namespace saver
-	{
+  namespace saver
+  {
     void ILDevilSaver::save(std::string path, std::string filename, util::ResourceHandle textureHandle, util::SingletonManager *singletonManager)
     {
       renderer::Texture2D *texture = singletonManager->getService<renderer::TextureManager>()->getObject(textureHandle);
 
       ILuint tex;
-	    ilGenImages(1, &tex);
-	    ilBindImage(tex);
+      ilGenImages(1, &tex);
+      ilBindImage(tex);
 
       std::vector<GLubyte> imageData(texture->getTextureSize());
       texture->getTextureData(&imageData[0]);

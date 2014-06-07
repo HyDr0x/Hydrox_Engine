@@ -3,16 +3,16 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename T> class UniquePointer
     {
     public:
 
       UniquePointer();
-	    explicit UniquePointer(T* obj);
+      explicit UniquePointer(T* obj);
 
-	    ~UniquePointer();
+      ~UniquePointer();
 
       void release();
 
@@ -23,7 +23,7 @@ namespace he
 
       T* get() const;
 
-	    T* operator->() const;
+      T* operator->() const;
       T& operator*() const;
 
     private:
@@ -33,7 +33,7 @@ namespace he
 
       void swap(UniquePointer<T>& other);
 
-	    T* m_ptr;
+      T* m_ptr;
     };
 
     template<typename T> class UniquePointer<T[]>
@@ -41,9 +41,9 @@ namespace he
     public:
 
       UniquePointer();
-	    explicit UniquePointer(T[] obj);
+      explicit UniquePointer(T[] obj);
 
-	    ~UniquePointer();
+      ~UniquePointer();
 
       void release();
 
@@ -57,9 +57,6 @@ namespace he
 
       T[] get() const;
 
-	    T[] operator->() const;
-      T[]& operator*() const;
-
     private:
 
       UniquePointer(const UniquePointer& other);
@@ -67,9 +64,9 @@ namespace he
 
       void swap(UniquePointer<T[]>& other);
 
-	    T* m_ptr;
+      T* m_ptr;
     };
-	}
+  }
 }
 
 #include "UniquePointer.inl"

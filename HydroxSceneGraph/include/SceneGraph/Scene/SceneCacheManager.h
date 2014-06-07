@@ -13,8 +13,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class TreeNode;
     class GroupNode;
     class LODNode;

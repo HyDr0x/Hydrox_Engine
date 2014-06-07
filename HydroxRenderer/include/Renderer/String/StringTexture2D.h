@@ -14,8 +14,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     struct GRAPHICAPI Font
     {
       std::vector<unsigned int> lut;
@@ -29,10 +29,10 @@ namespace he
     public:
 
       StringTexture2D(util::EventManager *eventManager, const Font& font, const std::string& text, float width, float height);
-      StringTexture2D(const StringTexture2D& o);
+      StringTexture2D(const StringTexture2D& other);
       ~StringTexture2D();
 
-      StringTexture2D& operator=(const StringTexture2D& o);
+      StringTexture2D& operator=(const StringTexture2D& other);
 
       void editString(const std::string& text, float width, float height);
 
@@ -98,7 +98,7 @@ namespace he
       unsigned char m_layer;
       std::string m_text;
     };
-	}
+  }
 }
 
 #endif

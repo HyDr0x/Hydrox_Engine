@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{    class ConstTraverser;
+  namespace sg
+  {    class ConstTraverser;
     class Traverser;
     class GroupNode;
 
@@ -63,7 +63,7 @@ namespace he
 
       TreeNode(const TreeNode&);
     };
-	}
+  }
 }
 
 #endif

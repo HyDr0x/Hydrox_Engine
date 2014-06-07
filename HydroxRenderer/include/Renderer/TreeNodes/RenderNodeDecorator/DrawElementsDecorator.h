@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Mesh;
 
     struct DrawElementsIndirectCommand

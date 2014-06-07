@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     SkinnedGeometryDecorator::SkinnedGeometryDecorator(IRenderNode *renderNode) : ARenderNodeDecorator(renderNode)
     {
     }
@@ -88,5 +88,5 @@ namespace he
         m_bboxMatrixBuffer.setData(instanceIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &skinnedGeometryContainer->getTransformationMatrix()[0][0]);
       }
     }
-	}
+  }
 }

@@ -7,7 +7,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ManagedResource.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Mesh.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/Particle.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParticleEmitter.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Sprite.cpp 

@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     DeleteTraverser::DeleteTraverser()
     {
     }
@@ -80,5 +80,5 @@ namespace he
       delete treeNode;
       treeNode = nullptr;
     }
-	}
+  }
 }

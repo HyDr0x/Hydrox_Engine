@@ -9,46 +9,46 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI RenderShader : public Shader
     {
     public:
 
       enum ShaderSlots
-	    {
-		    POSITION,
-		    TEXTURE0,
-		    TEXTURE1,
-		    TEXTURE2,
-		    TEXTURE3,
-		    NORMAL,
-		    BINORMAL,
-		    TANGENT,
-		    BONEWEIGHTS,
-		    BONEINDICES,
+      {
+        POSITION,
+        TEXTURE0,
+        TEXTURE1,
+        TEXTURE2,
+        TEXTURE3,
+        NORMAL,
+        BINORMAL,
+        TANGENT,
+        BONEWEIGHTS,
+        BONEINDICES,
         COLOR,
-		    SPECIAL0,
-		    SPECIAL1,
-		    SPECIAL2,
-		    SPECIAL3,
+        SPECIAL0,
+        SPECIAL1,
+        SPECIAL2,
+        SPECIAL3,
         SPECIAL4,
-	    };
+      };
 
       RenderShader();
       RenderShader(const std::string& shaderName,
                    const std::string& vertexShaderSource, 
-			             const std::string& fragmentShaderSource = std::string(), 
-			             const std::string& geometryShaderSource = std::string(), 
-			             const std::string& tesselationCTRLShaderSource = std::string(), 
+                   const std::string& fragmentShaderSource = std::string(), 
+                   const std::string& geometryShaderSource = std::string(), 
+                   const std::string& tesselationCTRLShaderSource = std::string(), 
                    const std::string& tesselationEVALShaderSource = std::string());
-	    RenderShader(const RenderShader& o);
+      RenderShader(const RenderShader& other);
 
-	    ~RenderShader();
+      ~RenderShader();
 
-      RenderShader& operator=(const RenderShader& o);
+      RenderShader& operator=(const RenderShader& other);
 
-	    void enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const;
+      void enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const;
 
       std::vector<std::string> getShaderSources() const;
 
@@ -63,7 +63,7 @@ namespace he
       std::vector<std::string> m_shaderSources;
     };
 
-	}
+  }
 }
 
 #endif

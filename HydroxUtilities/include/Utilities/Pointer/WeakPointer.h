@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename F> class SharedPointer;
 
     template<typename T> class WeakPointer
@@ -12,7 +12,7 @@ namespace he
     public:
 
       WeakPointer();
-	    WeakPointer(const WeakPointer<T>& other);
+      WeakPointer(const WeakPointer<T>& other);
       WeakPointer(const SharedPointer<T>& other);
 
       WeakPointer& operator=(WeakPointer<T> other);
@@ -31,10 +31,10 @@ namespace he
 
       void swap(WeakPointer<T>& other);
 
-	    unsigned int *m_referenceNumber;
-	    T* m_ptr;
+      unsigned int *m_referenceNumber;
+      T* m_ptr;
     };
-	}
+  }
 }
 
 #include "WeakPointer.inl"

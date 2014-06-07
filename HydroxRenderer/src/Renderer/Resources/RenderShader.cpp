@@ -2,9 +2,9 @@
 
 namespace he
 {
-	namespace renderer
-	{
-	
+  namespace renderer
+  {
+  
 
     RenderShader::RenderShader()
     {
@@ -12,9 +12,9 @@ namespace he
 
     RenderShader::RenderShader(const std::string& shaderName,
                                const std::string& vertexShaderSource, 
-			                         const std::string& fragmentShaderSource, 
-			                         const std::string& geometryShaderSource, 
-			                         const std::string& tesselationCTRLShaderSource, 
+                               const std::string& fragmentShaderSource, 
+                               const std::string& geometryShaderSource, 
+                               const std::string& tesselationCTRLShaderSource, 
                                const std::string& tesselationEVALShaderSource)
     {
       std::string data = std::string();
@@ -43,50 +43,50 @@ namespace he
       createProgram(shaderName, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
     }
 
-    RenderShader::RenderShader(const RenderShader& o)
+    RenderShader::RenderShader(const RenderShader& other)
     {
-      m_hash = o.m_hash;
-      m_program = o.m_program;
-      m_shaderSources = o.m_shaderSources;
+      m_hash = other.m_hash;
+      m_program = other.m_program;
+      m_shaderSources = other.m_shaderSources;
     }
 
     RenderShader::~RenderShader()
     {
     }
 
-    RenderShader& RenderShader::operator=(const RenderShader& o)
+    RenderShader& RenderShader::operator=(const RenderShader& other)
     {
-      m_hash = o.m_hash;
-	    m_program = o.m_program;
-      m_shaderSources = o.m_shaderSources;
+      m_hash = other.m_hash;
+      m_program = other.m_program;
+      m_shaderSources = other.m_shaderSources;
 
       return *this;
     }
 
     void RenderShader::enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const
     {
-	    glTransformFeedbackVaryings(m_program, count, varyings, buffertype);
-	    glLinkProgram(m_program);//new linking because some unused varyings could be in use now
-	
-	    GLsizei length;
-	    GLsizei size;
-	    GLenum type;
-	
-	    for(int i = 0; i != count; i++)
-	    {
+      glTransformFeedbackVaryings(m_program, count, varyings, buffertype);
+      glLinkProgram(m_program);//new linking because some unused varyings could be in use now
+  
+      GLsizei length;
+      GLsizei size;
+      GLenum type;
+  
+      for(int i = 0; i != count; i++)
+      {
         glGetTransformFeedbackVarying(m_program, i, 0, &length, nullptr, nullptr, nullptr);
 
         GLchar *var = new GLchar[length];
 
-		    glGetTransformFeedbackVarying(m_program, i, length, nullptr, &size, &type, var);
+        glGetTransformFeedbackVarying(m_program, i, length, nullptr, &size, &type, var);
 
         delete[] var;
     
-		    if(strcmp(var, varyings[i]))
+        if(strcmp(var, varyings[i]))
         {
-			    std::cout<<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
+          std::cout<<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
         }
-	    }
+      }
     }
 
     std::vector<std::string> RenderShader::getShaderSources() const
@@ -102,30 +102,30 @@ namespace he
     {
       m_program = glCreateProgram();
 
-	    glAttachShader(m_program, vertexShader);
+      glAttachShader(m_program, vertexShader);
       glDeleteShader(vertexShader);
 
-	    if(tesselationControlShader != 0)
-	    {
-		    glAttachShader(m_program, tesselationControlShader);
+      if(tesselationControlShader != 0)
+      {
+        glAttachShader(m_program, tesselationControlShader);
         glDeleteShader(tesselationControlShader);
       }
 
       if(tesselationEvaluationShader != 0)
-	    {
+      {
         glAttachShader(m_program, tesselationEvaluationShader);
-		    glDeleteShader(tesselationEvaluationShader);
-	    }
+        glDeleteShader(tesselationEvaluationShader);
+      }
 
       if(geometryShader != 0)
       {
-		    glAttachShader(m_program, geometryShader);
+        glAttachShader(m_program, geometryShader);
         glDeleteShader(geometryShader);
       }
 
       if(fragmentShader != 0)
       {
-		    glAttachShader(m_program, fragmentShader);
+        glAttachShader(m_program, fragmentShader);
         glDeleteShader(fragmentShader);
       }
 
@@ -139,13 +139,13 @@ namespace he
         GLsizei length;
         glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length);
 
-	      GLchar *errorLog = new GLchar[length];
-	      glGetProgramInfoLog(m_program, length, nullptr, errorLog);
+        GLchar *errorLog = new GLchar[length];
+        glGetProgramInfoLog(m_program, length, nullptr, errorLog);
 
         std::cout << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
 
         delete[] errorLog;
-	      glDeleteProgram(m_program);
+        glDeleteProgram(m_program);
 
         return false;
       }
@@ -153,5 +153,5 @@ namespace he
       return true;
     }
 
-	}
+  }
 }

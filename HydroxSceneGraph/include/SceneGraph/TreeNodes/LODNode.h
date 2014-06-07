@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class Traverser;
 
     class GRAPHICAPI LODNode : public GroupNode
@@ -21,7 +21,6 @@ namespace he
       LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
       virtual ~LODNode();
 
-      LODNode& operator=(const LODNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual GroupNode* clone() const;
@@ -50,7 +49,7 @@ namespace he
 
       unsigned int m_lodLevel;
     };
-	}
+  }
 }
 
 #endif

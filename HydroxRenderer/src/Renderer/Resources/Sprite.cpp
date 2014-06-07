@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd) : 
       m_eventManager(eventManager),
       m_textureHandle(textureHandle), 
@@ -23,60 +23,60 @@ namespace he
     {
     }
 
-    Sprite::Sprite(const Sprite& o)
+    Sprite::Sprite(const Sprite& other)
     {
-      m_eventManager = o.m_eventManager;
+      m_eventManager = other.m_eventManager;
 
-      m_textureHandle = o.m_textureHandle;
+      m_textureHandle = other.m_textureHandle;
 
-      m_rtMatrix = o.m_rtMatrix;
-	    m_tlMatrix = o.m_tlMatrix;
-	    m_scMatrix = o.m_scMatrix;
-	
-	    m_animNumber = o.m_animNumber;
-	    m_animCount = o.m_animCount;
-	    m_texStart = o.m_texStart;
-	    m_texEnd = o.m_texEnd;
+      m_rtMatrix = other.m_rtMatrix;
+      m_tlMatrix = other.m_tlMatrix;
+      m_scMatrix = other.m_scMatrix;
+  
+      m_animNumber = other.m_animNumber;
+      m_animCount = other.m_animCount;
+      m_texStart = other.m_texStart;
+      m_texEnd = other.m_texEnd;
 
-	    m_BoundingBox[0] = o.m_BoundingBox[0];
-      m_BoundingBox[1] = o.m_BoundingBox[1];
+      m_BoundingBox[0] = other.m_BoundingBox[0];
+      m_BoundingBox[1] = other.m_BoundingBox[1];
 
-      m_angle = o.m_angle;
+      m_angle = other.m_angle;
 
-      m_renderable = o.m_renderable;
-      m_transparency = o.m_transparency;
+      m_renderable = other.m_renderable;
+      m_transparency = other.m_transparency;
 
-      m_layer = o.m_layer;
+      m_layer = other.m_layer;
     }
 
     Sprite::~Sprite()
     {
     }
 
-    Sprite& Sprite::operator=(const Sprite& o)
+    Sprite& Sprite::operator=(const Sprite& other)
     {
-      m_eventManager = o.m_eventManager;
+      m_eventManager = other.m_eventManager;
 
-      m_textureHandle = o.m_textureHandle;
+      m_textureHandle = other.m_textureHandle;
 
-      m_rtMatrix = o.m_rtMatrix;
-	    m_tlMatrix = o.m_tlMatrix;
-	    m_scMatrix = o.m_scMatrix;
-	
-	    m_animNumber = o.m_animNumber;
-	    m_animCount = o.m_animCount;
-	    m_texStart = o.m_texStart;
-	    m_texEnd = o.m_texEnd;
+      m_rtMatrix = other.m_rtMatrix;
+      m_tlMatrix = other.m_tlMatrix;
+      m_scMatrix = other.m_scMatrix;
+  
+      m_animNumber = other.m_animNumber;
+      m_animCount = other.m_animCount;
+      m_texStart = other.m_texStart;
+      m_texEnd = other.m_texEnd;
 
-	    m_BoundingBox[0] = o.m_BoundingBox[0];
-      m_BoundingBox[1] = o.m_BoundingBox[1];
+      m_BoundingBox[0] = other.m_BoundingBox[0];
+      m_BoundingBox[1] = other.m_BoundingBox[1];
 
-      m_angle = o.m_angle;
+      m_angle = other.m_angle;
 
-      m_renderable = o.m_renderable;
-      m_transparency = o.m_transparency;
+      m_renderable = other.m_renderable;
+      m_transparency = other.m_transparency;
 
-      m_layer = o.m_layer;
+      m_layer = other.m_layer;
 
       return *this;
     }
@@ -119,95 +119,95 @@ namespace he
       }
     }
 
-	  bool Sprite::getTransparency() const
+    bool Sprite::getTransparency() const
     {
       return m_transparency;
     }
 
     void Sprite::setAnimation(unsigned int number)
     {
-	    m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
+      m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
     void Sprite::setAnimation(const util::Vector<unsigned int, 2>& number)
     {
-	    m_animCount = number;
+      m_animCount = number;
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
 
     util::Vector<unsigned int, 2> Sprite::getAnimationNumber() const
     {
-	    return m_animNumber;
+      return m_animNumber;
     }
 
     util::Vector<unsigned int, 2> Sprite::getAnimationCount() const
     {
-	    return m_animCount;
+      return m_animCount;
     }
 
     void Sprite::setTranslation(const util::Vector<float, 2>& v)
     {
-	    m_tlMatrix[2][0] = v[0];
-	    m_tlMatrix[2][1] = v[1];
+      m_tlMatrix[2][0] = v[0];
+      m_tlMatrix[2][1] = v[1];
     }
 
     void Sprite::setTranslation(float x, float y)
     {
-	    m_tlMatrix[2][0] = x;
-	    m_tlMatrix[2][1] = y;
+      m_tlMatrix[2][0] = x;
+      m_tlMatrix[2][1] = y;
     }
 
     void Sprite::addTranslation(const util::Vector<float, 2>& v)
     {
-	    m_tlMatrix[2][0] += v[0];
-	    m_tlMatrix[2][1] += v[1];
+      m_tlMatrix[2][0] += v[0];
+      m_tlMatrix[2][1] += v[1];
     }
 
     void Sprite::addTranslation(float x, float y)
     {
-	    m_tlMatrix[2][0] += x;
-	    m_tlMatrix[2][1] += y;
+      m_tlMatrix[2][0] += x;
+      m_tlMatrix[2][1] += y;
     }
 
     void Sprite::setScale(float s)
     {
-	    m_scMatrix[0][0] = s;
-	    m_scMatrix[1][1] = s;
+      m_scMatrix[0][0] = s;
+      m_scMatrix[1][1] = s;
     }
 
     void Sprite::addScale(float s)
     {
-	    m_scMatrix[0][0] += s;
-	    m_scMatrix[1][1] += s;
+      m_scMatrix[0][0] += s;
+      m_scMatrix[1][1] += s;
     }
 
     void Sprite::setScale(const util::Vector<float, 2>& s)
     {
-	    m_scMatrix[0][0] = s[0];
-	    m_scMatrix[1][1] = s[1];
+      m_scMatrix[0][0] = s[0];
+      m_scMatrix[1][1] = s[1];
     }
 
     void Sprite::setScale(float sx, float sy)
     {
-	    m_scMatrix[0][0] = sx;
-	    m_scMatrix[1][1] = sy;
+      m_scMatrix[0][0] = sx;
+      m_scMatrix[1][1] = sy;
     }
 
     void Sprite::addScale(const util::Vector<float, 2>& s)
     {
-	    m_scMatrix[0][0] += s[0];
-	    m_scMatrix[1][1] += s[1];
+      m_scMatrix[0][0] += s[0];
+      m_scMatrix[1][1] += s[1];
     }
 
     void Sprite::addScale(float sx, float sy)
     {
-	    m_scMatrix[0][0] += sx;
-	    m_scMatrix[1][1] += sy;
+      m_scMatrix[0][0] += sx;
+      m_scMatrix[1][1] += sy;
     }
 
     void Sprite::setRotation(float angle)
     {
-	    m_angle = angle;
+      m_angle = angle;
       m_rtMatrix[0][0] = m_rtMatrix[1][1] = cos(m_angle);
       m_rtMatrix[1][0] = sin(m_angle);
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
@@ -215,7 +215,7 @@ namespace he
 
     void Sprite::addRotation(float angle)
     {
-	    m_angle += angle;
+      m_angle += angle;
       m_rtMatrix[0][0] = m_rtMatrix[1][1] = cos(m_angle);
       m_rtMatrix[1][0] = sin(m_angle);
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
@@ -262,21 +262,21 @@ namespace he
 
     util::Matrix<float,3> Sprite::getTransformationMatrix() const
     {
-	    return m_tlMatrix * m_rtMatrix * m_scMatrix;
+      return m_tlMatrix * m_rtMatrix * m_scMatrix;
     }
 
     util::Matrix<float,3> Sprite::getTexTransformationMatrix() const
     {
-	    float width  = m_texEnd[0] - m_texStart[0];
-	    float height = m_texEnd[1] - m_texStart[1];
-	    return util::Matrix<float, 3>(width / m_animNumber[0], 0.0f,                     (static_cast<float>(m_animCount[0]) / static_cast<float>(m_animNumber[0])) * width  + m_texStart[0], 
-					                          0.0f,                    height / m_animNumber[1], (static_cast<float>(m_animCount[1]) / static_cast<float>(m_animNumber[1])) * height + m_texStart[1], 
-					                          0.0f,                    0.0f,                      1.0f);
+      float width  = m_texEnd[0] - m_texStart[0];
+      float height = m_texEnd[1] - m_texStart[1];
+      return util::Matrix<float, 3>(width / m_animNumber[0], 0.0f,                     (static_cast<float>(m_animCount[0]) / static_cast<float>(m_animNumber[0])) * width  + m_texStart[0], 
+                                    0.0f,                    height / m_animNumber[1], (static_cast<float>(m_animCount[1]) / static_cast<float>(m_animNumber[1])) * height + m_texStart[1], 
+                                    0.0f,                    0.0f,                      1.0f);
     }
 
     util::ResourceHandle Sprite::getTextureHandle() const
     {
-	    return m_textureHandle;
+      return m_textureHandle;
     }
-	}
+  }
 }

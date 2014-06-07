@@ -11,7 +11,7 @@
 
 namespace he
 {
-	namespace renderer
+  namespace renderer
   {
     class Traverser;
 
@@ -37,7 +37,7 @@ namespace he
       GLuint m_vaoIndex;
       GLuint m_vertexDeclaration;
     };
-	}
+  }
 }
 
 #endif

@@ -226,13 +226,13 @@ namespace he
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         LightNodeData& data = m_wrapperMapper.lightNodes[i];
-        m_wrapperMapper.lightNodeMap[i] = new sg::LightNode(data.nodeName);
+        m_wrapperMapper.lightNodeMap[i] = new sg::LightNode(eventManager, data.nodeName);
       }
 
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
       {
         ParticleNodeData& data = m_wrapperMapper.particleNodes[i];
-        m_wrapperMapper.particleNodeMap[i] = new sg::ParticleNode(data.nodeName);
+        m_wrapperMapper.particleNodeMap[i] = new sg::ParticleNode(eventManager, data.nodeName);
       }
     }
 

@@ -1,5 +1,6 @@
 #include "Renderer/Pipeline/RenderManager.h"
 
+#include <XBar/LightContainer.h>
 #include <XBar/BillboardContainer.h>
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
@@ -8,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     RenderManager::RenderManager() : m_skyboxRendering(false)
     {
     }
@@ -20,7 +21,7 @@ namespace he
 
     void RenderManager::setClearColor(he::util::Vector<float, 4> color) const
     {
-	    glClearColor(color[0], color[1], color[2], color[3]);
+      glClearColor(color[0], color[1], color[2], color[3]);
     }
 
     void RenderManager::resizeRenderWindow(unsigned int width, unsigned int height)
@@ -63,17 +64,18 @@ namespace he
       util::ResourceHandle spriteShaderHandle, 
       util::ResourceHandle stringShaderHandle,
       util::ResourceHandle frustumCullingShaderHandle,
-      util::ResourceHandle gBufferShaderHandle)
+      util::ResourceHandle gBufferShaderHandle,
+      util::ResourceHandle directLightShaderHandle)
     {
       m_options = options;
-
-      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_geometryRasterizer.initialize(m_options, singletonManager, frustumCullingShaderHandle);
       m_gBuffer.initialize(m_options, singletonManager, gBufferShaderHandle);
       m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
       m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);
+      m_lightRenderer.initialize(singletonManager, directLightShaderHandle);
+      m_particleRenderer.initialize(singletonManager, billboardShaderHandle);//dummy shader handle
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>) + sizeof(float) * 2, GL_DYNAMIC_DRAW);
     }
@@ -149,12 +151,12 @@ namespace he
 
     void RenderManager::addRenderComponent(const xBar::LightContainer& light)
     {
-      m_renderLight.push_back(light);
+      m_lightRenderer.addRenderComponent(light);
     }
 
-    void RenderManager::addRenderComponent(const xBar::ParticleContainer& particle)
+    void RenderManager::addRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter)
     {
-      m_renderParticle.push_back(particle);
+      m_particleRenderer.addRenderComponent(particleEmitter);
     }
 
     void RenderManager::removeRenderComponent(const Sprite *sprite)
@@ -184,27 +186,12 @@ namespace he
 
     void RenderManager::removeRenderComponent(const xBar::LightContainer& light)
     {
-      m_renderLight.remove(light);
+      m_lightRenderer.removeRenderComponent(light);
     }
 
-    void RenderManager::removeRenderComponent(const xBar::ParticleContainer& particle)
+    void RenderManager::removeRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter)
     {
-      m_renderParticle.remove(particle);
+      m_particleRenderer.removeRenderComponent(particleEmitter);
     }
-
-    void RenderManager::registerRenderComponentSlots(util::EventManager *eventManager)
-    {
-      eventManager->addNewSignal<void (*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::LightContainer& light), void (RenderManager::*)(const xBar::LightContainer& light)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddLightNode);
-
-      eventManager->addNewSignal<void (*)(const xBar::ParticleContainer& particle)>(util::EventManager::OnAddParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::ParticleContainer& particle), void (RenderManager::*)(const xBar::ParticleContainer& particle)>(this, &RenderManager::addRenderComponent, util::EventManager::OnAddParticleTransmitterNode);
-
-      eventManager->addNewSignal<void (*)(const xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::LightContainer& light), void (RenderManager::*)(const xBar::LightContainer& light)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveLightNode);
-
-      eventManager->addNewSignal<void (*)(const xBar::ParticleContainer& particle)>(util::EventManager::OnRemoveParticleTransmitterNode);
-      eventManager->addSlotToSignal<RenderManager, void (*)(const xBar::ParticleContainer& particle), void (RenderManager::*)(const xBar::ParticleContainer& particle)>(this, &RenderManager::removeRenderComponent, util::EventManager::OnRemoveParticleTransmitterNode);
-    }
-	}
+  }
 }

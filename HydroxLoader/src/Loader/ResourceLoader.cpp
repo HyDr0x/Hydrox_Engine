@@ -19,9 +19,9 @@ namespace he
     {
     }
 
-    ResourceLoader::ResourceLoader(const ResourceLoader& o)
+    ResourceLoader::ResourceLoader(const ResourceLoader& other)
     {
-      m_singletonManager = o.m_singletonManager;
+      m_singletonManager = other.m_singletonManager;
     }
 
     ResourceLoader::~ResourceLoader()

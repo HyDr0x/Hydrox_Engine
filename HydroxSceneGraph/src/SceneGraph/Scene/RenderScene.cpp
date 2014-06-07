@@ -13,8 +13,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     RenderScene::RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition) : Scene(rootNode), m_eventManager(eventManger), m_sceneCacheManager(SceneCacheManager(eventManger))
     {
       TransformTraverser transformTraverser;

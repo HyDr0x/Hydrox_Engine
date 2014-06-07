@@ -13,6 +13,8 @@
 
 #include "Renderer/Resources/Mesh.h"
 #include "Renderer/Resources/Material.h"
+#include "Renderer/Resources/Light.h"
+#include "Renderer/Resources/ParticleEmitter.h"
 #include "Renderer/Resources/RenderShader.h"
 #include "Renderer/Resources/ComputeShader.h"
 #include "Renderer/Resources/Texture2D.h"
@@ -20,8 +22,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     template<class CLASS> class ResourceManager : public util::SingletonBehaviour, public util::Observer<util::ResourceHandle*>
     {
     public:
@@ -30,7 +32,7 @@ namespace he
       {
       }
 
-	    ~ResourceManager()
+      ~ResourceManager()
       {
         for(unsigned int i = 0; i < m_objectsCache.size(); i++)
         {
@@ -98,19 +100,21 @@ namespace he
 
     private:
 
-	    ResourceManager(const ResourceManager&);
+      ResourceManager(const ResourceManager&);
       ResourceManager& operator=(const ResourceManager&);
 
       static const unsigned int m_BLOCKSIZE = 64;
 
-	    std::list<unsigned int> m_list;
+      std::list<unsigned int> m_list;
 
-	    std::vector<CLASS> m_objectsCache;
+      std::vector<CLASS> m_objectsCache;
       std::map<uint64_t, unsigned int> m_objectHash;
     };
 
     template class GRAPHICAPI ResourceManager<Mesh>;
     template class GRAPHICAPI ResourceManager<Material>;
+    template class GRAPHICAPI ResourceManager<Light>;
+    template class GRAPHICAPI ResourceManager<ParticleEmitter>;
     template class GRAPHICAPI ResourceManager<RenderShader>;
     template class GRAPHICAPI ResourceManager<ComputeShader>;
     template class GRAPHICAPI ResourceManager<Texture2D>;
@@ -118,11 +122,13 @@ namespace he
 
     typedef ResourceManager<Mesh> ModelManager;
     typedef ResourceManager<Material> MaterialManager;
+    typedef ResourceManager<Light> LightManager;
+    typedef ResourceManager<ParticleEmitter> ParticleEmitterManager;
     typedef ResourceManager<RenderShader> RenderShaderManager;
     typedef ResourceManager<ComputeShader> ComputeShaderManager;
     typedef ResourceManager<Texture2D> TextureManager;
     typedef ResourceManager<Texture3D> TextureArrayManager;
-	}
+  }
 }
 
 #endif

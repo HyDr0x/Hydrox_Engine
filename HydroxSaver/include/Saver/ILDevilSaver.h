@@ -16,15 +16,15 @@ namespace he
     class SingletonManager;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     class GRAPHICAPI ILDevilSaver
     {
     public:
 
       static void save(std::string path, std::string filename, util::ResourceHandle textureHandle, util::SingletonManager *singletonManager);
     };
-	}
+  }
 }
 
 #endif

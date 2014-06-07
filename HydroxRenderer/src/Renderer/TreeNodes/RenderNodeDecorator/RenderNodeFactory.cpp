@@ -14,8 +14,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     IRenderNode* RenderNodeFactory::createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
       switch(nodeType.toInt())

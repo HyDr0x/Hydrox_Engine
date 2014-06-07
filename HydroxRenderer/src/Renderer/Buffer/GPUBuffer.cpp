@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     GPUBuffer::GPUBuffer()
     {
       glGenBuffers(1, &m_bufferIndex);
@@ -84,5 +84,5 @@ namespace he
     {
       glBindVertexBuffer(bufferBindingPoint, 0, 0, 0);
     }
-	}
+  }
 }

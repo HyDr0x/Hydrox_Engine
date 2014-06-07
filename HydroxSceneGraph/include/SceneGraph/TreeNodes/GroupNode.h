@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class Traverser;
 
     class GRAPHICAPI GroupNode : public TreeNode
@@ -27,7 +27,6 @@ namespace he
       GroupNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
       virtual ~GroupNode();
 
-      GroupNode& operator=(const GroupNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual GroupNode* clone() const;
@@ -56,7 +55,7 @@ namespace he
 
       unsigned int m_dirtyFlag;
     };
-	}
+  }
 }
 
 #endif

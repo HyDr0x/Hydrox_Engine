@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
@@ -63,35 +63,35 @@ namespace he
       {
         glGenerateMipmap(m_target);
       }
-	    glBindTexture(m_target, 0);
+      glBindTexture(m_target, 0);
     }
 
-    Texture3D::Texture3D(const Texture3D& o)
+    Texture3D::Texture3D(const Texture3D& other)
     {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_depth = o.m_depth;
-      m_height = o.m_height;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
+      m_hash = other.m_hash;
+      m_width = other.m_width;
+      m_depth = other.m_depth;
+      m_height = other.m_height;
+      m_texIndex = other.m_texIndex;
+      m_target = other.m_target;
+      m_internalFormat = other.m_internalFormat;
+      m_format = other.m_format;
+      m_type = other.m_type;
+      m_slot = other.m_slot;
     }
 
-    Texture3D& Texture3D::operator=(const Texture3D& o)
+    Texture3D& Texture3D::operator=(const Texture3D& other)
     {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_height = o.m_height;
-      m_depth = o.m_depth;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
+      m_hash = other.m_hash;
+      m_width = other.m_width;
+      m_height = other.m_height;
+      m_depth = other.m_depth;
+      m_texIndex = other.m_texIndex;
+      m_target = other.m_target;
+      m_internalFormat = other.m_internalFormat;
+      m_format = other.m_format;
+      m_type = other.m_type;
+      m_slot = other.m_slot;
 
       return *this;
     }
@@ -109,17 +109,17 @@ namespace he
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");
 
-	    m_slot = slot;
+      m_slot = slot;
 
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, m_texIndex);
+      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glBindTexture(m_target, m_texIndex);
       glUniform1i(location, slot);
     }
 
     void Texture3D::unsetTexture() const
     {
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, 0);
+      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glBindTexture(m_target, 0);
     }
 
     void Texture3D::generateMipMapps() const
@@ -131,23 +131,23 @@ namespace he
 
     void Texture3D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter) const
     {
-	    glBindTexture(m_target, m_texIndex);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
+      glBindTexture(m_target, m_texIndex);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
         glTexParameteri(m_target, GL_TEXTURE_WRAP_R, edgeModeR);
-		    glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
-		    glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
-	    glBindTexture(m_target, 0);
+        glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
+        glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
+      glBindTexture(m_target, 0);
     }
 
     util::Vector<unsigned int, 3> Texture3D::getResolution() const
     {
-	    return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
+      return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
     }
 
     GLenum Texture3D::getTarget() const
     {
-	    return m_target;
+      return m_target;
     }
 
     GLenum Texture3D::getInternalFormat() const
@@ -200,5 +200,5 @@ namespace he
       glGetTexImage(m_target, 0, m_format, m_type, data);
       glBindTexture(m_target, 0);
     }
-	}
+  }
 }

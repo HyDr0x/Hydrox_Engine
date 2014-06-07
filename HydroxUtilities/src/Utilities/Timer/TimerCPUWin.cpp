@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     CPUTimerWin::CPUTimerWin(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
     {
       LARGE_INTEGER tmpTime;
@@ -37,5 +37,5 @@ namespace he
 
       return m_cpuTime;
     }
-	}
+  }
 }

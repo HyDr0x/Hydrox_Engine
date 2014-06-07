@@ -31,17 +31,17 @@ namespace he
 
       std::ifstream file(filename);
       std::string shaderSource;
-	    std::string line;
+      std::string line;
 
-	    if(file.is_open())
+      if(file.is_open())
       {
-		    while(!file.eof())
-		    {
-			    std::getline(file, line);
-			    line += '\n';
+        while(!file.eof())
+        {
+          std::getline(file, line);
+          line += '\n';
 
-			    shaderSource += line;
-		    }
+          shaderSource += line;
+        }
 
         file.close();
 
@@ -49,12 +49,12 @@ namespace he
         std::string path = filename.substr(0, pathEndPos);
         preprocessShaderSource(shaderSource, path);
       }
-	    else
-	    {
-		    file.close();
+      else
+      {
+        file.close();
 
         //std::cerr << "Warning, couldn't open shader source file: " << filename << std::endl;
-	    }
+      }
 
       return shaderSource;
     }

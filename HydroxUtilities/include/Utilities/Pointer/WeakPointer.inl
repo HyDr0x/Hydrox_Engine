@@ -4,24 +4,24 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename T> WeakPointer<T>::WeakPointer()
     {
       m_ptr = nullptr;
       m_referenceNumber = nullptr;
     }
 
-	  template<typename T> WeakPointer<T>::WeakPointer(const WeakPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
-	  {
-	  }
+    template<typename T> WeakPointer<T>::WeakPointer(const WeakPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
+    {
+    }
 
     template<typename T> WeakPointer<T>::WeakPointer(const SharedPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
-	  {
-	  }
+    {
+    }
 
     template<typename T> WeakPointer<T>::WeakPointer& operator=(WeakPointer<T> other)
-	  {
+    {
       if(*this == other)
       {
         return *this;
@@ -29,11 +29,11 @@ namespace he
 
       swap(other);
 
-		  return *this;
-	  }
+      return *this;
+    }
 
     template<typename T> WeakPointer<T>::WeakPointer& operator=(SharedPointer<T> other)
-	  {
+    {
       if(*this == other)
       {
         return *this;
@@ -41,8 +41,8 @@ namespace he
 
       swap(other);
 
-		  return *this;
-	  }
+      return *this;
+    }
 
     template<typename T> void WeakPointer<T>::reset()
     {
@@ -76,5 +76,5 @@ namespace he
       std::swap(m_referenceNumber, other.m_referenceNumber);
       std::swap(m_ptr, other.m_ptr);
     }
-	}
+  }
 }

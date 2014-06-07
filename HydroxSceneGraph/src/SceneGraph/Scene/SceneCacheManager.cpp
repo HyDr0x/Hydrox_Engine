@@ -20,8 +20,8 @@
 
 namespace he
 {
-	namespace sg
-	{    SceneCacheManager::SceneCacheManager(util::EventManager& eventManager) : m_eventManager(eventManager)
+  namespace sg
+  {    SceneCacheManager::SceneCacheManager(util::EventManager& eventManager) : m_eventManager(eventManager)
     {
       registerNodeCacheSlots();
     }
@@ -189,5 +189,5 @@ namespace he
         }
       }
     }
-	}
+  }
 }

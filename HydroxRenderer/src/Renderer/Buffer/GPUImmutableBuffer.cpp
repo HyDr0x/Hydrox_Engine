@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     GPUImmutableBuffer::GPUImmutableBuffer()
     {
       m_immutableBufferIndex = 0;
@@ -95,5 +95,5 @@ namespace he
     {
       glBindVertexBuffer(bufferBindingPoint, 0, 0, 0);
     }
-	}
+  }
 }

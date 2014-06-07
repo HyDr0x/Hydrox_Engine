@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     DrawArrayDecorator::DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
       m_primitiveType(primitiveType),

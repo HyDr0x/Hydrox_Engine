@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     class GRAPHICAPI StaticGeometryContainer : public AContainer
     {
     public:
@@ -19,7 +19,7 @@ namespace he
       StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
       virtual ~StaticGeometryContainer();
 
-      bool operator == (const StaticGeometryContainer& o) const;
+      bool operator == (const StaticGeometryContainer& other) const;
 
       util::ResourceHandle getMaterialHandle() const;
 

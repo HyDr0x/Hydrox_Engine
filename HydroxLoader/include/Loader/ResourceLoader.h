@@ -22,7 +22,7 @@ namespace he
     public:
 
       ResourceLoader(util::SingletonManager *singletonManager);
-      ResourceLoader(const ResourceLoader& o);
+      ResourceLoader(const ResourceLoader& other);
 
       virtual ~ResourceLoader() = 0;
 

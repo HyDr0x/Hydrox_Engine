@@ -12,44 +12,44 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI Sprite
     {
     public:
 
-	    Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd);
-      Sprite(const Sprite& o);
-	    ~Sprite();
+      Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd);
+      Sprite(const Sprite& other);
+      ~Sprite();
 
-      Sprite& operator=(const Sprite& o);
+      Sprite& operator=(const Sprite& other);
 
       void setRenderable(bool renderable);
-	    bool getRenderable() const;
+      bool getRenderable() const;
 
       void setTransparency(bool transparency);
-	    bool getTransparency() const;
+      bool getTransparency() const;
 
-	    void setAnimation(unsigned int number);
-	    void setAnimation(const util::Vector<unsigned int, 2>& number);
-	    util::Vector<unsigned int, 2> getAnimationNumber() const;
-	    util::Vector<unsigned int, 2> getAnimationCount() const;
+      void setAnimation(unsigned int number);
+      void setAnimation(const util::Vector<unsigned int, 2>& number);
+      util::Vector<unsigned int, 2> getAnimationNumber() const;
+      util::Vector<unsigned int, 2> getAnimationCount() const;
 
-	    void setTranslation(const util::Vector<float, 2>& v);
-	    void setTranslation(float x, float y);
+      void setTranslation(const util::Vector<float, 2>& v);
+      void setTranslation(float x, float y);
 
-	    void addTranslation(const util::Vector<float, 2>& v);
-	    void addTranslation(float x, float y);
+      void addTranslation(const util::Vector<float, 2>& v);
+      void addTranslation(float x, float y);
 
-	    void setScale(float s);
-	    void addScale(float s);
+      void setScale(float s);
+      void addScale(float s);
 
-	    void setScale(const util::Vector<float, 2>& s);
-	    void setScale(float sx, float sy);
-	    void addScale(const util::Vector<float, 2>& s);
-	    void addScale(float sx, float sy);
+      void setScale(const util::Vector<float, 2>& s);
+      void setScale(float sx, float sy);
+      void addScale(const util::Vector<float, 2>& s);
+      void addScale(float sx, float sy);
 
-	    void setRotation(float angle);
+      void setRotation(float angle);
       void addRotation(float angle);
 
       util::Vector<float, 2> getPosition() const;
@@ -59,9 +59,9 @@ namespace he
       void setLayer(unsigned char layer);
       unsigned char getLayer() const;
 
-	    util::Matrix<float, 3> getTransformationMatrix() const;
-	    util::Matrix<float, 3> getTexTransformationMatrix() const;
-	    util::ResourceHandle getTextureHandle() const;
+      util::Matrix<float, 3> getTransformationMatrix() const;
+      util::Matrix<float, 3> getTexTransformationMatrix() const;
+      util::ResourceHandle getTextureHandle() const;
 
     private:
 
@@ -72,23 +72,23 @@ namespace he
       util::ResourceHandle m_textureHandle;
 
       util::Matrix<float, 3> m_rtMatrix;
-	    util::Matrix<float, 3> m_tlMatrix;
-	    util::Matrix<float, 3> m_scMatrix;
+      util::Matrix<float, 3> m_tlMatrix;
+      util::Matrix<float, 3> m_scMatrix;
       unsigned char m_layer;
 
-	    util::Vector<unsigned int, 2> m_animNumber;
-	    util::Vector<unsigned int, 2> m_animCount;
-	    util::Vector<float, 2> m_texStart;
-	    util::Vector<float, 2> m_texEnd;
+      util::Vector<unsigned int, 2> m_animNumber;
+      util::Vector<unsigned int, 2> m_animCount;
+      util::Vector<float, 2> m_texStart;
+      util::Vector<float, 2> m_texEnd;
 
-	    util::Vector<float, 2> m_BoundingBox[2];
+      util::Vector<float, 2> m_BoundingBox[2];
 
       float m_angle;
 
       bool m_transparency;
       bool m_renderable;//boolean which decides if the sprite is being drawn or not
     };
-	}
+  }
 }
 
 #endif

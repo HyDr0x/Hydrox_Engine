@@ -1,33 +1,37 @@
 #ifndef LIGHT_H_
 #define LIGHT_H_
 
+#include <Utilities/Math/Math.hpp>
+
 #include "Renderer/DLLExport.h"
+#include "Renderer/Resources/ManagedResource.h"
+
 
 namespace he
 {
-	namespace renderer
-	{
-    class GRAPHICAPI Light
+  namespace renderer
+  {
+    class GRAPHICAPI Light : public ManagedResource
     {
     public:
 
+      void free();
+
     private:
 
-      /*
-      m_position;
-      m_intensity;
+      util::Vector<float, 3> m_position;
+      util::Vector<float, 3> m_spotLightDirection;
 
-      m_spotLightDirection;
-      m_spotLightExponent;
-      m_spotLightCutoff;
+      float m_intensity;
 
-      m_constAttenuation;
-      m_linearAttenuation;
-      m_quadricAttenuation;
-      */
+      float m_spotLightExponent;
+      float m_spotLightCutoff;
 
+      float m_constAttenuation;
+      float m_linearAttenuation;
+      float m_quadricAttenuation;
     };
-	}
+  }
 }
 
 #endif

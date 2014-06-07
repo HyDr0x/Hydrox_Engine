@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     typedef __int64 time;
 
     class GRAPHICAPI CPUTimerWin
@@ -35,7 +35,7 @@ namespace he
 
       bool m_showTimerWhenDying;
     };
-	}
+  }
 }
 
 #endif

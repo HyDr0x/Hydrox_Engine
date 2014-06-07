@@ -6,8 +6,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     TextureNode::TextureNode() 
     {
     }
@@ -56,5 +56,5 @@ namespace he
     {
       return m_textureHandles;
     }
-	}
+  }
 }

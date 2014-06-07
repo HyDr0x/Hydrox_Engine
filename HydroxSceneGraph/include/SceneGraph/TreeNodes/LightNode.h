@@ -4,22 +4,28 @@
 #include "SceneGraph/DLLExport.h"
 
 #include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
+
 #include "SceneGraph/TreeNodes/TreeNode.h"
 
 namespace he
 {
-	namespace sg
-	{
+  namespace util
+  {
+    class EventManager;
+  }
+
+  namespace sg
+  {
     class Traverser;
 
     class GRAPHICAPI LightNode : public TreeNode
     {
     public:
 
-      LightNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      LightNode(util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~LightNode();
 
-      LightNode& operator=(const LightNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual TreeNode* clone() const;
@@ -34,14 +40,25 @@ namespace he
 
       virtual bool isLightNode() const;
 
+      void setRenderable(bool renderable);
+
+      void setLightHandle(util::ResourceHandle lightHandle);
+      util::ResourceHandle getLightHandle() const;
+
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
       util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 
+      util::EventManager *m_eventManager;
+
       util::Matrix<float, 4> m_trfMatrix;//the tranformation util::Matrix
+
+      util::ResourceHandle m_lightHandle;
+
+      bool m_renderable;
     };
-	}
+  }
 }
 
 #endif

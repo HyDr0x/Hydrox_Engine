@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     ShaderNode::ShaderNode()
     {
     }

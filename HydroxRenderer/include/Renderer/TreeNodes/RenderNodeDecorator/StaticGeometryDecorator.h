@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class StaticGeometryDecorator : public ARenderNodeDecorator
     {
     public:
@@ -26,7 +26,7 @@ namespace he
 
       GPUImmutableBuffer m_matrixBuffer;
     };
-	}
+  }
 }
 
 #endif

@@ -17,8 +17,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class SceneCacheManager;
 
     class TreeNode;
@@ -34,14 +34,14 @@ namespace he
     {
     public:
 
-	    RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition);
-	    ~RenderScene();
+      RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition);
+      ~RenderScene();
 
       GroupNode* addParentNode(unsigned int eventID, TreeNode* destinationNode, const GroupNode* sourceNode);
       TreeNode* addChildNode(unsigned int eventID, GroupNode* destinationNode, const TreeNode* sourceNode);
       void removeNode(TreeNode* node);
 
-	    GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
+      GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
       void removeSubTree(TreeNode* sceneNode);
 
       void setLODRanges(const std::vector<float>& lodRanges);
@@ -49,9 +49,9 @@ namespace he
 
     private:
  
-	    RenderScene();
+      RenderScene();
       RenderScene(const RenderScene& object);
-	    RenderScene& operator=(const RenderScene&);
+      RenderScene& operator=(const RenderScene&);
 
       SceneCacheManager m_sceneCacheManager;
 

@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     MaterialDecorator::MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager) : 
       ARenderNodeDecorator(renderNode), 
       m_materialCount(0),

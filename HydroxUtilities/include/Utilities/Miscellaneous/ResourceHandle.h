@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class GRAPHICAPI ResourceHandle : public Subject<ResourceHandle*>
     {
     public:
@@ -33,7 +33,7 @@ namespace he
       unsigned int m_id;
       unsigned int *m_referenceCounter;
     };
-	}
+  }
 }
 
 #endif

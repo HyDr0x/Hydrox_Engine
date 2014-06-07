@@ -19,8 +19,8 @@ namespace he
   namespace xBar  {    class StaticGeometryContainer;
     class SkinnedGeometryContainer;  }
 
-	namespace renderer
-	{    class IRenderNode;    class InsertSkinnedGeometryTraverser : public InsertGeometryTraverser
+  namespace renderer
+  {    class IRenderNode;    class InsertSkinnedGeometryTraverser : public InsertGeometryTraverser
     {
     public:
 
@@ -33,7 +33,7 @@ namespace he
 
       const xBar::SkinnedGeometryContainer& m_geometryContainer;
     };
-	}
+  }
 }
 
 #endif

@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     struct MaterialMemoryManager
     {
       unsigned int bufferIndex;

@@ -12,19 +12,19 @@ namespace he
     {
     }
 
-    ILDevilLoader::ILDevilLoader(const ILDevilLoader& o ) : ResourceLoader(o)
+    ILDevilLoader::ILDevilLoader(const ILDevilLoader& other ) : ResourceLoader(other)
     {
-      m_textureManager = o.m_textureManager;
-      m_target = o.m_target;
+      m_textureManager = other.m_textureManager;
+      m_target = other.m_target;
     }
 
     ILDevilLoader::~ILDevilLoader()
     {
     }
 
-    ILDevilLoader& ILDevilLoader::operator=(const ILDevilLoader& o)
+    ILDevilLoader& ILDevilLoader::operator=(const ILDevilLoader& other)
     {
-      m_textureManager = o.m_textureManager;
+      m_textureManager = other.m_textureManager;
 
       return *this;
     }
@@ -48,12 +48,12 @@ namespace he
       ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
 
       ILuint tex;
-	    ilGenImages(1, &tex);
-	    ilBindImage(tex);
+      ilGenImages(1, &tex);
+      ilBindImage(tex);
       {
-		    ILboolean success = ilLoadImage(filename.c_str());
+        ILboolean success = ilLoadImage(filename.c_str());
 
-		    if(!success)
+        if(!success)
         {
           std::cerr << "ERROR, couldn't open file: " << filename << std::endl;
 
@@ -64,9 +64,9 @@ namespace he
           getImageInformations(width, height, internalFormat, format, type, channelNumber, bitsPerPixel);
 
           //success = ilConvertImage(format, type);
-		      //if(!success)
+          //if(!success)
           //{
-		      //	printf("ERROR, couldn't convert file %s/n", filename);
+          //  printf("ERROR, couldn't convert file %s/n", filename);
           //}
         
           tmpTextureID = m_textureManager->addObject(renderer::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerPixel, ilGetData()));

@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     GroupNode::GroupNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                         m_firstChild(firstChild)
     {
@@ -18,16 +18,6 @@ namespace he
     GroupNode::~GroupNode()
     {
       m_firstChild = nullptr;
-    }
-
-    GroupNode& GroupNode::operator=(const GroupNode& sourceNode)
-    {
-      TreeNode::operator=(sourceNode);
-
-      m_firstChild = sourceNode.m_firstChild;
-      m_dirtyFlag = sourceNode.m_dirtyFlag;
-
-      return *this;
     }
 
     TreeNode& GroupNode::operator=(const TreeNode& sourceNode)
@@ -109,5 +99,5 @@ namespace he
     {
       m_dirtyFlag &= ~dirtyFlag;
     }
-	}
+  }
 }

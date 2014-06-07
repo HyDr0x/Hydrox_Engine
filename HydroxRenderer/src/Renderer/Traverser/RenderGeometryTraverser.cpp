@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
     {
       m_modelManager = singletonManager->getService<ModelManager>();
@@ -96,5 +96,5 @@ namespace he
     void RenderGeometryTraverser::postTraverse(IRenderNode* treeNode)
     {
     }
-	}
+  }
 }

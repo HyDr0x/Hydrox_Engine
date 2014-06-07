@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Traverser::Traverser() : m_stopTraversal(false)
     {
     }
@@ -98,5 +98,5 @@ namespace he
     void Traverser::postTraverse(IRenderNode* treeNode)
     {
     }
-	}
+  }
 }

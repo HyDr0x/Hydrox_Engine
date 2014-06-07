@@ -6,8 +6,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     InsertObserverTraverser::InsertObserverTraverser(util::Observer<TransformNode*> *observer) : m_observer(observer)
     {
     }

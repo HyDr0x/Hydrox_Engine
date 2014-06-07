@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Mesh::Mesh()
     {
       m_primitiveCount = 0;
@@ -82,7 +82,7 @@ namespace he
       m_geometryData.resize(size);
 
       for(unsigned int i = 0; i < positions.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + sizeof(positions[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += posStride;
@@ -90,38 +90,38 @@ namespace he
       for(unsigned int j = 0; j < textureCoords.size(); j++)
       {
         for(unsigned int i = 0; i < textureCoords[j].size(); i++)
-		    {
+        {
           std::copy((GLubyte*)&textureCoords[j][i], (GLubyte*)&textureCoords[j][i] + sizeof(textureCoords[0][0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
         }
         lokalStride += texStride[j];
       }
 
       for(unsigned int i = 0; i < normals.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + sizeof(normals[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += normalStride;
 
       for(unsigned int i = 0; i < binormals.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + sizeof(binormals[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += binormalStride;
 
       for(unsigned int i = 0; i < boneWeights.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + sizeof(boneWeights[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += boneWeightStride;
 
       for(unsigned int i = 0; i < boneIndices.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + sizeof(boneIndices[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += boneIndexStride;
 
       for(unsigned int i = 0; i < vertexColors.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + sizeof(vertexColors[0]), &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += vertexColorStride;
@@ -130,11 +130,11 @@ namespace he
 
       m_indexData = indices;
 
-	    //const GLenum ErrorValue = glGetError();
-	    //int tmpE = 0;
-	    //if(ErrorValue != GL_NO_ERROR)
-	    //	tmpE++;
-	    //tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
+      //const GLenum ErrorValue = glGetError();
+      //int tmpE = 0;
+      //if(ErrorValue != GL_NO_ERROR)
+      //  tmpE++;
+      //tmpE = GL_INVALID_VALUE & GL_INVALID_VALUE;
     }
 
     Mesh::Mesh(AABB boundingVolume,
@@ -158,34 +158,34 @@ namespace he
       m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
     }
 
-    Mesh::Mesh(const Mesh& o)
+    Mesh::Mesh(const Mesh& other)
     {
-      m_hash = o.m_hash;
-      m_boundingVolume = o.m_boundingVolume;
-      m_primitiveType = o.m_primitiveType;
-	    m_primitiveCount = o.m_primitiveCount;
-      m_vertexCount = o.m_vertexCount;
-      m_vertexStride = o.m_vertexStride;
-      m_geometryData = o.m_geometryData;
-      m_indexData = o.m_indexData;
-      m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
+      m_hash = other.m_hash;
+      m_boundingVolume = other.m_boundingVolume;
+      m_primitiveType = other.m_primitiveType;
+      m_primitiveCount = other.m_primitiveCount;
+      m_vertexCount = other.m_vertexCount;
+      m_vertexStride = other.m_vertexStride;
+      m_geometryData = other.m_geometryData;
+      m_indexData = other.m_indexData;
+      m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
     }
 
     Mesh::~Mesh()
     {
     }
 
-    Mesh& Mesh::operator=(const Mesh& o)
+    Mesh& Mesh::operator=(const Mesh& other)
     {
-      m_hash = o.m_hash;
-      m_boundingVolume = o.m_boundingVolume;
-      m_primitiveType = o.m_primitiveType;
-	    m_primitiveCount = o.m_primitiveCount;
-      m_vertexCount = o.m_vertexCount;
-      m_vertexStride = o.m_vertexStride;
-      m_geometryData = o.m_geometryData;
-      m_indexData = o.m_indexData;
-      m_vertexDeclarationFlags = o.m_vertexDeclarationFlags;
+      m_hash = other.m_hash;
+      m_boundingVolume = other.m_boundingVolume;
+      m_primitiveType = other.m_primitiveType;
+      m_primitiveCount = other.m_primitiveCount;
+      m_vertexCount = other.m_vertexCount;
+      m_vertexStride = other.m_vertexStride;
+      m_geometryData = other.m_geometryData;
+      m_indexData = other.m_indexData;
+      m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
 
       return *this;
     }
@@ -201,7 +201,7 @@ namespace he
       assert(m_vertexDeclarationFlags & MODEL_POSITION);
 
       for(unsigned int i = 0; i < positions.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + sizeof(positions[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -223,7 +223,7 @@ namespace he
       for(unsigned int j = 0; j < textureCoords.size(); j++)
       {
         for(unsigned int i = 0; i < textureCoords[j].size(); i++)
-		    {
+        {
           std::copy((GLubyte*)&textureCoords[i], (GLubyte*)&textureCoords[i] + sizeof(textureCoords[0]), &m_geometryData[0] + m_vertexStride * i);
         }
         lokalStride += texStride[j];
@@ -245,7 +245,7 @@ namespace he
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3];
 
       for(unsigned int i = 0; i < normals.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + sizeof(normals[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -266,7 +266,7 @@ namespace he
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride;
 
       for(unsigned int i = 0; i < binormals.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + sizeof(binormals[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -288,7 +288,7 @@ namespace he
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride;
 
       for(unsigned int i = 0; i < boneWeights.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + sizeof(boneWeights[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -311,7 +311,7 @@ namespace he
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride + boneWeightStride;
 
       for(unsigned int i = 0; i < boneIndices.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + sizeof(boneIndices[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -335,7 +335,7 @@ namespace he
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride + boneWeightStride + boneIndextStride;
 
       for(unsigned int i = 0; i < vertexColors.size(); i++)
-		  {
+      {
         std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + sizeof(vertexColors[0]), &m_geometryData[0] + m_vertexStride * i);
       }
     }
@@ -394,5 +394,5 @@ namespace he
     {
       return m_primitiveCount;
     }
-	}
+  }
 }

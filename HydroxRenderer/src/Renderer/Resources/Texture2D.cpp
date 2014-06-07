@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data, bool mipmapping) : m_target(target),
       m_width(width),
       m_height(height),
@@ -40,41 +40,41 @@ namespace he
       {
         glGenerateMipmap(m_target);
       }
-	    glBindTexture(m_target, 0);
+      glBindTexture(m_target, 0);
     }
 
-    Texture2D::Texture2D(const Texture2D& o)
+    Texture2D::Texture2D(const Texture2D& other)
     {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_height = o.m_height;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
-      m_bitsPerPixel = o.m_bitsPerPixel;
-      m_channelNumber = o.m_channelNumber;
+      m_hash = other.m_hash;
+      m_width = other.m_width;
+      m_height = other.m_height;
+      m_texIndex = other.m_texIndex;
+      m_target = other.m_target;
+      m_internalFormat = other.m_internalFormat;
+      m_format = other.m_format;
+      m_type = other.m_type;
+      m_slot = other.m_slot;
+      m_bitsPerPixel = other.m_bitsPerPixel;
+      m_channelNumber = other.m_channelNumber;
     }
 
     Texture2D::~Texture2D()
     {
     }
 
-    Texture2D& Texture2D::operator=(const Texture2D& o)
+    Texture2D& Texture2D::operator=(const Texture2D& other)
     {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_height = o.m_height;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
-      m_bitsPerPixel = o.m_bitsPerPixel;
-      m_channelNumber = o.m_channelNumber;
+      m_hash = other.m_hash;
+      m_width = other.m_width;
+      m_height = other.m_height;
+      m_texIndex = other.m_texIndex;
+      m_target = other.m_target;
+      m_internalFormat = other.m_internalFormat;
+      m_format = other.m_format;
+      m_type = other.m_type;
+      m_slot = other.m_slot;
+      m_bitsPerPixel = other.m_bitsPerPixel;
+      m_channelNumber = other.m_channelNumber;
 
       return *this;
     }
@@ -88,17 +88,17 @@ namespace he
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");
 
-	    m_slot = slot;
+      m_slot = slot;
 
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, m_texIndex);
+      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glBindTexture(m_target, m_texIndex);
       glUniform1i(location, slot);
     }
 
     void Texture2D::unsetTexture() const
     {
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, 0);
+      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glBindTexture(m_target, 0);
     }
 
     void Texture2D::generateMipMapps() const
@@ -110,22 +110,22 @@ namespace he
 
     void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter) const
     {
-	    glBindTexture(m_target, m_texIndex);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
-		    glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
-		    glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
-	    glBindTexture(m_target, 0);
+      glBindTexture(m_target, m_texIndex);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
+        glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
+        glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
+      glBindTexture(m_target, 0);
     }
 
     util::Vector<unsigned int, 2> Texture2D::getResolution() const
     {
-	    return util::Vector<unsigned int, 2>(m_width, m_height);
+      return util::Vector<unsigned int, 2>(m_width, m_height);
     }
 
     GLenum Texture2D::getTarget() const
     {
-	    return m_target;
+      return m_target;
     }
 
     GLenum Texture2D::getInternalFormat() const
@@ -166,5 +166,5 @@ namespace he
       glGetTexImage(m_target, 0, m_format, m_type, data);
       glBindTexture(m_target, 0);
     }
-	}
+  }
 }

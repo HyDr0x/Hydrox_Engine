@@ -1,14 +1,16 @@
 #include "SceneGraph/Traverser/AddNodesTraverser.h"
 
-#include "SceneGraph/TreeNodes/LODNode.h"
 #include "SceneGraph/TreeNodes/GeoNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
 #include "SceneGraph/TreeNodes/BillboardNode.h"
+#include "SceneGraph/TreeNodes/LODNode.h"
+#include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ParticleNode.h"
 
 namespace he
 {
-	namespace sg
-	{    AddNodesTraverser::AddNodesTraverser(util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos) : m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
+  namespace sg
+  {    AddNodesTraverser::AddNodesTraverser(util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos) : m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
     {
     }
 
@@ -73,7 +75,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(ParticleNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(ParticleNode *treeNode)>(util::EventManager::OnAddParticleTransmitterNode)->execute(treeNode);
+      treeNode->setRenderable(true);
 
       return true;
     }
@@ -84,7 +86,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(LightNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(LightNode *treeNode)>(util::EventManager::OnAddLightNode)->execute(treeNode);
+      treeNode->setRenderable(true);
 
       return true;
     }
@@ -92,5 +94,5 @@ namespace he
     void AddNodesTraverser::postTraverse(LightNode* treeNode)
     {
     }
-	}
+  }
 }

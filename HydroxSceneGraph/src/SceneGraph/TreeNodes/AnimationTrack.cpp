@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     std::ofstream& operator<<(std::ofstream& stream, const AnimationTrack& animationTrack)
     {
       stream << animationTrack.m_animationName << std::endl;
@@ -73,5 +73,5 @@ namespace he
 
       return stream;
     }
-	}
+  }
 }

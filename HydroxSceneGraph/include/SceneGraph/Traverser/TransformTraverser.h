@@ -8,8 +8,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class TransformTraverser : public Traverser
     {
     public:
@@ -54,7 +54,7 @@ namespace he
       std::stack<util::Vector<float, 3>> m_translateStack;
       std::stack<util::Quaternion<float>> m_rotationStack;
     };
-	}
+  }
 }
 
 #endif

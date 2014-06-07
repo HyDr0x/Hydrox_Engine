@@ -19,8 +19,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI Mesh : public ManagedResource
     {
     public:
@@ -42,7 +42,7 @@ namespace he
       typedef GLuint indexType;
 
       Mesh();
-	    Mesh(GLenum primitiveType,
+      Mesh(GLenum primitiveType,
            const std::vector<util::Vector<float, 3>>& positions, 
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::Vector<float, 2>>>& textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
@@ -63,11 +63,11 @@ namespace he
            const std::vector<indexType>& indices = std::vector<indexType>()
            );
 
-      Mesh(const Mesh& o);
+      Mesh(const Mesh& other);
 
-	    ~Mesh();
+      ~Mesh();
 
-      Mesh& operator=(const Mesh& o);
+      Mesh& operator=(const Mesh& other);
 
       void free();
 
@@ -100,16 +100,16 @@ namespace he
 
       GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
 
-	    ////////////GEOMETRY////////////
-	    unsigned int m_primitiveCount;
+      ////////////GEOMETRY////////////
+      unsigned int m_primitiveCount;
       unsigned int m_vertexCount;
       GLuint m_vertexStride;
       std::vector<GLubyte> m_geometryData;
       std::vector<indexType> m_indexData;
       GLuint m_vertexDeclarationFlags;
-	    ////////////////////////////////
+      ////////////////////////////////
     };
-	}
+  }
 }
 
 #endif

@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     class GRAPHICAPI SkinnedGeometryContainer : public StaticGeometryContainer
     {
     public:
@@ -23,7 +23,7 @@ namespace he
 
       virtual ~SkinnedGeometryContainer();
 
-      bool operator == (const SkinnedGeometryContainer& o) const;
+      bool operator == (const SkinnedGeometryContainer& other) const;
 
       std::vector<util::Matrix<float, 4>>* getBoneTransformMatrices() const;
       std::vector<util::Matrix<float, 4>>* getInverseBindPoseTransformMatrices() const;

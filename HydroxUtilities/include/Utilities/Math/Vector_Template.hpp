@@ -2,15 +2,15 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename Type, unsigned int Dim> class Vector;
 
     template<typename Type> class Vector<Type, VECTOR_NUM_ARGS>
     {
       public:
 
-      Vector()	{m_vertexcounter++;}
+      Vector()  {m_vertexcounter++;}
       Vector(VECTOR_PARAMS)
       {
         VECTOR_INIT
@@ -42,14 +42,14 @@ namespace he
 
       inline Vector& operator = (const Vector  &v) { VECTOR_ASSIGNEMENT_OP return *this; }
 
-	    inline Vector operator + (const Vector &v) const { return Vector( VECTOR_PLUS_OP ); }
+      inline Vector operator + (const Vector &v) const { return Vector( VECTOR_PLUS_OP ); }
       inline Vector operator - (const Vector &v) const { return Vector( VECTOR_MINUS_OP ); }
 
       inline Vector operator * (const Vector &v) const { return Vector( VECTOR_MULTIPLY_OP ); }
       inline Vector operator * (Type s) const { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
 
       inline Vector operator / (const Vector &v) const { return Vector( VECTOR_DIVIDE_OP ); }
-	    inline Vector operator / (Type s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
+      inline Vector operator / (Type s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
 
       inline Vector& operator += (const Vector &v) { VECTOR_EQ_PLUS_OP return *this; }
       inline Vector& operator -= (const Vector &v) { VECTOR_EQ_MINUS_OP return *this; }
@@ -60,9 +60,9 @@ namespace he
 
       inline bool operator == (const Vector &v) { return VECTOR_COMP_EQ }
       inline bool operator != (const Vector &v) { return VECTOR_COMP_UQ }
-	    inline bool operator >  (const Vector &v) { return VECTOR_COMP_GR }
+      inline bool operator >  (const Vector &v) { return VECTOR_COMP_GR }
       inline bool operator <  (const Vector &v) { return VECTOR_COMP_LS }
-	    inline bool operator >= (const Vector &v) { return VECTOR_COMP_EQ_GR }
+      inline bool operator >= (const Vector &v) { return VECTOR_COMP_EQ_GR }
       inline bool operator <= (const Vector &v) { return VECTOR_COMP_EQ_LS }
 
       inline Type& operator [] (unsigned int i) { return m_x[i]; }
@@ -153,7 +153,7 @@ namespace he
     {
       return m_vertexcounter;
     }
-	}
+  }
 }
 
 #undef MIN

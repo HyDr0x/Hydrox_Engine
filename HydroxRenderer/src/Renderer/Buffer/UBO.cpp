@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     UBO::UBO() : m_bufferData(nullptr), 
                  m_bufferDataOffset(0), 
                  m_bufferSize(0), 
@@ -18,7 +18,7 @@ namespace he
     {
       glDeleteBuffers(1, &m_bufferIndex);
 
-	    delete[] m_bufferData;
+      delete[] m_bufferData;
     }
 
     void UBO::createBuffer(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames)//shared layout
@@ -27,12 +27,12 @@ namespace he
       m_bufferSize = bufferSize;
 
       m_uniformIndices.resize(m_uniformCount);
-	    m_uniformOffsets.resize(m_uniformCount);
-	    m_arrayStrides.resize(m_uniformCount);
-	    m_matrixStrides.resize(m_uniformCount);
+      m_uniformOffsets.resize(m_uniformCount);
+      m_arrayStrides.resize(m_uniformCount);
+      m_matrixStrides.resize(m_uniformCount);
 
-	    glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
-	    glBufferData(GL_UNIFORM_BUFFER, this->m_bufferSize, NULL, usage);
+      glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
+      glBufferData(GL_UNIFORM_BUFFER, this->m_bufferSize, NULL, usage);
 
       shader->getUniformParameters(uniformNames, m_uniformCount, &m_uniformIndices, &m_uniformOffsets, &m_arrayStrides, &m_matrixStrides);
 
@@ -47,8 +47,8 @@ namespace he
       m_bufferSize = bufferSize;
       m_uniformOffsets.resize(1, 0);
 
-	    glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
-	    glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, NULL, usage);
+      glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
+      glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, NULL, usage);
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
       delete[] m_bufferData;
@@ -69,19 +69,19 @@ namespace he
 
     void UBO::uploadData() const
     {
-	    glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
-	    glBufferSubData(GL_UNIFORM_BUFFER, m_uniformOffsets[0], m_bufferSize, m_bufferData);
-	    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+      glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
+      glBufferSubData(GL_UNIFORM_BUFFER, m_uniformOffsets[0], m_bufferSize, m_bufferData);
+      glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
     void UBO::bindBuffer(GLuint bufferBindingPoint) const
     {
-	    glBindBufferBase(GL_UNIFORM_BUFFER, bufferBindingPoint, m_bufferIndex);
+      glBindBufferBase(GL_UNIFORM_BUFFER, bufferBindingPoint, m_bufferIndex);
     }
 
     void UBO::unBindBuffer(GLuint bufferBindingPoint) const
     {
       glBindBufferBase(GL_UNIFORM_BUFFER, bufferBindingPoint, 0);
     }
-	}
+  }
 }

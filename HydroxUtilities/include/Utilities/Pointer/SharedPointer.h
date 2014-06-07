@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename F> class WeakPointer;
 
     template<typename T> class SharedPointer
@@ -12,11 +12,11 @@ namespace he
     public:
 
       SharedPointer();
-	    explicit SharedPointer(T *obj);
-	    SharedPointer(const SharedPointer<T>& other);
+      explicit SharedPointer(T *obj);
+      SharedPointer(const SharedPointer<T>& other);
       SharedPointer(const WeakPointer<T>& other);
 
-	    ~SharedPointer();
+      ~SharedPointer();
 
       SharedPointer<T>& operator=(SharedPointer<T> other);
 
@@ -36,7 +36,7 @@ namespace he
 
       T* get() const;
 
-	    T* operator->() const;
+      T* operator->() const;
       T& operator*() const;
 
     private:
@@ -45,8 +45,8 @@ namespace he
 
       void swap(SharedPointer<T>& other);
 
-	    unsigned int *m_referenceNumber;
-	    T* m_ptr;
+      unsigned int *m_referenceNumber;
+      T* m_ptr;
     };
 
     
@@ -56,11 +56,11 @@ namespace he
     public:
 
       SharedPointer();
-	    explicit SharedPointer(T *obj);
-	    SharedPointer(const SharedPointer<T[]>& other);
+      explicit SharedPointer(T *obj);
+      SharedPointer(const SharedPointer<T[]>& other);
       SharedPointer(const WeakPointer<T[]>& other);
 
-	    ~SharedPointer();
+      ~SharedPointer();
 
       SharedPointer<T[]>& operator=(SharedPointer<T[]> other);
 
@@ -83,19 +83,16 @@ namespace he
 
       T* get() const;
 
-	    T* operator->() const;
-      T& operator*() const;
-
     private:
 
       void ownDelete();
 
       void swap(SharedPointer<T[]>& other);
 
-	    unsigned int *m_referenceNumber;
-	    T* m_ptr;
+      unsigned int *m_referenceNumber;
+      T* m_ptr;
     };
-	}
+  }
 }
 
 #include "SharedPointer.inl"

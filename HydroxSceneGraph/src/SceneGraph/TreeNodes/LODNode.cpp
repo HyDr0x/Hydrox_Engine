@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
     GroupNode(nodeName, parent, nextSibling, firstChild),
       m_lodLevel(lodLevel),
@@ -22,17 +22,6 @@ namespace he
 
     LODNode::~LODNode()
     {
-    }
-
-    LODNode& LODNode::operator=(const LODNode& sourceNode)
-    {
-      GroupNode::operator=(sourceNode);
-
-      m_lodLevel = sourceNode.m_lodLevel;
-      m_position = sourceNode.m_position;
-      m_transformedPosition = sourceNode.m_transformedPosition;
-
-      return *this;
     }
 
     TreeNode& LODNode::operator=(const TreeNode& sourceNode)
@@ -101,7 +90,7 @@ namespace he
     {
       float distance = static_cast<float>((m_transformedPosition - camPos).length());
 
-	    return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
+      return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
     }
 
     void LODNode::transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation)
@@ -113,5 +102,5 @@ namespace he
     {
       return m_position;
     }
-	}
+  }
 }

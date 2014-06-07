@@ -18,8 +18,8 @@ namespace he
     class SingletonManager;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Texture2D;
     struct RenderOptions;
 
@@ -52,7 +52,7 @@ namespace he
 
       Renderquad m_fullscreenRenderQuad;
     };
-	}
+  }
 }
 
 #endif

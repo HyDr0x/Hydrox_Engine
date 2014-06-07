@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
   template<class ParamT> class Observer
   {
   public:
@@ -17,7 +17,7 @@ namespace he
   private:
 
   };
-	}
+  }
 }
 
 #endif

@@ -8,8 +8,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     namespace math//make the functions inline or create a declaration cpp (no double defined functions allowed in c++)
     {
       static const float PI = 3.141592654f;
@@ -38,7 +38,7 @@ namespace he
         return angle / PI * 180.0f;
       }
 
-	    template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
+      template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
       {
         return Vector<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));
       }
@@ -175,12 +175,12 @@ namespace he
         rtxMatrix[1][2] = -rtxMatrix[2][1];
         rtxMatrix = rtxMatrix.invert();
 
-	      rtyMatrix[0][0] = rtyMatrix[2][2] = cos(angle[1]);
+        rtyMatrix[0][0] = rtyMatrix[2][2] = cos(angle[1]);
         rtyMatrix[0][2] = sin(angle[1]);
         rtyMatrix[2][0] = -rtyMatrix[0][2];
         rtyMatrix = rtyMatrix.invert();
 
-	      rtzMatrix[0][0] = rtzMatrix[1][1] = cos(angle[2]);
+        rtzMatrix[0][0] = rtzMatrix[1][1] = cos(angle[2]);
         rtzMatrix[1][0] = sin(angle[2]);
         rtzMatrix[0][1] = -rtzMatrix[1][0];
         rtzMatrix = rtzMatrix.invert();
@@ -305,7 +305,7 @@ namespace he
       }
     #endif
     }
-	}
+  }
 }
 
 #endif

@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     CPUTimerUnix::CPUTimerUnix(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
     {
       m_cpuTime = clock();
@@ -30,5 +30,5 @@ namespace he
 
       return m_cpuTime;
     }
-	}
+  }
 }

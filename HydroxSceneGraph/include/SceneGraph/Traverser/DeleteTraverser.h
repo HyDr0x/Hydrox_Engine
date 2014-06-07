@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class DeleteTraverser : public ConstTraverser
     {
     public:
@@ -38,7 +38,7 @@ namespace he
       virtual bool preTraverse(const LightNode* treeNode);
       virtual void postTraverse(const LightNode* treeNode);
     };
-	}
+  }
 }
 
 #endif

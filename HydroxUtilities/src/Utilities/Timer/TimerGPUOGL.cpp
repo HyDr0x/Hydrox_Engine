@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     OGLTimer::OGLTimer(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
     {
       glGenQueries(1, &m_query);
@@ -35,5 +35,5 @@ namespace he
 
       return m_openGLTime;
     }
-	}
+  }
 }

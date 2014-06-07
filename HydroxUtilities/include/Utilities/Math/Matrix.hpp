@@ -5,10 +5,10 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename Type, unsigned int Dim> class Matrix;
-	}
+  }
 }
 
 #include "Matrix2.hpp"

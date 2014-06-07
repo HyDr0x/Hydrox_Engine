@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     OpenGLDebugLogManager::OpenGLDebugLogManager()
     {
     }
@@ -109,5 +109,5 @@ namespace he
     {
       glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
     }
-	}
+  }
 }

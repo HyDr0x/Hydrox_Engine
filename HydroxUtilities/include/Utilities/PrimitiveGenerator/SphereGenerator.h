@@ -3,15 +3,15 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class SphereGenerator
     {
     public:
 
     private:
 
-	  };
+    };
   }
 }
 

@@ -13,8 +13,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     Scene::Scene(GroupNode *rootNode)
     {
       m_rootNode = rootNode;
@@ -261,5 +261,5 @@ namespace he
       traverser.setStopAnimation();
       traverser.doTraverse(node);
     }
-	}
+  }
 }

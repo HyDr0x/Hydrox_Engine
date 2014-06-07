@@ -12,8 +12,8 @@ namespace he
     class SingletonManager;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class IRenderNode;
     struct RenderOptions;
 

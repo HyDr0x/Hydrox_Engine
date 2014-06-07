@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class Traverser;
 
     class GRAPHICAPI GeoNode : public TreeNode
@@ -22,7 +22,6 @@ namespace he
       GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~GeoNode();
 
-      GeoNode& operator=(const GeoNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual TreeNode* clone() const;
@@ -47,7 +46,7 @@ namespace he
       util::Matrix<float, 4> getTransformationMatrix() const;
 
       virtual void setRenderable(bool renderable);
-	    bool getRenderable() const;
+      bool getRenderable() const;
 
     protected:
 
@@ -60,7 +59,7 @@ namespace he
 
       bool m_renderable;//boolean which decides if the mesh is being drawn or not
     };
-	}
+  }
 }
 
 #endif

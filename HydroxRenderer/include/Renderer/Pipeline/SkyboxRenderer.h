@@ -18,8 +18,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class SkyboxRenderer
     {
     public:
@@ -31,7 +31,7 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
 
-	    void render() const;
+      void render() const;
 
     private:
 
@@ -44,11 +44,11 @@ namespace he
       GLuint m_skyBoxVAO;
       GPUBuffer m_geometryData;
 
-	    RenderShaderManager *m_renderShaderManager;
+      RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
       TextureArrayManager*m_textureArrayManager;
     };
-	}
+  }
 }
 
 #endif

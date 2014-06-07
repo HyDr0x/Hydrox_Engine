@@ -12,7 +12,7 @@ namespace he
   {
     Renderquad::Renderquad() : m_fboIndex(~0), m_depthTexture(nullptr)
     {
-	    glGenBuffers(1, &m_vboindex);
+      glGenBuffers(1, &m_vboindex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
       glVertexAttribPointer(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
@@ -23,7 +23,7 @@ namespace he
     {
       glDeleteBuffers(1, &m_vboindex);
 
-	    if(m_fboIndex != ~0)
+      if(m_fboIndex != ~0)
       {
         glDeleteFramebuffers(1, &m_fboIndex);
       }
@@ -36,23 +36,23 @@ namespace he
 
     void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, std::vector<util::SharedPointer<Texture2D>> textures)
     {
-	    assert(textures.size() > 0 || m_depthTexture);
+      assert(textures.size() > 0 || m_depthTexture);
 
       m_depthTexture = depthTexture;
 
       m_textures = textures;
 
-	    if(m_fboIndex == ~0)
+      if(m_fboIndex == ~0)
       {
         glGenFramebuffers(1, &m_fboIndex);
       }
 
-	    glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
-		    for(unsigned int i = 0; i < m_textures.size(); i++)
+      glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
+        for(unsigned int i = 0; i < m_textures.size(); i++)
         {
-			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
+          glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
         }
-		    if(m_depthTexture) glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
+        if(m_depthTexture) glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
 
         GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -60,7 +60,7 @@ namespace he
         {
           std::cerr << "Error, framebuffer corrupted." << std::endl;
         }
-	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void Renderquad::setRenderTargets(util::SharedPointer<Texture2D> depthTexture, int count, ...)
@@ -69,24 +69,24 @@ namespace he
 
       m_depthTexture = depthTexture;
 
-	    m_textures.resize(count);
+      m_textures.resize(count);
 
-	    if(m_fboIndex == ~0)
+      if(m_fboIndex == ~0)
       {
         glGenFramebuffers(1, &m_fboIndex);
       }
 
       va_list texList;
-	    va_start(texList, count);
+      va_start(texList, count);
 
-	    glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
-		    for(unsigned int i = 0; i < m_textures.size(); i++)
-		    {
+      glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
+        for(unsigned int i = 0; i < m_textures.size(); i++)
+        {
           m_textures[i] = va_arg(texList, util::SharedPointer<Texture2D>);
-			    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
-		    }
+          glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_textures[i]->m_texIndex, 0);
+        }
 
-		    if(m_depthTexture) 
+        if(m_depthTexture) 
           glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->m_texIndex, 0);
 
         GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -126,19 +126,19 @@ namespace he
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboIndex);
 
       std::vector<GLenum> fboBuffer(m_textures.size());
-		  for(unsigned int i = 0; i < m_textures.size(); i++)
+      for(unsigned int i = 0; i < m_textures.size(); i++)
       {
-			  fboBuffer[i] = GL_COLOR_ATTACHMENT0 + i;
+        fboBuffer[i] = GL_COLOR_ATTACHMENT0 + i;
       }
-		  glDrawBuffers(fboBuffer.size(), &fboBuffer[0]);
+      glDrawBuffers(fboBuffer.size(), &fboBuffer[0]);
     }
 
     void Renderquad::unsetWriteFrameBuffer() const
     {
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		  GLenum windowBuff[] = { GL_BACK_LEFT };//switching to back buffer (LEFT/RIGHT --> for stereoscopic rendering, default is LEFT)
-		  glDrawBuffers(1, windowBuff);
+      GLenum windowBuff[] = { GL_BACK_LEFT };//switching to back buffer (LEFT/RIGHT --> for stereoscopic rendering, default is LEFT)
+      glDrawBuffers(1, windowBuff);
 
       //glBindTexture(GL_TEXTURE_2D, m_depthTexture->m_texIndex);
       //std::vector<float> depth(1024 * 768);
@@ -161,10 +161,10 @@ namespace he
       glDepthFunc(GL_ALWAYS);
       shader->useShader();
 
-	    glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glEnableVertexAttribArray(RenderShader::SPECIAL0);
       glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
 
-	    glDrawArrays(GL_POINTS, 0, 1);
+      glDrawArrays(GL_POINTS, 0, 1);
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glDisableVertexAttribArray(RenderShader::SPECIAL0);
@@ -191,10 +191,10 @@ namespace he
         m_textures[i]->setTexture(i + depthTextureOffset, i + depthTextureOffset);
       }
 
-	    glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glEnableVertexAttribArray(RenderShader::SPECIAL0);
       glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
 
-	    glDrawArrays(GL_POINTS, 0, 1);
+      glDrawArrays(GL_POINTS, 0, 1);
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glDisableVertexAttribArray(RenderShader::SPECIAL0);
@@ -219,9 +219,9 @@ namespace he
       glClearBufferfv(GL_DEPTH, 0, &clearDepthValue);
 
       for(unsigned int i = 0; i < clearColors.size(); i++)
-		  {
+      {
         glClearBufferfv(GL_COLOR, i, &clearColors[i][0]);
-		  }
+      }
 
       unsetWriteFrameBuffer();
     }

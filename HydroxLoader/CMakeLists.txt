@@ -1,8 +1,8 @@
 project(Hydrox_Loader)
 
 set(
-	LIBSUFFIX 
-	${CMAKE_STATIC_LIBRARY_SUFFIX}
+  LIBSUFFIX 
+  ${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
 add_definitions(-DDLL_EXPORT)
@@ -19,46 +19,50 @@ find_package(GLEW)
 find_package(OPENGL)
 find_package(DevIL)
 
-if(ASSIMP_FOUND) # bad assimp find_package workaround
-else()
-  find_package(Assimp)
-endif()
+set(ASSIMP_INCLUDE_DIR "default" CACHE STRING "description")
+set(ASSIMP_LIBRARY_DBG "default" CACHE STRING "description")
+set(ASSIMP_LIBRARY_REL "default" CACHE STRING "description")
+
+#if(ASSIMP_FOUND) # bad assimp find_package workaround
+#else()
+#  find_package(Assimp)
+#endif()
 
 set(
-	INCLUDES 
-	${CMAKE_CURRENT_SOURCE_DIR}/include 
-	${HYDROX_UTIL_INCLUDE} 
-	${HYDROX_SG_INCLUDE} 
-	${HYDROX_RE_INCLUDE} 
-	${GLEW_INCLUDE_DIRS} 
-	${IL_INCLUDE_DIR} 
-	${ASSIMP_INCLUDE_DIR}
+  INCLUDES 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include 
+  ${HYDROX_UTIL_INCLUDE} 
+  ${HYDROX_SG_INCLUDE} 
+  ${HYDROX_RE_INCLUDE} 
+  ${GLEW_INCLUDE_DIRS} 
+  ${IL_INCLUDE_DIR} 
+  ${ASSIMP_INCLUDE_DIR}
 )
 
 include_directories(${INCLUDES})
 
 set(
-	DEBUG_LIBRARIES 
-	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
-	debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
-	debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
-	debug ${GLEW_LIBRARIES}
-	debug ${ASSIMP_LIBRARY_DBG} 
+  DEBUG_LIBRARIES 
+  debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+  debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
+  debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
+  debug ${GLEW_LIBRARIES}
+  debug ${ASSIMP_LIBRARY_DBG} 
 )
 
 set(
-	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
-	optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
-	optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
-	optimized ${GLEW_LIBRARIES} 
-	optimized ${ASSIMP_LIBRARY_REL} 
+  RELEASE_LIBRARIES 
+  optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+  optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
+  optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
+  optimized ${GLEW_LIBRARIES} 
+  optimized ${ASSIMP_LIBRARY_REL} 
 )
 
 set(
-	GENERAL_LIBRARIES 
-	general ${IL_LIBRARIES}
-	general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
+  GENERAL_LIBRARIES 
+  general ${IL_LIBRARIES}
+  general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
 )
 
 target_link_libraries(Hydrox_Loader ${DEBUG_LIBRARIES})

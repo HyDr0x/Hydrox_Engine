@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{    NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
+  namespace sg
+  {    NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
     {
     }
 
@@ -115,5 +115,5 @@ namespace he
 
       return true;
     }
-	}
+  }
 }

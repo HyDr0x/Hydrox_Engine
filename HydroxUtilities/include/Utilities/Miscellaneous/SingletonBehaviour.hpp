@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class SingletonBehaviour
     {
     public: 

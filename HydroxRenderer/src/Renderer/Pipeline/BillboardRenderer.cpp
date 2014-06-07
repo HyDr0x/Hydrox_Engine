@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     BillboardRenderer::BillboardRenderer()
     {
     }
@@ -35,31 +35,31 @@ namespace he
     {
       Texture2D *renderTexture;
 
-	    glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       glEnableVertexAttribArray(RenderShader::SPECIAL0);
 
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
  
       RenderShader *billboardShader = m_renderShaderManager->getObject(m_billboardShaderHandle);
-	    billboardShader->useShader();
+      billboardShader->useShader();
 
-	    for(std::list<xBar::BillboardContainer>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
-	    {
+      for(std::list<xBar::BillboardContainer>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)
+      {
         renderTexture = m_textureManager->getObject((*billboarditerator).getTextureHandle());
 
         renderTexture->setTexture(6, 0);
 
-		    util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator).getTexTransformationMatrix();
+        util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator).getTexTransformationMatrix();
         util::Vector<float, 2> scale = (*billboarditerator).getScale();
-		    util::Vector<float, 3> translate = (*billboarditerator).getPosition();
-		    billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
-		    billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
-		    billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
+        util::Vector<float, 3> translate = (*billboarditerator).getPosition();
+        billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
+        billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
+        billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);
 
         glDrawArrays(GL_POINTS, 0, 1);
-	    }
+      }
     
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glDisableVertexAttribArray(RenderShader::SPECIAL0);
@@ -85,5 +85,5 @@ namespace he
       eventManager->addNewSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode);
       eventManager->addSlotToSignal<BillboardRenderer, void (*)(const xBar::BillboardContainer& billboard), void (BillboardRenderer::*)(const xBar::BillboardContainer& billboard)>(this, &BillboardRenderer::removeRenderComponent, util::EventManager::OnRemoveBillboardNode);
     }
-	}
+  }
 }

@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     typedef clock_t time;
 
     class GRAPHICAPI CPUTimerUnix
@@ -32,7 +32,7 @@ namespace he
 
       bool m_showTimerWhenDying;
     };
-	}
+  }
 }
 
 #endif

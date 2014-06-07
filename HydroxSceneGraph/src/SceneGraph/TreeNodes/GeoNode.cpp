@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : 
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager),
@@ -23,19 +23,6 @@ namespace he
 
     GeoNode::~GeoNode()
     {
-    }
-
-    GeoNode& GeoNode::operator=(const GeoNode& sourceNode)
-    {
-      TreeNode::operator=(sourceNode);
-
-      m_eventManager = sourceNode.m_eventManager;
-      m_materialHandle = sourceNode.m_materialHandle;
-      m_trfMatrix = sourceNode.m_trfMatrix;
-      m_meshHandle = sourceNode.m_meshHandle;
-      m_renderable = sourceNode.m_renderable;
-
-      return *this;
     }
 
     TreeNode& GeoNode::operator=(const TreeNode& sourceNode)
@@ -160,5 +147,5 @@ namespace he
     {
       return m_renderable;
     }
-	}
+  }
 }

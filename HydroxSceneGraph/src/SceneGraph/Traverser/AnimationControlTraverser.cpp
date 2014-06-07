@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     AnimationControlTraverser::AnimationControlTraverser()
     {
       m_setterAnimationTime = 0.0f;
@@ -77,5 +77,5 @@ namespace he
     void AnimationControlTraverser::postTraverse(TreeNode* treeNode)
     {
     }
-	}
+  }
 }

@@ -50,14 +50,14 @@ namespace he
       std::vector<std::vector<std::string>> textureFilenames(renderer::Material::TEXTURETYPENUM);
 
       std::ifstream file(filename);
-	    std::string line;
+      std::string line;
 
-	    if(file.is_open())
+      if(file.is_open())
       {
         renderer::Material::MaterialData materialData;
-		    while(!file.eof())
-		    {
-			    std::getline(file, line);
+        while(!file.eof())
+        {
+          std::getline(file, line);
 
           if(line.empty() || line[0] == '#')//skip comments
           {
@@ -130,7 +130,7 @@ namespace he
           default:
             continue;//unknown command
           }
-		    }
+        }
 
         RenderShaderLoader renderShaderLoader(m_singletonManager);
         util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(shaderFilename);
@@ -152,16 +152,16 @@ namespace he
 
         materialHandle = m_materialManager->addObject(renderer::Material(materialData, textureHandles, shaderHandle, false));
       }
-	    else//wrong filename or file does not exist
-	    {
-		    file.close();
+      else//wrong filename or file does not exist
+      {
+        file.close();
 
-		    std::cerr << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
+        std::cerr << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
 
         return getDefaultResource();
-	    }
+      }
 
-	    file.close();
+      file.close();
 
       return materialHandle;
     }

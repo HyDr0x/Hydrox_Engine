@@ -75,12 +75,12 @@ namespace he
     struct BillboardNodeData : public TreeNodeData
     {
       util::Vector<unsigned int, 2> animNumber;
-	    util::Vector<unsigned int, 2> animCount;
-	    util::Vector<float, 2> texStart;
-	    util::Vector<float, 2> texEnd;
+      util::Vector<unsigned int, 2> animCount;
+      util::Vector<float, 2> texStart;
+      util::Vector<float, 2> texEnd;
 
-	    util::Vector<float, 2> scale;
-	    util::Vector<float, 3> translate;
+      util::Vector<float, 2> scale;
+      util::Vector<float, 3> translate;
       
       unsigned textureIndex;
     };

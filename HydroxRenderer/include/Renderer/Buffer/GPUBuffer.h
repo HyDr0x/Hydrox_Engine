@@ -37,7 +37,7 @@ namespace he
     private:
 
       GPUBuffer(const GPUBuffer&);
-	    GPUBuffer& operator=(const GPUBuffer&);
+      GPUBuffer& operator=(const GPUBuffer&);
 
       GLuint m_bufferIndex;
       

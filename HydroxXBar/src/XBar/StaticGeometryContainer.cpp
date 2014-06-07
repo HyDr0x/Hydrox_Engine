@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     StaticGeometryContainer::StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle) : 
       m_trfMatrix(trfMatrix),
       m_meshHandle(meshHandle),
@@ -16,9 +16,9 @@ namespace he
     {
     }
 
-    bool StaticGeometryContainer::operator == (const StaticGeometryContainer& o) const
+    bool StaticGeometryContainer::operator == (const StaticGeometryContainer& other) const
     {
-      return m_hash == o.m_hash;
+      return m_hash == other.m_hash;
     }
 
     util::ResourceHandle StaticGeometryContainer::getMaterialHandle() const
@@ -42,15 +42,12 @@ namespace he
 
       std::vector<unsigned char> data(sizeof(m_trfMatrix) + sizeof(id) + sizeof(id));
 
-      std::copy((unsigned char*)&m_trfMatrix, (unsigned char*)&m_trfMatrix + sizeof(m_trfMatrix), &data[0]);
-
+      unsigned int offset = 0;
+      offset = convertToRawData(m_trfMatrix, &data[0], offset);
       id = m_materialHandle.getID();
-
-      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix));
-
+      offset = convertToRawData(id, &data[0], offset);
       id = m_meshHandle.getID();
-
-      std::copy((unsigned char*)&id, (unsigned char*)&id + sizeof(id), &data[0] + sizeof(m_trfMatrix) + sizeof(id));
+      offset = convertToRawData(id, &data[0], offset);
 
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

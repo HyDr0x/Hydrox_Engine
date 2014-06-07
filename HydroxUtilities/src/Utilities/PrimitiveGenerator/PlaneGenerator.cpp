@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     void PlaneGenerator::generatePlane(std::vector<Vector<float, 3>>& position, unsigned int levelOfDetail)
     {
       generateNonIndexedPositions(position, levelOfDetail);
@@ -127,5 +127,5 @@ namespace he
     void PlaneGenerator::generateNonIndexedTextures(std::vector<Vector<float, 3>>& texture)
     {
     }
-	}
+  }
 }

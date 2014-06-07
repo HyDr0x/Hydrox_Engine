@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class TreeNode;
     class GroupNode;
     class AnimatedTransformNode;
@@ -58,7 +58,7 @@ namespace he
 
       GroupNode *m_rootNode;//the root node
     };
-	}
+  }
 }
 
 #endif

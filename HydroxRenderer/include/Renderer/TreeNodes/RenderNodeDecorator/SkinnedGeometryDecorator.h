@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class SkinnedGeometryDecorator : public ARenderNodeDecorator
     {
     public:
@@ -32,7 +32,7 @@ namespace he
       GPUImmutableBuffer m_matrixBuffer;
       GPUImmutableBuffer m_bboxMatrixBuffer;
     };
-	}
+  }
 }
 
 #endif

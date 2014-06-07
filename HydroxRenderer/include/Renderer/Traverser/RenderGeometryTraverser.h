@@ -12,8 +12,8 @@
 
 namespace he
 {
-	namespace renderer
-	{    class IRenderNode;    class RenderGeometryTraverser : public Traverser
+  namespace renderer
+  {    class IRenderNode;    class RenderGeometryTraverser : public Traverser
     {
     public:
 
@@ -35,11 +35,11 @@ namespace he
     private:
 
       ModelManager *m_modelManager;
-	    MaterialManager *m_materialManager;
-	    RenderShaderManager *m_renderShaderManager;
+      MaterialManager *m_materialManager;
+      RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
     };
-	}
+  }
 }
 
 #endif

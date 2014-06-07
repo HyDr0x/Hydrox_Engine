@@ -19,8 +19,8 @@ namespace he
     class SkinnedGeometryContainer;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GroupNode;
     class IRenderNode;
 
@@ -56,7 +56,7 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
     };
-	}
+  }
 }
 
 #endif

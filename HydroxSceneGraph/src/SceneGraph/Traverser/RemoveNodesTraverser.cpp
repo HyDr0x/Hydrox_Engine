@@ -3,11 +3,14 @@
 #include "SceneGraph/TreeNodes/GeoNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
 #include "SceneGraph/TreeNodes/BillboardNode.h"
+#include "SceneGraph/TreeNodes/LODNode.h"
+#include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ParticleNode.h"
 
 namespace he
 {
-	namespace sg
-	{    RemoveNodesTraverser::RemoveNodesTraverser(util::EventManager& eventManager) : m_eventManager(eventManager)
+  namespace sg
+  {    RemoveNodesTraverser::RemoveNodesTraverser(util::EventManager& eventManager) : m_eventManager(eventManager)
     {
     }
 
@@ -72,7 +75,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(ParticleNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(ParticleNode *treeNode)>(util::EventManager::OnRemoveParticleTransmitterNode)->execute(treeNode);
+      treeNode->setRenderable(false);
 
       return true;
     }
@@ -83,7 +86,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(LightNode* treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(LightNode *treeNode)>(util::EventManager::OnRemoveLightNode)->execute(treeNode);
+      treeNode->setRenderable(false);
 
       return true;
     }
@@ -91,5 +94,5 @@ namespace he
     void RemoveNodesTraverser::postTraverse(LightNode* treeNode)
     {
     }
-	}
+  }
 }

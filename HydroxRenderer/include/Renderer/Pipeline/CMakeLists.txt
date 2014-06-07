@@ -4,6 +4,8 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/LightRenderer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParticleRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderOptions.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.h 

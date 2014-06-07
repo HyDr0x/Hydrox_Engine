@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{    GetGlobalCoordinateTraverser::GetGlobalCoordinateTraverser()
+  namespace sg
+  {    GetGlobalCoordinateTraverser::GetGlobalCoordinateTraverser()
     {
     }
 
@@ -82,5 +82,5 @@ namespace he
     {
       return m_globalRotation;
     }
-	}
+  }
 }

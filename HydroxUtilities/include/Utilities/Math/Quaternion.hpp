@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename TYPE> class Quaternion
     {
     public:
@@ -266,7 +266,7 @@ namespace he
 
       return stream;
     }
-	}
+  }
 }
 
 #endif

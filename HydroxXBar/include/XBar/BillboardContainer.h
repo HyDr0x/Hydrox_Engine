@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     class GRAPHICAPI BillboardContainer : public AContainer
     {
     public:
@@ -26,12 +26,12 @@ namespace he
 
       ~BillboardContainer();
 
-      bool operator == (const BillboardContainer& o) const;
+      bool operator == (const BillboardContainer& other) const;
 
       util::ResourceHandle getTextureHandle() const;
 
       util::Vector<float, 3> getPosition() const;
-	    util::Vector<float, 2> getScale() const;
+      util::Vector<float, 2> getScale() const;
 
       util::Matrix<float, 3> getTexTransformationMatrix() const;
 
@@ -40,12 +40,12 @@ namespace he
       void createHash();
 
       util::Vector<unsigned int, 2>& m_animNumber;
-	    util::Vector<unsigned int, 2>& m_animCount;
-	    util::Vector<float, 2>& m_texStart;
-	    util::Vector<float, 2>& m_texEnd;
+      util::Vector<unsigned int, 2>& m_animCount;
+      util::Vector<float, 2>& m_texStart;
+      util::Vector<float, 2>& m_texEnd;
 
-	    util::Vector<float, 2>& m_scale;
-	    util::Vector<float, 3>& m_translate;
+      util::Vector<float, 2>& m_scale;
+      util::Vector<float, 3>& m_translate;
 
       util::ResourceHandle m_textureHandle;
     };

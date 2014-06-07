@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace renderer
-	{    class Traverser;
+  namespace renderer
+  {    class Traverser;
     class InsertGeometryTraverser;
     class GroupNode;
 
@@ -36,7 +36,7 @@ namespace he
 
       TreeNode(const TreeNode&);
     };
-	}
+  }
 }
 
 #endif

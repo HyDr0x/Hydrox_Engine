@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     DeleteTraverser::DeleteTraverser()
     {
     }
@@ -108,5 +108,5 @@ namespace he
       delete treeNode;
       treeNode = nullptr;
     }
-	}
+  }
 }

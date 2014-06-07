@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace xBar
-	{
+  namespace xBar
+  {
     class GRAPHICAPI AContainer
     {
     public:
@@ -25,8 +25,6 @@ namespace he
       }
 
     protected:
-
-      virtual void createHash() = 0;
 
       uint64_t m_hash;
     };

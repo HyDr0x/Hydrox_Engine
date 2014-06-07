@@ -14,8 +14,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     InsertStaticGeometryTraverser::InsertStaticGeometryTraverser(const xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) : 
       InsertGeometryTraverser(options, singletonManager),
       m_geometryContainer(geometryContainer)
@@ -45,5 +45,5 @@ namespace he
 
       return false;
     }
-	}
+  }
 }

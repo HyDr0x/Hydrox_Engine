@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
       GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
       : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTimeInSeconds(0.0f), m_pauseAnimation(false)
@@ -27,30 +27,6 @@ namespace he
 
     AnimatedTransformNode::~AnimatedTransformNode()
     {
-    }
-
-    AnimatedTransformNode& AnimatedTransformNode::operator=(const AnimatedTransformNode& sourceNode)
-    {
-      TransformNode::operator=(sourceNode);
-
-      m_animatedTranslation = sourceNode.m_animatedTranslation;
-      m_animatedRotation = sourceNode.m_animatedRotation;
-      m_animatedScale = sourceNode.m_animatedScale;
-
-      m_animationTracks = sourceNode.m_animationTracks;
-      m_currentTrack = sourceNode.m_currentTrack;
-      m_currentAnimationTimeInSeconds = sourceNode.m_currentAnimationTimeInSeconds;
-
-      m_currentScaleKey = sourceNode.m_currentScaleKey;
-      m_currentPositionKey = sourceNode.m_currentPositionKey;
-      m_currentRotationKey = sourceNode.m_currentRotationKey;
-
-      m_animatedMesh = sourceNode.m_animatedMesh;
-      m_boneIndex = sourceNode.m_boneIndex;
-
-      m_pauseAnimation = sourceNode.m_pauseAnimation;
-
-      return *this;
     }
 
     TreeNode& AnimatedTransformNode::operator=(const TreeNode& sourceNode)
@@ -242,7 +218,7 @@ namespace he
       return traverser.getGlobalRotation() * m_animatedRotation * m_rotation;
     }
 
-	  float AnimatedTransformNode::getGlobalScale()
+    float AnimatedTransformNode::getGlobalScale()
     {
       GetGlobalCoordinateTraverser traverser;
       traverser.doAscend(this);
@@ -350,5 +326,5 @@ namespace he
         }
       }
     }
-	}
+  }
 }

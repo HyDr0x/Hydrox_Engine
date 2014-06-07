@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class Traverser;
     class AnimatedGeoNode;
 
@@ -25,7 +25,6 @@ namespace he
 
       virtual ~AnimatedTransformNode();
 
-      AnimatedTransformNode& operator=(const AnimatedTransformNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual GroupNode* clone() const;
@@ -63,11 +62,11 @@ namespace he
 
       util::Vector<float, 3> getGlobalPosition();
       util::Quaternion<float> getGlobalRotation();
-	    float getGlobalScale();
+      float getGlobalScale();
 
       util::Vector<float, 3> getLocalPosition() const;
-	    util::Quaternion<float> getLocalRotation() const;
-	    float getLocalScale() const;
+      util::Quaternion<float> getLocalRotation() const;
+      float getLocalScale() const;
 
     private:
 
@@ -90,7 +89,7 @@ namespace he
       unsigned int m_boneIndex;//index into the bone vector of the animatedGeoNode if it is skinned
       bool m_pauseAnimation;
     };
-	}
+  }
 }
 
 #endif

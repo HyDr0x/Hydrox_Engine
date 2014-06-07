@@ -8,13 +8,12 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
 
-#include <XBar/LightContainer.h>
-#include <XBar/ParticleContainer.h>
-
 #include "Renderer/DLLExport.h"
 
 #include "Renderer/Resources/ResourceManager.hpp"
 #include "Renderer/Pipeline/GBuffer.h"
+#include "Renderer/Pipeline/LightRenderer.h"
+#include "Renderer/Pipeline/ParticleRenderer.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
 #include "Renderer/Pipeline/SkyboxRenderer.h"
@@ -31,16 +30,18 @@ namespace he
     class SkinnedGeometryContainer;
     class StaticGeometryContainer;
     class BillboardContainer;
+    class LightContainer;
+    class ParticleEmitterContainer;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI RenderManager : public util::SingletonBehaviour
     {
     public:
 
       RenderManager();
-	    ~RenderManager();
+      ~RenderManager();
 
       void setClearColor(he::util::Vector<float, 4> color) const;
 
@@ -60,11 +61,12 @@ namespace he
         util::ResourceHandle spriteShaderHandle, 
         util::ResourceHandle stringShaderHandle, 
         util::ResourceHandle frustumCullingShaderHandle,
-        util::ResourceHandle gBufferShaderHandle);
+        util::ResourceHandle gBufferShaderHandle,
+        util::ResourceHandle directLightShaderHandle);
 
       void setNearFarPlane(float near, float far);
 
-	    void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const;
+      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const;
 
       void addRenderComponent(const Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
@@ -72,7 +74,7 @@ namespace he
       void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
       void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
       void addRenderComponent(const xBar::LightContainer& light);
-      void addRenderComponent(const xBar::ParticleContainer& particle);
+      void addRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter);
 
       void removeRenderComponent(const Sprite* sprite);
       void removeRenderComponent(const StringTexture2D* string);
@@ -80,14 +82,12 @@ namespace he
       void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
       void removeRenderComponent(const xBar::SkinnedGeometryContainer& staticGeometry);
       void removeRenderComponent(const xBar::LightContainer& light);
-      void removeRenderComponent(const xBar::ParticleContainer& particle);
+      void removeRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter);
 
     private:
 
-	    RenderManager(const RenderManager&);
+      RenderManager(const RenderManager&);
       RenderManager& operator=(const RenderManager&);
-
-      void registerRenderComponentSlots(util::EventManager *eventManager);
 
       UBO m_cameraParameterUBO;
 
@@ -96,18 +96,17 @@ namespace he
       RenderOptions m_options;
 
       GBuffer m_gBuffer;
+      LightRenderer m_lightRenderer;
+      ParticleRenderer m_particleRenderer;
       GeometryRenderer m_geometryRasterizer;
       BillboardRenderer m_billboardRenderer;
       SkyboxRenderer m_skyboxRenderer;
       SpriteRenderer m_spriteRenderer;
       StringRenderer2D m_stringRenderer;
 
-      std::list<xBar::LightContainer> m_renderLight;
-      std::list<xBar::ParticleContainer> m_renderParticle;
-
       GLfloat m_aspectRatio;
     };
-	}
+  }
 }
 
 #endif

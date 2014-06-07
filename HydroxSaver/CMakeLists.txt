@@ -1,8 +1,8 @@
 project(Hydrox_Saver)
 
 set(
-	LIBSUFFIX 
-	${CMAKE_STATIC_LIBRARY_SUFFIX}
+  LIBSUFFIX 
+  ${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
 add_definitions(-DDLL_EXPORT)
@@ -20,37 +20,37 @@ find_package(OPENGL)
 find_package(DevIL)
 
 set(
-	INCLUDES 
-	${CMAKE_CURRENT_SOURCE_DIR}/include 
-	${HYDROX_UTIL_INCLUDE} 
-	${HYDROX_SG_INCLUDE} 
-	${HYDROX_RE_INCLUDE} 
-	${GLEW_INCLUDE_DIRS} 
-	${IL_INCLUDE_DIR} 
+  INCLUDES 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include 
+  ${HYDROX_UTIL_INCLUDE} 
+  ${HYDROX_SG_INCLUDE} 
+  ${HYDROX_RE_INCLUDE} 
+  ${GLEW_INCLUDE_DIRS} 
+  ${IL_INCLUDE_DIR} 
 )
 
 include_directories(${INCLUDES})
 
 set(
-	DEBUG_LIBRARIES 
-	debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
-	debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
-	debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
-	debug ${GLEW_LIBRARIES}
+  DEBUG_LIBRARIES 
+  debug ${HYDROX_UTIL_LIB_DBG}${LIBSUFFIX} 
+  debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
+  debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
+  debug ${GLEW_LIBRARIES}
 )
 
 set(
-	RELEASE_LIBRARIES 
-	optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
-	optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
-	optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
-	optimized ${GLEW_LIBRARIES} 
+  RELEASE_LIBRARIES 
+  optimized ${HYDROX_UTIL_LIB_REL}${LIBSUFFIX} 
+  optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
+  optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
+  optimized ${GLEW_LIBRARIES} 
 )
 
 set(
-	GENERAL_LIBRARIES 
-	general ${IL_LIBRARIES}
-	general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
+  GENERAL_LIBRARIES 
+  general ${IL_LIBRARIES}
+  general ${OPENGL_gl_LIBRARY}${LIBSUFFIX} 
 )
 
 target_link_libraries(Hydrox_Saver ${DEBUG_LIBRARIES})

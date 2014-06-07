@@ -19,18 +19,18 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class BillboardRenderer
     {
     public:
 
       BillboardRenderer();
-	    ~BillboardRenderer();
+      ~BillboardRenderer();
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle billboardShaderHandle);
 
-	    void render() const;
+      void render() const;
 
       void addRenderComponent(const xBar::BillboardContainer& billboard);
 
@@ -38,7 +38,7 @@ namespace he
 
     private:
 
-	    BillboardRenderer(const BillboardRenderer&);
+      BillboardRenderer(const BillboardRenderer&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
@@ -48,10 +48,10 @@ namespace he
 
       std::list<xBar::BillboardContainer> m_renderBillboards;
 
-	    RenderShaderManager *m_renderShaderManager;
+      RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
     };
-	}
+  }
 }
 
 #endif

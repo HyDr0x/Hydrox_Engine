@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class TreeNode;
     class GroupNode;
 
@@ -78,7 +78,7 @@ namespace he
 
       bool m_stopTraversal;
     };
-	}
+  }
 }
 
 #endif

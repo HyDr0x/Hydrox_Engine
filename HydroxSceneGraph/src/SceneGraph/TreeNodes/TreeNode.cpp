@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
                                                                                                 m_nextSibling(nextSibling),
                                                                                                 m_nodeName(nodeName)
@@ -112,5 +112,5 @@ namespace he
     {
       return m_nodeName;
     }
-	}
+  }
 }

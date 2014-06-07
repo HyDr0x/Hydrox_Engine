@@ -14,8 +14,8 @@ namespace he
     class StaticGeometryContainer;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class IRenderNode : public TreeNode
     {
     public:
@@ -55,7 +55,7 @@ namespace he
         }
       };
     };
-	}
+  }
 }
 
 #endif

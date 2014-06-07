@@ -1,9 +1,9 @@
 #include <list>
 
 #if SIGNALS_NUM_ARGS == 0
-#	define SIGNALS_COMMA_IF_ARGUMENTS
+#  define SIGNALS_COMMA_IF_ARGUMENTS
 #else
-#	define SIGNALS_COMMA_IF_ARGUMENTS ,
+#  define SIGNALS_COMMA_IF_ARGUMENTS ,
 #endif
 
 #define SIGNALS_SIGNAL SIGNALS_JOIN(Signal,SIGNALS_NUM_ARGS)
@@ -18,160 +18,160 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<
-	    typename R SIGNALS_COMMA_IF_ARGUMENTS 
-	    SIGNALS_TEMPLATE_PARAMS
+      typename R SIGNALS_COMMA_IF_ARGUMENTS 
+      SIGNALS_TEMPLATE_PARAMS
     > 
     class SIGNALS_SIGNAL
     {
     public:
 
-	    SIGNALS_SIGNAL()
-	    {}
+      SIGNALS_SIGNAL()
+      {}
 
-	    ~SIGNALS_SIGNAL()
-	    {
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    delete (*m_dit);
+      ~SIGNALS_SIGNAL()
+      {
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          delete (*m_dit);
 
-		    m_DList.clear();
-	    }
+        m_DList.clear();
+      }
 
 
-	    void execute(R* cargo SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_PARAMS)
-	    {
-		    unsigned int i=0;
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++,i++)
-			    cargo[i]=(*m_dit)->invoke(SIGNALS_ARGS);
-	    }
+      void execute(R* cargo SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_PARAMS)
+      {
+        unsigned int i=0;
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++,i++)
+          cargo[i]=(*m_dit)->invoke(SIGNALS_ARGS);
+      }
 
     private:
 
-	    typedef SIGNALS_DELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
+      typedef SIGNALS_DELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
 
-	    void connect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
-	    }
+      void connect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
+      }
 
-	    template<class C> void connect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
-	    }
+      template<class C> void connect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
+      }
 
-	    void disconnect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    if((*m_dit)==tmpObj)
-			    {
-				    m_dit=m_DList.erase(m_dit);
-				    m_dit--;
-			    }
-	    }
+      void disconnect(R(*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          if((*m_dit)==tmpObj)
+          {
+            m_dit=m_DList.erase(m_dit);
+            m_dit--;
+          }
+      }
 
-	    template<class C> void disconnect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    if((*m_dit)->operator==(tmpObj))
-			    {
-				    m_dit=m_DList.erase(m_dit);
-				    m_dit--;
-			    }
-	    }
+      template<class C> void disconnect(C *obj, R(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, R SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          if((*m_dit)->operator==(tmpObj))
+          {
+            m_dit=m_DList.erase(m_dit);
+            m_dit--;
+          }
+      }
 
-	    unsigned int getSlotNumber() const
-	    {
-		    return m_DList.size();
-	    }
+      unsigned int getSlotNumber() const
+      {
+        return m_DList.size();
+      }
 
-	    friend class EventManager;
+      friend class EventManager;
 
-	    typename std::list<Delegate*> m_DList;
-	    typename std::list<Delegate*>::iterator m_dit;
+      typename std::list<Delegate*> m_DList;
+      typename std::list<Delegate*>::iterator m_dit;
     };
 
 
     ////////////////////////////PARTIAL SPEZIALIZATION FOR VOID RETURN TYPE////////////////////////////////
     #if SIGNALS_NUM_ARGS == 0
-    #	define SIGNALS_TYPENAME
+    #  define SIGNALS_TYPENAME
     #else
-    #	define SIGNALS_TYPENAME typename
+    #  define SIGNALS_TYPENAME typename
     #endif
 
     template< 
-	    SIGNALS_TEMPLATE_PARAMS
+      SIGNALS_TEMPLATE_PARAMS
     > 
     class SIGNALS_SIGNAL<
-	    void SIGNALS_COMMA_IF_ARGUMENTS 
-	    SIGNALS_TEMPLATE_ARGS
+      void SIGNALS_COMMA_IF_ARGUMENTS 
+      SIGNALS_TEMPLATE_ARGS
     >
     {
     public:
 
-	    SIGNALS_SIGNAL()
-	    {}
+      SIGNALS_SIGNAL()
+      {}
 
-	    ~SIGNALS_SIGNAL()
-	    {
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    delete (*m_dit);
+      ~SIGNALS_SIGNAL()
+      {
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          delete (*m_dit);
 
-		    m_DList.clear();
-	    }
+        m_DList.clear();
+      }
 
 
-	    void execute(SIGNALS_PARAMS)
-	    {
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    (*m_dit)->invoke(SIGNALS_ARGS);
-	    }
+      void execute(SIGNALS_PARAMS)
+      {
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          (*m_dit)->invoke(SIGNALS_ARGS);
+      }
 
     private:
 
-	    typedef SIGNALS_DELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
+      typedef SIGNALS_DELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS> Delegate;
 
-	    void connect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
-	    }
+      void connect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr)));
+      }
 
-	    template<class C> void connect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
-	    }
+      template<class C> void connect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        m_DList.push_back(dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr)));
+      }
 
-	    void disconnect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    if((*m_dit)==tmpObj)
-			    {
-				    m_dit=m_DList.erase(m_dit);
-				    m_dit--;
-			    }
-	    }
+      void disconnect(void(*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_NONCLASSDELEGATE<void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(fptr));
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          if((*m_dit)==tmpObj)
+          {
+            m_dit=m_DList.erase(m_dit);
+            m_dit--;
+          }
+      }
 
-	    template<class C> void disconnect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
-	    {
-		    Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
-		    for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
-			    if((*m_dit)->operator==(tmpObj))
-			    {
-				    m_dit=m_DList.erase(m_dit);
-				    m_dit--;
-			    }
-	    }
+      template<class C> void disconnect(C *obj, void(C::*fptr)(SIGNALS_TEMPLATE_ARGS))
+      {
+        Delegate* tmpObj=dynamic_cast<Delegate*>(new SIGNALS_CLASSDELEGATE<C, void SIGNALS_COMMA_IF_ARGUMENTS SIGNALS_TEMPLATE_ARGS>(obj,fptr));
+        for(m_dit=m_DList.begin();m_dit!=m_DList.end();m_dit++)
+          if((*m_dit)->operator==(tmpObj))
+          {
+            m_dit=m_DList.erase(m_dit);
+            m_dit--;
+          }
+      }
 
-	    friend class EventManager;
+      friend class EventManager;
 
-	    SIGNALS_TYPENAME std::list<Delegate*> m_DList;
-	    SIGNALS_TYPENAME std::list<Delegate*>::iterator m_dit;
+      SIGNALS_TYPENAME std::list<Delegate*> m_DList;
+      SIGNALS_TYPENAME std::list<Delegate*>::iterator m_dit;
     };
-	}
+  }
 }
 
 #undef SIGNALS_COMMA_IF_ARGUMENTS

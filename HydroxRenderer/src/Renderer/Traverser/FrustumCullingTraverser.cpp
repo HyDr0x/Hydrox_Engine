@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     FrustumCullingTraverser::FrustumCullingTraverser()
     {
     }
@@ -25,5 +25,5 @@ namespace he
 
       return true;
     }
-	}
+  }
 }

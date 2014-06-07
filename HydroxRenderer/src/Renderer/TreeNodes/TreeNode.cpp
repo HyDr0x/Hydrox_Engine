@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     TreeNode::TreeNode(GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
                                                                    m_nextSibling(nextSibling)
     {
@@ -42,5 +42,5 @@ namespace he
     {
       m_parent = parent;
     }
-	}
+  }
 }

@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     SkyboxRenderer::SkyboxRenderer()
     {
     }
@@ -113,5 +113,5 @@ namespace he
 
       glDepthFunc(GL_LESS);
     }
-	}
+  }
 }

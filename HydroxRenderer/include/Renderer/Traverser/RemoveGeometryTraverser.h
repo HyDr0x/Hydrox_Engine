@@ -15,8 +15,8 @@ namespace he
   namespace xBar  {    class StaticGeometryContainer;
     class SkinnedGeometryContainer;  }
 
-	namespace renderer
-	{    class IRenderNode;    class RemoveGeometryTraverser : public Traverser
+  namespace renderer
+  {    class IRenderNode;    class RemoveGeometryTraverser : public Traverser
     {
     public:
 
@@ -42,7 +42,7 @@ namespace he
       void deleteNode(TreeNode *treeNode);
 
       ModelManager *m_modelManager;
-	    MaterialManager *m_materialManager;
+      MaterialManager *m_materialManager;
 
       const xBar::StaticGeometryContainer& m_geometryContainer;
 
@@ -50,7 +50,7 @@ namespace he
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
     };
-	}
+  }
 }
 
 #endif

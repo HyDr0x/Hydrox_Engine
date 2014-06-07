@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     ConstTraverser::ConstTraverser() : m_stopTraversal(false)
     {
     }
@@ -204,5 +204,5 @@ namespace he
     void ConstTraverser::postTraverse(const LightNode* treeNode)
     {
     }
-	}
+  }
 }

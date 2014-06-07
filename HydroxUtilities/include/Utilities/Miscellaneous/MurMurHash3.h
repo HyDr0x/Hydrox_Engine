@@ -25,6 +25,13 @@ typedef unsigned __int64 uint64_t;
 
 #endif // !defined(_MSC_VER)
 
+template<typename T> unsigned int convertToRawData(const T& data, unsigned char *chunk, unsigned int offset)
+{
+  std::copy((unsigned char*)&data, (unsigned char*)&data + sizeof(data), &chunk[0] + offset);
+
+  return offset + sizeof(data);
+}
+
 //-----------------------------------------------------------------------------
 
 GRAPHICAPI void MurmurHash3_x86_32  ( const void * key, int len, uint32_t seed, void * out );

@@ -17,8 +17,8 @@
 
 namespace he
 {
-	namespace saver
-	{    void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
+  namespace saver
+  {    void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
     {
       std::map<MaterialFileKeywords, std::string> materialFileKeywords;
       materialFileKeywords[DIFFUSESTRENGTH] = "Diffuse Strength";
@@ -92,5 +92,5 @@ namespace he
       
       fileStream.close();
     }
-	}
+  }
 }

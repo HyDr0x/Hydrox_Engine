@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace renderer
-	{    class GroupNode : public TreeNode
+  namespace renderer
+  {    class GroupNode : public TreeNode
     {
     public:
 
@@ -24,7 +24,7 @@ namespace he
 
       TreeNode* m_firstChild;
     };
-	}
+  }
 }
 
 #endif

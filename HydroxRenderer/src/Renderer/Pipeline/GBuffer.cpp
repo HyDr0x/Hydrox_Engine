@@ -16,8 +16,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     GBuffer::GBuffer()
     {
     }

@@ -7,16 +7,16 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<class T> class Singleton
     {
     public:
 
-      inline static T* getInstance()
+      inline static T& getInstance()
       {
         if(m_instance == nullptr) m_instance = new T;
-        return m_instance;
+        return *m_instance;
       }
 
       inline static void deleteInstance()
@@ -35,7 +35,7 @@ namespace he
     };
 
   template<class T> T* Singleton<T>::m_instance = nullptr;
-	}
+  }
 }
 
 #endif

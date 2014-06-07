@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Traverser;
 
     class TextureNode : public GroupNode
@@ -34,7 +34,7 @@ namespace he
 
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
     };
-	}
+  }
 }
 
 #endif

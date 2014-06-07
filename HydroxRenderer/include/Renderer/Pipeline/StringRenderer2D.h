@@ -18,8 +18,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class StringTexture2D;
 
     class StringRenderer2D
@@ -33,7 +33,7 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle stringShaderHandle, unsigned char maxLayer);
 
-	    void render() const;
+      void render() const;
 
       void addRenderComponent(const StringTexture2D* sprite);
       void removeRenderComponent(const StringTexture2D* sprite);
@@ -54,10 +54,10 @@ namespace he
       std::list<const StringTexture2D*> m_opaqueStrings;
       std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
-	    RenderShaderManager *m_renderShaderManager;
+      RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
     };
-	}
+  }
 }
 
 #endif

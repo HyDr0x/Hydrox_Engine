@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class AnimationControlTraverser : public Traverser
     {
     public:
@@ -36,7 +36,7 @@ namespace he
       bool m_pauseAnimation;
       bool m_stopAnimation;
     };
-	}
+  }
 }
 
 #endif

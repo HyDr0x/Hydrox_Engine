@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     SpriteRenderer::SpriteRenderer()
     {
     }
@@ -55,9 +55,9 @@ namespace he
       Texture2D *renderTexture;
       RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
 
-	    spriteShader->useShader();
+      spriteShader->useShader();
 
-	    for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
+      for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
       {
         renderSprite = (*spriteIDIterator);
         if(renderSprite->getRenderable())
@@ -65,24 +65,24 @@ namespace he
           renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
 
           renderTexture->setTexture(3, 0);
-		      
-		      util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
-		      util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+          
+          util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
+          util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
           float z = renderSprite->getLayer() / (float)m_maxLayer;
-		      RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		      RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+          RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+          RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
           RenderShader::setUniform(2, GL_FLOAT, &z);
 
-		      glDrawArrays(GL_POINTS, 0, 1);
+          glDrawArrays(GL_POINTS, 0, 1);
         }
-	    }
+      }
 
       ////////////////////////////////////////////RENDER TRANSPARENT 2D Sprites////////////////////////////////////////////
 
       glDepthMask(GL_FALSE);
 
       glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       for(unsigned int i = 0; i < m_transparentSprites.size(); i++)
       {
@@ -94,17 +94,17 @@ namespace he
             renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
 
             renderTexture->setTexture(3, 0);
-		
-		        util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
-		        util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+    
+            util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
+            util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
             float z = renderSprite->getLayer() / (float)m_maxLayer;
-		        RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-		        RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
             RenderShader::setUniform(2, GL_FLOAT, &z);
 
-		        glDrawArrays(GL_POINTS, 0, 1);
+            glDrawArrays(GL_POINTS, 0, 1);
           }
-	      }
+        }
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -148,5 +148,5 @@ namespace he
       eventManager->addNewSignal<void (*)(const Sprite* sprite)>(util::EventManager::OnRemoveSprite);
       eventManager->addSlotToSignal<SpriteRenderer, void (*)(const Sprite* sprite), void (SpriteRenderer::*)(const Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
     }
-	}
+  }
 }

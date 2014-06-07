@@ -14,8 +14,8 @@ namespace he
     class SingletonManager;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI StringTexture3D
     {
     public:
@@ -30,7 +30,7 @@ namespace he
       util::ResourceHandle m_meshHandle;
       std::string m_text;
     };
-	}
+  }
 }
 
 #endif

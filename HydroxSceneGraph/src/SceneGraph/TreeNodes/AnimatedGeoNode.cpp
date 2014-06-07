@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
       : GeoNode(eventManager, meshHandle, materialHandle, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
@@ -19,16 +19,6 @@ namespace he
 
     AnimatedGeoNode::~AnimatedGeoNode()
     {
-    }
-
-    AnimatedGeoNode& AnimatedGeoNode::operator=(const AnimatedGeoNode& sourceNode)
-    {
-      GeoNode::operator=(sourceNode);
-
-      m_inverseBindPoseMatrices = sourceNode.m_inverseBindPoseMatrices;
-      m_boneTransformMatrices = sourceNode.m_boneTransformMatrices;
-
-      return *this;
     }
 
     TreeNode& AnimatedGeoNode::operator=(const TreeNode& sourceNode)
@@ -153,5 +143,5 @@ namespace he
     {
       return m_inverseBindPoseMatrices;
     }
-	}
+  }
 }

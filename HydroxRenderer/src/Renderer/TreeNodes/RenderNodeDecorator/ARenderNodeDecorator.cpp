@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     ARenderNodeDecorator::ARenderNodeDecorator(IRenderNode *renderNode) : m_renderNode(renderNode)
     {
     }
@@ -91,5 +91,5 @@ namespace he
     {
       return m_renderNode->getMaxBones();
     }
-	}
+  }
 }

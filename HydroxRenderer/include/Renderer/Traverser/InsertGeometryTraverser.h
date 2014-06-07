@@ -20,8 +20,8 @@ namespace he
   namespace xBar  {    class StaticGeometryContainer;
     class SkinnedGeometryContainer;  }
 
-	namespace renderer
-	{    class IRenderNode;    class InsertGeometryTraverser : public Traverser
+  namespace renderer
+  {    class IRenderNode;    class InsertGeometryTraverser : public Traverser
     {
     public:
 
@@ -72,7 +72,7 @@ namespace he
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
     };
-	}
+  }
 }
 
 #endif

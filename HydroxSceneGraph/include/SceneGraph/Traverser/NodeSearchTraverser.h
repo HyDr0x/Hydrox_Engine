@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class NodeSearchTraverser : public Traverser
     {
     public:
@@ -49,7 +49,7 @@ namespace he
       TreeNode *m_discoveredNode;
       std::string m_nodeName;
     };
-	}
+  }
 }
 
 #endif

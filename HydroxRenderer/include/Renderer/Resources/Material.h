@@ -14,20 +14,20 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI Material : public ManagedResource
     {
     public:
 
       enum TextureType
-	    {
-		    DIFFUSETEX,
-		    NORMALTEX,
-		    DISPLACEMENTTEX,
-		    SPECULARTEX,
+      {
+        DIFFUSETEX,
+        NORMALTEX,
+        DISPLACEMENTTEX,
+        SPECULARTEX,
         TEXTURETYPENUM
-	    };
+      };
 
       static const unsigned int TEXTURENUMBER = 4;
 
@@ -52,19 +52,19 @@ namespace he
       };
 
       Material();
-      Material(const Material& o);
+      Material(const Material& other);
       Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, bool transparency);
-	    ~Material();
+      ~Material();
 
-      Material& operator=(Material o);
+      Material& operator=(Material other);
 
       void free();
 
-	    void setTextureNumber(TextureType texType, unsigned int texNum);
-	    unsigned int getTextureNumber(TextureType texType) const;
+      void setTextureNumber(TextureType texType, unsigned int texNum);
+      unsigned int getTextureNumber(TextureType texType) const;
 
-	    void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle);
-	    util::ResourceHandle getTextureHandle(TextureType texType, unsigned int slot) const;
+      void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle);
+      util::ResourceHandle getTextureHandle(TextureType texType, unsigned int slot) const;
 
       void setShaderHandle(util::ResourceHandle shaderHandle);
       util::ResourceHandle getShaderHandle() const;
@@ -76,7 +76,7 @@ namespace he
 
     private:
 
-      void swap(Material& o);
+      void swap(Material& other);
 
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
       util::ResourceHandle m_shaderHandle;//specifies the Shader of the submesh in the Shadermanager for the renderpass
@@ -85,7 +85,7 @@ namespace he
 
       bool m_transparency;
     };
-	}
+  }
 }
 
 #endif

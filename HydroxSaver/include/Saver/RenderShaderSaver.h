@@ -16,15 +16,15 @@ namespace he
     class SingletonManager;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     class GRAPHICAPI RenderShaderSaver
     {
     public:
 
       static void save(std::string path, std::string filename, util::ResourceHandle renderShaderHandle, util::SingletonManager *singletonManager);
     };
-	}
+  }
 }
 
 #endif

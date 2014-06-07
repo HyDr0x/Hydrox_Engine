@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     CopyTraverser::CopyTraverser(std::string namePrefix) : m_namePrefix(namePrefix), m_sibling(nullptr), m_rootNode(nullptr), m_parent(nullptr)
     {
     }
@@ -238,6 +238,6 @@ namespace he
       newNode->setNextSibling(oldSibling);
       newNode->setParent(sibling->getParent());
     }
-	}
+  }
 }
 

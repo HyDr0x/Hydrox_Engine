@@ -16,8 +16,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class GRAPHICAPI OGLTimer
     {
     public:
@@ -36,7 +36,7 @@ namespace he
 
       bool m_showTimerWhenDying;
     };
-	}
+  }
 }
 
 #endif

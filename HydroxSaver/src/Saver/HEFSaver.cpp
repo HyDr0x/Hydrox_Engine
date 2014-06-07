@@ -18,8 +18,8 @@
 
 namespace he
 {
-	namespace saver
-	{
+  namespace saver
+  {
     HEFSaver::~HEFSaver()
     {
       m_wrapperMapper.geoNodeMap.clear();

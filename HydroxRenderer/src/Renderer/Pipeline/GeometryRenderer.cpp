@@ -17,8 +17,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     GeometryRenderer::GeometryRenderer() : m_renderRootNode(nullptr)
     {
     }
@@ -36,13 +36,13 @@ namespace he
       m_options = options;
 
       glEnable(GL_DEPTH_TEST);
-	    glDepthMask(GL_TRUE);
-	    glDepthFunc(GL_LESS);
+      glDepthMask(GL_TRUE);
+      glDepthFunc(GL_LESS);
       glClearDepth(1.0f);
 
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
-	    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+      glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
       m_renderRootNode = new GroupNode();
 

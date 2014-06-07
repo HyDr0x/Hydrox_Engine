@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     void GLAPIENTRY getDebugMessage(GLenum source,
                                     GLenum type,
                                     GLuint id,
@@ -103,5 +103,5 @@ namespace he
           return std::string("UNEXPECTED SEVERITY");
       }
     }
-	}
+  }
 }

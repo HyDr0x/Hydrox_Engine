@@ -52,22 +52,22 @@ namespace he
                                   \n\
                                   layout(std140, binding = 0) uniform cameraParameters\n\
                                   {\n\
-	                                  mat4 viewMatrix;\n\
-	                                  mat4 projectionMatrix;\n\
-	                                  mat4 viewProjectionMatrix;\n\
-	                                  vec4 eyePos;\n\
+                                    mat4 viewMatrix;\n\
+                                    mat4 projectionMatrix;\n\
+                                    mat4 viewProjectionMatrix;\n\
+                                    vec4 eyePos;\n\
                                   };\n\
                                   \n\
                                   layout(std430, binding = 0) buffer transformMatrixBuffer\n\
                                   {\n\
-	                                  mat4 trfMatrix[];\n\
+                                    mat4 trfMatrix[];\n\
                                   };\n\
                                   \n\
                                   layout(location = 0) in vec3 in_Pos;\n\
                                   \n\
                                   void main()\n\
                                   {\n\
-	                                  gl_Position = viewProjectionMatrix * trfMatrix[gl_InstanceID + gl_BaseInstanceARB] * vec4(in_Pos, 1);\n\
+                                    gl_Position = viewProjectionMatrix * trfMatrix[gl_InstanceID + gl_BaseInstanceARB] * vec4(in_Pos, 1);\n\
                                   }";
 
       std::string fragmentSource = "#version 440 core\n\
@@ -77,7 +77,7 @@ namespace he
                                     \n\
                                     void main()\n\
                                     {\n\
-	                                    color = vec4(1,1,1,1);\n\
+                                      color = vec4(1,1,1,1);\n\
                                     }";
 
       return m_singletonManager->getService<renderer::RenderShaderManager>()->addObject(renderer::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));

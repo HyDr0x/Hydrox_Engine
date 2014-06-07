@@ -40,7 +40,7 @@ namespace he
     private:
 
       GPUImmutableBuffer(const GPUImmutableBuffer&);
-	    GPUImmutableBuffer& operator=(const GPUImmutableBuffer&);
+      GPUImmutableBuffer& operator=(const GPUImmutableBuffer&);
 
 
       GLvoid *m_bufferPointer;

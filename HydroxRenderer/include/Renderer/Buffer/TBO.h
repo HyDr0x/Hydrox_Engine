@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI TBO
     {
     public:
@@ -27,13 +27,13 @@ namespace he
     private:
 
       TBO(const TBO&);
-	    TBO& operator=(const TBO&);
+      TBO& operator=(const TBO&);
 
       GLuint m_bufferIndex;
       GLuint m_textureIndex;
 
       GLenum m_textureSlot;
     };
-	}
+  }
 }
 #endif

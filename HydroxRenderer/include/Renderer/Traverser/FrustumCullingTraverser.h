@@ -12,8 +12,8 @@
 
 namespace he
 {
-	namespace renderer
-	{    class IRenderNode;    class FrustumCullingTraverser : public Traverser
+  namespace renderer
+  {    class IRenderNode;    class FrustumCullingTraverser : public Traverser
     {
     public:
 
@@ -22,7 +22,7 @@ namespace he
 
       virtual bool preTraverse(IRenderNode* treeNode);
     };
-	}
+  }
 }
 
 #endif

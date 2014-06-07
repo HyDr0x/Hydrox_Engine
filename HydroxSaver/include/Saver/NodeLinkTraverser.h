@@ -21,8 +21,8 @@ namespace he
     class ParticleNode;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     enum NodeType;
     struct NodeWrapperMapper;
 
@@ -57,7 +57,7 @@ namespace he
 
       NodeWrapperMapper& m_wrapperMapper;
     };
-	}
+  }
 }
 
 #endif

@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     AABB::AABB()
     {
       m_bbMin = util::Vector<float, 3>(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -53,5 +53,5 @@ namespace he
       return m_bbMin;
     }
 
-	}
+  }
 }

@@ -16,8 +16,8 @@ namespace he
     class EventManager;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Sprite;
 
     class SpriteRenderer
@@ -25,20 +25,20 @@ namespace he
     public:
 
       SpriteRenderer();
-	    ~SpriteRenderer();
+      ~SpriteRenderer();
 
       const size_t getMaxSpriteLayer() const;
 
       void initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer);
 
-	    void render() const;
+      void render() const;
 
       void addRenderComponent(const Sprite* sprite);
       void removeRenderComponent(const Sprite* sprite);
 
     private:
 
-	    SpriteRenderer(const SpriteRenderer&);
+      SpriteRenderer(const SpriteRenderer&);
       SpriteRenderer& operator=(const SpriteRenderer&);
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
@@ -52,10 +52,10 @@ namespace he
       std::list<const Sprite*> m_opaqueSprites;
       std::vector<std::list<const Sprite*>> m_transparentSprites;
 
-	    RenderShaderManager *m_renderShaderManager;
+      RenderShaderManager *m_renderShaderManager;
       TextureManager *m_textureManager;
     };
-	}
+  }
 }
 
 #endif

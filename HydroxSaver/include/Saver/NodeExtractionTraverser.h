@@ -27,8 +27,8 @@ namespace he
     class SingletonManager;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     struct NodeWrapperMapper;
 
     class NodeExtractionTraverser : public sg::Traverser
@@ -65,7 +65,7 @@ namespace he
       renderer::RenderShaderManager *m_renderShaderManager;
       renderer::TextureManager *m_textureManager;
     };
-	}
+  }
 }
 
 #endif

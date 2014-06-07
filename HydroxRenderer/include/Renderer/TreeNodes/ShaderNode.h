@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Traverser;
 
     class ShaderNode : public GroupNode
@@ -34,7 +34,7 @@ namespace he
 
       util::ResourceHandle m_shaderHandle;
     };
-	}
+  }
 }
 
 #endif

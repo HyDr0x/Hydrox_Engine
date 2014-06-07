@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class GRAPHICAPI CubeGenerator
     {
     public:
@@ -31,6 +31,6 @@ namespace he
       static void generateIndexedTextures(std::vector<Vector<float, 3>>& texture);
       static void generateNonIndexedTextures(std::vector<Vector<float, 3>>& texture);
     };
-	}
+  }
 }
 #endif

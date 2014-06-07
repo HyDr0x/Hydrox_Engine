@@ -26,31 +26,31 @@ namespace he
       fillBuffer(text, width, height);
     }
 
-    StringTexture2D::StringTexture2D(const StringTexture2D& o)
+    StringTexture2D::StringTexture2D(const StringTexture2D& other)
     {
-      m_eventManager = o.m_eventManager;
+      m_eventManager = other.m_eventManager;
 
-      m_font = o.m_font;
+      m_font = other.m_font;
 
-      m_text = o.m_text;
+      m_text = other.m_text;
 
-      m_triangleNumber = o.m_triangleNumber;
+      m_triangleNumber = other.m_triangleNumber;
 
-      m_rtMatrix = o.m_rtMatrix;
-      m_tlMatrix = o.m_tlMatrix;
-      m_scMatrix = o.m_scMatrix;
+      m_rtMatrix = other.m_rtMatrix;
+      m_tlMatrix = other.m_tlMatrix;
+      m_scMatrix = other.m_scMatrix;
 
-      m_angle = o.m_angle;
+      m_angle = other.m_angle;
 
-      m_renderable = o.m_renderable;
-      m_transparency = o.m_transparency;
+      m_renderable = other.m_renderable;
+      m_transparency = other.m_transparency;
 
-      m_layer = o.m_layer;
+      m_layer = other.m_layer;
 
       glGenBuffers(1, &m_vertexBufferIndex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_COPY_READ_BUFFER, o.m_vertexBufferIndex);
+        glBindBuffer(GL_COPY_READ_BUFFER, other.m_vertexBufferIndex);
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -58,7 +58,7 @@ namespace he
       glGenBuffers(1, &m_indexBufferIndex);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(unsigned int) * m_triangleNumber * 3, nullptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_COPY_READ_BUFFER, o.m_indexBufferIndex);
+        glBindBuffer(GL_COPY_READ_BUFFER, other.m_indexBufferIndex);
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(unsigned int) * m_triangleNumber * 3);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -70,37 +70,37 @@ namespace he
       glDeleteBuffers(1, &m_indexBufferIndex);
     }
 
-    StringTexture2D& StringTexture2D::operator=(const StringTexture2D& o)
+    StringTexture2D& StringTexture2D::operator=(const StringTexture2D& other)
     {
-      m_eventManager = o.m_eventManager;
+      m_eventManager = other.m_eventManager;
 
-      m_font = o.m_font;
+      m_font = other.m_font;
 
-      m_text = o.m_text;
+      m_text = other.m_text;
 
-      m_triangleNumber = o.m_triangleNumber;
+      m_triangleNumber = other.m_triangleNumber;
 
-      m_rtMatrix = o.m_rtMatrix;
-      m_tlMatrix = o.m_tlMatrix;
-      m_scMatrix = o.m_scMatrix;
+      m_rtMatrix = other.m_rtMatrix;
+      m_tlMatrix = other.m_tlMatrix;
+      m_scMatrix = other.m_scMatrix;
 
-      m_angle = o.m_angle;
+      m_angle = other.m_angle;
 
-      m_renderable = o.m_renderable;
-      m_transparency = o.m_transparency;
+      m_renderable = other.m_renderable;
+      m_transparency = other.m_transparency;
 
-      m_layer = o.m_layer;
+      m_layer = other.m_layer;
 
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_COPY_READ_BUFFER, o.m_vertexBufferIndex);
+        glBindBuffer(GL_COPY_READ_BUFFER, other.m_vertexBufferIndex);
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferIndex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(unsigned int) * m_triangleNumber * 3, nullptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_COPY_READ_BUFFER, o.m_indexBufferIndex);
+        glBindBuffer(GL_COPY_READ_BUFFER, other.m_indexBufferIndex);
         glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(unsigned int) * m_triangleNumber * 3);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

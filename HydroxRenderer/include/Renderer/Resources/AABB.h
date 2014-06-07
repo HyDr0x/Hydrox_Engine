@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI AABB
     {
     public:
@@ -28,7 +28,7 @@ namespace he
       util::Vector<float, 3> m_bbMax;
       util::Vector<float, 3> m_bbMin;
     };
-	}
+  }
 }
 
 #endif

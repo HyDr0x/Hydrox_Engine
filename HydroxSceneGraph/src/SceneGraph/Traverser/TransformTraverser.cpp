@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     TransformTraverser::TransformTraverser()
     {
     }
@@ -251,5 +251,5 @@ namespace he
     void TransformTraverser::postTraverse(LightNode* treeNode)
     {
     }
-	}
+  }
 }

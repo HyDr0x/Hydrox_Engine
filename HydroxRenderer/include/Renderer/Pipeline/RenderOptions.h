@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     struct RenderOptions
     {
       unsigned int width;
@@ -13,7 +13,7 @@ namespace he
       unsigned int maxGeometry;
       unsigned int maxBones;
     };
-	}
+  }
 }
 
 #endif

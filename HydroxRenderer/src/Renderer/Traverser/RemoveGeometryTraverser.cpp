@@ -12,8 +12,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::StaticGeometryContainer& geometryContainer) : 
       m_geometryContainer(geometryContainer)
     {
@@ -153,5 +153,5 @@ namespace he
         treeNode = nullptr;
       }
     }
-	}
+  }
 }

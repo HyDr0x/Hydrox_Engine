@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class AddNodesTraverser : public Traverser
     {
     public:
@@ -46,7 +46,7 @@ namespace he
       util::Vector<float, 3> m_camPos;
       std::vector<float> m_lodRanges;
     };
-	}
+  }
 }
 
 #endif

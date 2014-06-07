@@ -13,8 +13,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     RenderNode::RenderNode(const RenderOptions& options) :  
       m_options(options),
       m_instanceNumberChanged(false)
@@ -128,5 +128,5 @@ namespace he
     {
       return m_options.maxBones;
     }
-	}
+  }
 }

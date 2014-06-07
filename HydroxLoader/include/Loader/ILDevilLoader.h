@@ -16,11 +16,11 @@ namespace he
     public:
 
       ILDevilLoader(util::SingletonManager *singletonManager);
-      ILDevilLoader(const ILDevilLoader& o);
+      ILDevilLoader(const ILDevilLoader& other);
       
       ~ILDevilLoader();
 
-      ILDevilLoader& operator=(const ILDevilLoader& o);
+      ILDevilLoader& operator=(const ILDevilLoader& other);
 
       void setTarget(GLenum target);
 

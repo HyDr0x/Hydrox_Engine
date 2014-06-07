@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
   template<class ParamT> class Subject
   {
   public:
@@ -31,14 +31,14 @@ namespace he
     {
     }
 
-    void add(Observer<ParamT> *o)
+    void add(Observer<ParamT> *other)
     {
-      m_observer.push_back(o);
+      m_observer.push_back(other);
     }
 
-    void remove(Observer<ParamT> *o)
+    void remove(Observer<ParamT> *other)
     {
-      m_observer.remove(o);
+      m_observer.remove(other);
     }
 
     virtual void notify(ParamT params)
@@ -53,7 +53,7 @@ namespace he
 
     std::list<Observer<ParamT>*> m_observer;
   };
-	}
+  }
 }
 
 #endif

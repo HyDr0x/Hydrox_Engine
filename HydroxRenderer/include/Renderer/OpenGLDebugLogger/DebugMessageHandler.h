@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     #ifndef APIENTRY
     #define GLAPIENTRY __stdcall
     #endif
@@ -32,6 +32,6 @@ namespace he
                                     GLsizei length,
                                     const GLchar* message,
                                     GLvoid* userParam);
-	}
+  }
 }
 #endif

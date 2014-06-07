@@ -8,18 +8,22 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace util
+  {
+    class EventManager;
+  }
+
+  namespace sg
+  {
     class Traverser;
 
     class GRAPHICAPI ParticleNode : public TreeNode
     {
     public:
 
-      ParticleNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      ParticleNode(util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~ParticleNode();
 
-      ParticleNode& operator=(const ParticleNode& sourceNode);
       virtual TreeNode& operator=(const TreeNode& sourceNode);
 
       virtual TreeNode* clone() const;
@@ -34,14 +38,21 @@ namespace he
 
       virtual bool isParticleNode() const;
 
+      void setRenderable(bool renderable);
+      bool getRenderable() const;
+
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
       util::Matrix<float, 4> getTransformationMatrix() const;
 
     private:
 
+      util::EventManager *m_eventManager;
+
       util::Matrix<float, 4> m_trfMatrix;//the tranformation util::Matrix
+
+      bool m_renderable;
     };
-	}
+  }
 }
 
 #endif

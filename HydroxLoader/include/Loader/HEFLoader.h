@@ -7,7 +7,7 @@
 #include "Loader/NodeWrapperMapper.h"
 
 namespace he
-{	
+{  
   namespace util
   {
     class SingletonManager;
@@ -20,7 +20,7 @@ namespace he
   }
 
   namespace loader
-	{
+  {
     struct NodeNumbers
     {
       unsigned int geoNodeSize;
@@ -66,7 +66,7 @@ namespace he
       loader::NodeWrapperMapper m_wrapperMapper;
       sg::GroupNode *m_rootNode;
     };
-	}
+  }
 }
 
 #endif

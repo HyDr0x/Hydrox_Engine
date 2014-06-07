@@ -22,8 +22,8 @@ namespace he
     class Material;
   }
 
-	namespace saver
-	{
+  namespace saver
+  {
     class GRAPHICAPI MaterialSaver//could have wrong debug lines
     {
     public:
@@ -45,7 +45,7 @@ namespace he
 
       static void save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager);
     };
-	}
+  }
 }
 
 #endif

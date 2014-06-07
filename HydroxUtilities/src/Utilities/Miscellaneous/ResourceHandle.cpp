@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     ResourceHandle::ResourceHandle() : m_id(~0), m_referenceCounter(nullptr)
     {
     }
@@ -43,9 +43,9 @@ namespace he
       std::swap(m_referenceCounter, other.m_referenceCounter);
     }
 
-    bool ResourceHandle::operator==(const ResourceHandle& o) const
+    bool ResourceHandle::operator==(const ResourceHandle& other) const
     {
-      return m_id == o.m_id && m_referenceCounter == o.m_referenceCounter;
+      return m_id == other.m_id && m_referenceCounter == other.m_referenceCounter;
     }
 
     void ResourceHandle::free()
@@ -63,5 +63,5 @@ namespace he
     {
       return m_id;
     }
-	}
+  }
 }

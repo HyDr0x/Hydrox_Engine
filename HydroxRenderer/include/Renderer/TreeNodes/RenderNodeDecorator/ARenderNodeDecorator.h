@@ -19,8 +19,8 @@ namespace he
     class StaticGeometryContainer;
   }
 
-	namespace renderer
-	{
+  namespace renderer
+  {
     class Traverser;
     class DrawCommandInterface;
     class MatrixBufferInterface;
@@ -60,7 +60,7 @@ namespace he
 
       IRenderNode *m_renderNode;
     };
-	}
+  }
 }
 
 #endif

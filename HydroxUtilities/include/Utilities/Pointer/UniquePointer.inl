@@ -2,21 +2,21 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename T> UniquePointer<T>::UniquePointer()
     {
       m_ptr = nullptr;
     }
 
-	  template<typename T> UniquePointer<T>::UniquePointer(T* obj) : m_ptr(obj)
-	  {}
+    template<typename T> UniquePointer<T>::UniquePointer(T* obj) : m_ptr(obj)
+    {}
 
-	  template<typename T> UniquePointer<T>::~UniquePointer()
-	  {
-		  delete m_ptr;
+    template<typename T> UniquePointer<T>::~UniquePointer()
+    {
+      delete m_ptr;
       m_ptr = nullptr;
-	  }
+    }
 
     template<typename T> void UniquePointer<T>::release()
     {
@@ -46,15 +46,15 @@ namespace he
       return m_ptr;
     }
 
-	  template<typename T> T* UniquePointer<T>::operator->() const
-	  {
-		  return m_ptr;
-	  }
+    template<typename T> T* UniquePointer<T>::operator->() const
+    {
+      return m_ptr;
+    }
 
     template<typename T> T& UniquePointer<T>::operator*() const
-	  {
-		  return *m_ptr;
-	  }
+    {
+      return *m_ptr;
+    }
 
     template<typename T> void UniquePointer<T>::swap(UniquePointer<T>& other)
     {
@@ -72,14 +72,14 @@ namespace he
       m_ptr = nullptr;
     }
 
-	  template<typename T> UniquePointer<T[]>::UniquePointer(T[] obj) : m_ptr(obj)
-	  {}
+    template<typename T> UniquePointer<T[]>::UniquePointer(T[] obj) : m_ptr(obj)
+    {}
 
-	  template<typename T> UniquePointer<T[]>::~UniquePointer()
-	  {
-		  delete[] m_ptr;
+    template<typename T> UniquePointer<T[]>::~UniquePointer()
+    {
+      delete[] m_ptr;
       m_ptr = nullptr;
-	  }
+    }
 
     template<typename T> void UniquePointer<T[]>::release()
     {
@@ -119,16 +119,6 @@ namespace he
       return m_ptr;
     }
 
-	  template<typename T> T* UniquePointer<T[]>::operator->() const
-	  {
-		  return m_ptr;
-	  }
-
-    template<typename T> T& UniquePointer<T[]>::operator*() const
-	  {
-		  return *m_ptr;
-	  }
-
     template<typename T> void UniquePointer<T[]>::ownDelete()
     {
       delete[] m_ptr;
@@ -139,5 +129,5 @@ namespace he
     {
       std::swap(m_ptr, other.m_ptr);
     }
-	}
+  }
 }

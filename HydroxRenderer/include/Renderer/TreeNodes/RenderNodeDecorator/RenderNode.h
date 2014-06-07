@@ -15,8 +15,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     struct RenderOptions;
 
     class RenderNode : public IRenderNode
@@ -58,7 +58,7 @@ namespace he
 
       std::list<const xBar::StaticGeometryContainer*> m_instances;
     };
-	}
+  }
 }
 
 #endif

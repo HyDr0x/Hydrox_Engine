@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{    struct GRAPHICAPI AnimationTrack//an animation track, each track represents all the keys for one animation in one node
+  namespace sg
+  {    struct GRAPHICAPI AnimationTrack//an animation track, each track represents all the keys for one animation in one node
     {
       std::string m_animationName;
       float m_duration;
@@ -30,7 +30,7 @@ namespace he
 
     GRAPHICAPI std::ofstream& operator<<(std::ofstream& stream, const AnimationTrack& animationTrack);
     GRAPHICAPI std::ifstream& operator>>(std::ifstream& stream, AnimationTrack& animationTrack);
-	}
+  }
 }
 
 #endif

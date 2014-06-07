@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     Material::Material()
     {
     }
@@ -34,14 +34,14 @@ namespace he
       m_materialData = materialData;
     }
 
-    Material::Material(const Material& o)
+    Material::Material(const Material& other)
     { 
-      m_hash = o.m_hash;
+      m_hash = other.m_hash;
 
-      m_materialData = o.m_materialData; 
+      m_materialData = other.m_materialData; 
 
-      m_textureHandles = o.m_textureHandles;
-      m_shaderHandle = o.m_shaderHandle;
+      m_textureHandles = other.m_textureHandles;
+      m_shaderHandle = other.m_shaderHandle;
     }
 
     Material::~Material()
@@ -49,19 +49,19 @@ namespace he
     }
 
     //copy swap idiom
-    Material& Material::operator=(Material o)//CTor of o called for auto construction
+    Material& Material::operator=(Material other)//CTor of other called for auto construction
     {
-      swap(o);//swap both
+      swap(other);//swap both
 
       return *this;
-    }//DTor of o called, for auto cleaning
+    }//DTor of other called, for auto cleaning
 
-    void Material::swap(Material& o)
+    void Material::swap(Material& other)
     {
-      std::swap(m_hash, o.m_hash);
-      std::swap(m_materialData, o.m_materialData);
-      std::swap(m_textureHandles, o.m_textureHandles);
-      std::swap(m_shaderHandle, o.m_shaderHandle);
+      std::swap(m_hash, other.m_hash);
+      std::swap(m_materialData, other.m_materialData);
+      std::swap(m_textureHandles, other.m_textureHandles);
+      std::swap(m_shaderHandle, other.m_shaderHandle);
     }
 
     void Material::free()
@@ -70,7 +70,7 @@ namespace he
 
       for(int i = 0; i < m_textureHandles.size(); i++)
       {
-	      for(int j = 0; j < m_textureHandles[i].size(); j++)
+        for(int j = 0; j < m_textureHandles[i].size(); j++)
         {
           m_textureHandles[i][j].free();
         }
@@ -79,8 +79,8 @@ namespace he
 
     unsigned int Material::getTextureNumber(TextureType texType) const
     {
-	    assert(texType >= 0 && texType < m_textureHandles.size());
-	    return static_cast<unsigned int>(m_textureHandles[texType].size());
+      assert(texType >= 0 && texType < m_textureHandles.size());
+      return static_cast<unsigned int>(m_textureHandles[texType].size());
     }
 
     void Material::setTextureNumber(TextureType texType, unsigned int texNum)
@@ -127,5 +127,5 @@ namespace he
     {
       return m_transparency;
     }
-	}
+  }
 }

@@ -5,8 +5,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position)
     {
       generateNonIndexedPositions(position);
@@ -180,5 +180,5 @@ namespace he
     void CubeGenerator::generateNonIndexedTextures(std::vector<Vector<float, 3>>& texture)
     {
     }
-	}
+  }
 }

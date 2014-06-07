@@ -9,8 +9,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class CopyTraverser : public ConstTraverser
     {
     public:
@@ -65,7 +65,7 @@ namespace he
 
       bool m_childNode;
     };
-	}
+  }
 }
 
 #endif

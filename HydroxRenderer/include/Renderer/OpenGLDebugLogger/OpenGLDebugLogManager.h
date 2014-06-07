@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     class GRAPHICAPI OpenGLDebugLogManager : public SingletonBehaviour
     {
     public:
@@ -52,7 +52,7 @@ namespace he
       GLint m_maxTextureImageUnits;
       GLint m_maxCombinedTextureUnits;
     };
-	}
+  }
 }
 
 #endif

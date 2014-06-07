@@ -10,8 +10,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     StaticGeometryDecorator::StaticGeometryDecorator(IRenderNode *renderNode) : ARenderNodeDecorator(renderNode)
     {
     }
@@ -59,5 +59,5 @@ namespace he
 
       m_matrixBuffer.syncWithFence();
     }
-	}
+  }
 }

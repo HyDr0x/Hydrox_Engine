@@ -37,26 +37,26 @@ namespace he
       setAnimationTimeUnit(m_animationTimeUnit);
     }
 
-    AssimpLoader::AssimpLoader(const AssimpLoader& o)
+    AssimpLoader::AssimpLoader(const AssimpLoader& other)
     {
-      m_modelManager = o.m_modelManager;
-      m_materialManager = o.m_materialManager;
-      m_textureManager = o.m_textureManager;
-      m_renderShaderManager = o.m_renderShaderManager;
-      m_defaultMaterial = o.m_defaultMaterial;
+      m_modelManager = other.m_modelManager;
+      m_materialManager = other.m_materialManager;
+      m_textureManager = other.m_textureManager;
+      m_renderShaderManager = other.m_renderShaderManager;
+      m_defaultMaterial = other.m_defaultMaterial;
     }
 
     AssimpLoader::~AssimpLoader()
     {
     }
 
-    AssimpLoader& AssimpLoader::operator=(const AssimpLoader& o)
+    AssimpLoader& AssimpLoader::operator=(const AssimpLoader& other)
     {
-      m_modelManager = o.m_modelManager;
-      m_materialManager = o.m_materialManager;
-      m_textureManager = o.m_textureManager;
-      m_renderShaderManager = o.m_renderShaderManager;
-      m_defaultMaterial = o.m_defaultMaterial;
+      m_modelManager = other.m_modelManager;
+      m_materialManager = other.m_materialManager;
+      m_textureManager = other.m_textureManager;
+      m_renderShaderManager = other.m_renderShaderManager;
+      m_defaultMaterial = other.m_defaultMaterial;
 
       return *this;
     }
@@ -90,11 +90,11 @@ namespace he
     {
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
-	    const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
+      const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
 
-	    if(!assimpScene)
+      if(!assimpScene)
       {
-		    std::cerr << importer.GetErrorString() << std::endl;
+        std::cerr << importer.GetErrorString() << std::endl;
 
         scene = loadDefaultSceneGraph();
       }
@@ -119,7 +119,7 @@ namespace he
 
       importer.FreeScene();
 
-	    return scene;
+      return scene;
     }
 
     sg::Scene* AssimpLoader::loadDefaultSceneGraph() const
@@ -146,10 +146,10 @@ namespace he
 
       util::ResourceHandle materialHandle;
 
-	    for(unsigned int i = 0; i != scene->mNumMeshes; i++)
-	    {
+      for(unsigned int i = 0; i != scene->mNumMeshes; i++)
+      {
         m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
-	    }
+      }
     }
 
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
@@ -183,61 +183,61 @@ namespace he
         break;
       }
 
-	    if(mesh->HasPositions())
-	    {
+      if(mesh->HasPositions())
+      {
         positions.resize(mesh->mNumVertices);
 
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
           positions[i] = util::Vector<float, 3>(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         }
-	    }
+      }
 
       for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
       {
-	      if(mesh->HasTextureCoords(j) && mesh->mNumUVComponents[j] != 0)
-	      {
+        if(mesh->HasTextureCoords(j) && mesh->mNumUVComponents[j] != 0)
+        {
           textureCoords[j].resize(mesh->mNumVertices);
 
-		      GLfloat tmpYCoordinates;
-		      for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		      {
+          GLfloat tmpYCoordinates;
+          for(unsigned int i = 0; i < mesh->mNumVertices; i++)
+          {
             //assert(mesh->mTextureCoords[j][i][0] >= 0.0 && mesh->mTextureCoords[j][i][1] >= 0.0 && mesh->mTextureCoords[j][i][0] <= 1.0 && mesh->mTextureCoords[j][i][1] <= 1.0);
 
-			      if( yAxisFlipped )
+            if( yAxisFlipped )
             {
               tmpYCoordinates = -mesh->mTextureCoords[j][i][1];
             }
-			      else
+            else
             {
               tmpYCoordinates = mesh->mTextureCoords[j][i][1];
             }
 
             textureCoords[j][i] = util::Vector<float, 2>(mesh->mTextureCoords[j][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
-		      }
-	      }
+          }
+        }
       }
 
-	    if(mesh->HasNormals())
-	    {
+      if(mesh->HasNormals())
+      {
         normals.resize(mesh->mNumVertices);
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		    {
+        {
           normals[i] = util::Vector<float, 3>(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         }
-	    }
+      }
 
-	    if(mesh->HasTangentsAndBitangents())
-	    {
+      if(mesh->HasTangentsAndBitangents())
+      {
         binormals.resize(mesh->mNumVertices);
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		    {
+        {
           binormals[i] = util::Vector<float, 3>(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         }
-	    }
+      }
 
-	    if(mesh->HasBones())
-	    {
+      if(mesh->HasBones())
+      {
         boneWeights.resize(mesh->mNumVertices, util::Vector<float, 4>::identity());
         boneIndices.resize(mesh->mNumVertices, util::Vector<float, 4>(~0, ~0, ~0, ~0));
 
@@ -246,7 +246,7 @@ namespace he
         m_boneNameTable[meshIndex].resize(mesh->mNumBones);
 
         for(unsigned int i = 0; i < mesh->mNumBones; i++)
-		    {
+        {
           std::copy(&mesh->mBones[i]->mOffsetMatrix[0][0], &mesh->mBones[i]->mOffsetMatrix[0][0] + 16, &tmpBoneMatrix[0][0]);
           tmpBoneMatrix = tmpBoneMatrix.transpose();
 
@@ -254,9 +254,9 @@ namespace he
           m_boneNameTable[meshIndex][i] = std::string(mesh->mBones[i]->mName.C_Str());
 
           for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
-		      {
+          {
             for(unsigned int k = 0; k < 4; k++)
-		        {
+            {
               unsigned int vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
               if(boneIndices[vertexID][k] == ~0)
               {
@@ -267,31 +267,31 @@ namespace he
             }
           }
         }
-	    }
+      }
 
       if(mesh->HasVertexColors(0))
       {
         vertexColors.resize(mesh->mNumVertices);
 
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
-		    {
+        {
           vertexColors[i] = util::Vector<float, 4>(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
         }
       }
 
-	    if(mesh->HasFaces())
-	    {
-		    indices.resize(mesh->mNumFaces * indicesPerFace);
+      if(mesh->HasFaces())
+      {
+        indices.resize(mesh->mNumFaces * indicesPerFace);
 
-		    for(unsigned int j = 0; j < mesh->mNumFaces; j++)
-		    {
+        for(unsigned int j = 0; j < mesh->mNumFaces; j++)
+        {
           for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++)
           {
             assert(mesh->mFaces[j].mNumIndices < 4 && "NO QUADS OR POLYGON PRIMITIVES ALLOWED!");
             indices[j * indicesPerFace + k] = static_cast<renderer::Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
           }
-		    }
-	    }
+        }
+      }
 
       return m_modelManager->addObject(renderer::Mesh(
         primitiveType,

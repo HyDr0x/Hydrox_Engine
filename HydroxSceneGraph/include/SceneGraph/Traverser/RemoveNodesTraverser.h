@@ -11,8 +11,8 @@
 
 namespace he
 {
-	namespace sg
-	{    class RemoveNodesTraverser : public Traverser
+  namespace sg
+  {    class RemoveNodesTraverser : public Traverser
     {
     public:
 
@@ -44,7 +44,7 @@ namespace he
 
       util::EventManager& m_eventManager;
     };
-	}
+  }
 }
 
 #endif

@@ -7,17 +7,17 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     class GRAPHICAPI ManagedResource
     {
     public:
 
       ManagedResource();
-      ManagedResource(const ManagedResource& o);
+      ManagedResource(const ManagedResource& other);
       virtual ~ManagedResource() = 0;
 
-      ManagedResource& operator=(const ManagedResource& o);
+      ManagedResource& operator=(const ManagedResource& other);
 
       virtual void free() = 0;
 
@@ -27,7 +27,7 @@ namespace he
 
       uint64_t m_hash;
     };
-	}
+  }
 }
 
 #endif

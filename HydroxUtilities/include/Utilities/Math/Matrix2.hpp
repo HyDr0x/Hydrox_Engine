@@ -3,8 +3,8 @@
 
 namespace he
 {
-	namespace util
-	{
+  namespace util
+  {
     template<typename Type> class Matrix<Type, 2>
     {
       public:
@@ -50,28 +50,28 @@ namespace he
       }
 
       inline Vector<Type, 2>& operator [](unsigned int i)
-	    {
-	      return m_m[i];
-	    }
+      {
+        return m_m[i];
+      }
 
       inline const Vector<Type, 2>& operator [](unsigned int i) const
-	    {
-	      return m_m[i];
-	    }
+      {
+        return m_m[i];
+      }
 
-	    inline Type detMat() const
-	    {
-	      return m_m[0][0] * m_m[1][1] - m_m[1][0] * m_m[0][1];
-	    }
+      inline Type detMat() const
+      {
+        return m_m[0][0] * m_m[1][1] - m_m[1][0] * m_m[0][1];
+      }
 
-	    inline Matrix invert() const
-	    {
-		    Type invDetM = detMat();
+      inline Matrix invert() const
+      {
+        Type invDetM = detMat();
         Matrix invM;
 
-		    if(invDetM)
-		    {
-			    invDetM = 1.0f / invDetM;
+        if(invDetM)
+        {
+          invDetM = 1.0f / invDetM;
 
           invM[0][0] = m_m[1][1];
           invM[1][0] =-m_m[0][1];
@@ -79,10 +79,10 @@ namespace he
           invM[1][1] = m_m[0][0];
 
           invM *= invDetM;
-		    }
+        }
 
-		    return invM;
-	    }
+        return invM;
+      }
 
       inline Matrix transpose() const
       {
@@ -102,7 +102,7 @@ namespace he
 
       inline Matrix operator - (const Matrix& m) const
       {
-		    Matrix result;
+        Matrix result;
 
         result[0] = m_m[0] - m[0];
         result[1] = m_m[1] - m[1];
@@ -145,7 +145,7 @@ namespace he
 
       inline Matrix& operator += (const Matrix& m)
       {
-		    m_m[0] += m[0];
+        m_m[0] += m[0];
         m_m[1] += m[1];
 
         return *this;
@@ -153,7 +153,7 @@ namespace he
 
       inline Matrix& operator -= (const Matrix& m)
       {
-		    m_m[0] -= m[0];
+        m_m[0] -= m[0];
         m_m[1] -= m[1];
 
         return *this;
@@ -163,7 +163,7 @@ namespace he
       {
         Matrix<Type, 2> tmpMat = *this;
 
-		    m_m[0][0] = tmpMat[0][0] * m[0][0] + tmpMat[1][0] * m[0][1];
+        m_m[0][0] = tmpMat[0][0] * m[0][0] + tmpMat[1][0] * m[0][1];
         m_m[0][1] = tmpMat[0][1] * m[0][0] + tmpMat[1][1] * m[0][1];
 
         m_m[1][0] = tmpMat[0][0] * m[1][0] + tmpMat[1][0] * m[1][1];
@@ -204,7 +204,7 @@ namespace he
 
       return stream;
     }
-	}
+  }
 }
 
 #endif

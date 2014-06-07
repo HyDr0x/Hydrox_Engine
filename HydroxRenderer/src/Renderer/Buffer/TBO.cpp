@@ -2,8 +2,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     TBO::TBO() : m_textureSlot(0)
     {
       glGenBuffers(1, &m_bufferIndex);
@@ -54,5 +54,5 @@ namespace he
       glActiveTexture(GL_TEXTURE0 + m_textureSlot);
       glBindTexture(GL_TEXTURE_BUFFER, 0);
     }
-	}
+  }
 }

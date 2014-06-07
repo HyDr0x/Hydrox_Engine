@@ -7,8 +7,8 @@
 
 namespace he
 {
-	namespace sg
-	{
+  namespace sg
+  {
     class InsertObserverTraverser : public Traverser
     {
     public:
@@ -26,7 +26,7 @@ namespace he
 
       util::Observer<TransformNode*> *m_observer;
     };
-	}
+  }
 }
 
 #endif

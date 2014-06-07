@@ -23,8 +23,8 @@
 
 namespace he
 {
-	namespace saver
-	{    NodeLinkTraverser::NodeLinkTraverser(NodeWrapperMapper& wrapperMapper) : 
+  namespace saver
+  {    NodeLinkTraverser::NodeLinkTraverser(NodeWrapperMapper& wrapperMapper) : 
       m_wrapperMapper(wrapperMapper)
     {
     }
@@ -169,5 +169,5 @@ namespace he
         }
       }
     }
-	}
+  }
 }

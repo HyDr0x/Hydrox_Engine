@@ -6,8 +6,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     VertexDeclarationNode::VertexDeclarationNode()
     {
       glGenVertexArrays(1, &m_vaoIndex);
@@ -202,5 +202,5 @@ namespace he
     {
       return m_vertexDeclaration == m_vertexDeclaration;
     }
-	}
+  }
 }

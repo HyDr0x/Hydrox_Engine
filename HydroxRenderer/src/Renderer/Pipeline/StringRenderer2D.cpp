@@ -4,8 +4,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     StringRenderer2D::StringRenderer2D()
     {
     }
@@ -70,19 +70,19 @@ namespace he
 
           util::Matrix<float, 3> worldMatrix = renderString->getTransformationMatrix();
           float z = renderString->getLayer() / (float)m_maxLayer;
-		      RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+          RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
           RenderShader::setUniform(5, GL_FLOAT, &z);
 
           renderString->render();
         }
-	    }
+      }
 
       ////////////////////////////////////////////RENDER TRANSPARENT 2D StringTextures////////////////////////////////////////////
 
       glDepthMask(GL_FALSE);
 
       glEnable(GL_BLEND);
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       for(unsigned int i = 0; i < m_transparentStrings.size(); i++)
       {
@@ -90,7 +90,7 @@ namespace he
         {
           renderString = (*stringIDIterator);
           if (renderString->getRenderable())
-          {		
+          {    
             renderTexture = m_textureManager->getObject(renderString->getFont().fontHandle);
             renderTexture->setTexture(0, 0);
 
@@ -101,7 +101,7 @@ namespace he
 
             renderString->render();
           }
-	      }
+        }
       }
 
       stringShader->useNoShader();
@@ -146,5 +146,5 @@ namespace he
       eventManager->addNewSignal<void (*)(const StringTexture2D* StringTexture2D)>(util::EventManager::OnRemoveStringTexture2D);
       eventManager->addSlotToSignal<StringRenderer2D, void (*)(const StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(const StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::removeRenderComponent, util::EventManager::OnRemoveStringTexture2D);
     }
-	}
+  }
 }

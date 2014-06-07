@@ -14,8 +14,8 @@
 
 namespace he
 {
-	namespace renderer
-	{
+  namespace renderer
+  {
     InsertGeometryTraverser::InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager) : 
       m_options(options),
       m_singletonManager(singletonManager),
@@ -209,5 +209,5 @@ namespace he
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());
     }
-	}
+  }
 }
