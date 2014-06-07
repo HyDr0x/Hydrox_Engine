@@ -9,7 +9,7 @@ namespace he
                                                        util::Matrix<float, 4> *trfMatrix, 
                                                        util::ResourceHandle materialHandle, 
                                                        util::ResourceHandle meshHandle) : 
-      StaticGeometryContainer(trfMatrix, materialHandle, meshHandle), 
+      IGeometryContainer(trfMatrix, materialHandle, meshHandle), 
       m_boneTransformMatrices(boneTransformMatrices),
       m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
@@ -20,9 +20,9 @@ namespace he
     {
     }
 
-    bool SkinnedGeometryContainer::operator == (const SkinnedGeometryContainer& other) const
+    bool SkinnedGeometryContainer::operator == (const IGeometryContainer& other) const
     {
-      return m_hash == other.m_hash;
+      return m_hash == other.getHash();
     }
 
     std::vector<util::Matrix<float, 4>>* SkinnedGeometryContainer::getBoneTransformMatrices() const

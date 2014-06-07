@@ -4,16 +4,12 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
+#include <XBar/IGeometryContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 namespace he
 {
-  namespace xBar
-  {
-    class SkinnedGeometryContainer;
-    class StaticGeometryContainer;
-  }
-
   namespace renderer
   {
     class IRenderNode : public TreeNode
@@ -23,12 +19,12 @@ namespace he
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
 
-      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer) = 0;
+      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
+      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
 
-      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer) = 0;
-      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer) = 0;
-
-      virtual const std::list<const xBar::StaticGeometryContainer*>& getInstances() const = 0;
+      virtual bool isEndInstanceIterator() const = 0;
+      virtual void resetInstanceIterator() = 0;
+      virtual const xBar::IGeometryContainer& incInstanceIterator() = 0;
 
       virtual unsigned int getInstanceNumber() const = 0;
 

@@ -28,10 +28,8 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer);
-
-      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
       virtual void rasterizeGeometry() const;
 

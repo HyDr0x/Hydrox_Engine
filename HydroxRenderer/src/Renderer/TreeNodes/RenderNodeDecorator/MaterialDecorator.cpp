@@ -35,7 +35,7 @@ namespace he
       return traverser->postTraverse(this);
     }
 
-    bool MaterialDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
@@ -63,42 +63,16 @@ namespace he
       return false;
     }
 
-    bool MaterialDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
-    {
-      if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
-      {
-        if(m_materialCount < getMaxMaterials() && m_renderNode->insertGeometry(geometryContainer))
-        {
-          m_materialNumberChanged = true;
-
-          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber = 1;
-
-          m_materialCount++;
-
-          return true;
-        }
-      }
-      else
-      {
-        if(m_renderNode->insertGeometry(geometryContainer))
-        {
-          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber++;
-
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    bool MaterialDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
+    bool MaterialDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++)
+        resetInstanceIterator();
+        while (!isEndInstanceIterator())
         {
-          if(geometryContainer == (**instanceIterator))
+          const xBar::IGeometryContainer& instance = incInstanceIterator();
+          if (geometryContainer == instance)
           {
             m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber--;
             
@@ -170,9 +144,13 @@ namespace he
       m_materialIndexBuffer.setMemoryFence();
 
       unsigned int index = 0;
-      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, index++)
+      resetInstanceIterator();
+      while (!isEndInstanceIterator())
       {
-        m_materialIndexBuffer.setData(sizeof(GLuint) * index, sizeof(GLuint), &m_materialHandles[(*instanceIterator)->getMeshHandle()].bufferIndex);
+        const xBar::IGeometryContainer& instance = incInstanceIterator();
+        
+        m_materialIndexBuffer.setData(sizeof(GLuint)* index, sizeof(GLuint), &m_materialHandles[instance.getMeshHandle()].bufferIndex);
+        index++;
       }
 
       m_materialIndexBuffer.syncWithFence();

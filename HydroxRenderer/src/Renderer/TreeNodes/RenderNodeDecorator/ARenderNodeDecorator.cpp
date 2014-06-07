@@ -32,24 +32,29 @@ namespace he
       m_renderNode->postTraverse(traverser);
     }
 
-    bool ARenderNodeDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
-    {
-     return m_renderNode->insertGeometry(geometryContainer);
-    }
-
-    bool ARenderNodeDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       return m_renderNode->removeGeometry(geometryContainer);
     }
 
-    const std::list<const xBar::StaticGeometryContainer*>& ARenderNodeDecorator::getInstances() const
+    bool ARenderNodeDecorator::isEndInstanceIterator() const
     {
-      return m_renderNode->getInstances();
+      return m_renderNode->isEndInstanceIterator();
+    }
+
+    void ARenderNodeDecorator::resetInstanceIterator()
+    {
+      m_renderNode->resetInstanceIterator();
+    }
+
+    const xBar::IGeometryContainer& ARenderNodeDecorator::incInstanceIterator()
+    {
+      return m_renderNode->incInstanceIterator();
     }
 
     unsigned int ARenderNodeDecorator::getInstanceNumber() const

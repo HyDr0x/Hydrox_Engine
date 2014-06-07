@@ -4,12 +4,12 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ARenderNodeDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsDecorator.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/IGeometryDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IRenderNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialDecorator.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/RenderNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderNodeFactory.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedRenderNode.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryDecorator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticRenderNode.h 
 	PARENT_SCOPE 
 )

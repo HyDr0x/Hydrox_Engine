@@ -6,35 +6,22 @@
 
 #include "XBar/DLLExport.h"
 
-#include "XBar/AContainer.h"
+#include "XBar/IGeometryContainer.h"
 
 namespace he
 {
   namespace xBar
   {
-    class GRAPHICAPI StaticGeometryContainer : public AContainer
+    class GRAPHICAPI StaticGeometryContainer : public IGeometryContainer
     {
     public:
 
       StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
       virtual ~StaticGeometryContainer();
 
-      bool operator == (const StaticGeometryContainer& other) const;
-
-      util::ResourceHandle getMaterialHandle() const;
-
-      util::ResourceHandle getMeshHandle() const;
-
-      util::Matrix<float, 4> getTransformationMatrix() const;
-
     protected:
 
-      virtual void createHash();
-
-      util::Matrix<float, 4> *m_trfMatrix;
-
-      util::ResourceHandle m_materialHandle;
-      util::ResourceHandle m_meshHandle;
+      void createHash();
     };
   }
 }

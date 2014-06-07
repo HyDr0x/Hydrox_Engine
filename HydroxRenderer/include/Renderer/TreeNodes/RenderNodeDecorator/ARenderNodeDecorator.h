@@ -35,12 +35,12 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
-      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
-      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer);
-
-      virtual const std::list<const xBar::StaticGeometryContainer*>& getInstances() const;
+      virtual bool isEndInstanceIterator() const;
+      virtual void resetInstanceIterator();
+      virtual const xBar::IGeometryContainer& incInstanceIterator();
 
       virtual unsigned int getInstanceNumber() const;
 

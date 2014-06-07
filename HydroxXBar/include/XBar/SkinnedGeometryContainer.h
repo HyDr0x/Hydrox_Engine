@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "XBar/StaticGeometryContainer.h"
+#include "XBar/IGeometryContainer.h"
 
 #include "XBar/DLLExport.h"
 
@@ -11,7 +11,7 @@ namespace he
 {
   namespace xBar
   {
-    class GRAPHICAPI SkinnedGeometryContainer : public StaticGeometryContainer
+    class GRAPHICAPI SkinnedGeometryContainer : public IGeometryContainer
     {
     public:
 
@@ -23,7 +23,7 @@ namespace he
 
       virtual ~SkinnedGeometryContainer();
 
-      bool operator == (const SkinnedGeometryContainer& other) const;
+      bool operator == (const IGeometryContainer& other) const;
 
       std::vector<util::Matrix<float, 4>>* getBoneTransformMatrices() const;
       std::vector<util::Matrix<float, 4>>* getInverseBindPoseTransformMatrices() const;

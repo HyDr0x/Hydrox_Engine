@@ -5,9 +5,10 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayDecorator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsDecorator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialDecorator.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/RenderNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderNodeFactory.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedRenderNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryDecorator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticRenderNode.cpp 
 	PARENT_SCOPE 
 )

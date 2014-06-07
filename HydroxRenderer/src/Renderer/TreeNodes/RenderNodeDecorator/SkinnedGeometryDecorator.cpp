@@ -67,12 +67,13 @@ namespace he
     void SkinnedGeometryDecorator::fillBuffer()
     {
       unsigned int instanceIndex = 0;
-      for (std::list<const xBar::StaticGeometryContainer*>::const_iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
+      resetInstanceIterator();
+      while (!isEndInstanceIterator())
       {
-        const xBar::SkinnedGeometryContainer *skinnedGeometryContainer = dynamic_cast<const xBar::SkinnedGeometryContainer*>(*geometryIterator);
+        const xBar::SkinnedGeometryContainer &skinnedGeometryContainer = dynamic_cast<const xBar::SkinnedGeometryContainer&>(incInstanceIterator());
 
-        std::vector<util::Matrix<float, 4>>* boneTransformMatrices = skinnedGeometryContainer->getBoneTransformMatrices();
-        std::vector<util::Matrix<float, 4>>* inverseBindPoseTransformMatrices = skinnedGeometryContainer->getInverseBindPoseTransformMatrices();
+        std::vector<util::Matrix<float, 4>>* boneTransformMatrices = skinnedGeometryContainer.getBoneTransformMatrices();
+        std::vector<util::Matrix<float, 4>>* inverseBindPoseTransformMatrices = skinnedGeometryContainer.getInverseBindPoseTransformMatrices();
 
         std::vector<util::Matrix<float, 4>> skinningMatrices(boneTransformMatrices->size());
 
@@ -85,7 +86,9 @@ namespace he
         unsigned int offset = sizeof(util::Matrix<float, 4>) * getMaxBones() * instanceIndex;
 
         m_matrixBuffer.setData(offset, size, &(skinningMatrices[0][0][0]));
-        m_bboxMatrixBuffer.setData(instanceIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &skinnedGeometryContainer->getTransformationMatrix()[0][0]);
+        m_bboxMatrixBuffer.setData(instanceIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &skinnedGeometryContainer.getTransformationMatrix()[0][0]);
+
+        instanceIndex++;
       }
     }
   }

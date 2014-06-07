@@ -1,7 +1,6 @@
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
 
-#include <XBar/StaticGeometryContainer.h>
-#include <XBar/SkinnedGeometryContainer.h>
+#include <XBar/IGeometryContainer.h>
 
 #include "Renderer/TreeNodes/TreeNode.h"
 
@@ -14,7 +13,7 @@ namespace he
 {
   namespace renderer
   {
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::StaticGeometryContainer& geometryContainer) : 
+    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<ModelManager>();

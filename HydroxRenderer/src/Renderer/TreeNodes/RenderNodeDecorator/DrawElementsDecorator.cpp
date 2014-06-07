@@ -25,7 +25,7 @@ namespace he
     {
     }
 
-    bool DrawElementsDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
@@ -54,36 +54,7 @@ namespace he
      return false;
     }
 
-    bool DrawElementsDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
-    {
-      Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
-
-      if(m_primitiveType != mesh->getPrimitiveType())
-      {
-        return false;
-      }
-
-      if(m_renderNode->insertGeometry(geometryContainer))
-      {
-        if(!m_meshes.count(geometryContainer.getMeshHandle()))
-        {
-          m_meshNumberChanged = true;
-
-          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
-
-          m_vboSize += mesh->getVBOSize();
-          m_iboSize += mesh->getIndexCount() * sizeof(GLINDEXTYPE);
-        }
-
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
-
-        return true;
-      }
-
-     return false;
-    }
-
-    bool DrawElementsDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
+    bool DrawElementsDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
@@ -201,19 +172,23 @@ namespace he
       m_commandBuffer.setMemoryFence();
 
       unsigned int instanceCounter = 0;
-      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, instanceCounter++)
+      resetInstanceIterator();
+      while (!isEndInstanceIterator())
       {
-        Mesh *mesh = m_modelManager->getObject((*instanceIterator)->getMeshHandle());
+        const xBar::IGeometryContainer& instance = incInstanceIterator();
+        Mesh *mesh = m_modelManager->getObject(instance.getMeshHandle());
 
         DrawElementsIndirectCommand command;
         command.count = mesh->getIndexCount();
         command.instanceCount = 1;
-        command.firstIndex = m_meshes[(*instanceIterator)->getMeshHandle()].indexOffset;
-        command.baseVertex = m_meshes[(*instanceIterator)->getMeshHandle()].vertexOffset;
+        command.firstIndex = m_meshes[instance.getMeshHandle()].indexOffset;
+        command.baseVertex = m_meshes[instance.getMeshHandle()].vertexOffset;
         command.baseInstance = instanceCounter;
 
         m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
-        m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex);
+        m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[instance.getMeshHandle()].bufferIndex);
+
+        instanceCounter++;
       }
     }
   }

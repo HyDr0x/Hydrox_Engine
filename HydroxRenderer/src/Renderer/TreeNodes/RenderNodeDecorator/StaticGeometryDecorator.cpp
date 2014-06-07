@@ -50,9 +50,13 @@ namespace he
       m_matrixBuffer.setMemoryFence();
 
       unsigned int instanceIndex = 0;
-      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator geometryIterator = getInstances().begin(); geometryIterator != getInstances().end(); geometryIterator++, instanceIndex++)
+      resetInstanceIterator();
+      while (!isEndInstanceIterator())
       {
-        m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &(*geometryIterator)->getTransformationMatrix()[0][0]);
+        const xBar::StaticGeometryContainer &staticGeometryContainer = dynamic_cast<const xBar::StaticGeometryContainer&>(incInstanceIterator());
+        m_matrixBuffer.setData(sizeof(util::Matrix<float, 4>) * instanceIndex, sizeof(util::Matrix<float, 4>), &staticGeometryContainer.getTransformationMatrix()[0][0]);
+
+        instanceIndex++;
       }
 
       m_renderNode->updateBuffer();

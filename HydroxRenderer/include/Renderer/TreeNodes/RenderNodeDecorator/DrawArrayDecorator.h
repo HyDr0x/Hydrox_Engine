@@ -34,10 +34,8 @@ namespace he
       DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       ~DrawArrayDecorator();
 
-      virtual bool insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer);
-
-      virtual bool insertGeometry(const xBar::StaticGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::StaticGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
       virtual void frustumCulling() const;
 

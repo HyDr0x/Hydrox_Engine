@@ -12,15 +12,14 @@
 
 namespace he
 {
-  namespace xBar  {    class StaticGeometryContainer;
-    class SkinnedGeometryContainer;  }
+  namespace xBar  {    class IGeometryContainer;  }
 
   namespace renderer
   {    class IRenderNode;    class RemoveGeometryTraverser : public Traverser
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::StaticGeometryContainer& geometryContainer);
+      RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer);
       virtual ~RemoveGeometryTraverser();
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
@@ -44,7 +43,7 @@ namespace he
       ModelManager *m_modelManager;
       MaterialManager *m_materialManager;
 
-      const xBar::StaticGeometryContainer& m_geometryContainer;
+      const xBar::IGeometryContainer& m_geometryContainer;
 
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;

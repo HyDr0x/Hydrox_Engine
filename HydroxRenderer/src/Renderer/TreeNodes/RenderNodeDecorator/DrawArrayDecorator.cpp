@@ -1,7 +1,6 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/DrawArrayDecorator.h"
 
-#include <XBar/StaticGeometryContainer.h>
-#include <XBar/SkinnedGeometryContainer.h>
+#include <XBar/IGeometryContainer.h>
 
 #include "Renderer/Resources/Mesh.h"
 
@@ -23,7 +22,7 @@ namespace he
     {
     }
 
-    bool DrawArrayDecorator::insertGeometry(const xBar::SkinnedGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
@@ -51,35 +50,7 @@ namespace he
      return false;
     }
 
-    bool DrawArrayDecorator::insertGeometry(const xBar::StaticGeometryContainer& geometryContainer)
-    {
-      Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
-
-      if(m_primitiveType != mesh->getPrimitiveType())
-      {
-        return false;
-      }
-
-      if(m_renderNode->insertGeometry(geometryContainer))
-      {
-        if(!m_meshes.count(geometryContainer.getMeshHandle()))
-        {
-          m_meshNumberChanged = true;
-
-          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
-
-          m_vboSize += mesh->getVBOSize();
-        }
-
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
-
-        return true;
-      }
-
-     return false;
-    }
-
-    bool DrawArrayDecorator::removeGeometry(const xBar::StaticGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
@@ -187,19 +158,23 @@ namespace he
       m_meshInstanceBufferIndex.setMemoryFence();
 
       unsigned int instanceCounter = 0;
-      for(std::list<const xBar::StaticGeometryContainer*>::const_iterator instanceIterator = getInstances().begin(); instanceIterator != getInstances().end(); instanceIterator++, instanceCounter++)
+      resetInstanceIterator();
+      while(!isEndInstanceIterator())
       {
-        Mesh *mesh = m_modelManager->getObject((*instanceIterator)->getMeshHandle());
+        const xBar::IGeometryContainer& instance = incInstanceIterator();
+        Mesh *mesh = m_modelManager->getObject(instance.getMeshHandle());
 
         DrawArraysIndirectCommand command;
         command.count = mesh->getVertexCount();
         command.instanceCount = 1;
-        command.baseVertex = m_meshes[(*instanceIterator)->getMeshHandle()].vertexOffset;
+        command.baseVertex = m_meshes[instance.getMeshHandle()].vertexOffset;
         command.baseInstance = instanceCounter;
 
         m_commandBuffer.setData(sizeof(DrawArraysIndirectCommand) * instanceCounter, sizeof(DrawArraysIndirectCommand), &command);
 
-        m_meshInstanceBufferIndex.setData(sizeof(unsigned int) * instanceCounter, sizeof(unsigned int), &m_meshes[(*instanceIterator)->getMeshHandle()].bufferIndex);
+        m_meshInstanceBufferIndex.setData(sizeof(unsigned int)* instanceCounter, sizeof(unsigned int), &m_meshes[instance.getMeshHandle()].bufferIndex);
+
+        instanceCounter++;
       }
     }
   }
