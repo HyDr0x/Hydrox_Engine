@@ -1,9 +1,5 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/StaticGeometryDecorator.h"
 
-#include "Renderer/Resources/Material.h"
-#include "Renderer/Resources/Mesh.h"
-#include "Renderer/Resources/RenderShader.h"
-
 #include "Renderer/Traverser/Traverser.h"
 
 #include <XBar/StaticGeometryContainer.h>

@@ -3,9 +3,9 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
 
-#include "Renderer/Resources/Sprite.h"
-#include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Texture2D.h"
+#include <DataBase/Sprite.h>
+#include <DataBase/RenderShader.h>
+#include <DataBase/Texture2D.h>
 
 namespace he
 {
@@ -25,8 +25,8 @@ namespace he
 
     void SpriteRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer)
     {
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
@@ -39,25 +39,25 @@ namespace he
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
       glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
-      glVertexAttribPointer(RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
+      glVertexAttribPointer(db::RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void SpriteRenderer::render() const
     {
-      glEnableVertexAttribArray(RenderShader::SPECIAL0);
+      glEnableVertexAttribArray(db::RenderShader::SPECIAL0);
 
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 
       glClear(GL_DEPTH_BUFFER_BIT);
 
-      const Sprite *renderSprite;
-      Texture2D *renderTexture;
-      RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
+      const db::Sprite *renderSprite;
+      db::Texture2D *renderTexture;
+      db::RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
 
       spriteShader->useShader();
 
-      for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
+      for(std::list<const db::Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
       {
         renderSprite = (*spriteIDIterator);
         if(renderSprite->getRenderable())
@@ -69,9 +69,9 @@ namespace he
           util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
           util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
           float z = renderSprite->getLayer() / (float)m_maxLayer;
-          RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-          RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-          RenderShader::setUniform(2, GL_FLOAT, &z);
+          db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+          db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+          db::RenderShader::setUniform(2, GL_FLOAT, &z);
 
           glDrawArrays(GL_POINTS, 0, 1);
         }
@@ -86,7 +86,7 @@ namespace he
 
       for(unsigned int i = 0; i < m_transparentSprites.size(); i++)
       {
-        for(std::list<const Sprite*>::const_iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
+        for(std::list<const db::Sprite*>::const_iterator spriteIDIterator = m_transparentSprites[i].begin(); spriteIDIterator != m_transparentSprites[i].end(); spriteIDIterator++)
         {
           renderSprite = (*spriteIDIterator);
           if(renderSprite->getRenderable())
@@ -98,9 +98,9 @@ namespace he
             util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
             util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
             float z = renderSprite->getLayer() / (float)m_maxLayer;
-            RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-            RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-            RenderShader::setUniform(2, GL_FLOAT, &z);
+            db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            db::RenderShader::setUniform(2, GL_FLOAT, &z);
 
             glDrawArrays(GL_POINTS, 0, 1);
           }
@@ -109,14 +109,14 @@ namespace he
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-      glDisableVertexAttribArray(RenderShader::SPECIAL0);
+      glDisableVertexAttribArray(db::RenderShader::SPECIAL0);
 
       glDisable(GL_BLEND);
 
       glDepthMask(GL_TRUE);
     }
 
-    void SpriteRenderer::addRenderComponent(const Sprite* sprite)
+    void SpriteRenderer::addRenderComponent(const db::Sprite* sprite)
     {
       if(sprite->getTransparency())
       {
@@ -128,7 +128,7 @@ namespace he
       }
     }
 
-    void SpriteRenderer::removeRenderComponent(const Sprite* sprite)
+    void SpriteRenderer::removeRenderComponent(const db::Sprite* sprite)
     {
       if(sprite->getTransparency())
       {
@@ -142,11 +142,11 @@ namespace he
 
     void SpriteRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
     {
-      eventManager->addNewSignal<void (*)(const Sprite* sprite)>(util::EventManager::OnAddSprite);
-      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const Sprite* sprite), void (SpriteRenderer::*)(const Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);
+      eventManager->addNewSignal<void (*)(const db::Sprite* sprite)>(util::EventManager::OnAddSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const db::Sprite* sprite), void (SpriteRenderer::*)(const db::Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);
 
-      eventManager->addNewSignal<void (*)(const Sprite* sprite)>(util::EventManager::OnRemoveSprite);
-      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const Sprite* sprite), void (SpriteRenderer::*)(const Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
+      eventManager->addNewSignal<void (*)(const db::Sprite* sprite)>(util::EventManager::OnRemoveSprite);
+      eventManager->addSlotToSignal<SpriteRenderer, void (*)(const db::Sprite* sprite), void (SpriteRenderer::*)(const db::Sprite* sprite)>(this, &SpriteRenderer::removeRenderComponent, util::EventManager::OnRemoveSprite);
     }
   }
 }

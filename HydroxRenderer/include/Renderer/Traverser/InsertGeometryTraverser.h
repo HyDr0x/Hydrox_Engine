@@ -9,7 +9,7 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
 
@@ -17,11 +17,17 @@
 
 namespace he
 {
-  namespace xBar  {    class StaticGeometryContainer;
-    class SkinnedGeometryContainer;  }
+  namespace xBar
+  {
+    class StaticGeometryContainer;
+    class SkinnedGeometryContainer;
+  }
 
   namespace renderer
-  {    class IRenderNode;    class InsertGeometryTraverser : public Traverser
+  {
+    class IRenderNode;
+
+    class InsertGeometryTraverser : public Traverser
     {
     public:
 
@@ -57,7 +63,7 @@ namespace he
 
     protected:
 
-      void initialize(Mesh* mesh, util::ResourceHandle materialHandle);
+      void initialize(db::Mesh* mesh, util::ResourceHandle materialHandle);
 
       util::SingletonManager *m_singletonManager;
 

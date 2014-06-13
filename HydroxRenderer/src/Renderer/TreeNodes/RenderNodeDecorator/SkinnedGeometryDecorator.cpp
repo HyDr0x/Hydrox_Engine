@@ -1,8 +1,6 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/SkinnedGeometryDecorator.h"
 
-#include "Renderer/Resources/Material.h"
-#include "Renderer/Resources/Mesh.h"
-#include "Renderer/Resources/RenderShader.h"
+#include <vector>
 
 #include "Renderer/Traverser/Traverser.h"
 

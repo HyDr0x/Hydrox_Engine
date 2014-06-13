@@ -1,8 +1,6 @@
 #ifndef SKINNEDGEOMETRYDECORATOR_H_
 #define SKINNEDGEOMETRYDECORATOR_H_
 
-#include <vector>
-
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"

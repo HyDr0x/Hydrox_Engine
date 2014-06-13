@@ -13,10 +13,10 @@ namespace he
   {
     RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
     {
-      m_modelManager = singletonManager->getService<ModelManager>();
-      m_materialManager = singletonManager->getService<MaterialManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
     }
 
     RenderGeometryTraverser::~RenderGeometryTraverser()
@@ -37,7 +37,7 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(ShaderNode* treeNode)
     {
-      RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
 
       shader->useShader();
 
@@ -46,7 +46,7 @@ namespace he
 
     void RenderGeometryTraverser::postTraverse(ShaderNode* treeNode)
     {
-      RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
 
       shader->useNoShader();
     }
@@ -61,7 +61,7 @@ namespace he
       {
         for(unsigned int j = 0; j < textureHandles[i].size(); j++)
         {
-          Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
+          db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
           texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
           texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
         }
@@ -80,7 +80,7 @@ namespace he
       {
         for(unsigned int j = 0; j < textureHandles[i].size(); j++)
         {
-          Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
+          db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
           texture->unsetTexture();
         }
       }

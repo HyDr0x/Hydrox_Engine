@@ -28,7 +28,7 @@ namespace he
       m_sceneCacheManager.removeSubTree(m_rootNode);
     }
 
-    GroupNode* RenderScene::addParentNode(unsigned int eventID, TreeNode* destinationNode, const GroupNode* sourceNode)
+    GroupNode* RenderScene::addParentNode(TreeNode* destinationNode, const GroupNode* sourceNode)
     {
       GroupNode* newNode = Scene::addParentNode(destinationNode, sourceNode);
 
@@ -41,7 +41,7 @@ namespace he
       return newNode;
     }
 
-    TreeNode* RenderScene::addChildNode(unsigned int eventID, GroupNode* destinationNode, const TreeNode* sourceNode)
+    TreeNode* RenderScene::addChildNode(GroupNode* destinationNode, const TreeNode* sourceNode)
     {
       TreeNode* newNode = Scene::addChildNode(destinationNode, sourceNode);
 

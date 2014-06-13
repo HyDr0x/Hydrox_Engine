@@ -4,8 +4,8 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/ResourceManager.hpp>
-#include <Renderer/Resources/Texture2D.h>
+#include <DataBase/ResourceManager.hpp>
+#include <DataBase/Texture2D.h>
 
 namespace he
 {
@@ -13,7 +13,7 @@ namespace he
   {
     void ILDevilSaver::save(std::string path, std::string filename, util::ResourceHandle textureHandle, util::SingletonManager *singletonManager)
     {
-      renderer::Texture2D *texture = singletonManager->getService<renderer::TextureManager>()->getObject(textureHandle);
+      db::Texture2D *texture = singletonManager->getService<db::TextureManager>()->getObject(textureHandle);
 
       ILuint tex;
       ilGenImages(1, &tex);

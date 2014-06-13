@@ -12,9 +12,9 @@
 #include <SceneGraph/TreeNodes/TransformNode.h>
 #include <SceneGraph/Scene/Scene.h>
 
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Mesh.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/Material.h>
+#include <DataBase/Mesh.h>
 
 #include "Loader/ILDevilLoader.h"
 #include "Loader/RenderShaderLoader.h"
@@ -27,10 +27,10 @@ namespace he
     AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_singletonManager(singletonManager), m_animationTimeUnit(Seconds)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
-      m_modelManager = singletonManager->getService<renderer::ModelManager>();
-      m_materialManager = singletonManager->getService<renderer::MaterialManager>();
-      m_textureManager = singletonManager->getService<renderer::TextureManager>();
-      m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
 
       MaterialLoader materialLoader(m_singletonManager);
       m_defaultMaterial = materialLoader.getDefaultResource();
@@ -127,12 +127,12 @@ namespace he
       sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube"));
 
       std::vector<util::Vector<float, 3>> positions;
-      std::vector<renderer::Mesh::indexType> indices;
+      std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices);
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(renderer::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode);
+      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode);
       sceneRootNode->setFirstChild(geoNode);
 
       return new sg::Scene(sceneRootNode);
@@ -155,13 +155,13 @@ namespace he
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
     {
       std::vector<util::Vector<float, 3>> positions;   
-      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(renderer::Material::TEXTURETYPENUM);
+      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(db::Material::TEXTURETYPENUM);
       std::vector<util::Vector<float, 3>> normals;
       std::vector<util::Vector<float, 3>> binormals;
       std::vector<util::Vector<float, 4>> boneIndices;
       std::vector<util::Vector<float, 4>> boneWeights;
       std::vector<util::Vector<float, 4>> vertexColors;
-      std::vector<renderer::Mesh::indexType> indices;
+      std::vector<db::Mesh::indexType> indices;
 
       GLuint primitiveType;
       unsigned int indicesPerFace;
@@ -288,12 +288,12 @@ namespace he
           for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++)
           {
             assert(mesh->mFaces[j].mNumIndices < 4 && "NO QUADS OR POLYGON PRIMITIVES ALLOWED!");
-            indices[j * indicesPerFace + k] = static_cast<renderer::Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
+            indices[j * indicesPerFace + k] = static_cast<db::Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
           }
         }
       }
 
-      return m_modelManager->addObject(renderer::Mesh(
+      return m_modelManager->addObject(db::Mesh(
         primitiveType,
         positions,
         indices,

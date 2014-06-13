@@ -49,13 +49,12 @@ namespace he
       glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &m_maxCombinedTextureUnits);
     }
 
-    void OpenGLDebugLogManager::initDebugMode() const
+    void OpenGLDebugLogManager::initDebugMode(bool syncedOutput) const
     {
-      /*if(m_debugMode)
+      if(syncedOutput)
       {
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);//looks like it doesn't work
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       }
-      else*/
     
       GLDEBUGCALLBACK callback = &getDebugMessage;
       glDebugMessageCallback(callback, nullptr);

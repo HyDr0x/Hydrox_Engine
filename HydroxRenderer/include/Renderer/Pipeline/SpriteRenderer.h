@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
@@ -16,10 +16,13 @@ namespace he
     class EventManager;
   }
 
-  namespace renderer
+  namespace db
   {
     class Sprite;
+  }
 
+  namespace renderer
+  {
     class SpriteRenderer
     {
     public:
@@ -33,8 +36,8 @@ namespace he
 
       void render() const;
 
-      void addRenderComponent(const Sprite* sprite);
-      void removeRenderComponent(const Sprite* sprite);
+      void addRenderComponent(const db::Sprite* sprite);
+      void removeRenderComponent(const db::Sprite* sprite);
 
     private:
 
@@ -49,11 +52,11 @@ namespace he
 
       unsigned char m_maxLayer;
 
-      std::list<const Sprite*> m_opaqueSprites;
-      std::vector<std::list<const Sprite*>> m_transparentSprites;
+      std::list<const db::Sprite*> m_opaqueSprites;
+      std::vector<std::list<const db::Sprite*>> m_transparentSprites;
 
-      RenderShaderManager *m_renderShaderManager;
-      TextureManager *m_textureManager;
+      db::RenderShaderManager *m_renderShaderManager;
+      db::TextureManager *m_textureManager;
     };
   }
 }

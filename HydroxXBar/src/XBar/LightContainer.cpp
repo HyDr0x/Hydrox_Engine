@@ -1,10 +1,12 @@
 #include "XBar/LightContainer.h"
 
+#include <DataBase/Light.h>
+
 namespace he
 {
   namespace xBar
   {
-    LightContainer::LightContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle lightHandle)
+    LightContainer::LightContainer(const db::Light& lightData) : m_lightData(lightData)
     {
       createHash();
     }
@@ -18,26 +20,18 @@ namespace he
       return m_hash == other.m_hash;
     }
 
-    util::ResourceHandle LightContainer::getLightHandle() const
+    const db::Light * const LightContainer::getLightData() const
     {
-      return m_lightHandle;
-    }
-
-    util::Matrix<float, 4> LightContainer::getTransformationMatrix() const
-    {
-      return *m_trfMatrix;
+      return &m_lightData;
     }
 
     void LightContainer::createHash()
     {
-      unsigned int id = m_lightHandle.getID();
-
-      std::vector<unsigned char> data(sizeof(m_trfMatrix)+sizeof(id));
+      std::vector<unsigned char> data(sizeof(m_lightData));
 
       unsigned int offset = 0;
 
-      offset = convertToRawData(id, &data[0], offset);
-      offset = convertToRawData(m_trfMatrix, &data[0], offset);
+      offset = convertToRawData(m_lightData, &data[0], offset);
 
       m_hash = MurmurHash64A(&data[0], data.size(), 0);
     }

@@ -32,7 +32,7 @@ namespace he
 
       void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerPixel);
 
-      renderer::TextureManager *m_textureManager;
+      db::TextureManager *m_textureManager;
 
       GLenum m_target;
     };

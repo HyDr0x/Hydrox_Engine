@@ -5,13 +5,13 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/ComputeShader.h>
+#include <DataBase/ComputeShader.h>
 
 namespace he
 {
   namespace loader
   {
-    ComputeShaderLoader::ComputeShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_computeShaderManager(m_singletonManager->getService<renderer::ComputeShaderManager>())
+    ComputeShaderLoader::ComputeShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_computeShaderManager(m_singletonManager->getService<db::ComputeShaderManager>())
     {
     }
 
@@ -33,7 +33,7 @@ namespace he
       }
       else
       {
-        shaderHandle = m_computeShaderManager->addObject(renderer::ComputeShader(filename, computeShaderSource));
+        shaderHandle = m_computeShaderManager->addObject(db::ComputeShader(filename, computeShaderSource));
       }
 
       return shaderHandle;
@@ -49,7 +49,7 @@ namespace he
                                   {\n\
                                   }";
 
-      return m_computeShaderManager->addObject(renderer::ComputeShader(std::string("defaultComputeShader"), computeSource));
+      return m_computeShaderManager->addObject(db::ComputeShader(std::string("defaultComputeShader"), computeSource));
     }
   }
 }

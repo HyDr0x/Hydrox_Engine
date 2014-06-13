@@ -4,10 +4,10 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/Mesh.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/Mesh.h>
+#include <DataBase/Material.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/RenderShader.h>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
@@ -24,7 +24,8 @@
 namespace he
 {
   namespace saver
-  {    NodeLinkTraverser::NodeLinkTraverser(NodeWrapperMapper& wrapperMapper) : 
+  {
+    NodeLinkTraverser::NodeLinkTraverser(NodeWrapperMapper& wrapperMapper) : 
       m_wrapperMapper(wrapperMapper)
     {
     }

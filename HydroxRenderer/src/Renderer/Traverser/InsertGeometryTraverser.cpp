@@ -10,7 +10,7 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
-#include "Renderer/Resources/Mesh.h"
+#include <DataBase/Mesh.h>
 
 namespace he
 {
@@ -27,25 +27,25 @@ namespace he
     {
     }
 
-    void InsertGeometryTraverser::initialize(Mesh* mesh, util::ResourceHandle materialHandle)
+    void InsertGeometryTraverser::initialize(db::Mesh* mesh, util::ResourceHandle materialHandle)
     {
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
       m_primitiveType = mesh->getPrimitiveType();
       m_vertexStride = mesh->getVertexStride();
 
-      Material *material = m_singletonManager->getService<MaterialManager>()->getObject(materialHandle);
+      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(materialHandle);
       m_shaderHandle = material->getShaderHandle();
 
-      m_textureHandles.resize(Material::TEXTURETYPENUM);
+      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)
       {
-        unsigned int texNum = material->getTextureNumber((Material::TextureType)i);
+        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
         m_textureHandles[i].resize(texNum);
 
         for(unsigned int j = 0; j < texNum; j++)
         {
-          m_textureHandles[i][j] = material->getTextureHandle((Material::TextureType)i, j);
+          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
         }
       }
     }

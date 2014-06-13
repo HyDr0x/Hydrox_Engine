@@ -7,7 +7,7 @@
 
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"

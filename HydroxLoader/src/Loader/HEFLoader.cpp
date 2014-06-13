@@ -18,9 +18,9 @@
 
 #include <SceneGraph/Scene/Scene.h>
 
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Mesh.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/Material.h>
+#include <DataBase/Mesh.h>
 
 #include "Loader/ILDevilLoader.h"
 #include "Loader/RenderShaderLoader.h"
@@ -69,7 +69,7 @@ namespace he
 
     void HEFLoader::readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager)
     {
-      renderer::ModelManager *modelManager = singletonManager->getService<renderer::ModelManager>();
+      db::ModelManager *modelManager = singletonManager->getService<db::ModelManager>();
 
       if(path.back() != '/')
       {
@@ -146,13 +146,13 @@ namespace he
         MeshMetaData meshData;
         fileStream.read((char*)&meshData, sizeof(meshData));
 
-        std::vector<renderer::Mesh::indexType> indexData(meshData.indexCount);
+        std::vector<db::Mesh::indexType> indexData(meshData.indexCount);
         std::vector<GLubyte> geometryData(meshData.vboSize);
 
         fileStream.read((char*)&indexData[0], sizeof(indexData[0]) * meshData.indexCount);
         fileStream.read((char*)&geometryData[0], sizeof(geometryData[0]) * meshData.vboSize);
 
-        m_wrapperMapper.meshMap[i] = modelManager->addObject(renderer::Mesh(renderer::AABB(meshData.bbMin, meshData.bbMax), meshData.primitiveType, meshData.primitiveCount, meshData.vertexCount, meshData.vertexStride, meshData.vertexDeclaration, geometryData, indexData));
+        m_wrapperMapper.meshMap[i] = modelManager->addObject(db::Mesh(db::AABB(meshData.bbMin, meshData.bbMax), meshData.primitiveType, meshData.primitiveCount, meshData.vertexCount, meshData.vertexStride, meshData.vertexDeclaration, geometryData, indexData));
       }
 
       unsigned int materialMapSize;
@@ -226,7 +226,7 @@ namespace he
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         LightNodeData& data = m_wrapperMapper.lightNodes[i];
-        m_wrapperMapper.lightNodeMap[i] = new sg::LightNode(eventManager, data.nodeName);
+        m_wrapperMapper.lightNodeMap[i] = new sg::LightNode(data.lightType, eventManager, data.nodeName);
       }
 
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)

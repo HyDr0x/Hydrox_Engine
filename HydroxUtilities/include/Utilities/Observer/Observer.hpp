@@ -5,18 +5,18 @@ namespace he
 {
   namespace util
   {
-  template<class ParamT> class Observer
-  {
-  public:
+    template<class ParamT> class Observer
+    {
+    public:
 
-    Observer(){}
-    virtual ~Observer(){}
+      Observer(){}
+      virtual ~Observer(){}
 
-    virtual void updateObserver(ParamT params) = 0;
+      virtual void update(ParamT params) = 0;
 
-  private:
+    private:
 
-  };
+    };
   }
 }
 

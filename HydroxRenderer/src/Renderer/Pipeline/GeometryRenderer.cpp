@@ -77,11 +77,11 @@ namespace he
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
-    void GeometryRenderer::rasterizeGeometry() const
+    void GeometryRenderer::rasterizeGeometry()
     {  
       FrustumCullingTraverser frustumCullingTraverser;
 
-      ComputeShader *frustumCullingShader = m_singletonManager->getService<ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
+      db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
       frustumCullingTraverser.doTraverse(m_renderRootNode);
       frustumCullingShader->useNoShader();

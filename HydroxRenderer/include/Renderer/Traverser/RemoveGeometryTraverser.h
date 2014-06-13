@@ -8,7 +8,7 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
@@ -40,8 +40,8 @@ namespace he
 
       void deleteNode(TreeNode *treeNode);
 
-      ModelManager *m_modelManager;
-      MaterialManager *m_materialManager;
+      db::ModelManager *m_modelManager;
+      db::MaterialManager *m_materialManager;
 
       const xBar::IGeometryContainer& m_geometryContainer;
 

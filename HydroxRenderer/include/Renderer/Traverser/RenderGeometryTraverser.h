@@ -8,12 +8,15 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
   namespace renderer
-  {    class IRenderNode;    class RenderGeometryTraverser : public Traverser
+  {
+    class IRenderNode;
+
+    class RenderGeometryTraverser : public Traverser
     {
     public:
 
@@ -34,10 +37,10 @@ namespace he
 
     private:
 
-      ModelManager *m_modelManager;
-      MaterialManager *m_materialManager;
-      RenderShaderManager *m_renderShaderManager;
-      TextureManager *m_textureManager;
+      db::ModelManager *m_modelManager;
+      db::MaterialManager *m_materialManager;
+      db::RenderShaderManager *m_renderShaderManager;
+      db::TextureManager *m_textureManager;
     };
   }
 }

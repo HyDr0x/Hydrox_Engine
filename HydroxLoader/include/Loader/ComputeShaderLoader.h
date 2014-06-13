@@ -20,7 +20,7 @@ namespace he
 
     private:
 
-      renderer::ComputeShaderManager *m_computeShaderManager;
+      db::ComputeShaderManager *m_computeShaderManager;
     };
   }
 }

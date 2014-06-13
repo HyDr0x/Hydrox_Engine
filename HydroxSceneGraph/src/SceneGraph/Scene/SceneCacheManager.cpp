@@ -109,7 +109,7 @@ namespace he
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveAnimatedTransformNode);
     }
 
-    void SceneCacheManager::updateObserver(TransformNode* data)
+    void SceneCacheManager::update(TransformNode* data)
     {
       m_dirtyTransforms.push_back(data);
     }

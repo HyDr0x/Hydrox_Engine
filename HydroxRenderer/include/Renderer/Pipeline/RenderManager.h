@@ -10,7 +10,7 @@
 
 #include "Renderer/DLLExport.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 #include "Renderer/Pipeline/GBuffer.h"
 #include "Renderer/Pipeline/LightRenderer.h"
 #include "Renderer/Pipeline/ParticleRenderer.h"
@@ -32,6 +32,11 @@ namespace he
     class BillboardContainer;
     class LightContainer;
     class ParticleEmitterContainer;
+  }
+
+  namespace util
+  {
+    class SingletonManager;
   }
 
   namespace renderer
@@ -62,13 +67,14 @@ namespace he
         util::ResourceHandle stringShaderHandle, 
         util::ResourceHandle frustumCullingShaderHandle,
         util::ResourceHandle gBufferShaderHandle,
-        util::ResourceHandle directLightShaderHandle);
+        util::ResourceHandle directLightShaderHandle,
+        util::ResourceHandle combineShaderHandle);
 
-      void setNearFarPlane(float near, float far);
+      void setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far);
 
-      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const;
+      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
 
-      void addRenderComponent(const Sprite* sprite);
+      void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
       void addRenderComponent(const xBar::BillboardContainer& billboard);
       void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
@@ -76,7 +82,7 @@ namespace he
       void addRenderComponent(const xBar::LightContainer& light);
       void addRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter);
 
-      void removeRenderComponent(const Sprite* sprite);
+      void removeRenderComponent(const db::Sprite* sprite);
       void removeRenderComponent(const StringTexture2D* string);
       void removeRenderComponent(const xBar::BillboardContainer& billboard);
       void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
@@ -89,9 +95,15 @@ namespace he
       RenderManager(const RenderManager&);
       RenderManager& operator=(const RenderManager&);
 
+      util::SingletonManager *m_singletonManager;
+
       UBO m_cameraParameterUBO;
 
       bool m_skyboxRendering;
+
+      util::ResourceHandle m_offscreenBufferShaderHandle;
+      util::ResourceHandle m_combineShaderHandle;
+      Renderquad m_fullscreenRenderQuad;
 
       RenderOptions m_options;
 

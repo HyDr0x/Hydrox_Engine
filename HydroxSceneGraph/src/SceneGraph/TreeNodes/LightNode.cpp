@@ -13,9 +13,12 @@ namespace he
 {
   namespace sg
   {
-    LightNode::LightNode(util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : 
+    LightNode::LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) :
       TreeNode(nodeName, parent, nextSibling), 
+      m_lightType(lightType),
       m_eventManager(eventManager),
+      m_position(util::Vector<float, 4>::identity()),
+      m_direction(util::Vector<float, 4>::identity()),
       m_renderable(false)
     {
     }
@@ -36,11 +39,14 @@ namespace he
 
     TreeNode* LightNode::clone() const
     {
-      LightNode *newNode = new LightNode(m_eventManager, m_nodeName);
+      LightNode *newNode = new LightNode(m_lightType, m_eventManager, m_nodeName);
 
       newNode->m_nodeName = m_nodeName;
 
-      newNode->m_trfMatrix = m_trfMatrix;
+      newNode->m_position = m_position;
+      newNode->m_direction = m_direction;
+
+      newNode->m_lightData = m_lightData;
 
       return newNode;
     }
@@ -84,34 +90,100 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode)->execute(xBar::LightContainer(&m_trfMatrix, m_lightHandle));
+        m_eventManager->raiseSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode)->execute(xBar::LightContainer(m_lightData));
       }
       else if (m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode)->execute(xBar::LightContainer(&m_trfMatrix, m_lightHandle));
+        m_eventManager->raiseSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnRemoveLightNode)->execute(xBar::LightContainer(m_lightData));
       }
 
       m_renderable = renderable;
     }
 
-    void LightNode::setLightHandle(util::ResourceHandle lightHandle)
+    void LightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
     {
-      m_lightHandle = lightHandle;
+      if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = m_position + position;
+      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.apply(m_direction);
     }
 
-    util::ResourceHandle LightNode::getLightHandle() const
+    void LightNode::setPosition(util::Vector<float, 3> position)
     {
-      return m_lightHandle;
+      m_position = position;
     }
 
-    void LightNode::setTransformationMatrix(const util::Matrix<float,4>& trfMatrix)
+    util::Vector<float, 3> LightNode::getPosition() const
     {
-      m_trfMatrix = trfMatrix;
+      return m_position;
     }
 
-    util::Matrix<float,4> LightNode::getTransformationMatrix() const
+    void LightNode::setDirection(util::Vector<float, 3> direction)
     {
-      return m_trfMatrix;
+      m_direction = direction;
+    }
+
+    util::Vector<float, 3> LightNode::getDirection() const
+    {
+      return m_direction;
+    }
+
+    void LightNode::setIntensity(float intensity)
+    {
+      m_lightData.intensity = intensity;
+    }
+
+    float LightNode::getIntensity() const
+    {
+      return m_lightData.intensity;
+    }
+
+    void LightNode::setSpotLightExponent(float spotLightExponent)
+    {
+      m_lightData.spotLightExponent = spotLightExponent;
+    }
+
+    float LightNode::getSpotLightExponent() const
+    {
+      return m_lightData.spotLightExponent;
+    }
+
+    void LightNode::setSpotLightCutoff(float spotLightCutoff)
+    {
+      m_lightData.spotLightCutoff = spotLightCutoff;
+    }
+
+    float LightNode::getSpotLightCutoff() const
+    {
+      return m_lightData.spotLightCutoff;
+    }
+
+    void LightNode::setConstAttenuation(float constAttenuation)
+    {
+      m_lightData.constAttenuation = constAttenuation;
+    }
+
+    float LightNode::getConstAttenuation() const
+    {
+      return m_lightData.constAttenuation;
+    }
+
+    void LightNode::setLinearAttenuation(float linearAttenuation)
+    {
+      m_lightData.linearAttenuation = linearAttenuation;
+    }
+
+    float LightNode::getLinearAttenuation() const
+    {
+      return m_lightData.linearAttenuation;
+    }
+
+    void LightNode::setQuadricAttenuation(float quadricAttenuation)
+    {
+      m_lightData.quadricAttenuation = quadricAttenuation;
+    }
+
+    float LightNode::getQuadricAttenuation() const
+    {
+      return m_lightData.quadricAttenuation;
     }
   }
 }

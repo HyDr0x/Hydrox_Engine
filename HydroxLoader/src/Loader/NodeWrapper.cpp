@@ -104,7 +104,22 @@ namespace he
     std::ifstream& operator >>(std::ifstream& stream, LightNodeData& node)
     {
       stream >> (TreeNodeData&)node;
-      stream >> node.trfMatrix;
+
+      stream >> node.position;
+      stream >> node.direction;
+
+      stream >> node.intensity;
+
+      stream >> node.spotLightExponent;
+      stream >> node.spotLightCutoff;
+
+      stream >> node.constAttenuation;
+      stream >> node.linearAttenuation;
+      stream >> node.quadricAttenuation;
+
+      unsigned int lightType;
+      stream >> lightType;
+      node.lightType = (sg::LightType)lightType;
 
       return stream;
     }

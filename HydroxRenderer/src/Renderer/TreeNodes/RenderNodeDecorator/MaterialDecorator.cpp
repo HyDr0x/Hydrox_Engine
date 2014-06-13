@@ -3,7 +3,7 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Resources/Material.h"
+#include <DataBase/Material.h>
 
 #include "Renderer/Traverser/Traverser.h"
 
@@ -16,9 +16,9 @@ namespace he
       m_materialCount(0),
       m_materialNumberChanged(false)
     {
-      m_materialManager = singletonManager->getService<MaterialManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
 
-      m_materialBuffer.createBuffer(sizeof(Material::MaterialData) * getMaxMaterials(), GL_STATIC_DRAW);
+      m_materialBuffer.createBuffer(sizeof(db::Material::MaterialData) * getMaxMaterials(), GL_STATIC_DRAW);
     }
 
     MaterialDecorator::~MaterialDecorator()
@@ -124,10 +124,10 @@ namespace he
       unsigned int instanceNumber = getInstanceNumber();
 
       unsigned int index = 0;
-      for(std::map<util::ResourceHandle, MaterialMemoryManager, Less>::iterator instanceIterator = m_materialHandles.begin(); instanceIterator != m_materialHandles.end(); instanceIterator++, index++)
+      for (std::map<util::ResourceHandle, MaterialIndexData, Less>::iterator instanceIterator = m_materialHandles.begin(); instanceIterator != m_materialHandles.end(); instanceIterator++, index++)
       {
-        Material *material = m_materialManager->getObject(instanceIterator->first);
-        m_materialBuffer.setData(m_materialCount * sizeof(Material::MaterialData), sizeof(Material::MaterialData), &material->getMaterialData());
+        db::Material *material = m_materialManager->getObject(instanceIterator->first);
+        m_materialBuffer.setData(index * sizeof(db::Material::MaterialData), sizeof(db::Material::MaterialData), &material->getMaterialData());
 
         instanceIterator->second.bufferIndex = index;
       }

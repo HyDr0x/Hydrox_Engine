@@ -54,7 +54,7 @@ namespace he
 
       void registerNodeCacheSlots();
 
-      void updateObserver(TransformNode* data);
+      void update(TransformNode* data);
 
       void updateAnimationTime(float currentTime, bool isTimeRelative);
       void updateAnimatedTransformNodes();

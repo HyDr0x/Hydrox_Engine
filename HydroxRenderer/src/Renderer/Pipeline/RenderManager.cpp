@@ -64,37 +64,47 @@ namespace he
       util::ResourceHandle spriteShaderHandle, 
       util::ResourceHandle stringShaderHandle,
       util::ResourceHandle frustumCullingShaderHandle,
-      util::ResourceHandle gBufferShaderHandle,
-      util::ResourceHandle directLightShaderHandle)
+      util::ResourceHandle offscreenBufferShaderHandle,
+      util::ResourceHandle directLightShaderHandle,
+      util::ResourceHandle combineShaderHandle)
     {
+      m_singletonManager = singletonManager;
+
       m_options = options;
 
-      m_geometryRasterizer.initialize(m_options, singletonManager, frustumCullingShaderHandle);
-      m_gBuffer.initialize(m_options, singletonManager, gBufferShaderHandle);
-      m_billboardRenderer.initialize(singletonManager, billboardShaderHandle);
-      m_spriteRenderer.initialize(singletonManager, spriteShaderHandle, maxLayer);
-      m_stringRenderer.initialize(singletonManager, stringShaderHandle, maxLayer);
-      m_lightRenderer.initialize(singletonManager, directLightShaderHandle);
-      m_particleRenderer.initialize(singletonManager, billboardShaderHandle);//dummy shader handle
+      m_offscreenBufferShaderHandle = offscreenBufferShaderHandle;
+      m_combineShaderHandle = combineShaderHandle;
 
-      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 3 + sizeof(util::Vector<float, 4>) + sizeof(float) * 2, GL_DYNAMIC_DRAW);
+      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle);
+      m_gBuffer.initialize(m_options, m_singletonManager);
+      m_billboardRenderer.initialize(m_singletonManager, billboardShaderHandle);
+      m_spriteRenderer.initialize(m_singletonManager, spriteShaderHandle, maxLayer);
+      m_stringRenderer.initialize(m_singletonManager, stringShaderHandle, maxLayer);
+      m_lightRenderer.initialize(m_options, m_singletonManager, directLightShaderHandle);
+      m_particleRenderer.initialize(m_singletonManager, billboardShaderHandle);//dummy shader 
+
+      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::Vector<float, 4>) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
 
-    void RenderManager::setNearFarPlane(float near, float far)
+    void RenderManager::setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far)
     {
-      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>), sizeof(float), &near);
-      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + sizeof(float), sizeof(float), &far);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>), sizeof(GLuint), &width);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + sizeof(GLuint), sizeof(GLuint), &height);
+
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + 2 * sizeof(GLuint), sizeof(GLfloat), &near);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &far);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition) const
+    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
       m_cameraParameterUBO.setData(0, sizeof(util::Matrix<float, 4>), &viewMatrix[0][0]);
-      m_cameraParameterUBO.setData(sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &projectionMatrix[0][0]);
+      m_cameraParameterUBO.setData(1 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &projectionMatrix[0][0]);
       m_cameraParameterUBO.setData(2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix[0][0]);
-      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>), &eyeVec[0]);
+      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix.invert()[0][0]);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>), &eyeVec[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
@@ -102,13 +112,21 @@ namespace he
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_gBuffer.clear();
+        m_lightRenderer.clear();
 
         m_gBuffer.setGBuffer();
 
         m_geometryRasterizer.rasterizeGeometry();
+
+        m_gBuffer.unsetGBuffer();
+
+        m_lightRenderer.render(m_options, m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
+
+        m_gBuffer.setGBuffer();
+
         m_billboardRenderer.render();
 
-        if (m_skyboxRendering)
+        if(m_skyboxRendering)
         {
           m_skyboxRenderer.render();
         }
@@ -116,7 +134,15 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      m_gBuffer.render();
+      //m_fullscreenRenderQuad.setReadTextures(1, m_gBuffer.getColorTexture());
+      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
+
+      m_fullscreenRenderQuad.setReadTextures(2, m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture());
+      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
+
+      shader->useShader();
+      m_fullscreenRenderQuad.render();
+      shader->useNoShader();
 
       m_spriteRenderer.render();
       m_stringRenderer.render();
@@ -124,7 +150,7 @@ namespace he
       m_cameraParameterUBO.unBindBuffer(0);
     }
 
-    void RenderManager::addRenderComponent(const Sprite *sprite)
+    void RenderManager::addRenderComponent(const db::Sprite *sprite)
     {
       m_spriteRenderer.addRenderComponent(sprite);
     }
@@ -159,7 +185,7 @@ namespace he
       m_particleRenderer.addRenderComponent(particleEmitter);
     }
 
-    void RenderManager::removeRenderComponent(const Sprite *sprite)
+    void RenderManager::removeRenderComponent(const db::Sprite *sprite)
     {
       m_spriteRenderer.removeRenderComponent(sprite);
     }

@@ -8,7 +8,7 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Signals/EventManager.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -33,7 +33,7 @@ namespace he
 
       void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
 
-      void rasterizeGeometry() const;
+      void rasterizeGeometry();
 
       void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
       void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);

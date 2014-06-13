@@ -93,7 +93,19 @@ namespace he
     std::ofstream& operator <<(std::ofstream& stream, const LightNodeData& node)
     {
       stream << (const TreeNodeData&)node;
-      stream << node.trfMatrix << std::endl;
+      stream << node.position << std::endl;
+      stream << node.direction << std::endl;
+
+      stream << node.intensity << std::endl;
+
+      stream << node.spotLightExponent << std::endl;
+      stream << node.spotLightCutoff << std::endl;
+
+      stream << node.constAttenuation << std::endl;
+      stream << node.linearAttenuation << std::endl;
+      stream << node.quadricAttenuation << std::endl;
+
+      stream << node.lightType << std::endl;
 
       return stream;
     }

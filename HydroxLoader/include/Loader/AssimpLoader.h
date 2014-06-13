@@ -13,7 +13,7 @@
 
 #include <Utilities/Signals/EventManager.h>
 
-#include <Renderer/Resources/ResourceManager.hpp>
+#include <DataBase/ResourceManager.hpp>
 
 #include <SceneGraph/Scene/Scene.h>
 #include <SceneGraph/TreeNodes/AnimatedTransformNode.h>
@@ -77,10 +77,10 @@ namespace he
 
       util::EventManager *m_eventManager;
 
-      renderer::ModelManager *m_modelManager;
-      renderer::MaterialManager *m_materialManager;
-      renderer::TextureManager *m_textureManager;
-      renderer::RenderShaderManager *m_renderShaderManager;
+      db::ModelManager *m_modelManager;
+      db::MaterialManager *m_materialManager;
+      db::TextureManager *m_textureManager;
+      db::RenderShaderManager *m_renderShaderManager;
 
       util::ResourceHandle m_defaultMaterial;
 

@@ -1,10 +1,10 @@
 #ifndef NODEWRAPPERMAPPER_H_
 #define NODEWRAPPERMAPPER_H_
 
-#include <Renderer/Resources/Mesh.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/Mesh.h>
+#include <DataBase/Material.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/RenderShader.h>
 
 #include "Saver/NodeWrapper.h"
 
@@ -57,7 +57,7 @@ namespace he
       std::map<util::ResourceHandle, unsigned int, Less> materialMap;
       std::map<util::ResourceHandle, unsigned int, Less> billboardTextureMap;
 
-      std::vector<renderer::Mesh> meshes;
+      std::vector<db::Mesh> meshes;
       std::vector<std::string> materialFileNames;
       std::vector<std::string> billboardTextureFileNames;
     };

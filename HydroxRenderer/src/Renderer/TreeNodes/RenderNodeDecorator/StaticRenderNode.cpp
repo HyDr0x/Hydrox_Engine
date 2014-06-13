@@ -3,10 +3,6 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Resources/Material.h"
-#include "Renderer/Resources/Mesh.h"
-#include "Renderer/Resources/RenderShader.h"
-
 #include "Renderer/Traverser/Traverser.h"
 
 #include "Renderer/Pipeline/RenderOptions.h"
@@ -77,9 +73,9 @@ namespace he
     void StaticRenderNode::frustumCulling() const
     {
       unsigned int instanceNumber = m_instances.size();
-      ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
+      db::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
 
-      ComputeShader::dispatchComputeShader(256, 1, 1);
+      db::ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 
     void StaticRenderNode::rasterizeGeometry() const

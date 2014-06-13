@@ -3,7 +3,7 @@
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Resources/Mesh.h"
+#include <DataBase/Mesh.h>
 
 namespace he
 {
@@ -18,7 +18,7 @@ namespace he
       m_iboSize(0),
       m_meshNumberChanged(false)
     {
-      m_modelManager = singletonManager->getService<ModelManager>();
+      m_modelManager = singletonManager->getService<db::ModelManager>();
     }
 
     DrawElementsDecorator::~DrawElementsDecorator()
@@ -27,7 +27,7 @@ namespace he
 
     bool DrawElementsDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
-      Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
       if(m_primitiveType != mesh->getPrimitiveType())
       {
@@ -65,7 +65,7 @@ namespace he
         {
           m_meshNumberChanged = true;
 
-          Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+          db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
 
           m_vboSize -= mesh->getVBOSize();
           m_iboSize -= mesh->getIndexCount() * sizeof(GLuint);
@@ -144,7 +144,7 @@ namespace he
       unsigned int indexOffset = 0;
       for(std::map<util::ResourceHandle, ElementGeometry, Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, bufferIndex++)
       {
-        Mesh *mesh = m_modelManager->getObject(meshIterator->first);
+        db::Mesh *mesh = m_modelManager->getObject(meshIterator->first);
 
         m_meshVertexBuffer.setData(vertexOffset * mesh->getVertexStride(), mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
         m_meshIndexBuffer.setData(indexOffset * sizeof(GLINDEXTYPE), mesh->getIndexCount() * sizeof(GLINDEXTYPE), &(mesh->getIndexBuffer()[0]));
@@ -176,7 +176,7 @@ namespace he
       while (!isEndInstanceIterator())
       {
         const xBar::IGeometryContainer& instance = incInstanceIterator();
-        Mesh *mesh = m_modelManager->getObject(instance.getMeshHandle());
+        db::Mesh *mesh = m_modelManager->getObject(instance.getMeshHandle());
 
         DrawElementsIndirectCommand command;
         command.count = mesh->getIndexCount();

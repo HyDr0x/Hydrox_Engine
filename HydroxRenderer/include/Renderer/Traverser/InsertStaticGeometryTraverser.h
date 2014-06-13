@@ -8,7 +8,7 @@
 
 #include "Renderer/Traverser/InsertGeometryTraverser.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
 
@@ -16,11 +16,17 @@
 
 namespace he
 {
-  namespace xBar  {    class StaticGeometryContainer;
-    class SkinnedGeometryContainer;  }
+  namespace xBar
+  {
+    class StaticGeometryContainer;
+    class SkinnedGeometryContainer;
+  }
 
   namespace renderer
-  {    class IRenderNode;    class InsertStaticGeometryTraverser : public InsertGeometryTraverser
+  {
+    class IRenderNode;
+
+    class InsertStaticGeometryTraverser : public InsertGeometryTraverser
     {
     public:
 

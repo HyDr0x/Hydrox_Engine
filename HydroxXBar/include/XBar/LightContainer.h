@@ -2,7 +2,6 @@
 #define LIGHTCONTAINER_H_
 
 #include <Utilities/Math/Math.hpp>
-#include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "XBar/DLLExport.h"
 
@@ -10,26 +9,29 @@
 
 namespace he
 {
+  namespace db
+  {
+    class Light;
+  }
+
   namespace xBar
   {
     class GRAPHICAPI LightContainer : public AContainer
     {
     public:
 
-      LightContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle lightHandle);
+      LightContainer(const db::Light& lightData);
       ~LightContainer();
 
       bool operator == (const LightContainer& other) const;
 
-      util::ResourceHandle getLightHandle() const;
-      util::Matrix<float, 4> getTransformationMatrix() const;
+      const db::Light * const getLightData() const;
 
     private:
 
       void createHash();
 
-      util::Matrix<float, 4> *m_trfMatrix;
-      util::ResourceHandle m_lightHandle;
+      const db::Light& m_lightData;
     };
   }
 }

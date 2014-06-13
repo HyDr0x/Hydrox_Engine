@@ -8,6 +8,10 @@ set(HYDROX_UTIL_INCLUDE ${HYDROX_DIR}/HydroxUtilities/include)
 set(HYDROX_UTIL_LIB_DBG ${HYDROX_DIR}/HydroxUtilities/lib/Debug/Hydrox_Utilities)
 set(HYDROX_UTIL_LIB_REL ${HYDROX_DIR}/HydroxUtilities/lib/Release/Hydrox_Utilities)
 
+set(HYDROX_DB_INCLUDE ${HYDROX_DIR}/HydroxDataBase/include)
+set(HYDROX_DB_LIB_DBG ${HYDROX_DIR}/HydroxDataBase/lib/Debug/Hydrox_DataBase)
+set(HYDROX_DB_LIB_REL ${HYDROX_DIR}/HydroxDataBase/lib/Release/Hydrox_DataBase)
+
 set(HYDROX_XBAR_INCLUDE ${HYDROX_DIR}/HydroxXBar/include)
 set(HYDROX_XBAR_LIB_DBG ${HYDROX_DIR}/HydroxXBar/lib/Debug/Hydrox_XBar)
 set(HYDROX_XBAR_LIB_REL ${HYDROX_DIR}/HydroxXBar/lib/Release/Hydrox_XBar)
@@ -30,20 +34,23 @@ set(HYDROX_SAVER_LIB_REL ${HYDROX_DIR}/HydroxSaver/lib/Release/Hydrox_Saver)
 
 add_subdirectory(HydroxUtilities) 
 
+add_subdirectory(HydroxDataBase) 
+add_dependencies(Hydrox_DataBase Hydrox_Utilities)
+
 add_subdirectory(HydroxXBar) 
-add_dependencies(Hydrox_XBar Hydrox_Utilities)
+add_dependencies(Hydrox_XBar Hydrox_Utilities Hydrox_DataBase)
 
 add_subdirectory(HydroxRenderer) 
-add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar)
+add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar Hydrox_DataBase)
 
 add_subdirectory(HydroxSceneGraph) 
-add_dependencies(Hydrox_SceneGraph Hydrox_Utilities Hydrox_XBar)
+add_dependencies(Hydrox_SceneGraph Hydrox_Utilities Hydrox_XBar Hydrox_DataBase)
 
 add_subdirectory(HydroxLoader) 
-add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
+add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)
 
 add_subdirectory(HydroxSaver) 
-add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer)
+add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)
 
 add_subdirectory(Sandbox) 
-add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer)
+add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)

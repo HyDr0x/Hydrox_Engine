@@ -1,10 +1,10 @@
 #ifndef LOADERNODEWRAPPERMAPPER_H_
 #define LOADERNODEWRAPPERMAPPER_H_
 
-#include <Renderer/Resources/Mesh.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/Mesh.h>
+#include <DataBase/Material.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/RenderShader.h>
 
 #include "Loader/NodeWrapper.h"
 

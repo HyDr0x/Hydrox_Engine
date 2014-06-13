@@ -12,7 +12,7 @@ namespace he
 {
   namespace renderer
   {
-    struct MaterialMemoryManager
+    struct MaterialIndexData
     {
       unsigned int bufferIndex;
       unsigned int instanceNumber;
@@ -40,7 +40,7 @@ namespace he
       void resizeMaterialBuffer();
       void resizeMaterialIndexBuffer();
 
-      MaterialManager *m_materialManager;
+      db::MaterialManager *m_materialManager;
 
       UBO m_materialBuffer;
       GPUImmutableBuffer m_materialIndexBuffer;
@@ -49,7 +49,7 @@ namespace he
 
       unsigned int m_materialCount;
 
-      std::map<util::ResourceHandle, MaterialMemoryManager, Less> m_materialHandles;
+      std::map<util::ResourceHandle, MaterialIndexData, Less> m_materialHandles;
     };
   }
 }

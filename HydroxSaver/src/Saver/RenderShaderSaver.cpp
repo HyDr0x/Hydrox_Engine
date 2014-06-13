@@ -5,8 +5,8 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/ResourceManager.hpp>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/ResourceManager.hpp>
+#include <DataBase/RenderShader.h>
 
 namespace he
 {
@@ -14,7 +14,7 @@ namespace he
   {
     void RenderShaderSaver::save(std::string path, std::string filename, util::ResourceHandle renderShaderHandle, util::SingletonManager *singletonManager)
     {
-      renderer::RenderShader *shader = singletonManager->getService<renderer::RenderShaderManager>()->getObject(renderShaderHandle);
+      db::RenderShader *shader = singletonManager->getService<db::RenderShaderManager>()->getObject(renderShaderHandle);
 
       std::vector<std::string> shaderType(5);
       shaderType[0] = ".vert";

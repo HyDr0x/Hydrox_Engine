@@ -1,6 +1,6 @@
 #include "Renderer/Buffer/UBO.h"
 
-#include "Renderer/Resources/Shader.h"
+#include <DataBase/Shader.h>
 
 namespace he
 {
@@ -21,7 +21,7 @@ namespace he
       delete[] m_bufferData;
     }
 
-    void UBO::createBuffer(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames)//shared layout
+    void UBO::createBuffer(db::Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames)//shared layout
     {
       m_uniformCount = uniformCount;
       m_bufferSize = bufferSize;

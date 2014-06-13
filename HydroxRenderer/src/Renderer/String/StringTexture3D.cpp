@@ -5,7 +5,7 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Math/Math.hpp>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
@@ -13,7 +13,7 @@ namespace he
   {
     StringTexture3D::StringTexture3D(util::SingletonManager *singletonManager, std::string text)
     {
-      ModelManager *modelManager = singletonManager->getService<ModelManager>();
+      db::ModelManager *modelManager = singletonManager->getService<db::ModelManager>();
 
       unsigned int letterNumber = text.size();
 

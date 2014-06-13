@@ -245,6 +245,8 @@ namespace he
 
     bool TransformTraverser::preTraverse(LightNode* treeNode)
     {
+      treeNode->applyTransformation(m_translateStack.top(), m_rotationStack.top());
+
       return true;
     }
 

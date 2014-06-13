@@ -5,7 +5,7 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/RenderShader.h>
 
 namespace he
 {
@@ -39,7 +39,7 @@ namespace he
       }
       else
       {
-        shaderHandle = m_singletonManager->getService<renderer::RenderShaderManager>()->addObject(renderer::RenderShader(filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
+        shaderHandle = m_singletonManager->getService<db::RenderShaderManager>()->addObject(db::RenderShader(filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource));
       }
 
       return shaderHandle;
@@ -80,7 +80,7 @@ namespace he
                                       color = vec4(1,1,1,1);\n\
                                     }";
 
-      return m_singletonManager->getService<renderer::RenderShaderManager>()->addObject(renderer::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
+      return m_singletonManager->getService<db::RenderShaderManager>()->addObject(db::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));
     }
   }
 }

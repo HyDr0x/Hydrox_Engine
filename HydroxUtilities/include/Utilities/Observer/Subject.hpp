@@ -45,7 +45,7 @@ namespace he
     {
       for(std::list<Observer<ParamT>*>::iterator oit = m_observer.begin(); oit != m_observer.end(); oit++)
       {
-        (*oit)->updateObserver(params);
+        (*oit)->update(params);
       }
     }
 

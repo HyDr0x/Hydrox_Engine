@@ -142,7 +142,7 @@ namespace he
       fileStream << m_wrapperMapper.meshes.size() << std::endl;
       for(unsigned int i = 0; i < m_wrapperMapper.meshes.size(); i++)
       {
-        renderer::Mesh& mesh = m_wrapperMapper.meshes[i];
+        db::Mesh& mesh = m_wrapperMapper.meshes[i];
 
         MeshMetaData meshData;
         meshData.bbMax = mesh.getBBMax();

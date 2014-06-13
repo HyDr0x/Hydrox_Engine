@@ -7,10 +7,13 @@
 
 namespace he
 {
-  namespace renderer
+  namespace db
   {
     class Mesh;
+  }
 
+  namespace renderer
+  {
     struct DrawElementsIndirectCommand
     {
       GLuint count;//number of indices
@@ -49,7 +52,7 @@ namespace he
       void updatePerMeshBuffer();
       void updatePerInstanceBuffer();
 
-      ModelManager *m_modelManager;
+      db::ModelManager *m_modelManager;
 
       //per mesh buffer
       GPUImmutableBuffer m_meshVertexBuffer;

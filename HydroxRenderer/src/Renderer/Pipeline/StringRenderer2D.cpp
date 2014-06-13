@@ -20,8 +20,8 @@ namespace he
 
     void StringRenderer2D::initialize(util::SingletonManager *singletonManager, util::ResourceHandle stringShaderHandle, unsigned char maxLayer)
     {
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
@@ -33,14 +33,14 @@ namespace he
       glGenVertexArrays(1, &m_stringVAO);
       glBindVertexArray(m_stringVAO);
 
-      glVertexAttribFormat(RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 2>));
+      glVertexAttribFormat(db::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 2>));
 
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::TEXTURE0, 0);
+      glVertexAttribBinding(db::RenderShader::POSITION, 0);
+      glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
 
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::TEXTURE0);
+      glEnableVertexAttribArray(db::RenderShader::POSITION);
+      glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
 
       glBindVertexArray(0);
     }
@@ -55,8 +55,8 @@ namespace he
       glAlphaFunc(GL_GREATER, 0.0f);
 
       const StringTexture2D *renderString;
-      Texture2D *renderTexture;
-      RenderShader *stringShader = m_renderShaderManager->getObject(m_stringShaderHandle);
+      db::Texture2D *renderTexture;
+      db::RenderShader *stringShader = m_renderShaderManager->getObject(m_stringShaderHandle);
 
       stringShader->useShader();
 
@@ -70,8 +70,8 @@ namespace he
 
           util::Matrix<float, 3> worldMatrix = renderString->getTransformationMatrix();
           float z = renderString->getLayer() / (float)m_maxLayer;
-          RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-          RenderShader::setUniform(5, GL_FLOAT, &z);
+          db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+          db::RenderShader::setUniform(5, GL_FLOAT, &z);
 
           renderString->render();
         }
@@ -96,8 +96,8 @@ namespace he
 
             util::Matrix<float, 3> worldMatrix = renderString->getTransformationMatrix();
             float z = renderString->getLayer() / (float)m_maxLayer;
-            RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-            RenderShader::setUniform(5, GL_FLOAT, &z);
+            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            db::RenderShader::setUniform(5, GL_FLOAT, &z);
 
             renderString->render();
           }

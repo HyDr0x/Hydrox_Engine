@@ -6,12 +6,12 @@
 
 #include <GL/glew.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Buffer/GPUBuffer.h"
 
-#include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Texture2D.h"
+#include <DataBase/RenderShader.h>
+#include <DataBase/Texture2D.h>
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
@@ -54,8 +54,8 @@ namespace he
       std::list<const StringTexture2D*> m_opaqueStrings;
       std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
-      RenderShaderManager *m_renderShaderManager;
-      TextureManager *m_textureManager;
+      db::RenderShaderManager *m_renderShaderManager;
+      db::TextureManager *m_textureManager;
     };
   }
 }

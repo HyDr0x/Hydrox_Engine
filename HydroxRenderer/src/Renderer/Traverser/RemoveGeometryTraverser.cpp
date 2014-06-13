@@ -16,24 +16,24 @@ namespace he
     RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
       m_geometryContainer(geometryContainer)
     {
-      m_modelManager = singletonManager->getService<ModelManager>();
-      m_materialManager = singletonManager->getService<MaterialManager>();
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
 
       m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
 
-      Material *material = m_materialManager->getObject(m_geometryContainer.getMaterialHandle());
+      db::Material *material = m_materialManager->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
-      m_textureHandles.resize(Material::TEXTURETYPENUM);
+      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)
       {
-        unsigned int texNum = material->getTextureNumber((Material::TextureType)i);
+        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
         m_textureHandles[i].resize(texNum);
 
         for(unsigned int j = 0; j < texNum; j++)
         {
-          m_textureHandles[i][j] = material->getTextureHandle((Material::TextureType)i, j);
+          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
         }
       }
     }

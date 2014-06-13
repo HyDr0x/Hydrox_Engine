@@ -5,7 +5,7 @@
 
 #include <XBar/ParticleEmitterContainer.h>
 
-#include "Renderer/Resources/RenderShader.h"
+#include <DataBase/RenderShader.h>
 
 namespace he
 {
@@ -22,7 +22,7 @@ namespace he
 
     void ParticleRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle particleShaderHandle)
     {
-      m_particleEmitterManager = singletonManager->getService<ParticleEmitterManager>();
+      m_particleEmitterManager = singletonManager->getService<db::ParticleEmitterManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 

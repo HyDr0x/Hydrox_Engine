@@ -22,7 +22,7 @@ namespace he
 
       void gatherSystemInformation();
 
-      void initDebugMode() const;
+      void initDebugMode(bool syncedOutput) const;
 
       void printSystemInformation() const;
       void printSupportedExtensions() const;

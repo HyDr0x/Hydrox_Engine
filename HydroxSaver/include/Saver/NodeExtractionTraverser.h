@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <Renderer/Resources/ResourceManager.hpp>
+#include <DataBase/ResourceManager.hpp>
 #include <SceneGraph/Traverser/Traverser.h>
 #include <Utilities/Math/Math.hpp>
 
@@ -60,10 +60,10 @@ namespace he
 
       NodeWrapperMapper& m_wrapperMapper;
 
-      renderer::ModelManager *m_modelManager;
-      renderer::MaterialManager *m_materialManager;
-      renderer::RenderShaderManager *m_renderShaderManager;
-      renderer::TextureManager *m_textureManager;
+      db::ModelManager *m_modelManager;
+      db::MaterialManager *m_materialManager;
+      db::RenderShaderManager *m_renderShaderManager;
+      db::TextureManager *m_textureManager;
     };
   }
 }

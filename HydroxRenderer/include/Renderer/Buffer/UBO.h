@@ -9,10 +9,13 @@
 
 namespace he
 {
-  namespace renderer
+  namespace db
   {
     class Shader;
+  }
 
+  namespace renderer
+  {
     class GRAPHICAPI UBO
     {
     public:
@@ -20,7 +23,7 @@ namespace he
       UBO();
       ~UBO();
 
-      void createBuffer(Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
+      void createBuffer(db::Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
       void createBuffer(const GLuint bufferSize, GLenum usage);//std140 layout
 
       template<class T> void setData(const GLuint index, T *data, const GLuint count = 1)//shared layout

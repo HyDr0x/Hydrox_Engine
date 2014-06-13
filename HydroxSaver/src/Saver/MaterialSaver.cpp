@@ -5,9 +5,9 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/Material.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/RenderShader.h>
 
 #include "Saver/NodeWrapper.h"
 #include "Saver/NodeWrapperMapper.h"
@@ -18,7 +18,8 @@
 namespace he
 {
   namespace saver
-  {    void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
+  {
+    void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
     {
       std::map<MaterialFileKeywords, std::string> materialFileKeywords;
       materialFileKeywords[DIFFUSESTRENGTH] = "Diffuse Strength";
@@ -33,10 +34,11 @@ namespace he
 
       materialFileKeywords[SHADERNAME] = "Shader Name";
 
-      renderer::TextureManager *textureManager = singletonManager->getService<renderer::TextureManager>();      renderer::RenderShaderManager *renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
-      renderer::MaterialManager *materialManager = singletonManager->getService<renderer::MaterialManager>();
+      db::TextureManager *textureManager = singletonManager->getService<db::TextureManager>();
+      db::RenderShaderManager *renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      db::MaterialManager *materialManager = singletonManager->getService<db::MaterialManager>();
 
-      renderer::Material *material = materialManager->getObject(materialHandle);
+      db::Material *material = materialManager->getObject(materialHandle);
 
       std::ofstream fileStream;
       fileStream.open(path + filename + std::string(".material"), std::ofstream::out | std::ofstream::trunc);
@@ -56,18 +58,18 @@ namespace he
       fileStream << std::endl;
 
       /////////////////////////TEXTURES/////////////////////////
-      for(unsigned int i = 0; i < renderer::Material::TEXTURETYPENUM; i++)
+      for(unsigned int i = 0; i < db::Material::TEXTURETYPENUM; i++)
       {
         fileStream << materialFileKeywords[MaterialFileKeywords(i + TEXTUREOFFSET + 1)] << std::endl;
-        for(unsigned int j = 0; j < renderer::Material::TEXTURENUMBER; j++)
+        for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
         {
-          if(j < material->getTextureNumber((renderer::Material::TextureType)i))
+          if(j < material->getTextureNumber((db::Material::TextureType)i))
           {
-            renderer::Texture2D *texture = textureManager->getObject(material->getTextureHandle((renderer::Material::TextureType)i, j));
+            db::Texture2D *texture = textureManager->getObject(material->getTextureHandle((db::Material::TextureType)i, j));
             std::stringstream textureFilename; 
             textureFilename << filename << materialFileKeywords[MaterialFileKeywords(i + TEXTUREOFFSET + 1)] << j;
 
-            ILDevilSaver::save(path, textureFilename.str(), material->getTextureHandle((renderer::Material::TextureType)i, j), singletonManager);
+            ILDevilSaver::save(path, textureFilename.str(), material->getTextureHandle((db::Material::TextureType)i, j), singletonManager);
 
             fileStream << path << textureFilename.str() << std::string(".png") << std::endl;
           }

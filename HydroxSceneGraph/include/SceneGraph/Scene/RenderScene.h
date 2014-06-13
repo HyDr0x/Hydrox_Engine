@@ -37,8 +37,8 @@ namespace he
       RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition);
       ~RenderScene();
 
-      GroupNode* addParentNode(unsigned int eventID, TreeNode* destinationNode, const GroupNode* sourceNode);
-      TreeNode* addChildNode(unsigned int eventID, GroupNode* destinationNode, const TreeNode* sourceNode);
+      GroupNode* addParentNode(TreeNode* destinationNode, const GroupNode* sourceNode);
+      TreeNode* addChildNode(GroupNode* destinationNode, const TreeNode* sourceNode);
       void removeNode(TreeNode* node);
 
       GroupNode* addSubTree(Scene& subScene, GroupNode* sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));

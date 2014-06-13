@@ -1,8 +1,8 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
 #include "Renderer/Traverser/Traverser.h"
-#include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Mesh.h"
+#include <DataBase/RenderShader.h>
+#include <DataBase/Mesh.h>
 
 namespace he
 {
@@ -36,52 +36,52 @@ namespace he
 
       unsigned int vertexStride = 0;
 
-      if(m_vertexDeclaration & Mesh::MODEL_POSITION) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION) 
       {
-        glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::POSITION, 0);
+        glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::POSITION, 0);
         vertexStride += sizeof(util::Vector<float, 3>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE0) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0) 
       {
-        glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::TEXTURE0, 0);
+        glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
         vertexStride += sizeof(util::Vector<float, 2>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_NORMAL) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL) 
       {
-        glVertexAttribFormat(RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::NORMAL, 0);
+        glVertexAttribFormat(db::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::NORMAL, 0);
         vertexStride += sizeof(util::Vector<float, 3>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BINORMAL) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL) 
       {
-        glVertexAttribFormat(RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::BINORMAL, 0);
+        glVertexAttribFormat(db::RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::BINORMAL, 0);
         vertexStride += sizeof(util::Vector<float, 3>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
       {
-        glVertexAttribFormat(RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::BONEWEIGHTS, 0);
+        glVertexAttribFormat(db::RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::BONEWEIGHTS, 0);
         vertexStride += sizeof(util::Vector<float, 4>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
       {
-        glVertexAttribFormat(RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::BONEINDICES, 0);
+        glVertexAttribFormat(db::RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::BONEINDICES, 0);
         vertexStride += sizeof(util::Vector<float, 4>);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_COLOR) 
+      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR) 
       {
-        glVertexAttribFormat(RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
-        glVertexAttribBinding(RenderShader::COLOR, 0);
+        glVertexAttribFormat(db::RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::COLOR, 0);
         vertexStride += sizeof(util::Vector<float, 4>);
       }
 
@@ -92,107 +92,107 @@ namespace he
     {
       glBindVertexArray(m_vaoIndex);
 
-      if(m_vertexDeclaration & Mesh::MODEL_POSITION)
+      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION)
       {
-        glEnableVertexAttribArray(RenderShader::POSITION);
+        glEnableVertexAttribArray(db::RenderShader::POSITION);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE0)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0)
       {
-        glEnableVertexAttribArray(RenderShader::TEXTURE0);
+        glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE1)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
       {
-        glEnableVertexAttribArray(RenderShader::TEXTURE1);
+        glEnableVertexAttribArray(db::RenderShader::TEXTURE1);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE2)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
       {
-        glEnableVertexAttribArray(RenderShader::TEXTURE2);
+        glEnableVertexAttribArray(db::RenderShader::TEXTURE2);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE3)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
       {
-        glEnableVertexAttribArray(RenderShader::TEXTURE3);
+        glEnableVertexAttribArray(db::RenderShader::TEXTURE3);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_NORMAL)
+      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL)
       {
-        glEnableVertexAttribArray(RenderShader::NORMAL);
+        glEnableVertexAttribArray(db::RenderShader::NORMAL);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BINORMAL)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL)
       {
-        glEnableVertexAttribArray(RenderShader::BINORMAL);
+        glEnableVertexAttribArray(db::RenderShader::BINORMAL);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_INDICES)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_INDICES)
       {
-        glEnableVertexAttribArray(RenderShader::BONEINDICES);
+        glEnableVertexAttribArray(db::RenderShader::BONEINDICES);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS)
       {
-        glEnableVertexAttribArray(RenderShader::BONEWEIGHTS);
+        glEnableVertexAttribArray(db::RenderShader::BONEWEIGHTS);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_COLOR)
+      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR)
       {
-        glEnableVertexAttribArray(RenderShader::COLOR);
+        glEnableVertexAttribArray(db::RenderShader::COLOR);
       }
     }
 
     void VertexDeclarationNode::unsetVertexArray() const
     {
-      if(m_vertexDeclaration & Mesh::MODEL_POSITION)
+      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION)
       {
-        glDisableVertexAttribArray(RenderShader::POSITION);
+        glDisableVertexAttribArray(db::RenderShader::POSITION);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE0)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0)
       {
-        glDisableVertexAttribArray(RenderShader::TEXTURE0);
+        glDisableVertexAttribArray(db::RenderShader::TEXTURE0);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE1)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
       {
-        glDisableVertexAttribArray(RenderShader::TEXTURE1);
+        glDisableVertexAttribArray(db::RenderShader::TEXTURE1);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE2)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
       {
-        glDisableVertexAttribArray(RenderShader::TEXTURE2);
+        glDisableVertexAttribArray(db::RenderShader::TEXTURE2);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_TEXTURE3)
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
       {
-        glDisableVertexAttribArray(RenderShader::TEXTURE3);
+        glDisableVertexAttribArray(db::RenderShader::TEXTURE3);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_NORMAL)
+      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL)
       {
-        glDisableVertexAttribArray(RenderShader::NORMAL);
+        glDisableVertexAttribArray(db::RenderShader::NORMAL);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BINORMAL)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL)
       {
-        glDisableVertexAttribArray(RenderShader::BINORMAL);
+        glDisableVertexAttribArray(db::RenderShader::BINORMAL);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_INDICES)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_INDICES)
       {
-        glDisableVertexAttribArray(RenderShader::BONEINDICES);
+        glDisableVertexAttribArray(db::RenderShader::BONEINDICES);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_BONE_WEIGHTS)
+      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS)
       {
-        glDisableVertexAttribArray(RenderShader::BONEWEIGHTS);
+        glDisableVertexAttribArray(db::RenderShader::BONEWEIGHTS);
       }
 
-      if(m_vertexDeclaration & Mesh::MODEL_COLOR)
+      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR)
       {
-        glDisableVertexAttribArray(RenderShader::COLOR);
+        glDisableVertexAttribArray(db::RenderShader::COLOR);
       }
 
       glBindVertexArray(0);

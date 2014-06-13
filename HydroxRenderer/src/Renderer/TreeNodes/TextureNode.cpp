@@ -2,7 +2,7 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Resources/Material.h"
+#include <DataBase/Material.h>
 
 namespace he
 {

@@ -5,7 +5,7 @@
 
 #include "Loader/DLLExport.h"
 
-#include <Renderer/Resources/ResourceManager.hpp>
+#include <DataBase/ResourceManager.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
 namespace he

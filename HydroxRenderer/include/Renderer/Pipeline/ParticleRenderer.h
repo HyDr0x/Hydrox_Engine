@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
@@ -50,7 +50,7 @@ namespace he
 
       std::list<const xBar::ParticleEmitterContainer> m_particleEmitter;
 
-      ParticleEmitterManager *m_particleEmitterManager;
+      db::ParticleEmitterManager *m_particleEmitterManager;
     };
   }
 }

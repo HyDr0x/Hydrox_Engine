@@ -18,13 +18,13 @@ namespace he
 
     void SkyboxRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6])
     {
-      m_renderShaderManager = singletonManager->getService<RenderShaderManager>();
-      m_textureManager = singletonManager->getService<TextureManager>();
-      m_textureArrayManager = singletonManager->getService<TextureArrayManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
+      m_textureArrayManager = singletonManager->getService<db::TextureArrayManager>();
 
       m_skyboxShaderHandle = skyboxShaderHandle;
 
-      Texture2D *texture;
+      db::Texture2D *texture;
       texture = m_textureManager->getObject(skyboxTextureHandles[0]);
       unsigned int size = texture->getTextureSize();
 
@@ -36,7 +36,7 @@ namespace he
         texture->getTextureData(&data[i * size]);
       }
 
-      m_arrayTextureHandle = m_textureArrayManager->addObject(Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), &data[0]));
+      m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), &data[0]));
 
       std::vector<util::Vector<float, 3>> positions;
 
@@ -76,14 +76,14 @@ namespace he
       glGenVertexArrays(1, &m_skyBoxVAO);
       glBindVertexArray(m_skyBoxVAO);
 
-      glVertexAttribFormat(RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
+      glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
 
-      glVertexAttribBinding(RenderShader::POSITION, 0);
-      glVertexAttribBinding(RenderShader::TEXTURE0, 0);
+      glVertexAttribBinding(db::RenderShader::POSITION, 0);
+      glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
 
-      glEnableVertexAttribArray(RenderShader::POSITION);
-      glEnableVertexAttribArray(RenderShader::TEXTURE0);
+      glEnableVertexAttribArray(db::RenderShader::POSITION);
+      glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
 
       glBindVertexArray(0);
     }
@@ -94,8 +94,8 @@ namespace he
 
       glBindVertexArray(m_skyBoxVAO);
 
-      Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
-      RenderShader *skyboxShader = m_renderShaderManager->getObject(m_skyboxShaderHandle);
+      db::Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
+      db::RenderShader *skyboxShader = m_renderShaderManager->getObject(m_skyboxShaderHandle);
 
       skyboxShader->useShader();
       renderTexture->setTexture(0, 0);

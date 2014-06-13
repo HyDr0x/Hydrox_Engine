@@ -8,12 +8,15 @@
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 namespace he
 {
   namespace renderer
-  {    class IRenderNode;    class FrustumCullingTraverser : public Traverser
+  {
+    class IRenderNode;
+
+    class FrustumCullingTraverser : public Traverser
     {
     public:
 

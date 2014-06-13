@@ -10,7 +10,7 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
-#include "Renderer/Resources/Mesh.h"
+#include <DataBase/Mesh.h>
 
 namespace he
 {
@@ -20,7 +20,7 @@ namespace he
       InsertGeometryTraverser(options, singletonManager),
       m_geometryContainer(geometryContainer)
     {
-      Mesh* mesh = m_singletonManager->getService<ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
+      db::Mesh* mesh = m_singletonManager->getService<db::ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
 
       if(mesh->getIndexCount() > 0)
       {

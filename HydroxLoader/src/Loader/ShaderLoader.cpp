@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <Renderer/Resources/Shader.h>
+#include <DataBase/Shader.h>
 
 namespace he
 {

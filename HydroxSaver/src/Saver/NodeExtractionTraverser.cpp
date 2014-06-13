@@ -4,10 +4,10 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <Renderer/Resources/Mesh.h>
-#include <Renderer/Resources/Material.h>
-#include <Renderer/Resources/Texture2D.h>
-#include <Renderer/Resources/RenderShader.h>
+#include <DataBase/Mesh.h>
+#include <DataBase/Material.h>
+#include <DataBase/Texture2D.h>
+#include <DataBase/RenderShader.h>
 
 #include <SceneGraph/TreeNodes/GeoNode.h>
 #include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
@@ -24,12 +24,13 @@
 namespace he
 {
   namespace saver
-  {    NodeExtractionTraverser::NodeExtractionTraverser(std::string fileName, NodeWrapperMapper& wrapperMapper, util::SingletonManager *singletonManager) : m_wrapperMapper(wrapperMapper), m_fileName(fileName)
+  {
+    NodeExtractionTraverser::NodeExtractionTraverser(std::string fileName, NodeWrapperMapper& wrapperMapper, util::SingletonManager *singletonManager) : m_wrapperMapper(wrapperMapper), m_fileName(fileName)
     {
-      m_modelManager = singletonManager->getService<renderer::ModelManager>();
-      m_materialManager = singletonManager->getService<renderer::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<renderer::RenderShaderManager>();
-      m_textureManager = singletonManager->getService<renderer::TextureManager>();
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_textureManager = singletonManager->getService<db::TextureManager>();
     }
 
     NodeExtractionTraverser::~NodeExtractionTraverser()
@@ -87,7 +88,7 @@ namespace he
           m_wrapperMapper.meshMap[treeNode->getMeshHandle()] = m_wrapperMapper.meshes.size();
           data.meshIndex = m_wrapperMapper.meshes.size();
 
-          renderer::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
+          db::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
           m_wrapperMapper.meshes.push_back(*mesh);
         }
         else
@@ -100,7 +101,7 @@ namespace he
           m_wrapperMapper.materialMap[treeNode->getMaterialHandle()] = m_wrapperMapper.materialFileNames.size();
           data.materialIndex = m_wrapperMapper.materialFileNames.size();
 
-          renderer::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
+          db::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
 
           std::stringstream materialFileName;
           materialFileName << m_fileName << "_Material_" << m_wrapperMapper.materialFileNames.size();
@@ -133,7 +134,7 @@ namespace he
           m_wrapperMapper.meshMap[treeNode->getMeshHandle()] = m_wrapperMapper.meshes.size();
           data.meshIndex = m_wrapperMapper.meshes.size();
 
-          renderer::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
+          db::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
           m_wrapperMapper.meshes.push_back(*mesh);
         }
         else
@@ -146,7 +147,7 @@ namespace he
           m_wrapperMapper.materialMap[treeNode->getMaterialHandle()] = m_wrapperMapper.materialFileNames.size();
           data.materialIndex = m_wrapperMapper.materialFileNames.size();
 
-          renderer::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
+          db::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
 
           std::stringstream materialFileName;
           materialFileName << m_fileName << "_Material_" << m_wrapperMapper.materialFileNames.size();
@@ -225,7 +226,18 @@ namespace he
       {
         LightNodeData data;
         data.nodeName = treeNode->getNodeName();
-        data.trfMatrix = treeNode->getTransformationMatrix();
+
+        data.position = treeNode->getPosition();
+        data.direction = treeNode->getPosition();
+
+        data.intensity = treeNode->getIntensity();
+
+        data.spotLightExponent = treeNode->getSpotLightExponent();
+        data.spotLightCutoff = treeNode->getSpotLightCutoff();
+
+        data.constAttenuation = treeNode->getConstAttenuation();
+        data.linearAttenuation = treeNode->getLinearAttenuation();
+        data.quadricAttenuation = treeNode->getQuadricAttenuation();
 
         m_wrapperMapper.lightNodeMap[treeNode] = m_wrapperMapper.lightNodes.size();
         m_wrapperMapper.lightNodes.push_back(data);

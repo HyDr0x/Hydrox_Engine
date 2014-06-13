@@ -18,9 +18,13 @@ namespace he
     class SingletonManager;
   }
 
-  namespace renderer
+  namespace db
   {
     class Texture2D;
+  }
+
+  namespace renderer
+  {
     struct RenderOptions;
 
     class GBuffer
@@ -30,12 +34,15 @@ namespace he
       GBuffer();
       ~GBuffer();
 
-      void initialize(const RenderOptions& renderingOptions, util::SingletonManager *singletonManager, util::ResourceHandle gBufferShaderHandle);
+      void initialize(const RenderOptions& renderingOptions, util::SingletonManager *singletonManager);
 
       void setGBuffer() const;
       void unsetGBuffer() const;
 
-      void render() const;
+      util::SharedPointer<db::Texture2D> getDepthTexture() const;
+      util::SharedPointer<db::Texture2D> getColorTexture() const;
+      util::SharedPointer<db::Texture2D> getNormalTexture() const;
+      util::SharedPointer<db::Texture2D> getMaterialTexture() const;
 
       void clear() const;
 
@@ -44,11 +51,12 @@ namespace he
       GBuffer(const GBuffer&);
       GBuffer& operator=(const GBuffer&);
 
-      util::ResourceHandle m_gBufferShaderHandle;
+      util::SingletonManager *m_singletonManager;
 
-      util::SharedPointer<Texture2D> m_depthTexture;
-      util::SharedPointer<Texture2D> m_colorTexture;
-      util::SharedPointer<Texture2D> m_normalTexture;
+      util::SharedPointer<db::Texture2D> m_depthTexture;
+      util::SharedPointer<db::Texture2D> m_colorTexture;
+      util::SharedPointer<db::Texture2D> m_normalTexture;
+      util::SharedPointer<db::Texture2D> m_materialTexture;
 
       Renderquad m_fullscreenRenderQuad;
     };

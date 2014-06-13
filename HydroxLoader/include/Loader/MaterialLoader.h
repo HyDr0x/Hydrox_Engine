@@ -38,9 +38,9 @@ namespace he
 
       std::map<std::string, MaterialFileKeywords> m_materialFileKeywords;
 
-      renderer::MaterialManager *m_materialManager;
-      renderer::TextureManager *m_textureManager;
-      renderer::RenderShaderManager *m_renderShaderManager;
+      db::MaterialManager *m_materialManager;
+      db::TextureManager *m_textureManager;
+      db::RenderShaderManager *m_renderShaderManager;
     };
   }
 }

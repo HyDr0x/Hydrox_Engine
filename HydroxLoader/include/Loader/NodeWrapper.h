@@ -1,11 +1,11 @@
 #ifndef LOADERNODEWRAPPER_H_
 #define LOADERNODEWRAPPER_H_
 
-
 #include <Utilities/Math/Math.hpp>
 
 #include <SceneGraph/TreeNodes/AnimatedTransformNode.h>
 #include <SceneGraph/TreeNodes/AnimationTrack.h>
+#include <SceneGraph/TreeNodes/LightNode.h>
 
 namespace he
 {
@@ -87,7 +87,19 @@ namespace he
 
     struct LightNodeData : public TreeNodeData
     {
-      util::Matrix<float, 4> trfMatrix;
+      util::Vector<float, 3> position;
+      util::Vector<float, 3> direction;
+
+      float intensity;
+
+      float spotLightExponent;
+      float spotLightCutoff;
+
+      float constAttenuation;
+      float linearAttenuation;
+      float quadricAttenuation;
+
+      sg::LightType lightType;
     };
 
     struct ParticleNodeData : public TreeNodeData

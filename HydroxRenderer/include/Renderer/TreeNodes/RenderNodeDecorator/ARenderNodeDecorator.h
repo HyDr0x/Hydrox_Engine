@@ -7,7 +7,7 @@
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 

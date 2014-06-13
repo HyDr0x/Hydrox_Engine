@@ -6,12 +6,12 @@
 
 #include <GL/glew.h>
 
-#include "Renderer/Resources/ResourceManager.hpp"
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Buffer/GPUBuffer.h"
 
-#include "Renderer/Resources/RenderShader.h"
-#include "Renderer/Resources/Texture2D.h"
+#include <DataBase/RenderShader.h>
+#include <DataBase/Texture2D.h>
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
@@ -44,9 +44,9 @@ namespace he
       GLuint m_skyBoxVAO;
       GPUBuffer m_geometryData;
 
-      RenderShaderManager *m_renderShaderManager;
-      TextureManager *m_textureManager;
-      TextureArrayManager*m_textureArrayManager;
+      db::RenderShaderManager *m_renderShaderManager;
+      db::TextureManager *m_textureManager;
+      db::TextureArrayManager*m_textureArrayManager;
     };
   }
 }
