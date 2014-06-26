@@ -19,6 +19,7 @@ namespace he
     class LODNode;
     class BillboardNode;
     class LightNode;
+    class ShadowLightNode;
     class ParticleNode;
   }
 
@@ -51,6 +52,8 @@ namespace he
       virtual bool preTraverse(sg::LODNode* treeNode);
 
       virtual bool preTraverse(sg::LightNode* treeNode);
+
+      virtual bool preTraverse(sg::ShadowLightNode* treeNode);
 
       virtual bool preTraverse(sg::ParticleNode* treeNode);
 

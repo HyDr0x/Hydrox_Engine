@@ -9,7 +9,7 @@ namespace he
 {
   namespace renderer
   {
-    FrustumCullingTraverser::FrustumCullingTraverser()
+    FrustumCullingTraverser::FrustumCullingTraverser(unsigned int viewProjectionMatrixID) : m_viewProjectionMatrixID(viewProjectionMatrixID)
     {
     }
 
@@ -17,11 +17,9 @@ namespace he
     {
     }
 
-    bool FrustumCullingTraverser::preTraverse(IRenderNode* treeNode)
+    bool FrustumCullingTraverser::preTraverse(const IRenderNode* treeNode)
     {
-      treeNode->updateBuffer();
-
-      treeNode->frustumCulling();
+      treeNode->frustumCulling(m_viewProjectionMatrixID);
 
       return true;
     }

@@ -16,6 +16,7 @@
 #include <SceneGraph/TreeNodes/LODNode.h>
 #include <SceneGraph/TreeNodes/BillboardNode.h>
 #include <SceneGraph/TreeNodes/LightNode.h>
+#include <SceneGraph/TreeNodes/ShadowLightNode.h>
 #include <SceneGraph/TreeNodes/ParticleNode.h>
 
 #include "Saver/NodeWrapper.h"
@@ -114,6 +115,16 @@ namespace he
       return true;
     }
 
+    bool NodeLinkTraverser::preTraverse(sg::ShadowLightNode* treeNode)
+    {
+      LightNodeData& data = m_wrapperMapper.shadowLightNodes[m_wrapperMapper.shadowLightNodeMap[treeNode]];
+      findNodeIndex(treeNode->getFirstChild(), data.firstChildIndex, data.firstChildNodeType);
+      findNodeIndex(treeNode->getNextSibling(), data.nextSiblingIndex, data.nextSiblingNodeType);
+      findNodeIndex(treeNode->getParent(), data.parentIndex, data.parentNodeType);
+
+      return true;
+    }
+
     bool NodeLinkTraverser::preTraverse(sg::ParticleNode* treeNode)
     {
       ParticleNodeData& data = m_wrapperMapper.particleNodes[m_wrapperMapper.particleNodeMap[treeNode]];
@@ -157,6 +168,11 @@ namespace he
         {
           index = m_wrapperMapper.lodNodeMap[dynamic_cast<sg::LODNode*>(treeNode)];
           nodeType = LODNODE;
+        }
+        else if(treeNode->isShadowedLightNode())
+        {
+          index = m_wrapperMapper.shadowLightNodeMap[dynamic_cast<sg::ShadowLightNode*>(treeNode)];
+          nodeType = SHADOWLIGHTNODE;
         }
         else if(treeNode->isLightNode())
         {

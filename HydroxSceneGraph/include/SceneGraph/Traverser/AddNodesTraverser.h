@@ -39,6 +39,9 @@ namespace he
       virtual bool preTraverse(LightNode* treeNode);
       virtual void postTraverse(LightNode* treeNode);
 
+      virtual bool preTraverse(ShadowLightNode* treeNode);
+      virtual void postTraverse(ShadowLightNode* treeNode);
+
     protected:
 
       util::EventManager& m_eventManager;

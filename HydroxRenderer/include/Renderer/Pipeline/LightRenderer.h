@@ -8,9 +8,9 @@
 #include <DataBase/Texture2D.h>
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
-#include "Renderer/Pipeline/Renderquad.h"
+#include "Renderer/Pipeline/Renderquad2D.h"
+#include "Renderer/Pipeline/Renderquad3D.h"
 #include "Renderer/Pipeline/RenderOptions.h"
-
 
 namespace he
 {
@@ -23,6 +23,7 @@ namespace he
   namespace xBar
   {
     class LightContainer;
+    class ShadowLightContainer;
   }
 
   namespace renderer
@@ -36,12 +37,19 @@ namespace he
 
       void initialize(RenderOptions options, util::SingletonManager *singletonManager, util::ResourceHandle directLightShaderHandle);
 
-      void render(RenderOptions options, util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
+      void updateBuffer();
+      void render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
 
       util::SharedPointer<db::Texture2D> getLightTexture() const;
 
-      void addRenderComponent(const xBar::LightContainer& light);
-      void removeRenderComponent(const xBar::LightContainer& light);
+      void setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
+      void unsetShadowMap(unsigned int bindingPoint);
+
+      void addLight(const xBar::LightContainer& light);
+      void removeLight(const xBar::LightContainer& light);
+
+      void addShadowLight(const xBar::ShadowLightContainer& light);
+      void removeShadowLight(const xBar::ShadowLightContainer& light);
 
       void clear() const;
 
@@ -52,17 +60,31 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
+      RenderOptions m_options;
+
       util::SingletonManager *m_singletonManager;
 
-      std::list<const xBar::LightContainer> m_lights;
+      std::list<const xBar::ShadowLightContainer> m_shadowLights;
+      util::SharedPointer<db::Texture3D> m_shadowMaps;
+      GPUImmutableBuffer m_shadowedLightBuffer;
+      Renderquad3D m_renderShadowMapsQuad;
 
+      std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
-      Renderquad m_renderQuad;
+
+      Renderquad2D m_renderLightMapQuad;
       util::SharedPointer<db::Texture2D> m_lightTexture;
 
+      util::ResourceHandle m_createShadowMapShaderHandle;
+
       util::ResourceHandle m_directLightShaderHandle;
+      util::ResourceHandle m_shadowMapShaderHandle;
+      util::ResourceHandle m_cascadedShadowMapShaderHandle;
+
+      GLint m_maxShadowMapsPerTextureArray;
 
       bool m_lightNumberChanged;
+      bool m_shadowLightNumberChanged;
     };
   }
 }

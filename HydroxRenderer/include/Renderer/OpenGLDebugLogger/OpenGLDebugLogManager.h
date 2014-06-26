@@ -37,6 +37,8 @@ namespace he
       void setEventType(GLenum type, bool enable) const;
       void setEventSource(GLenum source, bool enable) const;
 
+      void getState(GLenum pname, GLint *data);
+
     private:
 
       std::string m_vendorName;

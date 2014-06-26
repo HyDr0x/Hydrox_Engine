@@ -5,6 +5,7 @@
 #include "SceneGraph/TreeNodes/BillboardNode.h"
 #include "SceneGraph/TreeNodes/LODNode.h"
 #include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ShadowLightNode.h"
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 
 namespace he
@@ -92,6 +93,17 @@ namespace he
     }
 
     void RemoveNodesTraverser::postTraverse(LightNode* treeNode)
+    {
+    }
+
+    bool RemoveNodesTraverser::preTraverse(ShadowLightNode* treeNode)
+    {
+      treeNode->setRenderable(false);
+
+      return true;
+    }
+
+    void RemoveNodesTraverser::postTraverse(ShadowLightNode* treeNode)
     {
     }
   }

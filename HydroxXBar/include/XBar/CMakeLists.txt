@@ -6,6 +6,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/IGeometryContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/LightContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleEmitterContainer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShadowLightContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DLLExport.h 

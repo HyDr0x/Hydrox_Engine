@@ -12,8 +12,6 @@ namespace he
 {
   namespace renderer
   {
-    class Traverser;
-
     class TextureNode : public GroupNode
     {
     public:
@@ -23,6 +21,9 @@ namespace he
 
       bool preTraverse(Traverser* traverser);
       void postTraverse(Traverser* traverser);
+
+      bool preTraverse(ConstTraverser* traverser) const;
+      void postTraverse(ConstTraverser* traverser) const;
 
       void initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles);
 

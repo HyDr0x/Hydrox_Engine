@@ -105,8 +105,7 @@ namespace he
     {
       stream >> (TreeNodeData&)node;
 
-      stream >> node.position;
-      stream >> node.direction;
+      stream >> node.color;
 
       stream >> node.intensity;
 
@@ -119,7 +118,16 @@ namespace he
 
       unsigned int lightType;
       stream >> lightType;
-      node.lightType = (sg::LightType)lightType;
+      node.lightType = (LightType)lightType;
+
+      return stream;
+    }
+
+    std::ifstream& operator >>(std::ifstream& stream, ShadowLightNodeData& node)
+    {
+      stream >> (LightNodeData&)node;
+
+      stream >> node.projectionMatrix;
 
       return stream;
     }

@@ -1,6 +1,7 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
@@ -8,6 +9,8 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertStaticGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShadowMapTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/UpdateTraverser.h 
 	PARENT_SCOPE 
 )

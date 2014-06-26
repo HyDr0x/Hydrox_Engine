@@ -8,6 +8,7 @@
 #include "SceneGraph/TreeNodes/BillboardNode.h"
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 #include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ShadowLightNode.h"
 
 namespace he
 {
@@ -131,6 +132,17 @@ namespace he
     }
 
     void CopyTraverser::postTraverse(const LightNode* treeNode)
+    {
+      ascendingTreeNode(treeNode);
+    }
+
+    bool CopyTraverser::preTraverse(const ShadowLightNode* treeNode)
+    {
+      cloneTreeNode(treeNode);
+      return false;
+    }
+
+    void CopyTraverser::postTraverse(const ShadowLightNode* treeNode)
     {
       ascendingTreeNode(treeNode);
     }

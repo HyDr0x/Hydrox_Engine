@@ -8,6 +8,7 @@
 #include "SceneGraph/TreeNodes/BillboardNode.h"
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 #include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ShadowLightNode.h"
 
 namespace he
 {
@@ -89,6 +90,15 @@ namespace he
     }
 
     void NodeSearchTraverser::postTraverse(LightNode* treeNode)
+    {
+    }
+
+    bool NodeSearchTraverser::preTraverse(ShadowLightNode* treeNode)
+    {
+      return findNode(treeNode);
+    }
+
+    void NodeSearchTraverser::postTraverse(ShadowLightNode* treeNode)
     {
     }
 

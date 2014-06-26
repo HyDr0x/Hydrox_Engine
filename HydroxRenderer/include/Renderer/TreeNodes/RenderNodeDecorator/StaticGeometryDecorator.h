@@ -16,7 +16,7 @@ namespace he
       StaticGeometryDecorator(IRenderNode *renderNode);
       ~StaticGeometryDecorator();
 
-      virtual void frustumCulling() const;
+      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const;
 
       virtual void rasterizeGeometry() const;
 

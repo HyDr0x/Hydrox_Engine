@@ -1,6 +1,7 @@
 #include "Renderer/TreeNodes/ShaderNode.h"
 
 #include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 
 namespace he
 {
@@ -20,6 +21,16 @@ namespace he
     }
 
     void ShaderNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool ShaderNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void ShaderNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

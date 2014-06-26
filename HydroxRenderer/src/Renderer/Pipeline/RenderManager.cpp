@@ -11,7 +11,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderManager::RenderManager() : m_skyboxRendering(false)
+    RenderManager::RenderManager() : m_skyboxRendering(false), m_wireframe(false)
     {
     }
 
@@ -36,8 +36,9 @@ namespace he
       glFrontFace(cullingMode);
     }
 
-    void RenderManager::setWireframe(bool wireFrame) const
+    void RenderManager::setWireframe(bool wireFrame)
     {
+      m_wireframe = wireFrame;
       if(wireFrame)
       {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -75,7 +76,7 @@ namespace he
       m_offscreenBufferShaderHandle = offscreenBufferShaderHandle;
       m_combineShaderHandle = combineShaderHandle;
 
-      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle);
+      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle, frustumCullingShaderHandle);
       m_gBuffer.initialize(m_options, m_singletonManager);
       m_billboardRenderer.initialize(m_singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(m_singletonManager, spriteShaderHandle, maxLayer);
@@ -114,13 +115,32 @@ namespace he
         m_gBuffer.clear();
         m_lightRenderer.clear();
 
+        if(m_wireframe)
+        {
+          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         m_gBuffer.setGBuffer();
 
         m_geometryRasterizer.rasterizeGeometry();
 
         m_gBuffer.unsetGBuffer();
 
-        m_lightRenderer.render(m_options, m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
+        if(m_wireframe)
+        {
+          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        m_lightRenderer.updateBuffer();
+
+        //for(unsigned int i = 0; i < ; i++)
+        //{
+        //  m_lightRenderer.setShadowMap();
+        //  m_geometryRasterizer.generateShadowMap();
+        //  m_lightRenderer.unsetShadowMap();
+        //}
+
+        m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
 
         m_gBuffer.setGBuffer();
 
@@ -134,7 +154,7 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      //m_fullscreenRenderQuad.setReadTextures(1, m_gBuffer.getColorTexture());
+      //m_fullscreenRenderQuad.setReadTextures(1, m_lightRenderer.getLightTexture());
       //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
 
       m_fullscreenRenderQuad.setReadTextures(2, m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture());
@@ -177,7 +197,7 @@ namespace he
 
     void RenderManager::addRenderComponent(const xBar::LightContainer& light)
     {
-      m_lightRenderer.addRenderComponent(light);
+      m_lightRenderer.addLight(light);
     }
 
     void RenderManager::addRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter)
@@ -212,7 +232,7 @@ namespace he
 
     void RenderManager::removeRenderComponent(const xBar::LightContainer& light)
     {
-      m_lightRenderer.removeRenderComponent(light);
+      m_lightRenderer.removeLight(light);
     }
 
     void RenderManager::removeRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter)

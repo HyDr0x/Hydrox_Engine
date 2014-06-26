@@ -8,6 +8,8 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad2D.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad3D.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/StringRenderer2D.cpp 

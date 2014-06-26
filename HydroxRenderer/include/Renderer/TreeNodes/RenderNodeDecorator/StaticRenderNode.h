@@ -30,6 +30,9 @@ namespace he
       virtual bool preTraverse(Traverser* traverser) override;
       virtual void postTraverse(Traverser* traverser) override;
 
+      virtual bool preTraverse(ConstTraverser* traverser) const override;
+      virtual void postTraverse(ConstTraverser* traverser) const override;
+
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) override;
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) override;
 
@@ -54,7 +57,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const override;
 
-      virtual void frustumCulling() const override;
+      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const override;
 
       virtual void rasterizeGeometry() const override;
 

@@ -4,6 +4,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardContainer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/LightContainer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleEmitterContainer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShadowLightContainer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryContainer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/StaticGeometryContainer.cpp 
 	PARENT_SCOPE 

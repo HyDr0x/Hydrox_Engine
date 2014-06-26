@@ -16,6 +16,9 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool preTraverse(ConstTraverser* traverser) const;
+      virtual void postTraverse(ConstTraverser* traverser) const;
+
       TreeNode* getFirstChild() const;
 
       void setFirstChild(TreeNode* firstChild);

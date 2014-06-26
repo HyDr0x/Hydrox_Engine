@@ -4,6 +4,7 @@
 #include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 
 #include "Renderer/Pipeline/RenderOptions.h"
 
@@ -27,6 +28,16 @@ namespace he
     }
 
     void StaticRenderNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool StaticRenderNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void StaticRenderNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }
@@ -70,10 +81,11 @@ namespace he
       return m_instanceNumberChanged;
     }
 
-    void StaticRenderNode::frustumCulling() const
+    void StaticRenderNode::frustumCulling(unsigned int viewProjectionMatrixID) const
     {
       unsigned int instanceNumber = m_instances.size();
       db::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
+      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &viewProjectionMatrixID);
 
       db::ComputeShader::dispatchComputeShader(256, 1, 1);
     }

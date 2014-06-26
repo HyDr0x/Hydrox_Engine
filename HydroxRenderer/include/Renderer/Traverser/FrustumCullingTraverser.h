@@ -6,7 +6,7 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 
 #include <DataBase/ResourceManager.hpp>
 
@@ -16,14 +16,18 @@ namespace he
   {
     class IRenderNode;
 
-    class FrustumCullingTraverser : public Traverser
+    class FrustumCullingTraverser : public ConstTraverser
     {
     public:
 
-      FrustumCullingTraverser();
+      FrustumCullingTraverser(unsigned int viewProjectionMatrixID);
       virtual ~FrustumCullingTraverser();
 
-      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(const IRenderNode* treeNode) override;
+
+    private:
+
+      unsigned int m_viewProjectionMatrixID;
     };
   }
 }

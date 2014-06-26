@@ -19,6 +19,7 @@ namespace he
     class LODNode;
     class BillboardNode;
     class LightNode;
+    class ShadowLightNode;
     class ParticleNode;
   }
 
@@ -33,6 +34,7 @@ namespace he
       std::map<unsigned int, sg::BillboardNode*> billboardNodeMap;
       std::map<unsigned int, sg::LODNode*> lodNodeMap;
       std::map<unsigned int, sg::LightNode*> lightNodeMap;
+      std::map<unsigned int, sg::ShadowLightNode*> shadowLightNodeMap;
       std::map<unsigned int, sg::ParticleNode*> particleNodeMap;
 
       std::vector<GeoNodeData> geoNodes;
@@ -42,6 +44,7 @@ namespace he
       std::vector<LODNodeData> lodNodes;
       std::vector<BillboardNodeData> billboardNodes;
       std::vector<LightNodeData> lightNodes;
+      std::vector<ShadowLightNodeData> shadowLightNodes;
       std::vector<ParticleNodeData> particleNodes;
 
       std::map<unsigned int, util::ResourceHandle> meshMap;

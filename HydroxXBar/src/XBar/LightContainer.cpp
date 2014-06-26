@@ -6,7 +6,8 @@ namespace he
 {
   namespace xBar
   {
-    LightContainer::LightContainer(const db::Light& lightData) : m_lightData(lightData)
+    LightContainer::LightContainer(const db::Light& lightData) : 
+      m_lightData(lightData)
     {
       createHash();
     }

@@ -12,6 +12,8 @@ namespace he
       unsigned int maxMaterials;
       unsigned int maxGeometry;
       unsigned int maxBones;
+      unsigned int shadowMapWidth;
+      unsigned int shadowMapHeight;
     };
   }
 }

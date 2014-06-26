@@ -20,13 +20,6 @@ namespace he
   {
     class Traverser;
 
-    enum LightType
-    {
-      POINTLIGHT,
-      DIRECTIONALLIGHT,
-      SPOTLIGHT,
-    };
-
     class GRAPHICAPI LightNode : public TreeNode
     {
     public:
@@ -48,15 +41,12 @@ namespace he
 
       virtual bool isLightNode() const;
 
-      void setRenderable(bool renderable);
+      virtual void setRenderable(bool renderable);
 
       void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
 
-      void setPosition(util::Vector<float, 3> position);
-      util::Vector<float, 3> getPosition() const;
-
-      void setDirection(util::Vector<float, 3> direction);
-      util::Vector<float, 3> getDirection() const;
+      void setColor(util::Vector<float, 3> color);
+      util::Vector<float, 3> getColor() const;
 
       void setIntensity(float intensity);
       float getIntensity() const;
@@ -76,18 +66,15 @@ namespace he
       void setQuadricAttenuation(float quadricAttenuation);
       float getQuadricAttenuation() const;
 
-    private:
+    protected:
 
       util::EventManager *m_eventManager;
-
-      util::Vector<float, 3> m_position;
-      util::Vector<float, 3> m_direction;
-
-      db::Light m_lightData;
 
       LightType m_lightType;
 
       bool m_renderable;
+
+      db::Light m_lightData;
     };
   }
 }

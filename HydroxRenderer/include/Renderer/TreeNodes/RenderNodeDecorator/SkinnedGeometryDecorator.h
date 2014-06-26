@@ -16,7 +16,7 @@ namespace he
       SkinnedGeometryDecorator(IRenderNode *renderNode);
       ~SkinnedGeometryDecorator();
 
-      virtual void frustumCulling() const;
+      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const;
 
       virtual void rasterizeGeometry() const;
 

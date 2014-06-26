@@ -10,6 +10,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/LightNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/LODNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleNode.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShadowLightNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.cpp 
 	PARENT_SCOPE 

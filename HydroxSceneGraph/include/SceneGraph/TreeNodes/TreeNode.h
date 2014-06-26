@@ -36,6 +36,7 @@ namespace he
       virtual bool isParticleNode() const;
       virtual bool isLODNode() const;
       virtual bool isLightNode() const;
+      virtual bool isShadowedLightNode() const;
       virtual bool isGroupNode() const;
       virtual bool isGeoNode() const;
       virtual bool isBillboardNode() const;

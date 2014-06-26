@@ -42,6 +42,9 @@ namespace he
       virtual bool preTraverse(const LightNode* treeNode);
       virtual void postTraverse(const LightNode* treeNode);
 
+      virtual bool preTraverse(const ShadowLightNode* treeNode);
+      virtual void postTraverse(const ShadowLightNode* treeNode);
+
       GroupNode* getCopiedRootNode() const;
 
     protected:

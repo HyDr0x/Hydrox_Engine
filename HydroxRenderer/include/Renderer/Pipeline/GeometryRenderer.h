@@ -7,6 +7,7 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Signals/EventManager.h>
+#include <Utilities/Pointer/SharedPointer.h>
 
 #include <DataBase/ResourceManager.hpp>
 #include "Renderer/Pipeline/RenderOptions.h"
@@ -31,7 +32,9 @@ namespace he
       GeometryRenderer();
       ~GeometryRenderer();
 
-      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize = 8);
+      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, util::ResourceHandle shadowMapGenerationShaderHandle, unsigned int nodeCacheBlockSize = 8);
+
+      void generateShadowMap(unsigned int shadowMapIndex);
 
       void rasterizeGeometry();
 
@@ -49,6 +52,7 @@ namespace he
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
       util::ResourceHandle m_frustumCullingShaderHandle;
+      util::ResourceHandle m_shadowMapGenerationShaderHandle;
 
       RenderOptions m_options;
 

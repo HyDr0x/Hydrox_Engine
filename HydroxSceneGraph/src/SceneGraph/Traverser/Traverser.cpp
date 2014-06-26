@@ -204,5 +204,19 @@ namespace he
     void Traverser::postTraverse(LightNode* treeNode)
     {
     }
+
+    bool Traverser::ascendTraverse(ShadowLightNode* treeNode)
+    {
+      return true;
+    }
+
+    bool Traverser::preTraverse(ShadowLightNode* treeNode)
+    {
+      return true;
+    }
+
+    void Traverser::postTraverse(ShadowLightNode* treeNode)
+    {
+    }
   }
 }

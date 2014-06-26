@@ -12,6 +12,7 @@
 #include <Utilities/Pointer/SharedPointer.h>
 
 #include <DataBase/Texture2D.h>
+#include <DataBase/Texture3D.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
 
@@ -24,35 +25,22 @@ namespace he
     public:
 
       Renderquad();
-      ~Renderquad();
+      virtual ~Renderquad();
 
-      void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, std::vector<util::SharedPointer<db::Texture2D>> textures);
-      void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, int count, ...);
+      virtual void setWriteFrameBuffer(std::vector<unsigned int> indices = std::vector<unsigned int>()) const = 0;
+      virtual void unsetWriteFrameBuffer() const = 0;
 
-      void setRenderTargets(RenderOptions options, std::vector<util::SharedPointer<db::Texture2D>> textures);
-      void setRenderTargets(RenderOptions options, int count, ...);
-
-      void setReadTextures(std::vector<util::SharedPointer<db::Texture2D>> textures);
-      void setReadTextures(int count, ...);
-
-      void setWriteFrameBuffer() const;
-      void unsetWriteFrameBuffer() const;
-
-      void render() const;
+      virtual void render() const = 0;
 
       void clearTargets(GLfloat clearDepthValue, std::vector<util::Vector<float, 4>>& clearColors) const;
       void clearTargets(GLfloat clearDepthValue, util::Vector<float, 4> clearColor) const;
 
-    private:
+    protected:
 
       Renderquad(const Renderquad&);
       Renderquad& operator=(const Renderquad&);
 
-      void createFramebuffer();
-
-      util::SharedPointer<db::Texture2D> m_depthTexture;
-      std::vector<util::SharedPointer<db::Texture2D>> m_readTextures;
-      std::vector<util::SharedPointer<db::Texture2D>> m_writeTextures;
+      virtual void createFramebuffer() = 0;
 
       GLuint m_color_tex;
       GLuint m_rboIndex;

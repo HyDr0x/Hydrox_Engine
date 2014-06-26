@@ -10,6 +10,8 @@
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
 #include "Renderer/Traverser/FrustumCullingTraverser.h"
+#include "Renderer/Traverser/ShadowMapTraverser.h"
+#include "Renderer/Traverser/UpdateTraverser.h"
 #include "Renderer/Traverser/DeleteTraverser.h"
 
 #include "Renderer/TreeNodes/GroupNode.h"
@@ -31,7 +33,7 @@ namespace he
       delete m_renderRootNode;
     }
 
-    void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, unsigned int nodeCacheBlockSize)
+    void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, util::ResourceHandle shadowMapGenerationShaderHandle, unsigned int nodeCacheBlockSize)
     {
       m_options = options;
 
@@ -49,6 +51,7 @@ namespace he
       m_singletonManager = singletonManager;
 
       m_frustumCullingShaderHandle = cullingShaderHandle;
+      m_shadowMapGenerationShaderHandle = shadowMapGenerationShaderHandle;
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
@@ -77,9 +80,28 @@ namespace he
       removeTraverser.doTraverse(m_renderRootNode);
     }
 
+    void GeometryRenderer::generateShadowMap(unsigned int shadowMapIndex)
+    {
+      FrustumCullingTraverser frustumCullingTraverser(shadowMapIndex);
+
+      db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
+      frustumCullingShader->useShader();
+      frustumCullingTraverser.doTraverse(m_renderRootNode);
+      frustumCullingShader->useNoShader();
+
+      db::RenderShader *shadowMapGenerationShader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_shadowMapGenerationShaderHandle);
+      ShadowMapTraverser shadowMapTraverser;
+      shadowMapGenerationShader->useShader();
+      shadowMapTraverser.doTraverse(m_renderRootNode);
+      shadowMapGenerationShader->useNoShader();
+    }
+
     void GeometryRenderer::rasterizeGeometry()
     {  
-      FrustumCullingTraverser frustumCullingTraverser;
+      UpdateTraverser updateTraverser;
+      updateTraverser.doTraverse(m_renderRootNode);
+
+      FrustumCullingTraverser frustumCullingTraverser(UINT32_MAX);
 
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();

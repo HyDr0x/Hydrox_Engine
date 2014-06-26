@@ -54,7 +54,7 @@ namespace he
 
       void setBackfaceCulling(GLenum cullingMode) const;
 
-      void setWireframe(bool wireFrame) const;
+      void setWireframe(bool wireFrame);
 
       const size_t getMaxSpriteLayer() const;
 
@@ -100,10 +100,11 @@ namespace he
       UBO m_cameraParameterUBO;
 
       bool m_skyboxRendering;
+      bool m_wireframe;
 
       util::ResourceHandle m_offscreenBufferShaderHandle;
       util::ResourceHandle m_combineShaderHandle;
-      Renderquad m_fullscreenRenderQuad;
+      Renderquad2D m_fullscreenRenderQuad;
 
       RenderOptions m_options;
 

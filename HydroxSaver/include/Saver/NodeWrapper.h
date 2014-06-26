@@ -20,6 +20,7 @@ namespace he
       BILLBOARDNODE,
       LODNODE,
       LIGHTNODE,
+      SHADOWLIGHTNODE,
       PARTICLENODE,
     };
 
@@ -87,8 +88,7 @@ namespace he
 
     struct LightNodeData : public TreeNodeData
     {
-      util::Vector<float, 3> position;
-      util::Vector<float, 3> direction;
+      util::Vector<float, 4> color;
 
       float intensity;
 
@@ -99,7 +99,12 @@ namespace he
       float linearAttenuation;
       float quadricAttenuation;
 
-      sg::LightType lightType;
+      LightType lightType;
+    };
+
+    struct ShadowLightNodeData : public LightNodeData
+    {
+      util::Matrix<float, 4> projectionMatrix;
     };
 
     struct ParticleNodeData : public TreeNodeData
@@ -115,6 +120,7 @@ namespace he
     std::ofstream& operator <<(std::ofstream& stream, const LODNodeData& node);
     std::ofstream& operator <<(std::ofstream& stream, const BillboardNodeData& node);
     std::ofstream& operator <<(std::ofstream& stream, const LightNodeData& node);
+    std::ofstream& operator <<(std::ofstream& stream, const ShadowLightNodeData& node);
     std::ofstream& operator <<(std::ofstream& stream, const ParticleNodeData& node);
   }
 }

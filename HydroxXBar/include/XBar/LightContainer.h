@@ -11,7 +11,7 @@ namespace he
 {
   namespace db
   {
-    class Light;
+    struct Light;
   }
 
   namespace xBar

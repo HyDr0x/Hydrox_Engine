@@ -8,6 +8,7 @@
 #include "SceneGraph/TreeNodes/BillboardNode.h"
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 #include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ShadowLightNode.h"
 
 namespace he
 {
@@ -251,6 +252,17 @@ namespace he
     }
 
     void TransformTraverser::postTraverse(LightNode* treeNode)
+    {
+    }
+
+    bool TransformTraverser::preTraverse(ShadowLightNode* treeNode)
+    {
+      treeNode->applyTransformation(m_translateStack.top(), m_rotationStack.top());
+
+      return true;
+    }
+
+    void TransformTraverser::postTraverse(ShadowLightNode* treeNode)
     {
     }
   }

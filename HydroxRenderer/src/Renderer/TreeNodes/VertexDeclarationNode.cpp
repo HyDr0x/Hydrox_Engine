@@ -1,6 +1,7 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
 #include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 #include <DataBase/RenderShader.h>
 #include <DataBase/Mesh.h>
 
@@ -24,6 +25,16 @@ namespace he
     }
 
     void VertexDeclarationNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool VertexDeclarationNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void VertexDeclarationNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

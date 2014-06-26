@@ -19,6 +19,9 @@ namespace he
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
 
+      virtual bool preTraverse(ConstTraverser* traverser) const = 0;
+      virtual void postTraverse(ConstTraverser* traverser) const = 0;
+
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
 
@@ -30,7 +33,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const = 0;
 
-      virtual void frustumCulling() const = 0;
+      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const = 0;
 
       virtual void rasterizeGeometry() const = 0;
 

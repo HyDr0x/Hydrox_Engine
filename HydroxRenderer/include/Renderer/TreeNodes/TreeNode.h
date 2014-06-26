@@ -7,6 +7,7 @@ namespace he
 {
   namespace renderer
   {    class Traverser;
+    class ConstTraverser;
     class InsertGeometryTraverser;
     class GroupNode;
 
@@ -19,6 +20,9 @@ namespace he
 
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
+
+      virtual bool preTraverse(ConstTraverser* traverser) const = 0;
+      virtual void postTraverse(ConstTraverser* traverser) const = 0;
 
       virtual TreeNode* getFirstChild() const;
       TreeNode* getNextSibling() const;

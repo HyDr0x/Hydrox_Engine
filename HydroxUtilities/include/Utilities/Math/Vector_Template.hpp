@@ -23,9 +23,9 @@ namespace he
         m_vertexcounter++; 
       }
 
-      template<unsigned int DIM2> Vector(const Vector<Type, DIM2>& v)
+      template<unsigned int Dim2> Vector(const Vector<Type, Dim2>& v)
       { 
-        unsigned int b = MIN(VECTOR_NUM_ARGS, DIM2);
+        unsigned int b = MIN(VECTOR_NUM_ARGS, Dim2);
         for(unsigned int i = 0; i < b; i++)
         {
           m_x[i] = v[i];
@@ -35,6 +35,19 @@ namespace he
       }
 
       ~Vector(){ m_vertexcounter--; }
+
+      template<unsigned int Dim2> Vector<Type, VECTOR_NUM_ARGS>& operator=(const Vector<Type, Dim2>& v)
+      {
+        unsigned int b = MIN(VECTOR_NUM_ARGS, Dim2);
+        for(unsigned int i = 0; i < b; i++)
+        {
+          m_x[i] = v[i];
+        }
+
+        m_vertexcounter++;
+
+        return *this;
+      }
 
       static Vector identity() { return Vector(VECTOR_IDENTITY); }
 

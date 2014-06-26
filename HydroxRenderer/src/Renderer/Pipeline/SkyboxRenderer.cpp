@@ -36,7 +36,7 @@ namespace he
         texture->getTextureData(&data[i * size]);
       }
 
-      m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), &data[0]));
+      m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), texture->getChannelNumber(), texture->getBitsPerPixel(), &data[0]));
 
       std::vector<util::Vector<float, 3>> positions;
 

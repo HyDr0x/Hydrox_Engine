@@ -16,6 +16,7 @@
 #include <SceneGraph/TreeNodes/LODNode.h>
 #include <SceneGraph/TreeNodes/BillboardNode.h>
 #include <SceneGraph/TreeNodes/LightNode.h>
+#include <SceneGraph/TreeNodes/ShadowLightNode.h>
 #include <SceneGraph/TreeNodes/ParticleNode.h>
 
 #include "Saver/NodeWrapper.h"
@@ -227,8 +228,7 @@ namespace he
         LightNodeData data;
         data.nodeName = treeNode->getNodeName();
 
-        data.position = treeNode->getPosition();
-        data.direction = treeNode->getPosition();
+        data.color = treeNode->getColor();
 
         data.intensity = treeNode->getIntensity();
 
@@ -241,6 +241,33 @@ namespace he
 
         m_wrapperMapper.lightNodeMap[treeNode] = m_wrapperMapper.lightNodes.size();
         m_wrapperMapper.lightNodes.push_back(data);
+      }
+
+      return true;
+    }
+
+    bool NodeExtractionTraverser::preTraverse(sg::ShadowLightNode* treeNode)
+    {
+      if(!m_wrapperMapper.shadowLightNodeMap.count(treeNode))
+      {
+        ShadowLightNodeData data;
+        data.nodeName = treeNode->getNodeName();
+
+        data.color = treeNode->getColor();
+
+        data.intensity = treeNode->getIntensity();
+
+        data.spotLightExponent = treeNode->getSpotLightExponent();
+        data.spotLightCutoff = treeNode->getSpotLightCutoff();
+
+        data.constAttenuation = treeNode->getConstAttenuation();
+        data.linearAttenuation = treeNode->getLinearAttenuation();
+        data.quadricAttenuation = treeNode->getQuadricAttenuation();
+
+        data.projectionMatrix = treeNode->getShadowProjectionMatrix();
+
+        m_wrapperMapper.shadowLightNodeMap[treeNode] = m_wrapperMapper.shadowLightNodeMap.size();
+        m_wrapperMapper.shadowLightNodes.push_back(data);
       }
 
       return true;

@@ -1,6 +1,7 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 
 #include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 
 #include <DataBase/Material.h>
 
@@ -22,6 +23,16 @@ namespace he
     }
 
     void TextureNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool TextureNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void TextureNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

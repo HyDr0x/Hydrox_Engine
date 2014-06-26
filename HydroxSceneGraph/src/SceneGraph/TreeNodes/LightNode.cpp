@@ -6,6 +6,8 @@
 
 #include <XBar/LightContainer.h>
 
+#include <DataBase/Light.h>
+
 #include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"
 
@@ -17,8 +19,6 @@ namespace he
       TreeNode(nodeName, parent, nextSibling), 
       m_lightType(lightType),
       m_eventManager(eventManager),
-      m_position(util::Vector<float, 4>::identity()),
-      m_direction(util::Vector<float, 4>::identity()),
       m_renderable(false)
     {
     }
@@ -42,9 +42,6 @@ namespace he
       LightNode *newNode = new LightNode(m_lightType, m_eventManager, m_nodeName);
 
       newNode->m_nodeName = m_nodeName;
-
-      newNode->m_position = m_position;
-      newNode->m_direction = m_direction;
 
       newNode->m_lightData = m_lightData;
 
@@ -102,28 +99,18 @@ namespace he
 
     void LightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
     {
-      if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = m_position + position;
-      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.apply(m_direction);
+      if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
+      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
     }
 
-    void LightNode::setPosition(util::Vector<float, 3> position)
+    void LightNode::setColor(util::Vector<float, 3> color)
     {
-      m_position = position;
+      m_lightData.color = color;
     }
 
-    util::Vector<float, 3> LightNode::getPosition() const
+    util::Vector<float, 3> LightNode::getColor() const
     {
-      return m_position;
-    }
-
-    void LightNode::setDirection(util::Vector<float, 3> direction)
-    {
-      m_direction = direction;
-    }
-
-    util::Vector<float, 3> LightNode::getDirection() const
-    {
-      return m_direction;
+      return m_lightData.color;
     }
 
     void LightNode::setIntensity(float intensity)
@@ -138,22 +125,22 @@ namespace he
 
     void LightNode::setSpotLightExponent(float spotLightExponent)
     {
-      m_lightData.spotLightExponent = spotLightExponent;
+      m_lightData.position[3] = spotLightExponent;
     }
 
     float LightNode::getSpotLightExponent() const
     {
-      return m_lightData.spotLightExponent;
+      return m_lightData.position[3];
     }
 
     void LightNode::setSpotLightCutoff(float spotLightCutoff)
     {
-      m_lightData.spotLightCutoff = spotLightCutoff;
+      m_lightData.direction[3] = spotLightCutoff;
     }
 
     float LightNode::getSpotLightCutoff() const
     {
-      return m_lightData.spotLightCutoff;
+      return m_lightData.direction[3];
     }
 
     void LightNode::setConstAttenuation(float constAttenuation)

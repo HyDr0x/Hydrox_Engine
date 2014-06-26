@@ -53,6 +53,11 @@ namespace he
       return false;
     }
 
+    bool TreeNode::isShadowedLightNode() const
+    {
+      return false;
+    }
+
     bool TreeNode::isGroupNode() const
     {
       return false;

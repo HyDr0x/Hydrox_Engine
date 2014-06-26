@@ -18,6 +18,7 @@ namespace he
     class BillboardNode;
     class ParticleNode;
     class LightNode;
+    class ShadowLightNode;
 
     class GRAPHICAPI Traverser
     {
@@ -69,6 +70,10 @@ namespace he
       virtual bool ascendTraverse(LightNode* treeNode);
       virtual bool preTraverse(LightNode* treeNode);
       virtual void postTraverse(LightNode* treeNode);
+
+      virtual bool ascendTraverse(ShadowLightNode* treeNode);
+      virtual bool preTraverse(ShadowLightNode* treeNode);
+      virtual void postTraverse(ShadowLightNode* treeNode);
 
     protected:
 

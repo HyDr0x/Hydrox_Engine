@@ -21,7 +21,6 @@ namespace he
 
   namespace renderer
   {
-    class Traverser;
     class DrawCommandInterface;
     class MatrixBufferInterface;
 
@@ -35,6 +34,9 @@ namespace he
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
 
+      virtual bool preTraverse(ConstTraverser* traverser) const override;
+      virtual void postTraverse(ConstTraverser* traverser) const override;
+
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
@@ -46,7 +48,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const;
 
-      virtual void frustumCulling() const;
+      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const;
 
       virtual void rasterizeGeometry() const;
 

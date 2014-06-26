@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "Renderer/Traverser/Traverser.h"
+#include "Renderer/Traverser/ConstTraverser.h"
 
 namespace he
 {
@@ -24,6 +25,16 @@ namespace he
     }
 
     void GroupNode::postTraverse(Traverser* traverser)
+    {
+      traverser->postTraverse(this);
+    }
+
+    bool GroupNode::preTraverse(ConstTraverser* traverser) const
+    {
+      return traverser->preTraverse(this);
+    }
+
+    void GroupNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
     }

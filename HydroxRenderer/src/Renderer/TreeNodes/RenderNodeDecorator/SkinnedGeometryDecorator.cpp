@@ -18,11 +18,11 @@ namespace he
     {
     }
 
-    void SkinnedGeometryDecorator::frustumCulling() const
+    void SkinnedGeometryDecorator::frustumCulling(unsigned int viewProjectionMatrixID) const
     {
       m_bboxMatrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-      m_renderNode->frustumCulling();
+      m_renderNode->frustumCulling(viewProjectionMatrixID);
 
       m_bboxMatrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }

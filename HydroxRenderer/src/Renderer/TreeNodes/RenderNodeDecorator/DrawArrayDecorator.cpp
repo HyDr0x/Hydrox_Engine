@@ -72,13 +72,13 @@ namespace he
       return deleted;
     }
 
-    void DrawArrayDecorator::frustumCulling() const
+    void DrawArrayDecorator::frustumCulling(unsigned int viewProjectionMatrixID) const
     {
       m_bboxesBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_commandBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
 
-      m_renderNode->frustumCulling();
+      m_renderNode->frustumCulling(viewProjectionMatrixID);
 
       m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
       m_commandBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);

@@ -108,5 +108,10 @@ namespace he
     {
       glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
     }
+
+    void OpenGLDebugLogManager::getState(GLenum pname, GLint *data)
+    {
+      glGetIntegerv(pname, data);
+    }
   }
 }

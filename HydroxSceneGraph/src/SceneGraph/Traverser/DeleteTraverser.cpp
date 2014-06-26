@@ -5,6 +5,7 @@
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
 #include "SceneGraph/TreeNodes/GeoNode.h"
 #include "SceneGraph/TreeNodes/LightNode.h"
+#include "SceneGraph/TreeNodes/ShadowLightNode.h"
 #include "SceneGraph/TreeNodes/LODNode.h"
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 #include "SceneGraph/TreeNodes/TransformNode.h"
@@ -104,6 +105,17 @@ namespace he
     }
 
     void DeleteTraverser::postTraverse(const LightNode* treeNode)
+    {
+      delete treeNode;
+      treeNode = nullptr;
+    }
+
+    bool DeleteTraverser::preTraverse(const ShadowLightNode* treeNode)
+    {
+      return true;
+    }
+
+    void DeleteTraverser::postTraverse(const ShadowLightNode* treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
