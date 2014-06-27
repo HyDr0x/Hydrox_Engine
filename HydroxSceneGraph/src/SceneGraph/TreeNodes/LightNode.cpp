@@ -103,6 +103,11 @@ namespace he
       if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
     }
 
+    LightType LightNode::getLightType() const
+    {
+      return m_lightType;
+    }
+
     void LightNode::setColor(util::Vector<float, 3> color)
     {
       m_lightData.color = color;

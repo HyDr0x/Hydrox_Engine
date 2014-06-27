@@ -49,6 +49,8 @@ namespace he
 
       void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
 
+      LightType getLightType() const;
+
       void setColor(util::Vector<float, 3> color);
       util::Vector<float, 3> getColor() const;
 

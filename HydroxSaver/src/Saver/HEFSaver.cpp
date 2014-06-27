@@ -29,6 +29,7 @@ namespace he
       m_wrapperMapper.billboardNodeMap.clear();
       m_wrapperMapper.lodNodeMap.clear();
       m_wrapperMapper.lightNodeMap.clear();
+      m_wrapperMapper.shadowLightNodeMap.clear();
       m_wrapperMapper.particleNodeMap.clear();
 
       m_wrapperMapper.geoNodes.clear();
@@ -38,6 +39,7 @@ namespace he
       m_wrapperMapper.billboardNodes.clear();
       m_wrapperMapper.lodNodes.clear();
       m_wrapperMapper.lightNodes.clear();
+      m_wrapperMapper.shadowLightNodes.clear();
       m_wrapperMapper.particleNodes.clear();
 
       m_wrapperMapper.meshMap.clear();
@@ -93,6 +95,7 @@ namespace he
       nodeNumbers.billboardNodeSize = m_wrapperMapper.billboardNodes.size();
       nodeNumbers.lodNodeSize = m_wrapperMapper.lodNodes.size();
       nodeNumbers.lightNodeSize = m_wrapperMapper.lightNodes.size();
+      nodeNumbers.shadowLightNodeSize = m_wrapperMapper.shadowLightNodes.size();
       nodeNumbers.particleNodeSize = m_wrapperMapper.particleNodes.size();
 
       fileStream.write((char*)&nodeNumbers, sizeof(nodeNumbers));
@@ -132,6 +135,11 @@ namespace he
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         fileStream << m_wrapperMapper.lightNodes[i];
+      }
+
+      for(unsigned int i = 0; i < m_wrapperMapper.shadowLightNodes.size(); i++)
+      {
+        fileStream << m_wrapperMapper.shadowLightNodes[i];
       }
 
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)

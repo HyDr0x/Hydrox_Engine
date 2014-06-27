@@ -85,6 +85,9 @@ namespace he
       GLuint lightNumber = m_lights.size();
       db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &lightNumber);
 
+      GLuint shadowLightNumber = m_shadowLights.size();
+      db::RenderShader::setUniform(4, GL_UNSIGNED_INT, &shadowLightNumber);
+
       m_lightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_renderLightMapQuad.setWriteFrameBuffer();

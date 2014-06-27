@@ -29,6 +29,7 @@ namespace he
       unsigned int billboardNodeSize;
       unsigned int lodNodeSize;
       unsigned int lightNodeSize;
+      unsigned int shadowLightNodeSize;
       unsigned int particleNodeSize;
     };
 

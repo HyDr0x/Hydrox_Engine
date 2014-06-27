@@ -14,6 +14,7 @@
 #include <SceneGraph/TreeNodes/BillboardNode.h>
 #include <SceneGraph/TreeNodes/LODNode.h>
 #include <SceneGraph/TreeNodes/LightNode.h>
+#include <SceneGraph/TreeNodes/ShadowLightNode.h>
 #include <SceneGraph/TreeNodes/ParticleNode.h>
 
 #include <SceneGraph/Scene/Scene.h>
@@ -39,6 +40,7 @@ namespace he
       m_wrapperMapper.billboardNodeMap.clear();
       m_wrapperMapper.lodNodeMap.clear();
       m_wrapperMapper.lightNodeMap.clear();
+      m_wrapperMapper.shadowLightNodeMap.clear();
       m_wrapperMapper.particleNodeMap.clear();
 
       m_wrapperMapper.geoNodes.clear();
@@ -48,6 +50,7 @@ namespace he
       m_wrapperMapper.billboardNodes.clear();
       m_wrapperMapper.lodNodes.clear();
       m_wrapperMapper.lightNodes.clear();
+      m_wrapperMapper.shadowLightNodes.clear();
       m_wrapperMapper.particleNodes.clear();
 
       m_wrapperMapper.meshMap.clear();
@@ -55,12 +58,12 @@ namespace he
       m_wrapperMapper.billboardTextureMap.clear();
     }
 
-    sg::Scene* HEFLoader::load(std::string path, std::string filename, util::SingletonManager *singletonManager, util::EventManager *eventManager)
+    sg::Scene* HEFLoader::load(std::string path, std::string filename, util::SingletonManager *singletonManager)
     {
       m_rootNode = nullptr;
 
       readFromFile(path, filename, singletonManager);
-      createSceneNodes(eventManager);
+      createSceneNodes(singletonManager->getService<util::EventManager>());
       linkSceneNodes();
       findRootNode();
 
@@ -95,6 +98,7 @@ namespace he
       m_wrapperMapper.billboardNodes.resize(nodeNumbers.billboardNodeSize);
       m_wrapperMapper.lodNodes.resize(nodeNumbers.lodNodeSize);
       m_wrapperMapper.lightNodes.resize(nodeNumbers.lightNodeSize);
+      m_wrapperMapper.shadowLightNodes.resize(nodeNumbers.shadowLightNodeSize);
       m_wrapperMapper.particleNodes.resize(nodeNumbers.particleNodeSize);
 
       for(unsigned int i = 0; i < m_wrapperMapper.geoNodes.size(); i++)
@@ -130,6 +134,11 @@ namespace he
       for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
       {
         fileStream >> m_wrapperMapper.lightNodes[i];
+      }
+
+      for(unsigned int i = 0; i < m_wrapperMapper.shadowLightNodes.size(); i++)
+      {
+        fileStream >> m_wrapperMapper.shadowLightNodes[i];
       }
 
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
@@ -227,6 +236,26 @@ namespace he
       {
         LightNodeData& data = m_wrapperMapper.lightNodes[i];
         m_wrapperMapper.lightNodeMap[i] = new sg::LightNode(data.lightType, eventManager, data.nodeName);
+        m_wrapperMapper.lightNodeMap[i]->setColor(data.color);
+        m_wrapperMapper.lightNodeMap[i]->setIntensity(data.intensity);
+        m_wrapperMapper.lightNodeMap[i]->setSpotLightCutoff(data.spotLightCutoff);
+        m_wrapperMapper.lightNodeMap[i]->setSpotLightExponent(data.spotLightExponent);
+        m_wrapperMapper.lightNodeMap[i]->setConstAttenuation(data.constAttenuation);
+        m_wrapperMapper.lightNodeMap[i]->setLinearAttenuation(data.linearAttenuation);
+        m_wrapperMapper.lightNodeMap[i]->setQuadricAttenuation(data.quadricAttenuation);
+      }
+
+      for(unsigned int i = 0; i < m_wrapperMapper.lightNodes.size(); i++)
+      {
+        ShadowLightNodeData& data = m_wrapperMapper.shadowLightNodes[i];
+        m_wrapperMapper.shadowLightNodeMap[i] = new sg::ShadowLightNode(data.lightType, eventManager, data.nodeName);
+        m_wrapperMapper.shadowLightNodeMap[i]->setColor(data.color);
+        m_wrapperMapper.shadowLightNodeMap[i]->setIntensity(data.intensity);
+        m_wrapperMapper.shadowLightNodeMap[i]->setSpotLightCutoff(data.spotLightCutoff);
+        m_wrapperMapper.shadowLightNodeMap[i]->setSpotLightExponent(data.spotLightExponent);
+        m_wrapperMapper.shadowLightNodeMap[i]->setConstAttenuation(data.constAttenuation);
+        m_wrapperMapper.shadowLightNodeMap[i]->setLinearAttenuation(data.linearAttenuation);
+        m_wrapperMapper.shadowLightNodeMap[i]->setQuadricAttenuation(data.quadricAttenuation);
       }
 
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
@@ -332,6 +361,17 @@ namespace he
         m_wrapperMapper.lightNodeMap[i]->setNextSibling(treeNode);
       }
 
+      for(unsigned int i = 0; i < m_wrapperMapper.shadowLightNodes.size(); i++)
+      {
+        ShadowLightNodeData& data = m_wrapperMapper.shadowLightNodes[i];
+
+        findNode(&groupNode, data.parentIndex, data.parentNodeType);
+        m_wrapperMapper.shadowLightNodeMap[i]->setParent(groupNode);
+
+        findNode(&treeNode, data.nextSiblingIndex, data.nextSiblingNodeType);
+        m_wrapperMapper.shadowLightNodeMap[i]->setNextSibling(treeNode);
+      }
+
       for(unsigned int i = 0; i < m_wrapperMapper.particleNodes.size(); i++)
       {
         ParticleNodeData& data = m_wrapperMapper.particleNodes[i];
@@ -384,6 +424,9 @@ namespace he
             break;
           case LIGHTNODE:
             *treeNode = m_wrapperMapper.lightNodeMap[index];
+            break;
+          case SHADOWLIGHTNODE:
+            *treeNode = m_wrapperMapper.shadowLightNodeMap[index];
             break;
           case PARTICLENODE:
             *treeNode = m_wrapperMapper.particleNodeMap[index];

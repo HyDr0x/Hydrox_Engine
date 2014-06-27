@@ -122,6 +122,11 @@ namespace he
       m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(m_lightData.position, m_lightData.direction, util::Vector<float, 3>(0.0f, 1.0f, 0.0f));
     }
 
+    LightType ShadowLightNode::getLightType() const
+    {
+      return m_lightType;
+    }
+
     void ShadowLightNode::setColor(util::Vector<float, 3> color)
     {
       m_lightData.color = color;

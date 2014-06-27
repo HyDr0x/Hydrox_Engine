@@ -169,7 +169,7 @@ namespace he
           index = m_wrapperMapper.lodNodeMap[dynamic_cast<sg::LODNode*>(treeNode)];
           nodeType = LODNODE;
         }
-        else if(treeNode->isShadowedLightNode())
+        else if(treeNode->isShadowLightNode())
         {
           index = m_wrapperMapper.shadowLightNodeMap[dynamic_cast<sg::ShadowLightNode*>(treeNode)];
           nodeType = SHADOWLIGHTNODE;

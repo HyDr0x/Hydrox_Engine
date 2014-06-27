@@ -239,6 +239,8 @@ namespace he
         data.linearAttenuation = treeNode->getLinearAttenuation();
         data.quadricAttenuation = treeNode->getQuadricAttenuation();
 
+        data.lightType = treeNode->getLightType();
+
         m_wrapperMapper.lightNodeMap[treeNode] = m_wrapperMapper.lightNodes.size();
         m_wrapperMapper.lightNodes.push_back(data);
       }
@@ -265,6 +267,8 @@ namespace he
         data.quadricAttenuation = treeNode->getQuadricAttenuation();
 
         data.projectionMatrix = treeNode->getShadowProjectionMatrix();
+
+        data.lightType = treeNode->getLightType();
 
         m_wrapperMapper.shadowLightNodeMap[treeNode] = m_wrapperMapper.shadowLightNodeMap.size();
         m_wrapperMapper.shadowLightNodes.push_back(data);

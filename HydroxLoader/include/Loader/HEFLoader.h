@@ -30,6 +30,7 @@ namespace he
       unsigned int billboardNodeSize;
       unsigned int lodNodeSize;
       unsigned int lightNodeSize;
+      unsigned int shadowLightNodeSize;
       unsigned int particleNodeSize;
     };
 
@@ -52,7 +53,7 @@ namespace he
 
       ~HEFLoader();
 
-      sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager, util::EventManager *eventManager);
+      sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager);
 
     private:
 

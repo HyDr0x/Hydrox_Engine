@@ -53,7 +53,7 @@ namespace he
       return false;
     }
 
-    bool TreeNode::isShadowedLightNode() const
+    bool TreeNode::isShadowLightNode() const
     {
       return false;
     }
