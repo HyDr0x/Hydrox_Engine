@@ -19,6 +19,7 @@ namespace he
       m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
+      m_nodeType = GEONODE;
     }
 
     GeoNode::~GeoNode()
@@ -72,11 +73,6 @@ namespace he
     void GeoNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool GeoNode::isGeoNode() const
-    {
-      return true;
     }
 
     void GeoNode::setMeshHandle(util::ResourceHandle meshHandle)

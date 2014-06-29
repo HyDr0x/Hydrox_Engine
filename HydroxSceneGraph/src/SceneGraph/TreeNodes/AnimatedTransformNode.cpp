@@ -23,6 +23,8 @@ namespace he
       m_currentScaleKey = 0;
       m_currentPositionKey = 0;
       m_currentRotationKey = 0;
+
+      m_nodeType = ANIMATEDTRANSFORMNODE;
     }
 
     AnimatedTransformNode::~AnimatedTransformNode()
@@ -95,11 +97,6 @@ namespace he
     void AnimatedTransformNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool AnimatedTransformNode::isAnimatedTransformNode() const
-    {
-      return true;
     }
 
     void AnimatedTransformNode::setBoneIndex(unsigned int boneIndex)

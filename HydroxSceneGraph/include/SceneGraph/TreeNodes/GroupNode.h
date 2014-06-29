@@ -39,8 +39,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isGroupNode() const;
-
       TreeNode* getFirstChild() const;
 
       void setFirstChild(TreeNode* firstChild);

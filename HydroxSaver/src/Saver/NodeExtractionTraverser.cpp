@@ -40,16 +40,17 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::TransformNode* treeNode)
     {
-      if(!m_wrapperMapper.transformNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        TransformNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.translation = treeNode->getLocalPosition();
-        data.rotation = treeNode->getLocalRotation();
-        data.scale = treeNode->getLocalScale();
+        TransformNodeData *data = new TransformNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->translation = treeNode->getLocalPosition();
+        data->rotation = treeNode->getLocalRotation();
+        data->scale = treeNode->getLocalScale();
 
-        m_wrapperMapper.transformNodeMap[treeNode] = m_wrapperMapper.transformNodes.size();
-        m_wrapperMapper.transformNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -57,19 +58,20 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::AnimatedTransformNode* treeNode)
     {
-      if(!m_wrapperMapper.animatedTransformNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        AnimatedTransformNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.translation = treeNode->getLocalPosition();
-        data.rotation = treeNode->getLocalRotation();
-        data.scale = treeNode->getLocalScale();
+        AnimatedTransformNodeData *data = new AnimatedTransformNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->translation = treeNode->getLocalPosition();
+        data->rotation = treeNode->getLocalRotation();
+        data->scale = treeNode->getLocalScale();
 
-        data.boneIndex = treeNode->getBoneIndex();
-        data.animationTracks = treeNode->getAnimationTracks();
+        data->boneIndex = treeNode->getBoneIndex();
+        data->animationTracks = treeNode->getAnimationTracks();
 
-        m_wrapperMapper.animatedTransformNodeMap[treeNode] = m_wrapperMapper.animatedTransformNodes.size();
-        m_wrapperMapper.animatedTransformNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -77,46 +79,31 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::GeoNode* treeNode)
     {
-      if(!m_wrapperMapper.geoNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        GeoNodeData data;
+        GeoNodeData *data = new GeoNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
 
-        data.nodeName = treeNode->getNodeName();
-
-        
-        if(!m_wrapperMapper.meshMap.count(treeNode->getMeshHandle()))
+        if(!m_wrapperMapper.resourceMap["Meshes"].count(treeNode->getMeshHandle()))
         {
-          m_wrapperMapper.meshMap[treeNode->getMeshHandle()] = m_wrapperMapper.meshes.size();
-          data.meshIndex = m_wrapperMapper.meshes.size();
+          m_wrapperMapper.resourceMap["Meshes"][treeNode->getMeshHandle()] = m_fileName + "_Mesh";
+
 
           db::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
-          m_wrapperMapper.meshes.push_back(*mesh);
         }
-        else
-        {
-          data.meshIndex = m_wrapperMapper.meshMap[treeNode->getMeshHandle()];
-        }
+        data->meshFilename = m_wrapperMapper.resourceMap["Meshes"][treeNode->getMeshHandle()];
 
-        if(!m_wrapperMapper.materialMap.count(treeNode->getMaterialHandle()))
+        if(!m_wrapperMapper.resourceMap["Materials"].count(treeNode->getMaterialHandle()))
         {
-          m_wrapperMapper.materialMap[treeNode->getMaterialHandle()] = m_wrapperMapper.materialFileNames.size();
-          data.materialIndex = m_wrapperMapper.materialFileNames.size();
+          m_wrapperMapper.resourceMap["Materials"][treeNode->getMaterialHandle()] = m_fileName + "_Material";
 
           db::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
-
-          std::stringstream materialFileName;
-          materialFileName << m_fileName << "_Material_" << m_wrapperMapper.materialFileNames.size();
-
-          m_wrapperMapper.materialFileNames.push_back(materialFileName.str());
         }
-        else
-        {
-          data.materialIndex = m_wrapperMapper.materialMap[treeNode->getMaterialHandle()];
-        }
-
+        data->materialFilename = m_wrapperMapper.resourceMap["Materials"][treeNode->getMeshHandle()];
         
-        m_wrapperMapper.geoNodeMap[treeNode] = m_wrapperMapper.geoNodes.size();
-        m_wrapperMapper.geoNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -124,44 +111,31 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::AnimatedGeoNode* treeNode)
     {
-      if(!m_wrapperMapper.animatedGeoNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        AnimatedGeoNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.inverseBindPoseMatrices = treeNode->getInverseBindPoseMatrices();
+        AnimatedGeoNodeData *data = new AnimatedGeoNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->inverseBindPoseMatrices = treeNode->getInverseBindPoseMatrices();
 
-        if(!m_wrapperMapper.meshMap.count(treeNode->getMeshHandle()))
+        if(!m_wrapperMapper.resourceMap["Meshes"].count(treeNode->getMeshHandle()))
         {
-          m_wrapperMapper.meshMap[treeNode->getMeshHandle()] = m_wrapperMapper.meshes.size();
-          data.meshIndex = m_wrapperMapper.meshes.size();
+          m_wrapperMapper.resourceMap["Meshes"][treeNode->getMeshHandle()] = m_fileName + "_Mesh";
 
           db::Mesh *mesh = m_modelManager->getObject(treeNode->getMeshHandle());
-          m_wrapperMapper.meshes.push_back(*mesh);
         }
-        else
-        {
-          data.meshIndex = m_wrapperMapper.meshMap[treeNode->getMeshHandle()];
-        }
+        data->meshFilename = m_wrapperMapper.resourceMap["Meshes"][treeNode->getMeshHandle()];
 
-        if(!m_wrapperMapper.materialMap.count(treeNode->getMaterialHandle()))
+        if(!m_wrapperMapper.resourceMap["Materials"].count(treeNode->getMaterialHandle()))
         {
-          m_wrapperMapper.materialMap[treeNode->getMaterialHandle()] = m_wrapperMapper.materialFileNames.size();
-          data.materialIndex = m_wrapperMapper.materialFileNames.size();
+          m_wrapperMapper.resourceMap["Materials"][treeNode->getMaterialHandle()] = m_fileName + "_Material";
 
           db::Material *material = m_materialManager->getObject(treeNode->getMaterialHandle());
-
-          std::stringstream materialFileName;
-          materialFileName << m_fileName << "_Material_" << m_wrapperMapper.materialFileNames.size();
-
-          m_wrapperMapper.materialFileNames.push_back(materialFileName.str());
         }
-        else
-        {
-          data.materialIndex = m_wrapperMapper.materialMap[treeNode->getMaterialHandle()];
-        }
+        data->materialFilename = m_wrapperMapper.resourceMap["Materials"][treeNode->getMeshHandle()];
 
-        m_wrapperMapper.animatedGeoNodeMap[treeNode] = m_wrapperMapper.animatedGeoNodes.size();
-        m_wrapperMapper.animatedGeoNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -169,37 +143,28 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::BillboardNode* treeNode)
     {
-      if(!m_wrapperMapper.billboardNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        BillboardNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.animCount = treeNode->getAnimationCount();
-        data.animNumber = treeNode->getAnimationNumber();
-        data.translate = treeNode->getPosition();
-        data.scale = treeNode->getScale();
-        data.texStart = treeNode->getTextureStart();
-        data.texEnd = treeNode->getTextureEnd();
+        BillboardNodeData *data = new BillboardNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->animCount = treeNode->getAnimationCount();
+        data->animNumber = treeNode->getAnimationNumber();
+        data->translate = treeNode->getPosition();
+        data->scale = treeNode->getScale();
+        data->texStart = treeNode->getTextureStart();
+        data->texEnd = treeNode->getTextureEnd();
 
-        if(!m_wrapperMapper.billboardTextureMap.count(treeNode->getTextureHandle()))
+        if(!m_wrapperMapper.resourceMap["Textures"].count(treeNode->getTextureHandle()))
         {
-          //renderer::Texture2D *texture = m_textureManager->getObject(treeNode->getTextureHandle());
+          m_wrapperMapper.resourceMap["Textures"][treeNode->getTextureHandle()] = m_fileName + "_Texture";
 
-          std::stringstream billboardTextureFileName;
-          billboardTextureFileName << m_fileName << "_BillboardTexture_" << m_wrapperMapper.billboardTextureFileNames.size();
-
-          m_wrapperMapper.billboardTextureMap[treeNode->getTextureHandle()] = m_wrapperMapper.billboardTextureFileNames.size();
-
-          data.textureIndex = m_wrapperMapper.billboardTextureFileNames.size();
-
-          m_wrapperMapper.billboardTextureFileNames.push_back(billboardTextureFileName.str());
+          db::Mesh *mesh = m_modelManager->getObject(treeNode->getTextureHandle());
         }
-        else
-        {
-          data.textureIndex = m_wrapperMapper.billboardTextureMap[treeNode->getTextureHandle()];
-        }
+        data->textureFilename = m_wrapperMapper.resourceMap["Textures"][treeNode->getTextureHandle()];
 
-        m_wrapperMapper.billboardNodeMap[treeNode] = m_wrapperMapper.billboardNodes.size();
-        m_wrapperMapper.billboardNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -207,15 +172,16 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::LODNode* treeNode)
     {
-      if(!m_wrapperMapper.lodNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        LODNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.lodLevel = treeNode->getLODLevel();
-        data.position = treeNode->getPosition();
+        LODNodeData *data = new LODNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->lodLevel = treeNode->getLODLevel();
+        data->position = treeNode->getPosition();
 
-        m_wrapperMapper.lodNodeMap[treeNode] = m_wrapperMapper.lodNodes.size();
-        m_wrapperMapper.lodNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -223,26 +189,27 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::LightNode* treeNode)
     {
-      if(!m_wrapperMapper.lightNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        LightNodeData data;
-        data.nodeName = treeNode->getNodeName();
+        LightNodeData *data = new LightNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
 
-        data.color = treeNode->getColor();
+        data->color = treeNode->getColor();
 
-        data.intensity = treeNode->getIntensity();
+        data->intensity = treeNode->getIntensity();
 
-        data.spotLightExponent = treeNode->getSpotLightExponent();
-        data.spotLightCutoff = treeNode->getSpotLightCutoff();
+        data->spotLightExponent = treeNode->getSpotLightExponent();
+        data->spotLightCutoff = treeNode->getSpotLightCutoff();
 
-        data.constAttenuation = treeNode->getConstAttenuation();
-        data.linearAttenuation = treeNode->getLinearAttenuation();
-        data.quadricAttenuation = treeNode->getQuadricAttenuation();
+        data->constAttenuation = treeNode->getConstAttenuation();
+        data->linearAttenuation = treeNode->getLinearAttenuation();
+        data->quadricAttenuation = treeNode->getQuadricAttenuation();
 
-        data.lightType = treeNode->getLightType();
+        data->lightType = treeNode->getLightType();
 
-        m_wrapperMapper.lightNodeMap[treeNode] = m_wrapperMapper.lightNodes.size();
-        m_wrapperMapper.lightNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -250,28 +217,29 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::ShadowLightNode* treeNode)
     {
-      if(!m_wrapperMapper.shadowLightNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        ShadowLightNodeData data;
-        data.nodeName = treeNode->getNodeName();
+        ShadowLightNodeData *data = new ShadowLightNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
 
-        data.color = treeNode->getColor();
+        data->color = treeNode->getColor();
 
-        data.intensity = treeNode->getIntensity();
+        data->intensity = treeNode->getIntensity();
 
-        data.spotLightExponent = treeNode->getSpotLightExponent();
-        data.spotLightCutoff = treeNode->getSpotLightCutoff();
+        data->spotLightExponent = treeNode->getSpotLightExponent();
+        data->spotLightCutoff = treeNode->getSpotLightCutoff();
 
-        data.constAttenuation = treeNode->getConstAttenuation();
-        data.linearAttenuation = treeNode->getLinearAttenuation();
-        data.quadricAttenuation = treeNode->getQuadricAttenuation();
+        data->constAttenuation = treeNode->getConstAttenuation();
+        data->linearAttenuation = treeNode->getLinearAttenuation();
+        data->quadricAttenuation = treeNode->getQuadricAttenuation();
 
-        data.projectionMatrix = treeNode->getShadowProjectionMatrix();
+        data->projectionMatrix = treeNode->getShadowProjectionMatrix();
 
-        data.lightType = treeNode->getLightType();
+        data->lightType = treeNode->getLightType();
 
-        m_wrapperMapper.shadowLightNodeMap[treeNode] = m_wrapperMapper.shadowLightNodeMap.size();
-        m_wrapperMapper.shadowLightNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;
@@ -279,14 +247,15 @@ namespace he
 
     bool NodeExtractionTraverser::preTraverse(sg::ParticleNode* treeNode)
     {
-      if(!m_wrapperMapper.particleNodeMap.count(treeNode))
+      if(!m_wrapperMapper.nodeMap.count(treeNode))
       {
-        ParticleNodeData data;
-        data.nodeName = treeNode->getNodeName();
-        data.trfMatrix = treeNode->getTransformationMatrix();
+        ParticleNodeData *data = new ParticleNodeData;
+        data->nodeType = treeNode->getNodeType();
+        data->nodeName = treeNode->getNodeName();
+        data->trfMatrix = treeNode->getTransformationMatrix();
 
-        m_wrapperMapper.particleNodeMap[treeNode] = m_wrapperMapper.particleNodes.size();
-        m_wrapperMapper.particleNodes.push_back(data);
+        m_wrapperMapper.nodeMap[treeNode] = m_wrapperMapper.treeNodes.size();
+        m_wrapperMapper.treeNodes.push_back(data);
       }
 
       return true;

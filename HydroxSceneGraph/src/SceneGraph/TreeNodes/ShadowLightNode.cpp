@@ -20,6 +20,7 @@ namespace he
       m_renderable(false)
     {
       setShadowProjection(1.0f, 1000.0f);
+      m_nodeType = SHADOWLIGHTNODE;
     }
 
     ShadowLightNode::~ShadowLightNode()
@@ -73,11 +74,6 @@ namespace he
     void ShadowLightNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool ShadowLightNode::isShadowLightNode() const
-    {
-      return true;
     }
 
     void ShadowLightNode::setShadowProjection(float near, float far)

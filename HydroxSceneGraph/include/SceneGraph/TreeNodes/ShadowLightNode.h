@@ -39,8 +39,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isShadowLightNode() const;
-
       void setShadowProjection (float near, float far);
 
       util::Matrix<float, 4> getShadowProjectionMatrix() const;

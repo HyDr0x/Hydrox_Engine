@@ -15,6 +15,7 @@ namespace he
     {
     public:
 
+      AnimatedGeoNode(std::istream stream);
       AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~AnimatedGeoNode();
 
@@ -29,8 +30,6 @@ namespace he
       virtual bool ascendTraverse(ConstTraverser* traverser) const;
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
-
-      virtual bool isAnimatedGeoNode() const;
 
       void setMeshHandle(util::ResourceHandle meshHandle);
       void setMaterialHandle(util::ResourceHandle materialHandle);

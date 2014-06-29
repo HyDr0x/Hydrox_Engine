@@ -3,48 +3,56 @@
 
 #include <Utilities/Math/Math.hpp>
 
-#include <SceneGraph/TreeNodes/AnimatedTransformNode.h>
+#include <SceneGraph/TreeNodes/TreeNode.h>
+#include <SceneGraph/TreeNodes/GroupNode.h>
+#include <SceneGraph/TreeNodes/AnimatedGeoNode.h>
+
 #include <SceneGraph/TreeNodes/AnimationTrack.h>
-#include <SceneGraph/TreeNodes/LightNode.h>
+
+#include <DataBase/Light.h>
 
 namespace he
 {
   namespace loader
   {
-    enum NodeType
-    {
-      GEONODE,
-      ANIMATEDGEONODE,
-      TRANSFORMNODE,
-      ANIMATEDTRANSFORMNODE,
-      BILLBOARDNODE,
-      LODNODE,
-      LIGHTNODE,
-      SHADOWLIGHTNODE,
-      PARTICLENODE,
-    };
+    //namespace sg
+    //{
+    //  class TransformNode;
+    //  class AnimatedTransformNode;
+    //  class GeoNode;
+    //  class AnimatedGeoNode;
+    //  class LODNode;
+    //  class BillboardNode;
+    //  class LightNode;
+    //  class ShadowLightNode;
+    //  class ParticleNode;
+    //}
 
     struct TreeNodeData
     {
       TreeNodeData() : parentIndex(~0), firstChildIndex(~0), nextSiblingIndex(~0)
       {}
 
+      sg::NodeType nodeType;
       std::string nodeName;
 
-      NodeType parentNodeType;
+      sg::NodeType parentNodeType;
       unsigned int parentIndex;
+      sg::GroupNode *parentNode;
 
-      NodeType firstChildNodeType;
+      sg::NodeType firstChildNodeType;
       unsigned int firstChildIndex;
+      sg::TreeNode *firstChildNode;
 
-      NodeType nextSiblingNodeType;
+      sg::NodeType nextSiblingNodeType;
       unsigned int nextSiblingIndex;
+      sg::TreeNode *nextSiblingNode;
     };
 
     struct GeoNodeData : public TreeNodeData
     {
-      unsigned int meshIndex;
-      unsigned int materialIndex;
+      std::string meshFilename;
+      std::string materialFilename;
     };
 
     struct AnimatedGeoNodeData : public GeoNodeData
@@ -63,6 +71,8 @@ namespace he
     {
       std::vector<sg::AnimationTrack> animationTracks;
       unsigned int animatedMeshIndex;
+      sg::AnimatedGeoNode* animatedGeoNode;
+
       unsigned int boneIndex;
     };
 
@@ -83,7 +93,7 @@ namespace he
       util::Vector<float, 2> scale;
       util::Vector<float, 3> translate;
       
-      unsigned textureIndex;
+      std::string textureFileName;
     };
 
     struct LightNodeData : public TreeNodeData

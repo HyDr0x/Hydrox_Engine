@@ -29,6 +29,8 @@ namespace he
 
       virtual GroupNode* clone() const;
 
+      void initialize();
+
       virtual bool ascendTraverse(Traverser* traverser);
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);
@@ -36,8 +38,6 @@ namespace he
       virtual bool ascendTraverse(ConstTraverser* traverser) const;
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
-
-      virtual bool isAnimatedTransformNode() const;
 
       void setBoneIndex(unsigned int boneIndex);
       unsigned int getBoneIndex() const;

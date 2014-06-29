@@ -29,6 +29,7 @@ namespace he
     m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
     m_renderable(false)
     {
+      m_nodeType = BILLBOARDNODE;
     }
 
     BillboardNode::~BillboardNode()
@@ -83,11 +84,6 @@ namespace he
     void BillboardNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool BillboardNode::isBillboardNode() const
-    {
-      return true;
     }
 
     util::ResourceHandle BillboardNode::getTextureHandle() const

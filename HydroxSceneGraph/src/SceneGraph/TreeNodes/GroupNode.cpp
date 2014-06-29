@@ -13,6 +13,7 @@ namespace he
                                                                                                                         m_firstChild(firstChild)
     {
       m_dirtyFlag = DEFAULT;
+      m_nodeType = GROUPNODE;
     }
 
     GroupNode::~GroupNode()
@@ -68,11 +69,6 @@ namespace he
     void GroupNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool GroupNode::isGroupNode() const
-    {
-      return true;
     }
 
     TreeNode* GroupNode::getFirstChild() const

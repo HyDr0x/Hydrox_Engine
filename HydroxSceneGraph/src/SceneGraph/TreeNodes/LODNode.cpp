@@ -18,6 +18,7 @@ namespace he
     {
       m_dirtyFlag |= LOD_INRANGE;
       m_transformedPosition = m_position;
+      m_nodeType = LODNODE;
     }
 
     LODNode::~LODNode()
@@ -74,11 +75,6 @@ namespace he
     void LODNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool LODNode::isLODNode() const
-    {
-      return true;
     }
 
     unsigned int LODNode::getLODLevel() const

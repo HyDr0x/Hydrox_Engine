@@ -1,10 +1,7 @@
 #ifndef LOADERNODEWRAPPERMAPPER_H_
 #define LOADERNODEWRAPPERMAPPER_H_
 
-#include <DataBase/Mesh.h>
-#include <DataBase/Material.h>
-#include <DataBase/Texture2D.h>
-#include <DataBase/RenderShader.h>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "Loader/NodeWrapper.h"
 
@@ -12,6 +9,8 @@ namespace he
 {
   namespace sg
   {
+    class TreeNode;
+    class GroupNode;
     class TransformNode;
     class AnimatedTransformNode;
     class GeoNode;
@@ -27,29 +26,24 @@ namespace he
   {
     struct NodeWrapperMapper
     {
-      std::map<unsigned int, sg::GeoNode*> geoNodeMap;
-      std::map<unsigned int, sg::AnimatedGeoNode*> animatedGeoNodeMap;
-      std::map<unsigned int, sg::TransformNode*> transformNodeMap;
-      std::map<unsigned int, sg::AnimatedTransformNode*> animatedTransformNodeMap;
-      std::map<unsigned int, sg::BillboardNode*> billboardNodeMap;
-      std::map<unsigned int, sg::LODNode*> lodNodeMap;
-      std::map<unsigned int, sg::LightNode*> lightNodeMap;
-      std::map<unsigned int, sg::ShadowLightNode*> shadowLightNodeMap;
-      std::map<unsigned int, sg::ParticleNode*> particleNodeMap;
+      ~NodeWrapperMapper()
+      {
+        for(unsigned int i = 0; i < treeNodes.size(); i++)
+        {
+          delete treeNodes[i];
+        }
 
-      std::vector<GeoNodeData> geoNodes;
-      std::vector<AnimatedGeoNodeData> animatedGeoNodes;
-      std::vector<TransformNodeData> transformNodes;
-      std::vector<AnimatedTransformNodeData> animatedTransformNodes;
-      std::vector<LODNodeData> lodNodes;
-      std::vector<BillboardNodeData> billboardNodes;
-      std::vector<LightNodeData> lightNodes;
-      std::vector<ShadowLightNodeData> shadowLightNodes;
-      std::vector<ParticleNodeData> particleNodes;
+        for(std::map<unsigned int, sg::TreeNode*>::iterator it = treeNodeMap.begin(); it != treeNodeMap.end(); it++)
+        {
+          delete it->second;
+        }
+      }
 
-      std::map<unsigned int, util::ResourceHandle> meshMap;
-      std::map<unsigned int, util::ResourceHandle> materialMap;
-      std::map<unsigned int, util::ResourceHandle> billboardTextureMap;
+      std::map<unsigned int, sg::TreeNode*> treeNodeMap;
+
+      std::vector<TreeNodeData*> treeNodes;
+
+      std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceMap;
     };
   }
 }

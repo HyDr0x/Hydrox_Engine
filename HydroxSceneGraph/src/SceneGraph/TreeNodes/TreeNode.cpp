@@ -7,10 +7,16 @@ namespace he
 {
   namespace sg
   {
+    TreeNode::TreeNode(std::istream stream)
+    {
+
+    }
+
     TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
                                                                                                 m_nextSibling(nextSibling),
                                                                                                 m_nodeName(nodeName)
     {
+      m_nodeType = TREENODE;
     }
 
     TreeNode& TreeNode::operator=(const TreeNode& sourceNode)
@@ -28,59 +34,9 @@ namespace he
       m_parent = nullptr;
     }
 
-    bool TreeNode::isTreeNode() const
+    NodeType TreeNode::getNodeType() const
     {
-      return true;
-    }
-
-    bool TreeNode::isTransformNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isParticleNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isLODNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isLightNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isShadowLightNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isGroupNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isGeoNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isBillboardNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isAnimatedTransformNode() const
-    {
-      return false;
-    }
-
-    bool TreeNode::isAnimatedGeoNode() const
-    {
-      return false;
+      return m_nodeType;
     }
 
     TreeNode* TreeNode::getNextSibling() const

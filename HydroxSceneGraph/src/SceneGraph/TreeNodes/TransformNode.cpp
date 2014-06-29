@@ -20,6 +20,8 @@ namespace he
 
       m_scale = scale[0];
       m_rotation = util::math::createRotXQuaternion(angles[0]) * util::math::createRotYQuaternion(angles[1]) * util::math::createRotZQuaternion(angles[2]);
+
+      m_nodeType = TRANSFORMNODE;
     }
 
     TransformNode::TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
@@ -86,11 +88,6 @@ namespace he
     void TransformNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool TransformNode::isTransformNode() const
-    {
-      return true;
     }
 
     void TransformNode::calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation) const

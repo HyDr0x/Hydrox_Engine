@@ -33,8 +33,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isBillboardNode() const;
-
       util::ResourceHandle getTextureHandle() const;
 
       void setAnimation(unsigned int number);

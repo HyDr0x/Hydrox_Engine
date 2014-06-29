@@ -35,8 +35,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isTransformNode() const;
-
       virtual void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation) const;
 
       virtual util::Vector<float, 3> getGlobalPosition();

@@ -21,6 +21,7 @@ namespace he
       m_eventManager(eventManager),
       m_renderable(false)
     {
+      m_nodeType = LIGHTNODE;
     }
 
     LightNode::~LightNode()
@@ -76,11 +77,6 @@ namespace he
     void LightNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool LightNode::isLightNode() const
-    {
-      return true;
     }
 
     void LightNode::setRenderable(bool renderable)

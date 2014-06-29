@@ -15,6 +15,7 @@ namespace he
       : GeoNode(eventManager, meshHandle, materialHandle, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
       m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
+      m_nodeType = ANIMATEDGEONODE;
     }
 
     AnimatedGeoNode::~AnimatedGeoNode()
@@ -70,11 +71,6 @@ namespace he
     void AnimatedGeoNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool AnimatedGeoNode::isAnimatedGeoNode() const
-    {
-      return true;
     }
 
     void AnimatedGeoNode::setMeshHandle(util::ResourceHandle meshHandle)

@@ -33,8 +33,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isLODNode() const;
-
       unsigned int getLODLevel() const;
       bool getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const;
 

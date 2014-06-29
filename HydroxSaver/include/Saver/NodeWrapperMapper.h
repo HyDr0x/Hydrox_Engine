@@ -1,10 +1,7 @@
 #ifndef NODEWRAPPERMAPPER_H_
 #define NODEWRAPPERMAPPER_H_
 
-#include <DataBase/Mesh.h>
-#include <DataBase/Material.h>
-#include <DataBase/Texture2D.h>
-#include <DataBase/RenderShader.h>
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "Saver/NodeWrapper.h"
 
@@ -27,6 +24,19 @@ namespace he
   {
     struct NodeWrapperMapper
     {
+      ~NodeWrapperMapper()
+      {
+        for(unsigned int i = 0; i < treeNodes.size(); i++)
+        {
+          delete treeNodes[i];
+        }
+
+        for(std::map<sg::TreeNode*, unsigned int>::iterator it = nodeMap.begin(); it != nodeMap.end(); it++)
+        {
+          delete it->first;
+        }
+      }
+
       class Less
       {
       public:
@@ -36,33 +46,10 @@ namespace he
         }
       };
 
-      std::map<sg::GeoNode*, unsigned int> geoNodeMap;
-      std::map<sg::AnimatedGeoNode*, unsigned int> animatedGeoNodeMap;
-      std::map<sg::TransformNode*, unsigned int> transformNodeMap;
-      std::map<sg::AnimatedTransformNode*, unsigned int> animatedTransformNodeMap;
-      std::map<sg::LODNode*, unsigned int> lodNodeMap;
-      std::map<sg::BillboardNode*, unsigned int> billboardNodeMap;
-      std::map<sg::LightNode*, unsigned int> lightNodeMap;
-      std::map<sg::ShadowLightNode*, unsigned int> shadowLightNodeMap;
-      std::map<sg::ParticleNode*, unsigned int> particleNodeMap;
+      std::map<sg::TreeNode*, unsigned int> nodeMap;//index into the treenodes vector, ptr as unique key
+      std::vector<TreeNodeData*> treeNodes;//all treenodes
 
-      std::vector<GeoNodeData> geoNodes;
-      std::vector<AnimatedGeoNodeData> animatedGeoNodes;
-      std::vector<TransformNodeData> transformNodes;
-      std::vector<AnimatedTransformNodeData> animatedTransformNodes;
-      std::vector<LODNodeData> lodNodes;
-      std::vector<BillboardNodeData> billboardNodes;
-      std::vector<LightNodeData> lightNodes;
-      std::vector<ShadowLightNodeData> shadowLightNodes;
-      std::vector<ParticleNodeData> particleNodes;
-
-      std::map<util::ResourceHandle, unsigned int, Less> meshMap;
-      std::map<util::ResourceHandle, unsigned int, Less> materialMap;
-      std::map<util::ResourceHandle, unsigned int, Less> billboardTextureMap;
-
-      std::vector<db::Mesh> meshes;
-      std::vector<std::string> materialFileNames;
-      std::vector<std::string> billboardTextureFileNames;
+      std::map<std::string, std::map<util::ResourceHandle, std::string, Less>> resourceMap;//first string: resource kind e.g. mesh, billboard etc. | resource handle: for unique mapping | second string: filename
     };
   }
 }

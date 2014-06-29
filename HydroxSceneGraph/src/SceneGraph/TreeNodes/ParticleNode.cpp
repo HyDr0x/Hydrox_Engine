@@ -16,6 +16,7 @@ namespace he
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager)
     {
+      m_nodeType = PARTICLENODE;
     }
 
     ParticleNode::~ParticleNode()
@@ -71,11 +72,6 @@ namespace he
     void ParticleNode::postTraverse(ConstTraverser* traverser) const
     {
       traverser->postTraverse(this);
-    }
-
-    bool ParticleNode::isParticleNode() const
-    {
-      return true;
     }
 
     void ParticleNode::setRenderable(bool renderable)

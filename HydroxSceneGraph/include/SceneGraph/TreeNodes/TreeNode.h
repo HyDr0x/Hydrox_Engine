@@ -2,13 +2,27 @@
 #define TREENODE_H_
 
 #include <string>
+#include <istream>
 
 #include "SceneGraph/DLLExport.h"
 
 namespace he
 {
   namespace sg
-  {    class ConstTraverser;
+  {    enum NodeType
+    {
+      TREENODE,
+      GROUPNODE,
+      GEONODE,
+      ANIMATEDGEONODE,
+      TRANSFORMNODE,
+      ANIMATEDTRANSFORMNODE,
+      BILLBOARDNODE,
+      LODNODE,
+      LIGHTNODE,
+      SHADOWLIGHTNODE,
+      PARTICLENODE,
+    };    class ConstTraverser;
     class Traverser;
     class GroupNode;
 
@@ -16,6 +30,7 @@ namespace he
     {
     public:
 
+      TreeNode(std::istream stream);
       TreeNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
       virtual ~TreeNode() = 0;
 
@@ -31,17 +46,7 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const = 0;
       virtual void postTraverse(ConstTraverser* traverser) const = 0;
 
-      virtual bool isTreeNode() const;
-      virtual bool isTransformNode() const;
-      virtual bool isParticleNode() const;
-      virtual bool isLODNode() const;
-      virtual bool isLightNode() const;
-      virtual bool isShadowLightNode() const;
-      virtual bool isGroupNode() const;
-      virtual bool isGeoNode() const;
-      virtual bool isBillboardNode() const;
-      virtual bool isAnimatedTransformNode() const;
-      virtual bool isAnimatedGeoNode() const;
+      virtual NodeType getNodeType() const;
 
       virtual TreeNode* getFirstChild() const;
       TreeNode* getNextSibling() const;
@@ -56,6 +61,8 @@ namespace he
     protected:
 
       std::string m_nodeName;
+
+      NodeType m_nodeType;
 
       GroupNode* m_parent;
       TreeNode* m_nextSibling;

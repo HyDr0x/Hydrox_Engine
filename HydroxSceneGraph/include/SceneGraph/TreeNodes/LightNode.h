@@ -39,8 +39,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isLightNode() const;
-
       virtual void setRenderable(bool renderable);
 
       void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);

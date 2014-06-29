@@ -34,8 +34,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isGeoNode() const;
-
       virtual void setMeshHandle(util::ResourceHandle meshHandle);
       util::ResourceHandle getMeshHandle() const;
 

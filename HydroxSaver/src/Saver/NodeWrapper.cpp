@@ -8,6 +8,7 @@ namespace he
   {
     std::ofstream& operator <<(std::ofstream& stream, const TreeNodeData& node)
     {
+      stream << node.nodeType << std::endl;
       stream << node.nodeName << std::endl;
       stream << node.parentNodeType << std::endl;
       stream << node.parentIndex << std::endl;
@@ -22,8 +23,8 @@ namespace he
     std::ofstream& operator <<(std::ofstream& stream, const GeoNodeData& node)
     {
       stream << (const TreeNodeData&)node;
-      stream << node.meshIndex << std::endl;
-      stream << node.materialIndex << std::endl;
+      stream << node.meshFilename << std::endl;
+      stream << node.materialFilename << std::endl;
 
       return stream;
     }
@@ -85,7 +86,7 @@ namespace he
       stream << node.texEnd << std::endl;
       stream << node.scale << std::endl;
       stream << node.translate << std::endl;
-      stream << node.textureIndex << std::endl;
+      stream << node.textureFilename << std::endl;
 
       return stream;
     }

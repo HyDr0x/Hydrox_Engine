@@ -36,8 +36,6 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual bool isParticleNode() const;
-
       void setRenderable(bool renderable);
       bool getRenderable() const;
 

@@ -13,13 +13,13 @@ namespace he
       std::getline(stream, node.nodeName);
       std::getline(stream, node.nodeName);//getline because of white spaces
       stream >> nodeTypes;
-      node.parentNodeType = (NodeType)nodeTypes;
+      node.parentNodeType = (sg::NodeType)nodeTypes;
       stream >> node.parentIndex;
       stream >> nodeTypes;
-      node.firstChildNodeType = (NodeType)nodeTypes;
+      node.firstChildNodeType = (sg::NodeType)nodeTypes;
       stream >> node.firstChildIndex;
       stream >> nodeTypes;
-      node.nextSiblingNodeType = (NodeType)nodeTypes;
+      node.nextSiblingNodeType = (sg::NodeType)nodeTypes;
       stream >> node.nextSiblingIndex;
 
       return stream;
@@ -28,8 +28,8 @@ namespace he
     std::ifstream& operator >>(std::ifstream& stream, GeoNodeData& node)
     {
       stream >> (TreeNodeData&)node;
-      stream >> node.meshIndex;
-      stream >> node.materialIndex;
+      stream >> node.meshFilename;
+      stream >> node.materialFilename;
 
       return stream;
     }
@@ -96,7 +96,7 @@ namespace he
       stream >> node.texEnd;
       stream >> node.scale;
       stream >> node.translate;
-      stream >> node.textureIndex;
+      stream >> node.textureFileName;
 
       return stream;
     }
