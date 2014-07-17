@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      AnimationControlTraverser();
+      AnimationControlTraverser(TreeNodeAllocator& allocator);
       virtual ~AnimationControlTraverser();
 
       void setAnimationTime(float animationTime);
@@ -21,11 +21,11 @@ namespace he
       void setPauseAnimation(bool pauseAnimation);//pause/unpause animation
       void setStopAnimation();
 
-      virtual bool preTraverse(AnimatedTransformNode* treeNode);
-      virtual void postTraverse(AnimatedTransformNode* treeNode);
+      virtual bool preTraverse(AnimatedTransformNode& treeNode);
+      virtual void postTraverse(AnimatedTransformNode& treeNode);
 
-      virtual bool preTraverse(TreeNode* treeNode);
-      virtual void postTraverse(TreeNode* treeNode);
+      virtual bool preTraverse(TreeNode& treeNode);
+      virtual void postTraverse(TreeNode& treeNode);
 
     protected:
 

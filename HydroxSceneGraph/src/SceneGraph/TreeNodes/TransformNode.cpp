@@ -10,7 +10,7 @@ namespace he
 {
   namespace sg
   {
-    TransformNode::TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
+    TransformNode::TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild) : GroupNode(nodeName, parent, nextSibling, firstChild)
     {
       util::Vector<float, 3> angles;
       util::Vector<float, 3> scale;
@@ -21,15 +21,25 @@ namespace he
       m_scale = scale[0];
       m_rotation = util::math::createRotXQuaternion(angles[0]) * util::math::createRotYQuaternion(angles[1]) * util::math::createRotZQuaternion(angles[2]);
 
-      m_nodeType = TRANSFORMNODE;
+      m_index.nodeType = TRANSFORMNODE;
     }
 
-    TransformNode::TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild)
+    TransformNode::TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild)
       : GroupNode(nodeName, parent, nextSibling, firstChild),
       m_translation(translation),
       m_scale(scale),
       m_rotation(rotation)
     {
+      m_index.nodeType = TRANSFORMNODE;
+    }
+
+    TransformNode::TransformNode(const TreeNode& sourceNode) : GroupNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild())
+    {
+      assert(TRANSFORMNODE == sourceNode.getNodeType());
+
+      const TransformNode& copyNode = static_cast<const TransformNode&>(sourceNode);
+
+      new (this) TransformNode(copyNode);
     }
 
     TransformNode::~TransformNode()
@@ -38,10 +48,11 @@ namespace he
 
     TreeNode& TransformNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const TransformNode& copyNode = static_cast<const TransformNode&>(sourceNode);
-      TransformNode::operator=(copyNode);
+      this->~TransformNode();
+
+      new (this) TransformNode(sourceNode);
 
       return *this;
     }
@@ -62,32 +73,32 @@ namespace he
 
     bool TransformNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool TransformNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void TransformNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool TransformNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool TransformNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void TransformNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void TransformNode::calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation) const
@@ -99,29 +110,29 @@ namespace he
 
     ///////////////////TRANSFORMATIONS//////////////////////////
 
-    util::Vector<float, 3> TransformNode::getGlobalPosition()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //util::Vector<float, 3> TransformNode::getGlobalPosition()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_translation * traverser.getGlobalScale());
-    }
+    //  return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_translation * traverser.getGlobalScale());
+    //}
 
-    util::Quaternion<float> TransformNode::getGlobalRotation()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //util::Quaternion<float> TransformNode::getGlobalRotation()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalRotation() * m_rotation;
-    }
+    //  return traverser.getGlobalRotation() * m_rotation;
+    //}
 
-    float TransformNode::getGlobalScale()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //float TransformNode::getGlobalScale()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalScale() * m_scale;
-    }
+    //  return traverser.getGlobalScale() * m_scale;
+    //}
 
     util::Vector<float, 3> TransformNode::getLocalPosition() const
     {
@@ -138,37 +149,37 @@ namespace he
       return m_scale;
     }
 
-    void TransformNode::setGlobalTranslation(float x, float y, float z)
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //void TransformNode::setGlobalTranslation(float x, float y, float z)
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      m_translation = traverser.getGlobalRotation().invert().apply(util::Vector<float, 3>(x, y, z) - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
-    }
+    //  m_translation = traverser.getGlobalRotation().invert().apply(util::Vector<float, 3>(x, y, z) - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
+    //}
 
-    void TransformNode::setGlobalTranslation(const util::Vector<float, 3>& v)
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //void TransformNode::setGlobalTranslation(const util::Vector<float, 3>& v)
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      m_translation = traverser.getGlobalRotation().invert().apply(v - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
-    }
+    //  m_translation = traverser.getGlobalRotation().invert().apply(v - traverser.getGlobalTranslation()) / traverser.getGlobalScale();
+    //}
 
-    void TransformNode::setGlobalRotation(const util::Quaternion<float>& q)
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //void TransformNode::setGlobalRotation(const util::Quaternion<float>& q)
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      m_rotation = traverser.getGlobalRotation().invert() * q;
-    }
+    //  m_rotation = traverser.getGlobalRotation().invert() * q;
+    //}
 
-    void TransformNode::setGlobalScale(float s)
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //void TransformNode::setGlobalScale(float s)
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      m_scale = s / traverser.getGlobalScale();
-    }
+    //  m_scale = s / traverser.getGlobalScale();
+    //}
 
     void TransformNode::setLocalTranslation(float x, float y, float z)
     {

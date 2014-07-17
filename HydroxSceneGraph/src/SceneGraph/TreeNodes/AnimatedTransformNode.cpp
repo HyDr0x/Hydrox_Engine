@@ -13,8 +13,8 @@ namespace he
   namespace sg
   {
     AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
-      GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) 
-      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(nullptr), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTimeInSeconds(0.0f), m_pauseAnimation(false)
+      NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild)
+      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(~0), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTimeInSeconds(0.0f), m_pauseAnimation(false)
     {
       m_animatedTranslation = util::Vector<float, 3>::identity();
       m_animatedRotation = util::Quaternion<float>::identity();
@@ -24,7 +24,18 @@ namespace he
       m_currentPositionKey = 0;
       m_currentRotationKey = 0;
 
-      m_nodeType = ANIMATEDTRANSFORMNODE;
+      m_index.nodeType = ANIMATEDTRANSFORMNODE;
+    }
+
+    AnimatedTransformNode::AnimatedTransformNode(const TreeNode& sourceNode) : 
+      TransformNode(util::Matrix<float, 4>::identity() , sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild()),
+      m_animatedMesh(~0)
+    {
+      assert(ANIMATEDTRANSFORMNODE == sourceNode.getNodeType());
+
+      const AnimatedTransformNode& copyNode = static_cast<const AnimatedTransformNode&>(sourceNode);
+
+      new (this) AnimatedTransformNode(copyNode);
     }
 
     AnimatedTransformNode::~AnimatedTransformNode()
@@ -33,10 +44,11 @@ namespace he
 
     TreeNode& AnimatedTransformNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const AnimatedTransformNode& copyNode = static_cast<const AnimatedTransformNode&>(sourceNode);
-      AnimatedTransformNode::operator=(copyNode);
+      this->~AnimatedTransformNode();
+
+      new (this) AnimatedTransformNode(sourceNode);
 
       return *this;
     }
@@ -69,34 +81,34 @@ namespace he
       return newNode;
     }
 
-   bool AnimatedTransformNode::ascendTraverse(Traverser* traverser)
+    bool AnimatedTransformNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+     return traverser->ascendTraverse(*this);
     }
 
     bool AnimatedTransformNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void AnimatedTransformNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool AnimatedTransformNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool AnimatedTransformNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void AnimatedTransformNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void AnimatedTransformNode::setBoneIndex(unsigned int boneIndex)
@@ -109,12 +121,12 @@ namespace he
       return m_boneIndex;
     }
 
-    void AnimatedTransformNode::setSkinnedMesh(AnimatedGeoNode* animatedMesh)
+    void AnimatedTransformNode::setSkinnedMesh(NodeIndex animatedMesh)
     {
       m_animatedMesh = animatedMesh;
     }
 
-    AnimatedGeoNode* AnimatedTransformNode::getSkinnedMesh() const
+    NodeIndex AnimatedTransformNode::getSkinnedMesh() const
     {
       return m_animatedMesh;
     }
@@ -192,36 +204,31 @@ namespace he
       translation += rotation.apply((m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale)) * scale);
       rotation *= (m_animatedRotation * m_rotation);
       scale *= (m_animatedScale * m_scale);
-
-      if(m_animatedMesh != nullptr)
-      {
-        m_animatedMesh->setBoneTransform(util::math::createTransformationMatrix(translation, scale, rotation), m_boneIndex);
-      }
     }
 
-    util::Vector<float, 3> AnimatedTransformNode::getGlobalPosition()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //util::Vector<float, 3> AnimatedTransformNode::getGlobalPosition()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale) * traverser.getGlobalScale());
-    }
+    //  return traverser.getGlobalTranslation() + traverser.getGlobalRotation().apply(m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale) * traverser.getGlobalScale());
+    //}
 
-    util::Quaternion<float> AnimatedTransformNode::getGlobalRotation()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //util::Quaternion<float> AnimatedTransformNode::getGlobalRotation()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalRotation() * m_animatedRotation * m_rotation;
-    }
+    //  return traverser.getGlobalRotation() * m_animatedRotation * m_rotation;
+    //}
 
-    float AnimatedTransformNode::getGlobalScale()
-    {
-      GetGlobalCoordinateTraverser traverser;
-      traverser.doAscend(this);
+    //float AnimatedTransformNode::getGlobalScale()
+    //{
+    //  GetGlobalCoordinateTraverser traverser;
+    //  traverser.doAscend(*this);
 
-      return traverser.getGlobalScale() * m_animatedScale * m_scale;
-    }
+    //  return traverser.getGlobalScale() * m_animatedScale * m_scale;
+    //}
 
     util::Vector<float, 3> AnimatedTransformNode::getLocalPosition() const
     {

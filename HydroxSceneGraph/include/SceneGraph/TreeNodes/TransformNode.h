@@ -19,8 +19,9 @@ namespace he
     {
     public:
 
-      TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-      TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      TransformNode(const TreeNode& sourceNode);
       virtual ~TransformNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);
@@ -37,20 +38,20 @@ namespace he
 
       virtual void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation) const;
 
-      virtual util::Vector<float, 3> getGlobalPosition();
-      virtual util::Quaternion<float> getGlobalRotation();
-      virtual float getGlobalScale();
+      //virtual util::Vector<float, 3> getGlobalPosition();
+      //virtual util::Quaternion<float> getGlobalRotation();
+      //virtual float getGlobalScale();
 
       virtual util::Vector<float, 3> getLocalPosition() const;
       virtual util::Quaternion<float> getLocalRotation() const;
       virtual float getLocalScale() const;
 
-      void setGlobalTranslation(float x, float y, float z);
-      void setGlobalTranslation(const util::Vector<float, 3>& v);
+      //void setGlobalTranslation(float x, float y, float z);
+      //void setGlobalTranslation(const util::Vector<float, 3>& v);
 
-      void setGlobalRotation(const util::Quaternion<float>& q);
+      //void setGlobalRotation(const util::Quaternion<float>& q);
 
-      void setGlobalScale(float s);
+      //void setGlobalScale(float s);
 
       void setLocalTranslation(float x, float y, float z);
       void setLocalTranslation(const util::Vector<float, 3>& v);

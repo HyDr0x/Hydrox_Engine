@@ -11,7 +11,8 @@
 namespace he
 {
   namespace sg
-  {    AddNodesTraverser::AddNodesTraverser(util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos) : m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
+  {    AddNodesTraverser::AddNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos) :
+      Traverser(allocator), m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
     {
     }
 
@@ -19,91 +20,91 @@ namespace he
     {
     }
 
-    bool AddNodesTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool AddNodesTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode *treeNode)>(util::EventManager::OnAddAnimatedTransformNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnAddAnimatedTransformNode)->execute(treeNode);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void AddNodesTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(LODNode* treeNode)
+    bool AddNodesTraverser::preTraverse(LODNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(LODNode *treeNode)>(util::EventManager::OnAddLODNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void (*)(LODNode &treeNode)>(util::EventManager::OnAddLODNode)->execute(treeNode);
 
-      return treeNode->getLOD(m_camPos, m_lodRanges);
+      return treeNode.getLOD(m_camPos, m_lodRanges);
     }
 
-    void AddNodesTraverser::postTraverse(LODNode* treeNode)
+    void AddNodesTraverser::postTraverse(LODNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool AddNodesTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void AddNodesTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(GeoNode* treeNode)
+    bool AddNodesTraverser::preTraverse(GeoNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(GeoNode* treeNode)
+    void AddNodesTraverser::postTraverse(GeoNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(BillboardNode* treeNode)
+    bool AddNodesTraverser::preTraverse(BillboardNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(BillboardNode* treeNode)
+    void AddNodesTraverser::postTraverse(BillboardNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(ParticleNode* treeNode)
+    bool AddNodesTraverser::preTraverse(ParticleNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(ParticleNode* treeNode)
+    void AddNodesTraverser::postTraverse(ParticleNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(LightNode* treeNode)
+    bool AddNodesTraverser::preTraverse(LightNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(LightNode* treeNode)
+    void AddNodesTraverser::postTraverse(LightNode& treeNode)
     {
     }
 
-    bool AddNodesTraverser::preTraverse(ShadowLightNode* treeNode)
+    bool AddNodesTraverser::preTraverse(ShadowLightNode& treeNode)
     {
-      treeNode->setRenderable(true);
+      treeNode.setRenderable(true);
 
       return true;
     }
 
-    void AddNodesTraverser::postTraverse(ShadowLightNode* treeNode)
+    void AddNodesTraverser::postTraverse(ShadowLightNode& treeNode)
     {
     }
   }

@@ -3,5 +3,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderScene.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Scene.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SceneCacheManager.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeAllocator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeFactory.h 
 	PARENT_SCOPE 
 )

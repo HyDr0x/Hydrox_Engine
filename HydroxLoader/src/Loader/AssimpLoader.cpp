@@ -104,11 +104,11 @@ namespace he
 
         loadAnimatedSkeleton(assimpScene);
 
-        sg::GroupNode *rootNode = loadSceneGraphFromAssimp(filename, assimpScene);
+        sg::NodeIndex rootNode = loadSceneGraphFromAssimp(filename, assimpScene);
 
         attachBonesToSkinnedMesh();
 
-        scene = new sg::Scene(rootNode);
+        scene = new sg::Scene(m_allocator, rootNode);
 
         m_animationTracks.clear();
         m_inverseBindPoseTable.clear();
@@ -122,9 +122,9 @@ namespace he
       return scene;
     }
 
-    sg::Scene* AssimpLoader::loadDefaultSceneGraph() const
+    sg::Scene* AssimpLoader::loadDefaultSceneGraph()
     {
-      sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube"));
+      sg::NodeIndex sceneRootNode = m_allocator.push_back(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
 
       std::vector<util::Vector<float, 3>> positions;
       std::vector<db::Mesh::indexType> indices;
@@ -132,10 +132,10 @@ namespace he
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::GeoNode *geoNode = new sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode);
-      sceneRootNode->setFirstChild(geoNode);
+      sg::NodeIndex geoNodeIndex = m_allocator.push_back(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
-      return new sg::Scene(sceneRootNode);
+      return new sg::Scene(m_allocator, sceneRootNode);
     }
 
     void AssimpLoader::loadMeshesFromAssimp(const aiScene *scene, bool yAxisFlipped)
@@ -305,25 +305,27 @@ namespace he
         vertexColors));
     }
 
-    sg::GroupNode* AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene)
+    sg::NodeIndex AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene)
     {
-      sg::TransformNode *sceneRootNode = new sg::TransformNode(util::Matrix<float, 4>::identity(), filename);
-      sceneRootNode->setFirstChild(createTransformNodes(scene->mRootNode, sceneRootNode, nullptr));
+      sg::NodeIndex sceneRootNodeIndex = m_allocator.push_back(sg::TransformNode(util::Matrix<float, 4>::identity(), filename));
+      ((sg::GroupNode&)m_allocator[sceneRootNodeIndex]).setFirstChild(createTransformNodes(scene->mRootNode, sceneRootNodeIndex, ~0));
 
-      return sceneRootNode;
+      return sceneRootNodeIndex;
     }
 
-    sg::TreeNode* AssimpLoader::createTransformNodes(const aiNode *node, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    sg::NodeIndex AssimpLoader::createTransformNodes(const aiNode *node, sg::NodeIndex parentNode, sg::NodeIndex nextSibling)
     {
-      sg::TransformNode *transformNode = nullptr;
+      sg::NodeIndex transformNodeIndex = ~0;
 
       std::map<std::string, std::vector<sg::AnimationTrack>>::iterator mit = m_animationTracks.find(std::string(node->mName.C_Str()));
 
       if(mit != m_animationTracks.end())
       {
-        transformNode = new sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
-        m_boneTable[transformNode->getNodeName()] = dynamic_cast<sg::AnimatedTransformNode*>(transformNode);
-        transformNode->addDirtyFlag(sg::GroupNode::ANIM_DIRTY);//animations need to be updated
+        transformNodeIndex = m_allocator.push_back(sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
+        sg::AnimatedTransformNode& transformNode = (sg::AnimatedTransformNode&)m_allocator[transformNodeIndex];
+
+        m_boneTable[transformNode.getNodeName()] = transformNodeIndex;
+        transformNode.addDirtyFlag(sg::GroupNode::ANIM_DIRTY);//animations need to be updated
       }
       else
       {
@@ -332,56 +334,54 @@ namespace he
         std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + size, &tmpTransformationMatrix[0][0]);
         tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
-        transformNode = new sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
-        transformNode->addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
+        transformNodeIndex = m_allocator.push_back(sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
+        ((sg::GroupNode&)m_allocator[transformNodeIndex]).addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
       }
 
-      nextSibling = nullptr;
+      nextSibling = ~0;
 
       if(node->mNumMeshes)
       {
-        sg::GeoNode *geoNode = nullptr;
-
         for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
         {
-          nextSibling = createGeoNodes(std::string(node->mName.C_Str()), node->mMeshes[i], transformNode, nextSibling);
+          nextSibling = createGeoNodes(std::string(node->mName.C_Str()), node->mMeshes[i], transformNodeIndex, nextSibling);
         }
 
-        transformNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
+        ((sg::GroupNode&)m_allocator[transformNodeIndex]).setFirstChild(nextSibling);//the last sibling index must be the first childindex
       }
 
       if(node->mNumChildren)
       {
         for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
         {
-          nextSibling = createTransformNodes(node->mChildren[i], transformNode, nextSibling);
+          nextSibling = createTransformNodes(node->mChildren[i], transformNodeIndex, nextSibling);
         }
 
-        transformNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
+        ((sg::GroupNode&)m_allocator[transformNodeIndex]).setFirstChild(nextSibling);//the last sibling index must be the first childindex
       }
 
-      return transformNode;
+      return transformNodeIndex;
     }
 
-    sg::TreeNode* AssimpLoader::createGeoNodes(std::string meshName, unsigned int meshIndex, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
+    sg::NodeIndex AssimpLoader::createGeoNodes(std::string meshName, unsigned int meshIndex, sg::NodeIndex parentNode, sg::NodeIndex nextSibling)
     {
       std::stringstream stream;
-      sg::GeoNode *geoNode = nullptr;
+      sg::NodeIndex geoNodeIndex = ~0;
 
       stream << 0;
       if(!m_inverseBindPoseTable[meshIndex].empty())
       {
-        geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
-        m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
+        geoNodeIndex = m_allocator.push_back(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
+        m_skinnedMeshTable[geoNodeIndex] = m_boneNameTable[meshIndex];
       }
       else
       {
-        geoNode = new sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
+        geoNodeIndex = m_allocator.push_back(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
       }
       
       stream.str("");
 
-      return geoNode;
+      return geoNodeIndex;
     }
 
     //sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
@@ -504,14 +504,14 @@ namespace he
 
     void AssimpLoader::attachBonesToSkinnedMesh()
     {
-      for(std::map<sg::AnimatedGeoNode*, std::vector<std::string>>::iterator mit = m_skinnedMeshTable.begin(); mit != m_skinnedMeshTable.end(); mit++)
+      for(std::map<sg::NodeIndex, std::vector<std::string>, sg::NodeIndex::Less>::iterator mit = m_skinnedMeshTable.begin(); mit != m_skinnedMeshTable.end(); mit++)
       {
-        sg::AnimatedGeoNode *geoNode = mit->first;
+        sg::NodeIndex geoNode = mit->first;
         for(unsigned int i = 0; i < mit->second.size(); i++)
         {
-          std::map<std::string, sg::AnimatedTransformNode*>::iterator animNode = m_boneTable.find(mit->second[i]);
-          animNode->second->setSkinnedMesh(geoNode);
-          animNode->second->setBoneIndex(i);
+          sg::AnimatedTransformNode& animNode = (sg::AnimatedTransformNode&)m_allocator[m_boneTable.find(mit->second[i])->second];
+          animNode.setSkinnedMesh(geoNode);
+          animNode.setBoneIndex(i);
         }
       }
     }

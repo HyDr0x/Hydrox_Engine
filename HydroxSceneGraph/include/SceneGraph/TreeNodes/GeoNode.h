@@ -19,7 +19,8 @@ namespace he
     {
     public:
 
-      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      GeoNode(const TreeNode& sourceNode);
       virtual ~GeoNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);

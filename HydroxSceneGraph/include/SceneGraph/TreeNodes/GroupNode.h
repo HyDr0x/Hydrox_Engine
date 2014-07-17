@@ -24,7 +24,8 @@ namespace he
         ANIM_DIRTY  = 8,
       };
 
-      GroupNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      GroupNode(const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      GroupNode(const TreeNode& sourceNode);
       virtual ~GroupNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);
@@ -39,9 +40,9 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      TreeNode* getFirstChild() const;
+      NodeIndex getFirstChild() const;
 
-      void setFirstChild(TreeNode* firstChild);
+      void setFirstChild(NodeIndex firstChild);
 
       DirtyFlags getDirtyFlag() const;
       void addDirtyFlag(DirtyFlags dirtyFlag);
@@ -49,7 +50,7 @@ namespace he
 
     protected:
 
-      TreeNode* m_firstChild;
+      NodeIndex m_firstChild;
 
       unsigned int m_dirtyFlag;
     };

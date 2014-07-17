@@ -10,10 +10,12 @@
 #include "SceneGraph/TreeNodes/LightNode.h"
 #include "SceneGraph/TreeNodes/ShadowLightNode.h"
 
+#include "SceneGraph/Scene/TreeNodeAllocator.h"
+
 namespace he
 {
   namespace sg
-  {    NodeSearchTraverser::NodeSearchTraverser(const std::string& nodeName) : m_nodeName(nodeName), m_discoveredNode(nullptr)
+  {    NodeSearchTraverser::NodeSearchTraverser(const TreeNodeAllocator& allocator, const std::string& nodeName) : ConstTraverser(allocator), m_nodeName(nodeName), m_discoveredNode(~0)
     {
     }
 
@@ -21,104 +23,97 @@ namespace he
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void NodeSearchTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(TransformNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(TransformNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(TransformNode* treeNode)
+    void NodeSearchTraverser::postTraverse(TransformNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(LODNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(LODNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(LODNode* treeNode)
+    void NodeSearchTraverser::postTraverse(LODNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void NodeSearchTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(GeoNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(GeoNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(GeoNode* treeNode)
+    void NodeSearchTraverser::postTraverse(GeoNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(BillboardNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(BillboardNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(BillboardNode* treeNode)
+    void NodeSearchTraverser::postTraverse(BillboardNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(ParticleNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(ParticleNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(ParticleNode* treeNode)
+    void NodeSearchTraverser::postTraverse(ParticleNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(LightNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(LightNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(LightNode* treeNode)
+    void NodeSearchTraverser::postTraverse(LightNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(ShadowLightNode* treeNode)
+    bool NodeSearchTraverser::preTraverse(ShadowLightNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(ShadowLightNode* treeNode)
+    void NodeSearchTraverser::postTraverse(ShadowLightNode& treeNode)
     {
     }
 
-    TreeNode* NodeSearchTraverser::getDiscoveredNode() const
+    NodeIndex NodeSearchTraverser::getDiscoveredNode() const
     {
-      if(m_discoveredNode != nullptr)
+      return m_discoveredNode;
+    }
+
+    bool NodeSearchTraverser::findNode(TreeNode& treeNode)
+    {
+      if(treeNode.getNodeName() == m_nodeName)
       {
-        return m_discoveredNode;
-      }
-      else
-      {
-        return nullptr;//GroupNode(m_nodeName);
-      }
-    }
-
-    bool NodeSearchTraverser::findNode(TreeNode* treeNode)
-    {
-      if(treeNode->getNodeName() == m_nodeName)
-      {
-        m_discoveredNode = treeNode;
+        m_discoveredNode = treeNode.getNodeIndex();
         m_stopTraversal = true;//stop further searching
         return false;
       }

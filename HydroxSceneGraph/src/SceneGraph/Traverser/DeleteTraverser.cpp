@@ -10,11 +10,13 @@
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 #include "SceneGraph/TreeNodes/TransformNode.h"
 
+#include "SceneGraph/Scene/TreeNodeAllocator.h"
+
 namespace he
 {
   namespace sg
   {
-    DeleteTraverser::DeleteTraverser()
+    DeleteTraverser::DeleteTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
     }
 
@@ -22,103 +24,107 @@ namespace he
     {
     }
 
-    bool DeleteTraverser::preTraverse(const AnimatedTransformNode* treeNode)
+    void DeleteTraverser::postTraverse(TreeNode& treeNode)
+    {
+      m_allocator.erase(treeNode.getNodeIndex());
+    }
+
+    /*bool DeleteTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const AnimatedTransformNode* treeNode)
+    void DeleteTraverser::postTraverse(AnimatedTransformNode& treeNode)
+    {
+      m_allocator.erase(m_allocator.getIndex(treeNode));
+    }
+
+    bool DeleteTraverser::preTraverse(TransformNode& treeNode)
+    {
+      return true;
+    }
+
+    void DeleteTraverser::postTraverse(TransformNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const TransformNode* treeNode)
+    bool DeleteTraverser::preTraverse(LODNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const TransformNode* treeNode)
+    void DeleteTraverser::postTraverse(LODNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const LODNode* treeNode)
+    bool DeleteTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const LODNode* treeNode)
+    void DeleteTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const AnimatedGeoNode* treeNode)
+    bool DeleteTraverser::preTraverse(GeoNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const AnimatedGeoNode* treeNode)
+    void DeleteTraverser::postTraverse(GeoNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const GeoNode* treeNode)
+    bool DeleteTraverser::preTraverse(BillboardNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const GeoNode* treeNode)
+    void DeleteTraverser::postTraverse(BillboardNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const BillboardNode* treeNode)
+    bool DeleteTraverser::preTraverse(ParticleNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const BillboardNode* treeNode)
+    void DeleteTraverser::postTraverse(ParticleNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const ParticleNode* treeNode)
+    bool DeleteTraverser::preTraverse(LightNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const ParticleNode* treeNode)
+    void DeleteTraverser::postTraverse(LightNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(const LightNode* treeNode)
+    bool DeleteTraverser::preTraverse(ShadowLightNode& treeNode)
     {
       return true;
     }
 
-    void DeleteTraverser::postTraverse(const LightNode* treeNode)
+    void DeleteTraverser::postTraverse(ShadowLightNode& treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(const ShadowLightNode* treeNode)
-    {
-      return true;
-    }
-
-    void DeleteTraverser::postTraverse(const ShadowLightNode* treeNode)
-    {
-      delete treeNode;
-      treeNode = nullptr;
-    }
+    }*/
   }
 }

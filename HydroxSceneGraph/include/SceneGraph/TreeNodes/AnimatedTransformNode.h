@@ -12,7 +12,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     class Traverser;
     class AnimatedGeoNode;
 
@@ -20,9 +20,8 @@ namespace he
     {
     public:
 
-      AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
-        GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
-
+      AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      AnimatedTransformNode(const TreeNode& sourceNode);
       virtual ~AnimatedTransformNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);
@@ -42,8 +41,8 @@ namespace he
       void setBoneIndex(unsigned int boneIndex);
       unsigned int getBoneIndex() const;
 
-      void setSkinnedMesh(AnimatedGeoNode* animatedMesh);
-      AnimatedGeoNode* getSkinnedMesh() const;
+      void setSkinnedMesh(NodeIndex animatedMesh);
+      NodeIndex getSkinnedMesh() const;
 
       void setCurrentAnimationTrack(unsigned int currentTrack);
       unsigned int getCurrentAnimationTrack() const;
@@ -60,9 +59,9 @@ namespace he
 
       void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
 
-      util::Vector<float, 3> getGlobalPosition();
-      util::Quaternion<float> getGlobalRotation();
-      float getGlobalScale();
+      //util::Vector<float, 3> getGlobalPosition();
+      //util::Quaternion<float> getGlobalRotation();
+      //float getGlobalScale();
 
       util::Vector<float, 3> getLocalPosition() const;
       util::Quaternion<float> getLocalRotation() const;
@@ -78,7 +77,7 @@ namespace he
 
       std::vector<AnimationTrack> m_animationTracks;//tha animation tracks for skeletal and skinned animation
 
-      AnimatedGeoNode* m_animatedMesh;//the corresponding animatedGeoNode if it is skinned
+      NodeIndex m_animatedMesh;//the corresponding animatedGeoNode if it is skinned
 
       unsigned int m_currentScaleKey;
       unsigned int m_currentRotationKey;

@@ -24,21 +24,16 @@ namespace he
     {
     }
 
-    void HEFSaver::save(std::string path, std::string filename, sg::Scene* scene, util::SingletonManager *singletonManager)
+    void HEFSaver::save(std::string path, std::string filename, const sg::Scene& scene, util::SingletonManager *singletonManager)
     {
       std::string filenameWithoutEnding = filename.substr(0, filename.size() - 4);
-      NodeExtractionTraverser extractionTraverser(filenameWithoutEnding, m_wrapperMapper, singletonManager);
-      extractionTraverser.doTraverse(scene->getRootNode());
+      NodeExtractionTraverser extractionTraverser(scene.getTreeNodeAllocator(), filenameWithoutEnding, m_resourceMap);
+      extractionTraverser.doTraverse(scene.getTreeNodeAllocator()[scene.getRootNode()]);
 
-      for(unsigned int i = 0; i < m_wrapperMapper.treeNodes.size(); i++)
-      {
-        m_wrapperMapper.treeNodes[i]->convertPointerToIndices(m_wrapperMapper.nodeMap);
-      }
-
-      writeToFile(path, filename, singletonManager);
+      writeToFile(path, filename, scene, singletonManager);
     }
 
-    void HEFSaver::writeToFile(std::string path, std::string filename, util::SingletonManager *singletonManager)
+    void HEFSaver::writeToFile(std::string path, std::string filename, const sg::Scene& scene, util::SingletonManager *singletonManager)
     {
       if(path.back() != '/')
       {
@@ -61,14 +56,10 @@ namespace he
         }
       }
 
-      fileStream << m_wrapperMapper.treeNodes.size() << std::endl;
-      for(unsigned int i = 0; i < m_wrapperMapper.treeNodes.size(); i++)
-      {
-        fileStream << *m_wrapperMapper.treeNodes[i] << std::endl;
-      }
+      scene.getTreeNodeAllocator().writeToStream(fileStream);
       
-      fileStream << m_wrapperMapper.resourceMap["Meshes"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, NodeWrapperMapper::Less>::iterator it = m_wrapperMapper.resourceMap["Meshes"].begin(); it != m_wrapperMapper.resourceMap["Meshes"].end(); it++)
+      fileStream << m_resourceMap["Meshes"].size() << std::endl;
+      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Meshes"].begin(); it != m_resourceMap["Meshes"].end(); it++)
       {
         fileStream << it->second << std::endl;
         MeshSaver::save(path, it->second, it->first, singletonManager);
@@ -76,8 +67,8 @@ namespace he
 
       fileStream << std::endl;
 
-      fileStream << m_wrapperMapper.resourceMap["Materials"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, NodeWrapperMapper::Less>::iterator it = m_wrapperMapper.resourceMap["Materials"].begin(); it != m_wrapperMapper.resourceMap["Materials"].end(); it++)
+      fileStream << m_resourceMap["Materials"].size() << std::endl;
+      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Materials"].begin(); it != m_resourceMap["Materials"].end(); it++)
       {
         fileStream << it->second << std::endl;
         MaterialSaver::save(path, it->second, it->first, singletonManager);
@@ -85,8 +76,8 @@ namespace he
 
       fileStream << std::endl;
 
-      fileStream << m_wrapperMapper.resourceMap["Textures"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, NodeWrapperMapper::Less>::iterator it = m_wrapperMapper.resourceMap["Textures"].begin(); it != m_wrapperMapper.resourceMap["Textures"].end(); it++)
+      fileStream << m_resourceMap["Textures"].size() << std::endl;
+      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Textures"].begin(); it != m_resourceMap["Textures"].end(); it++)
       {
         fileStream << it->second << std::endl;
         ILDevilSaver::save(path, it->second, it->first, singletonManager);

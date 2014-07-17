@@ -13,14 +13,24 @@ namespace he
 {
   namespace sg
   {
-    ShadowLightNode::ShadowLightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) :
+    ShadowLightNode::ShadowLightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_lightType(lightType),
       m_eventManager(eventManager),
       m_renderable(false)
     {
       setShadowProjection(1.0f, 1000.0f);
-      m_nodeType = SHADOWLIGHTNODE;
+
+      m_index.nodeType = SHADOWLIGHTNODE;
+    }
+
+    ShadowLightNode::ShadowLightNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(SHADOWLIGHTNODE == sourceNode.getNodeType());
+
+      const ShadowLightNode& copyNode = static_cast<const ShadowLightNode&>(sourceNode);
+
+      new (this) ShadowLightNode(copyNode);
     }
 
     ShadowLightNode::~ShadowLightNode()
@@ -29,10 +39,11 @@ namespace he
 
     TreeNode& ShadowLightNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const ShadowLightNode& copyNode = static_cast<const ShadowLightNode&>(sourceNode);
-      ShadowLightNode::operator=(copyNode);
+      this->~ShadowLightNode();
+
+      new (this) ShadowLightNode(sourceNode);
 
       return *this;
     }
@@ -48,32 +59,32 @@ namespace he
 
     bool ShadowLightNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool ShadowLightNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void ShadowLightNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool ShadowLightNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool ShadowLightNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void ShadowLightNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void ShadowLightNode::setShadowProjection(float near, float far)

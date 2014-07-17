@@ -16,9 +16,7 @@ namespace he
                                  util::Vector<unsigned int, 2> animNumber, 
                                  util::Vector<float, 2> texStart, 
                                  util::Vector<float, 2> texEnd, 
-                                 const std::string& nodeName, 
-                                 GroupNode* parent, 
-                                 TreeNode* nextSibling) : 
+                                 const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
     TreeNode(nodeName, parent, nextSibling),
     m_eventManager(eventManager),
     m_textureHandle(textureHandle),
@@ -29,7 +27,16 @@ namespace he
     m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
     m_renderable(false)
     {
-      m_nodeType = BILLBOARDNODE;
+      m_index.nodeType = BILLBOARDNODE;
+    }
+
+    BillboardNode::BillboardNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(BILLBOARDNODE == sourceNode.getNodeType());
+
+      const BillboardNode& copyNode = static_cast<const BillboardNode&>(sourceNode);
+
+      new (this) BillboardNode(copyNode);
     }
 
     BillboardNode::~BillboardNode()
@@ -38,10 +45,11 @@ namespace he
 
     TreeNode& BillboardNode::operator=(const TreeNode& other)
     {
-      assert(typeid(*this) == typeid(other));
+      assert(m_index.nodeType == other.getNodeType());
 
-      const BillboardNode& copyNode = static_cast<const BillboardNode&>(other);
-      BillboardNode::operator=(copyNode);
+      this->~BillboardNode();
+
+      new (this) BillboardNode(other);
 
       return *this;
     }
@@ -58,32 +66,32 @@ namespace he
 
     bool BillboardNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool BillboardNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void BillboardNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool BillboardNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool BillboardNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void BillboardNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     util::ResourceHandle BillboardNode::getTextureHandle() const

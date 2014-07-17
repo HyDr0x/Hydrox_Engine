@@ -2,7 +2,6 @@
 #define TREENODE_H_
 
 #include <string>
-#include <istream>
 
 #include "SceneGraph/DLLExport.h"
 
@@ -26,15 +25,41 @@ namespace he
     class Traverser;
     class GroupNode;
 
+    struct NodeIndex
+    {
+      class Less
+      {
+      public:
+        inline bool operator()(const NodeIndex& o1, const NodeIndex& o2) const
+        {
+          return o1.index < o2.index;
+        }
+      };
+
+      NodeIndex(unsigned int newIndex = ~0, NodeType newNodeType = TREENODE) : index(newIndex), nodeType(newNodeType)
+      {
+      }
+
+      bool operator==(const NodeIndex& other)
+      {
+        return index == other.index && nodeType == other.nodeType;
+      }
+
+      bool operator!=(const NodeIndex& other)
+      {
+        return index != other.index || nodeType != other.nodeType;
+      }
+
+      unsigned int index;
+      NodeType nodeType;
+    };
+
     class GRAPHICAPI TreeNode
     {
     public:
 
-      TreeNode(std::istream stream);
-      TreeNode(const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      TreeNode(const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       virtual ~TreeNode() = 0;
-
-      virtual TreeNode& operator=(const TreeNode& sourceNode);
   
       virtual TreeNode* clone() const = 0;
       
@@ -48,24 +73,27 @@ namespace he
 
       virtual NodeType getNodeType() const;
 
-      virtual TreeNode* getFirstChild() const;
-      TreeNode* getNextSibling() const;
-      GroupNode* getParent() const;
+      virtual NodeIndex getFirstChild() const;
+      NodeIndex getNextSibling() const;
+      NodeIndex getParent() const;
 
-      void setNextSibling(TreeNode* nextSibling);
-      void setParent(GroupNode* parent);
+      void setNextSibling(NodeIndex nextSibling);
+      void setParent(NodeIndex parent);
 
       void setNodeName(std::string& nodeName);
       const std::string& getNodeName() const;
+
+      void setNodeIndex(NodeIndex index);
+      NodeIndex getNodeIndex() const;
 
     protected:
 
       std::string m_nodeName;
 
-      NodeType m_nodeType;
+      NodeIndex m_index;
 
-      GroupNode* m_parent;
-      TreeNode* m_nextSibling;
+      NodeIndex m_parent;
+      NodeIndex m_nextSibling;
 
     private:
 

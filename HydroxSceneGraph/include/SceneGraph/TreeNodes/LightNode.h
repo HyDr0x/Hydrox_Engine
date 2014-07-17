@@ -24,7 +24,8 @@ namespace he
     {
     public:
 
-      LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      LightNode(const TreeNode& sourceNode);
       virtual ~LightNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);

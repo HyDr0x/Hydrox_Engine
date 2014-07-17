@@ -12,11 +12,20 @@
 namespace he
 {
   namespace sg
-  {    ParticleNode::ParticleNode(util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) :
+  {    ParticleNode::ParticleNode(util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager)
     {
-      m_nodeType = PARTICLENODE;
+      m_index.nodeType = PARTICLENODE;
+    }
+
+    ParticleNode::ParticleNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(PARTICLENODE == sourceNode.getNodeType());
+
+      const ParticleNode& copyNode = static_cast<const ParticleNode&>(sourceNode);
+
+      new (this) ParticleNode(copyNode);
     }
 
     ParticleNode::~ParticleNode()
@@ -25,10 +34,11 @@ namespace he
 
     TreeNode& ParticleNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const ParticleNode& copyNode = static_cast<const ParticleNode&>(sourceNode);
-      ParticleNode::operator=(copyNode);
+      this->~ParticleNode();
+
+      new (this) ParticleNode(sourceNode);
 
       return *this;
     }
@@ -46,32 +56,32 @@ namespace he
 
     bool ParticleNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool ParticleNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void ParticleNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool ParticleNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool ParticleNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void ParticleNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void ParticleNode::setRenderable(bool renderable)

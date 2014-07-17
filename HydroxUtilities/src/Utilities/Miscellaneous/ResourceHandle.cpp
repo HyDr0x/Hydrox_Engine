@@ -52,7 +52,7 @@ namespace he
     {
       if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)
       {
-        notify(this);
+        notify(*this);
       }
 
       m_referenceCounter = nullptr;

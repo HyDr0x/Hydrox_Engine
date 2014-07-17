@@ -5,13 +5,15 @@
 #include <vector>
 
 #include <DataBase/ResourceManager.hpp>
-#include <SceneGraph/Traverser/Traverser.h>
+#include <SceneGraph/Traverser/ConstTraverser.h>
 #include <Utilities/Math/Math.hpp>
 
 namespace he
 {
   namespace sg
   {
+    class TreeNodeAllocator;
+
     class TransformNode;
     class AnimatedTransformNode;
     class GeoNode;
@@ -32,41 +34,24 @@ namespace he
   {
     struct NodeWrapperMapper;
 
-    class NodeExtractionTraverser : public sg::Traverser
+    class NodeExtractionTraverser : public sg::ConstTraverser
     {
     public:
 
-      NodeExtractionTraverser(std::string fileName, NodeWrapperMapper& wrapperMapper, util::SingletonManager *singletonManager);
+      NodeExtractionTraverser(const sg::TreeNodeAllocator& allocator, std::string fileName, std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceMap);
       virtual ~NodeExtractionTraverser();
 
-      virtual bool preTraverse(sg::TransformNode* treeNode);
+      virtual bool preTraverse(sg::GeoNode& treeNode);
 
-      virtual bool preTraverse(sg::AnimatedTransformNode* treeNode);
+      virtual bool preTraverse(sg::AnimatedGeoNode& treeNode);
 
-      virtual bool preTraverse(sg::GeoNode* treeNode);
-
-      virtual bool preTraverse(sg::AnimatedGeoNode* treeNode);
-
-      virtual bool preTraverse(sg::BillboardNode* treeNode);
-
-      virtual bool preTraverse(sg::LODNode* treeNode);
-
-      virtual bool preTraverse(sg::LightNode* treeNode);
-
-      virtual bool preTraverse(sg::ShadowLightNode* treeNode);
-
-      virtual bool preTraverse(sg::ParticleNode* treeNode);
+      virtual bool preTraverse(sg::BillboardNode& treeNode);
 
     protected:
 
       std::string m_fileName;
 
-      NodeWrapperMapper& m_wrapperMapper;
-
-      db::ModelManager *m_modelManager;
-      db::MaterialManager *m_materialManager;
-      db::RenderShaderManager *m_renderShaderManager;
-      db::TextureManager *m_textureManager;
+      std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& m_resourceMap;
     };
   }
 }

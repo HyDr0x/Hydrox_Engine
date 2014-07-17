@@ -11,6 +11,8 @@
 
 #include "SceneGraph/Traverser/Traverser.h"
 
+#include "SceneGraph/Scene/TreeNodeAllocator.h"
+
 namespace he
 {
   namespace sg
@@ -35,10 +37,10 @@ namespace he
 
       void setLODRanges(const std::vector<float>& lodRanges);
 
-      void addSubTree(TreeNode* rootNode, const util::Vector<float, 3>& cameraPosition);
-      void removeSubTree(TreeNode* rootNode);
+      void addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::Vector<float, 3>& cameraPosition);
+      void removeSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode);
 
-      void updateCaches(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
+      void updateCaches(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
       void addNodeToCache(sg::LODNode *lodNode);
       void addNodeToCache(sg::TransformNode *transformNode);
@@ -54,12 +56,12 @@ namespace he
 
       void registerNodeCacheSlots();
 
-      void update(TransformNode* data);
+      void update(TransformNode *data) override;
 
       void updateAnimationTime(float currentTime, bool isTimeRelative);
-      void updateAnimatedTransformNodes();
-      void updateTransformNodes();
-      void updateLODNodes(const util::Vector<float, 3>& cameraPosition);
+      void updateAnimatedTransformNodes(TreeNodeAllocator& allocator);
+      void updateTransformNodes(TreeNodeAllocator& allocator);
+      void updateLODNodes(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition);
 
       util::EventManager& m_eventManager;
 

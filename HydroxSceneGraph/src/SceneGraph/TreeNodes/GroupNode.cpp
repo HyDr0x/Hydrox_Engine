@@ -9,24 +9,33 @@ namespace he
 {
   namespace sg
   {
-    GroupNode::GroupNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : TreeNode(nodeName, parent, nextSibling),
+    GroupNode::GroupNode(const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild) : TreeNode(nodeName, parent, nextSibling),
                                                                                                                         m_firstChild(firstChild)
     {
       m_dirtyFlag = DEFAULT;
-      m_nodeType = GROUPNODE;
+      m_index.nodeType = GROUPNODE;
+    }
+
+    GroupNode::GroupNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling()), m_firstChild(sourceNode.getFirstChild())
+    {
+      assert(GROUPNODE == sourceNode.getNodeType());
+
+      const GroupNode& copyNode = static_cast<const GroupNode&>(sourceNode);
+
+      new (this) GroupNode(copyNode);
     }
 
     GroupNode::~GroupNode()
     {
-      m_firstChild = nullptr;
     }
 
     TreeNode& GroupNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const GroupNode& copyNode = static_cast<const GroupNode&>(sourceNode);
-      GroupNode::operator=(copyNode);
+      this->~GroupNode();
+
+      new (this) GroupNode(sourceNode);
 
       return *this;
     }
@@ -43,40 +52,40 @@ namespace he
 
     bool GroupNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool GroupNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void GroupNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool GroupNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool GroupNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void GroupNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
-    TreeNode* GroupNode::getFirstChild() const
+    NodeIndex GroupNode::getFirstChild() const
     {
       return m_firstChild;
     }
 
-    void GroupNode::setFirstChild(TreeNode* firstChild)
+    void GroupNode::setFirstChild(NodeIndex firstChild)
     {
       m_firstChild = firstChild;
     }

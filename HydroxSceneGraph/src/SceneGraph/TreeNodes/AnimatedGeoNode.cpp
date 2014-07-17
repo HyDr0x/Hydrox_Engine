@@ -11,11 +11,21 @@ namespace he
 {
   namespace sg
   {
-    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) 
+    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, 
+      const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling)
       : GeoNode(eventManager, meshHandle, materialHandle, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
       m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
-      m_nodeType = ANIMATEDGEONODE;
+      m_index.nodeType = ANIMATEDGEONODE;
+    }
+
+    AnimatedGeoNode::AnimatedGeoNode(const TreeNode& sourceNode) : GeoNode(nullptr, util::ResourceHandle(), util::ResourceHandle(), sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(ANIMATEDGEONODE == sourceNode.getNodeType());
+
+      const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(sourceNode);
+
+      new (this) AnimatedGeoNode(copyNode);
     }
 
     AnimatedGeoNode::~AnimatedGeoNode()
@@ -24,10 +34,11 @@ namespace he
 
     TreeNode& AnimatedGeoNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(sourceNode);
-      AnimatedGeoNode::operator=(copyNode);
+      this->~AnimatedGeoNode();
+
+      new (this) AnimatedGeoNode(sourceNode);
 
       return *this;
     }
@@ -45,32 +56,32 @@ namespace he
 
     bool AnimatedGeoNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool AnimatedGeoNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void AnimatedGeoNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool AnimatedGeoNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool AnimatedGeoNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void AnimatedGeoNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void AnimatedGeoNode::setMeshHandle(util::ResourceHandle meshHandle)

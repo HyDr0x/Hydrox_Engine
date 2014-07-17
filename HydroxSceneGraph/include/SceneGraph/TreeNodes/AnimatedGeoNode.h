@@ -16,7 +16,9 @@ namespace he
     public:
 
       AnimatedGeoNode(std::istream stream);
-      AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, 
+        const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      AnimatedGeoNode(const TreeNode& sourceNode);
       virtual ~AnimatedGeoNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);

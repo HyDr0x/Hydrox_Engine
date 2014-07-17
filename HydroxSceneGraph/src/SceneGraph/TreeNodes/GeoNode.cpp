@@ -11,7 +11,7 @@ namespace he
 {
   namespace sg
   {
-    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : 
+    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager),
       m_meshHandle(meshHandle),
@@ -19,7 +19,16 @@ namespace he
       m_renderable(false)
     {
       m_trfMatrix = util::Matrix<float, 4>::identity();
-      m_nodeType = GEONODE;
+      m_index.nodeType = GEONODE;
+    }
+
+    GeoNode::GeoNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(GEONODE == sourceNode.getNodeType());
+
+      const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
+
+      new (this) GeoNode(copyNode);
     }
 
     GeoNode::~GeoNode()
@@ -28,10 +37,11 @@ namespace he
 
     TreeNode& GeoNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
-      GeoNode::operator=(copyNode);
+      this->~GeoNode();
+
+      new (this) GeoNode(sourceNode);
 
       return *this;
     }
@@ -47,32 +57,32 @@ namespace he
 
     bool GeoNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool GeoNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void GeoNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool GeoNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool GeoNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void GeoNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void GeoNode::setMeshHandle(util::ResourceHandle meshHandle)

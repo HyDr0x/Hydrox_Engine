@@ -18,7 +18,8 @@ namespace he
     {
     public:
 
-      LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      LODNode(const TreeNode& sourceNode);
       virtual ~LODNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);

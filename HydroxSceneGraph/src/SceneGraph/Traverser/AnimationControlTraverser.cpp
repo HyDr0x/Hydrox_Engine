@@ -7,7 +7,7 @@ namespace he
 {
   namespace sg
   {
-    AnimationControlTraverser::AnimationControlTraverser()
+    AnimationControlTraverser::AnimationControlTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
       m_setterAnimationTime = 0.0f;
       m_adderAnimationTime = 0.0f;
@@ -43,38 +43,38 @@ namespace he
       m_stopAnimation = true;
     }
 
-    bool AnimationControlTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool AnimationControlTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      treeNode->setPauseAnimation(m_pauseAnimation);//pause/unpause animation
+      treeNode.setPauseAnimation(m_pauseAnimation);//pause/unpause animation
 
       if(m_stopAnimation)
       {
-        treeNode->stopAnimation();
+        treeNode.stopAnimation();
       }
 
       if(m_setAnimationTime)
       {
-        treeNode->setCurrentAnimationTime(m_setterAnimationTime);
+        treeNode.setCurrentAnimationTime(m_setterAnimationTime);
       }
     
       if(m_addAnimationTime)
       {
-        treeNode->addCurrentAnimationTime(m_adderAnimationTime);
+        treeNode.addCurrentAnimationTime(m_adderAnimationTime);
       }
 
       return true;
     }
 
-    void AnimationControlTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void AnimationControlTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
     }
 
-    bool AnimationControlTraverser::preTraverse(TreeNode* treeNode)
+    bool AnimationControlTraverser::preTraverse(TreeNode& treeNode)
     {
       return false;
     }
 
-    void AnimationControlTraverser::postTraverse(TreeNode* treeNode)
+    void AnimationControlTraverser::postTraverse(TreeNode& treeNode)
     {
     }
   }

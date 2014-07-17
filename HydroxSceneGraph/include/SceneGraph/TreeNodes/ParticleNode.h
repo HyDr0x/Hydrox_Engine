@@ -21,7 +21,8 @@ namespace he
     {
     public:
 
-      ParticleNode(util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      ParticleNode(util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      ParticleNode(const TreeNode& sourceNode);
       virtual ~ParticleNode();
 
       virtual TreeNode& operator=(const TreeNode& sourceNode);

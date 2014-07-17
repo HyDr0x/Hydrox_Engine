@@ -1,5 +1,7 @@
 #include "SceneGraph/Traverser/CopyTraverser.h"
 
+#include "SceneGraph/Scene/Scene.h"
+
 #include "SceneGraph/TreeNodes/AnimatedTransformNode.h"
 #include "SceneGraph/TreeNodes/TransformNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
@@ -14,7 +16,8 @@ namespace he
 {
   namespace sg
   {
-    CopyTraverser::CopyTraverser(std::string namePrefix) : m_namePrefix(namePrefix), m_sibling(nullptr), m_rootNode(nullptr), m_parent(nullptr)
+    CopyTraverser::CopyTraverser(const TreeNodeAllocator& sourceAllocator, TreeNodeAllocator& destinationAllocator, std::string namePrefix) :
+      ConstTraverser(sourceAllocator), m_destinationAllocator(destinationAllocator), m_namePrefix(namePrefix), m_sibling(~0), m_rootNode(~0), m_parent(~0)
     {
     }
 
@@ -22,233 +25,243 @@ namespace he
     {
     }
 
-    bool CopyTraverser::preTraverse(const AnimatedTransformNode* treeNode)
+    bool CopyTraverser::preTraverse(const AnimatedTransformNode& treeNode)
     {
-      AnimatedTransformNode *newTransformNode = (AnimatedTransformNode*)cloneGroupNode(treeNode);
+      NodeIndex newTransformNodeindex = cloneGroupNode(treeNode);
 
-      AnimatedGeoNode *oldGeoNode = treeNode->getSkinnedMesh();
-      if(oldGeoNode != nullptr)
+      NodeIndex oldGeoNodeIndex = treeNode.getSkinnedMesh();
+      if(oldGeoNodeIndex != ~0)
       {
-        AnimatedGeoNode *newGeoNode = m_newGeoNodeTable[oldGeoNode];
-        if(newGeoNode == nullptr)
+        const AnimatedGeoNode *oldGeoNode = dynamic_cast<const AnimatedGeoNode*>(&m_allocator[oldGeoNodeIndex]);
+        AnimatedTransformNode *newTransformNode = dynamic_cast<AnimatedTransformNode*>(&m_destinationAllocator[newTransformNodeindex]);
+
+        if(!m_newGeoNodeTable.count(oldGeoNode))
         {
           m_oldGeoNodeTable[oldGeoNode].push_back(newTransformNode);
         }
         else
         {
-          newTransformNode->setSkinnedMesh(newGeoNode);
+          newTransformNode->setSkinnedMesh(m_newGeoNodeTable.find(oldGeoNode)->second);
         }
       }
     
       return true;
     }
 
-    void CopyTraverser::postTraverse(const AnimatedTransformNode* treeNode)
+    void CopyTraverser::postTraverse(const AnimatedTransformNode& treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const TransformNode* treeNode)
+    bool CopyTraverser::preTraverse(const TransformNode& treeNode)
     {
       cloneGroupNode(treeNode);
       return true;
     }
 
-    void CopyTraverser::postTraverse(const TransformNode* treeNode)
+    void CopyTraverser::postTraverse(const TransformNode& treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const LODNode* treeNode)
+    bool CopyTraverser::preTraverse(const LODNode& treeNode)
     {
       cloneGroupNode(treeNode);
       return true;
     }
 
-    void CopyTraverser::postTraverse(const LODNode* treeNode)
+    void CopyTraverser::postTraverse(const LODNode& treeNode)
     {
       ascendingGroupNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const AnimatedGeoNode* treeNode)
+    bool CopyTraverser::preTraverse(const AnimatedGeoNode& treeNode)
     {
-      AnimatedGeoNode *newGeoNode = (AnimatedGeoNode*)cloneTreeNode(treeNode);
-      m_newGeoNodeTable[treeNode] = newGeoNode;
+      NodeIndex newGeoNodeIndex = cloneTreeNode(treeNode);
+      m_newGeoNodeTable.insert(std::map<const AnimatedGeoNode*, NodeIndex>::value_type(&treeNode, newGeoNodeIndex));
 
-      std::list<AnimatedTransformNode*> transformList = m_oldGeoNodeTable[treeNode];
+      std::list<AnimatedTransformNode*> transformList = m_oldGeoNodeTable[&treeNode];
 
       for(std::list<AnimatedTransformNode*>::iterator lit = transformList.begin(); lit != transformList.end(); lit++)
       {
-        (*lit)->setSkinnedMesh(newGeoNode);
+        (*lit)->setSkinnedMesh(newGeoNodeIndex);
       }
 
-      m_oldGeoNodeTable.erase(treeNode);
+      m_oldGeoNodeTable.erase(&treeNode);
 
       return false;
     }
 
-    void CopyTraverser::postTraverse(const AnimatedGeoNode* treeNode)
+    void CopyTraverser::postTraverse(const AnimatedGeoNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const GeoNode* treeNode)
+    bool CopyTraverser::preTraverse(const GeoNode& treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(const GeoNode* treeNode)
+    void CopyTraverser::postTraverse(const GeoNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const BillboardNode* treeNode)
+    bool CopyTraverser::preTraverse(const BillboardNode& treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(const BillboardNode* treeNode)
+    void CopyTraverser::postTraverse(const BillboardNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const ParticleNode* treeNode)
+    bool CopyTraverser::preTraverse(const ParticleNode& treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(const ParticleNode* treeNode)
+    void CopyTraverser::postTraverse(const ParticleNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const LightNode* treeNode)
+    bool CopyTraverser::preTraverse(const LightNode& treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(const LightNode* treeNode)
+    void CopyTraverser::postTraverse(const LightNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    bool CopyTraverser::preTraverse(const ShadowLightNode* treeNode)
+    bool CopyTraverser::preTraverse(const ShadowLightNode& treeNode)
     {
       cloneTreeNode(treeNode);
       return false;
     }
 
-    void CopyTraverser::postTraverse(const ShadowLightNode* treeNode)
+    void CopyTraverser::postTraverse(const ShadowLightNode& treeNode)
     {
       ascendingTreeNode(treeNode);
     }
 
-    GroupNode* CopyTraverser::getCopiedRootNode() const
+    NodeIndex CopyTraverser::getCopiedRootNode() const
     {
       return m_rootNode;
     }
 
-    GroupNode* CopyTraverser::cloneGroupNode(const GroupNode* treeNode)
+    NodeIndex CopyTraverser::cloneGroupNode(const GroupNode& treeNode)
     {
-      GroupNode* newNode = treeNode->clone();
+      NodeIndex newNodeIndex = m_destinationAllocator.push_back(treeNode);
 
-      newNode->setNodeName(m_namePrefix + newNode->getNodeName());
+      GroupNode& newNode = dynamic_cast<GroupNode&>(m_destinationAllocator[newNodeIndex]);
+      newNode.setNodeName(m_namePrefix + newNode.getNodeName());
 
-      if(m_rootNode == nullptr)//we ve got the root node
+      if(m_rootNode == ~0)//we ve got the root node
       {
-        m_rootNode = newNode;
+        m_rootNode = newNodeIndex;
       }
       else//we ve got a child node
       {
         if(m_childNode)
         {
-          addChild(m_parent, newNode);
+          addChild(m_parent, newNodeIndex);
         }
         else
         {
-          addSibling(m_sibling, newNode);
+          addSibling(m_sibling, newNodeIndex);
         }
       }
 
-      m_sibling = newNode;
+      m_sibling = newNodeIndex;
     
-      if(treeNode->getFirstChild() != nullptr)
+      if(treeNode.getFirstChild() != ~0)
       {
-        m_parent = newNode;
+        m_parent = newNodeIndex;
         m_childNode = true;
       }
 
-      return newNode;
+      return newNodeIndex;
     }
 
-    TreeNode* CopyTraverser::cloneTreeNode(const TreeNode* treeNode)
+    NodeIndex CopyTraverser::cloneTreeNode(const TreeNode& treeNode)
     {
-      TreeNode* newNode = treeNode->clone();
+      NodeIndex newNodeIndex = m_destinationAllocator.push_back(treeNode);
 
-      newNode->setNodeName(m_namePrefix + newNode->getNodeName());
+      TreeNode& newNode = m_destinationAllocator[newNodeIndex];
+      newNode.setNodeName(m_namePrefix + newNode.getNodeName());
 
       if(m_childNode)
       {
-        addChild(m_parent, newNode);
+        addChild(m_parent, newNodeIndex);
       }
       else
       {
-        addSibling(m_sibling, newNode);
+        addSibling(m_sibling, newNodeIndex);
       }
 
-      m_sibling = newNode;
+      m_sibling = newNodeIndex;
 
-      return newNode;
+      return newNodeIndex;
     }
 
-    void CopyTraverser::ascendingGroupNode(const GroupNode* treeNode)
+    void CopyTraverser::ascendingGroupNode(const GroupNode& treeNode)
     {
       m_childNode = false;
 
-      if(treeNode->getNextSibling() == nullptr)
+      if(treeNode.getNextSibling() == ~0)
       {
         m_sibling = m_parent;
-        if(m_parent != nullptr)
+        if(m_parent != ~0)
         {
-          m_parent = m_parent->getParent();
+          m_parent = m_destinationAllocator[m_parent].getParent();
         }
       }
     }
 
-    void CopyTraverser::ascendingTreeNode(const TreeNode* treeNode)
+    void CopyTraverser::ascendingTreeNode(const TreeNode& treeNode)
     {
       m_childNode = false;
 
-      if(treeNode->getNextSibling() == nullptr)
+      if(treeNode.getNextSibling() == ~0)
       {
         m_sibling = m_parent;
-        if(m_parent != nullptr)
+        if(m_parent != ~0)
         {
-          m_parent = m_parent->getParent();
+          m_parent = m_destinationAllocator[m_parent].getParent();
         }
       }
     }
 
-    void CopyTraverser::addChild(GroupNode* parent, TreeNode* newNode)
+    void CopyTraverser::addChild(NodeIndex parentIndex, NodeIndex newNodeIndex)
     {
-      TreeNode* oldFirstChild = parent->getFirstChild();
+      GroupNode& parent = dynamic_cast<GroupNode&>(m_destinationAllocator[parentIndex]);
+      NodeIndex& oldFirstChild = parent.getFirstChild();
 
-      parent->setFirstChild(newNode);
-      newNode->setNextSibling(oldFirstChild);
-      newNode->setParent(parent);
+      parent.setFirstChild(newNodeIndex);
+
+      TreeNode& newNode = m_destinationAllocator[newNodeIndex];
+      newNode.setNextSibling(oldFirstChild);
+      newNode.setParent(parentIndex);
     }
 
-    void CopyTraverser::addSibling(TreeNode* sibling, TreeNode* newNode)
+    void CopyTraverser::addSibling(NodeIndex siblingIndex, NodeIndex newNodeIndex)
     {
-      TreeNode* oldSibling = sibling->getNextSibling();
+      TreeNode& sibling = m_destinationAllocator[siblingIndex];
+      NodeIndex oldSiblingIndex = sibling.getNextSibling();
 
-      sibling->setNextSibling(newNode);
-      newNode->setNextSibling(oldSibling);
-      newNode->setParent(sibling->getParent());
+      sibling.setNextSibling(newNodeIndex);
+
+      TreeNode& newNode = m_destinationAllocator[newNodeIndex];
+      newNode.setNextSibling(oldSiblingIndex);
+      newNode.setParent(sibling.getParent());
     }
   }
 }

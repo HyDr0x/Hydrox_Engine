@@ -1,4 +1,4 @@
-#include "Loader/TreeNodeFactory.h"
+#include "SceneGraph/Scene/TreeNodeFactory.h"
 
 #include <sstream>
 #include <fstream>
@@ -9,14 +9,11 @@
 
 #include <DataBase/Material.h>
 
-#include "Loader/RenderShaderLoader.h"
-#include "Loader/ILDevilLoader.h"
-
 namespace he
 {
-  namespace loader
+  namespace sg
   {
-    void TreeNodeFactory::registerCreateFunction(sg::NodeType nodeType, CreateTreeNode foo)
+    void TreeNodeFactory::registerCreateFunction(NodeType nodeType, CreateTreeNode foo)
     {
       if(!m_createTreeNodeFunctions.count(nodeType))
       {
@@ -24,9 +21,9 @@ namespace he
       }
     }
 
-    TreeNodeFactory::CreateTreeNode TreeNodeFactory::createTreeNode(sg::NodeType nodeType)
+    TreeNode* TreeNodeFactory::createTreeNode(NodeType nodeType, TreeNode *adress, const TreeNode& node)
     {
-      return m_createTreeNodeFunctions[nodeType];
+      return m_createTreeNodeFunctions[nodeType](adress, node);
     }
   }
 }

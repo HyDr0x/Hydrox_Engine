@@ -11,6 +11,5 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderLoader.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderLoader.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeFactory.cpp 
 	PARENT_SCOPE 
 )

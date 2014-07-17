@@ -13,13 +13,13 @@ namespace he
     {
     public:
 
-      GetGlobalCoordinateTraverser();
+      GetGlobalCoordinateTraverser(const TreeNodeAllocator& allocator);
       virtual ~GetGlobalCoordinateTraverser();
 
       void clearStacks();
 
-      virtual bool ascendTraverse(const AnimatedTransformNode* treeNode);
-      virtual bool ascendTraverse(const TransformNode* treeNode);
+      virtual bool ascendTraverse(const AnimatedTransformNode& treeNode);
+      virtual bool ascendTraverse(const TransformNode& treeNode);
 
       float getGlobalScale() const;
       util::Vector<float, 3> getGlobalTranslation() const;

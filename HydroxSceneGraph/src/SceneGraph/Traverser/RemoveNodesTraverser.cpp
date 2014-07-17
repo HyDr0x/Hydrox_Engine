@@ -11,7 +11,7 @@
 namespace he
 {
   namespace sg
-  {    RemoveNodesTraverser::RemoveNodesTraverser(util::EventManager& eventManager) : m_eventManager(eventManager)
+  {    RemoveNodesTraverser::RemoveNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager) : Traverser(allocator), m_eventManager(eventManager)
     {
     }
 
@@ -19,91 +19,91 @@ namespace he
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode *treeNode)>(util::EventManager::OnRemoveAnimatedTransformNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnRemoveAnimatedTransformNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(LODNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(LODNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(LODNode *treeNode)>(util::EventManager::OnRemoveLODNode)->execute(treeNode);
+      m_eventManager.raiseSignal<void(*)(LODNode &treeNode)>(util::EventManager::OnRemoveLODNode)->execute(treeNode);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(LODNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(LODNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(GeoNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(GeoNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(GeoNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(GeoNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(BillboardNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(BillboardNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(BillboardNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(BillboardNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(ParticleNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(ParticleNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(ParticleNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(ParticleNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(LightNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(LightNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(LightNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(LightNode& treeNode)
     {
     }
 
-    bool RemoveNodesTraverser::preTraverse(ShadowLightNode* treeNode)
+    bool RemoveNodesTraverser::preTraverse(ShadowLightNode& treeNode)
     {
-      treeNode->setRenderable(false);
+      treeNode.setRenderable(false);
 
       return true;
     }
 
-    void RemoveNodesTraverser::postTraverse(ShadowLightNode* treeNode)
+    void RemoveNodesTraverser::postTraverse(ShadowLightNode& treeNode)
     {
     }
   }

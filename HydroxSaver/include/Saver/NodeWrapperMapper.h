@@ -24,19 +24,6 @@ namespace he
   {
     struct NodeWrapperMapper
     {
-      ~NodeWrapperMapper()
-      {
-        for(unsigned int i = 0; i < treeNodes.size(); i++)
-        {
-          delete treeNodes[i];
-        }
-
-        for(std::map<sg::TreeNode*, unsigned int>::iterator it = nodeMap.begin(); it != nodeMap.end(); it++)
-        {
-          delete it->first;
-        }
-      }
-
       class Less
       {
       public:
@@ -45,9 +32,6 @@ namespace he
           return o1.getID() < o2.getID();
         }
       };
-
-      std::map<sg::TreeNode*, unsigned int> nodeMap;//index into the treenodes vector, ptr as unique key
-      std::vector<TreeNodeData*> treeNodes;//all treenodes
 
       std::map<std::string, std::map<util::ResourceHandle, std::string, Less>> resourceMap;//first string: resource kind e.g. mesh, billboard etc. | resource handle: for unique mapping | second string: filename
     };

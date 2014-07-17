@@ -7,59 +7,45 @@ namespace he
 {
   namespace sg
   {
-    TreeNode::TreeNode(std::istream stream)
+    TreeNode::TreeNode(const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) : 
+      m_parent(parent),
+      m_nextSibling(nextSibling),
+      m_nodeName(nodeName),
+      m_index(~0)
     {
-
-    }
-
-    TreeNode::TreeNode(const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
-                                                                                                m_nextSibling(nextSibling),
-                                                                                                m_nodeName(nodeName)
-    {
-      m_nodeType = TREENODE;
-    }
-
-    TreeNode& TreeNode::operator=(const TreeNode& sourceNode)
-    {
-      m_parent = sourceNode.m_parent;
-      m_nextSibling = sourceNode.m_nextSibling;
-      m_nodeName = sourceNode.m_nodeName;
-
-      return *this;
+      m_index.nodeType = TREENODE;
     }
 
     TreeNode::~TreeNode()
     {
-      m_nextSibling = nullptr;
-      m_parent = nullptr;
     }
 
     NodeType TreeNode::getNodeType() const
     {
-      return m_nodeType;
+      return m_index.nodeType;
     }
 
-    TreeNode* TreeNode::getNextSibling() const
+    NodeIndex TreeNode::getNextSibling() const
     {
       return m_nextSibling;
     }
 
-    GroupNode* TreeNode::getParent() const
+    NodeIndex TreeNode::getParent() const
     {
       return m_parent;
     }
 
-    TreeNode* TreeNode::getFirstChild() const
+    NodeIndex TreeNode::getFirstChild() const
     {
-      return nullptr;
+      return ~0;
     }
 
-    void TreeNode::setNextSibling(TreeNode* nextSibling)
+    void TreeNode::setNextSibling(NodeIndex nextSibling)
     {
       m_nextSibling = nextSibling;
     }
 
-    void TreeNode::setParent(GroupNode* parent)
+    void TreeNode::setParent(NodeIndex parent)
     {
       m_parent = parent;
     }
@@ -72,6 +58,16 @@ namespace he
     const std::string& TreeNode::getNodeName() const
     {
       return m_nodeName;
+    }
+
+    void TreeNode::setNodeIndex(NodeIndex index)
+    {
+      m_index = index;
+    }
+
+    NodeIndex TreeNode::getNodeIndex() const
+    {
+      return m_index;
     }
   }
 }

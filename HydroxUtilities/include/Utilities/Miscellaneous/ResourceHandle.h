@@ -9,7 +9,7 @@ namespace he
 {
   namespace util
   {
-    class GRAPHICAPI ResourceHandle : public Subject<ResourceHandle*>
+    class GRAPHICAPI ResourceHandle : public Subject<ResourceHandle&>
     {
     public:
 
@@ -32,6 +32,15 @@ namespace he
 
       unsigned int m_id;
       unsigned int *m_referenceCounter;
+    };
+
+    class Less
+    {
+    public:
+      inline bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
+      {
+        return o1.getID() < o2.getID();
+      }
     };
   }
 }

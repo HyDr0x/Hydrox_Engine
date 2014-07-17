@@ -26,6 +26,21 @@ namespace he
 
       std::vector<float> m_scales;
       std::vector<float> m_scalesTime;
+
+      unsigned int getSize() const
+      {
+        unsigned int size = 0;
+        size += m_positions.size() * sizeof(util::Vector<float, 3>);
+        size += m_positionsTime.size() * sizeof(float);
+
+        size += m_rotations.size() * sizeof(util::Quaternion<float>);
+        size += m_rotationsTime.size() * sizeof(float);
+
+        size += m_scales.size() * sizeof(float);
+        size += m_scalesTime.size() * sizeof(float);
+
+        return size;
+      }
     };
 
     GRAPHICAPI std::ofstream& operator<<(std::ofstream& stream, const AnimationTrack& animationTrack);

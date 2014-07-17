@@ -40,27 +40,27 @@ namespace he
       m_lodRanges = lodRanges;
     }
 
-    void SceneCacheManager::addSubTree(TreeNode* rootNode, const util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::Vector<float, 3>& cameraPosition)
     {
-      InsertObserverTraverser insertObserverTraverser(this);
+      InsertObserverTraverser insertObserverTraverser(allocator, this);
       insertObserverTraverser.doTraverse(rootNode);//insert this scene as an observer to every Transform node
 
-      AddNodesTraverser addRenderNodesTraverser(m_eventManager, m_lodRanges, cameraPosition);
+      AddNodesTraverser addRenderNodesTraverser(allocator, m_eventManager, m_lodRanges, cameraPosition);
       addRenderNodesTraverser.doTraverse(rootNode);
     }
 
-    void SceneCacheManager::removeSubTree(TreeNode* rootNode)
+    void SceneCacheManager::removeSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode)
     {
-      RemoveNodesTraverser removeRenderNodesTraverser(m_eventManager);
+      RemoveNodesTraverser removeRenderNodesTraverser(allocator, m_eventManager);
       removeRenderNodesTraverser.doTraverse(rootNode);
     }
 
-    void SceneCacheManager::updateCaches(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
+    void SceneCacheManager::updateCaches(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
     {
       updateAnimationTime(currentTime, isTimeRelative);
-      updateTransformNodes();
-      updateAnimatedTransformNodes();
-      updateLODNodes(cameraPosition);
+      updateTransformNodes(allocator);
+      updateAnimatedTransformNodes(allocator);
+      updateLODNodes(allocator, cameraPosition);
     }
 
     void SceneCacheManager::addNodeToCache(sg::LODNode *lodNode)
@@ -109,7 +109,7 @@ namespace he
       m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveAnimatedTransformNode);
     }
 
-    void SceneCacheManager::update(TransformNode* data)
+    void SceneCacheManager::update(TransformNode *data)
     {
       m_dirtyTransforms.push_back(data);
     }
@@ -127,36 +127,36 @@ namespace he
       {
         for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
         {
-          (*tit)->setCurrentAnimationTime(currentTime);   
+          (*tit)->setCurrentAnimationTime(currentTime);
         }
       }
     }
 
-    void SceneCacheManager::updateAnimatedTransformNodes()
+    void SceneCacheManager::updateAnimatedTransformNodes(TreeNodeAllocator& allocator)
     {
-      TransformTraverser transformTraverser;
+      TransformTraverser transformTraverser(allocator);
 
       for(std::list<AnimatedTransformNode*>::iterator tit = m_activeAnimatedTransforms.begin(); tit != m_activeAnimatedTransforms.end(); tit++)
       { 
         if((*tit)->getDirtyFlag() & GroupNode::TRF_DIRTY || (*tit)->getDirtyFlag() & GroupNode::ANIM_DIRTY)//traverse it only if its not been traversed before
         {
-          transformTraverser.doAscend(*tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
-          transformTraverser.doTraverse(*tit);
+          transformTraverser.doAscend(**tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+          transformTraverser.doTraverse(**tit);
           transformTraverser.clearStacks();
         }
       }
     }
 
-    void SceneCacheManager::updateTransformNodes()
+    void SceneCacheManager::updateTransformNodes(TreeNodeAllocator& allocator)
     {
-      TransformTraverser transformTraverser;
+      TransformTraverser transformTraverser(allocator);
 
       for(std::list<TransformNode*>::iterator tit = m_dirtyTransforms.begin(); tit != m_dirtyTransforms.end(); tit++)
       { 
         if((*tit)->getDirtyFlag() & GroupNode::TRF_DIRTY)//traverse it only if its not been traversed before
         {
-          transformTraverser.doAscend(*tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
-          transformTraverser.doTraverse(*tit);
+          transformTraverser.doAscend(**tit);//calculate the transformations of the upper path of the actual node (could be already saved in every transform node; memory / compute tradeoff)
+          transformTraverser.doTraverse(**tit);
           transformTraverser.clearStacks();
         }
       }
@@ -164,7 +164,7 @@ namespace he
       m_dirtyTransforms.clear();
     }
 
-    void SceneCacheManager::updateLODNodes(const util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::updateLODNodes(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition)
     {
       for(std::list<LODNode*>::iterator lit = m_activeLODs.begin(); lit != m_activeLODs.end(); lit++)
       {
@@ -176,16 +176,16 @@ namespace he
           {
             (*lit)->addDirtyFlag(GroupNode::LOD_INRANGE);
 
-            AddNodesTraverser addTraverser(m_eventManager, m_lodRanges, cameraPosition);
-            addTraverser.doTraverse(*lit);
+            AddNodesTraverser addTraverser(allocator, m_eventManager, m_lodRanges, cameraPosition);
+            addTraverser.doTraverse(**lit);
           }
         }
         else if((*lit)->getDirtyFlag() & GroupNode::LOD_INRANGE)
         {
           (*lit)->removeDirtyFlag(GroupNode::LOD_INRANGE);
 
-          RemoveNodesTraverser removeTraverser(m_eventManager);
-          removeTraverser.doTraverse(*lit);
+          RemoveNodesTraverser removeTraverser(allocator, m_eventManager);
+          removeTraverser.doTraverse(**lit);
         }
       }
     }

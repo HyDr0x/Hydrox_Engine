@@ -1,5 +1,7 @@
 #include "SceneGraph/Traverser/TransformTraverser.h"
 
+#include "SceneGraph/Scene/Scene.h"
+
 #include "SceneGraph/TreeNodes/AnimatedTransformNode.h"
 #include "SceneGraph/TreeNodes/TransformNode.h"
 #include "SceneGraph/TreeNodes/AnimatedGeoNode.h"
@@ -14,7 +16,7 @@ namespace he
 {
   namespace sg
   {
-    TransformTraverser::TransformTraverser()
+    TransformTraverser::TransformTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
     }
 
@@ -58,13 +60,13 @@ namespace he
       m_rotationStack.push(trfRotation);
     }
 
-    bool TransformTraverser::ascendTraverse(AnimatedTransformNode* treeNode)
+    bool TransformTraverser::ascendTraverse(AnimatedTransformNode& treeNode)
     {
-      if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
+      if(!(treeNode.getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode.getDirtyFlag() & GroupNode::ANIM_DIRTY))
       {
-        m_translateStack.push(treeNode->getLocalPosition());
-        m_scaleStack.push(treeNode->getLocalScale());
-        m_rotationStack.push(treeNode->getLocalRotation());
+        m_translateStack.push(treeNode.getLocalPosition());
+        m_scaleStack.push(treeNode.getLocalScale());
+        m_rotationStack.push(treeNode.getLocalRotation());
 
         return true;
       }
@@ -74,7 +76,7 @@ namespace he
       return false;
     }
 
-    bool TransformTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool TransformTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
       util::Vector<float, 3> translation;
       float scale;
@@ -93,31 +95,36 @@ namespace he
         rotation = util::Quaternion<float>::identity();
       }
 
-      treeNode->calculateTransformation(translation, scale, rotation);
+      treeNode.calculateTransformation(translation, scale, rotation);
+      if(treeNode.getSkinnedMesh() != ~0)
+      {
+        sg::AnimatedGeoNode& node = (sg::AnimatedGeoNode&)m_allocator[treeNode.getSkinnedMesh()];
+        node.setBoneTransform(util::math::createTransformationMatrix(translation, scale, rotation), treeNode.getBoneIndex());
+      }
 
       m_translateStack.push(translation);
       m_scaleStack.push(scale);
       m_rotationStack.push(rotation);
 
-      treeNode->removeDirtyFlag((GroupNode::DirtyFlags)(GroupNode::ANIM_DIRTY | GroupNode::TRF_DIRTY));//animation is updated now
+      treeNode.removeDirtyFlag((GroupNode::DirtyFlags)(GroupNode::ANIM_DIRTY | GroupNode::TRF_DIRTY));//animation is updated now
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void TransformTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
       m_scaleStack.pop();
       m_translateStack.pop();
       m_rotationStack.pop();
     }
 
-    bool TransformTraverser::ascendTraverse(TransformNode* treeNode)
+    bool TransformTraverser::ascendTraverse(TransformNode& treeNode)
     {
-      if(!(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode->getDirtyFlag() & GroupNode::ANIM_DIRTY))
+      if(!(treeNode.getDirtyFlag() & GroupNode::TRF_DIRTY || treeNode.getDirtyFlag() & GroupNode::ANIM_DIRTY))
       {
-        m_translateStack.push(treeNode->getLocalPosition());
-        m_scaleStack.push(treeNode->getLocalScale());
-        m_rotationStack.push(treeNode->getLocalRotation());
+        m_translateStack.push(treeNode.getLocalPosition());
+        m_scaleStack.push(treeNode.getLocalScale());
+        m_rotationStack.push(treeNode.getLocalRotation());
 
         return true;
       }
@@ -127,7 +134,7 @@ namespace he
       return false;
     }
 
-    bool TransformTraverser::preTraverse(TransformNode* treeNode)
+    bool TransformTraverser::preTraverse(TransformNode& treeNode)
     {
       util::Vector<float, 3> translation;
       float scale;
@@ -146,9 +153,9 @@ namespace he
         rotation = util::Quaternion<float>::identity();
       }
 
-      treeNode->calculateTransformation(translation, scale, rotation);
+      treeNode.calculateTransformation(translation, scale, rotation);
 
-      treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
+      treeNode.removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
 
       m_translateStack.push(translation);
       m_scaleStack.push(scale);
@@ -157,16 +164,16 @@ namespace he
       return true;
     }
 
-    void TransformTraverser::postTraverse(TransformNode* treeNode)
+    void TransformTraverser::postTraverse(TransformNode& treeNode)
     {
       m_scaleStack.pop();
       m_translateStack.pop();
       m_rotationStack.pop();
     }
 
-    bool TransformTraverser::ascendTraverse(LODNode* treeNode)
+    bool TransformTraverser::ascendTraverse(LODNode& treeNode)
     {
-      if(treeNode->getDirtyFlag() & GroupNode::TRF_DIRTY)
+      if(treeNode.getDirtyFlag() & GroupNode::TRF_DIRTY)
       {
         while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
         {
@@ -181,88 +188,88 @@ namespace he
       return true;
     }
 
-    bool TransformTraverser::preTraverse(LODNode* treeNode)
+    bool TransformTraverser::preTraverse(LODNode& treeNode)
     {
-      treeNode->removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
+      treeNode.removeDirtyFlag(GroupNode::TRF_DIRTY);//transformation is updated now
 
       if(!m_scaleStack.empty())
       {
-        treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top());
+        treeNode.transformPosition(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top());
       }
       else
       {
-        treeNode->transformPosition(m_translateStack.top(), m_scaleStack.top(), util::Quaternion<float>::identity());
+        treeNode.transformPosition(m_translateStack.top(), m_scaleStack.top(), util::Quaternion<float>::identity());
       }
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(LODNode* treeNode)
+    void TransformTraverser::postTraverse(LODNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(AnimatedGeoNode* treeNode)
+    bool TransformTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
-      treeNode->setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(AnimatedGeoNode* treeNode)
+    void TransformTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(GeoNode* treeNode)
+    bool TransformTraverser::preTraverse(GeoNode& treeNode)
     {
-      treeNode->setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(GeoNode* treeNode)
+    void TransformTraverser::postTraverse(GeoNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(BillboardNode* treeNode)
+    bool TransformTraverser::preTraverse(BillboardNode& treeNode)
     {
-      treeNode->setTranslation(m_translateStack.top());
-      treeNode->setScale(m_scaleStack.top());
+      treeNode.setTranslation(m_translateStack.top());
+      treeNode.setScale(m_scaleStack.top());
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(BillboardNode* treeNode)
+    void TransformTraverser::postTraverse(BillboardNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(ParticleNode* treeNode)
+    bool TransformTraverser::preTraverse(ParticleNode& treeNode)
     {
       return true;
     }
 
-    void TransformTraverser::postTraverse(ParticleNode* treeNode)
+    void TransformTraverser::postTraverse(ParticleNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(LightNode* treeNode)
+    bool TransformTraverser::preTraverse(LightNode& treeNode)
     {
-      treeNode->applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(LightNode* treeNode)
+    void TransformTraverser::postTraverse(LightNode& treeNode)
     {
     }
 
-    bool TransformTraverser::preTraverse(ShadowLightNode* treeNode)
+    bool TransformTraverser::preTraverse(ShadowLightNode& treeNode)
     {
-      treeNode->applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
 
       return true;
     }
 
-    void TransformTraverser::postTraverse(ShadowLightNode* treeNode)
+    void TransformTraverser::postTraverse(ShadowLightNode& treeNode)
     {
     }
   }

@@ -15,68 +15,75 @@ namespace he
 {
   namespace sg
   {
-    RenderScene::RenderScene(GroupNode* rootNode, util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition) : Scene(rootNode), m_eventManager(eventManger), m_sceneCacheManager(SceneCacheManager(eventManger))
+    RenderScene::RenderScene(util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) : 
+      Scene(allocator, rootNode), m_eventManager(eventManger), m_sceneCacheManager(SceneCacheManager(eventManger))
     {
-      TransformTraverser transformTraverser;
-      transformTraverser.doTraverse(m_rootNode);
+      TransformTraverser transformTraverser(m_allocator);
+      transformTraverser.doTraverse(getNode<TreeNode>(m_rootNode));
 
-      m_sceneCacheManager.addSubTree(m_rootNode, cameraPosition);
+      m_sceneCacheManager.addSubTree(m_allocator, getNode<TreeNode>(m_rootNode), cameraPosition);
     }
 
     RenderScene::~RenderScene()
     {
-      m_sceneCacheManager.removeSubTree(m_rootNode);
+      m_sceneCacheManager.removeSubTree(m_allocator, getNode<TreeNode>(m_rootNode));
     }
 
-    GroupNode* RenderScene::addParentNode(TreeNode* destinationNode, const GroupNode* sourceNode)
+    NodeIndex RenderScene::addParentNode(NodeIndex destinationNode, const NodeIndex sourceNode)
     {
-      GroupNode* newNode = Scene::addParentNode(destinationNode, sourceNode);
+      NodeIndex newNodeIndex = Scene::addParentNode(destinationNode, sourceNode);
 
-      TransformTraverser transformTraverser;
+      TreeNode& newNode = getNode<TreeNode>(newNodeIndex);
+
+      TransformTraverser transformTraverser(m_allocator);
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager.addSubTree(newNode, util::Vector<float, 3>::identity());
+      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::Vector<float, 3>::identity());
 
-      return newNode;
+      return newNodeIndex;
     }
 
-    TreeNode* RenderScene::addChildNode(GroupNode* destinationNode, const TreeNode* sourceNode)
+    NodeIndex RenderScene::addChildNode(NodeIndex destinationNode, const NodeIndex sourceNode)
     {
-      TreeNode* newNode = Scene::addChildNode(destinationNode, sourceNode);
+      NodeIndex newNodeIndex = Scene::addChildNode(destinationNode, sourceNode);
 
-      TransformTraverser transformTraverser;
+      TreeNode& newNode = getNode<TreeNode>(newNodeIndex);
+
+      TransformTraverser transformTraverser(m_allocator);
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager.addSubTree(newNode, util::Vector<float, 3>::identity());
+      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::Vector<float, 3>::identity());
 
-      return newNode;
+      return newNodeIndex;
     }
 
-    void RenderScene::removeNode(TreeNode* node)
+    void RenderScene::removeNode(NodeIndex node)
     {
-      m_sceneCacheManager.removeSubTree(node);
+      m_sceneCacheManager.removeSubTree(m_allocator, getNode<TreeNode>(node));
 
       Scene::removeNode(node);
     }
 
-    GroupNode* RenderScene::addSubTree(Scene& subScene, GroupNode* sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
+    NodeIndex RenderScene::addSubTree(Scene& subScene, NodeIndex sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
     {
-      GroupNode* copiedRootNode = Scene::addSubTree(subScene, sceneNode, cameraPosition, namePrefix);
+      NodeIndex copiedRootNodeIndex = Scene::addSubTree(subScene, sceneNode, cameraPosition, namePrefix);
 
-      TransformTraverser transformTraverser;
+      TreeNode& copiedRootNode = getNode<TreeNode>(copiedRootNodeIndex);
+
+      TransformTraverser transformTraverser(m_allocator);
       transformTraverser.doAscend(copiedRootNode);
       transformTraverser.doTraverse(copiedRootNode);
 
-      m_sceneCacheManager.addSubTree(copiedRootNode, cameraPosition);
+      m_sceneCacheManager.addSubTree(m_allocator, copiedRootNode, cameraPosition);
 
-      return copiedRootNode;
+      return copiedRootNodeIndex;
     }
 
-    void RenderScene::removeSubTree(TreeNode *sceneNode)
+    void RenderScene::removeSubTree(NodeIndex sceneNode)
     {
-      m_sceneCacheManager.removeSubTree(sceneNode);
+      m_sceneCacheManager.removeSubTree(m_allocator, getNode<TreeNode>(sceneNode));
 
       Scene::removeSubTree(sceneNode);
     }
@@ -88,7 +95,7 @@ namespace he
 
     void RenderScene::updateScene(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
     {
-      m_sceneCacheManager.updateCaches(cameraPosition, currentTime, isTimeRelative);
+      m_sceneCacheManager.updateCaches(m_allocator, cameraPosition, currentTime, isTimeRelative);
     }
   }
 }

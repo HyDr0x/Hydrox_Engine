@@ -4,8 +4,8 @@
 
 #include "SceneGraph/TreeNodes/GroupNode.h"
 
-#include "SceneGraph/Traverser/DeleteTraverser.h"
 #include "SceneGraph/Traverser/CopyTraverser.h"
+#include "SceneGraph/Traverser/DeleteTraverser.h"
 #include "SceneGraph/Traverser/NodeSearchTraverser.h"
 #include "SceneGraph/Traverser/AnimationControlTraverser.h"
 
@@ -14,21 +14,18 @@
 namespace he
 {
   namespace sg
-  {
-    Scene::Scene(GroupNode *rootNode)
+  {
+    Scene::Scene(const TreeNodeAllocator& allocator, NodeIndex rootNode) : m_allocator(allocator), m_rootNode(rootNode)
     {
-      m_rootNode = rootNode;
     }
 
-    Scene::Scene(const Scene& object)
+    Scene::Scene(const Scene& object) : m_allocator(object.getTreeNodeAllocator()), m_rootNode(object.getRootNode())
     {
       addSubTree(object, m_rootNode, he::util::Vector<float, 3>::identity(), "");
     }
 
     Scene::~Scene()
     {
-      DeleteTraverser deleteTraverser;
-      deleteTraverser.doTraverse(m_rootNode);
     }
 
     Scene& Scene::operator=(Scene& other)
@@ -38,158 +35,163 @@ namespace he
       return *this;
     }
 
-    GroupNode* Scene::getRootNode()
+    NodeIndex Scene::getRootNode()
     {
       return m_rootNode;
     }
 
-    const GroupNode* const Scene::getRootNode() const
+    const NodeIndex const Scene::getRootNode() const
     {
       return m_rootNode;
     }
 
-    TreeNode* Scene::searchNode(const std::string& nodeName) const
+    NodeIndex Scene::searchNode(const std::string& nodeName)
     {
-      NodeSearchTraverser traverser(nodeName);
+      NodeSearchTraverser traverser(m_allocator, nodeName);
 
-      traverser.doTraverse(m_rootNode);
+      traverser.doTraverse(m_allocator[m_rootNode]);
 
       return traverser.getDiscoveredNode();
     }
 
-    TreeNode* Scene::searchNode(const std::string& nodeName, TreeNode *searchRootNode) const
+    NodeIndex Scene::searchNode(const std::string& nodeName, NodeIndex searchRootNode)
     {
-      NodeSearchTraverser traverser(nodeName);
+      NodeSearchTraverser traverser(m_allocator, nodeName);
 
-      traverser.doTraverse(searchRootNode);
+      traverser.doTraverse(m_allocator[searchRootNode]);
 
       return traverser.getDiscoveredNode(); 
     }
 
-    GroupNode* Scene::addParentNode(TreeNode *destinationNode, const GroupNode *sourceNode)
+    NodeIndex Scene::addParentNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex)
     {
-      GroupNode *oldParent = destinationNode->getParent();
-      GroupNode *newParent = sourceNode->clone();
+      TreeNode& destinationNode = m_allocator[destinationNodeIndex];
+      NodeIndex newParentIndex = m_allocator.push_back(m_allocator[sourceNodeIndex]);
+      GroupNode& newParent = (GroupNode&)m_allocator[newParentIndex];
 
-      newParent->setParent(oldParent);
-      newParent->setNextSibling(destinationNode->getNextSibling());
-      newParent->setFirstChild(destinationNode);
-      destinationNode->setParent(newParent);
-      destinationNode->setNextSibling(nullptr);
+      NodeIndex oldParentIndex = destinationNode.getParent();
+      GroupNode& oldParent = (GroupNode&)m_allocator[oldParentIndex];
 
-      if(oldParent != nullptr)
+      newParent.setParent(oldParentIndex);
+      newParent.setNextSibling(destinationNode.getNextSibling());
+      newParent.setFirstChild(destinationNodeIndex);
+      destinationNode.setParent(newParentIndex);
+      destinationNode.setNextSibling(~0);
+
+      if(oldParentIndex != ~0)
       {
-        if(oldParent->getFirstChild() == destinationNode)//if the destination node was the first child, just change the parent
+        if(oldParent.getFirstChild() == destinationNodeIndex)//if the destination node was the first child, just change the parent
         {
-          oldParent->setFirstChild(newParent);
+          oldParent.setFirstChild(newParentIndex);
         }
         else//loop until we find the preceded sibling of the destination node and change its next sibling to the new node
         {
-          TreeNode *firstSibling = oldParent->getFirstChild();
-          TreeNode *oldSibling = nullptr;
-          while(firstSibling != destinationNode)
+          NodeIndex firstSibling = oldParent.getFirstChild();
+          NodeIndex oldSibling = ~0;
+          while(firstSibling != destinationNodeIndex)
           {
             oldSibling = firstSibling;
-            firstSibling = firstSibling->getNextSibling();
+            firstSibling = m_allocator[firstSibling].getNextSibling();
           }
 
-          if(oldSibling != nullptr)
+          if(oldSibling != ~0)
           {
-            oldSibling->setNextSibling(newParent);
+            m_allocator[oldSibling].setNextSibling(newParentIndex);
           }
         }
       }
 
-      return newParent;
+      return newParentIndex;
     }
 
-    TreeNode* Scene::addChildNode(GroupNode *destinationNode, const TreeNode *sourceNode)
+    NodeIndex Scene::addChildNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex)
     {
-      TreeNode* oldFirstChild = destinationNode->getFirstChild();
-      TreeNode* newFirstChild = sourceNode->clone();
+      GroupNode& destinationNode = (GroupNode&)m_allocator[destinationNodeIndex];
+      NodeIndex oldFirstChildIndex = destinationNode.getFirstChild();
 
-      destinationNode->setFirstChild(newFirstChild);
-      newFirstChild->setNextSibling(oldFirstChild);
-      newFirstChild->setParent(destinationNode);
+      NodeIndex newFirstChildIndex = m_allocator.push_back(m_allocator[sourceNodeIndex]);
+      TreeNode& newFirstChild = m_allocator[newFirstChildIndex];
 
-      return newFirstChild;
+      destinationNode.setFirstChild(newFirstChildIndex);
+      newFirstChild.setNextSibling(oldFirstChildIndex);
+      newFirstChild.setParent(destinationNodeIndex);
+
+      return newFirstChildIndex;
     }
 
-    void Scene::removeNode(const TreeNode *node)
+    void Scene::removeNode(const NodeIndex node)
     {
-      TreeNode *sibling = node->getNextSibling();
-      GroupNode *parent = node->getParent();
-      TreeNode *firstChild = node->getFirstChild();
+      NodeIndex siblingIndex = m_allocator[node].getNextSibling();
 
-      if(parent->getFirstChild() == node)
+      NodeIndex parentIndex = m_allocator[node].getParent();
+      GroupNode& parent = (GroupNode&)m_allocator[parentIndex];
+
+      NodeIndex firstChildIndex = m_allocator[node].getFirstChild();
+
+      if(firstChildIndex != ~0)
       {
-        if(firstChild != nullptr)
+        parent.setFirstChild(firstChildIndex);
+
+        TreeNode& firstChild = m_allocator[firstChildIndex];
+        TreeNode& oldChildSibling = firstChild;
+        while(firstChildIndex != ~0)
         {
-          parent->setFirstChild(firstChild);
+          firstChild.setParent(parentIndex);
 
-          TreeNode *oldChildSibling;
-          while(firstChild != nullptr)
-          {
-            firstChild->setParent(parent);
+          oldChildSibling = firstChild;
+          firstChildIndex = firstChild.getNextSibling();
+        }
 
-            oldChildSibling = firstChild;
-            firstChild = firstChild->getNextSibling();
-          }
+        oldChildSibling.setNextSibling(siblingIndex);
+      }
 
-          oldChildSibling->setNextSibling(sibling);
+      if(parent.getFirstChild() == node)
+      {
+        if(firstChildIndex != ~0)
+        {
+          parent.setFirstChild(firstChildIndex);
         }
         else
         {
-          parent->setFirstChild(sibling);
+          parent.setFirstChild(siblingIndex);
         }
       }
       else
       {
-        TreeNode *parentFirstChild = parent->getFirstChild();
-        TreeNode *oldParentFirstChild;
-        while(parentFirstChild != node)
+        NodeIndex parentFirstChildIndex = parent.getFirstChild();
+        NodeIndex oldParentFirstChildindex = parentFirstChildIndex;
+        while(parentFirstChildIndex != node)
         {
-          oldParentFirstChild = parentFirstChild;
-          parentFirstChild = parentFirstChild->getNextSibling();
+          oldParentFirstChildindex = parentFirstChildIndex;
+          parentFirstChildIndex = m_allocator[parentFirstChildIndex].getNextSibling();
         }
 
-        if(firstChild != nullptr)
+        if(firstChildIndex != ~0)
         {
-          oldParentFirstChild->setNextSibling(firstChild);
-
-          TreeNode *oldChildSibling;
-          while(firstChild != nullptr)
-          {
-            firstChild->setParent(parent);
-
-            oldChildSibling = firstChild;
-            firstChild = firstChild->getNextSibling();
-          }
-
-          oldChildSibling->setNextSibling(sibling);
+          m_allocator[oldParentFirstChildindex].setNextSibling(firstChildIndex);
         }
         else
         {
-          oldParentFirstChild->setNextSibling(sibling);
+          m_allocator[oldParentFirstChildindex].setNextSibling(siblingIndex);
         }
       }
 
-      delete node;
+      m_allocator.erase(node);
     }
 
-    GroupNode* Scene::addSubTree(const Scene& subTree, GroupNode* parentNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
+    NodeIndex Scene::addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
     {
-      CopyTraverser traverser(namePrefix);
-      traverser.doTraverse(subTree.getRootNode());
-      GroupNode *newNode = traverser.getCopiedRootNode();
+      CopyTraverser traverser(subTree.getTreeNodeAllocator(), m_allocator, namePrefix);
+      traverser.doTraverse(subTree.getTreeNodeAllocator()[subTree.getRootNode()]);
+      NodeIndex newNode = traverser.getCopiedRootNode();
 
-      if(m_rootNode != nullptr)
+      if(m_rootNode != ~0)
       {
-        TreeNode *oldFirstChild = parentNode->getFirstChild();
+        NodeIndex oldFirstChild = m_allocator[parentNodeIndex].getFirstChild();
 
-        parentNode->setFirstChild(newNode);
-        newNode->setNextSibling(oldFirstChild);
-        newNode->setParent(parentNode);
+        ((GroupNode&)m_allocator[parentNodeIndex]).setFirstChild(newNode);
+        m_allocator[newNode].setNextSibling(oldFirstChild);
+        m_allocator[newNode].setParent(parentNodeIndex);
       }
       else
       {
@@ -199,65 +201,75 @@ namespace he
       return newNode;
     }
 
-    void Scene::removeSubTree(const TreeNode *rootNode)
+    void Scene::removeSubTree(const NodeIndex rootNodeIndex)
     {
-      GroupNode* parentNode = rootNode->getParent();
+      NodeIndex parentNodeIndex = m_allocator[rootNodeIndex].getParent();
 
-      if(parentNode != nullptr)
+      if(parentNodeIndex != ~0)
       {
-        TreeNode* currentSibling = parentNode->getFirstChild();
-        TreeNode* predSibling = currentSibling;
+        NodeIndex currentSibling = m_allocator[parentNodeIndex].getFirstChild();
+        NodeIndex predSibling = currentSibling;
 
         //disconnect the subtree from the whole tree
-        while(currentSibling != nullptr)
+        while(currentSibling != ~0)
         {
-          if(currentSibling == rootNode)
+          if(currentSibling == rootNodeIndex)
           {
             if(currentSibling == predSibling)
             {
-              parentNode->setFirstChild(currentSibling->getNextSibling());
+              ((GroupNode&)m_allocator[parentNodeIndex]).setFirstChild(m_allocator[currentSibling].getNextSibling());
             }
             else
             {
-              predSibling->setNextSibling(currentSibling->getNextSibling());
+              m_allocator[predSibling].setNextSibling(m_allocator[currentSibling].getNextSibling());
             }
 
             break;//leave the loop
           }
 
           predSibling = currentSibling;
-          currentSibling = currentSibling->getNextSibling();
+          currentSibling = m_allocator[currentSibling].getNextSibling();
         }
       }
 
-      DeleteTraverser traverser;
-      traverser.doTraverse(rootNode);
+      DeleteTraverser traverser(m_allocator);
+      traverser.doTraverse(m_allocator[rootNodeIndex]);
     }
 
-    void Scene::setAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
+    TreeNodeAllocator& Scene::getTreeNodeAllocator()
     {
-      AnimationControlTraverser traverser;
+      return m_allocator;
+    }
+
+    const TreeNodeAllocator& Scene::getTreeNodeAllocator() const
+    {
+      return m_allocator;
+    }
+
+    void Scene::setAnimatedSceneTime(AnimatedTransformNode& node, float animationTime)
+    {
+      AnimationControlTraverser traverser(m_allocator);
       traverser.setAnimationTime(animationTime);
       traverser.doTraverse(node);
     }
 
-    void Scene::addAnimatedSceneTime(AnimatedTransformNode *node, float animationTime)
+    void Scene::addAnimatedSceneTime(AnimatedTransformNode& node, float animationTime)
     {
-      AnimationControlTraverser traverser;
+      AnimationControlTraverser traverser(m_allocator);
       traverser.addAnimationTime(animationTime);
       traverser.doTraverse(node);
     }
 
-    void Scene::pauseAnimatedScene(AnimatedTransformNode *node, bool pauseAnimation)
+    void Scene::pauseAnimatedScene(AnimatedTransformNode& node, bool pauseAnimation)
     {
-      AnimationControlTraverser traverser;
+      AnimationControlTraverser traverser(m_allocator);
       traverser.setPauseAnimation(pauseAnimation);
       traverser.doTraverse(node);
     }
 
-    void Scene::stopAnimatedScene(AnimatedTransformNode *node)
+    void Scene::stopAnimatedScene(AnimatedTransformNode& node)
     {
-      AnimationControlTraverser traverser;
+      AnimationControlTraverser traverser(m_allocator);
       traverser.setStopAnimation();
       traverser.doTraverse(node);
     }

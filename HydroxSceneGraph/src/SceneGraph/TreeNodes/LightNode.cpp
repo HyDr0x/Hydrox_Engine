@@ -15,13 +15,22 @@ namespace he
 {
   namespace sg
   {
-    LightNode::LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling) :
+    LightNode::LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling), 
       m_lightType(lightType),
       m_eventManager(eventManager),
       m_renderable(false)
     {
-      m_nodeType = LIGHTNODE;
+      m_index.nodeType = LIGHTNODE;
+    }
+
+    LightNode::LightNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    {
+      assert(LIGHTNODE == sourceNode.getNodeType());
+
+      const LightNode& copyNode = static_cast<const LightNode&>(sourceNode);
+
+      new (this) LightNode(copyNode);
     }
 
     LightNode::~LightNode()
@@ -30,10 +39,11 @@ namespace he
 
     TreeNode& LightNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const LightNode& copyNode = static_cast<const LightNode&>(sourceNode);
-      LightNode::operator=(copyNode);
+      this->~LightNode();
+
+      new (this) LightNode(sourceNode);
 
       return *this;
     }
@@ -51,32 +61,32 @@ namespace he
 
     bool LightNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool LightNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void LightNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool LightNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool LightNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void LightNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     void LightNode::setRenderable(bool renderable)

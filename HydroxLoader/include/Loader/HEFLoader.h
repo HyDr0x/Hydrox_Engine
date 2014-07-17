@@ -1,12 +1,14 @@
 #ifndef HEFLOADER_H_
 #define HEFLOADER_H_
 
+#include <string>
+
 #include "Loader/DLLExport.h"
 
-#include "Loader/TreeNodeFactory.h"
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 
-#include "Loader/NodeWrapper.h"
-#include "Loader/NodeWrapperMapper.h"
+#include <SceneGraph/Scene/TreeNodeAllocator.h>
+#include <SceneGraph/TreeNodes/TreeNode.h>
 
 namespace he
 {  
@@ -19,6 +21,7 @@ namespace he
   namespace sg
   {
     class Scene;
+    class TreeNodeAllocator;
   }
 
   namespace loader
@@ -27,22 +30,18 @@ namespace he
     {
     public:
 
-      HEFLoader();
+      HEFLoader(unsigned int nodeBlockSize = 256);
 
       sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager);
 
     private:
 
       void readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
-      void createSceneNodes(util::EventManager *eventManager);
-      void linkSceneNodes();
       void findRootNode();
-      void findNode(sg::TreeNode **treeNode, unsigned int index, sg::NodeType nodeType);
-      void findNode(sg::GroupNode **groupNode, unsigned int index, sg::NodeType nodeType);
 
-      TreeNodeFactory m_factory;
-      NodeWrapperMapper m_wrapperMapper;
-      sg::GroupNode *m_rootNode;
+      sg::NodeIndex m_rootNode;
+      sg::TreeNodeAllocator m_allocator;
+      std::map<std::string, std::map<std::string, util::ResourceHandle>> m_resourceMap;
     };
   }
 }

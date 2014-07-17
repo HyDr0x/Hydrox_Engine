@@ -13,14 +13,14 @@ namespace he
     {
     public:
 
-      InsertObserverTraverser(util::Observer<TransformNode*> *observer);
+      InsertObserverTraverser(TreeNodeAllocator& allocator, util::Observer<TransformNode*> *observer);
       virtual ~InsertObserverTraverser();
 
-      bool preTraverse(AnimatedTransformNode* treeNode);
-      void postTraverse(AnimatedTransformNode* treeNode);
+      bool preTraverse(AnimatedTransformNode& treeNode);
+      void postTraverse(AnimatedTransformNode& treeNode);
 
-      bool preTraverse(TransformNode* treeNode);
-      void postTraverse(TransformNode* treeNode);
+      bool preTraverse(TransformNode& treeNode);
+      void postTraverse(TransformNode& treeNode);
 
     protected:
 

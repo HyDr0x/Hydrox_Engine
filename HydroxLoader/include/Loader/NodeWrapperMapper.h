@@ -9,6 +9,8 @@ namespace he
 {
   namespace sg
   {
+    struct NodeIndex;
+
     class TreeNode;
     class GroupNode;
     class TransformNode;
@@ -26,22 +28,9 @@ namespace he
   {
     struct NodeWrapperMapper
     {
-      ~NodeWrapperMapper()
-      {
-        for(unsigned int i = 0; i < treeNodes.size(); i++)
-        {
-          delete treeNodes[i];
-        }
+      std::map<sg::NodeIndex, sg::TreeNode*> treeNodeMap;
 
-        for(std::map<unsigned int, sg::TreeNode*>::iterator it = treeNodeMap.begin(); it != treeNodeMap.end(); it++)
-        {
-          delete it->second;
-        }
-      }
-
-      std::map<unsigned int, sg::TreeNode*> treeNodeMap;
-
-      std::vector<TreeNodeData*> treeNodes;
+      std::vector<sg::TreeNode*> treeNodes;
 
       std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceMap;
     };

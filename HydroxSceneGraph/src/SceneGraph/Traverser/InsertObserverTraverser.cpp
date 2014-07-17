@@ -8,7 +8,7 @@ namespace he
 {
   namespace sg
   {
-    InsertObserverTraverser::InsertObserverTraverser(util::Observer<TransformNode*> *observer) : m_observer(observer)
+    InsertObserverTraverser::InsertObserverTraverser(TreeNodeAllocator& allocator, util::Observer<TransformNode*> *observer) : Traverser(allocator), m_observer(observer)
     {
     }
 
@@ -16,25 +16,25 @@ namespace he
     {
     }
 
-    bool InsertObserverTraverser::preTraverse(AnimatedTransformNode* treeNode)
+    bool InsertObserverTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      treeNode->add(m_observer);
+      treeNode.add(m_observer);
 
       return true;
     }
 
-    void InsertObserverTraverser::postTraverse(AnimatedTransformNode* treeNode)
+    void InsertObserverTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
     }
 
-    bool InsertObserverTraverser::preTraverse(TransformNode* treeNode)
+    bool InsertObserverTraverser::preTraverse(TransformNode& treeNode)
     {
-      treeNode->add(m_observer);
+      treeNode.add(m_observer);
 
       return true;
     }
 
-    void InsertObserverTraverser::postTraverse(TransformNode* treeNode)
+    void InsertObserverTraverser::postTraverse(TransformNode& treeNode)
     {
     }
   }

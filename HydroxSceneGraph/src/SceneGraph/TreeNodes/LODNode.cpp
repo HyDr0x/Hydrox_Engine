@@ -11,14 +11,24 @@ namespace he
 {
   namespace sg
   {
-    LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : 
+    LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild) :
     GroupNode(nodeName, parent, nextSibling, firstChild),
       m_lodLevel(lodLevel),
       m_position(position)
     {
       m_dirtyFlag |= LOD_INRANGE;
       m_transformedPosition = m_position;
-      m_nodeType = LODNODE;
+
+      m_index.nodeType = LODNODE;
+    }
+
+    LODNode::LODNode(const TreeNode& sourceNode) : GroupNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild())
+    {
+      assert(LODNODE == sourceNode.getNodeType());
+
+      const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
+
+      new (this) LODNode(copyNode);
     }
 
     LODNode::~LODNode()
@@ -27,10 +37,11 @@ namespace he
 
     TreeNode& LODNode::operator=(const TreeNode& sourceNode)
     {
-      assert(typeid(*this) == typeid(sourceNode));
+      assert(m_index.nodeType == sourceNode.getNodeType());
 
-      const LODNode& copyNode = static_cast<const LODNode&>(sourceNode);
-      LODNode::operator=(copyNode);
+      this->~LODNode();
+
+      new (this) LODNode(sourceNode);
 
       return *this;
     }
@@ -49,32 +60,32 @@ namespace he
 
     bool LODNode::ascendTraverse(Traverser* traverser)
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool LODNode::preTraverse(Traverser* traverser)
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void LODNode::postTraverse(Traverser* traverser)
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     bool LODNode::ascendTraverse(ConstTraverser* traverser) const
     {
-      return traverser->ascendTraverse(this);
+      return traverser->ascendTraverse(*this);
     }
 
     bool LODNode::preTraverse(ConstTraverser* traverser) const
     {
-      return traverser->preTraverse(this);
+      return traverser->preTraverse(*this);
     }
 
     void LODNode::postTraverse(ConstTraverser* traverser) const
     {
-      traverser->postTraverse(this);
+      traverser->postTraverse(*this);
     }
 
     unsigned int LODNode::getLODLevel() const
