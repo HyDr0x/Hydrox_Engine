@@ -124,7 +124,7 @@ namespace he
 
     sg::Scene* AssimpLoader::loadDefaultSceneGraph()
     {
-      sg::NodeIndex sceneRootNode = m_allocator.push_back(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
+      sg::NodeIndex sceneRootNode = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
 
       std::vector<util::Vector<float, 3>> positions;
       std::vector<db::Mesh::indexType> indices;
@@ -132,7 +132,7 @@ namespace he
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::NodeIndex geoNodeIndex = m_allocator.push_back(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);
@@ -307,7 +307,7 @@ namespace he
 
     sg::NodeIndex AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene)
     {
-      sg::NodeIndex sceneRootNodeIndex = m_allocator.push_back(sg::TransformNode(util::Matrix<float, 4>::identity(), filename));
+      sg::NodeIndex sceneRootNodeIndex = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), filename));
       ((sg::GroupNode&)m_allocator[sceneRootNodeIndex]).setFirstChild(createTransformNodes(scene->mRootNode, sceneRootNodeIndex, ~0));
 
       return sceneRootNodeIndex;
@@ -321,7 +321,7 @@ namespace he
 
       if(mit != m_animationTracks.end())
       {
-        transformNodeIndex = m_allocator.push_back(sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
+        transformNodeIndex = m_allocator.insert(sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
         sg::AnimatedTransformNode& transformNode = (sg::AnimatedTransformNode&)m_allocator[transformNodeIndex];
 
         m_boneTable[transformNode.getNodeName()] = transformNodeIndex;
@@ -334,7 +334,7 @@ namespace he
         std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + size, &tmpTransformationMatrix[0][0]);
         tmpTransformationMatrix = tmpTransformationMatrix.transpose();
 
-        transformNodeIndex = m_allocator.push_back(sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
+        transformNodeIndex = m_allocator.insert(sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, ~0));
         ((sg::GroupNode&)m_allocator[transformNodeIndex]).addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
       }
 
@@ -371,12 +371,12 @@ namespace he
       stream << 0;
       if(!m_inverseBindPoseTable[meshIndex].empty())
       {
-        geoNodeIndex = m_allocator.push_back(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
         m_skinnedMeshTable[geoNodeIndex] = m_boneNameTable[meshIndex];
       }
       else
       {
-        geoNodeIndex = m_allocator.push_back(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
       }
       
       stream.str("");

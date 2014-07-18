@@ -33,9 +33,16 @@ namespace he
       m_index.nodeType = TRANSFORMNODE;
     }
 
-    TransformNode::TransformNode(const TreeNode& sourceNode) : GroupNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild())
+    TransformNode::TransformNode(const TransformNode& sourceNode) : GroupNode(sourceNode)
     {
-      assert(TRANSFORMNODE == sourceNode.getNodeType());
+      m_translation = sourceNode.m_translation;
+      m_scale = sourceNode.m_scale;
+      m_rotation = sourceNode.m_rotation;
+    }
+
+    TransformNode::TransformNode(const TreeNode& sourceNode) : GroupNode(sourceNode)
+    {
+      assert(TRANSFORMNODE == sourceNode.getNodeType() || ANIMATEDTRANSFORMNODE == sourceNode.getNodeType());
 
       const TransformNode& copyNode = static_cast<const TransformNode&>(sourceNode);
 

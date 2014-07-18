@@ -19,6 +19,7 @@ namespace he
     public:
 
       LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      LODNode(const LODNode& sourceNode);
       LODNode(const TreeNode& sourceNode);
       virtual ~LODNode();
 

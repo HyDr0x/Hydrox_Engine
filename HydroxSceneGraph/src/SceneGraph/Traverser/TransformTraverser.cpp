@@ -15,7 +15,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     TransformTraverser::TransformTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
     }

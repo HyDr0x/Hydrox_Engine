@@ -22,7 +22,15 @@ namespace he
       m_index.nodeType = LODNODE;
     }
 
-    LODNode::LODNode(const TreeNode& sourceNode) : GroupNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild())
+    LODNode::LODNode(const LODNode& sourceNode) : GroupNode(sourceNode)
+    {
+      m_lodLevel = sourceNode.m_lodLevel;
+      m_position = sourceNode.m_position;
+      m_dirtyFlag |= LOD_INRANGE;
+      m_transformedPosition = m_position;
+    }
+
+    LODNode::LODNode(const TreeNode& sourceNode) : GroupNode(sourceNode)
     {
       assert(LODNODE == sourceNode.getNodeType());
 

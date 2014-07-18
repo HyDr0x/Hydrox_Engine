@@ -16,6 +16,14 @@ namespace he
       m_index.nodeType = TREENODE;
     }
 
+    TreeNode::TreeNode(const TreeNode& other)
+    {
+      m_parent = other.m_parent;
+      m_nextSibling = other.m_nextSibling;
+      m_nodeName = other.m_nodeName;
+      m_index = other.m_index;
+    }
+
     TreeNode::~TreeNode()
     {
     }

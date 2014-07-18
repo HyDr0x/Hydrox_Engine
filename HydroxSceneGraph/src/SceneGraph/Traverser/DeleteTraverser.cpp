@@ -15,7 +15,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     DeleteTraverser::DeleteTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
     }

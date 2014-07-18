@@ -54,8 +54,8 @@ namespace he
       void ascendingGroupNode(const GroupNode& treeNode);
       void ascendingTreeNode(const TreeNode& treeNode);
 
-      void addChild(NodeIndex parentIndex, NodeIndex newNodeIndex);
-      void addSibling(NodeIndex parentIndex, NodeIndex newNodeIndex);
+      void addChild(NodeIndex parentIndex, TreeNode& newNode);
+      void addSibling(NodeIndex parentIndex, TreeNode& newNode);
 
       TreeNodeAllocator &m_destinationAllocator;
 

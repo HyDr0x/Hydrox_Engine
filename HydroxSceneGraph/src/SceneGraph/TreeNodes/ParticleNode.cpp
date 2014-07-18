@@ -19,7 +19,12 @@ namespace he
       m_index.nodeType = PARTICLENODE;
     }
 
-    ParticleNode::ParticleNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    ParticleNode::ParticleNode(const ParticleNode& sourceNode) : TreeNode(sourceNode)
+    {
+      m_eventManager = sourceNode.m_eventManager;
+    }
+
+    ParticleNode::ParticleNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
     {
       assert(PARTICLENODE == sourceNode.getNodeType());
 

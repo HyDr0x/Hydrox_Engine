@@ -22,9 +22,18 @@ namespace he
       m_index.nodeType = GEONODE;
     }
 
-    GeoNode::GeoNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    GeoNode::GeoNode(const GeoNode& sourceNode) : TreeNode(sourceNode)
     {
-      assert(GEONODE == sourceNode.getNodeType());
+      m_eventManager = sourceNode.m_eventManager;
+      m_meshHandle = sourceNode.m_meshHandle;
+      m_materialHandle = sourceNode.m_materialHandle;
+      m_renderable = sourceNode.m_renderable;
+      m_trfMatrix = util::Matrix<float, 4>::identity();
+    }
+
+    GeoNode::GeoNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
+    {
+      assert(GEONODE == sourceNode.getNodeType() || ANIMATEDGEONODE == sourceNode.getNodeType());
 
       const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
 

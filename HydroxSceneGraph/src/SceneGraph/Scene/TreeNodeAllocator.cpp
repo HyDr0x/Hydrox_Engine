@@ -74,19 +74,17 @@ namespace he
       m_treeNodeFactory = other.m_treeNodeFactory;
       m_nodeAddressConvert = other.m_nodeAddressConvert;
       m_nodeSizes = other.m_nodeSizes;
-      m_freeSlots = other.m_freeSlots;
 
       for(std::map<NodeType, std::vector<TreeNode*>>::const_iterator it = other.m_treeNodes.begin(); it != other.m_treeNodes.end(); it++)
       {
-        m_treeNodes.insert(std::map<NodeType, std::vector<TreeNode*>>::value_type(it->first, std::vector<TreeNode*>(it->second.size(), nullptr)));
+        //m_treeNodes.insert(std::map<NodeType, std::vector<TreeNode*>>::value_type(it->first, std::vector<TreeNode*>(it->second.size(), nullptr)));
 
         for(unsigned int i = 0; i < it->second.size(); i++)
         {
-          unsigned int blockSize = (i + 1) * m_nodeBlockSize < other.m_size.find(it->first)->second ? m_nodeBlockSize : other.m_size.find(it->first)->second % m_nodeBlockSize;
-          for(unsigned int j = 0; j < blockSize; j++)
+          for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
             NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, it->first);
-            std::list<unsigned int>& list = m_freeSlots[index.nodeType];
+            const std::list<unsigned int>& list = other.m_freeSlots.find(index.nodeType)->second;
             if(std::find(list.begin(), list.end(), index.index) == list.end())
             {
               this->insert(other[index], index);
@@ -117,8 +115,7 @@ namespace he
       {
         for(unsigned int i = 0; i < it->second.size(); i++)
         {
-          unsigned int blockSize = (i + 1) * m_nodeBlockSize < m_size[it->first] ? m_nodeBlockSize : m_size[it->first] % m_nodeBlockSize;
-          for(unsigned int j = 0; j < blockSize; j++)
+          for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
             NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, it->first);
 
@@ -146,6 +143,7 @@ namespace he
     {
       NodeType type = treeNode.getNodeType();
       unsigned int index = ~0;
+
       if(!m_freeSlots[type].empty())
       {
         index = m_freeSlots[type].front();
@@ -153,15 +151,15 @@ namespace he
       }
       else
       {
-        index = m_size[type];
+        resize(NodeIndex(m_treeNodes[type].size() * m_nodeBlockSize, type));
+        index = m_freeSlots[type].front();
+        m_freeSlots[type].pop_front();
       }
-
-      resize(NodeIndex(index, type));
 
       m_treeNodeFactory.createTreeNode(type, &(*this)[NodeIndex(index, type)], treeNode);
       (*this)[NodeIndex(index, type)].setNodeIndex(NodeIndex(index, type));
 
-      return index;
+      return NodeIndex(index, type);
     }
 
     TreeNode& TreeNodeAllocator::insert(const TreeNode& treeNode, NodeIndex index)
@@ -186,39 +184,16 @@ namespace he
       m_freeSlots[index.nodeType].push_back(index.index);
     }
 
-    NodeIndex TreeNodeAllocator::push_back(const TreeNode& treeNode)
-    {
-      NodeType type = treeNode.getNodeType();
-      NodeIndex index = NodeIndex(m_size[type]++, type);
-
-      resize(index);
-      TreeNode& tmp = (*this)[index];
-      TreeNode* tmp2 = &tmp;
-      m_treeNodeFactory.createTreeNode(type, &tmp, treeNode);
-      (*this)[index].setNodeIndex(index);
-
-      return index;
-    }
-
-    void TreeNodeAllocator::pop_back(NodeType type)
-    {
-      (*this)[NodeIndex(m_size[type]--, type)].~TreeNode();
-    }
-
     TreeNode& TreeNodeAllocator::operator[](NodeIndex index)
     {
       unsigned int nodeBlock = index.index / m_nodeBlockSize;
-      unsigned int offset = index.index % m_nodeBlockSize;
-      TreeNode *tmp = m_nodeAddressConvert[index.nodeType](m_treeNodes[index.nodeType][nodeBlock], offset);
-      return *tmp;
+      return *m_nodeAddressConvert[index.nodeType](m_treeNodes[index.nodeType][nodeBlock], index.index % m_nodeBlockSize);
     }
 
     const TreeNode& TreeNodeAllocator::operator[](NodeIndex index) const
     {
       unsigned int nodeBlock = index.index / m_nodeBlockSize;
-      unsigned int offset = m_nodeSizes.find(index.nodeType)->second * (index.index % m_nodeBlockSize);
-      TreeNode *tmp = m_nodeAddressConvert.find(index.nodeType)->second(m_treeNodes.find(index.nodeType)->second[nodeBlock], offset);
-      return *tmp;
+      return *m_nodeAddressConvert.find(index.nodeType)->second(m_treeNodes.find(index.nodeType)->second[nodeBlock], index.index % m_nodeBlockSize);
     }
 
     /*NodeIndex TreeNodeAllocator::getIndex(const TreeNode& treeNode) const
@@ -246,10 +221,9 @@ namespace he
       {
         for(unsigned int i = 0; i < it->second.size(); i++)
         {
-          unsigned int blockSize = (i + 1) * m_nodeBlockSize < other.m_size.find(it->first)->second ? m_nodeBlockSize : other.m_size.find(it->first)->second % m_nodeBlockSize;
-          for(unsigned int j = 0; j < blockSize; j++)
+          for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
-            other.push_back((*this)[NodeIndex(i * m_nodeBlockSize + j, it->first)]);
+            other.insert((*this)[NodeIndex(i * m_nodeBlockSize + j, it->first)]);
           }
         }
       }
@@ -328,9 +302,13 @@ namespace he
         ostream << it->second << std::endl;
       }
 
-      for(std::map<NodeType, unsigned int>::const_iterator it = m_size.begin(); it != m_size.end(); it++)
+      for(std::map<NodeType, std::list<unsigned int>>::const_iterator it = m_freeSlots.begin(); it != m_freeSlots.end(); it++)
       {
-        ostream << it->second << std::endl;
+        ostream << it->second.size() << std::endl;
+        for(std::list<unsigned int>::const_iterator lit = it->second.begin(); lit != it->second.end(); lit++)
+        {
+          ostream << *lit << std::endl;
+        }
       }
 
       for(std::map<NodeType, std::vector<TreeNode*>>::const_iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
@@ -362,9 +340,16 @@ namespace he
 
       for(unsigned int i = 0; i < nodeTypeNumber; i++)
       {
-        unsigned int nodeSize = 0;
-        istream >> nodeSize;
-        m_size.insert(std::map<NodeType, unsigned int>::value_type(nodeTypes[i], nodeSize));
+        m_freeSlots.insert(std::map<NodeType, std::list<unsigned int>>::value_type(nodeTypes[i], std::list<unsigned int>()));
+
+        unsigned int freeSlotNumber = 0;
+        istream >> freeSlotNumber;
+        for(unsigned int j = 0; j < freeSlotNumber; j++)
+        {
+          unsigned int freeSlotIndex = 0;
+          istream >> freeSlotIndex;
+          m_freeSlots[nodeTypes[i]].push_back(freeSlotIndex);
+        }
       }
 
       for(unsigned int i = 0; i < nodeTypeNumber; i++)
@@ -392,6 +377,10 @@ namespace he
         for(unsigned int i = oldNodeBlockNumber; i < newNodeBlockNumber; i++)
         {
           m_treeNodes[index.nodeType][i] = (TreeNode*)std::malloc(m_nodeSizes[index.nodeType] * m_nodeBlockSize);
+          for(unsigned int j = 0; j < m_nodeBlockSize; j++)
+          {
+            m_freeSlots[index.nodeType].push_back(j + oldNodeBlockNumber * m_nodeBlockSize);
+          }
         }
       }
     }

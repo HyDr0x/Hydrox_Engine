@@ -8,7 +8,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     ConstTraverser::ConstTraverser(const TreeNodeAllocator& allocator) : m_allocator(allocator), m_stopTraversal(false)
     {
     }
@@ -19,19 +19,17 @@ namespace he
 
     void ConstTraverser::doAscend(const TreeNode &treeNode)
     {
-      if(treeNode.getParent() != ~0)
+      NodeIndex index = treeNode.getParent();
+      while(index != ~0)
       {
-        NodeIndex parentNodeIndex = treeNode.getParent();
+        const TreeNode& treeNode2 = m_allocator[index];
 
-        while(m_allocator[parentNodeIndex].getParent() != ~0)//start calculating the trfMatrix of the upper path of the actual node
+        if(!treeNode2.ascendTraverse(this) || m_stopTraversal)
         {
-          if(!m_allocator[parentNodeIndex].ascendTraverse(this) || m_stopTraversal)
-          {
-            return;
-          }
-
-          parentNodeIndex = m_allocator[parentNodeIndex].getParent();
+          return;
         }
+
+        index = treeNode2.getParent();
       }
 
       postAscendTraverse();
@@ -50,14 +48,15 @@ namespace he
     {
       while(nodeIndex != ~0)
       {
-        if(m_allocator[nodeIndex].preTraverse(this))
+        const TreeNode& treeNode = m_allocator[nodeIndex];
+
+        if(treeNode.preTraverse(this))
         {
-          doTraverseDown(m_allocator[nodeIndex].getFirstChild());
+          doTraverseDown(treeNode.getFirstChild());
         }
 
-        NodeIndex nodeIndexTmp = m_allocator[nodeIndex].getNextSibling();
-        m_allocator[nodeIndex].postTraverse(this);
-        nodeIndex = nodeIndexTmp;
+        nodeIndex = treeNode.getNextSibling();
+        treeNode.postTraverse(this);
 
         if(m_stopTraversal)
         {

@@ -29,7 +29,7 @@ namespace he
       m_sceneCacheManager.removeSubTree(m_allocator, getNode<TreeNode>(m_rootNode));
     }
 
-    NodeIndex RenderScene::addParentNode(NodeIndex destinationNode, const NodeIndex sourceNode)
+    NodeIndex RenderScene::addParentNode(NodeIndex destinationNode, const TreeNode& sourceNode)
     {
       NodeIndex newNodeIndex = Scene::addParentNode(destinationNode, sourceNode);
 
@@ -44,7 +44,7 @@ namespace he
       return newNodeIndex;
     }
 
-    NodeIndex RenderScene::addChildNode(NodeIndex destinationNode, const NodeIndex sourceNode)
+    NodeIndex RenderScene::addChildNode(NodeIndex destinationNode, const TreeNode& sourceNode)
     {
       NodeIndex newNodeIndex = Scene::addChildNode(destinationNode, sourceNode);
 

@@ -6,7 +6,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     AnimationControlTraverser::AnimationControlTraverser(TreeNodeAllocator& allocator) : Traverser(allocator)
     {
       m_setterAnimationTime = 0.0f;

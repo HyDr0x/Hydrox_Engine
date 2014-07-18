@@ -63,10 +63,10 @@ namespace he
       return traverser.getDiscoveredNode(); 
     }
 
-    NodeIndex Scene::addParentNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex)
+    NodeIndex Scene::addParentNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode)
     {
       TreeNode& destinationNode = m_allocator[destinationNodeIndex];
-      NodeIndex newParentIndex = m_allocator.push_back(m_allocator[sourceNodeIndex]);
+      NodeIndex newParentIndex = m_allocator.insert(sourceNode);
       GroupNode& newParent = (GroupNode&)m_allocator[newParentIndex];
 
       NodeIndex oldParentIndex = destinationNode.getParent();
@@ -104,12 +104,12 @@ namespace he
       return newParentIndex;
     }
 
-    NodeIndex Scene::addChildNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex)
+    NodeIndex Scene::addChildNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode)
     {
       GroupNode& destinationNode = (GroupNode&)m_allocator[destinationNodeIndex];
       NodeIndex oldFirstChildIndex = destinationNode.getFirstChild();
 
-      NodeIndex newFirstChildIndex = m_allocator.push_back(m_allocator[sourceNodeIndex]);
+      NodeIndex newFirstChildIndex = m_allocator.insert(sourceNode);
       TreeNode& newFirstChild = m_allocator[newFirstChildIndex];
 
       destinationNode.setFirstChild(newFirstChildIndex);

@@ -21,6 +21,7 @@ namespace he
 
       TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      TransformNode(const TransformNode& sourceNode);
       TransformNode(const TreeNode& sourceNode);
       virtual ~TransformNode();
 

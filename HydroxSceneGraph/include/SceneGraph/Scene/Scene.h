@@ -35,8 +35,8 @@ namespace he
 
       NodeIndex searchNode(const std::string& nodeName, NodeIndex searchRootNode);
 
-      virtual NodeIndex addParentNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex);
-      virtual NodeIndex addChildNode(NodeIndex destinationNodeIndex, const NodeIndex sourceNodeIndex);
+      virtual NodeIndex addParentNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode);
+      virtual NodeIndex addChildNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode);
       virtual void removeNode(const NodeIndex node);
 
       virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::Vector<float, 3>& cameraPosition, std::string namePrefix);

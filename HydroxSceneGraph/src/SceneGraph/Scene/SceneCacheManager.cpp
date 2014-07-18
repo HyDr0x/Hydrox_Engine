@@ -63,50 +63,50 @@ namespace he
       updateLODNodes(allocator, cameraPosition);
     }
 
-    void SceneCacheManager::addNodeToCache(sg::LODNode *lodNode)
+    void SceneCacheManager::addNodeToCache(sg::LODNode& lodNode)
     {
-      m_activeLODs.push_back(lodNode);
+      m_activeLODs.push_back(&lodNode);
     }
 
-    void SceneCacheManager::addNodeToCache(sg::TransformNode *transformNode)
+    void SceneCacheManager::addNodeToCache(sg::TransformNode& transformNode)
     {
-      m_dirtyTransforms.push_back(transformNode);
+      m_dirtyTransforms.push_back(&transformNode);
     }
 
-    void SceneCacheManager::addNodeToCache(sg::AnimatedTransformNode *animatedTransformNode)
+    void SceneCacheManager::addNodeToCache(sg::AnimatedTransformNode& animatedTransformNode)
     {
-      m_activeAnimatedTransforms.push_back(animatedTransformNode);
+      m_activeAnimatedTransforms.push_back(&animatedTransformNode);
     }
 
-    void SceneCacheManager::removeNodeFromCache(sg::LODNode *lodNode)
+    void SceneCacheManager::removeNodeFromCache(sg::LODNode& lodNode)
     {
-      m_activeLODs.remove(lodNode);
+      m_activeLODs.remove(&lodNode);
     }
 
-    void SceneCacheManager::removeNodeFromCache(sg::TransformNode *transformNode)
+    void SceneCacheManager::removeNodeFromCache(sg::TransformNode& transformNode)
     {
-      m_dirtyTransforms.remove(transformNode);
+      m_dirtyTransforms.remove(&transformNode);
     }
 
-    void SceneCacheManager::removeNodeFromCache(sg::AnimatedTransformNode *animatedTransformNode)
+    void SceneCacheManager::removeNodeFromCache(sg::AnimatedTransformNode& animatedTransformNode)
     {
-      m_activeAnimatedTransforms.remove(animatedTransformNode);
+      m_activeAnimatedTransforms.remove(&animatedTransformNode);
     }
 
     void SceneCacheManager::registerNodeCacheSlots()
     {
-      m_eventManager.addNewSignal<void (*)(sg::LODNode *node)>(util::EventManager::OnAddLODNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode *node), void (SceneCacheManager::*)(sg::LODNode *node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddLODNode);
+      m_eventManager.addNewSignal<void (*)(sg::LODNode& node)>(util::EventManager::OnAddLODNode);
+      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode& node), void (SceneCacheManager::*)(sg::LODNode& node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddLODNode);
 
-      m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode *node)>(util::EventManager::OnAddAnimatedTransformNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddAnimatedTransformNode);
+      m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode& node)>(util::EventManager::OnAddAnimatedTransformNode);
+      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode& node), void (SceneCacheManager::*)(sg::AnimatedTransformNode& node)>(this, &SceneCacheManager::addNodeToCache, util::EventManager::OnAddAnimatedTransformNode);
 
 
-      m_eventManager.addNewSignal<void (*)(sg::LODNode *node)>(util::EventManager::OnRemoveLODNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode *node), void (SceneCacheManager::*)(sg::LODNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveLODNode);
+      m_eventManager.addNewSignal<void (*)(sg::LODNode& node)>(util::EventManager::OnRemoveLODNode);
+      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::LODNode& node), void (SceneCacheManager::*)(sg::LODNode& node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveLODNode);
 
-      m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode *node)>(util::EventManager::OnRemoveAnimatedTransformNode);
-      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode *node), void (SceneCacheManager::*)(sg::AnimatedTransformNode *node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveAnimatedTransformNode);
+      m_eventManager.addNewSignal<void (*)(sg::AnimatedTransformNode& node)>(util::EventManager::OnRemoveAnimatedTransformNode);
+      m_eventManager.addSlotToSignal<SceneCacheManager, void (*)(sg::AnimatedTransformNode& node), void (SceneCacheManager::*)(sg::AnimatedTransformNode& node)>(this, &SceneCacheManager::removeNodeFromCache, util::EventManager::OnRemoveAnimatedTransformNode);
     }
 
     void SceneCacheManager::update(TransformNode *data)

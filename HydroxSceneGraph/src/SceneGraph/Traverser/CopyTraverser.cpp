@@ -15,7 +15,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     CopyTraverser::CopyTraverser(const TreeNodeAllocator& sourceAllocator, TreeNodeAllocator& destinationAllocator, std::string namePrefix) :
       ConstTraverser(sourceAllocator), m_destinationAllocator(destinationAllocator), m_namePrefix(namePrefix), m_sibling(~0), m_rootNode(~0), m_parent(~0)
     {
@@ -159,29 +159,31 @@ namespace he
 
     NodeIndex CopyTraverser::cloneGroupNode(const GroupNode& treeNode)
     {
-      NodeIndex newNodeIndex = m_destinationAllocator.push_back(treeNode);
-
-      GroupNode& newNode = dynamic_cast<GroupNode&>(m_destinationAllocator[newNodeIndex]);
+      NodeIndex newNodeIndex = m_destinationAllocator.insert(treeNode);
+      GroupNode& newNode = (GroupNode&)m_destinationAllocator[newNodeIndex];
       newNode.setNodeName(m_namePrefix + newNode.getNodeName());
+      newNode.setParent(~0);
+      newNode.setFirstChild(~0);
+      newNode.setNextSibling(~0);
 
       if(m_rootNode == ~0)//we ve got the root node
       {
         m_rootNode = newNodeIndex;
       }
-      else//we ve got a child node
+      else
       {
         if(m_childNode)
         {
-          addChild(m_parent, newNodeIndex);
+          addChild(m_parent, newNode);
         }
         else
         {
-          addSibling(m_sibling, newNodeIndex);
+          addSibling(m_sibling, newNode);
         }
       }
 
       m_sibling = newNodeIndex;
-    
+
       if(treeNode.getFirstChild() != ~0)
       {
         m_parent = newNodeIndex;
@@ -193,18 +195,17 @@ namespace he
 
     NodeIndex CopyTraverser::cloneTreeNode(const TreeNode& treeNode)
     {
-      NodeIndex newNodeIndex = m_destinationAllocator.push_back(treeNode);
-
+      NodeIndex newNodeIndex = m_destinationAllocator.insert(treeNode);
       TreeNode& newNode = m_destinationAllocator[newNodeIndex];
       newNode.setNodeName(m_namePrefix + newNode.getNodeName());
 
       if(m_childNode)
       {
-        addChild(m_parent, newNodeIndex);
+        addChild(m_parent, newNode);
       }
       else
       {
-        addSibling(m_sibling, newNodeIndex);
+        addSibling(m_sibling, newNode);
       }
 
       m_sibling = newNodeIndex;
@@ -240,28 +241,26 @@ namespace he
       }
     }
 
-    void CopyTraverser::addChild(NodeIndex parentIndex, NodeIndex newNodeIndex)
+    void CopyTraverser::addChild(NodeIndex parentIndex, TreeNode& newNode)
     {
       GroupNode& parent = dynamic_cast<GroupNode&>(m_destinationAllocator[parentIndex]);
       NodeIndex& oldFirstChild = parent.getFirstChild();
 
-      parent.setFirstChild(newNodeIndex);
-
-      TreeNode& newNode = m_destinationAllocator[newNodeIndex];
       newNode.setNextSibling(oldFirstChild);
       newNode.setParent(parentIndex);
+
+      parent.setFirstChild(newNode.getNodeIndex());
     }
 
-    void CopyTraverser::addSibling(NodeIndex siblingIndex, NodeIndex newNodeIndex)
+    void CopyTraverser::addSibling(NodeIndex siblingIndex, TreeNode& newNode)
     {
       TreeNode& sibling = m_destinationAllocator[siblingIndex];
       NodeIndex oldSiblingIndex = sibling.getNextSibling();
 
-      sibling.setNextSibling(newNodeIndex);
-
-      TreeNode& newNode = m_destinationAllocator[newNodeIndex];
       newNode.setNextSibling(oldSiblingIndex);
       newNode.setParent(sibling.getParent());
+
+      sibling.setNextSibling(newNode.getNodeIndex());
     }
   }
 }

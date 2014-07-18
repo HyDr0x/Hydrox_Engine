@@ -30,7 +30,19 @@ namespace he
       m_index.nodeType = BILLBOARDNODE;
     }
 
-    BillboardNode::BillboardNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    BillboardNode::BillboardNode(const BillboardNode& sourceNode) : TreeNode(sourceNode)
+    {
+      m_eventManager = sourceNode.m_eventManager;
+      m_textureHandle = sourceNode.m_textureHandle;
+      m_animNumber = sourceNode.m_animNumber;
+      m_texStart = sourceNode.m_texStart;
+      m_texEnd = sourceNode.m_texEnd;
+      m_translate = sourceNode.m_translate;
+      m_scale = sourceNode.m_scale;
+      m_renderable = sourceNode.m_renderable;
+    }
+
+    BillboardNode::BillboardNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
     {
       assert(BILLBOARDNODE == sourceNode.getNodeType());
 

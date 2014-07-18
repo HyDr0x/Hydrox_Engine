@@ -24,7 +24,16 @@ namespace he
       m_index.nodeType = SHADOWLIGHTNODE;
     }
 
-    ShadowLightNode::ShadowLightNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    ShadowLightNode::ShadowLightNode(const ShadowLightNode& sourceNode) : TreeNode(sourceNode)
+    {
+      m_eventManager = sourceNode.m_eventManager;
+      m_lightType = sourceNode.m_lightType;
+      m_renderable = sourceNode.m_renderable;
+      m_lightData = sourceNode.m_lightData;
+      setShadowProjection(1.0f, 1000.0f);
+    }
+
+    ShadowLightNode::ShadowLightNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
     {
       assert(SHADOWLIGHTNODE == sourceNode.getNodeType());
 

@@ -19,7 +19,13 @@ namespace he
       m_index.nodeType = ANIMATEDGEONODE;
     }
 
-    AnimatedGeoNode::AnimatedGeoNode(const TreeNode& sourceNode) : GeoNode(nullptr, util::ResourceHandle(), util::ResourceHandle(), sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    AnimatedGeoNode::AnimatedGeoNode(const AnimatedGeoNode& sourceNode) : GeoNode(sourceNode)
+    {
+      m_inverseBindPoseMatrices = sourceNode.m_inverseBindPoseMatrices;
+      m_boneTransformMatrices = sourceNode.m_boneTransformMatrices;
+    }
+
+    AnimatedGeoNode::AnimatedGeoNode(const TreeNode& sourceNode) : GeoNode(sourceNode)
     {
       assert(ANIMATEDGEONODE == sourceNode.getNodeType());
 

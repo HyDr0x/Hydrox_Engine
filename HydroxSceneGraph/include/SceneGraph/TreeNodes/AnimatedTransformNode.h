@@ -21,6 +21,7 @@ namespace he
     public:
 
       AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      AnimatedTransformNode(const AnimatedTransformNode& sourceNode);
       AnimatedTransformNode(const TreeNode& sourceNode);
       virtual ~AnimatedTransformNode();
 

@@ -8,7 +8,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     Traverser::Traverser(TreeNodeAllocator& allocator) : m_allocator(allocator), m_stopTraversal(false)
     {
     }
@@ -19,14 +19,17 @@ namespace he
 
     void Traverser::doAscend(TreeNode& treeNode)
     {
-      while(treeNode.getParent() != ~0)//start calculating the trfMatrix of the upper path of the actual node
+      NodeIndex index = treeNode.getParent();
+      while(index != ~0)//start calculating the trfMatrix of the upper path of the actual node
       {
-        treeNode = m_allocator[treeNode.getParent()];
+        TreeNode& treeNode2 = m_allocator[index];
 
-        if(!treeNode.ascendTraverse(this) || m_stopTraversal)
+        if(!treeNode2.ascendTraverse(this) || m_stopTraversal)
         {
           return;
         }
+
+        index = treeNode2.getParent();
       }
 
       postAscendTraverse();
@@ -51,10 +54,9 @@ namespace he
         {
           doTraverseDown(treeNode.getFirstChild());
         }
-        
-        TreeNode &node = m_allocator[treeNode.getNextSibling()];
+
+        nodeIndex = treeNode.getNextSibling();
         treeNode.postTraverse(this);
-        treeNode = node;
 
         if(m_stopTraversal)
         {

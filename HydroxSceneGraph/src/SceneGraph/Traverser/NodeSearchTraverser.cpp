@@ -23,84 +23,84 @@ namespace he
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(AnimatedTransformNode& treeNode)
+    bool NodeSearchTraverser::preTraverse(const AnimatedTransformNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(AnimatedTransformNode& treeNode)
+    void NodeSearchTraverser::postTraverse(const AnimatedTransformNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(TransformNode& treeNode)
-    {
-      return findNode(treeNode);
-    }
-
-    void NodeSearchTraverser::postTraverse(TransformNode& treeNode)
-    {
-    }
-
-    bool NodeSearchTraverser::preTraverse(LODNode& treeNode)
+    bool NodeSearchTraverser::preTraverse(const TransformNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(LODNode& treeNode)
+    void NodeSearchTraverser::postTraverse(const TransformNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(AnimatedGeoNode& treeNode)
-    {
-      return findNode(treeNode);
-    }
-
-    void NodeSearchTraverser::postTraverse(AnimatedGeoNode& treeNode)
-    {
-    }
-
-    bool NodeSearchTraverser::preTraverse(GeoNode& treeNode)
+    bool NodeSearchTraverser::preTraverse(const LODNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(GeoNode& treeNode)
+    void NodeSearchTraverser::postTraverse(const LODNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(BillboardNode& treeNode)
-    {
-      return findNode(treeNode);
-    }
-
-    void NodeSearchTraverser::postTraverse(BillboardNode& treeNode)
-    {
-    }
-
-    bool NodeSearchTraverser::preTraverse(ParticleNode& treeNode)
+    bool NodeSearchTraverser::preTraverse(const AnimatedGeoNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(ParticleNode& treeNode)
+    void NodeSearchTraverser::postTraverse(const AnimatedGeoNode& treeNode)
     {
     }
 
-    bool NodeSearchTraverser::preTraverse(LightNode& treeNode)
-    {
-      return findNode(treeNode);
-    }
-
-    void NodeSearchTraverser::postTraverse(LightNode& treeNode)
-    {
-    }
-
-    bool NodeSearchTraverser::preTraverse(ShadowLightNode& treeNode)
+    bool NodeSearchTraverser::preTraverse(const GeoNode& treeNode)
     {
       return findNode(treeNode);
     }
 
-    void NodeSearchTraverser::postTraverse(ShadowLightNode& treeNode)
+    void NodeSearchTraverser::postTraverse(const GeoNode& treeNode)
+    {
+    }
+
+    bool NodeSearchTraverser::preTraverse(const BillboardNode& treeNode)
+    {
+      return findNode(treeNode);
+    }
+
+    void NodeSearchTraverser::postTraverse(const BillboardNode& treeNode)
+    {
+    }
+
+    bool NodeSearchTraverser::preTraverse(const ParticleNode& treeNode)
+    {
+      return findNode(treeNode);
+    }
+
+    void NodeSearchTraverser::postTraverse(const ParticleNode& treeNode)
+    {
+    }
+
+    bool NodeSearchTraverser::preTraverse(const LightNode& treeNode)
+    {
+      return findNode(treeNode);
+    }
+
+    void NodeSearchTraverser::postTraverse(const LightNode& treeNode)
+    {
+    }
+
+    bool NodeSearchTraverser::preTraverse(const ShadowLightNode& treeNode)
+    {
+      return findNode(treeNode);
+    }
+
+    void NodeSearchTraverser::postTraverse(const ShadowLightNode& treeNode)
     {
     }
 
@@ -109,7 +109,7 @@ namespace he
       return m_discoveredNode;
     }
 
-    bool NodeSearchTraverser::findNode(TreeNode& treeNode)
+    bool NodeSearchTraverser::findNode(const TreeNode& treeNode)
     {
       if(treeNode.getNodeName() == m_nodeName)
       {

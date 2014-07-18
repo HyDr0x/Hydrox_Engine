@@ -27,8 +27,28 @@ namespace he
       m_index.nodeType = ANIMATEDTRANSFORMNODE;
     }
 
+    AnimatedTransformNode::AnimatedTransformNode(const AnimatedTransformNode& sourceNode) :
+      TransformNode(sourceNode)
+    {
+      m_animatedMesh = sourceNode.m_animatedMesh;
+      m_boneIndex = sourceNode.m_boneIndex;
+      m_currentTrack = sourceNode.m_currentTrack;
+      m_currentAnimationTimeInSeconds = sourceNode.m_currentAnimationTimeInSeconds;
+      m_pauseAnimation = sourceNode.m_pauseAnimation;
+
+      m_animationTracks = sourceNode.m_animationTracks;
+
+      m_animatedTranslation = sourceNode.m_animatedTranslation;
+      m_animatedRotation = sourceNode.m_animatedRotation;
+      m_animatedScale = sourceNode.m_animatedScale;
+
+      m_currentScaleKey = sourceNode.m_currentScaleKey;
+      m_currentPositionKey = sourceNode.m_currentPositionKey;
+      m_currentRotationKey = sourceNode.m_currentRotationKey;
+    }
+
     AnimatedTransformNode::AnimatedTransformNode(const TreeNode& sourceNode) : 
-      TransformNode(util::Matrix<float, 4>::identity() , sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling(), sourceNode.getFirstChild()),
+      TransformNode(sourceNode),
       m_animatedMesh(~0)
     {
       assert(ANIMATEDTRANSFORMNODE == sourceNode.getNodeType());

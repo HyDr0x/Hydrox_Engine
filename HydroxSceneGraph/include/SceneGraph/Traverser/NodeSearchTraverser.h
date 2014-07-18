@@ -16,38 +16,38 @@ namespace he
       NodeSearchTraverser(const TreeNodeAllocator& allocator, const std::string& nodeName);
       virtual ~NodeSearchTraverser();
 
-      virtual bool preTraverse(AnimatedTransformNode& treeNode);
-      virtual void postTraverse(AnimatedTransformNode& treeNode);
+      virtual bool preTraverse(const AnimatedTransformNode& treeNode);
+      virtual void postTraverse(const AnimatedTransformNode& treeNode);
 
-      virtual bool preTraverse(TransformNode& treeNode);
-      virtual void postTraverse(TransformNode& treeNode);
+      virtual bool preTraverse(const TransformNode& treeNode);
+      virtual void postTraverse(const TransformNode& treeNode);
 
-      virtual bool preTraverse(LODNode& treeNode);
-      virtual void postTraverse(LODNode& treeNode);
+      virtual bool preTraverse(const LODNode& treeNode);
+      virtual void postTraverse(const LODNode& treeNode);
 
-      virtual bool preTraverse(AnimatedGeoNode& treeNode);
-      virtual void postTraverse(AnimatedGeoNode& treeNode);
+      virtual bool preTraverse(const AnimatedGeoNode& treeNode);
+      virtual void postTraverse(const AnimatedGeoNode& treeNode);
 
-      virtual bool preTraverse(GeoNode& treeNode);
-      virtual void postTraverse(GeoNode& treeNode);
+      virtual bool preTraverse(const GeoNode& treeNode);
+      virtual void postTraverse(const GeoNode& treeNode);
 
-      virtual bool preTraverse(BillboardNode& treeNode);
-      virtual void postTraverse(BillboardNode& treeNode);
+      virtual bool preTraverse(const BillboardNode& treeNode);
+      virtual void postTraverse(const BillboardNode& treeNode);
 
-      virtual bool preTraverse(ParticleNode& treeNode);
-      virtual void postTraverse(ParticleNode& treeNode);
+      virtual bool preTraverse(const ParticleNode& treeNode);
+      virtual void postTraverse(const ParticleNode& treeNode);
 
-      virtual bool preTraverse(LightNode& treeNode);
-      virtual void postTraverse(LightNode& treeNode);
+      virtual bool preTraverse(const LightNode& treeNode);
+      virtual void postTraverse(const LightNode& treeNode);
 
-      virtual bool preTraverse(ShadowLightNode& treeNode);
-      virtual void postTraverse(ShadowLightNode& treeNode);
+      virtual bool preTraverse(const ShadowLightNode& treeNode);
+      virtual void postTraverse(const ShadowLightNode& treeNode);
 
       NodeIndex getDiscoveredNode() const;
 
     protected:
 
-      bool findNode(TreeNode &treeNode);
+      bool findNode(const TreeNode &treeNode);
 
       NodeIndex m_discoveredNode;
       std::string m_nodeName;

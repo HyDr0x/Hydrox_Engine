@@ -59,6 +59,7 @@ namespace he
     public:
 
       TreeNode(const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      TreeNode(const TreeNode& other);
       virtual ~TreeNode() = 0;
   
       virtual TreeNode* clone() const = 0;
@@ -94,10 +95,6 @@ namespace he
 
       NodeIndex m_parent;
       NodeIndex m_nextSibling;
-
-    private:
-
-      TreeNode(const TreeNode&);
     };
   }
 }

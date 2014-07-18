@@ -17,14 +17,22 @@ namespace he
   {
     LightNode::LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling), 
-      m_lightType(lightType),
       m_eventManager(eventManager),
+      m_lightType(lightType),
       m_renderable(false)
     {
       m_index.nodeType = LIGHTNODE;
     }
 
-    LightNode::LightNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling())
+    LightNode::LightNode(const LightNode& sourceNode) : TreeNode(sourceNode)
+    {
+      m_eventManager = sourceNode.m_eventManager;
+      m_lightType = sourceNode.m_lightType;
+      m_renderable = sourceNode.m_renderable;
+      m_lightData = sourceNode.m_lightData;
+    }
+
+    LightNode::LightNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
     {
       assert(LIGHTNODE == sourceNode.getNodeType());
 

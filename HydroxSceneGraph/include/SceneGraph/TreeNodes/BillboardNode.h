@@ -20,6 +20,7 @@ namespace he
 
       BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, 
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      BillboardNode(const BillboardNode& sourceNode);
       BillboardNode(const TreeNode& sourceNode);
       virtual ~BillboardNode();
 

@@ -16,9 +16,15 @@ namespace he
       m_index.nodeType = GROUPNODE;
     }
 
-    GroupNode::GroupNode(const TreeNode& sourceNode) : TreeNode(sourceNode.getNodeName(), sourceNode.getParent(), sourceNode.getNextSibling()), m_firstChild(sourceNode.getFirstChild())
+    GroupNode::GroupNode(const GroupNode& sourceNode) : TreeNode(sourceNode)
     {
-      assert(GROUPNODE == sourceNode.getNodeType());
+      m_firstChild = sourceNode.m_firstChild;
+      m_dirtyFlag = DEFAULT;
+    }
+
+    GroupNode::GroupNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
+    {
+      //assert(typeid(this) == typeid(sourceNode));
 
       const GroupNode& copyNode = static_cast<const GroupNode&>(sourceNode);
 

@@ -42,13 +42,13 @@ namespace he
 
       void updateCaches(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
 
-      void addNodeToCache(sg::LODNode *lodNode);
-      void addNodeToCache(sg::TransformNode *transformNode);
-      void addNodeToCache(sg::AnimatedTransformNode *animatedTransformNode);
+      void addNodeToCache(sg::LODNode& lodNode);
+      void addNodeToCache(sg::TransformNode& transformNode);
+      void addNodeToCache(sg::AnimatedTransformNode& animatedTransformNode);
 
-      void removeNodeFromCache(sg::LODNode *lodNode);
-      void removeNodeFromCache(sg::TransformNode *transformNode);
-      void removeNodeFromCache(sg::AnimatedTransformNode *animatedTransformNode);
+      void removeNodeFromCache(sg::LODNode& lodNode);
+      void removeNodeFromCache(sg::TransformNode& transformNode);
+      void removeNodeFromCache(sg::AnimatedTransformNode& animatedTransformNode);
 
     private:
 
