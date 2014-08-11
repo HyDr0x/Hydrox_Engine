@@ -94,6 +94,11 @@ namespace he
       traverser->postTraverse(*this);
     }
 
+    void GeoNode::setEventManager(util::EventManager *eventManager)
+    {
+      m_eventManager = eventManager;
+    }
+
     void GeoNode::setMeshHandle(util::ResourceHandle meshHandle)
     {
       if(m_renderable)

@@ -4,7 +4,7 @@ namespace he
 {
   namespace sg
   {
-    std::ofstream& operator<<(std::ofstream& stream, const AnimationTrack& animationTrack)
+    std::ostream& operator<<(std::ostream& stream, const AnimationTrack& animationTrack)
     {
       stream << animationTrack.m_animationName << std::endl;
       stream << animationTrack.m_duration << std::endl;
@@ -34,7 +34,7 @@ namespace he
       return stream;
     }
 
-    std::ifstream& operator>>(std::ifstream& stream, AnimationTrack& animationTrack)
+    std::istream& operator>>(std::istream& stream, AnimationTrack& animationTrack)
     {
       std::getline(stream, animationTrack.m_animationName);//getline because of white spaces
       std::getline(stream, animationTrack.m_animationName);

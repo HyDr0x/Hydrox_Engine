@@ -9,9 +9,6 @@
 #include <DataBase/Texture2D.h>
 #include <DataBase/RenderShader.h>
 
-#include "Saver/NodeWrapper.h"
-#include "Saver/NodeWrapperMapper.h"
-
 #include "Saver/RenderShaderSaver.h"
 #include "Saver/ILDevilSaver.h"
 

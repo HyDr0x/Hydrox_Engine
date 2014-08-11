@@ -24,6 +24,7 @@ namespace he
         ANIM_DIRTY  = 8,
       };
 
+      GroupNode(){}
       GroupNode(const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       GroupNode(const GroupNode& sourceNode);
       GroupNode(const TreeNode& sourceNode);

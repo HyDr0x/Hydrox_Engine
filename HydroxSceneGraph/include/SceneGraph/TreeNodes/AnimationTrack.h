@@ -43,8 +43,8 @@ namespace he
       }
     };
 
-    GRAPHICAPI std::ofstream& operator<<(std::ofstream& stream, const AnimationTrack& animationTrack);
-    GRAPHICAPI std::ifstream& operator>>(std::ifstream& stream, AnimationTrack& animationTrack);
+    GRAPHICAPI std::ostream& operator<<(std::ostream& stream, const AnimationTrack& animationTrack);
+    GRAPHICAPI std::istream& operator>>(std::istream& stream, AnimationTrack& animationTrack);
   }
 }
 

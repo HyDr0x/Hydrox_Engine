@@ -24,6 +24,7 @@ namespace he
     {
     public:
 
+      LightNode(){}
       LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       LightNode(const LightNode& sourceNode);
       LightNode(const TreeNode& sourceNode);
@@ -45,6 +46,7 @@ namespace he
 
       void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
 
+      void setLightType(LightType lightType);
       LightType getLightType() const;
 
       void setColor(util::Vector<float, 3> color);

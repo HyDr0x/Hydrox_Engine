@@ -106,31 +106,41 @@ namespace he
       traverser->postTraverse(*this);
     }
 
+    void BillboardNode::setTextureHandle(util::ResourceHandle textureHandle)
+    {
+      m_textureHandle = textureHandle;
+    }
+
     util::ResourceHandle BillboardNode::getTextureHandle() const
     {
       return m_textureHandle;
     }
 
-    void BillboardNode::setAnimation(unsigned int number)
+    void BillboardNode::setCurrentAnimationFrame(unsigned int currentFrame)
     {
-      assert(number / m_animNumber[0] < m_animNumber[1]);
-      m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
+      assert(currentFrame / m_animNumber[0] < m_animNumber[1]);
+      m_currentFrame = util::Vector<unsigned int, 2>(currentFrame % m_animNumber[0], currentFrame / m_animNumber[0]);
     }
 
-    void BillboardNode::setAnimation(const util::Vector<unsigned int, 2>& number)
+    void BillboardNode::setCurrentAnimationFrame(const util::Vector<unsigned int, 2>& currentFrame)
     {
-      assert(number[1] < m_animNumber[1] && number[0] < m_animNumber[0]);
-      m_animCount = number;
+      assert(currentFrame[1] < m_animNumber[1] && currentFrame[0] < m_animNumber[0]);
+      m_currentFrame = currentFrame;
+    }
+
+    util::Vector<unsigned int, 2> BillboardNode::getCurrentAnimationFrame() const
+    {
+      return m_currentFrame;
+    }
+
+    void BillboardNode::setAnimationNumber(const util::Vector<unsigned int, 2>& animationNumber)
+    {
+      m_animNumber = animationNumber;
     }
 
     util::Vector<unsigned int, 2> BillboardNode::getAnimationNumber() const
     {
       return m_animNumber;
-    }
-
-    util::Vector<unsigned int, 2> BillboardNode::getAnimationCount() const
-    {
-      return m_animCount;
     }
 
     void BillboardNode::setTranslation(float x, float y, float z)
@@ -201,9 +211,19 @@ namespace he
       return m_scale;
     }
 
+    void BillboardNode::setTextureStart(const util::Vector<float, 2>& texStart)
+    {
+      m_texStart = texStart;
+    }
+
     util::Vector<float, 2> BillboardNode::getTextureStart() const
     {
       return m_texStart;
+    }
+
+    void BillboardNode::setTextureEnd(const util::Vector<float, 2>& texEnd)
+    {
+      m_texEnd = texEnd;
     }
 
     util::Vector<float, 2> BillboardNode::getTextureEnd() const
@@ -216,8 +236,8 @@ namespace he
       float width  = m_texEnd[0] - m_texStart[0];
       float height = m_texEnd[1] - m_texStart[1];
 
-      return util::Matrix<float,3>(width/m_animNumber[0],0.0f,(static_cast<float>(m_animCount[0])/static_cast<float>(m_animNumber[0]))*width+m_texStart[0], 
-                0.0f,height/m_animNumber[1],(static_cast<float>(m_animCount[1])/static_cast<float>(m_animNumber[1]))*height+m_texStart[1], 
+      return util::Matrix<float,3>(width/m_animNumber[0],0.0f,(static_cast<float>(m_currentFrame[0])/static_cast<float>(m_animNumber[0]))*width+m_texStart[0], 
+                0.0f,height/m_animNumber[1],(static_cast<float>(m_currentFrame[1])/static_cast<float>(m_animNumber[1]))*height+m_texStart[1], 
                 0.0f,0.0f,1.0f);
     }
 
@@ -225,11 +245,11 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_currentFrame, m_texStart, m_texEnd, m_textureHandle));
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_animCount, m_texStart, m_texEnd, m_textureHandle));
+        m_eventManager->raiseSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnRemoveBillboardNode)->execute(xBar::BillboardContainer(m_translate, m_scale, m_animNumber, m_currentFrame, m_texStart, m_texEnd, m_textureHandle));
       }
 
       m_renderable = renderable;

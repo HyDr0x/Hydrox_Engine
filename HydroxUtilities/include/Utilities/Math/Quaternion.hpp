@@ -257,7 +257,7 @@ namespace he
       Vector<TYPE, 4> m_coord;
     };
 
-    template<typename Type> std::ofstream& operator<<(std::ofstream& stream, const Quaternion<Type>& q)
+    template<typename Type> std::ostream& operator<<(std::ostream& stream, const Quaternion<Type>& q)
     {
       for(unsigned int i = 0; i < 4; i++)
       {
@@ -271,7 +271,7 @@ namespace he
       return stream;
     }
 
-    template<typename Type> std::ifstream& operator>>(std::ifstream& stream, Quaternion<Type>& q)
+    template<typename Type> std::istream& operator>>(std::istream& stream, Quaternion<Type>& q)
     {
       for(unsigned int i = 0; i < 4; i++)
       {

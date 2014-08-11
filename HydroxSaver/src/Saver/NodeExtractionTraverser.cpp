@@ -21,9 +21,6 @@
 #include <SceneGraph/TreeNodes/ShadowLightNode.h>
 #include <SceneGraph/TreeNodes/ParticleNode.h>
 
-#include "Saver/NodeWrapper.h"
-#include "Saver/NodeWrapperMapper.h"
-
 namespace he
 {
   namespace saver
@@ -37,41 +34,40 @@ namespace he
     {
     }
 
-    bool NodeExtractionTraverser::preTraverse(sg::GeoNode& treeNode)
+    bool NodeExtractionTraverser::preTraverse(const sg::GeoNode& treeNode)
     {
       if(!m_resourceMap["Meshes"].count(treeNode.getMeshHandle()))
       {
-        m_resourceMap["Meshes"][treeNode.getMeshHandle()] = m_fileName + treeNode.getNodeName() + "_Mesh";
+        std::stringstream stream;
+        stream << m_resourceNumberMap["Meshes"];
+        m_resourceMap["Meshes"][treeNode.getMeshHandle()] = m_fileName + std::string("_Mesh_") + stream.str();
+        m_resourceNumberMap["Meshes"]++;
       }
 
       if(!m_resourceMap["Materials"].count(treeNode.getMaterialHandle()))
       {
-        m_resourceMap["Materials"][treeNode.getMaterialHandle()] = m_fileName + treeNode.getNodeName() + "_Material";
+        std::stringstream stream;
+        stream << m_resourceNumberMap["Materials"];
+        m_resourceMap["Materials"][treeNode.getMaterialHandle()] = m_fileName + "_Material_" + stream.str();
+        m_resourceNumberMap["Materials"]++;
       }
 
       return true;
     }
 
-    bool NodeExtractionTraverser::preTraverse(sg::AnimatedGeoNode& treeNode)
+    bool NodeExtractionTraverser::preTraverse(const sg::AnimatedGeoNode& treeNode)
     {
-      if(!m_resourceMap["Meshes"].count(treeNode.getMeshHandle()))
-      {
-        m_resourceMap["Meshes"][treeNode.getMeshHandle()] = m_fileName + treeNode.getNodeName() + "_Mesh";
-      }
-
-      if(!m_resourceMap["Materials"].count(treeNode.getMaterialHandle()))
-      {
-        m_resourceMap["Materials"][treeNode.getMaterialHandle()] = m_fileName + treeNode.getNodeName() + "_Material";
-      }
-
-      return true;
+      return preTraverse((sg::GeoNode&) treeNode);
     }
 
-    bool NodeExtractionTraverser::preTraverse(sg::BillboardNode& treeNode)
+    bool NodeExtractionTraverser::preTraverse(const sg::BillboardNode& treeNode)
     {
       if(!m_resourceMap["Textures"].count(treeNode.getTextureHandle()))
       {
-        m_resourceMap["Textures"][treeNode.getTextureHandle()] = m_fileName + treeNode.getNodeName() + "_Texture";
+        std::stringstream stream;
+        stream << m_resourceNumberMap["Textures"];
+        m_resourceMap["Textures"][treeNode.getTextureHandle()] = m_fileName + "_Texture_" + stream.str();
+        m_resourceNumberMap["Textures"]++;
       }
 
       return true;

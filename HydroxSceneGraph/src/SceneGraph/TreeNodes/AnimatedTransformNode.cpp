@@ -174,6 +174,11 @@ namespace he
       return m_animationTracks;
     }
 
+    void AnimatedTransformNode::setAnimationTracks(const std::vector<AnimationTrack>& animationTracks)
+    {
+      m_animationTracks = animationTracks;
+    }
+
     void AnimatedTransformNode::setCurrentAnimationTime(float time)
     {
       if(!m_pauseAnimation)

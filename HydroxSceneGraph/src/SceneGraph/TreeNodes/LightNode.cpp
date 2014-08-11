@@ -117,6 +117,11 @@ namespace he
       if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
     }
 
+    void LightNode::setLightType(LightType lightType)
+    {
+      m_lightType = lightType;
+    }
+
     LightType LightNode::getLightType() const
     {
       return m_lightType;

@@ -156,5 +156,10 @@ namespace he
     {
       return m_inverseBindPoseMatrices;
     }
+
+    void AnimatedGeoNode::setInverseBindPoseMatrices(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices)
+    {
+      m_inverseBindPoseMatrices = inverseBindPoseMatrices;
+    }
   }
 }

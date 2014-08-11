@@ -15,6 +15,7 @@ namespace he
     {
     public:
 
+      AnimatedGeoNode(){}
       AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, 
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       AnimatedGeoNode(const AnimatedGeoNode& sourceNode);
@@ -40,7 +41,9 @@ namespace he
       void setBoneTransform(const util::Matrix<float, 4>& boneTransform, unsigned int boneIndex);
 
       std::vector<util::Matrix<float, 4>> getSkinningMatrices() const;
+
       std::vector<util::Matrix<float, 4>> getInverseBindPoseMatrices() const;
+      void setInverseBindPoseMatrices(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices);
 
     private:
 

@@ -15,6 +15,7 @@
 #include "Saver/MaterialSaver.h"
 #include "Saver/ILDevilSaver.h"
 #include "Saver/CreateDirectory.h"
+#include "Saver/NodeStreaming.h"
 
 namespace he
 {
@@ -55,8 +56,6 @@ namespace he
           fileStream.open(path + filename, std::ofstream::out | std::ofstream::trunc);
         }
       }
-
-      scene.getTreeNodeAllocator().writeToStream(fileStream);
       
       fileStream << m_resourceMap["Meshes"].size() << std::endl;
       for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Meshes"].begin(); it != m_resourceMap["Meshes"].end(); it++)
@@ -82,6 +81,8 @@ namespace he
         fileStream << it->second << std::endl;
         ILDevilSaver::save(path, it->second, it->first, singletonManager);
       }
+
+      write(fileStream, scene.getTreeNodeAllocator(), singletonManager);
 
       fileStream.close();
     }

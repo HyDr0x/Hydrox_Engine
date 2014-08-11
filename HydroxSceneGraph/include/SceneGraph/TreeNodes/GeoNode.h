@@ -19,6 +19,7 @@ namespace he
     {
     public:
 
+      GeoNode(){}
       GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       GeoNode(const GeoNode& sourceNode);
       GeoNode(const TreeNode& sourceNode);
@@ -35,6 +36,8 @@ namespace he
       virtual bool ascendTraverse(ConstTraverser* traverser) const;
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
+
+      void setEventManager(util::EventManager *eventManager);
 
       virtual void setMeshHandle(util::ResourceHandle meshHandle);
       util::ResourceHandle getMeshHandle() const;

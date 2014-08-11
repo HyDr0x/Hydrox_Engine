@@ -18,6 +18,7 @@ namespace he
     {
     public:
 
+      LODNode(){}
       LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       LODNode(const LODNode& sourceNode);
       LODNode(const TreeNode& sourceNode);
@@ -35,11 +36,13 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
+      void setLODLevel(unsigned int lodLevel);
       unsigned int getLODLevel() const;
       bool getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const;
 
       void transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation);
 
+      void setPosition(util::Vector<float, 3> position);
       util::Vector<float, 3> getPosition() const;
 
     private:

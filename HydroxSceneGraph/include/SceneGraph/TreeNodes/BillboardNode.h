@@ -18,6 +18,7 @@ namespace he
     {
     public:
 
+      BillboardNode(){}
       BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, 
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       BillboardNode(const BillboardNode& sourceNode);
@@ -36,12 +37,15 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
+      void setTextureHandle(util::ResourceHandle textureHandle);
       util::ResourceHandle getTextureHandle() const;
 
-      void setAnimation(unsigned int number);
-      void setAnimation(const util::Vector<unsigned int, 2>& number);
+      void setCurrentAnimationFrame(unsigned int currentFrame);
+      void setCurrentAnimationFrame(const util::Vector<unsigned int, 2>& currentFrame);
+      util::Vector<unsigned int, 2> getCurrentAnimationFrame() const;
+
+      void setAnimationNumber(const util::Vector<unsigned int, 2>& animationNumber);
       util::Vector<unsigned int, 2> getAnimationNumber() const;
-      util::Vector<unsigned int, 2> getAnimationCount() const;
 
       void setTranslation(const util::Vector<float, 3>& v);
       void setTranslation(float x, float y, float z);
@@ -59,11 +63,13 @@ namespace he
       util::Vector<float, 3> getPosition() const;
       util::Vector<float, 2> getScale() const;
 
+      void setTextureStart(const util::Vector<float, 2>& texStart);
       util::Vector<float, 2> getTextureStart() const;
+
+      void setTextureEnd(const util::Vector<float, 2>& texEnd);
       util::Vector<float, 2> getTextureEnd() const;
 
       util::Matrix<float, 3> getTexTransformationMatrix() const;
-      util::ResourceHandle getTextureID() const;
 
       void setRenderable(bool renderable);
       bool getRenderable() const;
@@ -73,7 +79,7 @@ namespace he
       util::EventManager *m_eventManager;
 
       util::Vector<unsigned int, 2> m_animNumber;
-      util::Vector<unsigned int, 2> m_animCount;
+      util::Vector<unsigned int, 2> m_currentFrame;
       util::Vector<float, 2> m_texStart;
       util::Vector<float, 2> m_texEnd;
 

@@ -21,6 +21,7 @@ namespace he
       LIGHTNODE,
       SHADOWLIGHTNODE,
       PARTICLENODE,
+      NODENUMBER,
     };    class ConstTraverser;
     class Traverser;
     class GroupNode;
@@ -58,6 +59,7 @@ namespace he
     {
     public:
 
+      TreeNode(){}
       TreeNode(const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       TreeNode(const TreeNode& other);
       virtual ~TreeNode() = 0;

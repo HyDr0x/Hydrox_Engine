@@ -1,14 +1,5 @@
 #include "SceneGraph/Scene/TreeNodeFactory.h"
 
-#include <sstream>
-#include <fstream>
-#include <iostream>
-
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
-#include <Utilities/PrimitiveGenerator/CubeGenerator.h>
-
-#include <DataBase/Material.h>
-
 namespace he
 {
   namespace sg
@@ -21,9 +12,22 @@ namespace he
       }
     }
 
-    TreeNode* TreeNodeFactory::createTreeNode(NodeType nodeType, TreeNode *adress, const TreeNode& node)
+    void TreeNodeFactory::registerCreateFunction(NodeType nodeType, CreateBlankTreeNode foo)
     {
-      return m_createTreeNodeFunctions[nodeType](adress, node);
+      if(!m_createBlankTreeNodeFunctions.count(nodeType))
+      {
+        m_createBlankTreeNodeFunctions[nodeType] = foo;
+      }
+    }
+
+    void TreeNodeFactory::createTreeNode(NodeType nodeType, TreeNode *adress, const TreeNode& node)
+    {
+      m_createTreeNodeFunctions[nodeType](adress, node);
+    }
+
+    void TreeNodeFactory::createTreeNode(NodeType nodeType, TreeNode *adress)
+    {
+      m_createBlankTreeNodeFunctions[nodeType](adress);
     }
   }
 }

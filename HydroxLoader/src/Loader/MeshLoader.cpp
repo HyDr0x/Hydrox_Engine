@@ -50,7 +50,7 @@ namespace he
       {
         file.close();
 
-        std::cerr << "Error: couldn't open mesh source file " << filename[0] << "." << std::endl;
+        std::cerr << "Error: couldn't open mesh source file " << filename << "." << std::endl;
 
         return getDefaultResource();
       }

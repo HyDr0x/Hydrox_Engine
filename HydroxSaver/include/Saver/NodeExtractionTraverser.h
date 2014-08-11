@@ -41,17 +41,18 @@ namespace he
       NodeExtractionTraverser(const sg::TreeNodeAllocator& allocator, std::string fileName, std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceMap);
       virtual ~NodeExtractionTraverser();
 
-      virtual bool preTraverse(sg::GeoNode& treeNode);
+      virtual bool preTraverse(const sg::GeoNode& treeNode);
 
-      virtual bool preTraverse(sg::AnimatedGeoNode& treeNode);
+      virtual bool preTraverse(const sg::AnimatedGeoNode& treeNode);
 
-      virtual bool preTraverse(sg::BillboardNode& treeNode);
+      virtual bool preTraverse(const sg::BillboardNode& treeNode);
 
     protected:
 
       std::string m_fileName;
 
       std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& m_resourceMap;
+      std::map<std::string, unsigned int> m_resourceNumberMap;
     };
   }
 }

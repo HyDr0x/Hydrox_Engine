@@ -41,7 +41,7 @@ namespace he
 
       sg::NodeIndex m_rootNode;
       sg::TreeNodeAllocator m_allocator;
-      std::map<std::string, std::map<std::string, util::ResourceHandle>> m_resourceMap;
+      std::map<std::string, std::map<unsigned int, util::ResourceHandle>> m_resourceMap;
     };
   }
 }

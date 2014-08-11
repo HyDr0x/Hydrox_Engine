@@ -28,6 +28,7 @@
 #include "Loader/RenderShaderLoader.h"
 #include "Loader/MaterialLoader.h"
 #include "Loader/MeshLoader.h"
+#include "Loader/NodeStreaming.h"
 
 namespace he
 {
@@ -65,8 +66,6 @@ namespace he
         return;
       }
 
-      m_allocator.readFromStream(fileStream);
-
       std::string resourceFilename;
       MeshLoader meshLoader = MeshLoader(singletonManager);
 
@@ -77,10 +76,10 @@ namespace he
       for(unsigned int i = 0; i < meshMapSize; i++)
       {
         std::getline(fileStream, resourceFilename);
-        m_resourceMap["Meshes"][resourceFilename] = meshLoader.loadResource(resourceFilename);
+        util::ResourceHandle handle = meshLoader.loadResource(path + resourceFilename + ".mesh");
+        m_resourceMap["Meshes"][singletonManager->getService<db::ModelManager>()->getObject(handle)->getHash()] = handle;
       }
 
-      std::string materialFilename;
       MaterialLoader materialLoader(singletonManager);
 
       unsigned int materialMapSize;
@@ -89,11 +88,11 @@ namespace he
       
       for(unsigned int i = 0; i < materialMapSize; i++)
       {
-        std::getline(fileStream, materialFilename);
-        m_resourceMap["Materials"][materialFilename] = materialLoader.loadResource(path + materialFilename);
+        std::getline(fileStream, resourceFilename);
+        util::ResourceHandle handle = materialLoader.loadResource(path + resourceFilename + ".material");
+        m_resourceMap["Materials"][singletonManager->getService<db::MaterialManager>()->getObject(handle)->getHash()] = handle;
       }
 
-      std::string billboardTextureFilename;
       ILDevilLoader ilDevilLoader(singletonManager);
 
       unsigned int billboardTextureMapSize;
@@ -102,9 +101,12 @@ namespace he
       
       for(unsigned int i = 0; i < billboardTextureMapSize; i++)
       {
-        std::getline(fileStream, billboardTextureFilename);
-        m_resourceMap["Textures"][billboardTextureFilename] = ilDevilLoader.loadResource(billboardTextureFilename);
+        std::getline(fileStream, resourceFilename);
+        util::ResourceHandle handle = ilDevilLoader.loadResource(path + resourceFilename + ".png");
+        m_resourceMap["Textures"][singletonManager->getService<db::TextureManager>()->getObject(handle)->getHash()] = handle;
       }
+
+      read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());
 
       fileStream.close();
     }

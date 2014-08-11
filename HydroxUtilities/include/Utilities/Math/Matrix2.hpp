@@ -185,7 +185,7 @@ namespace he
       Vector<Type, 2> m_m[2];
     };
 
-    template<typename Type> std::ofstream& operator<<(std::ofstream& stream, const Matrix<Type, 2>& matrix)
+    template<typename Type> std::ostream& operator<<(std::ostream& stream, const Matrix<Type, 2>& matrix)
     {
       for(unsigned int i = 0; i < 2; i++)
       {
@@ -195,7 +195,7 @@ namespace he
       return stream;
     }
 
-    template<typename Type> std::ifstream& operator>>(std::ifstream& stream, Matrix<Type, 2>& matrix)
+    template<typename Type> std::istream& operator>>(std::istream& stream, Matrix<Type, 2>& matrix)
     {
       for(unsigned int i = 0; i < 2; i++)
       {

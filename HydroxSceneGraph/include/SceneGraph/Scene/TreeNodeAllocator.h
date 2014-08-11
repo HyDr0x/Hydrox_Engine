@@ -1,11 +1,8 @@
 #ifndef TREENODEALLOCATOR_H_
 #define TREENODEALLOCATOR_H_
 
-#include <map>
 #include <vector>
 #include <list>
-#include <string>
-#include <iostream>
 
 #include "SceneGraph/DLLExport.h"
 
@@ -32,6 +29,7 @@ namespace he
 
       TreeNodeAllocator& operator=(TreeNodeAllocator other);
 
+      TreeNode& insert(NodeIndex index);
       NodeIndex insert(const TreeNode& treeNode);
       TreeNode& insert(const TreeNode& treeNode, NodeIndex index);
       void erase();
@@ -40,10 +38,12 @@ namespace he
       TreeNode& operator[](NodeIndex index);
       const TreeNode& operator[](NodeIndex index) const;
 
+      bool contains(NodeIndex index) const;
+
       void reorderTreeNodes();
 
-      void writeToStream(std::ostream& ostream) const;
-      void readFromStream(std::istream& istream);
+      unsigned int getNodeBlockSize() const;
+      unsigned int getNodeBlockNumber(NodeType type) const;
 
     private:
 
@@ -53,10 +53,10 @@ namespace he
 
       TreeNodeFactory m_treeNodeFactory;
 
-      std::map<NodeType, std::list<unsigned int>> m_freeSlots;
-      std::map<NodeType, unsigned int> m_nodeSizes;
-      std::map<NodeType, ConvertTreeNodeAddress> m_nodeAddressConvert;//converts the address offsets of the different node types in bytes
-      std::map<NodeType, std::vector<TreeNode*>> m_treeNodes;//NodeType: kind of nodes | Vector: each entry is the beginning of a placement new array of the specific node Type
+      std::vector<std::list<unsigned int>> m_freeSlots;
+      std::vector<unsigned int> m_nodeSizes;
+      std::vector<ConvertTreeNodeAddress> m_nodeAddressConvert;//converts the address offsets of the different node types in bytes
+      std::vector<std::vector<TreeNode*>> m_treeNodes;//NodeType: kind of nodes | Vector: each entry is the beginning of a placement new array of the specific node Type
 
       unsigned int m_nodeBlockSize;
     };

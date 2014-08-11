@@ -20,6 +20,7 @@ namespace he
     {
     public:
 
+      AnimatedTransformNode(){}
       AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       AnimatedTransformNode(const AnimatedTransformNode& sourceNode);
       AnimatedTransformNode(const TreeNode& sourceNode);
@@ -48,6 +49,7 @@ namespace he
       void setCurrentAnimationTrack(unsigned int currentTrack);
       unsigned int getCurrentAnimationTrack() const;
 
+      void setAnimationTracks(const std::vector<AnimationTrack>& animationTracks);
       const std::vector<AnimationTrack>& getAnimationTracks() const;
 
       void setCurrentAnimationTime(float time);

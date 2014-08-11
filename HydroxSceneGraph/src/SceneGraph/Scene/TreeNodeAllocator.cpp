@@ -25,18 +25,38 @@ namespace he
 {
   namespace sg
   {
-    template<typename T> TreeNode* createTreeNode(TreeNode *adress, const TreeNode& node)
+    template<typename T> void createBlankTreeNode(TreeNode *adress)
     {
-      return new (reinterpret_cast<T*>(adress))T(node);
+      new (reinterpret_cast<T*>(adress))T();
     }
 
-    template<typename T> TreeNode* createTreeNode(TreeNode *adress, unsigned int offset)
+    template<typename T> void createTreeNode(TreeNode *adress, const TreeNode& node)
+    {
+      new (reinterpret_cast<T*>(adress))T(node);
+    }
+
+    template<typename T> TreeNode* getTreeNode(TreeNode *adress, unsigned int offset)
     {
       return reinterpret_cast<T*>(adress) + offset;
     }
 
     TreeNodeAllocator::TreeNodeAllocator(unsigned int nodeBlockSize) : m_nodeBlockSize(nodeBlockSize)
     {
+      m_nodeAddressConvert.resize(NODENUMBER);
+      m_nodeSizes.resize(NODENUMBER);
+      m_freeSlots.resize(NODENUMBER);
+      m_treeNodes.resize(NODENUMBER);
+        
+      m_treeNodeFactory.registerCreateFunction(GEONODE, createBlankTreeNode<GeoNode>);
+      m_treeNodeFactory.registerCreateFunction(ANIMATEDGEONODE, createBlankTreeNode<AnimatedGeoNode>);
+      m_treeNodeFactory.registerCreateFunction(TRANSFORMNODE, createBlankTreeNode<TransformNode>);
+      m_treeNodeFactory.registerCreateFunction(ANIMATEDTRANSFORMNODE, createBlankTreeNode<AnimatedTransformNode>);
+      m_treeNodeFactory.registerCreateFunction(BILLBOARDNODE, createBlankTreeNode<BillboardNode>);
+      m_treeNodeFactory.registerCreateFunction(LODNODE, createBlankTreeNode<LODNode>);
+      m_treeNodeFactory.registerCreateFunction(LIGHTNODE, createBlankTreeNode<LightNode>);
+      m_treeNodeFactory.registerCreateFunction(SHADOWLIGHTNODE, createBlankTreeNode<ShadowLightNode>);
+      m_treeNodeFactory.registerCreateFunction(PARTICLENODE, createBlankTreeNode<ParticleNode>);
+
       m_treeNodeFactory.registerCreateFunction(GEONODE, createTreeNode<GeoNode>);
       m_treeNodeFactory.registerCreateFunction(ANIMATEDGEONODE, createTreeNode<AnimatedGeoNode>);
       m_treeNodeFactory.registerCreateFunction(TRANSFORMNODE, createTreeNode<TransformNode>);
@@ -47,15 +67,15 @@ namespace he
       m_treeNodeFactory.registerCreateFunction(SHADOWLIGHTNODE, createTreeNode<ShadowLightNode>);
       m_treeNodeFactory.registerCreateFunction(PARTICLENODE, createTreeNode<ParticleNode>);
 
-      m_nodeAddressConvert[GEONODE] = createTreeNode<GeoNode>;
-      m_nodeAddressConvert[ANIMATEDGEONODE] = createTreeNode<AnimatedGeoNode>;
-      m_nodeAddressConvert[TRANSFORMNODE] = createTreeNode<TransformNode>;
-      m_nodeAddressConvert[ANIMATEDTRANSFORMNODE] = createTreeNode<AnimatedTransformNode>;
-      m_nodeAddressConvert[BILLBOARDNODE] = createTreeNode<BillboardNode>;
-      m_nodeAddressConvert[LODNODE] = createTreeNode<LODNode>;
-      m_nodeAddressConvert[LIGHTNODE] = createTreeNode<LightNode>;
-      m_nodeAddressConvert[SHADOWLIGHTNODE] = createTreeNode<ShadowLightNode>;
-      m_nodeAddressConvert[PARTICLENODE] = createTreeNode<ParticleNode>;
+      m_nodeAddressConvert[GEONODE] = getTreeNode<GeoNode>;
+      m_nodeAddressConvert[ANIMATEDGEONODE] = getTreeNode<AnimatedGeoNode>;
+      m_nodeAddressConvert[TRANSFORMNODE] = getTreeNode<TransformNode>;
+      m_nodeAddressConvert[ANIMATEDTRANSFORMNODE] = getTreeNode<AnimatedTransformNode>;
+      m_nodeAddressConvert[BILLBOARDNODE] = getTreeNode<BillboardNode>;
+      m_nodeAddressConvert[LODNODE] = getTreeNode<LODNode>;
+      m_nodeAddressConvert[LIGHTNODE] = getTreeNode<LightNode>;
+      m_nodeAddressConvert[SHADOWLIGHTNODE] = getTreeNode<ShadowLightNode>;
+      m_nodeAddressConvert[PARTICLENODE] = getTreeNode<ParticleNode>;
 
       m_nodeSizes[GEONODE] = sizeof(GeoNode);
       m_nodeSizes[ANIMATEDGEONODE] = sizeof(AnimatedGeoNode);
@@ -75,16 +95,17 @@ namespace he
       m_nodeAddressConvert = other.m_nodeAddressConvert;
       m_nodeSizes = other.m_nodeSizes;
 
-      for(std::map<NodeType, std::vector<TreeNode*>>::const_iterator it = other.m_treeNodes.begin(); it != other.m_treeNodes.end(); it++)
-      {
-        //m_treeNodes.insert(std::map<NodeType, std::vector<TreeNode*>>::value_type(it->first, std::vector<TreeNode*>(it->second.size(), nullptr)));
+      m_freeSlots.resize(NODENUMBER);
+      m_treeNodes.resize(NODENUMBER);
 
-        for(unsigned int i = 0; i < it->second.size(); i++)
+      for(unsigned int k = 0; k < other.m_treeNodes.size(); k++)
+      {
+        for(unsigned int i = 0; i < other.m_treeNodes[k].size(); i++)
         {
           for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
-            NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, it->first);
-            const std::list<unsigned int>& list = other.m_freeSlots.find(index.nodeType)->second;
+            NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, (NodeType)k);
+            const std::list<unsigned int>& list = other.m_freeSlots[index.nodeType];
             if(std::find(list.begin(), list.end(), index.index) == list.end())
             {
               this->insert(other[index], index);
@@ -92,41 +113,26 @@ namespace he
           }
         }
       }
-
-      /*for(std::map<NodeType, std::vector<TreeNode*>>::iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
-      {
-        for(unsigned int i = 0; i < it->second.size(); i++)
-        {
-          it->second[i] = (TreeNode*)std::malloc(m_nodeSizes[it->first] * m_nodeBlockSize);
-
-          unsigned int blockSize = (i + 1) * m_nodeBlockSize < m_size[it->first] ? m_nodeBlockSize : m_size[it->first] % m_nodeBlockSize;
-          for(unsigned int j = 0; j < blockSize; j++)
-          {
-            NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, it->first);
-            m_treeNodeFactory.createTreeNode(it->first, it->second[i] + j * m_nodeSizes[it->first], other[index]);
-          }
-        }
-      }*/
     }
 
     TreeNodeAllocator::~TreeNodeAllocator()
     {
-      for(std::map<NodeType, std::vector<TreeNode*>>::iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
+      for(unsigned int k = 0; k < m_treeNodes.size(); k++)
       {
-        for(unsigned int i = 0; i < it->second.size(); i++)
+        for(unsigned int i = 0; i < m_treeNodes[k].size(); i++)
         {
           for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
-            NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, it->first);
+            NodeIndex index = NodeIndex(i * m_nodeBlockSize + j, (NodeType)k);
 
-            std::list<unsigned int>::iterator lit = std::find(m_freeSlots[it->first].begin(), m_freeSlots[it->first].end(), index.index);
+            std::list<unsigned int>::iterator lit = std::find(m_freeSlots[(NodeType)k].begin(), m_freeSlots[(NodeType)k].end(), index.index);
 
-            if(lit == m_freeSlots[it->first].end())
+            if(lit == m_freeSlots[(NodeType)k].end())
             {
               (*this)[index].~TreeNode();
             }
           }
-          std::free(m_treeNodes[it->first][i]);
+          std::free(m_treeNodes[(NodeType)k][i]);
         }
       }
     }
@@ -137,6 +143,20 @@ namespace he
       swap(*this, other);
 
       return *this;
+    }
+
+    TreeNode& TreeNodeAllocator::insert(NodeIndex index)
+    {
+      resize(index);
+
+      m_freeSlots[index.nodeType].remove(index.index);
+
+      TreeNode *newNode = &(*this)[index];
+
+      m_treeNodeFactory.createTreeNode(index.nodeType, newNode);
+      newNode->setNodeIndex(index);
+
+      return *newNode;
     }
 
     NodeIndex TreeNodeAllocator::insert(const TreeNode& treeNode)
@@ -193,37 +213,25 @@ namespace he
     const TreeNode& TreeNodeAllocator::operator[](NodeIndex index) const
     {
       unsigned int nodeBlock = index.index / m_nodeBlockSize;
-      return *m_nodeAddressConvert.find(index.nodeType)->second(m_treeNodes.find(index.nodeType)->second[nodeBlock], index.index % m_nodeBlockSize);
+      return *m_nodeAddressConvert[index.nodeType](m_treeNodes[index.nodeType][nodeBlock], index.index % m_nodeBlockSize);
     }
 
-    /*NodeIndex TreeNodeAllocator::getIndex(const TreeNode& treeNode) const
+    bool TreeNodeAllocator::contains(NodeIndex index) const
     {
-      unsigned int blockNumber = m_size.find(treeNode.getNodeType())->second / m_nodeBlockSize;
-      for(unsigned int i = 0; i < blockNumber; i++)
-      {
-        for(unsigned int j = 0; j < m_nodeBlockSize; j++)
-        {
-          if(&(*this)[NodeIndex(i * m_nodeBlockSize + j, treeNode.getNodeType())] == &treeNode)
-          {
-            return NodeIndex(i * m_nodeBlockSize + j, treeNode.getNodeType());
-          }
-        }
-      }
-
-      return ~0;
-    }*/
+      return std::find(m_freeSlots[index.nodeType].begin(), m_freeSlots[index.nodeType].end(), index.index) == m_freeSlots[index.nodeType].end();
+    }
 
     void TreeNodeAllocator::reorderTreeNodes()
     {
       TreeNodeAllocator other(m_nodeBlockSize);
 
-      for(std::map<NodeType, std::vector<TreeNode*>>::iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
+      for(unsigned int k = 0; k < m_treeNodes.size(); k++)
       {
-        for(unsigned int i = 0; i < it->second.size(); i++)
+        for(unsigned int i = 0; i < m_treeNodes[k].size(); i++)
         {
           for(unsigned int j = 0; j < m_nodeBlockSize; j++)
           {
-            other.insert((*this)[NodeIndex(i * m_nodeBlockSize + j, it->first)]);
+            other.insert((*this)[NodeIndex(i * m_nodeBlockSize + j, (NodeType)k)]);
           }
         }
       }
@@ -292,79 +300,6 @@ namespace he
       //}
     }
 
-    void TreeNodeAllocator::writeToStream(std::ostream& ostream) const
-    {
-      ostream << m_nodeSizes.size() << std::endl;
-
-      for(std::map<NodeType, unsigned int>::const_iterator it = m_nodeSizes.begin(); it != m_nodeSizes.end(); it++)
-      {
-        ostream << it->first << std::endl;
-        ostream << it->second << std::endl;
-      }
-
-      for(std::map<NodeType, std::list<unsigned int>>::const_iterator it = m_freeSlots.begin(); it != m_freeSlots.end(); it++)
-      {
-        ostream << it->second.size() << std::endl;
-        for(std::list<unsigned int>::const_iterator lit = it->second.begin(); lit != it->second.end(); lit++)
-        {
-          ostream << *lit << std::endl;
-        }
-      }
-
-      for(std::map<NodeType, std::vector<TreeNode*>>::const_iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
-      {
-        ostream << m_treeNodes.find(it->first)->second.size() << std::endl;
-        for(unsigned int i = 0; i < m_treeNodes.find(it->first)->second.size(); i++)
-        {
-          ostream.write((const char*)m_treeNodes.find(it->first)->second[i], m_nodeSizes.find(it->first)->second * m_nodeBlockSize);
-        }
-      }
-    }
-
-    void TreeNodeAllocator::readFromStream(std::istream& istream)
-    {
-      unsigned int nodeTypeNumber = 0;
-      istream >> nodeTypeNumber;
-
-      std::vector<NodeType> nodeTypes(nodeTypeNumber);
-      for(unsigned int i = 0; i < nodeTypeNumber; i++)
-      {
-        unsigned int nodeType = 0;
-        istream >> nodeType;
-        nodeTypes[i] = (NodeType)nodeType;
-
-        unsigned int nodeTypeSize = 0;
-        istream >> nodeTypeSize;
-        m_nodeSizes.insert(std::map<NodeType, unsigned int>::value_type((NodeType)nodeType, nodeTypeSize));
-      }
-
-      for(unsigned int i = 0; i < nodeTypeNumber; i++)
-      {
-        m_freeSlots.insert(std::map<NodeType, std::list<unsigned int>>::value_type(nodeTypes[i], std::list<unsigned int>()));
-
-        unsigned int freeSlotNumber = 0;
-        istream >> freeSlotNumber;
-        for(unsigned int j = 0; j < freeSlotNumber; j++)
-        {
-          unsigned int freeSlotIndex = 0;
-          istream >> freeSlotIndex;
-          m_freeSlots[nodeTypes[i]].push_back(freeSlotIndex);
-        }
-      }
-
-      for(unsigned int i = 0; i < nodeTypeNumber; i++)
-      {
-        unsigned int nodeBlockNumber = 0;
-        istream >> nodeBlockNumber;
-        std::vector<TreeNode*> nodes(nodeBlockNumber);
-        for(unsigned int j = 0; j < nodeBlockNumber; j++)
-        {
-          istream.read((char*)&nodes[j], m_nodeSizes[nodeTypes[i]] * m_nodeBlockSize);
-        }
-        m_treeNodes.insert(std::map<NodeType, std::vector<TreeNode*>>::value_type(nodeTypes[i], nodes));
-      }
-    }
-
     void TreeNodeAllocator::resize(NodeIndex index)
     {
       unsigned int newNodeBlockNumber = index.index / m_nodeBlockSize + 1;
@@ -383,6 +318,16 @@ namespace he
           }
         }
       }
+    }
+
+    unsigned int TreeNodeAllocator::getNodeBlockSize() const
+    {
+      return m_nodeBlockSize;
+    }
+
+    unsigned int TreeNodeAllocator::getNodeBlockNumber(NodeType type) const
+    {
+      return m_treeNodes[type].size();
     }
   }
 }

@@ -96,6 +96,11 @@ namespace he
       traverser->postTraverse(*this);
     }
 
+    void LODNode::setLODLevel(unsigned int lodLevel)
+    {
+      m_lodLevel = lodLevel;
+    }
+
     unsigned int LODNode::getLODLevel() const
     {
       return m_lodLevel;
@@ -111,6 +116,11 @@ namespace he
     void LODNode::transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation)
     {
       m_transformedPosition = translation + rotation.apply(m_position * scale);
+    }
+
+    void LODNode::setPosition(util::Vector<float, 3> position)
+    {
+      m_position = position;
     }
 
     util::Vector<float, 3> LODNode::getPosition() const
