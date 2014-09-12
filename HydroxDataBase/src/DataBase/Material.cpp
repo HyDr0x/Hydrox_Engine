@@ -8,24 +8,12 @@ namespace he
     {
     }
 
-    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, bool transparency) : m_transparency(transparency)
+    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, std::vector<uint64_t> hashes, bool transparency) : m_transparency(transparency)
     {
-      unsigned int length = sizeof(MaterialData) + sizeof(unsigned int);
+      unsigned int length = sizeof(MaterialData) + sizeof(hashes[0]) * hashes.size();
       std::vector<unsigned char> data(length);
       std::copy(&materialData, &materialData + 1, (MaterialData*)&data[0]);
-      unsigned int id = shader.getID();
-      std::copy(&id, &id + 1, &data[sizeof(MaterialData)]);
-
-      for(size_t i = 0; i < textureIndices.size(); i++)
-      {
-        for(size_t j = 0; j < textureIndices[i].size(); j++)
-        {
-          data.resize(data.size() + sizeof(unsigned int));
-          id = textureIndices[i][j].getID();
-          std::copy(&id, &id + 1, &data[length]);
-          length += sizeof(unsigned int);
-        }
-      }
+      std::copy(&hashes[0], &hashes[0] + hashes.size(), (uint64_t*)&data[sizeof(MaterialData)]);
 
       m_hash = MurmurHash64A(&data[0], length, 0);
 

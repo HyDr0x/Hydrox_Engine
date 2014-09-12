@@ -10,7 +10,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     class AddNodesTraverser : public Traverser
     {
     public:

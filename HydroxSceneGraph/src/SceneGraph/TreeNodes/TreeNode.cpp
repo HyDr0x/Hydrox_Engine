@@ -77,5 +77,37 @@ namespace he
     {
       return m_index;
     }
+
+    void TreeNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      std::string name;
+      std::getline(stream, m_nodeName);
+      std::getline(stream, m_nodeName);//getline because of white spaces
+
+      unsigned int nodeTypes;
+      unsigned int nodeIndex;
+
+      stream >> nodeTypes;
+      stream >> nodeIndex;
+      m_parent = NodeIndex(nodeIndex, (NodeType)nodeTypes);
+
+      stream >> nodeTypes;
+      stream >> nodeIndex;
+      m_nextSibling = NodeIndex(nodeIndex, (NodeType)nodeTypes);
+    }
+
+    void TreeNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      stream << (unsigned int)m_index.nodeType << std::endl;
+      stream << m_index.index << std::endl;
+
+      stream << m_nodeName.c_str() << std::endl;
+
+      stream << (unsigned int)m_parent.nodeType << std::endl;
+      stream << m_parent.index << std::endl;
+
+      stream << (unsigned int)m_nextSibling.nodeType << std::endl;
+      stream << m_nextSibling.index << std::endl;
+    }
   }
 }

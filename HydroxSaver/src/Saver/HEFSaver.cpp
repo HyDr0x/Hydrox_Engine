@@ -61,6 +61,7 @@ namespace he
       for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Meshes"].begin(); it != m_resourceMap["Meshes"].end(); it++)
       {
         fileStream << it->second << std::endl;
+        
         MeshSaver::save(path, it->second, it->first, singletonManager);
       }
 
@@ -70,6 +71,7 @@ namespace he
       for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Materials"].begin(); it != m_resourceMap["Materials"].end(); it++)
       {
         fileStream << it->second << std::endl;
+
         MaterialSaver::save(path, it->second, it->first, singletonManager);
       }
 
@@ -79,12 +81,44 @@ namespace he
       for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Textures"].begin(); it != m_resourceMap["Textures"].end(); it++)
       {
         fileStream << it->second << std::endl;
+
         ILDevilSaver::save(path, it->second, it->first, singletonManager);
       }
 
       write(fileStream, scene.getTreeNodeAllocator(), singletonManager);
 
+      fileStream << scene.getRootNode().nodeType << std::endl;
+      fileStream << scene.getRootNode().index << std::endl;
+
       fileStream.close();
+    }
+
+    void HEFSaver::write(std::ostream& stream, const sg::TreeNodeAllocator& allocator, util::SingletonManager *singletonManager)
+    {
+      stream << (unsigned int)sg::NODENUMBER << std::endl;
+
+      unsigned int nodeBlockSize = allocator.getNodeBlockSize();
+      stream << nodeBlockSize << std::endl;
+
+      for(unsigned int k = 0; k < sg::NODENUMBER; k++)
+      {
+        unsigned int nodeBlockNumber = allocator.getNodeBlockNumber((sg::NodeType)k);
+        stream << nodeBlockNumber << std::endl;
+
+        stream << allocator.getExactNodeBlockSize((sg::NodeType)k) << std::endl;
+
+        for(unsigned int i = 0; i < nodeBlockNumber; i++)
+        {
+          for(unsigned int j = 0; j < nodeBlockSize; j++)
+          {
+            sg::NodeIndex index = sg::NodeIndex(i * nodeBlockSize + j, (sg::NodeType)k);
+            if(allocator.contains(index))
+            {
+              allocator[index].write(stream, m_resourceMap);
+            }
+          }
+        }
+      }
     }
   }
 }

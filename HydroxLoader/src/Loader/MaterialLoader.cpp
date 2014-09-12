@@ -132,8 +132,11 @@ namespace he
           }
         }
 
+        std::vector<uint64_t> hashes;
+
         RenderShaderLoader renderShaderLoader(m_singletonManager);
         util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(shaderFilename);
+        hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shaderHandle)->getHash());
 
         ILDevilLoader textureLoader(m_singletonManager);
 
@@ -146,11 +149,12 @@ namespace he
             if(textureFilenames[i][j] != std::string())
             {
               textureHandles[i].push_back(textureLoader.loadResource(textureFilenames[i][j]));
+              hashes.push_back(m_singletonManager->getService<db::TextureManager>()->getObject(textureHandles[i][j])->getHash());
             }
           }
         }
 
-        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, shaderHandle, false));
+        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, shaderHandle, hashes, false));
       }
       else//wrong filename or file does not exist
       {
@@ -169,7 +173,11 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource(), false));
+
+      std::vector<uint64_t> hashes;
+      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(renderShaderLoader.getDefaultResource())->getHash());
+
+      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource(), hashes, false));
     }
   }
 }

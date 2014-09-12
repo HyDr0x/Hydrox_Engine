@@ -47,6 +47,7 @@ namespace he
       m_freeSlots.resize(NODENUMBER);
       m_treeNodes.resize(NODENUMBER);
         
+      m_treeNodeFactory.registerCreateFunction(GROUPNODE, createBlankTreeNode<GroupNode>);
       m_treeNodeFactory.registerCreateFunction(GEONODE, createBlankTreeNode<GeoNode>);
       m_treeNodeFactory.registerCreateFunction(ANIMATEDGEONODE, createBlankTreeNode<AnimatedGeoNode>);
       m_treeNodeFactory.registerCreateFunction(TRANSFORMNODE, createBlankTreeNode<TransformNode>);
@@ -57,6 +58,7 @@ namespace he
       m_treeNodeFactory.registerCreateFunction(SHADOWLIGHTNODE, createBlankTreeNode<ShadowLightNode>);
       m_treeNodeFactory.registerCreateFunction(PARTICLENODE, createBlankTreeNode<ParticleNode>);
 
+      m_treeNodeFactory.registerCreateFunction(GROUPNODE, createTreeNode<GroupNode>);
       m_treeNodeFactory.registerCreateFunction(GEONODE, createTreeNode<GeoNode>);
       m_treeNodeFactory.registerCreateFunction(ANIMATEDGEONODE, createTreeNode<AnimatedGeoNode>);
       m_treeNodeFactory.registerCreateFunction(TRANSFORMNODE, createTreeNode<TransformNode>);
@@ -67,6 +69,7 @@ namespace he
       m_treeNodeFactory.registerCreateFunction(SHADOWLIGHTNODE, createTreeNode<ShadowLightNode>);
       m_treeNodeFactory.registerCreateFunction(PARTICLENODE, createTreeNode<ParticleNode>);
 
+      m_nodeAddressConvert[GROUPNODE] = getTreeNode<GroupNode>;
       m_nodeAddressConvert[GEONODE] = getTreeNode<GeoNode>;
       m_nodeAddressConvert[ANIMATEDGEONODE] = getTreeNode<AnimatedGeoNode>;
       m_nodeAddressConvert[TRANSFORMNODE] = getTreeNode<TransformNode>;
@@ -77,6 +80,7 @@ namespace he
       m_nodeAddressConvert[SHADOWLIGHTNODE] = getTreeNode<ShadowLightNode>;
       m_nodeAddressConvert[PARTICLENODE] = getTreeNode<ParticleNode>;
 
+      m_nodeSizes[GROUPNODE] = sizeof(GroupNode);
       m_nodeSizes[GEONODE] = sizeof(GeoNode);
       m_nodeSizes[ANIMATEDGEONODE] = sizeof(AnimatedGeoNode);
       m_nodeSizes[TRANSFORMNODE] = sizeof(TransformNode);
@@ -323,6 +327,11 @@ namespace he
     unsigned int TreeNodeAllocator::getNodeBlockSize() const
     {
       return m_nodeBlockSize;
+    }
+
+    unsigned int TreeNodeAllocator::getExactNodeBlockSize(NodeType type) const
+    {
+      return (m_treeNodes[type].size() * m_nodeBlockSize) - m_freeSlots[type].size();
     }
 
     unsigned int TreeNodeAllocator::getNodeBlockNumber(NodeType type) const

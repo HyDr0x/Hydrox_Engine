@@ -12,7 +12,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     class Traverser;
 
     class GRAPHICAPI GeoNode : public TreeNode
@@ -50,6 +50,9 @@ namespace he
 
       virtual void setRenderable(bool renderable);
       bool getRenderable() const;
+
+      virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
+      virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
 
     protected:
 

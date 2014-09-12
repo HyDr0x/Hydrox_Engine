@@ -8,7 +8,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     class NodeSearchTraverser : public ConstTraverser
     {
     public:

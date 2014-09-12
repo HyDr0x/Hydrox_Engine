@@ -30,7 +30,7 @@ namespace he
 
       util::ResourceHandle meshHandle;
 
-      std::ifstream file(filename);
+      std::ifstream file(filename, std::ifstream::in | std::ifstream::binary);
       std::string line;
 
       if(file.is_open())

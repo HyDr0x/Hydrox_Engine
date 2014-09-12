@@ -161,5 +161,34 @@ namespace he
     {
       m_inverseBindPoseMatrices = inverseBindPoseMatrices;
     }
+
+    void AnimatedGeoNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      GeoNode::read(stream, eventManager, resourceHandles);
+
+      unsigned int inverseBindPoseMatricesSize;
+      stream >> inverseBindPoseMatricesSize;
+
+      m_inverseBindPoseMatrices.resize(inverseBindPoseMatricesSize);
+      if(m_inverseBindPoseMatrices.size())
+      {
+        std::getline(stream, std::string());
+        stream.read((char*)&m_inverseBindPoseMatrices[0][0][0], sizeof(m_inverseBindPoseMatrices[0]) * m_inverseBindPoseMatrices.size());
+      }
+
+      m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
+    }
+
+    void AnimatedGeoNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      GeoNode::write(stream, resourceHandles);
+
+      stream << m_inverseBindPoseMatrices.size() << std::endl;
+      if(m_inverseBindPoseMatrices.size())
+      {
+        stream.write((char*)&m_inverseBindPoseMatrices[0][0][0], sizeof(m_inverseBindPoseMatrices[0]) * m_inverseBindPoseMatrices.size());
+        stream << std::endl;
+      }
+    }
   }
 }

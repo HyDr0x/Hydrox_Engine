@@ -11,9 +11,9 @@
 
 namespace he
 {
-  namespace util
+  namespace renderer
   {
-    class GRAPHICAPI OpenGLDebugLogManager : public SingletonBehaviour
+    class GRAPHICAPI OpenGLDebugLogManager : public util::SingletonBehaviour
     {
     public:
 

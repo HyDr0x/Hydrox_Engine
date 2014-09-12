@@ -389,5 +389,25 @@ namespace he
 
       m_scale += s;
     }
+
+    void TransformNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      GroupNode::read(stream, eventManager, resourceHandles);
+
+      stream >> m_rotation;
+
+      stream >> m_translation;
+
+      stream >> m_scale;
+    }
+
+    void TransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      GroupNode::write(stream, resourceHandles);
+
+      stream << m_rotation << std::endl;
+      stream << m_translation << std::endl;
+      stream << m_scale << std::endl;
+    }
   }
 }

@@ -24,107 +24,49 @@ namespace he
     {
     }
 
-    void DeleteTraverser::postTraverse(TreeNode& treeNode)
+    void DeleteTraverser::postTraverse(AnimatedTransformNode& treeNode)
     {
       m_allocator.erase(treeNode.getNodeIndex());
     }
 
-    /*bool DeleteTraverser::preTraverse(AnimatedTransformNode& treeNode)
-    {
-      return true;
-    }
-
-    void DeleteTraverser::postTraverse(AnimatedTransformNode& treeNode)
-    {
-      m_allocator.erase(m_allocator.getIndex(treeNode));
-    }
-
-    bool DeleteTraverser::preTraverse(TransformNode& treeNode)
-    {
-      return true;
-    }
-
     void DeleteTraverser::postTraverse(TransformNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(LODNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(LODNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(AnimatedGeoNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(AnimatedGeoNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(GeoNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(GeoNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(BillboardNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(BillboardNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(ParticleNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(ParticleNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(LightNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(LightNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(ShadowLightNode& treeNode)
-    {
-      return true;
+      m_allocator.erase(treeNode.getNodeIndex());
     }
 
     void DeleteTraverser::postTraverse(ShadowLightNode& treeNode)
     {
-      delete treeNode;
-      treeNode = nullptr;
-    }*/
+      m_allocator.erase(treeNode.getNodeIndex());
+    }
   }
 }

@@ -48,7 +48,7 @@ namespace he
       RenderManager();
       ~RenderManager();
 
-      void setClearColor(he::util::Vector<float, 4> color) const;
+      void setClearColor(he::util::Vector<float, 4> color);
 
       void resizeRenderWindow(unsigned int width, unsigned int height);
 

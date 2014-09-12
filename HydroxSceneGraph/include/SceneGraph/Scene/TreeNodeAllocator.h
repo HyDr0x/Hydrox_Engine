@@ -43,6 +43,7 @@ namespace he
       void reorderTreeNodes();
 
       unsigned int getNodeBlockSize() const;
+      unsigned int getExactNodeBlockSize(NodeType type) const;
       unsigned int getNodeBlockNumber(NodeType type) const;
 
     private:

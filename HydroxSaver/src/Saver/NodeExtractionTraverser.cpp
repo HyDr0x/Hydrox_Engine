@@ -25,8 +25,9 @@ namespace he
 {
   namespace saver
   {
-    NodeExtractionTraverser::NodeExtractionTraverser(const sg::TreeNodeAllocator& allocator, std::string fileName, std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceMap) :
-      ConstTraverser(allocator), m_resourceMap(resourceMap), m_fileName(fileName)
+    NodeExtractionTraverser::NodeExtractionTraverser(const sg::TreeNodeAllocator& allocator, std::string fileName,
+      std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceMap) :
+      ConstTraverser(allocator), m_fileName(fileName), m_resourceMap(resourceMap)
     {
     }
 
@@ -39,17 +40,15 @@ namespace he
       if(!m_resourceMap["Meshes"].count(treeNode.getMeshHandle()))
       {
         std::stringstream stream;
-        stream << m_resourceNumberMap["Meshes"];
+        stream << m_resourceMap["Meshes"].size();
         m_resourceMap["Meshes"][treeNode.getMeshHandle()] = m_fileName + std::string("_Mesh_") + stream.str();
-        m_resourceNumberMap["Meshes"]++;
       }
 
       if(!m_resourceMap["Materials"].count(treeNode.getMaterialHandle()))
       {
         std::stringstream stream;
-        stream << m_resourceNumberMap["Materials"];
+        stream << m_resourceMap["Materials"].size();
         m_resourceMap["Materials"][treeNode.getMaterialHandle()] = m_fileName + "_Material_" + stream.str();
-        m_resourceNumberMap["Materials"]++;
       }
 
       return true;
@@ -65,9 +64,8 @@ namespace he
       if(!m_resourceMap["Textures"].count(treeNode.getTextureHandle()))
       {
         std::stringstream stream;
-        stream << m_resourceNumberMap["Textures"];
+        stream << m_resourceMap["Textures"].size();
         m_resourceMap["Textures"][treeNode.getTextureHandle()] = m_fileName + "_Texture_" + stream.str();
-        m_resourceNumberMap["Textures"]++;
       }
 
       return true;

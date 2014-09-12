@@ -117,5 +117,21 @@ namespace he
     {
       return m_trfMatrix;
     }
+
+    void ParticleNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TreeNode::read(stream, eventManager, resourceHandles);
+
+      stream >> m_trfMatrix;
+
+      m_eventManager = eventManager;
+    }
+
+    void ParticleNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TreeNode::write(stream, resourceHandles);
+
+      stream << m_trfMatrix << std::endl;
+    }
   }
 }

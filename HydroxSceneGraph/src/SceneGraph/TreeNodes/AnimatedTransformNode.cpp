@@ -14,7 +14,13 @@ namespace he
   {
     AnimatedTransformNode::AnimatedTransformNode(const std::vector<AnimationTrack>& animationTracks, const std::string& nodeName, 
       NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild)
-      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), m_animationTracks(animationTracks), m_animatedMesh(~0), m_boneIndex(~0), m_currentTrack(0), m_currentAnimationTimeInSeconds(0.0f), m_pauseAnimation(false)
+      : TransformNode(util::Matrix<float, 4>::identity(), nodeName, parent, nextSibling, firstChild), 
+      m_animationTracks(animationTracks), 
+      m_animatedMesh(~0), 
+      m_boneIndex(~0), 
+      m_currentTrack(0), 
+      m_currentAnimationTimeInSeconds(0.0f), 
+      m_pauseAnimation(false)
     {
       m_animatedTranslation = util::Vector<float, 3>::identity();
       m_animatedRotation = util::Quaternion<float>::identity();
@@ -354,6 +360,50 @@ namespace he
           m_animatedTranslation = currentTrack.m_positions[i];
         }
       }
+    }
+
+    void AnimatedTransformNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TransformNode::read(stream, eventManager, resourceHandles);
+
+      unsigned int animationTracksSize;
+      stream >> animationTracksSize;
+      m_animationTracks.resize(animationTracksSize);
+
+      for(unsigned int i = 0; i < m_animationTracks.size(); i++)
+      {
+        stream >> m_animationTracks[i];
+      }
+
+      stream >> m_animatedMesh.index;
+      m_animatedMesh.nodeType = m_animatedMesh.index != ~0 ? ANIMATEDGEONODE : TREENODE;
+
+      stream >> m_boneIndex;
+
+      m_currentTrack = 0;
+      m_currentAnimationTimeInSeconds = 0.0f;
+      m_pauseAnimation = false;
+
+      m_animatedTranslation = util::Vector<float, 3>::identity();
+      m_animatedRotation = util::Quaternion<float>::identity();
+      m_animatedScale = 1.0f;
+
+      m_currentScaleKey = 0;
+      m_currentPositionKey = 0;
+      m_currentRotationKey = 0;
+    }
+
+    void AnimatedTransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TransformNode::write(stream, resourceHandles);
+
+      stream << m_animationTracks.size() << std::endl;
+      for(unsigned int i = 0; i < m_animationTracks.size(); i++)
+      {
+        stream << m_animationTracks[i];
+      }
+      stream << m_animatedMesh.index << std::endl;
+      stream << m_boneIndex << std::endl;
     }
   }
 }

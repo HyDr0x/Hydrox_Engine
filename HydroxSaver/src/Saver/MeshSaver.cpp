@@ -22,7 +22,7 @@ namespace he
       db::Mesh *mesh = modelManager->getObject(meshHandle);
 
       std::ofstream fileStream;
-      fileStream.open(path + filename + std::string(".mesh"), std::ofstream::out | std::ofstream::trunc);
+      fileStream.open(path + filename + std::string(".mesh"), std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
 
       MeshMetaData meshData;
       meshData.bbMax = mesh->getBBMax();

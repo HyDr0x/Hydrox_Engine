@@ -77,7 +77,7 @@ namespace he
                                     \n\
                                     void main()\n\
                                     {\n\
-                                      color = vec4(1,1,1,1);\n\
+                                      color = vec4(0.5f, 0.5f, 0.5f, 1);\n\
                                     }";
 
       return m_singletonManager->getService<db::RenderShaderManager>()->addObject(db::RenderShader(std::string("defaultRenderShader"), vertexSource, fragmentSource));

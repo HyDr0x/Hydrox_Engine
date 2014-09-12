@@ -110,5 +110,25 @@ namespace he
     {
       m_dirtyFlag &= ~dirtyFlag;
     }
+
+    void GroupNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TreeNode::read(stream, eventManager, resourceHandles);
+
+      unsigned int type;
+      stream >> type;
+      m_firstChild.nodeType = (NodeType)type;
+      stream >> m_firstChild.index;
+
+      m_dirtyFlag = DEFAULT;
+    }
+
+    void GroupNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TreeNode::write(stream, resourceHandles);
+
+      stream << (unsigned int)m_firstChild.nodeType << std::endl;
+      stream << m_firstChild.index << std::endl;
+    }
   }
 }

@@ -259,5 +259,44 @@ namespace he
     {
       return m_renderable;
     }
+
+    void BillboardNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TreeNode::read(stream, eventManager, resourceHandles);
+
+      stream >> m_currentFrame;
+      stream >> m_animNumber;
+
+      stream >> m_texStart;
+      stream >> m_texEnd;
+
+      stream >> m_scale;
+
+      stream >> m_translate;
+
+      std::string resourceFilename;
+
+      std::getline(stream, resourceFilename);
+      std::getline(stream, resourceFilename);//getline because of white spaces
+
+      m_textureHandle = resourceHandles["Texture"][resourceFilename];
+
+      m_eventManager = eventManager;
+
+      m_renderable = false;
+    }
+
+    void BillboardNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TreeNode::write(stream, resourceHandles);
+
+      stream << m_currentFrame << std::endl;
+      stream << m_animNumber << std::endl;
+      stream << m_texStart << std::endl;
+      stream << m_texEnd << std::endl;
+      stream << m_scale << std::endl;
+      stream << m_translate << std::endl;
+      stream << resourceHandles.find("Textures")->second.find(m_textureHandle)->second << std::endl;
+    }
   }
 }

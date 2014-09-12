@@ -19,9 +19,10 @@ namespace he
     {
     }
 
-    void RenderManager::setClearColor(he::util::Vector<float, 4> color) const
+    void RenderManager::setClearColor(he::util::Vector<float, 4> color)
     {
       glClearColor(color[0], color[1], color[2], color[3]);
+      m_gBuffer.setClearColor(color);
     }
 
     void RenderManager::resizeRenderWindow(unsigned int width, unsigned int height)
@@ -154,7 +155,7 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      //m_fullscreenRenderQuad.setReadTextures(1, m_lightRenderer.getLightTexture());
+      //m_fullscreenRenderQuad.setReadTextures(1, m_gBuffer.getColorTexture());
       //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
 
       m_fullscreenRenderQuad.setReadTextures(2, m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture());

@@ -344,7 +344,12 @@ namespace he
       {
         for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
         {
-          nextSibling = createGeoNodes(std::string(node->mName.C_Str()), node->mMeshes[i], transformNodeIndex, nextSibling);
+          std::stringstream stream;
+          stream << i;
+
+          nextSibling = createGeoNodes(std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), node->mMeshes[i], transformNodeIndex, nextSibling);
+
+          stream.str("");
         }
 
         ((sg::GroupNode&)m_allocator[transformNodeIndex]).setFirstChild(nextSibling);//the last sibling index must be the first childindex
@@ -365,21 +370,17 @@ namespace he
 
     sg::NodeIndex AssimpLoader::createGeoNodes(std::string meshName, unsigned int meshIndex, sg::NodeIndex parentNode, sg::NodeIndex nextSibling)
     {
-      std::stringstream stream;
       sg::NodeIndex geoNodeIndex = ~0;
 
-      stream << 0;
       if(!m_inverseBindPoseTable[meshIndex].empty())
       {
-        geoNodeIndex = m_allocator.insert(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName, parentNode, nextSibling));
         m_skinnedMeshTable[geoNodeIndex] = m_boneNameTable[meshIndex];
       }
       else
       {
-        geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName + std::string("_Mesh") + stream.str(), parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName, parentNode, nextSibling));
       }
-      
-      stream.str("");
 
       return geoNodeIndex;
     }

@@ -53,7 +53,7 @@ namespace he
 
       Material();
       Material(const Material& other);
-      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, bool transparency);
+      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, std::vector<uint64_t> hashes, bool transparency);
       ~Material();
 
       Material& operator=(Material other);

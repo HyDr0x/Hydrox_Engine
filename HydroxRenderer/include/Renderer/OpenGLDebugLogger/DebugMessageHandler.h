@@ -7,7 +7,7 @@
 
 namespace he
 {
-  namespace util
+  namespace renderer
   {
     #ifndef APIENTRY
     #define GLAPIENTRY __stdcall

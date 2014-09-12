@@ -61,6 +61,27 @@ namespace he
         vertexStride += sizeof(util::Vector<float, 2>);
       }
 
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
+      {
+        glVertexAttribFormat(db::RenderShader::TEXTURE1, 2, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::TEXTURE1, 0);
+        vertexStride += sizeof(util::Vector<float, 2>);
+      }
+
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
+      {
+        glVertexAttribFormat(db::RenderShader::TEXTURE2, 2, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::TEXTURE2, 0);
+        vertexStride += sizeof(util::Vector<float, 2>);
+      }
+
+      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
+      {
+        glVertexAttribFormat(db::RenderShader::TEXTURE3, 2, GL_FLOAT, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::TEXTURE3, 0);
+        vertexStride += sizeof(util::Vector<float, 2>);
+      }
+
       if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL) 
       {
         glVertexAttribFormat(db::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
@@ -209,9 +230,9 @@ namespace he
       glBindVertexArray(0);
     }
 
-    bool VertexDeclarationNode::isMesh(GLuint m_vertexDeclaration) const
+    bool VertexDeclarationNode::isMesh(GLuint vertexDeclaration) const
     {
-      return m_vertexDeclaration == m_vertexDeclaration;
+      return m_vertexDeclaration == vertexDeclaration;
     }
   }
 }

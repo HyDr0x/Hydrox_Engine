@@ -127,5 +127,24 @@ namespace he
     {
       return m_position;
     }
+
+    void LODNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      GroupNode::read(stream, eventManager, resourceHandles);
+
+      stream >> m_position;
+      stream >> m_lodLevel;
+
+      m_dirtyFlag |= LOD_INRANGE;
+      m_transformedPosition = m_position;
+    }
+
+    void LODNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      GroupNode::write(stream, resourceHandles);
+
+      stream << m_position << std::endl;
+      stream << m_lodLevel << std::endl;
+    }
   }
 }

@@ -45,6 +45,9 @@ namespace he
       void setTransformationMatrix(const util::Matrix<float, 4>& trfMatrix);
       util::Matrix<float, 4> getTransformationMatrix() const;
 
+      virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
+      virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
+
     private:
 
       util::EventManager *m_eventManager;

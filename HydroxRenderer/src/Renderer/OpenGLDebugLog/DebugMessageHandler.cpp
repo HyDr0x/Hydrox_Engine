@@ -2,7 +2,7 @@
 
 namespace he
 {
-  namespace util
+  namespace renderer
   {
     void GLAPIENTRY getDebugMessage(GLenum source,
                                     GLenum type,

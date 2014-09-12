@@ -7,7 +7,7 @@
 
 namespace he
 {
-  namespace util
+  namespace renderer
   {
     OpenGLDebugLogManager::OpenGLDebugLogManager()
     {

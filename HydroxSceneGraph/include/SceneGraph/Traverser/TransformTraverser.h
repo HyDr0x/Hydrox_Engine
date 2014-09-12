@@ -9,7 +9,7 @@
 namespace he
 {
   namespace sg
-  {
+  {
     class TransformTraverser : public Traverser
     {
     public:

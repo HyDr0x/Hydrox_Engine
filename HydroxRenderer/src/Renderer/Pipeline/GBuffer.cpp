@@ -53,6 +53,11 @@ namespace he
       m_fullscreenRenderQuad.unsetWriteFrameBuffer();
     }
 
+    void GBuffer::setClearColor(util::Vector<float, 4> clearColor)
+    {
+      m_clearColor = clearColor;
+    }
+
     util::SharedPointer<db::Texture2D> GBuffer::getDepthTexture() const
     {
       return m_depthTexture;
@@ -75,7 +80,7 @@ namespace he
 
     void GBuffer::clear() const
     {
-      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(3, util::Vector<float, 4>(0, 0, 0, 0)));
+      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(3, m_clearColor));
     }
   }
 }

@@ -43,7 +43,6 @@ namespace he
       m_rootNode = ~0;
 
       readFromFile(path, filename, singletonManager);
-      findRootNode();
 
       return new sg::Scene(m_allocator, m_rootNode);
     }
@@ -59,7 +58,7 @@ namespace he
 
       std::ifstream fileStream;
 
-      fileStream.open(path + filename, std::ifstream::in | std::ofstream::binary);
+      fileStream.open(path + filename, std::ifstream::in);
 
       if(fileStream.fail())
       {
@@ -77,7 +76,7 @@ namespace he
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = meshLoader.loadResource(path + resourceFilename + ".mesh");
-        m_resourceMap["Meshes"][singletonManager->getService<db::ModelManager>()->getObject(handle)->getHash()] = handle;
+        m_resourceMap["Meshes"][resourceFilename] = handle;
       }
 
       MaterialLoader materialLoader(singletonManager);
@@ -90,7 +89,7 @@ namespace he
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = materialLoader.loadResource(path + resourceFilename + ".material");
-        m_resourceMap["Materials"][singletonManager->getService<db::MaterialManager>()->getObject(handle)->getHash()] = handle;
+        m_resourceMap["Materials"][resourceFilename] = handle;
       }
 
       ILDevilLoader ilDevilLoader(singletonManager);
@@ -103,26 +102,52 @@ namespace he
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = ilDevilLoader.loadResource(path + resourceFilename + ".png");
-        m_resourceMap["Textures"][singletonManager->getService<db::TextureManager>()->getObject(handle)->getHash()] = handle;
+        m_resourceMap["Textures"][resourceFilename] = handle;
       }
 
       read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());
 
+      unsigned int nodeType;
+      fileStream >> nodeType;
+      m_rootNode.nodeType = (sg::NodeType)nodeType;
+
+      fileStream >> m_rootNode.index;
+
       fileStream.close();
     }
 
-    void HEFLoader::findRootNode()
+    void HEFLoader::read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::EventManager *eventManager)
     {
-      sg::NodeIndex newNodeIndex = m_allocator[0].getNodeIndex();//pick a random node
-      sg::NodeIndex oldNodeIndex = ~0;
+      unsigned int nodeTypeNumber;
+      stream >> nodeTypeNumber;
 
-      while(newNodeIndex != ~0)
+      unsigned int nodeBlockSize;
+      stream >> nodeBlockSize;
+
+      for(unsigned int i = 0; i < nodeTypeNumber; i++)
       {
-        oldNodeIndex = newNodeIndex;
-        newNodeIndex = m_allocator[oldNodeIndex].getParent();
-      }
+        unsigned int nodeBlockNumber;
+        stream >> nodeBlockNumber;
 
-      m_rootNode = oldNodeIndex;
+        unsigned int exactNodeBlockSize;
+        stream >> exactNodeBlockSize;
+
+        unsigned int nodeCounter = 0;
+
+        for(unsigned int j = 0; j < nodeBlockNumber && nodeCounter < exactNodeBlockSize; j++)
+        {
+          for(unsigned int k = 0; k < nodeBlockSize && nodeCounter < exactNodeBlockSize; k++, nodeCounter++)
+          {
+            unsigned int index;
+            unsigned int type;
+            stream >> type;
+            stream >> index;
+            sg::NodeIndex nodeIndex = sg::NodeIndex(index, (sg::NodeType)type);
+            sg::TreeNode& node = allocator.insert(nodeIndex);
+            node.read(stream, eventManager, resourceHandles);
+          }
+        }
+      }
     }
   }
 }

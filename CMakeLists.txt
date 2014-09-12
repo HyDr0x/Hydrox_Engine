@@ -35,22 +35,22 @@ set(HYDROX_SAVER_LIB_REL ${HYDROX_DIR}/HydroxSaver/lib/Release/Hydrox_Saver)
 add_subdirectory(HydroxUtilities) 
 
 add_subdirectory(HydroxDataBase) 
-add_dependencies(Hydrox_DataBase Hydrox_Utilities)
+add_dependencies(Hydrox_DataBase Hydrox_Utilities) 
 
 add_subdirectory(HydroxXBar) 
-add_dependencies(Hydrox_XBar Hydrox_Utilities Hydrox_DataBase)
+add_dependencies(Hydrox_XBar Hydrox_Utilities Hydrox_DataBase) 
 
 add_subdirectory(HydroxRenderer) 
-add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar Hydrox_DataBase)
+add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar Hydrox_DataBase) 
 
 add_subdirectory(HydroxSceneGraph) 
-add_dependencies(Hydrox_SceneGraph Hydrox_Utilities Hydrox_XBar Hydrox_DataBase)
+add_dependencies(Hydrox_SceneGraph Hydrox_Utilities Hydrox_XBar Hydrox_DataBase) 
 
 add_subdirectory(HydroxLoader) 
-add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)
+add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 
 
 add_subdirectory(HydroxSaver) 
-add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)
+add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 
 
 add_subdirectory(Sandbox) 
-add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase)
+add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 

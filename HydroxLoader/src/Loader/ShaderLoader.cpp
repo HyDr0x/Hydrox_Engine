@@ -37,8 +37,8 @@ namespace he
       {
         while(!file.eof())
         {
-          std::getline(file, line);
-          line += '\n';
+          std::getline(file, line, '\0');
+          //line += '\n';
 
           shaderSource += line;
         }

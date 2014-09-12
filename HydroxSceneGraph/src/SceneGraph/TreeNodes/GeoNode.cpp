@@ -167,5 +167,31 @@ namespace he
     {
       return m_renderable;
     }
+
+    void GeoNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TreeNode::read(stream, eventManager, resourceHandles);
+      std::string resourceFilename;
+
+      std::getline(stream, resourceFilename);
+      std::getline(stream, resourceFilename);//getline because of white spaces
+      m_meshHandle = resourceHandles["Meshes"][resourceFilename];
+
+      std::getline(stream, resourceFilename);//getline because of white spaces
+      m_materialHandle = resourceHandles["Materials"][resourceFilename];
+
+      m_eventManager = eventManager;
+
+      m_renderable = false;
+      m_trfMatrix = util::Matrix<float, 4>::identity();
+    }
+
+    void GeoNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TreeNode::write(stream, resourceHandles);
+
+      stream << resourceHandles.find("Meshes")->second.find(m_meshHandle)->second << std::endl;
+      stream << resourceHandles.find("Materials")->second.find(m_materialHandle)->second << std::endl;
+    }
   }
 }

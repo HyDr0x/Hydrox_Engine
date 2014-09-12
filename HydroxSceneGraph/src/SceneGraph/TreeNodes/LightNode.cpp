@@ -196,5 +196,43 @@ namespace he
     {
       return m_lightData.quadricAttenuation;
     }
+
+    void LightNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    {
+      TreeNode::read(stream, eventManager, resourceHandles);
+
+      stream >> m_lightData.position;
+      stream >> m_lightData.direction;
+      stream >> m_lightData.color;
+      stream >> m_lightData.intensity;
+
+      stream >> m_lightData.constAttenuation;
+      stream >> m_lightData.linearAttenuation;
+      stream >> m_lightData.quadricAttenuation;
+
+      unsigned int type;
+      stream >> type;
+      m_lightType = (LightType)type;
+
+      m_eventManager = eventManager;
+
+      m_renderable = false;
+    }
+
+    void LightNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    {
+      TreeNode::write(stream, resourceHandles);
+
+      stream << m_lightData.position << std::endl;
+      stream << m_lightData.direction << std::endl;
+      stream << m_lightData.color << std::endl;
+      stream << m_lightData.intensity << std::endl;
+
+      stream << m_lightData.constAttenuation << std::endl;
+      stream << m_lightData.linearAttenuation << std::endl;
+      stream << m_lightData.quadricAttenuation << std::endl;
+
+      stream << (unsigned int)m_lightType << std::endl;
+    }
   }
 }

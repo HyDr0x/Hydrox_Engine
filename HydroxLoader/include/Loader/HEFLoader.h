@@ -37,11 +37,11 @@ namespace he
     private:
 
       void readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
-      void findRootNode();
+      void read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::EventManager *eventManager);
 
       sg::NodeIndex m_rootNode;
       sg::TreeNodeAllocator m_allocator;
-      std::map<std::string, std::map<unsigned int, util::ResourceHandle>> m_resourceMap;
+      std::map<std::string, std::map<std::string, util::ResourceHandle>> m_resourceMap;
     };
   }
 }
