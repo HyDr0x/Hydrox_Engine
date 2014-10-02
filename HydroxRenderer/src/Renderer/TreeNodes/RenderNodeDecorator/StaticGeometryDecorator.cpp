@@ -16,11 +16,11 @@ namespace he
     {
     }
 
-    void StaticGeometryDecorator::frustumCulling(unsigned int viewProjectionMatrixID) const
+    void StaticGeometryDecorator::frustumCulling() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-      m_renderNode->frustumCulling(viewProjectionMatrixID);
+      m_renderNode->frustumCulling();
 
       m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }

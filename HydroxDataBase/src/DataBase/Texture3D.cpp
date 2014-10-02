@@ -172,5 +172,14 @@ namespace he
       glGetTexImage(m_target, 0, m_format, m_type, data);
       glBindTexture(m_target, 0);
     }
+
+    util::SharedPointer<Texture2D> Texture3D::convertToTexture2D(unsigned int depth) const
+    {
+      util::SharedPointer<Texture2D> texture2D = util::SharedPointer<Texture2D>(new Texture2D(m_width, m_height, GL_TEXTURE_2D, m_type, m_internalFormat, m_format, m_channelNumber, m_bitsPerPixel));
+
+      glCopyImageSubData(m_texIndex, m_target, 0, 0, 0, depth, texture2D->getIndex(), texture2D->getTarget(), 0, 0, 0, 0, m_width, m_height, 1);
+
+      return texture2D;
+    }
   }
 }

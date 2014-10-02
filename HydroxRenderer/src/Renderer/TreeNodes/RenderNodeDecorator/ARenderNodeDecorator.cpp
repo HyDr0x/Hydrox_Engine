@@ -1,7 +1,7 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
 #include "Renderer/Traverser/ConstTraverser.h"
-#include "Renderer/Traverser/InsertGeometryTraverser.h"
+#include "Renderer/Traverser/InsertShadowGeometryTraverser.h"
 
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
@@ -21,12 +21,12 @@ namespace he
 
     bool ARenderNodeDecorator::preTraverse(Traverser* traverser)
     {
-      return m_renderNode->preTraverse(traverser);
+      return traverser->preTraverse(this);
     }
 
     void ARenderNodeDecorator::postTraverse(Traverser* traverser)
     {
-      m_renderNode->postTraverse(traverser);
+      traverser->postTraverse(this);
     }
 
     bool ARenderNodeDecorator::preTraverse(ConstTraverser* traverser) const
@@ -74,9 +74,9 @@ namespace he
       return m_renderNode->hasInstanceNumberChanged();
     }
 
-    void ARenderNodeDecorator::frustumCulling(unsigned int viewProjectionMatrixID) const
+    void ARenderNodeDecorator::frustumCulling() const
     {
-      m_renderNode->frustumCulling(viewProjectionMatrixID);
+      m_renderNode->frustumCulling();
     }
 
     void ARenderNodeDecorator::rasterizeGeometry() const

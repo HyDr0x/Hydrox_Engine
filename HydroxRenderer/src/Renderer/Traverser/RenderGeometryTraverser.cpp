@@ -11,7 +11,8 @@ namespace he
 {
   namespace renderer
   {
-    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
+    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager, unsigned int viewProjectionIndex) :
+      m_viewProjectionIndex(viewProjectionIndex)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
@@ -40,6 +41,11 @@ namespace he
       db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
 
       shader->useShader();
+
+      if(m_viewProjectionIndex != UINT32_MAX)
+      {
+        db::RenderShader::setUniform(0, GL_UNSIGNED_INT, &m_viewProjectionIndex);
+      }
 
       return true;
     }

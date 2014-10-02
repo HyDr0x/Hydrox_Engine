@@ -8,7 +8,7 @@
 namespace he
 {
   namespace renderer
-  {
+  {
     GroupNode::GroupNode(GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : TreeNode(parent, nextSibling),
                                                                                            m_firstChild(firstChild)
     {

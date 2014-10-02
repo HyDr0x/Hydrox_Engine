@@ -6,7 +6,7 @@
 namespace he
 {
   namespace renderer
-  {
+  {
     TreeNode::TreeNode(GroupNode* parent, TreeNode* nextSibling) : m_parent(parent),
                                                                    m_nextSibling(nextSibling)
     {

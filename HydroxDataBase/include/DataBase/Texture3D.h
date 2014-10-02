@@ -1,16 +1,15 @@
 #ifndef TEXTURE3D_H_
 #define TEXTURE3D_H_
 
-#include <list>
-
 #include <GL/glew.h>
 
-#include "DataBase/DLLExport.h"
-
+#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Math/Math.hpp>
 
+#include "DataBase/DLLExport.h"
 #include "DataBase/ManagedResource.h"
-#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include "DataBase/Texture2D.h"
 
 namespace he
 {
@@ -20,7 +19,7 @@ namespace he
     {
     public:
 
-      Texture3D() {}
+      Texture3D(){}
       Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data = nullptr, bool mipmapping = true);
       Texture3D(const Texture3D&);
 
@@ -51,7 +50,7 @@ namespace he
 
       void getTextureData(GLvoid* data) const;
 
-      friend class Renderquad;
+      util::SharedPointer<Texture2D> convertToTexture2D(unsigned int depth) const;
 
     private:
 

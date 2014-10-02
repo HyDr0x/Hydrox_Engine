@@ -6,8 +6,6 @@
 #include <stdarg.h>
 #include <assert.h>
 
-#include "Renderer/Pipeline/Renderquad.h"
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Pointer/SharedPointer.h>
 
@@ -20,37 +18,43 @@ namespace he
 {
   namespace renderer
   {
-    class GRAPHICAPI Renderquad2D : public Renderquad
+    class GRAPHICAPI Renderquad2D
     {
     public:
 
       Renderquad2D();
       ~Renderquad2D();
 
-      virtual void setWriteFrameBuffer(std::vector<unsigned int> indices = std::vector<unsigned int>()) const override;
-      virtual void unsetWriteFrameBuffer() const override;
+      void setWriteFrameBuffer(std::vector<unsigned int> indices = std::vector<unsigned int>()) const;
+      void unsetWriteFrameBuffer() const;
 
-      void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, std::vector<util::SharedPointer<db::Texture2D>> textures);
       void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, int count, ...);
-
-      void setRenderTargets(std::vector<util::SharedPointer<db::Texture2D>> textures);
+      void setRenderTargets(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, int count, ...);
       void setRenderTargets(int count, ...);
+      void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, util::SharedPointer<db::Texture3D> writeTexture3D);
+      void setRenderTargets(util::SharedPointer<db::Texture3D> depthTexture3D, util::SharedPointer<db::Texture3D> writeTexture3D);
+      void setRenderTargets(util::SharedPointer<db::Texture3D> writeTexture3D);
 
-      void setReadTextures(std::vector<util::SharedPointer<db::Texture2D>> textures);
-      void setReadTextures(int count, ...);
+      void render() const;
 
-      virtual void render() const override;
+      void clearTargets(GLfloat clearDepthValue, std::vector<util::Vector<float, 4>>& clearColors) const;
+      void clearTargets(GLfloat clearDepthValue, util::Vector<float, 4> clearColor) const;
 
     private:
 
       Renderquad2D(const Renderquad2D&);
       Renderquad2D& operator=(const Renderquad2D&);
 
-      virtual void createFramebuffer() override;
+      virtual void createFramebuffer(unsigned int layer);
 
       util::SharedPointer<db::Texture2D> m_depthTexture;
-      std::vector<util::SharedPointer<db::Texture2D>> m_readTextures;
+      util::SharedPointer<db::Texture3D> m_depthTexture3D;
+
       std::vector<util::SharedPointer<db::Texture2D>> m_writeTextures;
+      util::SharedPointer<db::Texture3D> m_writeTexture3D;
+
+      GLuint m_vboindex;
+      GLuint m_fboIndex;
     };
   }
 }

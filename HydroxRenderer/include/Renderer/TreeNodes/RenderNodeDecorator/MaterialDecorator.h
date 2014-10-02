@@ -23,7 +23,7 @@ namespace he
     public:
 
       MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager);
-      ~MaterialDecorator();
+      virtual ~MaterialDecorator();
 
       virtual bool preTraverse(Traverser* traverser);
       virtual void postTraverse(Traverser* traverser);

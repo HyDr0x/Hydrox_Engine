@@ -16,6 +16,8 @@ namespace he
     {
     public:
 
+      virtual ~IRenderNode() = 0 {}
+
       virtual bool preTraverse(Traverser* traverser) = 0;
       virtual void postTraverse(Traverser* traverser) = 0;
 
@@ -33,7 +35,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const = 0;
 
-      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const = 0;
+      virtual void frustumCulling() const = 0;
 
       virtual void rasterizeGeometry() const = 0;
 

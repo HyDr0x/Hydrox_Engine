@@ -37,20 +37,10 @@ namespace he
       }
     }
 
-    bool DeleteTraverser::preTraverse(VertexDeclarationNode* treeNode)
-    {
-      return true;
-    }
-
     void DeleteTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(ShaderNode* treeNode)
-    {
-      return true;
     }
 
     void DeleteTraverser::postTraverse(ShaderNode* treeNode)
@@ -59,20 +49,10 @@ namespace he
       treeNode = nullptr;
     }
 
-    bool DeleteTraverser::preTraverse(TextureNode* treeNode)
-    {
-      return true;
-    }
-
     void DeleteTraverser::postTraverse(TextureNode* treeNode)
     {
       delete treeNode;
       treeNode = nullptr;
-    }
-
-    bool DeleteTraverser::preTraverse(IRenderNode* treeNode)
-    {
-      return true;
     }
 
     void DeleteTraverser::postTraverse(IRenderNode* treeNode)

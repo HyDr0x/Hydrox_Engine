@@ -20,14 +20,10 @@ namespace he
     {
     public:
 
-      FrustumCullingTraverser(unsigned int viewProjectionMatrixID);
+      FrustumCullingTraverser();
       virtual ~FrustumCullingTraverser();
 
       virtual bool preTraverse(const IRenderNode* treeNode) override;
-
-    private:
-
-      unsigned int m_viewProjectionMatrixID;
     };
   }
 }

@@ -29,6 +29,8 @@ namespace he
 
       static IRenderNode* createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
+      static IRenderNode* createShadowRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+
     private:
 
     };

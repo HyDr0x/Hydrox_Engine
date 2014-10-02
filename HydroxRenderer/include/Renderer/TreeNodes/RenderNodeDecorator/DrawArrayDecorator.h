@@ -35,12 +35,12 @@ namespace he
     public:
 
       DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
-      ~DrawArrayDecorator();
+      virtual ~DrawArrayDecorator();
 
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
-      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const;
+      virtual void frustumCulling() const;
 
       virtual void rasterizeGeometry() const;
 

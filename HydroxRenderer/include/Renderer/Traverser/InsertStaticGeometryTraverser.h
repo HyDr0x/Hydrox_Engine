@@ -6,12 +6,9 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include "Renderer/Traverser/InsertGeometryTraverser.h"
-
 #include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
-
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -19,27 +16,22 @@ namespace he
   namespace xBar
   {
     class StaticGeometryContainer;
-    class SkinnedGeometryContainer;
   }
 
   namespace renderer
   {
     class IRenderNode;
 
-    class InsertStaticGeometryTraverser : public InsertGeometryTraverser
+    template<typename InsertTraverser> class InsertStaticGeometryTraverser : public InsertTraverser
     {
     public:
 
       InsertStaticGeometryTraverser(const xBar::StaticGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
       virtual ~InsertStaticGeometryTraverser();
-
-      virtual bool preTraverse(IRenderNode* treeNode);
-
-    private:
-
-      const xBar::StaticGeometryContainer& m_geometryContainer;
     };
   }
 }
+
+#include "Renderer/Traverser/InsertStaticGeometryTraverser.inl"
 
 #endif

@@ -13,13 +13,13 @@ namespace he
 {
   namespace sg
   {
-    ShadowLightNode::ShadowLightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
+    ShadowLightNode::ShadowLightNode(float near, float far, LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_lightType(lightType),
       m_eventManager(eventManager),
       m_renderable(false)
     {
-      setShadowProjection(1.0f, 1000.0f);
+      setShadowProjection(near, far);
 
       m_index.nodeType = SHADOWLIGHTNODE;
     }
@@ -30,7 +30,9 @@ namespace he
       m_lightType = sourceNode.m_lightType;
       m_renderable = sourceNode.m_renderable;
       m_lightData = sourceNode.m_lightData;
-      setShadowProjection(1.0f, 1000.0f);
+      m_near = sourceNode.m_near;
+      m_far = sourceNode.m_far;
+      m_projectionMatrix = sourceNode.m_projectionMatrix;
     }
 
     ShadowLightNode::ShadowLightNode(const TreeNode& sourceNode) : TreeNode(sourceNode)
@@ -59,7 +61,7 @@ namespace he
 
     TreeNode* ShadowLightNode::clone() const
     {
-      ShadowLightNode *newNode = new ShadowLightNode(m_lightType, m_eventManager, m_nodeName);
+      ShadowLightNode *newNode = new ShadowLightNode(m_near, m_far, m_lightType, m_eventManager, m_nodeName);
 
       newNode->m_lightData = m_lightData;
 
@@ -98,15 +100,18 @@ namespace he
 
     void ShadowLightNode::setShadowProjection(float near, float far)
     {
+      m_near = near;
+      m_far = far;
+
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        m_projectionMatrix = util::math::createPerspective(45.0f, 1.0f, near, far);
+        m_projectionMatrix = util::math::createPerspective(60.0f, 1.0f, m_near, m_far);
         break;
       case POINTLIGHT:
         break;
       case DIRECTIONALLIGHT:
-        m_projectionMatrix = util::math::createOrthographic(-1.0f, 1.0f, -1.0f, 1.0f, near, far);
+        m_projectionMatrix = util::math::createOrthographic(-100.0f, 100.0f, -100.0f, 100.0f, m_near, m_far);
         break;
       }
     }
@@ -133,9 +138,9 @@ namespace he
     void ShadowLightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
-      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
+      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis() * -1.0f;
 
-      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(m_lightData.position, m_lightData.direction, util::Vector<float, 3>(0.0f, 1.0f, 0.0f));
+      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.direction, util::Vector<float, 3>(0.0f, 1.0f, 0.0f));
     }
 
     LightType ShadowLightNode::getLightType() const
@@ -230,7 +235,10 @@ namespace he
       stream >> type;
       m_lightType = (LightType)type;
 
-      stream >> m_projectionMatrix;
+      stream >> m_near;
+      stream >> m_far;
+
+      setShadowProjection(m_near, m_far);
 
       m_eventManager = eventManager;
 
@@ -252,7 +260,8 @@ namespace he
 
       stream << (unsigned int)m_lightType << std::endl;
 
-      stream << m_projectionMatrix << std::endl;
+      stream << m_near << std::endl;
+      stream << m_far << std::endl;
     }
   }
 }

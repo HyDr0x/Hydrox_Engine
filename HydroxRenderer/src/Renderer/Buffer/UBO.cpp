@@ -32,7 +32,7 @@ namespace he
       m_matrixStrides.resize(m_uniformCount);
 
       glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
-      glBufferData(GL_UNIFORM_BUFFER, this->m_bufferSize, NULL, usage);
+      glBufferData(GL_UNIFORM_BUFFER, this->m_bufferSize, nullptr, usage);
 
       shader->getUniformParameters(uniformNames, m_uniformCount, &m_uniformIndices, &m_uniformOffsets, &m_arrayStrides, &m_matrixStrides);
 
@@ -48,7 +48,7 @@ namespace he
       m_uniformOffsets.resize(1, 0);
 
       glBindBuffer(GL_UNIFORM_BUFFER, m_bufferIndex);
-      glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, NULL, usage);
+      glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, nullptr, usage);
       glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
       delete[] m_bufferData;

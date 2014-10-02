@@ -25,7 +25,7 @@ namespace he
     public:
 
       ShadowLightNode(){}
-      ShadowLightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      ShadowLightNode(float near, float far, LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       ShadowLightNode(const ShadowLightNode& sourceNode);
       ShadowLightNode(const TreeNode& sourceNode);
       virtual ~ShadowLightNode();
@@ -86,6 +86,8 @@ namespace he
 
       db::ShadowLight m_lightData;
 
+      float m_near;
+      float m_far;
       util::Matrix<float, 4> m_projectionMatrix;
     };
   }

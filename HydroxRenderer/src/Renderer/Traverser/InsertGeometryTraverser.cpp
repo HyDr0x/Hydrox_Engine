@@ -1,7 +1,8 @@
 #include "Renderer/Traverser/InsertGeometryTraverser.h"
 
-#include <XBar/StaticGeometryContainer.h>
-#include <XBar/SkinnedGeometryContainer.h>
+#include <DataBase/Mesh.h>
+
+#include <XBar/IGeometryContainer.h>
 
 #include "Renderer/TreeNodes/TreeNode.h"
 #include "Renderer/TreeNodes/GroupNode.h"
@@ -10,30 +11,22 @@
 #include "Renderer/TreeNodes/TextureNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
 
-#include <DataBase/Mesh.h>
-
 namespace he
 {
   namespace renderer
   {
-    InsertGeometryTraverser::InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager) : 
+    InsertGeometryTraverser::InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) :
+      m_geometryContainer(geometryContainer),
       m_options(options),
       m_singletonManager(singletonManager),
       m_inserted(false)
     {
-    }
-
-    InsertGeometryTraverser::~InsertGeometryTraverser()
-    {
-    }
-
-    void InsertGeometryTraverser::initialize(db::Mesh* mesh, util::ResourceHandle materialHandle)
-    {
+      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
       m_primitiveType = mesh->getPrimitiveType();
       m_vertexStride = mesh->getVertexStride();
 
-      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(materialHandle);
+      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
@@ -48,6 +41,10 @@ namespace he
           m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
         }
       }
+    }
+
+    InsertGeometryTraverser::~InsertGeometryTraverser()
+    {
     }
 
     bool InsertGeometryTraverser::preTraverse(GroupNode* treeNode)
@@ -122,6 +119,18 @@ namespace he
       {
         createNewSibling(treeNode);
       }
+    }
+
+    bool InsertGeometryTraverser::preTraverse(IRenderNode* treeNode)
+    {
+      m_inserted = false;
+      if(treeNode->insertGeometry(m_geometryContainer))
+      {
+        m_stopTraversal = true;
+        m_inserted = true;
+      }
+
+      return false;
     }
 
     void InsertGeometryTraverser::postTraverse(IRenderNode* treeNode)

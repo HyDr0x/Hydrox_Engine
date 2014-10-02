@@ -57,7 +57,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const override;
 
-      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const override;
+      virtual void frustumCulling() const override;
 
       virtual void rasterizeGeometry() const override;
 

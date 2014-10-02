@@ -5,6 +5,8 @@
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
+#include "Renderer/Traverser/InsertGeometryTraverser.h"
+#include "Renderer/Traverser/InsertShadowGeometryTraverser.h"
 #include "Renderer/Traverser/InsertStaticGeometryTraverser.h"
 #include "Renderer/Traverser/InsertSkinnedGeometryTraverser.h"
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
@@ -21,19 +23,20 @@ namespace he
 {
   namespace renderer
   {
-    GeometryRenderer::GeometryRenderer() : m_renderRootNode(nullptr)
+    GeometryRenderer::GeometryRenderer() : m_renderRootNode(nullptr), m_renderShadowRootNode(nullptr)
     {
     }
 
     GeometryRenderer::~GeometryRenderer()
     {
-      DeleteTraverser deleteTraverser;
-      deleteTraverser.doTraverse(m_renderRootNode);
-
       delete m_renderRootNode;
+      delete m_renderShadowRootNode;
     }
 
-    void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, util::ResourceHandle shadowMapGenerationShaderHandle, unsigned int nodeCacheBlockSize)
+    void GeometryRenderer::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, 
+      util::ResourceHandle cullingShaderHandle, 
+      util::ResourceHandle staticShadowMapGenerationShaderHandle,
+      util::ResourceHandle animatedShadowMapGenerationShaderHandle)
     {
       m_options = options;
 
@@ -47,68 +50,84 @@ namespace he
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
       m_renderRootNode = new GroupNode();
+      m_renderShadowRootNode = new GroupNode();
 
       m_singletonManager = singletonManager;
 
       m_frustumCullingShaderHandle = cullingShaderHandle;
-      m_shadowMapGenerationShaderHandle = shadowMapGenerationShaderHandle;
+      m_staticShadowMapGenerationShaderHandle = staticShadowMapGenerationShaderHandle;
+      m_animatedShadowMapGenerationShaderHandle = animatedShadowMapGenerationShaderHandle;
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
 
     void GeometryRenderer::addRenderComponent(const xBar::StaticGeometryContainer &staticGeometry)
     {
-      InsertStaticGeometryTraverser insertTraverser(staticGeometry, m_options, m_singletonManager);
+      InsertStaticGeometryTraverser<InsertGeometryTraverser> insertTraverser(staticGeometry, m_options, m_singletonManager);
       insertTraverser.doTraverse(m_renderRootNode);
+
+      InsertStaticGeometryTraverser<InsertShadowGeometryTraverser> insertShadowTraverser(staticGeometry, m_options, m_singletonManager);
+      insertShadowTraverser.initialize(m_staticShadowMapGenerationShaderHandle, m_animatedShadowMapGenerationShaderHandle);
+      insertShadowTraverser.doTraverse(m_renderShadowRootNode);
     }
 
     void GeometryRenderer::addRenderComponent(const xBar::SkinnedGeometryContainer &skinnedGeometry)
     {
-      InsertSkinnedGeometryTraverser insertTraverser(skinnedGeometry, m_options, m_singletonManager);
+      InsertSkinnedGeometryTraverser<InsertGeometryTraverser> insertTraverser(skinnedGeometry, m_options, m_singletonManager);
       insertTraverser.doTraverse(m_renderRootNode);
+
+      InsertSkinnedGeometryTraverser<InsertShadowGeometryTraverser> insertShadowTraverser(skinnedGeometry, m_options, m_singletonManager);
+      insertShadowTraverser.initialize(m_staticShadowMapGenerationShaderHandle, m_animatedShadowMapGenerationShaderHandle);
+      insertShadowTraverser.doTraverse(m_renderShadowRootNode);
     }
 
     void GeometryRenderer::removeRenderComponent(const xBar::StaticGeometryContainer &staticGeometry)
     {
       RemoveGeometryTraverser removeTraverser(m_singletonManager, staticGeometry);
       removeTraverser.doTraverse(m_renderRootNode);
+
+      removeTraverser.doTraverse(m_renderShadowRootNode);
     }
 
     void GeometryRenderer::removeRenderComponent(const xBar::SkinnedGeometryContainer &skinnedGeometry)
     {
       RemoveGeometryTraverser removeTraverser(m_singletonManager, skinnedGeometry);
       removeTraverser.doTraverse(m_renderRootNode);
+
+      removeTraverser.doTraverse(m_renderShadowRootNode);
     }
 
-    void GeometryRenderer::generateShadowMap(unsigned int shadowMapIndex)
+    void GeometryRenderer::updateBuffer()
     {
-      FrustumCullingTraverser frustumCullingTraverser(shadowMapIndex);
+      UpdateTraverser updateTraverser;
+      updateTraverser.doTraverse(m_renderRootNode);
+      updateTraverser.doTraverse(m_renderShadowRootNode);
+    }
 
+    void GeometryRenderer::generateShadowMap(int shadowMapIndex)
+    {
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
-      frustumCullingTraverser.doTraverse(m_renderRootNode);
+      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &shadowMapIndex);
+      FrustumCullingTraverser frustumCullingTraverser;
+      frustumCullingTraverser.doTraverse(m_renderShadowRootNode);
       frustumCullingShader->useNoShader();
 
-      db::RenderShader *shadowMapGenerationShader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_shadowMapGenerationShaderHandle);
-      ShadowMapTraverser shadowMapTraverser;
-      shadowMapGenerationShader->useShader();
-      shadowMapTraverser.doTraverse(m_renderRootNode);
-      shadowMapGenerationShader->useNoShader();
+      RenderGeometryTraverser renderTraverser(m_singletonManager, shadowMapIndex);
+      renderTraverser.doTraverse(m_renderShadowRootNode);
     }
 
     void GeometryRenderer::rasterizeGeometry()
     {  
-      UpdateTraverser updateTraverser;
-      updateTraverser.doTraverse(m_renderRootNode);
-
-      FrustumCullingTraverser frustumCullingTraverser(UINT32_MAX);
-
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
+      unsigned int viewProjectionIndex = UINT32_MAX;
+      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &viewProjectionIndex);
+      FrustumCullingTraverser frustumCullingTraverser;
       frustumCullingTraverser.doTraverse(m_renderRootNode);
       frustumCullingShader->useNoShader();
 
-      RenderGeometryTraverser renderTraverser(m_singletonManager);
+      RenderGeometryTraverser renderTraverser(m_singletonManager, UINT32_MAX);
       renderTraverser.doTraverse(m_renderRootNode);
     }
 

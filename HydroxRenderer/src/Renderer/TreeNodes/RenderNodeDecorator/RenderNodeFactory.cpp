@@ -35,5 +35,24 @@ namespace he
         break;
       };
     }
+
+    IRenderNode* RenderNodeFactory::createShadowRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
+    {
+      switch(nodeType.toInt())
+      {
+      case SKINNEDNODE | INDEXEDNODE:
+        return new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager));
+        break;
+      case INDEXEDNODE:
+        return new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager));
+        break;
+      case SKINNEDNODE:
+        return new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager));
+        break;
+      default:
+        return new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager));
+        break;
+      };
+    }
   }
 }

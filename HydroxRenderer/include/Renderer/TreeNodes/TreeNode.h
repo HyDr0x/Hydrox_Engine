@@ -6,9 +6,10 @@
 namespace he
 {
   namespace renderer
-  {    class Traverser;
+  {
+    class Traverser;
     class ConstTraverser;
-    class InsertGeometryTraverser;
+    class InsertShadowGeometryTraverser;
     class GroupNode;
 
     class TreeNode

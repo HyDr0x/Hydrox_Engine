@@ -68,7 +68,9 @@ namespace he
       util::ResourceHandle frustumCullingShaderHandle,
       util::ResourceHandle offscreenBufferShaderHandle,
       util::ResourceHandle directLightShaderHandle,
-      util::ResourceHandle combineShaderHandle)
+      util::ResourceHandle combineShaderHandle,
+      util::ResourceHandle staticShadowMapGenerationShaderHandle,
+      util::ResourceHandle animatedShadowMapGenerationShaderHandle)
     {
       m_singletonManager = singletonManager;
 
@@ -77,7 +79,7 @@ namespace he
       m_offscreenBufferShaderHandle = offscreenBufferShaderHandle;
       m_combineShaderHandle = combineShaderHandle;
 
-      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle, frustumCullingShaderHandle);
+      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle, staticShadowMapGenerationShaderHandle, animatedShadowMapGenerationShaderHandle);
       m_gBuffer.initialize(m_options, m_singletonManager);
       m_billboardRenderer.initialize(m_singletonManager, billboardShaderHandle);
       m_spriteRenderer.initialize(m_singletonManager, spriteShaderHandle, maxLayer);
@@ -97,7 +99,7 @@ namespace he
       m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &far);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition)
+    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition, float near, float far)
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
@@ -112,10 +114,10 @@ namespace he
 
       {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         m_gBuffer.clear();
         m_lightRenderer.clear();
-
+        
         if(m_wireframe)
         {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -123,6 +125,7 @@ namespace he
 
         m_gBuffer.setGBuffer();
 
+        m_geometryRasterizer.updateBuffer();
         m_geometryRasterizer.rasterizeGeometry();
 
         m_gBuffer.unsetGBuffer();
@@ -133,13 +136,15 @@ namespace he
         }
 
         m_lightRenderer.updateBuffer();
-
-        //for(unsigned int i = 0; i < ; i++)
-        //{
-        //  m_lightRenderer.setShadowMap();
-        //  m_geometryRasterizer.generateShadowMap();
-        //  m_lightRenderer.unsetShadowMap();
-        //}
+        
+        //glPolygonOffset(-1.1f, -4.0f);
+        for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
+        {
+          m_lightRenderer.setShadowMap(4, i);
+          m_geometryRasterizer.generateShadowMap(i);
+          m_lightRenderer.unsetShadowMap(4);
+        }
+        //glPolygonOffset(0.0f, 0.0f);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
 
@@ -147,22 +152,27 @@ namespace he
 
         m_billboardRenderer.render();
 
-        if(m_skyboxRendering)
+        if(m_skyboxRendering)     
         {
           m_skyboxRenderer.render();
         }
 
         m_gBuffer.unsetGBuffer();
       }
-
-      //m_fullscreenRenderQuad.setReadTextures(1, m_gBuffer.getColorTexture());
+      
       //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
-
-      m_fullscreenRenderQuad.setReadTextures(2, m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture());
       db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
 
       shader->useShader();
+      //m_gBuffer.getDepthTexture()->setTexture(0, 0);
+      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->setTexture(0, 0);
+      m_gBuffer.getColorTexture()->setTexture(0, 0);
+      m_lightRenderer.getLightTexture()->setTexture(1, 1);
       m_fullscreenRenderQuad.render();
+      m_lightRenderer.getLightTexture()->unsetTexture();
+      m_gBuffer.getColorTexture()->unsetTexture();
+      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->unsetTexture();
+      //m_gBuffer.getDepthTexture()->unsetTexture();
       shader->useNoShader();
 
       m_spriteRenderer.render();

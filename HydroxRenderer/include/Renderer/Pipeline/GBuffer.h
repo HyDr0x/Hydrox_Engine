@@ -9,7 +9,7 @@
 #include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Signals/EventManager.h>
 
-#include "Renderer/Pipeline/Renderquad2D.h"
+#include "Renderer/Pipeline/Renderquad.h"
 
 namespace he
 {
@@ -60,7 +60,7 @@ namespace he
       util::SharedPointer<db::Texture2D> m_normalTexture;
       util::SharedPointer<db::Texture2D> m_materialTexture;
 
-      Renderquad2D m_fullscreenRenderQuad;
+      Renderquad m_fullscreenRenderQuad;
 
       util::Vector<float, 4> m_clearColor;
     };

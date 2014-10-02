@@ -7,7 +7,6 @@ namespace he
   {
     class TreeNode;
     class GroupNode;
-
     class VertexDeclarationNode;
     class ShaderNode;
     class TextureNode;

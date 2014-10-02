@@ -3,24 +3,21 @@
 
 #include <vector>
 
+#include <DataBase/ResourceManager.hpp>
+
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/Flags.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
-
-#include <DataBase/ResourceManager.hpp>
-
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
-
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
   namespace xBar
   {
-    class StaticGeometryContainer;
-    class SkinnedGeometryContainer;
+    class IGeometryContainer;
   }
 
   namespace renderer
@@ -31,7 +28,7 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(const RenderOptions& options, util::SingletonManager *singletonManager);
+      InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
       virtual ~InsertGeometryTraverser() = 0;
 
       virtual bool preTraverse(GroupNode* treeNode);
@@ -46,7 +43,7 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(IRenderNode* treeNode) = 0;
+      virtual bool preTraverse(IRenderNode* treeNode);
       virtual void postTraverse(IRenderNode* treeNode);
 
       void createNewChildNode(TreeNode* parent);
@@ -63,11 +60,9 @@ namespace he
 
     protected:
 
-      void initialize(db::Mesh* mesh, util::ResourceHandle materialHandle);
-
       util::SingletonManager *m_singletonManager;
 
-      bool m_inserted;
+      const xBar::IGeometryContainer& m_geometryContainer;
 
       const RenderOptions& m_options;
 
@@ -77,6 +72,8 @@ namespace he
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
+
+      bool m_inserted;
     };
   }
 }

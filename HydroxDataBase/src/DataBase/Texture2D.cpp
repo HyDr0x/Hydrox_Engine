@@ -128,6 +128,11 @@ namespace he
       return util::Vector<unsigned int, 2>(m_width, m_height);
     }
 
+    GLuint Texture2D::getIndex() const
+    {
+      return m_texIndex;
+    }
+
     GLenum Texture2D::getTarget() const
     {
       return m_target;

@@ -40,6 +40,8 @@ namespace he
 
       ShadowLight();
 
+      util::Matrix<float, 4> viewProj;
+
       util::Vector<float, 4> position;//w component = spotLightExponent
       util::Vector<float, 4> direction;//w component = spotLightCutoff
 
@@ -50,9 +52,6 @@ namespace he
       float constAttenuation;
       float linearAttenuation;
       float quadricAttenuation;
-
-      util::Matrix<float, 4> viewProj;
-      util::Matrix<float, 4> invViewProj;
     };
   }
 }

@@ -1,15 +1,12 @@
 #ifndef TEXTURE2D_H_
 #define TEXTURE2D_H_
 
-#include <list>
-
 #include <GL/glew.h>
-
-#include "DataBase/DLLExport.h"
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
+#include "DataBase/DLLExport.h"
 #include "DataBase/ManagedResource.h"
 
 namespace he
@@ -40,6 +37,7 @@ namespace he
       void bindToFramebuffer(GLenum attachment);
 
       util::Vector<unsigned int, 2> getResolution() const;
+      GLuint getIndex() const;
       GLenum getTarget() const;
       GLenum getInternalFormat() const;
       GLenum getFormat() const;

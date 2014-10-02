@@ -5,8 +5,11 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertShadowGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertSkinnedGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertSkinnedGeometryTraverser.inl 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertStaticGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertStaticGeometryTraverser.inl 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShadowMapTraverser.h 

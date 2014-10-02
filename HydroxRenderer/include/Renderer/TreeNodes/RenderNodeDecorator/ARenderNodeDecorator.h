@@ -48,7 +48,7 @@ namespace he
 
       virtual bool hasInstanceNumberChanged() const;
 
-      virtual void frustumCulling(unsigned int viewProjectionMatrixID) const;
+      virtual void frustumCulling() const;
 
       virtual void rasterizeGeometry() const;
 

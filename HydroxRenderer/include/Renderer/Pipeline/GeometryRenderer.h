@@ -32,9 +32,14 @@ namespace he
       GeometryRenderer();
       ~GeometryRenderer();
 
-      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, util::ResourceHandle cullingShaderHandle, util::ResourceHandle shadowMapGenerationShaderHandle, unsigned int nodeCacheBlockSize = 8);
+      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, 
+        util::ResourceHandle cullingShaderHandle, 
+        util::ResourceHandle staticShadowMapGenerationShaderHandle, 
+        util::ResourceHandle animatedShadowMapGenerationShaderHandle);
 
-      void generateShadowMap(unsigned int shadowMapIndex);
+      void updateBuffer();
+
+      void generateShadowMap(int shadowMapIndex);
 
       void rasterizeGeometry();
 
@@ -52,11 +57,14 @@ namespace he
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
       util::ResourceHandle m_frustumCullingShaderHandle;
-      util::ResourceHandle m_shadowMapGenerationShaderHandle;
+
+      util::ResourceHandle m_staticShadowMapGenerationShaderHandle;
+      util::ResourceHandle m_animatedShadowMapGenerationShaderHandle;
 
       RenderOptions m_options;
 
       GroupNode *m_renderRootNode;
+      GroupNode *m_renderShadowRootNode;
 
       util::SingletonManager *m_singletonManager;
     };

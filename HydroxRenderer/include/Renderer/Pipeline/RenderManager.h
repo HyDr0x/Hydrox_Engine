@@ -68,11 +68,13 @@ namespace he
         util::ResourceHandle frustumCullingShaderHandle,
         util::ResourceHandle gBufferShaderHandle,
         util::ResourceHandle directLightShaderHandle,
-        util::ResourceHandle combineShaderHandle);
+        util::ResourceHandle combineShaderHandle,
+        util::ResourceHandle staticShadowMapGenerationShaderHandle,
+        util::ResourceHandle animatedShadowMapGenerationShaderHandle);
 
       void setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far);
 
-      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition);
+      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition, float near, float far);
 
       void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
@@ -104,7 +106,7 @@ namespace he
 
       util::ResourceHandle m_offscreenBufferShaderHandle;
       util::ResourceHandle m_combineShaderHandle;
-      Renderquad2D m_fullscreenRenderQuad;
+      Renderquad m_fullscreenRenderQuad;
 
       RenderOptions m_options;
 

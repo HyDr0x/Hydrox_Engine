@@ -8,8 +8,7 @@
 #include <DataBase/Texture2D.h>
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
-#include "Renderer/Pipeline/Renderquad2D.h"
-#include "Renderer/Pipeline/Renderquad3D.h"
+#include "Renderer/Pipeline/Renderquad.h"
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -53,6 +52,10 @@ namespace he
 
       void clear() const;
 
+      unsigned int getShadowLightNumber() const;
+
+      util::SharedPointer<db::Texture3D> getShadowMaps() const;
+
     private:
       
       LightRenderer(const LightRenderer&);
@@ -65,14 +68,14 @@ namespace he
       util::SingletonManager *m_singletonManager;
 
       std::list<const xBar::ShadowLightContainer> m_shadowLights;
-      util::SharedPointer<db::Texture3D> m_shadowMaps;
       GPUImmutableBuffer m_shadowedLightBuffer;
-      Renderquad3D m_renderShadowMapsQuad;
+      util::SharedPointer<db::Texture3D> m_shadowMaps;
+      Renderquad m_renderShadowMapsQuad;
 
       std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
 
-      Renderquad2D m_renderLightMapQuad;
+      Renderquad m_renderLightMapQuad;
       util::SharedPointer<db::Texture2D> m_lightTexture;
 
       util::ResourceHandle m_createShadowMapShaderHandle;

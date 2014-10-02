@@ -81,12 +81,10 @@ namespace he
       return m_instanceNumberChanged;
     }
 
-    void SkinnedRenderNode::frustumCulling(unsigned int viewProjectionMatrixID) const
+    void SkinnedRenderNode::frustumCulling() const
     {
       unsigned int instanceNumber = m_instances.size();
       db::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
-      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &viewProjectionMatrixID);
-
       db::ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 

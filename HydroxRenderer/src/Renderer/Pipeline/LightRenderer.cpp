@@ -74,8 +74,6 @@ namespace he
 
     void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
     {
-      m_renderLightMapQuad.setReadTextures(3, depthMap, normalMap, materialMap);
-
       m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(1, util::Vector<float, 4>(0, 0, 0, 0)));
 
       db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_directLightShaderHandle);
@@ -83,19 +81,27 @@ namespace he
       shader->useShader();
 
       GLuint lightNumber = m_lights.size();
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &lightNumber);
+      db::RenderShader::setUniform(4, GL_UNSIGNED_INT, &lightNumber);
 
       GLuint shadowLightNumber = m_shadowLights.size();
-      db::RenderShader::setUniform(4, GL_UNSIGNED_INT, &shadowLightNumber);
+      db::RenderShader::setUniform(5, GL_UNSIGNED_INT, &shadowLightNumber);
 
       m_lightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_renderLightMapQuad.setWriteFrameBuffer();
       
+      depthMap->setTexture(0, 0);
+      normalMap->setTexture(1, 1);
+      materialMap->setTexture(2, 2);
+      if(m_shadowMaps) m_shadowMaps->setTexture(3, 3);
       m_renderLightMapQuad.render();
+      if(m_shadowMaps) m_shadowMaps->unsetTexture();
+      materialMap->unsetTexture();
+      normalMap->unsetTexture();
+      depthMap->unsetTexture();
 
       m_renderLightMapQuad.unsetWriteFrameBuffer();
-      m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_shadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_lightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       shader->useNoShader();
@@ -108,6 +114,7 @@ namespace he
 
     void LightRenderer::setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex)
     {
+      m_renderShadowMapsQuad.clearTargets(1.0f, util::Vector<float, 4>::identity(), std::vector<unsigned int>(1, shadowMapIndex));
       m_renderShadowMapsQuad.setWriteFrameBuffer(std::vector<unsigned int>(1, shadowMapIndex));
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
     }
@@ -116,6 +123,17 @@ namespace he
     {
       m_shadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
       m_renderShadowMapsQuad.unsetWriteFrameBuffer();
+
+      //std::vector<float> data(m_options.shadowMapWidth * m_options.shadowMapHeight);
+      //m_shadowMaps->convertToTexture2D(0)->getTextureData(&data[0]);
+      //float depth = 0.0f;
+      //for(unsigned int i = 0; i < data.size(); i++)
+      //{
+      //  if(data[i] >= 0.0625f)
+      //  {
+      //    depth = data[i];
+      //  }
+      //}
     }
 
     void LightRenderer::addLight(const xBar::LightContainer& light)
@@ -132,7 +150,7 @@ namespace he
 
     void LightRenderer::addShadowLight(const xBar::ShadowLightContainer& light)
     {
-      unsigned int shadowMapLayer = m_shadowMaps ? m_shadowMaps->getResolution()[2]  : 0;
+      unsigned int shadowMapLayer = m_shadowMaps ? m_shadowMaps->getResolution()[2] : 0;
 
       if(shadowMapLayer < m_maxShadowMapsPerTextureArray)
       {
@@ -149,7 +167,7 @@ namespace he
     {
       unsigned int shadowMapLayer = m_shadowMaps ? m_shadowMaps->getResolution()[2] : 0;
 
-      if(shadowMapLayer > 1)
+      if(shadowMapLayer > 0)
       {
         m_shadowMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options.shadowMapWidth, m_options.shadowMapHeight, shadowMapLayer - 1, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_R32F, GL_RED, 1, 32, nullptr));
       }
@@ -160,7 +178,17 @@ namespace he
 
     void LightRenderer::clear() const
     {
-      m_renderLightMapQuad.clearTargets(1.0f, util::Vector<float, 4>(1.0f, 1.0f, 1.0f, 1.0f));
+      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(1, util::Vector<float, 4>(1.0f, 1.0f, 1.0f, 1.0f)));
+    }
+
+    unsigned int LightRenderer::getShadowLightNumber() const
+    {
+      return m_shadowLights.size();
+    }
+
+    util::SharedPointer<db::Texture3D> LightRenderer::getShadowMaps() const
+    {
+      return m_shadowMaps;
     }
 
     void LightRenderer::registerRenderComponentSlots(util::EventManager *eventManager)

@@ -80,28 +80,36 @@ namespace he
         //                         0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
         //                         0.0f,                           0.0f,                            -1.0f,                           0.0f);
 
-        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            0.0f, 0.0f,
-                                 0.0f,                           (2.0f * cnear) / (top - bottom), 0.0f, 0.0f,
-                                 0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
-                                 0.0f,                           0.0f,                            -1.0f,                           0.0f);
+        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                           0.0f,                             0.0f,
+                                 0.0f,                          (2.0f * cnear) / (top - bottom), 0.0f,                             0.0f,
+                                 0.0f,                           0.0f,                         -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
+                                 0.0f,                           0.0f,                          -1.0f,                             0.0f);
       }
 
       inline Matrix<float, 4> createPerspective(float fov, float aspectRatio, float cnear, float cfar)
       {
-        float f = 1.0f / tanf(fov / 2.0f);
+        float f = 1.0f / tanf(degToRad(fov) / 2.0f);
 
-        return Matrix<float,4>(f / aspectRatio,             0.0f,                       0.0f,                               0.0f,
-                               0.0f,                        f,                          0.0f,                               0.0f,
-                               0.0f,                        0.0f,                       -(cfar + cnear) / (cfar - cnear),    -(2.0f * cfar * cnear) / (cfar - cnear),
-                               0.0f,                        0.0f,                       -1.0f,                              0.0f);
+        return Matrix<float,4>(f / aspectRatio,             0.0f,                       0.0f,                             0.0f,
+                               0.0f,                        f,                          0.0f,                             0.0f,
+                               0.0f,                        0.0f,                     -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
+                               0.0f,                        0.0f,                      -1.0f,                             0.0f);
       }
+
+      /*inline Matrix<float, 4> createOrthographic(float left, float right, float bottom, float top, float cnear, float cfar)
+      {
+        return Matrix<float, 4>(2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+                                0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+                                0.0f, 0.0f, -2.0f / (cfar - cnear), 0.0f,
+                                -(left + right) / (right - left), -(bottom + top) / (top - bottom), -(cnear + cfar) / (cfar - cnear), 1.0f);
+      }*/
 
       inline Matrix<float, 4> createOrthographic(float left, float right, float bottom, float top, float cnear, float cfar)
       {
-        return Matrix<float, 4>(2.0f / (right - left), 0.0f,                   0.0f,                   -(left + right) / (right - left),
-                                0.0f,                  2.0f / (top - bottom),  0.0f,                   -(bottom + top) / (top - bottom),
-                                0.0f,                  0.0f,                  -2.0f / (cfar - cnear),  -(cnear + cfar) / (cfar - cnear),
-                                0.0f,                  0.0f,                   0.0f,                   1.0f);
+        return Matrix<float, 4>(2.0f / (right - left), 0.0f,                  0.0f,                  -(left + right) / (right - left),
+                                0.0f,                  2.0f / (top - bottom), 0.0f,                  -(bottom + top) / (top - bottom),
+                                0.0f,                  0.0f,                 -2.0f / (cfar - cnear), -(cnear + cfar) / (cfar - cnear),
+                                0.0f,                  0.0f,                  0.0f,                   1.0f);
       }
 
       inline Matrix<float, 4> createLookAt(const Vector<float, 3>& camPos, const Vector<float, 3>& forwardVector, const Vector<float, 3>& upVektor)
