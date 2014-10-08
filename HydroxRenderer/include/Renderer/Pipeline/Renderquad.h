@@ -12,8 +12,6 @@
 #include <DataBase/Texture2D.h>
 #include <DataBase/Texture3D.h>
 
-#include "Renderer/Pipeline/RenderOptions.h"
-
 namespace he
 {
   namespace renderer
@@ -31,9 +29,10 @@ namespace he
       void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, int count, ...);
       void setRenderTargets(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, int count, ...);
       void setRenderTargets(int count, ...);
-      void setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, util::SharedPointer<db::Texture3D> writeTexture3D);
-      void setRenderTargets(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, util::SharedPointer<db::Texture3D> writeTexture3D);
-      void setRenderTargets(util::SharedPointer<db::Texture3D> writeTexture3D);
+
+      void setRenderTargets3D(util::SharedPointer<db::Texture2D> depthTexture, int count, ...);
+      void setRenderTargets3D(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, int count, ...);
+      void setRenderTargets3D(int count, ...);
 
       virtual void render() const;
 
@@ -51,7 +50,7 @@ namespace he
       util::SharedPointer<db::Texture3D> m_depthTexture3D;
 
       std::vector<util::SharedPointer<db::Texture2D>> m_writeTextures;
-      util::SharedPointer<db::Texture3D> m_writeTexture3D;
+      std::vector<util::SharedPointer<db::Texture3D>> m_writeTextures3D;
 
       GLuint m_vboindex;
       GLuint m_fboIndex;

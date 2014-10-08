@@ -9,7 +9,6 @@
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
 #include "Renderer/Pipeline/Renderquad.h"
-#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -27,6 +26,8 @@ namespace he
 
   namespace renderer
   {
+    class RenderOptions;
+
     class LightRenderer
     {
     public:
@@ -34,7 +35,7 @@ namespace he
       LightRenderer();
       ~LightRenderer();
 
-      void initialize(RenderOptions options, util::SingletonManager *singletonManager, util::ResourceHandle directLightShaderHandle);
+      void initialize(util::SingletonManager *singletonManager);
 
       void updateBuffer();
       void render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
@@ -44,17 +45,28 @@ namespace he
       void setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
       void unsetShadowMap(unsigned int bindingPoint);
 
+      void setReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
+      void unsetReflectiveShadowMap(unsigned int bindingPoint);
+
       void addLight(const xBar::LightContainer& light);
       void removeLight(const xBar::LightContainer& light);
 
       void addShadowLight(const xBar::ShadowLightContainer& light);
       void removeShadowLight(const xBar::ShadowLightContainer& light);
 
+      void addReflectiveShadowLight(const xBar::ShadowLightContainer& light);
+      void removeReflectiveShadowLight(const xBar::ShadowLightContainer& light);
+
       void clear() const;
 
       unsigned int getShadowLightNumber() const;
 
+      unsigned int getReflectiveShadowLightNumber() const;
+
       util::SharedPointer<db::Texture3D> getShadowMaps() const;
+
+      util::SharedPointer<db::Texture3D> getReflectiveShadowPosMaps() const;
+      util::SharedPointer<db::Texture3D> getReflectiveShadowNormalMaps() const;
 
     private:
       
@@ -63,14 +75,22 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      RenderOptions m_options;
+      RenderOptions *m_options;
 
       util::SingletonManager *m_singletonManager;
 
+      util::SharedPointer<db::Texture2D> m_shadowDepthMap;
+
       std::list<const xBar::ShadowLightContainer> m_shadowLights;
-      GPUImmutableBuffer m_shadowedLightBuffer;
       util::SharedPointer<db::Texture3D> m_shadowMaps;
+      GPUImmutableBuffer m_shadowedLightBuffer;
       Renderquad m_renderShadowMapsQuad;
+
+      std::list<const xBar::ShadowLightContainer> m_reflectiveShadowLights;
+      util::SharedPointer<db::Texture3D> m_shadowPosMaps;
+      util::SharedPointer<db::Texture3D> m_shadowNormalMaps;
+      GPUImmutableBuffer m_reflectiveShadowedLightBuffer;
+      Renderquad m_renderReflectiveShadowMapsQuad;
 
       std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
@@ -78,16 +98,13 @@ namespace he
       Renderquad m_renderLightMapQuad;
       util::SharedPointer<db::Texture2D> m_lightTexture;
 
-      util::ResourceHandle m_createShadowMapShaderHandle;
-
       util::ResourceHandle m_directLightShaderHandle;
-      util::ResourceHandle m_shadowMapShaderHandle;
-      util::ResourceHandle m_cascadedShadowMapShaderHandle;
 
       GLint m_maxShadowMapsPerTextureArray;
 
       bool m_lightNumberChanged;
       bool m_shadowLightNumberChanged;
+      bool m_relfectiveShadowLightNumberChanged;
     };
   }
 }

@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      SkinnedGeometryDecorator(IRenderNode *renderNode);
+      SkinnedGeometryDecorator(IRenderGroup *renderNode);
       virtual ~SkinnedGeometryDecorator();
 
       virtual void frustumCulling() const;

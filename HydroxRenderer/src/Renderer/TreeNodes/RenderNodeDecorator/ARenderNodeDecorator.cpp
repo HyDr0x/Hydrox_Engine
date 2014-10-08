@@ -10,7 +10,7 @@ namespace he
 {
   namespace renderer
   {
-    ARenderNodeDecorator::ARenderNodeDecorator(IRenderNode *renderNode) : m_renderNode(renderNode)
+    ARenderNodeDecorator::ARenderNodeDecorator(IRenderGroup *renderNode) : m_renderNode(renderNode)
     {
     }
 
@@ -19,24 +19,9 @@ namespace he
       delete m_renderNode;
     }
 
-    bool ARenderNodeDecorator::preTraverse(Traverser* traverser)
+    bool ARenderNodeDecorator::containsContainer(const xBar::IGeometryContainer& geometryContainer)
     {
-      return traverser->preTraverse(this);
-    }
-
-    void ARenderNodeDecorator::postTraverse(Traverser* traverser)
-    {
-      traverser->postTraverse(this);
-    }
-
-    bool ARenderNodeDecorator::preTraverse(ConstTraverser* traverser) const
-    {
-      return traverser->preTraverse(this);
-    }
-
-    void ARenderNodeDecorator::postTraverse(ConstTraverser* traverser) const
-    {
-      traverser->postTraverse(this);
+      return m_renderNode->containsContainer(geometryContainer);
     }
 
     bool ARenderNodeDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)

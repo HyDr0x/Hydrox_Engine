@@ -17,7 +17,8 @@ namespace he
       TreeNode(nodeName, parent, nextSibling),
       m_lightType(lightType),
       m_eventManager(eventManager),
-      m_renderable(false)
+      m_renderable(false),
+      m_reflectiveShadow(false)
     {
       setShadowProjection(near, far);
 
@@ -106,7 +107,7 @@ namespace he
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        m_projectionMatrix = util::math::createPerspective(60.0f, 1.0f, m_near, m_far);
+        m_projectionMatrix = util::math::createPerspective(60.0f, 4.0f / 3.0f, m_near, m_far);
         break;
       case POINTLIGHT:
         break;
@@ -125,14 +126,57 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnAddShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData));
+        if(m_reflectiveShadow)
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnAddReflectiveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+        else
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnAddShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
       }
       else if (m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnRemoveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData));
+        if(m_reflectiveShadow)
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnRemoveReflectiveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+        else
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnRemoveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
       }
 
       m_renderable = renderable;
+    }
+
+    void ShadowLightNode::setReflectiveShadow(bool reflectiveShadow)
+    {
+      if(m_renderable)
+      {
+        if(m_reflectiveShadow)
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnRemoveReflectiveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+        else
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnRemoveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+      }
+
+      m_reflectiveShadow = reflectiveShadow;
+
+      if(m_renderable)
+      {
+        if(m_reflectiveShadow)
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnAddReflectiveShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+        else
+        {
+          m_eventManager->raiseSignal<void(*)(const xBar::ShadowLightContainer& light)>(util::EventManager::OnAddShadowLightNode)->execute(xBar::ShadowLightContainer(m_lightData, m_reflectiveShadow));
+        }
+      }
     }
 
     void ShadowLightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
@@ -238,6 +282,8 @@ namespace he
       stream >> m_near;
       stream >> m_far;
 
+      stream >> m_reflectiveShadow;
+
       setShadowProjection(m_near, m_far);
 
       m_eventManager = eventManager;
@@ -262,6 +308,8 @@ namespace he
 
       stream << m_near << std::endl;
       stream << m_far << std::endl;
+
+      stream << m_reflectiveShadow;
     }
   }
 }

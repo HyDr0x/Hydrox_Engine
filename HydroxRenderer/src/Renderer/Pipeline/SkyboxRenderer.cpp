@@ -3,6 +3,8 @@
 #include <vector>
 #include <Utilities/PrimitiveGenerator/CubeGenerator.h>
 
+#include "Renderer/Pipeline/RenderShaderContainer.h"
+
 namespace he
 {
   namespace renderer
@@ -16,13 +18,13 @@ namespace he
       glDeleteVertexArrays(1, &m_skyBoxVAO);
     }
 
-    void SkyboxRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6])
+    void SkyboxRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxTextureHandles[6])
     {
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_textureArrayManager = singletonManager->getService<db::TextureArrayManager>();
 
-      m_skyboxShaderHandle = skyboxShaderHandle;
+      m_skyboxShaderHandle = singletonManager->getService<RenderShaderContainer>()->skyboxShaderHandle;
 
       db::Texture2D *texture;
       texture = m_textureManager->getObject(skyboxTextureHandles[0]);

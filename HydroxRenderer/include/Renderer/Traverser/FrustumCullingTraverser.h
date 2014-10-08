@@ -14,8 +14,6 @@ namespace he
 {
   namespace renderer
   {
-    class IRenderNode;
-
     class FrustumCullingTraverser : public ConstTraverser
     {
     public:
@@ -23,7 +21,7 @@ namespace he
       FrustumCullingTraverser();
       virtual ~FrustumCullingTraverser();
 
-      virtual bool preTraverse(const IRenderNode* treeNode) override;
+      virtual bool preTraverse(const RenderNode* treeNode) override;
     };
   }
 }

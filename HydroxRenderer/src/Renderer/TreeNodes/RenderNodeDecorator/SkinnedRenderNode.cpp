@@ -12,7 +12,7 @@ namespace he
 {
   namespace renderer
   {
-    SkinnedRenderNode::SkinnedRenderNode(const RenderOptions& options) :  
+    SkinnedRenderNode::SkinnedRenderNode(RenderOptions *options) :
       m_options(options),
       m_instanceNumberChanged(false)
     {
@@ -22,29 +22,22 @@ namespace he
     {
     }
 
-    bool SkinnedRenderNode::preTraverse(Traverser* traverser)
+    bool SkinnedRenderNode::containsContainer(const xBar::IGeometryContainer& geometryContainer)
     {
-      return traverser->preTraverse(this);
-    }
+      for(std::list<const xBar::SkinnedGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
+      {
+        if((*instanceIterator) == geometryContainer)
+        {
+          return true;
+        }
+      }
 
-    void SkinnedRenderNode::postTraverse(Traverser* traverser)
-    {
-      traverser->postTraverse(this);
-    }
-
-    bool SkinnedRenderNode::preTraverse(ConstTraverser* traverser) const
-    {
-      return traverser->preTraverse(this);
-    }
-
-    void SkinnedRenderNode::postTraverse(ConstTraverser* traverser) const
-    {
-      traverser->postTraverse(this);
+      return false;
     }
 
     bool SkinnedRenderNode::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
-      if(m_instances.size() >= m_options.maxGeometry)
+      if(m_instances.size() >= m_options->maxGeometry)
       {
         return false;
       }
@@ -99,17 +92,17 @@ namespace he
 
     unsigned int SkinnedRenderNode::getMaxGeometry() const
     {
-      return m_options.maxGeometry;
+      return m_options->maxGeometry;
     }
 
     unsigned int SkinnedRenderNode::getMaxMaterials() const
     {
-      return m_options.maxMaterials;
+      return m_options->maxMaterials;
     }
 
     unsigned int SkinnedRenderNode::getMaxBones() const
     {
-      return m_options.maxBones;
+      return m_options->maxBones;
     }
   }
 }

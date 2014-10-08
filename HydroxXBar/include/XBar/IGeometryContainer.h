@@ -3,20 +3,27 @@
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
+#include <Utilities/Miscellaneous/Flags.hpp>
 
 #include "XBar/DLLExport.h"
-
 #include "XBar/AContainer.h"
 
 namespace he
 {
   namespace xBar
   {
+    enum GRAPHICAPI RenderNodeType
+    {
+      SKINNEDNODE = 1,
+      INDEXEDNODE = 2,
+    };
+
     class GRAPHICAPI IGeometryContainer : public AContainer
     {
     public:
 
-      IGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle) : 
+      IGeometryContainer(util::Flags<RenderNodeType> nodeType, util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle) :
+        m_nodeType(nodeType),
         m_trfMatrix(trfMatrix),
         m_materialHandle(materialHandle),
         m_meshHandle(meshHandle)
@@ -47,9 +54,16 @@ namespace he
         return *m_trfMatrix;
       }
 
+      util::Flags<RenderNodeType> IGeometryContainer::getNodeType() const
+      {
+        return m_nodeType;
+      }
+
     protected:
 
       virtual void createHash() = 0;
+
+      util::Flags<RenderNodeType> m_nodeType;
 
       util::Matrix<float, 4> *m_trfMatrix;
 

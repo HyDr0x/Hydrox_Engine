@@ -4,12 +4,13 @@ namespace he
 {
   namespace xBar
   {
-    SkinnedGeometryContainer::SkinnedGeometryContainer(std::vector<util::Matrix<float, 4>> *boneTransformMatrices, 
+    SkinnedGeometryContainer::SkinnedGeometryContainer(std::vector<util::Matrix<float, 4>> *boneTransformMatrices,
                                                        std::vector<util::Matrix<float, 4>> *inverseBindPoseMatrices, 
+                                                       util::Flags<RenderNodeType> nodeType,
                                                        util::Matrix<float, 4> *trfMatrix, 
                                                        util::ResourceHandle materialHandle, 
                                                        util::ResourceHandle meshHandle) : 
-      IGeometryContainer(trfMatrix, materialHandle, meshHandle), 
+                                                       IGeometryContainer(nodeType, trfMatrix, materialHandle, meshHandle),
       m_boneTransformMatrices(boneTransformMatrices),
       m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {

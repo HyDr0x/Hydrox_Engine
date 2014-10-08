@@ -5,13 +5,14 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Utilities/Pointer/SharedPointer.h>
+
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/Flags.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
-#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -22,14 +23,12 @@ namespace he
 
   namespace renderer
   {
-    class IRenderNode;
-
     class InsertGeometryTraverser : public Traverser
     {
     public:
 
-      InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
-      virtual ~InsertGeometryTraverser() = 0;
+      InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager);
+      virtual ~InsertGeometryTraverser();
 
       virtual bool preTraverse(GroupNode* treeNode);
       virtual void postTraverse(GroupNode* treeNode);
@@ -43,8 +42,12 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(IRenderNode* treeNode);
-      virtual void postTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode);
+      virtual void postTraverse(RenderNode* treeNode);
+
+      util::SharedPointer<IRenderGroup> getCreatedRenderNode() const;
+
+    protected:
 
       void createNewChildNode(TreeNode* parent);
       void createNewChildNode(GroupNode* parent);
@@ -56,17 +59,15 @@ namespace he
       void createNewSibling(VertexDeclarationNode* sibling);
       void createNewSibling(ShaderNode* sibling);
       void createNewSibling(TextureNode* sibling);
-      void createNewSibling(IRenderNode* sibling);
-
-    protected:
+      void createNewSibling(RenderNode* sibling);
 
       util::SingletonManager *m_singletonManager;
 
       const xBar::IGeometryContainer& m_geometryContainer;
 
-      const RenderOptions& m_options;
+      util::SharedPointer<IRenderGroup> m_createdRenderGroup;
 
-      util::Flags<RenderNodeType> m_nodeType;
+      util::Flags<xBar::RenderNodeType> m_nodeType;
       GLenum m_primitiveType;
       GLuint m_vertexStride;
       unsigned int m_vertexDeclaration;

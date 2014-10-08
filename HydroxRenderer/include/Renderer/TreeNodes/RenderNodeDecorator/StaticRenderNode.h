@@ -12,26 +12,22 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
   namespace renderer
   {
-    struct RenderOptions;
+    class RenderOptions;
 
-    class StaticRenderNode : public IRenderNode
+    class StaticRenderNode : public IRenderGroup
     {
     public:
 
-      StaticRenderNode(const RenderOptions& options);
+      StaticRenderNode(RenderOptions *options);
       virtual ~StaticRenderNode();
 
-      virtual bool preTraverse(Traverser* traverser) override;
-      virtual void postTraverse(Traverser* traverser) override;
-
-      virtual bool preTraverse(ConstTraverser* traverser) const override;
-      virtual void postTraverse(ConstTraverser* traverser) const override;
+      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
 
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) override;
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) override;
@@ -71,7 +67,7 @@ namespace he
 
       bool m_instanceNumberChanged;
 
-      const RenderOptions& m_options;
+      RenderOptions *m_options;
 
       std::list<const xBar::StaticGeometryContainer> m_instances;
       std::list<const xBar::StaticGeometryContainer>::const_iterator m_iter;

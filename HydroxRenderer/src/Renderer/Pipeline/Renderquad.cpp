@@ -35,7 +35,18 @@ namespace he
       if(indices.empty())
       {
         unsigned int size = 0;
-        size += m_writeTexture3D ? m_writeTexture3D->getResolution()[2] : m_writeTextures.size();
+
+        if(!m_writeTextures3D.empty())
+        {
+          for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
+          {
+            size += m_writeTextures3D[i]->getResolution()[2];
+          }
+        }
+        else
+        {
+          size = m_writeTextures.size();
+        }
 
         indices.resize(size);
         for(unsigned int i = 0; i < indices.size(); i++)
@@ -128,35 +139,56 @@ namespace he
       createFramebuffer(UINT32_MAX);
     }
 
-    void Renderquad::setRenderTargets(util::SharedPointer<db::Texture2D> depthTexture, util::SharedPointer<db::Texture3D> writeTexture3D)
+    void Renderquad::setRenderTargets3D(util::SharedPointer<db::Texture2D> depthTexture, int count, ...)
     {
-      assert(writeTexture3D && depthTexture);
+      assert(count > 0 || depthTexture);
+
+      va_list texList;
+      va_start(texList, count);
 
       m_depthTexture = depthTexture;
 
-      m_writeTexture3D = writeTexture3D;
+      m_writeTextures3D.resize(count);
+      for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
+      {
+        m_writeTextures3D[i] = va_arg(texList, util::SharedPointer<db::Texture3D>);
+      }
 
       createFramebuffer(UINT32_MAX);
     }
 
-    void Renderquad::setRenderTargets(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, util::SharedPointer<db::Texture3D> writeTexture3D)
+    void Renderquad::setRenderTargets3D(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, int count, ...)
     {
-      assert(writeTexture3D && depthTexture3D);
+      assert(count > 0 || depthTexture3D);
+
+      va_list texList;
+      va_start(texList, count);
 
       m_depthTexture3D = depthTexture3D;
 
-      m_writeTexture3D = writeTexture3D;
+      m_writeTextures3D.resize(count);
+      for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
+      {
+        m_writeTextures3D[i] = va_arg(texList, util::SharedPointer<db::Texture3D>);
+      }
 
       createFramebuffer(layer);
     }
 
-    void Renderquad::setRenderTargets(util::SharedPointer<db::Texture3D> writeTexture3D)
+    void Renderquad::setRenderTargets3D(int count, ...)
     {
-      assert(writeTexture3D);
+      assert(count > 0);
+
+      va_list texList;
+      va_start(texList, count);
 
       m_depthTexture = util::SharedPointer<db::Texture2D>();
 
-      m_writeTexture3D = writeTexture3D;
+      m_writeTextures3D.resize(count);
+      for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
+      {
+        m_writeTextures3D[i] = va_arg(texList, util::SharedPointer<db::Texture3D>);
+      }
 
       createFramebuffer(UINT32_MAX);
     }
@@ -169,11 +201,20 @@ namespace he
       }
 
       glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
-      if(m_writeTexture3D)
+
+      if(!m_writeTextures3D.empty())
       {
-        for(unsigned int i = 0; i < m_writeTexture3D->getResolution()[2]; i++)
+        unsigned int indexOffset = 0;
+        for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
         {
-          m_writeTexture3D->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + i, i);
+          if(m_writeTextures3D[i])
+          {
+            for(unsigned int j = 0; j < m_writeTextures3D[i]->getResolution()[2]; j++)
+            {
+              m_writeTextures3D[i]->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + indexOffset + j, j);
+            }
+            indexOffset += m_writeTextures3D[i]->getResolution()[2];
+          }
         }
       }
       else

@@ -32,7 +32,7 @@ namespace he
       ParticleRenderer();
       ~ParticleRenderer();
 
-      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle particleShaderHandle);
+      void initialize(util::SingletonManager *singletonManager);
 
       void render() const;
 

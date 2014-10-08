@@ -16,7 +16,7 @@ namespace he
     {
     public:
 
-      StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
+      StaticGeometryContainer(util::Flags<RenderNodeType> nodeType, util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle);
       virtual ~StaticGeometryContainer();
 
     protected:

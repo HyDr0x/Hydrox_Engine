@@ -9,7 +9,7 @@ namespace he
 {
   namespace renderer
   {
-    DrawElementsDecorator::DrawElementsDecorator(IRenderNode *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) : 
+    DrawElementsDecorator::DrawElementsDecorator(IRenderGroup *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager) :
       ARenderNodeDecorator(renderNode), 
       m_indexType(indexType), 
       m_primitiveType(primitiveType),

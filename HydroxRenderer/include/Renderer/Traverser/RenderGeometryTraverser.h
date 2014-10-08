@@ -14,8 +14,6 @@ namespace he
 {
   namespace renderer
   {
-    class IRenderNode;
-
     class RenderGeometryTraverser : public Traverser
     {
     public:
@@ -32,8 +30,8 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(IRenderNode* treeNode);
-      virtual void postTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode);
+      virtual void postTraverse(RenderNode* treeNode);
 
     private:
 

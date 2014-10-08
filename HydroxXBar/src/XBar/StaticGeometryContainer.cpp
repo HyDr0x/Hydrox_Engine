@@ -4,8 +4,8 @@ namespace he
 {
   namespace xBar
   {
-    StaticGeometryContainer::StaticGeometryContainer(util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle) : 
-      IGeometryContainer(trfMatrix, materialHandle, meshHandle)
+    StaticGeometryContainer::StaticGeometryContainer(util::Flags<RenderNodeType> nodeType, util::Matrix<float, 4> *trfMatrix, util::ResourceHandle materialHandle, util::ResourceHandle meshHandle) :
+      IGeometryContainer(nodeType, trfMatrix, materialHandle, meshHandle)
     {
       createHash();
     }

@@ -9,22 +9,30 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNode.h"
+
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
   namespace renderer
   {
-    InsertGeometryTraverser::InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) :
+    InsertGeometryTraverser::InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager) :
       m_geometryContainer(geometryContainer),
-      m_options(options),
       m_singletonManager(singletonManager),
+      m_createdRenderGroup(util::SharedPointer<IRenderGroup>()),
       m_inserted(false)
     {
       db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
       m_primitiveType = mesh->getPrimitiveType();
       m_vertexStride = mesh->getVertexStride();
+      m_nodeType = geometryContainer.getNodeType();
+
+      if(mesh->getIndexCount())
+      {
+        m_nodeType |= util::Flags<xBar::RenderNodeType>(xBar::RenderNodeType::INDEXEDNODE);
+      }
 
       db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(m_geometryContainer.getMaterialHandle());
       m_shaderHandle = material->getShaderHandle();
@@ -121,10 +129,10 @@ namespace he
       }
     }
 
-    bool InsertGeometryTraverser::preTraverse(IRenderNode* treeNode)
+    bool InsertGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
       m_inserted = false;
-      if(treeNode->insertGeometry(m_geometryContainer))
+      if(treeNode->getRenderGroup()->insertGeometry(m_geometryContainer))
       {
         m_stopTraversal = true;
         m_inserted = true;
@@ -133,12 +141,17 @@ namespace he
       return false;
     }
 
-    void InsertGeometryTraverser::postTraverse(IRenderNode* treeNode)
+    void InsertGeometryTraverser::postTraverse(RenderNode* treeNode)
     {
       if(!m_inserted && treeNode->getNextSibling() == nullptr)
       {
         createNewSibling(treeNode);
       }
+    }
+
+    util::SharedPointer<IRenderGroup> InsertGeometryTraverser::getCreatedRenderNode() const
+    {
+      return m_createdRenderGroup;
     }
 
     void InsertGeometryTraverser::createNewChildNode(TreeNode* parent)
@@ -174,7 +187,8 @@ namespace he
 
     void InsertGeometryTraverser::createNewChildNode(VertexDeclarationNode* parent)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_options, m_primitiveType, m_vertexStride, m_singletonManager);
+      m_createdRenderGroup = RenderNodeFactory::createRenderNode(m_nodeType, m_primitiveType, m_vertexStride, m_singletonManager);
+      RenderNode *treeNode = new RenderNode(m_createdRenderGroup);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -211,9 +225,10 @@ namespace he
       treeNode->setParent(sibling->getParent());
     }
 
-    void InsertGeometryTraverser::createNewSibling(IRenderNode* sibling)
+    void InsertGeometryTraverser::createNewSibling(RenderNode* sibling)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createRenderNode(m_nodeType, m_options, m_primitiveType, m_vertexStride, m_singletonManager);
+      m_createdRenderGroup = RenderNodeFactory::createRenderNode(m_nodeType, m_primitiveType, m_vertexStride, m_singletonManager);
+      RenderNode *treeNode = new RenderNode(m_createdRenderGroup);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

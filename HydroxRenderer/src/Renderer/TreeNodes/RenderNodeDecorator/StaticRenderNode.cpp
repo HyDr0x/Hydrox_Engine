@@ -12,7 +12,7 @@ namespace he
 {
   namespace renderer
   {
-    StaticRenderNode::StaticRenderNode(const RenderOptions& options) :  
+    StaticRenderNode::StaticRenderNode(RenderOptions *options) :
       m_options(options),
       m_instanceNumberChanged(false)
     {
@@ -22,29 +22,22 @@ namespace he
     {
     }
 
-    bool StaticRenderNode::preTraverse(Traverser* traverser)
+    bool StaticRenderNode::containsContainer(const xBar::IGeometryContainer& geometryContainer)
     {
-      return traverser->preTraverse(this);
-    }
+      for(std::list<const xBar::StaticGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
+      {
+        if((*instanceIterator) == geometryContainer)
+        {
+          return true;
+        }
+      }
 
-    void StaticRenderNode::postTraverse(Traverser* traverser)
-    {
-      traverser->postTraverse(this);
-    }
-
-    bool StaticRenderNode::preTraverse(ConstTraverser* traverser) const
-    {
-      return traverser->preTraverse(this);
-    }
-
-    void StaticRenderNode::postTraverse(ConstTraverser* traverser) const
-    {
-      traverser->postTraverse(this);
+      return false;
     }
 
     bool StaticRenderNode::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
     {
-      if(m_instances.size() >= m_options.maxGeometry)
+      if(m_instances.size() >= m_options->maxGeometry)
       {
         return false;
       }
@@ -99,17 +92,17 @@ namespace he
 
     unsigned int StaticRenderNode::getMaxGeometry() const
     {
-      return m_options.maxGeometry;
+      return m_options->maxGeometry;
     }
 
     unsigned int StaticRenderNode::getMaxMaterials() const
     {
-      return m_options.maxMaterials;
+      return m_options->maxMaterials;
     }
 
     unsigned int StaticRenderNode::getMaxBones() const
     {
-      return m_options.maxBones;
+      return m_options->maxBones;
     }
   }
 }

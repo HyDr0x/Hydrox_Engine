@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      StaticGeometryDecorator(IRenderNode *renderNode);
+      StaticGeometryDecorator(IRenderGroup *renderNode);
       virtual ~StaticGeometryDecorator();
 
       virtual void frustumCulling() const;

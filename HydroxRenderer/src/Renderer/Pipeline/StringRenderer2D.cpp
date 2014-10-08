@@ -2,6 +2,9 @@
 
 #include "Renderer/String/StringTexture2D.h"
 
+#include "Renderer/Pipeline/RenderOptions.h"
+#include "Renderer/Pipeline/RenderShaderContainer.h"
+
 namespace he
 {
   namespace renderer
@@ -18,16 +21,16 @@ namespace he
       glDeleteVertexArrays(1, &m_stringVAO);
     }
 
-    void StringRenderer2D::initialize(util::SingletonManager *singletonManager, util::ResourceHandle stringShaderHandle, unsigned char maxLayer)
+    void StringRenderer2D::initialize(util::SingletonManager *singletonManager)
     {
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_stringShaderHandle = stringShaderHandle;
+      m_stringShaderHandle = singletonManager->getService<RenderShaderContainer>()->stringShaderHandle;
 
-      m_maxLayer = maxLayer;
+      m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
       m_transparentStrings.resize(m_maxLayer);
 
       glGenVertexArrays(1, &m_stringVAO);

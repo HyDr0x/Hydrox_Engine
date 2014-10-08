@@ -34,7 +34,7 @@ namespace he
     {
     public:
 
-      DrawArrayDecorator(IRenderNode *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      DrawArrayDecorator(IRenderGroup *renderNode, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       virtual ~DrawArrayDecorator();
 
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);

@@ -10,7 +10,7 @@ namespace he
 {
   namespace renderer
   {
-    SkinnedGeometryDecorator::SkinnedGeometryDecorator(IRenderNode *renderNode) : ARenderNodeDecorator(renderNode)
+    SkinnedGeometryDecorator::SkinnedGeometryDecorator(IRenderGroup *renderNode) : ARenderNodeDecorator(renderNode)
     {
     }
 

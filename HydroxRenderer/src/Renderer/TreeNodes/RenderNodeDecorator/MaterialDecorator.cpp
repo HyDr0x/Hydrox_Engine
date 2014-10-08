@@ -11,7 +11,7 @@ namespace he
 {
   namespace renderer
   {
-    MaterialDecorator::MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager) : 
+    MaterialDecorator::MaterialDecorator(IRenderGroup *renderNode, util::SingletonManager *singletonManager) :
       ARenderNodeDecorator(renderNode), 
       m_materialCount(0),
       m_materialNumberChanged(false)
@@ -23,16 +23,6 @@ namespace he
 
     MaterialDecorator::~MaterialDecorator()
     {
-    }
-
-    bool MaterialDecorator::preTraverse(Traverser* traverser)
-    {
-      return traverser->preTraverse(this);
-    }
-
-    void MaterialDecorator::postTraverse(Traverser* traverser)
-    {
-      return traverser->postTraverse(this);
     }
 
     bool MaterialDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)

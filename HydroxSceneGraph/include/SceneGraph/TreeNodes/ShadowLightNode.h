@@ -48,6 +48,8 @@ namespace he
 
       virtual void setRenderable(bool renderable);
 
+      void setReflectiveShadow(bool reflectiveShadow);
+
       void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
 
       LightType getLightType() const;
@@ -78,17 +80,18 @@ namespace he
 
     private:
 
+      db::ShadowLight m_lightData;
+
+      util::Matrix<float, 4> m_projectionMatrix;
+      float m_near;
+      float m_far;
+
       util::EventManager *m_eventManager;
 
       LightType m_lightType;
 
       bool m_renderable;
-
-      db::ShadowLight m_lightData;
-
-      float m_near;
-      float m_far;
-      util::Matrix<float, 4> m_projectionMatrix;
+      bool m_reflectiveShadow;
     };
   }
 }

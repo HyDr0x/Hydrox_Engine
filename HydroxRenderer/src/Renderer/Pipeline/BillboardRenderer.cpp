@@ -1,5 +1,7 @@
 #include "Renderer/Pipeline/BillboardRenderer.h"
 
+#include "Renderer/Pipeline/RenderShaderContainer.h"
+
 namespace he
 {
   namespace renderer
@@ -15,14 +17,14 @@ namespace he
       m_renderBillboards.clear();
     }
 
-    void BillboardRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle billboardShaderHandle)
+    void BillboardRenderer::initialize(util::SingletonManager *singletonManager)
     {
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_billboardShaderHandle = billboardShaderHandle;
+      m_billboardShaderHandle = singletonManager->getService<RenderShaderContainer>()->billboardShaderHandle;
 
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);

@@ -9,6 +9,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderOptions.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/StringRenderer2D.h 

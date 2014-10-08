@@ -20,18 +20,21 @@ namespace he
     {
     public:
 
-      ShadowLightContainer(const db::ShadowLight& lightData);
+      ShadowLightContainer(const db::ShadowLight& lightData, bool reflectiveShadow);
       ~ShadowLightContainer();
 
       bool operator == (const ShadowLightContainer& other) const;
 
       const db::ShadowLight * const getLightData() const;
 
+      bool isReflectiveShadow() const;
+
     private:
 
       void createHash();
 
       const db::ShadowLight& m_lightData;
+      bool m_reflectiveShadow;
     };
   }
 }

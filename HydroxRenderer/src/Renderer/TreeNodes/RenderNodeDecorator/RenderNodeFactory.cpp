@@ -11,46 +11,50 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/MaterialDecorator.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/StaticRenderNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/SkinnedRenderNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
   namespace renderer
   {
-    IRenderNode* RenderNodeFactory::createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
+    util::SharedPointer<IRenderGroup> RenderNodeFactory::createRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
+      RenderOptions *options = singletonManager->getService<RenderOptions>();
+
       switch(nodeType.toInt())
       {
-      case SKINNEDNODE | INDEXEDNODE:
-        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager);
+      case xBar::SKINNEDNODE | xBar::INDEXEDNODE:
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager));
         break;
-      case INDEXEDNODE:
-        return new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager);
+      case xBar::INDEXEDNODE:
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager));
         break;
-      case SKINNEDNODE:
-        return new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager);
+      case xBar::SKINNEDNODE:
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager));
         break;
       default:
-        return new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager);
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager));
         break;
       };
     }
 
-    IRenderNode* RenderNodeFactory::createShadowRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
+    util::SharedPointer<IRenderGroup> RenderNodeFactory::createShadowRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
+      RenderOptions *options = singletonManager->getService<RenderOptions>();
+
       switch(nodeType.toInt())
       {
-      case SKINNEDNODE | INDEXEDNODE:
-        return new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager));
+      case xBar::SKINNEDNODE | xBar::INDEXEDNODE:
+        return util::SharedPointer<IRenderGroup>(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)));
         break;
-      case INDEXEDNODE:
-        return new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager));
+      case xBar::INDEXEDNODE:
+        return util::SharedPointer<IRenderGroup>(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)));
         break;
-      case SKINNEDNODE:
-        return new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager));
+      case xBar::SKINNEDNODE:
+        return util::SharedPointer<IRenderGroup>(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager)));
         break;
       default:
-        return new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager));
+        return util::SharedPointer<IRenderGroup>(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager)));
         break;
       };
     }

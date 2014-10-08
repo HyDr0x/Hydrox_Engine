@@ -4,7 +4,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ARenderNodeDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsDecorator.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/IRenderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IRenderGroup.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialDecorator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderNodeFactory.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedGeometryDecorator.h 

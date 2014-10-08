@@ -8,7 +8,7 @@ namespace he
 {
   namespace renderer
   {
-    StaticGeometryDecorator::StaticGeometryDecorator(IRenderNode *renderNode) : ARenderNodeDecorator(renderNode)
+    StaticGeometryDecorator::StaticGeometryDecorator(IRenderGroup *renderNode) : ARenderNodeDecorator(renderNode)
     {
     }
 

@@ -9,7 +9,7 @@
 
 #include <DataBase/ResourceManager.hpp>
 
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
@@ -24,18 +24,14 @@ namespace he
     class DrawCommandInterface;
     class MatrixBufferInterface;
 
-    class ARenderNodeDecorator : public IRenderNode
+    class ARenderNodeDecorator : public IRenderGroup
     {
     public:
 
-      ARenderNodeDecorator(IRenderNode *renderNode);
+      ARenderNodeDecorator(IRenderGroup *renderNode);
       virtual ~ARenderNodeDecorator() = 0;
 
-      virtual bool preTraverse(Traverser* traverser);
-      virtual void postTraverse(Traverser* traverser);
-
-      virtual bool preTraverse(ConstTraverser* traverser) const override;
-      virtual void postTraverse(ConstTraverser* traverser) const override;
+      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
 
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
@@ -60,7 +56,7 @@ namespace he
 
     protected:
 
-      IRenderNode *m_renderNode;
+      IRenderGroup *m_renderNode;
     };
   }
 }

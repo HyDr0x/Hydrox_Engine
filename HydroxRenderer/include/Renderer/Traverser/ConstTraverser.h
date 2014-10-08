@@ -13,7 +13,7 @@ namespace he
     class VertexDeclarationNode;
     class ShaderNode;
     class TextureNode;
-    class IRenderNode;
+    class RenderNode;
 
     class GRAPHICAPI ConstTraverser
     {
@@ -39,8 +39,8 @@ namespace he
       virtual bool preTraverse(const TextureNode* treeNode);
       virtual void postTraverse(const TextureNode* treeNode);
 
-      virtual bool preTraverse(const IRenderNode* treeNode);
-      virtual void postTraverse(const IRenderNode* treeNode);
+      virtual bool preTraverse(const RenderNode* treeNode);
+      virtual void postTraverse(const RenderNode* treeNode);
 
     protected:
 

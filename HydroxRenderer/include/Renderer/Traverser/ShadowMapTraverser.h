@@ -14,8 +14,6 @@ namespace he
 {
   namespace renderer
   {
-    class IRenderNode;
-
     class ShadowMapTraverser : public Traverser
     {
     public:
@@ -23,7 +21,7 @@ namespace he
       ShadowMapTraverser();
       virtual ~ShadowMapTraverser();
 
-      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode);
     };
   }
 }

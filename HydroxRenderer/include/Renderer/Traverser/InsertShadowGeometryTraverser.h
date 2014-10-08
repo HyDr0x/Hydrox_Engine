@@ -5,13 +5,13 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Utilities/Pointer/SharedPointer.h>
+
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/Flags.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
-#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -22,16 +22,19 @@ namespace he
 
   namespace renderer
   {
-    class IRenderNode;
+    class IRenderGroup;
 
     class InsertShadowGeometryTraverser : public Traverser
     {
     public:
 
-      InsertShadowGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager);
-      virtual ~InsertShadowGeometryTraverser() = 0;
+      InsertShadowGeometryTraverser(util::SharedPointer<IRenderGroup> renderGroup,
+        const xBar::IGeometryContainer& geometryContainer,
+        util::SingletonManager *singletonManager, 
+        util::ResourceHandle staticShadowMapGenerationShaderHandle, 
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
 
-      void initialize(util::ResourceHandle staticShadowMapGenerationShaderHandle, util::ResourceHandle animatedShadowMapGenerationShaderHandle);
+      virtual ~InsertShadowGeometryTraverser();
 
       virtual bool preTraverse(GroupNode* treeNode);
       virtual void postTraverse(GroupNode* treeNode);
@@ -42,30 +45,25 @@ namespace he
       virtual bool preTraverse(ShaderNode* treeNode);
       virtual void postTraverse(ShaderNode* treeNode);
 
-      virtual bool preTraverse(IRenderNode* treeNode);
-      virtual void postTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode);
+      virtual void postTraverse(RenderNode* treeNode);
 
       void createNewChildNode(TreeNode* parent);
       void createNewChildNode(GroupNode* parent);
-      void createNewChildNode(VertexDeclarationNode* parent);
       void createNewChildNode(ShaderNode* parent);
+      void createNewChildNode(VertexDeclarationNode* parent);
 
       void createNewSibling(TreeNode* sibling);
-      void createNewSibling(VertexDeclarationNode* sibling);
       void createNewSibling(ShaderNode* sibling);
-      void createNewSibling(IRenderNode* sibling);
+      void createNewSibling(VertexDeclarationNode* sibling);
+      void createNewSibling(RenderNode* sibling);
 
     protected:
 
       util::SingletonManager *m_singletonManager;
 
-      const xBar::IGeometryContainer& m_geometryContainer;
+      util::SharedPointer<IRenderGroup> m_renderGroup;
 
-      const RenderOptions& m_options;
-
-      util::Flags<RenderNodeType> m_nodeType;
-      GLenum m_primitiveType;
-      GLuint m_vertexStride;
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;
 

@@ -6,8 +6,9 @@ namespace he
 {
   namespace xBar
   {
-    ShadowLightContainer::ShadowLightContainer(const db::ShadowLight& lightData) :
-      m_lightData(lightData)
+    ShadowLightContainer::ShadowLightContainer(const db::ShadowLight& lightData, bool reflectiveShadow) :
+      m_lightData(lightData),
+      m_reflectiveShadow(reflectiveShadow)
     {
     }
 
@@ -23,6 +24,11 @@ namespace he
     const db::ShadowLight * const ShadowLightContainer::getLightData() const
     {
       return &m_lightData;
+    }
+
+    bool ShadowLightContainer::isReflectiveShadow() const
+    {
+      return m_reflectiveShadow;
     }
 
     void ShadowLightContainer::createHash()

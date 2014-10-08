@@ -14,8 +14,6 @@ namespace he
 {
   namespace renderer
   {
-    class IRenderNode;
-
     class UpdateTraverser : public Traverser
     {
     public:
@@ -23,7 +21,7 @@ namespace he
       UpdateTraverser();
       virtual ~UpdateTraverser();
 
-      virtual bool preTraverse(IRenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode);
     };
   }
 }

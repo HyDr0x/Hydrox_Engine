@@ -3,6 +3,9 @@
 
 #include <GL/glew.h>
 
+#include <XBar/IGeometryContainer.h>
+
+#include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Miscellaneous/Flags.hpp>
 
 namespace he
@@ -14,22 +17,16 @@ namespace he
 
   namespace renderer
   {
-    class IRenderNode;
-    struct RenderOptions;
-
-    enum RenderNodeType
-    {
-      SKINNEDNODE = 1,
-      INDEXEDNODE = 2,
-    };
+    class IRenderGroup;
+    class RenderOptions;
 
     class RenderNodeFactory
     {
     public:
 
-      static IRenderNode* createRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      static util::SharedPointer<IRenderGroup> createRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
-      static IRenderNode* createShadowRenderNode(util::Flags<RenderNodeType> nodeType, const RenderOptions& options, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
+      static util::SharedPointer<IRenderGroup> createShadowRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
     private:
 

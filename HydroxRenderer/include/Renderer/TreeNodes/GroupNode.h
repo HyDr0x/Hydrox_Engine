@@ -6,7 +6,8 @@
 namespace he
 {
   namespace renderer
-  {    class GroupNode : public TreeNode
+  {
+    class GroupNode : public TreeNode
     {
     public:
 

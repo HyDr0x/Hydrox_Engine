@@ -6,7 +6,8 @@
 namespace he
 {
   namespace renderer
-  {
+  {
+
     ConstTraverser::ConstTraverser() : m_stopTraversal(false)
     {
     }
@@ -90,12 +91,12 @@ namespace he
     {
     }
 
-    bool ConstTraverser::preTraverse(const IRenderNode* treeNode)
+    bool ConstTraverser::preTraverse(const RenderNode* treeNode)
     {
       return true;
     }
 
-    void ConstTraverser::postTraverse(const IRenderNode* treeNode)
+    void ConstTraverser::postTraverse(const RenderNode* treeNode)
     {
     }
   }

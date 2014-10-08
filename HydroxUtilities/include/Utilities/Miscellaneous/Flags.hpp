@@ -35,6 +35,26 @@ namespace he
         return *this;
       }
 
+      int_t toInt()
+      {
+        return static_cast<int_t>(m_flag);
+      }
+
+      Flags operator&(const Flags& other)
+      {
+        return Flags(toInt() & other.toInt());
+      }
+
+      Flags operator|(const Flags& other)
+      {
+        return Flags(toInt() | other.toInt());
+      }
+
+      Flags operator^(const Flags& other)
+      {
+        return Flags(toInt() ^ other.toInt());
+      }
+
       int_t toInt() const
       {
         return static_cast<int_t>(m_flag);
@@ -42,17 +62,17 @@ namespace he
 
       Flags operator&(const Flags& other) const
       {
-        return Flags(toInt() & other.toInt);
+        return Flags(toInt() & other.toInt());
       }
 
       Flags operator|(const Flags& other) const
       {
-        return Flags(toInt() | other.toInt);
+        return Flags(toInt() | other.toInt());
       }
 
       Flags operator^(const Flags& other) const
       {
-        return Flags(toInt() ^ other.toInt);
+        return Flags(toInt() ^ other.toInt());
       }
 
       Flags operator~() const
@@ -73,6 +93,16 @@ namespace he
       Flags& operator^=(const Flags& other)
       {
         return *this = (*this ^ other);
+      }
+
+      bool operator==(const Flags& other) const
+      {
+        return this->toInt() == other.toInt();
+      }
+
+      bool operator!=(const Flags& other) const
+      {
+        return this->toInt() != other.toInt();
       }
 
     private:

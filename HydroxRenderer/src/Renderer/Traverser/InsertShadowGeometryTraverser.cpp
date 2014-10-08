@@ -9,39 +9,39 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNode.h"
 
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
+
+#include "Renderer/Pipeline/RenderShaderContainer.h"
 namespace he
 {
   namespace renderer
   {
-    InsertShadowGeometryTraverser::InsertShadowGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, const RenderOptions& options, util::SingletonManager *singletonManager) :
-      m_geometryContainer(geometryContainer),
-      m_options(options),
+    InsertShadowGeometryTraverser::InsertShadowGeometryTraverser(util::SharedPointer<IRenderGroup> renderGroup,
+      const xBar::IGeometryContainer& geometryContainer,
+      util::SingletonManager *singletonManager,
+      util::ResourceHandle staticShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
+      m_renderGroup(renderGroup),
       m_singletonManager(singletonManager),
       m_inserted(false)
     {
-    }
-
-    InsertShadowGeometryTraverser::~InsertShadowGeometryTraverser()
-    {
-    }
-
-    void InsertShadowGeometryTraverser::initialize(util::ResourceHandle staticShadowMapGenerationShaderHandle, util::ResourceHandle animatedShadowMapGenerationShaderHandle)
-    {
-      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
+      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
-      m_primitiveType = mesh->getPrimitiveType();
-      m_vertexStride = mesh->getVertexStride();
 
-      if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BONE_WEIGHTS)
+      if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        m_shaderHandle = animatedShadowMapGenerationShaderHandle;
+        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
       }
       else
       {
         m_shaderHandle = staticShadowMapGenerationShaderHandle;
       }
+    }
+
+    InsertShadowGeometryTraverser::~InsertShadowGeometryTraverser()
+    {
     }
 
     bool InsertShadowGeometryTraverser::preTraverse(GroupNode* treeNode)
@@ -56,26 +56,6 @@ namespace he
 
     void InsertShadowGeometryTraverser::postTraverse(GroupNode* treeNode)
     {
-    }
-
-    bool InsertShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
-    {
-      m_inserted = treeNode->isMesh(m_vertexDeclaration);
-
-      if(treeNode->getFirstChild() == nullptr && m_inserted)
-      {
-        createNewChildNode(treeNode);
-      }
-
-      return m_inserted;
-    }
-
-    void InsertShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
-    {
-      if(!m_inserted && treeNode->getNextSibling() == nullptr)
-      {
-        createNewSibling(treeNode);
-      }
     }
 
     bool InsertShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
@@ -98,22 +78,40 @@ namespace he
       }
     }
 
-    bool InsertShadowGeometryTraverser::preTraverse(IRenderNode* treeNode)
+    bool InsertShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
     {
-      m_inserted = false;
-      if(treeNode->insertGeometry(m_geometryContainer))
+      m_inserted = treeNode->isMesh(m_vertexDeclaration);
+
+      if(treeNode->getFirstChild() == nullptr && m_inserted)
       {
+        createNewChildNode(treeNode);
         m_stopTraversal = true;
-        m_inserted = true;
       }
 
-      return false;
+      return m_inserted;
     }
-    void InsertShadowGeometryTraverser::postTraverse(IRenderNode* treeNode)
+
+    void InsertShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
       if(!m_inserted && treeNode->getNextSibling() == nullptr)
       {
         createNewSibling(treeNode);
+      }
+    }
+
+    bool InsertShadowGeometryTraverser::preTraverse(RenderNode* treeNode)
+    {
+      m_inserted = false;
+
+      return m_inserted;
+    }
+
+    void InsertShadowGeometryTraverser::postTraverse(RenderNode* treeNode)
+    {
+      if(!m_inserted && treeNode->getNextSibling() == nullptr)
+      {
+        createNewSibling(treeNode);
+        m_stopTraversal = true;
       }
     }
 
@@ -141,7 +139,7 @@ namespace he
 
     void InsertShadowGeometryTraverser::createNewChildNode(VertexDeclarationNode* parent)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createShadowRenderNode(m_nodeType, m_options, m_primitiveType, m_vertexStride, m_singletonManager);
+      RenderNode *treeNode = new RenderNode(m_renderGroup);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -169,9 +167,9 @@ namespace he
       treeNode->setParent(sibling->getParent());
     }
 
-    void InsertShadowGeometryTraverser::createNewSibling(IRenderNode* sibling)
+    void InsertShadowGeometryTraverser::createNewSibling(RenderNode* sibling)
     {
-      IRenderNode *treeNode = RenderNodeFactory::createShadowRenderNode(m_nodeType, m_options, m_primitiveType, m_vertexStride, m_singletonManager);
+      RenderNode *treeNode = new RenderNode(m_renderGroup);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

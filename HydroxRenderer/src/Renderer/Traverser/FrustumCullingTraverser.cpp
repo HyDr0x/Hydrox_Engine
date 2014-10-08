@@ -3,7 +3,9 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNode.h"
+
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
@@ -17,9 +19,9 @@ namespace he
     {
     }
 
-    bool FrustumCullingTraverser::preTraverse(const IRenderNode* treeNode)
+    bool FrustumCullingTraverser::preTraverse(const RenderNode* treeNode)
     {
-      treeNode->frustumCulling();
+      treeNode->getRenderGroup()->frustumCulling();
 
       return true;
     }

@@ -32,7 +32,7 @@ namespace he
 
       const size_t getMaxSpriteLayer() const;
 
-      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle spriteShaderHandle, unsigned char maxLayer);
+      void initialize(util::SingletonManager *singletonManager);
 
       void render() const;
 

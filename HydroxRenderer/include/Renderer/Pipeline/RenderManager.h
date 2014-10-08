@@ -19,7 +19,6 @@
 #include "Renderer/Pipeline/SkyboxRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"
 #include "Renderer/Pipeline/StringRenderer2D.h"
-#include "Renderer/Pipeline/RenderOptions.h"
 
 #include "Renderer/Buffer/UBO.h"
 
@@ -41,6 +40,8 @@ namespace he
 
   namespace renderer
   {
+    class RenderOptions;
+
     class GRAPHICAPI RenderManager : public util::SingletonBehaviour
     {
     public:
@@ -58,19 +59,10 @@ namespace he
 
       const size_t getMaxSpriteLayer() const;
 
-      void enableSkybox(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
+      void enableSkybox(util::ResourceHandle skyboxTextureHandles[6]);
       void disableSkybox();
 
-      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, unsigned char maxLayer,
-        util::ResourceHandle billboardShaderHandle, 
-        util::ResourceHandle spriteShaderHandle, 
-        util::ResourceHandle stringShaderHandle, 
-        util::ResourceHandle frustumCullingShaderHandle,
-        util::ResourceHandle gBufferShaderHandle,
-        util::ResourceHandle directLightShaderHandle,
-        util::ResourceHandle combineShaderHandle,
-        util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle animatedShadowMapGenerationShaderHandle);
+      void initialize(util::SingletonManager *singletonManager);
 
       void setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far);
 
@@ -108,7 +100,7 @@ namespace he
       util::ResourceHandle m_combineShaderHandle;
       Renderquad m_fullscreenRenderQuad;
 
-      RenderOptions m_options;
+      RenderOptions *m_options;
 
       GBuffer m_gBuffer;
       LightRenderer m_lightRenderer;

@@ -29,7 +29,7 @@ namespace he
 
       const size_t getMaxSpriteLayer() const;
 
-      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6]);
+      void initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxTextureHandles[6]);
 
       void render() const;
 

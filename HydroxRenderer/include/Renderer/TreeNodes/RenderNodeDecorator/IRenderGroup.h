@@ -1,29 +1,22 @@
-#ifndef IRENDERNODE_H_
-#define IRENDERNODE_H_
+#ifndef IRENDERGROUP_H_
+#define IRENDERGROUP_H_
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <XBar/IGeometryContainer.h>
 
-#include "Renderer/TreeNodes/TreeNode.h"
-
 namespace he
 {
   namespace renderer
   {
-    class IRenderNode : public TreeNode
+    class IRenderGroup
     {
     public:
 
-      virtual ~IRenderNode() = 0 {}
+      virtual ~IRenderGroup() = 0 {}
 
-      virtual bool preTraverse(Traverser* traverser) = 0;
-      virtual void postTraverse(Traverser* traverser) = 0;
-
-      virtual bool preTraverse(ConstTraverser* traverser) const = 0;
-      virtual void postTraverse(ConstTraverser* traverser) const = 0;
-
+      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer) = 0;
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
 

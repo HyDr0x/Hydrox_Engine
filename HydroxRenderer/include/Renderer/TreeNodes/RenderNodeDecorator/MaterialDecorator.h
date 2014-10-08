@@ -22,11 +22,8 @@ namespace he
     {
     public:
 
-      MaterialDecorator(IRenderNode *renderNode, util::SingletonManager *singletonManager);
+      MaterialDecorator(IRenderGroup *renderNode, util::SingletonManager *singletonManager);
       virtual ~MaterialDecorator();
-
-      virtual bool preTraverse(Traverser* traverser);
-      virtual void postTraverse(Traverser* traverser);
 
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);

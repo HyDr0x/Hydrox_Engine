@@ -1,5 +1,5 @@
-#ifndef REMOVEGEOMETRYTRAVERSER_H_
-#define REMOVEGEOMETRYTRAVERSER_H_
+#ifndef REMOVESHADOWGEOMETRYTRAVERSER_H_
+#define REMOVESHADOWGEOMETRYTRAVERSER_H_
 
 #include <vector>
 
@@ -15,21 +15,23 @@ namespace he
   namespace xBar  {    class IGeometryContainer;  }
 
   namespace renderer
-  {    class RemoveGeometryTraverser : public Traverser
+  {    class RemoveShadowGeometryTraverser : public Traverser
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer);
-      virtual ~RemoveGeometryTraverser();
+      RemoveShadowGeometryTraverser(
+        util::SingletonManager *singletonManager, 
+        const xBar::IGeometryContainer& geometryContainer, 
+        util::ResourceHandle staticShadowMapGenerationShaderHandle,
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
+
+      virtual ~RemoveShadowGeometryTraverser();
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
       virtual void postTraverse(VertexDeclarationNode* treeNode);
 
       virtual bool preTraverse(ShaderNode* treeNode);
       virtual void postTraverse(ShaderNode* treeNode);
-
-      virtual bool preTraverse(TextureNode* treeNode);
-      virtual void postTraverse(TextureNode* treeNode);
 
       virtual bool preTraverse(RenderNode* treeNode);
       virtual void postTraverse(RenderNode* treeNode);

@@ -25,8 +25,6 @@ namespace he
 
   namespace renderer
   {
-    struct RenderOptions;
-
     class GBuffer
     {
     public:
@@ -34,7 +32,7 @@ namespace he
       GBuffer();
       ~GBuffer();
 
-      void initialize(const RenderOptions& renderingOptions, util::SingletonManager *singletonManager);
+      void initialize(util::SingletonManager *singletonManager);
 
       void setGBuffer() const;
       void unsetGBuffer() const;

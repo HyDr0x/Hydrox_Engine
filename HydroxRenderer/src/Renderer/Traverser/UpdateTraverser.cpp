@@ -3,7 +3,9 @@
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 #include "Renderer/TreeNodes/ShaderNode.h"
 #include "Renderer/TreeNodes/TextureNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
+#include "Renderer/TreeNodes/RenderNode.h"
+
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
@@ -17,9 +19,9 @@ namespace he
     {
     }
 
-    bool UpdateTraverser::preTraverse(IRenderNode* treeNode)
+    bool UpdateTraverser::preTraverse(RenderNode* treeNode)
     {
-      treeNode->updateBuffer();
+      treeNode->getRenderGroup()->updateBuffer();
 
       return true;
     }

@@ -10,14 +10,12 @@
 #include <Utilities/Pointer/SharedPointer.h>
 
 #include <DataBase/ResourceManager.hpp>
-#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
   namespace xBar
   {
-    class StaticGeometryContainer;
-    class SkinnedGeometryContainer;
+    class IGeometryContainer;
   }
 
   namespace renderer
@@ -32,22 +30,19 @@ namespace he
       GeometryRenderer();
       ~GeometryRenderer();
 
-      void initialize(const RenderOptions& options, util::SingletonManager *singletonManager, 
-        util::ResourceHandle cullingShaderHandle, 
-        util::ResourceHandle staticShadowMapGenerationShaderHandle, 
-        util::ResourceHandle animatedShadowMapGenerationShaderHandle);
+      void initialize(util::SingletonManager *singletonManager);
 
       void updateBuffer();
 
       void generateShadowMap(int shadowMapIndex);
 
+      void generateReflectiveShadowMap(int shadowMapIndex);
+
       void rasterizeGeometry();
 
-      void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
-      void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void addRenderComponent(const xBar::IGeometryContainer& geometry);
 
-      void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
-      void removeRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void removeRenderComponent(const xBar::IGeometryContainer& geometry);
 
     private:
 
@@ -59,12 +54,14 @@ namespace he
       util::ResourceHandle m_frustumCullingShaderHandle;
 
       util::ResourceHandle m_staticShadowMapGenerationShaderHandle;
-      util::ResourceHandle m_animatedShadowMapGenerationShaderHandle;
+      util::ResourceHandle m_skinnedShadowMapGenerationShaderHandle;
 
-      RenderOptions m_options;
+      util::ResourceHandle m_staticReflectiveShadowMapGenerationShaderHandle;
+      util::ResourceHandle m_skinnedReflectiveShadowMapGenerationShaderHandle;
 
       GroupNode *m_renderRootNode;
       GroupNode *m_renderShadowRootNode;
+      GroupNode *m_renderReflectiveShadowRootNode;
 
       util::SingletonManager *m_singletonManager;
     };

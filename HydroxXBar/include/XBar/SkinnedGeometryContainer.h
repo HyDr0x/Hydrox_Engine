@@ -15,8 +15,9 @@ namespace he
     {
     public:
 
-      SkinnedGeometryContainer(std::vector<util::Matrix<float, 4>> *boneTransformMatrices, 
+      SkinnedGeometryContainer(std::vector<util::Matrix<float, 4>> *boneTransformMatrices,
                                std::vector<util::Matrix<float, 4>> *inverseBindPoseMatrices, 
+                               util::Flags<RenderNodeType> nodeType,
                                util::Matrix<float, 4> *trfMatrix, 
                                util::ResourceHandle materialHandle, 
                                util::ResourceHandle meshHandle);

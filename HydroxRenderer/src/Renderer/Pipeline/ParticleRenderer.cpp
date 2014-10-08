@@ -7,6 +7,8 @@
 
 #include <DataBase/RenderShader.h>
 
+#include "Renderer/Pipeline/RenderShaderContainer.h"
+
 namespace he
 {
   namespace renderer
@@ -20,13 +22,13 @@ namespace he
       m_particleEmitter.clear();
     }
 
-    void ParticleRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle particleShaderHandle)
+    void ParticleRenderer::initialize(util::SingletonManager *singletonManager)
     {
       m_particleEmitterManager = singletonManager->getService<db::ParticleEmitterManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_particleShaderHandle = particleShaderHandle;
+      m_particleShaderHandle = singletonManager->getService<RenderShaderContainer>()->particleShaderHandle;
     }
 
     void ParticleRenderer::render() const

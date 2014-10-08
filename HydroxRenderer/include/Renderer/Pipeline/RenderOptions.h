@@ -1,12 +1,18 @@
 #ifndef RENDEROPTIONS_H_
 #define RENDEROPTIONS_H_
 
+#include <Utilities/Miscellaneous/SingletonBehaviour.hpp>
+
 namespace he
 {
   namespace renderer
   {
-    struct RenderOptions
+    class RenderOptions : public util::SingletonBehaviour
     {
+    public:
+
+      ~RenderOptions(){}
+
       unsigned int width;
       unsigned int height;
       unsigned int maxMaterials;
@@ -14,6 +20,8 @@ namespace he
       unsigned int maxBones;
       unsigned int shadowMapWidth;
       unsigned int shadowMapHeight;
+      unsigned int lightNumber;
+      unsigned char max2DLayer;
     };
   }
 }

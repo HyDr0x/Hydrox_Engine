@@ -1,4 +1,4 @@
-#include "Renderer/Traverser/RemoveGeometryTraverser.h"
+#include "Renderer/Traverser/RemoveShadowGeometryTraverser.h"
 
 #include <XBar/IGeometryContainer.h>
 
@@ -15,7 +15,11 @@ namespace he
 {
   namespace renderer
   {
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
+    RemoveShadowGeometryTraverser::RemoveShadowGeometryTraverser(
+      util::SingletonManager *singletonManager, 
+      const xBar::IGeometryContainer& geometryContainer,
+      util::ResourceHandle staticShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -23,28 +27,21 @@ namespace he
 
       m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
 
-      db::Material *material = m_materialManager->getObject(m_geometryContainer.getMaterialHandle());
-      m_shaderHandle = material->getShaderHandle();
-
-      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
-
-      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
+      if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
-        m_textureHandles[i].resize(texNum);
-
-        for(unsigned int j = 0; j < texNum; j++)
-        {
-          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
-        }
+        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+      }
+      else
+      {
+        m_shaderHandle = staticShadowMapGenerationShaderHandle;
       }
     }
 
-    RemoveGeometryTraverser::~RemoveGeometryTraverser()
+    RemoveShadowGeometryTraverser::~RemoveShadowGeometryTraverser()
     {
     }
 
-    void RemoveGeometryTraverser::doTraverseDown(TreeNode* treeNode)
+    void RemoveShadowGeometryTraverser::doTraverseDown(TreeNode* treeNode)
     {
       while(treeNode != nullptr)
       {
@@ -64,12 +61,12 @@ namespace he
       }
     }
 
-    bool RemoveGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RemoveShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
     {
       return treeNode->isMesh(m_vertexDeclaration);
     }
 
-    void RemoveGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RemoveShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
       if(treeNode->getFirstChild() == nullptr)
       {
@@ -77,12 +74,12 @@ namespace he
       }
     }
 
-    bool RemoveGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RemoveShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
     {
       return treeNode->isShader(m_shaderHandle);
     }
 
-    void RemoveGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RemoveShadowGeometryTraverser::postTraverse(ShaderNode* treeNode)
     {
       if(treeNode->getFirstChild() == nullptr)
       {
@@ -90,35 +87,21 @@ namespace he
       }
     }
 
-    bool RemoveGeometryTraverser::preTraverse(TextureNode* treeNode)
+    bool RemoveShadowGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
-      return treeNode->isTexture(m_textureHandles);
-    }
-
-    void RemoveGeometryTraverser::postTraverse(TextureNode* treeNode)
-    {
-      if(treeNode->getFirstChild() == nullptr)
-      {
-        deleteNode(treeNode);
-      }
-    }
-
-    bool RemoveGeometryTraverser::preTraverse(RenderNode* treeNode)
-    {
-      m_stopTraversal = treeNode->getRenderGroup()->removeGeometry(m_geometryContainer);
-
       return false;
     }
 
-    void RemoveGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RemoveShadowGeometryTraverser::postTraverse(RenderNode* treeNode)
     {
       if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
       {
         deleteNode(treeNode);
+        m_stopTraversal = true;
       }
     }
 
-    void RemoveGeometryTraverser::deleteNode(TreeNode *treeNode)
+    void RemoveShadowGeometryTraverser::deleteNode(TreeNode *treeNode)
     {
       TreeNode *currentRenderNode = treeNode->getParent();
 

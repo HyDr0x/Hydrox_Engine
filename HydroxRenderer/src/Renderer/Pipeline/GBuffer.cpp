@@ -3,20 +3,18 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <DataBase/ResourceManager.hpp>
+#include <DataBase/Texture2D.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
 
-#include "Renderer/Traverser/InsertStaticGeometryTraverser.h"
-#include "Renderer/Traverser/InsertSkinnedGeometryTraverser.h"
 #include "Renderer/Traverser/RemoveGeometryTraverser.h"
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
 #include "Renderer/Traverser/FrustumCullingTraverser.h"
-#include "Renderer/Traverser/DeleteTraverser.h"
 
 #include "Renderer/TreeNodes/GroupNode.h"
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderNode.h"
-#include <DataBase/Texture2D.h>
+
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {
@@ -30,15 +28,17 @@ namespace he
     {
     }
 
-    void GBuffer::initialize(const RenderOptions& renderingOptions, util::SingletonManager *singletonManager)
+    void GBuffer::initialize(util::SingletonManager *singletonManager)
     {
       m_singletonManager = singletonManager;
 
-      m_depthTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32, nullptr, false));
-      m_colorTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
-      m_normalTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
-      m_materialTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(renderingOptions.width, renderingOptions.height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
+      RenderOptions *options = m_singletonManager->getService<RenderOptions>();
 
+      m_depthTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32, nullptr, false));
+      m_colorTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
+      m_normalTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
+      m_materialTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr, false));
+      
       m_fullscreenRenderQuad.setRenderTargets(m_depthTexture, 3, m_colorTexture, m_normalTexture, m_materialTexture);
     }
 
@@ -79,7 +79,7 @@ namespace he
 
     void GBuffer::clear() const
     {
-      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(3, m_clearColor));
+      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(4, m_clearColor));
     }
   }
 }

@@ -6,6 +6,7 @@
 #include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
+#include "Renderer/Pipeline/RenderShaderContainer.h"
 
 namespace he
 {
@@ -50,10 +51,10 @@ namespace he
       }
     }
 
-    void RenderManager::enableSkybox(util::SingletonManager *singletonManager, util::ResourceHandle skyboxShaderHandle, util::ResourceHandle skyboxTextureHandles[6])
+    void RenderManager::enableSkybox(util::ResourceHandle skyboxTextureHandles[6])
     {
       m_skyboxRendering = true;
-      m_skyboxRenderer.initialize(singletonManager, skyboxShaderHandle, skyboxTextureHandles);
+      m_skyboxRenderer.initialize(m_singletonManager, skyboxTextureHandles);
     }
 
     void RenderManager::disableSkybox()
@@ -61,31 +62,24 @@ namespace he
       m_skyboxRendering = false;
     }
 
-    void RenderManager::initialize(const RenderOptions& options, util::SingletonManager *singletonManager, unsigned char maxLayer,
-      util::ResourceHandle billboardShaderHandle, 
-      util::ResourceHandle spriteShaderHandle, 
-      util::ResourceHandle stringShaderHandle,
-      util::ResourceHandle frustumCullingShaderHandle,
-      util::ResourceHandle offscreenBufferShaderHandle,
-      util::ResourceHandle directLightShaderHandle,
-      util::ResourceHandle combineShaderHandle,
-      util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle animatedShadowMapGenerationShaderHandle)
+    void RenderManager::initialize(util::SingletonManager *singletonManager)
     {
       m_singletonManager = singletonManager;
 
-      m_options = options;
+      m_options = singletonManager->getService<RenderOptions>();
 
-      m_offscreenBufferShaderHandle = offscreenBufferShaderHandle;
-      m_combineShaderHandle = combineShaderHandle;
+      RenderShaderContainer *renderShader = singletonManager->getService<RenderShaderContainer>();
 
-      m_geometryRasterizer.initialize(m_options, m_singletonManager, frustumCullingShaderHandle, staticShadowMapGenerationShaderHandle, animatedShadowMapGenerationShaderHandle);
-      m_gBuffer.initialize(m_options, m_singletonManager);
-      m_billboardRenderer.initialize(m_singletonManager, billboardShaderHandle);
-      m_spriteRenderer.initialize(m_singletonManager, spriteShaderHandle, maxLayer);
-      m_stringRenderer.initialize(m_singletonManager, stringShaderHandle, maxLayer);
-      m_lightRenderer.initialize(m_options, m_singletonManager, directLightShaderHandle);
-      m_particleRenderer.initialize(m_singletonManager, billboardShaderHandle);//dummy shader 
+      m_offscreenBufferShaderHandle = renderShader->offscreenBufferShaderHandle;
+      m_combineShaderHandle = renderShader->combineShaderHandle;
+
+      m_geometryRasterizer.initialize(m_singletonManager);
+      m_gBuffer.initialize(m_singletonManager);
+      m_billboardRenderer.initialize(m_singletonManager);
+      m_spriteRenderer.initialize(m_singletonManager);
+      m_stringRenderer.initialize(m_singletonManager);
+      m_lightRenderer.initialize(m_singletonManager);
+      m_particleRenderer.initialize(m_singletonManager); 
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::Vector<float, 4>) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
@@ -144,6 +138,13 @@ namespace he
           m_geometryRasterizer.generateShadowMap(i);
           m_lightRenderer.unsetShadowMap(4);
         }
+
+        for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
+        {
+          m_lightRenderer.setReflectiveShadowMap(4, i);
+          m_geometryRasterizer.generateReflectiveShadowMap(i);
+          m_lightRenderer.unsetReflectiveShadowMap(4);
+        }
         //glPolygonOffset(0.0f, 0.0f);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
@@ -165,6 +166,7 @@ namespace he
 
       shader->useShader();
       //m_gBuffer.getDepthTexture()->setTexture(0, 0);
+      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)->setTexture(0, 0);
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->setTexture(0, 0);
       m_gBuffer.getColorTexture()->setTexture(0, 0);
       m_lightRenderer.getLightTexture()->setTexture(1, 1);
@@ -172,6 +174,7 @@ namespace he
       m_lightRenderer.getLightTexture()->unsetTexture();
       m_gBuffer.getColorTexture()->unsetTexture();
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->unsetTexture();
+      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)->unsetTexture();
       //m_gBuffer.getDepthTexture()->unsetTexture();
       shader->useNoShader();
 
