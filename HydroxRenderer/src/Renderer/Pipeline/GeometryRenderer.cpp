@@ -113,7 +113,7 @@ namespace he
     {
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
-      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &shadowMapIndex);
+      db::ComputeShader::setUniform(1, GL_INT, &shadowMapIndex);
       FrustumCullingTraverser frustumCullingTraverser;
       frustumCullingTraverser.doTraverse(m_renderShadowRootNode);
       frustumCullingShader->useNoShader();
@@ -126,7 +126,7 @@ namespace he
     {
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
-      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &shadowMapIndex);
+      db::ComputeShader::setUniform(1, GL_INT, &shadowMapIndex);
       FrustumCullingTraverser frustumCullingTraverser;
       frustumCullingTraverser.doTraverse(m_renderReflectiveShadowRootNode);
       frustumCullingShader->useNoShader();
@@ -139,13 +139,13 @@ namespace he
     {  
       db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_frustumCullingShaderHandle);
       frustumCullingShader->useShader();
-      unsigned int viewProjectionIndex = UINT32_MAX;
-      db::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &viewProjectionIndex);
+      int viewProjectionIndex = -1;
+      db::ComputeShader::setUniform(1, GL_INT, &viewProjectionIndex);
       FrustumCullingTraverser frustumCullingTraverser;
       frustumCullingTraverser.doTraverse(m_renderRootNode);
       frustumCullingShader->useNoShader();
 
-      RenderGeometryTraverser renderTraverser(m_singletonManager, UINT32_MAX);
+      RenderGeometryTraverser renderTraverser(m_singletonManager, -1);
       renderTraverser.doTraverse(m_renderRootNode);
     }
 

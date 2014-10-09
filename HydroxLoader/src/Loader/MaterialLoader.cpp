@@ -149,7 +149,12 @@ namespace he
             if(textureFilenames[i][j] != std::string())
             {
               textureHandles[i].push_back(textureLoader.loadResource(textureFilenames[i][j]));
-              hashes.push_back(m_singletonManager->getService<db::TextureManager>()->getObject(textureHandles[i][j])->getHash());
+              db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textureHandles[i][j]);
+              if(i == 0)
+              {
+                texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
+              }
+              hashes.push_back(texture->getHash());
             }
           }
         }

@@ -13,7 +13,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager, unsigned int viewProjectionIndex) :
+    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager, int viewProjectionIndex) :
       m_viewProjectionIndex(viewProjectionIndex)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -44,9 +44,9 @@ namespace he
 
       shader->useShader();
 
-      if(m_viewProjectionIndex != UINT32_MAX)
+      if(m_viewProjectionIndex != -1)
       {
-        db::RenderShader::setUniform(0, GL_UNSIGNED_INT, &m_viewProjectionIndex);
+        db::RenderShader::setUniform(0, GL_INT, &m_viewProjectionIndex);
       }
 
       return true;
@@ -70,7 +70,6 @@ namespace he
         for(unsigned int j = 0; j < textureHandles[i].size(); j++)
         {
           db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
-          texture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
           texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
         }
 

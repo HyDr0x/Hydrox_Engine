@@ -104,10 +104,13 @@ namespace he
       m_near = near;
       m_far = far;
 
+      float fov = 0.0f;
+
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        m_projectionMatrix = util::math::createPerspective(60.0f, 4.0f / 3.0f, m_near, m_far);
+        fov = util::math::radToDeg(acosf(m_lightData.direction[3]));
+        m_projectionMatrix = util::math::createPerspective(fov, 1.0f, m_near, m_far);
         break;
       case POINTLIGHT:
         break;
@@ -225,6 +228,7 @@ namespace he
     void ShadowLightNode::setSpotLightCutoff(float spotLightCutoff)
     {
       m_lightData.direction[3] = spotLightCutoff;
+      setShadowProjection(m_near, m_far);
     }
 
     float ShadowLightNode::getSpotLightCutoff() const
