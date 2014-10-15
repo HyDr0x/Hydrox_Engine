@@ -22,10 +22,10 @@ namespace he
 
       Light();
 
-      util::Vector<float, 4> position;//w component = spotLightExponent
-      util::Vector<float, 4> direction;//w component = spotLightCutoff
+      util::vec4f position;//w component = spotLightExponent
+      util::vec4f direction;//w component = spotLightCutoff
 
-      util::Vector<float, 4> color;//w component = shadow algorithm
+      util::vec4f color;//w component = shadow algorithm
 
       float intensity;
 
@@ -42,10 +42,10 @@ namespace he
 
       util::Matrix<float, 4> viewProj;
 
-      util::Vector<float, 4> position;//w component = spotLightExponent
-      util::Vector<float, 4> direction;//w component = spotLightCutoff
+      util::vec4f position;//w component = spotLightExponent
+      util::vec4f direction;//w component = spotLightCutoff
 
-      util::Vector<float, 4> color;//w component = shadow algorithm
+      util::vec4f color;//w component = shadow algorithm
 
       float intensity;
 

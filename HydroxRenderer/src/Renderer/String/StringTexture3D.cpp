@@ -17,7 +17,7 @@ namespace he
 
       unsigned int letterNumber = text.size();
 
-      //std::vector<util::Vector<float, 2>>;
+      //std::vector<util::vec2f>;
     }
 
     StringTexture3D::~StringTexture3D()

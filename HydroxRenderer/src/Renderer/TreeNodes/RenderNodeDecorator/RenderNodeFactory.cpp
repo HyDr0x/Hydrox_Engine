@@ -37,26 +37,5 @@ namespace he
         break;
       };
     }
-
-    util::SharedPointer<IRenderGroup> RenderNodeFactory::createShadowRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
-    {
-      RenderOptions *options = singletonManager->getService<RenderOptions>();
-
-      switch(nodeType.toInt())
-      {
-      case xBar::SKINNEDNODE | xBar::INDEXEDNODE:
-        return util::SharedPointer<IRenderGroup>(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)));
-        break;
-      case xBar::INDEXEDNODE:
-        return util::SharedPointer<IRenderGroup>(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)));
-        break;
-      case xBar::SKINNEDNODE:
-        return util::SharedPointer<IRenderGroup>(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager)));
-        break;
-      default:
-        return util::SharedPointer<IRenderGroup>(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager)));
-        break;
-      };
-    }
   }
 }

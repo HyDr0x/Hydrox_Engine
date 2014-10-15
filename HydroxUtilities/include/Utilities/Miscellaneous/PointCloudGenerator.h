@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      static void generateCaches(std::vector<util::Vector<float, 3>>& caches, const std::vector<util::Vector<float, 3>>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
+      static void generateCaches(std::vector<vec3f>& caches, float meanArea, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
 
     private:
 

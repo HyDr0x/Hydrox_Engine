@@ -4,12 +4,12 @@ namespace he
 {
   namespace xBar
   {
-    BillboardContainer::BillboardContainer(util::Vector<float, 3>& translation, 
-                                          util::Vector<float, 2>& scale, 
-                                          util::Vector<unsigned int, 2>& animNumber, 
-                                          util::Vector<unsigned int, 2>& animCount, 
-                                          util::Vector<float, 2>& texStart, 
-                                          util::Vector<float, 2>& texEnd, 
+    BillboardContainer::BillboardContainer(util::vec3f& translation, 
+                                          util::vec2f& scale, 
+                                          util::vec2ui& animNumber, 
+                                          util::vec2ui& animCount, 
+                                          util::vec2f& texStart, 
+                                          util::vec2f& texEnd, 
                                           util::ResourceHandle textureHandle) : 
                                           m_animNumber(animNumber),
                                           m_animCount(animNumber),
@@ -36,12 +36,12 @@ namespace he
       return m_textureHandle;
     }
 
-    util::Vector<float, 3> BillboardContainer::getPosition() const
+    util::vec3f BillboardContainer::getPosition() const
     {
       return m_translate;
     }
 
-    util::Vector<float, 2> BillboardContainer::getScale() const
+    util::vec2f BillboardContainer::getScale() const
     {
       return m_scale;
     }

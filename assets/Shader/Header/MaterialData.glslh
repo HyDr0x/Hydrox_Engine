@@ -1,0 +1,17 @@
+struct MaterialData
+{
+	float diffuseStrength;
+	float specularStrength;//metall materials have their own color as specular reflection
+	float ambientStrength;
+	float specularExponent;
+};
+
+layout(std140, binding = 1) uniform materialBuffer
+{
+	MaterialData material[512];
+};
+
+layout(std430, binding = 1) buffer materialIndexBuffer
+{
+	uint materialIndex[];
+};

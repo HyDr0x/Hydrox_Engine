@@ -89,7 +89,7 @@
 //      util::Quaternion<float> rotation;
 //      stream >> rotation;
 //
-//      util::Vector<float, 3> translation;
+//      util::vec3f translation;
 //      stream >> translation;
 //
 //      float scale;
@@ -128,7 +128,7 @@
 //    {
 //      read(stream, (sg::TreeNode&)node, eventManager, resourceHandles);
 //
-//      util::Vector<float, 3> position;
+//      util::vec3f position;
 //      stream >> position;
 //      node.setPosition(position);
 //
@@ -141,14 +141,14 @@
 //    {
 //      read(stream, (sg::TreeNode&)node, eventManager, resourceHandles);
 //
-//      util::Vector<unsigned int, 2> anim;
+//      util::vec2ui anim;
 //
 //      stream >> anim;
 //      node.setCurrentAnimationFrame(anim);
 //      stream >> anim;
 //      node.setAnimationNumber(anim);
 //
-//      util::Vector<float, 2> tex;
+//      util::vec2f tex;
 //      stream >> tex;
 //      node.setTextureStart(tex);
 //
@@ -158,7 +158,7 @@
 //      stream >> tex;
 //      node.setScale(tex);
 //
-//      util::Vector<float, 3> translate;
+//      util::vec3f translate;
 //      stream >> translate;
 //      node.setTranslation(translate);
 //
@@ -171,7 +171,7 @@
 //    {
 //      read(stream, (sg::TreeNode&)node, eventManager, resourceHandles);
 //
-//      util::Vector<float, 3> color;
+//      util::vec3f color;
 //      stream >> color;
 //
 //      float data;

@@ -36,7 +36,7 @@ namespace he
 
       void bindToFramebuffer(GLenum attachment);
 
-      util::Vector<unsigned int, 2> getResolution() const;
+      util::vec2ui getResolution() const;
       GLuint getIndex() const;
       GLenum getTarget() const;
       GLenum getInternalFormat() const;

@@ -44,13 +44,13 @@ namespace he
 
       virtual void setRenderable(bool renderable);
 
-      void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
+      void applyTransformation(util::vec3f position, util::Quaternion<float> rotation);
 
       void setLightType(LightType lightType);
       LightType getLightType() const;
 
-      void setColor(util::Vector<float, 3> color);
-      util::Vector<float, 3> getColor() const;
+      void setColor(util::vec3f color);
+      util::vec3f getColor() const;
 
       void setIntensity(float intensity);
       float getIntensity() const;

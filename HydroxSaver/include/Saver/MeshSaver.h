@@ -28,8 +28,8 @@ namespace he
     {
       struct MeshMetaData
       {
-        util::Vector<float, 3> bbMax;
-        util::Vector<float, 3> bbMin;
+        util::vec3f bbMax;
+        util::vec3f bbMin;
         GLuint primitiveType;
         GLuint primitiveCount;
         GLuint indexCount;

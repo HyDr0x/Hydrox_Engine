@@ -60,13 +60,13 @@ namespace he
 
       void stopAnimation();
 
-      void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation);
+      void calculateTransformation(util::vec3f& translation, float& scale, util::Quaternion<float>& rotation);
 
-      //util::Vector<float, 3> getGlobalPosition();
+      //util::vec3f getGlobalPosition();
       //util::Quaternion<float> getGlobalRotation();
       //float getGlobalScale();
 
-      util::Vector<float, 3> getLocalPosition() const;
+      util::vec3f getLocalPosition() const;
       util::Quaternion<float> getLocalRotation() const;
       float getLocalScale() const;
 
@@ -77,7 +77,7 @@ namespace he
 
       void interpolateKeyFrames(AnimationTrack& currentTrack);
 
-      util::Vector<float, 3> m_animatedTranslation;
+      util::vec3f m_animatedTranslation;
       util::Quaternion<float> m_animatedRotation;
       float m_animatedScale;
 

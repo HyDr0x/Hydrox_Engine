@@ -126,7 +126,7 @@ namespace he
     {
       sg::NodeIndex sceneRootNode = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
 
-      std::vector<util::Vector<float, 3>> positions;
+      std::vector<util::vec3f> positions;
       std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices);
     
@@ -154,13 +154,13 @@ namespace he
 
     util::ResourceHandle AssimpLoader::loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped)
     {
-      std::vector<util::Vector<float, 3>> positions;   
-      std::vector<std::vector<util::Vector<float, 2>>> textureCoords(db::Material::TEXTURETYPENUM);
-      std::vector<util::Vector<float, 3>> normals;
-      std::vector<util::Vector<float, 3>> binormals;
-      std::vector<util::Vector<float, 4>> boneIndices;
-      std::vector<util::Vector<float, 4>> boneWeights;
-      std::vector<util::Vector<float, 4>> vertexColors;
+      std::vector<util::vec3f> positions;   
+      std::vector<std::vector<util::vec2f>> textureCoords(db::Material::TEXTURETYPENUM);
+      std::vector<util::vec3f> normals;
+      std::vector<util::vec3f> binormals;
+      std::vector<util::vec4f> boneIndices;
+      std::vector<util::vec4f> boneWeights;
+      std::vector<util::vec4f> vertexColors;
       std::vector<db::Mesh::indexType> indices;
 
       GLuint primitiveType;
@@ -189,7 +189,7 @@ namespace he
 
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-          positions[i] = util::Vector<float, 3>(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+          positions[i] = util::vec3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         }
       }
 
@@ -213,7 +213,7 @@ namespace he
               tmpYCoordinates = mesh->mTextureCoords[j][i][1];
             }
 
-            textureCoords[j][i] = util::Vector<float, 2>(mesh->mTextureCoords[j][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
+            textureCoords[j][i] = util::vec2f(mesh->mTextureCoords[j][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
           }
         }
       }
@@ -223,7 +223,7 @@ namespace he
         normals.resize(mesh->mNumVertices);
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-          normals[i] = util::Vector<float, 3>(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+          normals[i] = util::vec3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         }
       }
 
@@ -232,14 +232,14 @@ namespace he
         binormals.resize(mesh->mNumVertices);
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-          binormals[i] = util::Vector<float, 3>(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+          binormals[i] = util::vec3f(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         }
       }
 
       if(mesh->HasBones())
       {
-        boneWeights.resize(mesh->mNumVertices, util::Vector<float, 4>::identity());
-        boneIndices.resize(mesh->mNumVertices, util::Vector<float, 4>(~0, ~0, ~0, ~0));
+        boneWeights.resize(mesh->mNumVertices, util::vec4f::identity());
+        boneIndices.resize(mesh->mNumVertices, util::vec4f(~0, ~0, ~0, ~0));
 
         util::Matrix<float, 4> tmpBoneMatrix;
         m_inverseBindPoseTable[meshIndex].resize(mesh->mNumBones);
@@ -275,7 +275,7 @@ namespace he
 
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-          vertexColors[i] = util::Vector<float, 4>(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
+          vertexColors[i] = util::vec4f(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
         }
       }
 
@@ -480,7 +480,7 @@ namespace he
           for(unsigned int k = 0; k < channel->mNumPositionKeys; k++)
           {
             aiVector3D position = channel->mPositionKeys[k].mValue;
-            animationTrack.m_positions[k] = util::Vector<float, 3>(position.x, position.y, position.z);
+            animationTrack.m_positions[k] = util::vec3f(position.x, position.y, position.z);
             animationTrack.m_positionsTime[k] = channel->mPositionKeys[k].mTime;
           }
 

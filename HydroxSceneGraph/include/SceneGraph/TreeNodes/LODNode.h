@@ -19,7 +19,7 @@ namespace he
     public:
 
       LODNode(){}
-      LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      LODNode(util::vec3f position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       LODNode(const LODNode& sourceNode);
       LODNode(const TreeNode& sourceNode);
       virtual ~LODNode();
@@ -38,20 +38,20 @@ namespace he
 
       void setLODLevel(unsigned int lodLevel);
       unsigned int getLODLevel() const;
-      bool getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const;
+      bool getLOD(const util::vec3f& camPos, const std::vector<float>& lodRanges) const;
 
-      void transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation);
+      void transformPosition(const util::vec3f& translation, float scale, const util::Quaternion<float>& rotation);
 
-      void setPosition(util::Vector<float, 3> position);
-      util::Vector<float, 3> getPosition() const;
+      void setPosition(util::vec3f position);
+      util::vec3f getPosition() const;
 
       virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
       virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
 
     private:
 
-      util::Vector<float, 3> m_position;
-      util::Vector<float, 3> m_transformedPosition;
+      util::vec3f m_position;
+      util::vec3f m_transformedPosition;
 
       unsigned int m_lodLevel;
     };

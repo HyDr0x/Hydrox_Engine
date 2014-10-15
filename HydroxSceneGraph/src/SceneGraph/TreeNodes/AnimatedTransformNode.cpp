@@ -22,7 +22,7 @@ namespace he
       m_currentAnimationTimeInSeconds(0.0f), 
       m_pauseAnimation(false)
     {
-      m_animatedTranslation = util::Vector<float, 3>::identity();
+      m_animatedTranslation = util::vec3f::identity();
       m_animatedRotation = util::Quaternion<float>::identity();
       m_animatedScale = 1.0f;
 
@@ -223,7 +223,7 @@ namespace he
       m_currentAnimationTimeInSeconds = 0.0f;
     }
 
-    void AnimatedTransformNode::calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation)
+    void AnimatedTransformNode::calculateTransformation(util::vec3f& translation, float& scale, util::Quaternion<float>& rotation)
     {
       AnimationTrack& currentTrack = m_animationTracks[m_currentTrack];
 
@@ -237,7 +237,7 @@ namespace he
       scale *= (m_animatedScale * m_scale);
     }
 
-    //util::Vector<float, 3> AnimatedTransformNode::getGlobalPosition()
+    //util::vec3f AnimatedTransformNode::getGlobalPosition()
     //{
     //  GetGlobalCoordinateTraverser traverser;
     //  traverser.doAscend(*this);
@@ -261,7 +261,7 @@ namespace he
     //  return traverser.getGlobalScale() * m_animatedScale * m_scale;
     //}
 
-    util::Vector<float, 3> AnimatedTransformNode::getLocalPosition() const
+    util::vec3f AnimatedTransformNode::getLocalPosition() const
     {
       return m_animatedTranslation + m_animatedRotation.apply(m_translation * m_animatedScale);
     }
@@ -351,7 +351,7 @@ namespace he
             {
               diffTime = currentTrack.m_positionsTime[i] + timeInTicks;
             }
-            m_animatedTranslation = util::Vector<float, 3>::lerp(currentTrack.m_positions[i], currentTrack.m_positions[i + 1], diffTime / (currentTrack.m_positionsTime[i + 1] - currentTrack.m_positionsTime[i]));
+            m_animatedTranslation = util::vec3f::lerp(currentTrack.m_positions[i], currentTrack.m_positions[i + 1], diffTime / (currentTrack.m_positionsTime[i + 1] - currentTrack.m_positionsTime[i]));
             break;
           }
         }
@@ -384,7 +384,7 @@ namespace he
       m_currentAnimationTimeInSeconds = 0.0f;
       m_pauseAnimation = false;
 
-      m_animatedTranslation = util::Vector<float, 3>::identity();
+      m_animatedTranslation = util::vec3f::identity();
       m_animatedRotation = util::Quaternion<float>::identity();
       m_animatedScale = 1.0f;
 

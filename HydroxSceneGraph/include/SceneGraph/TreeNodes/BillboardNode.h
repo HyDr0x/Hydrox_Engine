@@ -12,14 +12,15 @@
 namespace he
 {
   namespace sg
-  {    class Traverser;
+  {
+    class Traverser;
 
     class GRAPHICAPI BillboardNode : public TreeNode
     {
     public:
 
       BillboardNode(){}
-      BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::Vector<unsigned int, 2> animNumber, util::Vector<float, 2> texStart, util::Vector<float, 2> texEnd, 
+      BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::vec2ui animNumber, util::vec2f texStart, util::vec2f texEnd, 
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       BillboardNode(const BillboardNode& sourceNode);
       BillboardNode(const TreeNode& sourceNode);
@@ -41,33 +42,33 @@ namespace he
       util::ResourceHandle getTextureHandle() const;
 
       void setCurrentAnimationFrame(unsigned int currentFrame);
-      void setCurrentAnimationFrame(const util::Vector<unsigned int, 2>& currentFrame);
-      util::Vector<unsigned int, 2> getCurrentAnimationFrame() const;
+      void setCurrentAnimationFrame(const util::vec2ui& currentFrame);
+      util::vec2ui getCurrentAnimationFrame() const;
 
-      void setAnimationNumber(const util::Vector<unsigned int, 2>& animationNumber);
-      util::Vector<unsigned int, 2> getAnimationNumber() const;
+      void setAnimationNumber(const util::vec2ui& animationNumber);
+      util::vec2ui getAnimationNumber() const;
 
-      void setTranslation(const util::Vector<float, 3>& v);
+      void setTranslation(const util::vec3f& v);
       void setTranslation(float x, float y, float z);
-      void addTranslation(const util::Vector<float, 3>& v);
+      void addTranslation(const util::vec3f& v);
       void addTranslation(float x, float y, float z);
   
       void setScale(float s);
       void addScale(float s);
 
-      void setScale(const util::Vector<float, 2>& s);
+      void setScale(const util::vec2f& s);
       void setScale(float sx, float sy);
-      void addScale(const util::Vector<float, 2>& s);
+      void addScale(const util::vec2f& s);
       void addScale(float sx, float sy);
 
-      util::Vector<float, 3> getPosition() const;
-      util::Vector<float, 2> getScale() const;
+      util::vec3f getPosition() const;
+      util::vec2f getScale() const;
 
-      void setTextureStart(const util::Vector<float, 2>& texStart);
-      util::Vector<float, 2> getTextureStart() const;
+      void setTextureStart(const util::vec2f& texStart);
+      util::vec2f getTextureStart() const;
 
-      void setTextureEnd(const util::Vector<float, 2>& texEnd);
-      util::Vector<float, 2> getTextureEnd() const;
+      void setTextureEnd(const util::vec2f& texEnd);
+      util::vec2f getTextureEnd() const;
 
       util::Matrix<float, 3> getTexTransformationMatrix() const;
 
@@ -81,13 +82,13 @@ namespace he
 
       util::EventManager *m_eventManager;
 
-      util::Vector<unsigned int, 2> m_animNumber;
-      util::Vector<unsigned int, 2> m_currentFrame;
-      util::Vector<float, 2> m_texStart;
-      util::Vector<float, 2> m_texEnd;
+      util::vec2ui m_animNumber;
+      util::vec2ui m_currentFrame;
+      util::vec2f m_texStart;
+      util::vec2f m_texEnd;
 
-      util::Vector<float, 2> m_scale;
-      util::Vector<float, 3> m_translate;
+      util::vec2f m_scale;
+      util::vec3f m_translate;
 
       util::ResourceHandle m_textureHandle;
 

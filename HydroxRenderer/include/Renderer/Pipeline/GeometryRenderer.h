@@ -57,7 +57,9 @@ namespace he
       util::ResourceHandle m_skinnedShadowMapGenerationShaderHandle;
 
       util::ResourceHandle m_staticReflectiveShadowMapGenerationShaderHandle;
+      util::ResourceHandle m_staticNormalReflectiveShadowMapGenerationShaderHandle;
       util::ResourceHandle m_skinnedReflectiveShadowMapGenerationShaderHandle;
+      util::ResourceHandle m_skinnedNormalReflectiveShadowMapGenerationShaderHandle;
 
       GroupNode *m_renderRootNode;
       GroupNode *m_renderShadowRootNode;

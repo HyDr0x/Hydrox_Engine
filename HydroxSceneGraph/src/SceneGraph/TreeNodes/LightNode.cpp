@@ -111,7 +111,7 @@ namespace he
       m_renderable = renderable;
     }
 
-    void LightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
+    void LightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
       if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
@@ -127,12 +127,12 @@ namespace he
       return m_lightType;
     }
 
-    void LightNode::setColor(util::Vector<float, 3> color)
+    void LightNode::setColor(util::vec3f color)
     {
       m_lightData.color = color;
     }
 
-    util::Vector<float, 3> LightNode::getColor() const
+    util::vec3f LightNode::getColor() const
     {
       return m_lightData.color;
     }

@@ -1,0 +1,12 @@
+layout(std140, binding = 0) uniform cameraParameters
+{
+	mat4 viewMatrix;
+	mat4 projectionMatrix;
+	mat4 viewProjectionMatrix;
+	mat4 invViewProjectionMatrix;
+	vec4 eyePos;
+	uint width;
+	uint height;
+	float near;
+	float far;
+};

@@ -43,7 +43,7 @@ namespace he
     protected:
 
       GLuint createShader(GLenum shaderType, std::string shaderName, std::string shaderSource) const;
-      bool checkShaderStatus(GLuint shader, std::string shaderName) const;
+      bool checkShaderStatus(GLuint shader, GLenum shaderType, std::string shaderName) const;
 
       GLuint m_program;
     };

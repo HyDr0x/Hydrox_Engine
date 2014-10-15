@@ -50,12 +50,12 @@ namespace he
 
       void setReflectiveShadow(bool reflectiveShadow);
 
-      void applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation);
+      void applyTransformation(util::vec3f position, util::Quaternion<float> rotation);
 
       LightType getLightType() const;
 
-      void setColor(util::Vector<float, 3> color);
-      util::Vector<float, 3> getColor() const;
+      void setColor(util::vec3f color);
+      util::vec3f getColor() const;
 
       void setIntensity(float intensity);
       float getIntensity() const;

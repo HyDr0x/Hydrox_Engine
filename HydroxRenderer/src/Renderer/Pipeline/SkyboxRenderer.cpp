@@ -40,7 +40,7 @@ namespace he
 
       m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), texture->getChannelNumber(), texture->getBitsPerPixel(), &data[0]));
 
-      std::vector<util::Vector<float, 3>> positions;
+      std::vector<util::vec3f> positions;
 
       util::CubeGenerator::generateCube(positions);
 
@@ -79,7 +79,7 @@ namespace he
       glBindVertexArray(m_skyBoxVAO);
 
       glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 3>));
+      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec3f));
 
       glVertexAttribBinding(db::RenderShader::POSITION, 0);
       glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
@@ -102,7 +102,7 @@ namespace he
       skyboxShader->useShader();
       renderTexture->setTexture(0, 0);
 
-      m_geometryData.bindVertexbuffer(0, 0, sizeof(util::Vector<float, 3>) + sizeof(util::Vector<float, 2>));
+      m_geometryData.bindVertexbuffer(0, 0, sizeof(util::vec3f) + sizeof(util::vec2f));
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
 

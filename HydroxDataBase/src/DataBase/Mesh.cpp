@@ -14,14 +14,14 @@ namespace he
     }
 
     Mesh::Mesh(GLenum primitiveType,
-           const std::vector<util::Vector<float, 3>>& positions, 
+           const std::vector<util::vec3f>& positions, 
            const std::vector<indexType>& indices,
-           const std::vector<std::vector<util::Vector<float, 2>>>& textureCoords, 
-           const std::vector<util::Vector<float, 3>>& normals, 
-           const std::vector<util::Vector<float, 3>>& binormals, 
-           const std::vector<util::Vector<float, 4>>& boneWeights,
-           const std::vector<util::Vector<float, 4>>& boneIndices,
-           const std::vector<util::Vector<float, 4>>& vertexColors) : m_boundingVolume(positions)
+           const std::vector<std::vector<util::vec2f>>& textureCoords, 
+           const std::vector<util::vec3f>& normals, 
+           const std::vector<util::vec3f>& binormals, 
+           const std::vector<util::vec4f>& boneWeights,
+           const std::vector<util::vec4f>& boneIndices,
+           const std::vector<util::vec4f>& vertexColors) : m_boundingVolume(positions)
     {
       assert(textureCoords.size() == 4);
 
@@ -196,7 +196,7 @@ namespace he
       m_indexData.clear();
     }
 
-    void Mesh::setPositions(std::vector<util::Vector<float, 3>> positions)
+    void Mesh::setPositions(std::vector<util::vec3f> positions)
     {
       assert(m_vertexDeclarationFlags & MODEL_POSITION);
 
@@ -206,17 +206,17 @@ namespace he
       }
     }
 
-    void Mesh::setTextureCoordinations(std::vector<std::vector<util::Vector<float, 2>>> textureCoords)
+    void Mesh::setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords)
     {
       assert(textureCoords.size() == 4 && m_vertexDeclarationFlags & MODEL_TEXTURE0);
 
       GLuint texStride[4];
 
-      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
+      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
 
       GLuint lokalStride = posStride;
 
@@ -230,17 +230,17 @@ namespace he
       }
     }
 
-    void Mesh::setNormals(std::vector<util::Vector<float, 3>> normals)
+    void Mesh::setNormals(std::vector<util::vec3f> normals)
     {
       assert(m_vertexDeclarationFlags & MODEL_NORMAL);
 
       GLuint texStride[4];
 
-      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
+      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
 
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3];
 
@@ -250,18 +250,18 @@ namespace he
       }
     }
 
-    void Mesh::setBiNormals(std::vector<util::Vector<float, 3>> binormals)
+    void Mesh::setBiNormals(std::vector<util::vec3f> binormals)
     {
       assert(m_vertexDeclarationFlags & MODEL_BINORMAL);
 
       GLuint texStride[4];
 
-      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
-      GLuint normalStride  = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint posStride = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
+      GLuint normalStride  = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(util::vec3f) : 0;
 
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride;
 
@@ -271,19 +271,19 @@ namespace he
       }
     }
 
-    void Mesh::setBoneWeights(std::vector<util::Vector<float, 4>> boneWeights)
+    void Mesh::setBoneWeights(std::vector<util::vec4f> boneWeights)
     {
       assert(m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS);
 
       GLuint texStride[4];
 
-      GLuint posStride      = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
-      GLuint normalStride   = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint binormalStride = m_vertexDeclarationFlags & MODEL_BINORMAL ? sizeof(util::Vector<float, 3>) : 0;
+      GLuint posStride      = m_vertexDeclarationFlags & MODEL_POSITION ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
+      GLuint normalStride   = m_vertexDeclarationFlags & MODEL_NORMAL   ? sizeof(util::vec3f) : 0;
+      GLuint binormalStride = m_vertexDeclarationFlags & MODEL_BINORMAL ? sizeof(util::vec3f) : 0;
 
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride;
 
@@ -293,20 +293,20 @@ namespace he
       }
     }
 
-    void Mesh::setBoneIndices(std::vector<util::Vector<float, 4>> boneIndices)
+    void Mesh::setBoneIndices(std::vector<util::vec4f> boneIndices)
     {
       assert(m_vertexDeclarationFlags & MODEL_BONE_INDICES);
 
       GLuint texStride[4];
 
-      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
-      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
+      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::vec3f) : 0;
+      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::vec3f) : 0;
+      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::vec4f) : 0;
 
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride + boneWeightStride;
 
@@ -316,21 +316,21 @@ namespace he
       }
     }
 
-    void Mesh::setVertexColors(std::vector<util::Vector<float, 4>> vertexColors)
+    void Mesh::setVertexColors(std::vector<util::vec4f> vertexColors)
     {
       assert(m_vertexDeclarationFlags & MODEL_COLOR);
 
       GLuint texStride[4];
 
-      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::Vector<float, 3>) : 0;
-      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::Vector<float, 2>) : 0;
-      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::Vector<float, 2>) : 0;
-      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::Vector<float, 3>) : 0;
-      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::Vector<float, 4>) : 0;
-      GLuint boneIndextStride = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(util::Vector<float, 4>) : 0;
+      GLuint posStride        = m_vertexDeclarationFlags & MODEL_POSITION      ? sizeof(util::vec3f) : 0;
+      texStride[0] = m_vertexDeclarationFlags & MODEL_TEXTURE0 ? sizeof(util::vec2f) : 0;
+      texStride[1] = m_vertexDeclarationFlags & MODEL_TEXTURE1 ? sizeof(util::vec2f) : 0;
+      texStride[2] = m_vertexDeclarationFlags & MODEL_TEXTURE2 ? sizeof(util::vec2f) : 0;
+      texStride[3] = m_vertexDeclarationFlags & MODEL_TEXTURE3 ? sizeof(util::vec2f) : 0;
+      GLuint normalStride     = m_vertexDeclarationFlags & MODEL_NORMAL        ? sizeof(util::vec3f) : 0;
+      GLuint binormalStride   = m_vertexDeclarationFlags & MODEL_BINORMAL      ? sizeof(util::vec3f) : 0;
+      GLuint boneWeightStride = m_vertexDeclarationFlags & MODEL_BONE_WEIGHTS  ? sizeof(util::vec4f) : 0;
+      GLuint boneIndextStride = m_vertexDeclarationFlags & MODEL_BONE_INDICES  ? sizeof(util::vec4f) : 0;
 
       GLuint lokalStride = posStride + texStride[0] + texStride[1] + texStride[2] + texStride[3] + normalStride + binormalStride + boneWeightStride + boneIndextStride;
 
@@ -350,12 +350,12 @@ namespace he
       return m_primitiveType;
     }
 
-    util::Vector<float, 3> Mesh::getBBMin() const
+    util::vec3f Mesh::getBBMin() const
     {
       return m_boundingVolume.getBBMin();
     }
 
-    util::Vector<float, 3> Mesh::getBBMax() const
+    util::vec3f Mesh::getBBMax() const
     {
       return m_boundingVolume.getBBMax();
     }

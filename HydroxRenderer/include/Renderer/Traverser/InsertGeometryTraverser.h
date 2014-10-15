@@ -56,8 +56,8 @@ namespace he
       void createNewChildNode(TextureNode* parent);
 
       void createNewSibling(TreeNode* sibling);
-      void createNewSibling(VertexDeclarationNode* sibling);
-      void createNewSibling(ShaderNode* sibling);
+      void createNewSibling(ShaderNode* parent);
+      void createNewSibling(VertexDeclarationNode* parent);
       void createNewSibling(TextureNode* sibling);
       void createNewSibling(RenderNode* sibling);
 

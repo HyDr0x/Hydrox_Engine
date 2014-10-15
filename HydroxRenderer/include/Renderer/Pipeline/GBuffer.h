@@ -37,7 +37,7 @@ namespace he
       void setGBuffer() const;
       void unsetGBuffer() const;
 
-      void setClearColor(util::Vector<float, 4> clearColor);
+      void setClearColor(util::vec4f clearColor);
 
       util::SharedPointer<db::Texture2D> getDepthTexture() const;
       util::SharedPointer<db::Texture2D> getColorTexture() const;
@@ -60,7 +60,7 @@ namespace he
 
       Renderquad m_fullscreenRenderQuad;
 
-      util::Vector<float, 4> m_clearColor;
+      util::vec4f m_clearColor;
     };
   }
 }

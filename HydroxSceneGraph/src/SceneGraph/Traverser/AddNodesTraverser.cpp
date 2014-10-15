@@ -11,7 +11,7 @@
 namespace he
 {
   namespace sg
-  {    AddNodesTraverser::AddNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager, std::vector<float> lodRanges, util::Vector<float, 3> camPos) :
+  {    AddNodesTraverser::AddNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager, std::vector<float> lodRanges, util::vec3f camPos) :
       Traverser(allocator), m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
     {
     }

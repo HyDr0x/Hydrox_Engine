@@ -45,26 +45,26 @@ namespace he
       void setLayer(unsigned char layer);
       unsigned char getLayer() const;
 
-      void setTranslation(const util::Vector<float, 2>& v);
+      void setTranslation(const util::vec2f& v);
       void setTranslation(float x, float y);
 
-      void addTranslation(const util::Vector<float, 2>& v);
+      void addTranslation(const util::vec2f& v);
       void addTranslation(float x, float y);
 
       void setScale(float s);
       void addScale(float s);
 
-      void setScale(const util::Vector<float, 2>& s);
+      void setScale(const util::vec2f& s);
       void setScale(float sx, float sy);
-      void addScale(const util::Vector<float, 2>& s);
+      void addScale(const util::vec2f& s);
       void addScale(float sx, float sy);
 
       void setRotation(float angle);
       void addRotation(float angle);
 
-      util::Vector<float, 2> getPosition() const;
+      util::vec2f getPosition() const;
       float getRotation() const;
-      util::Vector<float, 2> getScale() const;
+      util::vec2f getScale() const;
 
       util::Matrix<float, 3> getTransformationMatrix() const;
 

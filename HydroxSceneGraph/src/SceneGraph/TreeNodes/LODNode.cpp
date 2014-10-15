@@ -11,7 +11,7 @@ namespace he
 {
   namespace sg
   {
-    LODNode::LODNode(util::Vector<float, 3> position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild) :
+    LODNode::LODNode(util::vec3f position, unsigned int lodLevel, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling, NodeIndex firstChild) :
     GroupNode(nodeName, parent, nextSibling, firstChild),
       m_lodLevel(lodLevel),
       m_position(position)
@@ -106,24 +106,24 @@ namespace he
       return m_lodLevel;
     }
 
-    bool LODNode::getLOD(const util::Vector<float, 3>& camPos, const std::vector<float>& lodRanges) const
+    bool LODNode::getLOD(const util::vec3f& camPos, const std::vector<float>& lodRanges) const
     {
       float distance = static_cast<float>((m_transformedPosition - camPos).length());
 
       return lodRanges[m_lodLevel] < distance && distance < lodRanges[std::max(m_lodLevel + 1, m_lodLevel)];
     }
 
-    void LODNode::transformPosition(const util::Vector<float, 3>& translation, float scale, const util::Quaternion<float>& rotation)
+    void LODNode::transformPosition(const util::vec3f& translation, float scale, const util::Quaternion<float>& rotation)
     {
       m_transformedPosition = translation + rotation.apply(m_position * scale);
     }
 
-    void LODNode::setPosition(util::Vector<float, 3> position)
+    void LODNode::setPosition(util::vec3f position)
     {
       m_position = position;
     }
 
-    util::Vector<float, 3> LODNode::getPosition() const
+    util::vec3f LODNode::getPosition() const
     {
       return m_position;
     }

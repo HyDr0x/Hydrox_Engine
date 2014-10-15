@@ -123,9 +123,9 @@ namespace he
       glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, m_target, m_texIndex, 0);
     }
 
-    util::Vector<unsigned int, 2> Texture2D::getResolution() const
+    util::vec2ui Texture2D::getResolution() const
     {
-      return util::Vector<unsigned int, 2>(m_width, m_height);
+      return util::vec2ui(m_width, m_height);
     }
 
     GLuint Texture2D::getIndex() const

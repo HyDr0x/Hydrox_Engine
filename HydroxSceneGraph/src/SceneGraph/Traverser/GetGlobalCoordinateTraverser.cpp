@@ -6,7 +6,8 @@
 namespace he
 {
   namespace sg
-  {    GetGlobalCoordinateTraverser::GetGlobalCoordinateTraverser(const TreeNodeAllocator& allocator) : ConstTraverser(allocator)
+  {
+    GetGlobalCoordinateTraverser::GetGlobalCoordinateTraverser(const TreeNodeAllocator& allocator) : ConstTraverser(allocator)
     {
     }
 
@@ -26,13 +27,13 @@ namespace he
 
     void GetGlobalCoordinateTraverser::postAscendTraverse()
     {
-      util::Vector<float, 3> trfTranslation = util::Vector<float, 3>::identity();
+      util::vec3f trfTranslation = util::vec3f::identity();
       float trfScale = 1.0f;
       util::Quaternion<float> trfRotation = util::Quaternion<float>::identity();
 
       while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
       {
-        util::Vector<float, 3> translation = m_translateStack.top();
+        util::vec3f translation = m_translateStack.top();
         float scale = m_scaleStack.top();
         util::Quaternion<float> rotation = m_rotationStack.top();
 
@@ -73,7 +74,7 @@ namespace he
       return m_globalScale;
     }
 
-    util::Vector<float, 3> GetGlobalCoordinateTraverser::getGlobalTranslation() const
+    util::vec3f GetGlobalCoordinateTraverser::getGlobalTranslation() const
     {
       return m_globalTranslation;
     }

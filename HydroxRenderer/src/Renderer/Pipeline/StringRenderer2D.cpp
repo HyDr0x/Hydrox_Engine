@@ -37,7 +37,7 @@ namespace he
       glBindVertexArray(m_stringVAO);
 
       glVertexAttribFormat(db::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::Vector<float, 2>));
+      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec2f));
 
       glVertexAttribBinding(db::RenderShader::POSITION, 0);
       glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);

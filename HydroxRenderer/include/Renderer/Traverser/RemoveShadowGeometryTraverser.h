@@ -23,15 +23,20 @@ namespace he
         util::SingletonManager *singletonManager, 
         const xBar::IGeometryContainer& geometryContainer, 
         util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
+        util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
+        util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle);
 
       virtual ~RemoveShadowGeometryTraverser();
 
-      virtual bool preTraverse(VertexDeclarationNode* treeNode);
-      virtual void postTraverse(VertexDeclarationNode* treeNode);
-
       virtual bool preTraverse(ShaderNode* treeNode);
       virtual void postTraverse(ShaderNode* treeNode);
+
+      virtual bool preTraverse(TextureNode* treeNode);
+      virtual void postTraverse(TextureNode* treeNode);
+
+      virtual bool preTraverse(VertexDeclarationNode* treeNode);
+      virtual void postTraverse(VertexDeclarationNode* treeNode);
 
       virtual bool preTraverse(RenderNode* treeNode);
       virtual void postTraverse(RenderNode* treeNode);

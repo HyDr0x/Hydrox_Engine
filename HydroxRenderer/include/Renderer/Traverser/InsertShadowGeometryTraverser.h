@@ -31,8 +31,10 @@ namespace he
       InsertShadowGeometryTraverser(util::SharedPointer<IRenderGroup> renderGroup,
         const xBar::IGeometryContainer& geometryContainer,
         util::SingletonManager *singletonManager, 
-        util::ResourceHandle staticShadowMapGenerationShaderHandle, 
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
+        util::ResourceHandle staticShadowMapGenerationShaderHandle,
+        util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
+        util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle);
 
       virtual ~InsertShadowGeometryTraverser();
 
@@ -45,16 +47,21 @@ namespace he
       virtual bool preTraverse(ShaderNode* treeNode);
       virtual void postTraverse(ShaderNode* treeNode);
 
+      virtual bool preTraverse(TextureNode* treeNode);
+      virtual void postTraverse(TextureNode* treeNode);
+
       virtual bool preTraverse(RenderNode* treeNode);
       virtual void postTraverse(RenderNode* treeNode);
 
       void createNewChildNode(TreeNode* parent);
       void createNewChildNode(GroupNode* parent);
       void createNewChildNode(ShaderNode* parent);
+      void createNewChildNode(TextureNode* parent);
       void createNewChildNode(VertexDeclarationNode* parent);
 
       void createNewSibling(TreeNode* sibling);
       void createNewSibling(ShaderNode* sibling);
+      void createNewSibling(TextureNode* sibling);
       void createNewSibling(VertexDeclarationNode* sibling);
       void createNewSibling(RenderNode* sibling);
 
@@ -66,6 +73,7 @@ namespace he
 
       unsigned int m_vertexDeclaration;
       util::ResourceHandle m_shaderHandle;
+      std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
 
       bool m_inserted;
     };

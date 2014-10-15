@@ -7,41 +7,41 @@ namespace he
 {
   namespace util
   {
-    void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position)
     {
       generateNonIndexedPositions(position);
     }
 
-    void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position, std::vector<Vector<float, 3>>& normal)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal)
     {
       generateNonIndexedPositions(position);
       generateNonIndexedNormals(normal, position);
     }
 
-    void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index)
     {
       generateIndexedPositions(position, index);
     }
 
-    void CubeGenerator::generateCube(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, std::vector<Vector<float, 3>>& normal)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal)
     {
       generateIndexedPositions(position, index);
       generateIndexedNormals(normal, position);
     }
 
-    void CubeGenerator::generateIndexedPositions(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index)
+    void CubeGenerator::generateIndexedPositions(std::vector<vec3f>& position, std::vector<unsigned int>& index)
     {
       position.resize(8);
 
-      position[0] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[1] = Vector<float, 3>( 0.5f, -0.5f, -0.5f);
-      position[2] = Vector<float, 3>(-0.5f, -0.5f,  0.5f);
-      position[3] = Vector<float, 3>( 0.5f, -0.5f,  0.5f);
+      position[0] = vec3f(-0.5f, -0.5f, -0.5f);
+      position[1] = vec3f( 0.5f, -0.5f, -0.5f);
+      position[2] = vec3f(-0.5f, -0.5f,  0.5f);
+      position[3] = vec3f( 0.5f, -0.5f,  0.5f);
 
-      position[4] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
-      position[5] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
-      position[6] = Vector<float, 3>(-0.5f,  0.5f,  0.5f);
-      position[7] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
+      position[4] = vec3f(-0.5f,  0.5f, -0.5f);
+      position[5] = vec3f( 0.5f,  0.5f, -0.5f);
+      position[6] = vec3f(-0.5f,  0.5f,  0.5f);
+      position[7] = vec3f( 0.5f,  0.5f,  0.5f);
 
       index.resize(36);//CCW is OGL's default front facing
 
@@ -94,65 +94,65 @@ namespace he
       index[35] = 1;
     }
 
-    void CubeGenerator::generateNonIndexedPositions(std::vector<Vector<float, 3>>& position)
+    void CubeGenerator::generateNonIndexedPositions(std::vector<vec3f>& position)
     {
       position.resize(36);
       //front
-      position[0] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[1] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
-      position[2] = Vector<float, 3>( 0.5f, -0.5f, -0.5f);
+      position[0] = vec3f(-0.5f, -0.5f, -0.5f);
+      position[1] = vec3f( 0.5f,  0.5f, -0.5f);
+      position[2] = vec3f( 0.5f, -0.5f, -0.5f);
 
-      position[3] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[4] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
-      position[5] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
+      position[3] = vec3f(-0.5f, -0.5f, -0.5f);
+      position[4] = vec3f(-0.5f,  0.5f, -0.5f);
+      position[5] = vec3f( 0.5f,  0.5f, -0.5f);
 
       //back
-      position[6] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
-      position[7] = Vector<float, 3>( 0.5f, 0.5f,  0.5f);
-      position[8] = Vector<float, 3>(-0.5f, 0.5f,  0.5f);
+      position[6] = vec3f(-0.5f, -0.5f, 0.5f);
+      position[7] = vec3f( 0.5f, 0.5f,  0.5f);
+      position[8] = vec3f(-0.5f, 0.5f,  0.5f);
 
-      position[9] = Vector<float, 3>(-0.5f, -0.5f, 0.5f); 
-      position[10] = Vector<float, 3>(0.5f, -0.5f, 0.5f); 
-      position[11] = Vector<float, 3>(0.5f, 0.5f, 0.5f);
+      position[9] = vec3f(-0.5f, -0.5f, 0.5f); 
+      position[10] = vec3f(0.5f, -0.5f, 0.5f); 
+      position[11] = vec3f(0.5f, 0.5f, 0.5f);
 
       //right
-      position[12] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
-      position[13] = Vector<float, 3>(-0.5f, 0.5f, -0.5f);
-      position[14] = Vector<float, 3>(-0.5f, -0.5f, -0.5f); 
+      position[12] = vec3f(-0.5f, -0.5f, 0.5f);
+      position[13] = vec3f(-0.5f, 0.5f, -0.5f);
+      position[14] = vec3f(-0.5f, -0.5f, -0.5f); 
 
-      position[15] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
-      position[16] = Vector<float, 3>(-0.5f, 0.5f, 0.5f);
-      position[17] = Vector<float, 3>(-0.5f, 0.5f, -0.5f);
+      position[15] = vec3f(-0.5f, -0.5f, 0.5f);
+      position[16] = vec3f(-0.5f, 0.5f, 0.5f);
+      position[17] = vec3f(-0.5f, 0.5f, -0.5f);
 
       //left
-      position[18] = Vector<float, 3>(0.5f, 0.5f, -0.5f);
-      position[19] = Vector<float, 3>(0.5f, -0.5f, 0.5f);
-      position[20] = Vector<float, 3>(0.5f, -0.5f, -0.5f);
+      position[18] = vec3f(0.5f, 0.5f, -0.5f);
+      position[19] = vec3f(0.5f, -0.5f, 0.5f);
+      position[20] = vec3f(0.5f, -0.5f, -0.5f);
 
-      position[21] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
-      position[22] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
-      position[23] = Vector<float, 3>( 0.5f, -0.5f,  0.5f);
+      position[21] = vec3f( 0.5f,  0.5f, -0.5f);
+      position[22] = vec3f( 0.5f,  0.5f,  0.5f);
+      position[23] = vec3f( 0.5f, -0.5f,  0.5f);
 
       //bottom
-      position[24] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[25] = Vector<float, 3>(0.5f, -0.5f, 0.5f);
-      position[26] = Vector<float, 3>(-0.5f, -0.5f, 0.5f);
+      position[24] = vec3f(-0.5f, -0.5f, -0.5f);
+      position[25] = vec3f(0.5f, -0.5f, 0.5f);
+      position[26] = vec3f(-0.5f, -0.5f, 0.5f);
 
-      position[27] = Vector<float, 3>(-0.5f, -0.5f, -0.5f);
-      position[28] = Vector<float, 3>( 0.5f, -0.5f, -0.5f);
-      position[29] = Vector<float, 3>( 0.5f, -0.5f,  0.5f);
+      position[27] = vec3f(-0.5f, -0.5f, -0.5f);
+      position[28] = vec3f( 0.5f, -0.5f, -0.5f);
+      position[29] = vec3f( 0.5f, -0.5f,  0.5f);
 
       //top
-      position[30] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
-      position[31] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
-      position[32] = Vector<float, 3>( 0.5f,  0.5f, -0.5f);
+      position[30] = vec3f(-0.5f,  0.5f, -0.5f);
+      position[31] = vec3f( 0.5f,  0.5f,  0.5f);
+      position[32] = vec3f( 0.5f,  0.5f, -0.5f);
 
-      position[33] = Vector<float, 3>(-0.5f,  0.5f, -0.5f);
-      position[34] = Vector<float, 3>(-0.5f,  0.5f,  0.5f);
-      position[35] = Vector<float, 3>( 0.5f,  0.5f,  0.5f);
+      position[33] = vec3f(-0.5f,  0.5f, -0.5f);
+      position[34] = vec3f(-0.5f,  0.5f,  0.5f);
+      position[35] = vec3f( 0.5f,  0.5f,  0.5f);
     }
 
-    void CubeGenerator::generateIndexedNormals(std::vector<Vector<float, 3>>& normal, const std::vector<Vector<float, 3>>& positions)
+    void CubeGenerator::generateIndexedNormals(std::vector<vec3f>& normal, const std::vector<vec3f>& positions)
     {
       normal.resize(8);
       for(unsigned int i = 0; i < positions.size(); i++)
@@ -161,23 +161,23 @@ namespace he
       }
     }
 
-    void CubeGenerator::generateNonIndexedNormals(std::vector<Vector<float, 3>>& normal, const std::vector<Vector<float, 3>>& positions)
+    void CubeGenerator::generateNonIndexedNormals(std::vector<vec3f>& normal, const std::vector<vec3f>& positions)
     {
       normal.resize(36);
 
       for(unsigned int i = 0; i < positions.size(); i += 3)
       {
-        Vector<float, 3> a = positions[i + 1] - positions[i];
-        Vector<float, 3> b = positions[i + 2] - positions[i];
+        vec3f a = positions[i + 1] - positions[i];
+        vec3f b = positions[i + 2] - positions[i];
         normal[i] = normal[i + 1] = normal[i + 2] = math::cross(a, b).normalize();
       }
     }
 
-    void CubeGenerator::generateIndexedTextures(std::vector<Vector<float, 3>>& texture)
+    void CubeGenerator::generateIndexedTextures(std::vector<vec3f>& texture)
     {
     }
 
-    void CubeGenerator::generateNonIndexedTextures(std::vector<Vector<float, 3>>& texture)
+    void CubeGenerator::generateNonIndexedTextures(std::vector<vec3f>& texture)
     {
     }
   }

@@ -49,9 +49,9 @@ namespace he
 
       glGenBuffers(1, &m_vertexBufferIndex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(util::vec2f) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
         glBindBuffer(GL_COPY_READ_BUFFER, other.m_vertexBufferIndex);
-        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::vec2f) * m_vertexNumber * 2);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -92,9 +92,9 @@ namespace he
       m_layer = other.m_layer;
 
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(util::vec2f) * m_vertexNumber * 2, nullptr, GL_STATIC_DRAW);
         glBindBuffer(GL_COPY_READ_BUFFER, other.m_vertexBufferIndex);
-        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_ARRAY_BUFFER, 0, 0, sizeof(util::vec2f) * m_vertexNumber * 2);
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -180,7 +180,7 @@ namespace he
       return m_layer;
     }
 
-    void StringTexture2D::setTranslation(const util::Vector<float, 2>& v)
+    void StringTexture2D::setTranslation(const util::vec2f& v)
     {
       m_tlMatrix[2][0] = v[0];
       m_tlMatrix[2][1] = v[1];
@@ -192,7 +192,7 @@ namespace he
       m_tlMatrix[2][1] = y;
     }
 
-    void StringTexture2D::addTranslation(const util::Vector<float, 2>& v)
+    void StringTexture2D::addTranslation(const util::vec2f& v)
     {
       m_tlMatrix[2][0] += v[0];
       m_tlMatrix[2][1] += v[1];
@@ -216,7 +216,7 @@ namespace he
       m_scMatrix[1][1] += s;
     }
 
-    void StringTexture2D::setScale(const util::Vector<float, 2>& s)
+    void StringTexture2D::setScale(const util::vec2f& s)
     {
       m_scMatrix[0][0] = s[0];
       m_scMatrix[1][1] = s[1];
@@ -228,7 +228,7 @@ namespace he
       m_scMatrix[1][1] = sy;
     }
 
-    void StringTexture2D::addScale(const util::Vector<float, 2>& s)
+    void StringTexture2D::addScale(const util::vec2f& s)
     {
       m_scMatrix[0][0] += s[0];
       m_scMatrix[1][1] += s[1];
@@ -256,9 +256,9 @@ namespace he
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
     }
 
-    util::Vector<float, 2> StringTexture2D::getPosition() const
+    util::vec2f StringTexture2D::getPosition() const
     {
-      return util::Vector<float, 2>(m_tlMatrix[2][0], m_tlMatrix[2][1]);
+      return util::vec2f(m_tlMatrix[2][0], m_tlMatrix[2][1]);
     }
 
     float StringTexture2D::getRotation() const
@@ -266,9 +266,9 @@ namespace he
       return m_angle;
     }
 
-    util::Vector<float, 2> StringTexture2D::getScale() const
+    util::vec2f StringTexture2D::getScale() const
     {
-      return util::Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
+      return util::vec2f(m_scMatrix[0][0], m_scMatrix[1][1]);
     }
 
     util::Matrix<float, 3> StringTexture2D::getTransformationMatrix() const
@@ -288,7 +288,7 @@ namespace he
 
     void StringTexture2D::render() const
     {
-      glBindVertexBuffer(0, m_vertexBufferIndex, 0, sizeof(util::Vector<float, 2>) * 2);
+      glBindVertexBuffer(0, m_vertexBufferIndex, 0, sizeof(util::vec2f) * 2);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferIndex);
       glDrawElements(GL_TRIANGLES, m_triangleNumber * 3, GL_UNSIGNED_INT, nullptr);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -306,8 +306,8 @@ namespace he
       float texWidth = 1.0f / m_font.letterNumberX;
       float texHeight = 1.0f / m_font.letterNumberY;
 
-      util::Vector<float, 2> position;
-      util::Vector<float, 2> texCoord;
+      util::vec2f position;
+      util::vec2f texCoord;
       for (unsigned int i = 0; i < letterNumber; i++)
       {
         //first
@@ -316,9 +316,9 @@ namespace he
 
         unsigned int decodedChar = m_font.lut[(unsigned char)text[i]];
         
-        texCoord = util::Vector<float, 2>((decodedChar % m_font.letterNumberX) * texWidth, unsigned int(decodedChar * texWidth) * texHeight);
+        texCoord = util::vec2f((decodedChar % m_font.letterNumberX) * texWidth, unsigned int(decodedChar * texWidth) * texHeight);
 
-        int z = sizeof(util::Vector<float, 2>);
+        int z = sizeof(util::vec2f);
         std::copy(&position[0], &position[0] + 2, geometryData.begin() + (4 * i + 0) * 4);
         std::copy(&texCoord[0], &texCoord[0] + 2, geometryData.begin() + (4 * i + 0) * 4 + 2);
 
@@ -352,7 +352,7 @@ namespace he
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferIndex);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(util::Vector<float, 2>) * m_vertexNumber * 2, &geometryData[0], GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(util::vec2f) * m_vertexNumber * 2, &geometryData[0], GL_STATIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
       m_triangleNumber = letterNumber * 2;

@@ -62,7 +62,7 @@ namespace he
 
     util::ResourceHandle MeshLoader::getDefaultResource() const
     {
-      std::vector<util::Vector<float, 3>> positions;
+      std::vector<util::vec3f> positions;
       std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices);
 

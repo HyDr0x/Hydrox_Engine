@@ -46,7 +46,7 @@ namespace he
 
       if(m_viewProjectionIndex != -1)
       {
-        db::RenderShader::setUniform(0, GL_INT, &m_viewProjectionIndex);
+        db::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
       }
 
       return true;

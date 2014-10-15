@@ -51,70 +51,70 @@ namespace he
       {
         glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::POSITION, 0);
-        vertexStride += sizeof(util::Vector<float, 3>);
+        vertexStride += sizeof(util::vec3f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0) 
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
-        vertexStride += sizeof(util::Vector<float, 2>);
+        vertexStride += sizeof(util::vec2f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE1, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE1, 0);
-        vertexStride += sizeof(util::Vector<float, 2>);
+        vertexStride += sizeof(util::vec2f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE2, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE2, 0);
-        vertexStride += sizeof(util::Vector<float, 2>);
+        vertexStride += sizeof(util::vec2f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE3, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE3, 0);
-        vertexStride += sizeof(util::Vector<float, 2>);
+        vertexStride += sizeof(util::vec2f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL) 
       {
         glVertexAttribFormat(db::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::NORMAL, 0);
-        vertexStride += sizeof(util::Vector<float, 3>);
+        vertexStride += sizeof(util::vec3f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL) 
       {
         glVertexAttribFormat(db::RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BINORMAL, 0);
-        vertexStride += sizeof(util::Vector<float, 3>);
+        vertexStride += sizeof(util::vec3f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
       {
         glVertexAttribFormat(db::RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BONEWEIGHTS, 0);
-        vertexStride += sizeof(util::Vector<float, 4>);
+        vertexStride += sizeof(util::vec4f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
       {
         glVertexAttribFormat(db::RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BONEINDICES, 0);
-        vertexStride += sizeof(util::Vector<float, 4>);
+        vertexStride += sizeof(util::vec4f);
       }
 
       if(m_vertexDeclaration & db::Mesh::MODEL_COLOR) 
       {
         glVertexAttribFormat(db::RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::COLOR, 0);
-        vertexStride += sizeof(util::Vector<float, 4>);
+        vertexStride += sizeof(util::vec4f);
       }
 
       glBindVertexArray(0);

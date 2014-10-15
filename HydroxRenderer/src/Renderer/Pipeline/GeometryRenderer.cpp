@@ -55,7 +55,10 @@ namespace he
       m_skinnedShadowMapGenerationShaderHandle = singletonManager->getService<RenderShaderContainer>()->skinnedShadowMapGenerationShaderHandle;
 
       m_staticReflectiveShadowMapGenerationShaderHandle = singletonManager->getService<RenderShaderContainer>()->staticReflectiveShadowMapGenerationShaderHandle;
+      m_staticNormalReflectiveShadowMapGenerationShaderHandle = singletonManager->getService<RenderShaderContainer>()->staticNormalReflectiveShadowMapGenerationShaderHandle;
+      
       m_skinnedReflectiveShadowMapGenerationShaderHandle = singletonManager->getService<RenderShaderContainer>()->skinnedReflectiveShadowMapGenerationShaderHandle;
+      m_skinnedNormalReflectiveShadowMapGenerationShaderHandle = singletonManager->getService<RenderShaderContainer>()->skinnedNormalReflectiveShadowMapGenerationShaderHandle;
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
     }
@@ -71,13 +74,17 @@ namespace he
       {
         InsertShadowGeometryTraverser insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
           m_staticShadowMapGenerationShaderHandle,
-          m_skinnedShadowMapGenerationShaderHandle);
+          m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+          m_skinnedShadowMapGenerationShaderHandle,
+          m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
         insertShadowTraverser.doTraverse(m_renderShadowRootNode);
 
         InsertShadowGeometryTraverser insertReflectiveShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
-          m_staticReflectiveShadowMapGenerationShaderHandle,
-          m_skinnedReflectiveShadowMapGenerationShaderHandle);
+          m_staticShadowMapGenerationShaderHandle,
+          m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+          m_skinnedShadowMapGenerationShaderHandle,
+          m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
         insertReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
       }
@@ -90,13 +97,17 @@ namespace he
 
       RemoveShadowGeometryTraverser removeShadowTraverser(m_singletonManager, geometry, 
         m_staticShadowMapGenerationShaderHandle,
-        m_skinnedShadowMapGenerationShaderHandle);
+        m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+        m_skinnedShadowMapGenerationShaderHandle,
+        m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
       removeShadowTraverser.doTraverse(m_renderShadowRootNode);
 
       RemoveShadowGeometryTraverser removeReflectiveShadowTraverser(m_singletonManager, geometry,
-        m_staticReflectiveShadowMapGenerationShaderHandle,
-        m_skinnedReflectiveShadowMapGenerationShaderHandle);
+        m_staticShadowMapGenerationShaderHandle,
+        m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+        m_skinnedShadowMapGenerationShaderHandle,
+        m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
       removeReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
     }

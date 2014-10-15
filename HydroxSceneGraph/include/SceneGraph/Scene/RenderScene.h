@@ -34,18 +34,18 @@ namespace he
     {
     public:
 
-      RenderScene(util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode);
+      RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode);
       ~RenderScene();
 
       NodeIndex addParentNode(NodeIndex destinationNode, const TreeNode& sourceNode);
       NodeIndex addChildNode(NodeIndex destinationNode, const TreeNode& sourceNode);
       void removeNode(NodeIndex node);
 
-      NodeIndex addSubTree(Scene& subScene, NodeIndex sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix = std::string(""));
+      NodeIndex addSubTree(Scene& subScene, NodeIndex sceneNode, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
       void removeSubTree(NodeIndex sceneNode);
 
       void setLODRanges(const std::vector<float>& lodRanges);
-      void updateScene(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
+      void updateScene(const util::vec3f& cameraPosition, float currentTime, bool isTimeRelative = true);
 
     private:
  

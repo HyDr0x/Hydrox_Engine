@@ -22,7 +22,9 @@ namespace he
       const xBar::IGeometryContainer& geometryContainer,
       util::SingletonManager *singletonManager,
       util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
+      util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle) :
       m_renderGroup(renderGroup),
       m_singletonManager(singletonManager),
       m_inserted(false)
@@ -32,11 +34,40 @@ namespace he
 
       if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        {
+          m_shaderHandle = skinnedNormalShadowMapGenerationShaderHandle;
+        }
+        else
+        {
+          m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+        }
       }
       else
       {
-        m_shaderHandle = staticShadowMapGenerationShaderHandle;
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        {
+          m_shaderHandle = staticNormalShadowMapGenerationShaderHandle;
+        }
+        else
+        {
+          m_shaderHandle = staticShadowMapGenerationShaderHandle;
+        }
+      }
+
+      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+
+      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
+
+      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
+      {
+        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
+        m_textureHandles[i].resize(texNum);
+
+        for(unsigned int j = 0; j < texNum; j++)
+        {
+          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
+        }
       }
     }
 
@@ -99,6 +130,26 @@ namespace he
       }
     }
 
+    bool InsertShadowGeometryTraverser::preTraverse(TextureNode* treeNode)
+    {
+      if(treeNode->getFirstChild() == nullptr)
+      {
+        createNewChildNode(treeNode);
+      }
+
+      m_inserted = treeNode->isTexture(m_textureHandles);
+
+      return m_inserted;
+    }
+
+    void InsertShadowGeometryTraverser::postTraverse(TextureNode* treeNode)
+    {
+      if(!m_inserted && treeNode->getNextSibling() == nullptr)
+      {
+        createNewSibling(treeNode);
+      }
+    }
+
     bool InsertShadowGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
       m_inserted = false;
@@ -130,6 +181,15 @@ namespace he
 
     void InsertShadowGeometryTraverser::createNewChildNode(ShaderNode* parent)
     {
+      TextureNode *treeNode = new TextureNode();
+      treeNode->initialize(m_textureHandles);
+
+      parent->setFirstChild(treeNode);
+      treeNode->setParent(parent);
+    }
+
+    void InsertShadowGeometryTraverser::createNewChildNode(TextureNode* parent)
+    {
       VertexDeclarationNode *treeNode = new VertexDeclarationNode();
       treeNode->initialize(m_vertexDeclaration);
 
@@ -153,6 +213,15 @@ namespace he
     {
       ShaderNode *treeNode = new ShaderNode();
       treeNode->initialize(m_shaderHandle);
+
+      sibling->setNextSibling(treeNode);
+      treeNode->setParent(sibling->getParent());
+    }
+
+    void InsertShadowGeometryTraverser::createNewSibling(TextureNode* sibling)
+    {
+      TextureNode *treeNode = new TextureNode();
+      treeNode->initialize(m_textureHandles);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

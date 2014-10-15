@@ -16,12 +16,12 @@ namespace he
     {
     public:
 
-      BillboardContainer(util::Vector<float, 3>& translation, 
-                         util::Vector<float, 2>& scale, 
-                         util::Vector<unsigned int, 2>& animNumber, 
-                         util::Vector<unsigned int, 2>& animCount, 
-                         util::Vector<float, 2>& texStart, 
-                         util::Vector<float, 2>& texEnd, 
+      BillboardContainer(util::vec3f& translation, 
+                         util::vec2f& scale, 
+                         util::vec2ui& animNumber, 
+                         util::vec2ui& animCount, 
+                         util::vec2f& texStart, 
+                         util::vec2f& texEnd, 
                          util::ResourceHandle textureHandle);
 
       ~BillboardContainer();
@@ -30,8 +30,8 @@ namespace he
 
       util::ResourceHandle getTextureHandle() const;
 
-      util::Vector<float, 3> getPosition() const;
-      util::Vector<float, 2> getScale() const;
+      util::vec3f getPosition() const;
+      util::vec2f getScale() const;
 
       util::Matrix<float, 3> getTexTransformationMatrix() const;
 
@@ -39,13 +39,13 @@ namespace he
 
       void createHash();
 
-      util::Vector<unsigned int, 2>& m_animNumber;
-      util::Vector<unsigned int, 2>& m_animCount;
-      util::Vector<float, 2>& m_texStart;
-      util::Vector<float, 2>& m_texEnd;
+      util::vec2ui& m_animNumber;
+      util::vec2ui& m_animCount;
+      util::vec2f& m_texStart;
+      util::vec2f& m_texEnd;
 
-      util::Vector<float, 2>& m_scale;
-      util::Vector<float, 3>& m_translate;
+      util::vec2f& m_scale;
+      util::vec3f& m_translate;
 
       util::ResourceHandle m_textureHandle;
     };

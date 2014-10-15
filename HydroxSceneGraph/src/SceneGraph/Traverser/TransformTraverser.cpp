@@ -36,13 +36,13 @@ namespace he
 
     void TransformTraverser::postAscendTraverse()
     {
-      util::Vector<float, 3> trfTranslation = util::Vector<float, 3>::identity();
+      util::vec3f trfTranslation = util::vec3f::identity();
       float trfScale = 1.0f;
       util::Quaternion<float> trfRotation = util::Quaternion<float>::identity();
 
       while(!m_scaleStack.empty())//clear the matrix stack, cause there is another dirty node higher in the tree
       {
-        util::Vector<float, 3> translation = m_translateStack.top();
+        util::vec3f translation = m_translateStack.top();
         float scale = m_scaleStack.top();
         util::Quaternion<float> rotation = m_rotationStack.top();
 
@@ -78,7 +78,7 @@ namespace he
 
     bool TransformTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      util::Vector<float, 3> translation;
+      util::vec3f translation;
       float scale;
       util::Quaternion<float> rotation;
 
@@ -90,7 +90,7 @@ namespace he
       }
       else
       {
-        translation = util::Vector<float, 3>::identity();
+        translation = util::vec3f::identity();
         scale = 1.0f;
         rotation = util::Quaternion<float>::identity();
       }
@@ -136,7 +136,7 @@ namespace he
 
     bool TransformTraverser::preTraverse(TransformNode& treeNode)
     {
-      util::Vector<float, 3> translation;
+      util::vec3f translation;
       float scale;
       util::Quaternion<float> rotation;
 
@@ -148,7 +148,7 @@ namespace he
       }
       else
       {
-        translation = util::Vector<float, 3>::identity();
+        translation = util::vec3f::identity();
         scale = 1.0f;
         rotation = util::Quaternion<float>::identity();
       }

@@ -21,7 +21,7 @@ namespace he
 
     Scene::Scene(const Scene& object) : m_allocator(object.getTreeNodeAllocator()), m_rootNode(object.getRootNode())
     {
-      addSubTree(object, m_rootNode, he::util::Vector<float, 3>::identity(), "");
+      addSubTree(object, m_rootNode, he::util::vec3f::identity(), "");
     }
 
     Scene::~Scene()
@@ -30,7 +30,7 @@ namespace he
 
     Scene& Scene::operator=(Scene& other)
     {
-      addSubTree(other, m_rootNode, he::util::Vector<float, 3>::identity(), "");
+      addSubTree(other, m_rootNode, he::util::vec3f::identity(), "");
 
       return *this;
     }
@@ -179,7 +179,7 @@ namespace he
       m_allocator.erase(node);
     }
 
-    NodeIndex Scene::addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
+    NodeIndex Scene::addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix)
     {
       CopyTraverser traverser(subTree.getTreeNodeAllocator(), m_allocator, namePrefix);
       traverser.doTraverse(subTree.getTreeNodeAllocator()[subTree.getRootNode()]);

@@ -18,7 +18,7 @@ namespace he
     {
     public:
 
-      Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd);
+      Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd);
       Sprite(const Sprite& other);
       ~Sprite();
 
@@ -31,30 +31,30 @@ namespace he
       bool getTransparency() const;
 
       void setAnimation(unsigned int number);
-      void setAnimation(const util::Vector<unsigned int, 2>& number);
-      util::Vector<unsigned int, 2> getAnimationNumber() const;
-      util::Vector<unsigned int, 2> getAnimationCount() const;
+      void setAnimation(const util::vec2ui& number);
+      util::vec2ui getAnimationNumber() const;
+      util::vec2ui getAnimationCount() const;
 
-      void setTranslation(const util::Vector<float, 2>& v);
+      void setTranslation(const util::vec2f& v);
       void setTranslation(float x, float y);
 
-      void addTranslation(const util::Vector<float, 2>& v);
+      void addTranslation(const util::vec2f& v);
       void addTranslation(float x, float y);
 
       void setScale(float s);
       void addScale(float s);
 
-      void setScale(const util::Vector<float, 2>& s);
+      void setScale(const util::vec2f& s);
       void setScale(float sx, float sy);
-      void addScale(const util::Vector<float, 2>& s);
+      void addScale(const util::vec2f& s);
       void addScale(float sx, float sy);
 
       void setRotation(float angle);
       void addRotation(float angle);
 
-      util::Vector<float, 2> getPosition() const;
+      util::vec2f getPosition() const;
       float getRotation() const;
-      util::Vector<float, 2> getScale() const;
+      util::vec2f getScale() const;
 
       void setLayer(unsigned char layer);
       unsigned char getLayer() const;
@@ -76,12 +76,12 @@ namespace he
       util::Matrix<float, 3> m_scMatrix;
       unsigned char m_layer;
 
-      util::Vector<unsigned int, 2> m_animNumber;
-      util::Vector<unsigned int, 2> m_animCount;
-      util::Vector<float, 2> m_texStart;
-      util::Vector<float, 2> m_texEnd;
+      util::vec2ui m_animNumber;
+      util::vec2ui m_animCount;
+      util::vec2f m_texStart;
+      util::vec2f m_texEnd;
 
-      util::Vector<float, 2> m_BoundingBox[2];
+      util::vec2f m_BoundingBox[2];
 
       float m_angle;
 

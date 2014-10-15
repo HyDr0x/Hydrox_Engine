@@ -16,17 +16,17 @@ namespace he
     public:
 
       AABB();
-      AABB(util::Vector<float, 3> min, util::Vector<float, 3> max);
-      AABB(const std::vector<util::Vector<float, 3>>& positions);
+      AABB(util::vec3f min, util::vec3f max);
+      AABB(const std::vector<util::vec3f>& positions);
       ~AABB();
 
-      util::Vector<float, 3> getBBMax() const;
-      util::Vector<float, 3> getBBMin() const;
+      util::vec3f getBBMax() const;
+      util::vec3f getBBMin() const;
 
     private:
 
-      util::Vector<float, 3> m_bbMax;
-      util::Vector<float, 3> m_bbMin;
+      util::vec3f m_bbMax;
+      util::vec3f m_bbMin;
     };
   }
 }

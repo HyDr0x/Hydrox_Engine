@@ -52,7 +52,7 @@ namespace he
       m_fullscreenRenderQuad.unsetWriteFrameBuffer();
     }
 
-    void GBuffer::setClearColor(util::Vector<float, 4> clearColor)
+    void GBuffer::setClearColor(util::vec4f clearColor)
     {
       m_clearColor = clearColor;
     }
@@ -79,7 +79,7 @@ namespace he
 
     void GBuffer::clear() const
     {
-      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(4, m_clearColor));
+      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::vec4f>(4, m_clearColor));
     }
   }
 }

@@ -182,12 +182,12 @@ namespace he
       }
     }
 
-    void ShadowLightNode::applyTransformation(util::Vector<float, 3> position, util::Quaternion<float> rotation)
+    void ShadowLightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
       if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis() * -1.0f;
 
-      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.direction, util::Vector<float, 3>(0.0f, 1.0f, 0.0f));
+      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.direction, util::vec3f(0.0f, 1.0f, 0.0f));
     }
 
     LightType ShadowLightNode::getLightType() const
@@ -195,12 +195,12 @@ namespace he
       return m_lightType;
     }
 
-    void ShadowLightNode::setColor(util::Vector<float, 3> color)
+    void ShadowLightNode::setColor(util::vec3f color)
     {
       m_lightData.color = color;
     }
 
-    util::Vector<float, 3> ShadowLightNode::getColor() const
+    util::vec3f ShadowLightNode::getColor() const
     {
       return m_lightData.color;
     }

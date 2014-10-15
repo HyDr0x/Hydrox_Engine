@@ -80,7 +80,7 @@ namespace he
 
     util::ResourceHandle ILDevilLoader::getDefaultResource() const
     {
-      util::Vector<float, 3> textureData = util::Vector<float, 3>(0.0f, 1.0f, 0.0f);
+      util::vec3f textureData = util::vec3f(0.0f, 1.0f, 0.0f);
       return m_textureManager->addObject(db::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, 3, 24, &textureData[0]));
     }
 

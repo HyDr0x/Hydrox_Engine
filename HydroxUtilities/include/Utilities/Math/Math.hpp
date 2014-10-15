@@ -10,26 +10,6 @@ namespace he
 {
   namespace util
   {
-    typedef Vector<int, 1> vec1i;
-    typedef Vector<int, 2> vec2i;
-    typedef Vector<int, 3> vec3i;
-    typedef Vector<int, 4> vec4i;
-
-    typedef Vector<unsigned int, 1> vec1ui;
-    typedef Vector<unsigned int, 2> vec2ui;
-    typedef Vector<unsigned int, 3> vec3ui;
-    typedef Vector<unsigned int, 4> vec4ui;
-
-    typedef Vector<float, 1> vec1f;
-    typedef Vector<float, 2> vec2f;
-    typedef Vector<float, 3> vec3f;
-    typedef Vector<float, 4> vec4f;
-
-    typedef Vector<double, 1> vec1d;
-    typedef Vector<double, 2> vec2d;
-    typedef Vector<double, 3> vec3d;
-    typedef Vector<double, 4> vec4d;
-
     namespace math//make the functions inline or create a declaration cpp (no double defined functions allowed in c++)
     {
       static const float PI = 3.141592654f;
@@ -132,12 +112,12 @@ namespace he
                                 0.0f,                  0.0f,                  0.0f,                   1.0f);
       }
 
-      inline Matrix<float, 4> createLookAt(const Vector<float, 3>& camPos, const Vector<float, 3>& forwardVector, const Vector<float, 3>& upVektor)
+      inline Matrix<float, 4> createLookAt(const vec3f& camPos, const vec3f& forwardVector, const vec3f& upVektor)
       {
-        Vector<float, 3> z = forwardVector.normalize();
+        vec3f z = forwardVector.normalize();
 
-        Vector<float, 3> x = cross(upVektor.normalize(), z).normalize();
-        Vector<float, 3> y = cross(z, x);
+        vec3f x = cross(upVektor.normalize(), z).normalize();
+        vec3f y = cross(z, x);
 
         Matrix<float, 4> rotMat(x[0], x[1], x[2], 0.0f,
                                 y[0], y[1], y[2], 0.0f,
@@ -246,7 +226,7 @@ namespace he
         return Quaternion<Type>(cosf(angle), axis[0], axis[1], axis[2]);
       }
 
-      inline Matrix<float, 4> createTransformationMatrix(const Vector<float, 3>& translation, float scale, const Quaternion<float>& rotation)
+      inline Matrix<float, 4> createTransformationMatrix(const vec3f& translation, float scale, const Quaternion<float>& rotation)
       {
         Matrix<float, 4> trfMatrix;
 

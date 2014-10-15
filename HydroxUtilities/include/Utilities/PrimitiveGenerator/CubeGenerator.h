@@ -15,21 +15,21 @@ namespace he
     {
     public:
 
-      static void generateCube(std::vector<Vector<float, 3>>& position);
-      static void generateCube(std::vector<Vector<float, 3>>& position, std::vector<Vector<float, 3>>& normal);
-      static void generateCube(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index);
-      static void generateCube(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index, std::vector<Vector<float, 3>>& normal);
+      static void generateCube(std::vector<vec3f>& position);
+      static void generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal);
+      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index);
+      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal);
 
     private:
 
-      static void generateIndexedPositions(std::vector<Vector<float, 3>>& position, std::vector<unsigned int>& index);
-      static void generateNonIndexedPositions(std::vector<Vector<float, 3>>& position);
+      static void generateIndexedPositions(std::vector<vec3f>& position, std::vector<unsigned int>& index);
+      static void generateNonIndexedPositions(std::vector<vec3f>& position);
 
-      static void generateIndexedNormals(std::vector<Vector<float, 3>>& normal, const std::vector<Vector<float, 3>>& positions);
-      static void generateNonIndexedNormals(std::vector<Vector<float, 3>>& normal, const std::vector<Vector<float, 3>>& positions);
+      static void generateIndexedNormals(std::vector<vec3f>& normal, const std::vector<vec3f>& positions);
+      static void generateNonIndexedNormals(std::vector<vec3f>& normal, const std::vector<vec3f>& positions);
 
-      static void generateIndexedTextures(std::vector<Vector<float, 3>>& texture);
-      static void generateNonIndexedTextures(std::vector<Vector<float, 3>>& texture);
+      static void generateIndexedTextures(std::vector<vec3f>& texture);
+      static void generateNonIndexedTextures(std::vector<vec3f>& texture);
     };
   }
 }

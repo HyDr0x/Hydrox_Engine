@@ -26,8 +26,6 @@ namespace he
 
       static util::SharedPointer<IRenderGroup> createRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
 
-      static util::SharedPointer<IRenderGroup> createShadowRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
-
     private:
 
     };

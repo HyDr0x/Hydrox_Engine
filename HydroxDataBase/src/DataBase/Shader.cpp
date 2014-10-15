@@ -121,7 +121,7 @@ namespace he
       glShaderSource(shader, 1, &include, nullptr );
       glCompileShader(shader);
 
-      if(!checkShaderStatus(shader, shaderName))
+      if(!checkShaderStatus(shader, shaderType, shaderName))
       {
         glDeleteShader(shader);
         return 0;
@@ -130,7 +130,7 @@ namespace he
       return shader;
     }
 
-    bool Shader::checkShaderStatus(GLuint shader, std::string shaderName) const
+    bool Shader::checkShaderStatus(GLuint shader, GLenum shaderType, std::string shaderName) const
     {
       GLint errorCode;
       glGetShaderiv(shader, GL_COMPILE_STATUS, &errorCode);
@@ -144,7 +144,33 @@ namespace he
         GLchar *errorLog = new GLchar[length];
         glGetShaderInfoLog(shader, length, nullptr, errorLog);
 
-        std::cerr << "Error compiling " << shaderName << " because of " << errorLog << std::endl;
+        std::string shaderTypeEnding;
+
+        switch(shaderType)
+        {
+        case GL_VERTEX_SHADER:
+          shaderTypeEnding = ".vert";
+          break;
+        case GL_TESS_CONTROL_SHADER:
+          shaderTypeEnding = ".control";
+          break;
+        case GL_TESS_EVALUATION_SHADER:
+          shaderTypeEnding = ".eval";
+          break;
+        case GL_GEOMETRY_SHADER:
+          shaderTypeEnding = ".geom";
+          break;
+        case GL_FRAGMENT_SHADER:
+          shaderTypeEnding = ".frag";
+          break;
+        case GL_COMPUTE_SHADER:
+          shaderTypeEnding = ".comp";
+          break;
+        default:
+          shaderTypeEnding = ".uknw";
+        }
+
+        std::cerr << "Error compiling " << shaderName << shaderTypeEnding << " because of " << errorLog << std::endl;
 
         delete[] errorLog;
 

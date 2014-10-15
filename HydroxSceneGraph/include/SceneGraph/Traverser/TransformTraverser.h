@@ -54,7 +54,7 @@ namespace he
       virtual void postAscendTraverse();
 
       std::stack<float> m_scaleStack;
-      std::stack<util::Vector<float, 3>> m_translateStack;
+      std::stack<util::vec3f> m_translateStack;
       std::stack<util::Quaternion<float>> m_rotationStack;
     };
   }

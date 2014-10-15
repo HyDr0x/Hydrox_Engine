@@ -20,7 +20,7 @@ namespace he
     {
     }
 
-    void RenderManager::setClearColor(he::util::Vector<float, 4> color)
+    void RenderManager::setClearColor(he::util::vec4f color)
     {
       glClearColor(color[0], color[1], color[2], color[3]);
       m_gBuffer.setClearColor(color);
@@ -81,28 +81,28 @@ namespace he
       m_lightRenderer.initialize(m_singletonManager);
       m_particleRenderer.initialize(m_singletonManager); 
 
-      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::Vector<float, 4>) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
+      m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::vec4f) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
 
     void RenderManager::setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far)
     {
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>), sizeof(GLuint), &width);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + sizeof(GLuint), sizeof(GLuint), &height);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f), sizeof(GLuint), &width);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + sizeof(GLuint), sizeof(GLuint), &height);
 
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + 2 * sizeof(GLuint), sizeof(GLfloat), &near);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::Vector<float, 4>) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &far);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint), sizeof(GLfloat), &near);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &far);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition, float near, float far)
+    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition, float near, float far)
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-      util::Vector<float, 4> eyeVec = util::Vector<float, 4>(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
+      util::vec4f eyeVec = util::vec4f(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
       m_cameraParameterUBO.setData(0, sizeof(util::Matrix<float, 4>), &viewMatrix[0][0]);
       m_cameraParameterUBO.setData(1 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &projectionMatrix[0][0]);
       m_cameraParameterUBO.setData(2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix[0][0]);
       m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix.invert()[0][0]);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::Vector<float, 4>), &eyeVec[0]);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &eyeVec[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
@@ -161,21 +161,21 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
       
-      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
-      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
+      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
+      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
 
       shader->useShader();
-      //m_gBuffer.getDepthTexture()->setTexture(0, 0);
-      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)->setTexture(0, 0);
+      m_gBuffer.getNormalTexture()->setTexture(0, 0);
+      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->setTexture(0, 0);
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->setTexture(0, 0);
-      m_gBuffer.getColorTexture()->setTexture(0, 0);
-      m_lightRenderer.getLightTexture()->setTexture(1, 1);
+      //m_gBuffer.getColorTexture()->setTexture(0, 0);
+      //m_lightRenderer.getLightTexture()->setTexture(1, 1);
       m_fullscreenRenderQuad.render();
-      m_lightRenderer.getLightTexture()->unsetTexture();
-      m_gBuffer.getColorTexture()->unsetTexture();
+      //m_lightRenderer.getLightTexture()->unsetTexture();
+      //m_gBuffer.getColorTexture()->unsetTexture();
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->unsetTexture();
-      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)->unsetTexture();
-      //m_gBuffer.getDepthTexture()->unsetTexture();
+      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->unsetTexture();
+      m_gBuffer.getNormalTexture()->unsetTexture();
       shader->useNoShader();
 
       m_spriteRenderer.render();

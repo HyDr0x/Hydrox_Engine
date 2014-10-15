@@ -28,7 +28,9 @@ namespace he
       he::util::ResourceHandle staticShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skinnedShadowMapGenerationShaderHandle;
       he::util::ResourceHandle staticReflectiveShadowMapGenerationShaderHandle;
+      he::util::ResourceHandle staticNormalReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skinnedReflectiveShadowMapGenerationShaderHandle;
+      he::util::ResourceHandle skinnedNormalReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skyboxShaderHandle;
       he::util::ResourceHandle frustumCullingShaderHandle;
     };

@@ -49,7 +49,7 @@ namespace he
       RenderManager();
       ~RenderManager();
 
-      void setClearColor(he::util::Vector<float, 4> color);
+      void setClearColor(he::util::vec4f color);
 
       void resizeRenderWindow(unsigned int width, unsigned int height);
 
@@ -66,7 +66,7 @@ namespace he
 
       void setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far);
 
-      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::Vector<float, 3>& cameraPosition, float near, float far);
+      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition, float near, float far);
 
       void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);

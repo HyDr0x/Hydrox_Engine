@@ -13,9 +13,9 @@ namespace he
   {
     BillboardNode::BillboardNode(util::EventManager *eventManager,
                                  util::ResourceHandle textureHandle,
-                                 util::Vector<unsigned int, 2> animNumber, 
-                                 util::Vector<float, 2> texStart, 
-                                 util::Vector<float, 2> texEnd, 
+                                 util::vec2ui animNumber, 
+                                 util::vec2f texStart, 
+                                 util::vec2f texEnd, 
                                  const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
     TreeNode(nodeName, parent, nextSibling),
     m_eventManager(eventManager),
@@ -23,8 +23,8 @@ namespace he
     m_animNumber(animNumber), 
     m_texStart(texStart), 
     m_texEnd(texEnd),
-    m_translate(util::Vector<float, 3>::identity()),
-    m_scale(util::Vector<float, 2>(1.0f, 1.0f)),
+    m_translate(util::vec3f::identity()),
+    m_scale(util::vec2f(1.0f, 1.0f)),
     m_renderable(false)
     {
       m_index.nodeType = BILLBOARDNODE;
@@ -119,26 +119,26 @@ namespace he
     void BillboardNode::setCurrentAnimationFrame(unsigned int currentFrame)
     {
       assert(currentFrame / m_animNumber[0] < m_animNumber[1]);
-      m_currentFrame = util::Vector<unsigned int, 2>(currentFrame % m_animNumber[0], currentFrame / m_animNumber[0]);
+      m_currentFrame = util::vec2ui(currentFrame % m_animNumber[0], currentFrame / m_animNumber[0]);
     }
 
-    void BillboardNode::setCurrentAnimationFrame(const util::Vector<unsigned int, 2>& currentFrame)
+    void BillboardNode::setCurrentAnimationFrame(const util::vec2ui& currentFrame)
     {
       assert(currentFrame[1] < m_animNumber[1] && currentFrame[0] < m_animNumber[0]);
       m_currentFrame = currentFrame;
     }
 
-    util::Vector<unsigned int, 2> BillboardNode::getCurrentAnimationFrame() const
+    util::vec2ui BillboardNode::getCurrentAnimationFrame() const
     {
       return m_currentFrame;
     }
 
-    void BillboardNode::setAnimationNumber(const util::Vector<unsigned int, 2>& animationNumber)
+    void BillboardNode::setAnimationNumber(const util::vec2ui& animationNumber)
     {
       m_animNumber = animationNumber;
     }
 
-    util::Vector<unsigned int, 2> BillboardNode::getAnimationNumber() const
+    util::vec2ui BillboardNode::getAnimationNumber() const
     {
       return m_animNumber;
     }
@@ -150,7 +150,7 @@ namespace he
       m_translate[2] = z;
     }
 
-    void BillboardNode::setTranslation(const util::Vector<float, 3>& v)
+    void BillboardNode::setTranslation(const util::vec3f& v)
     {
       m_translate = v;
     }
@@ -162,7 +162,7 @@ namespace he
       m_translate[2] += z;
     }
 
-    void BillboardNode::addTranslation(const util::Vector<float, 3>& v)
+    void BillboardNode::addTranslation(const util::vec3f& v)
     {
       m_translate = v;
     }
@@ -179,7 +179,7 @@ namespace he
       m_scale[1] += s;
     }
 
-    void BillboardNode::setScale(const util::Vector<float, 2>& s)
+    void BillboardNode::setScale(const util::vec2f& s)
     {
       m_scale = s;
     }
@@ -190,7 +190,7 @@ namespace he
       m_scale[1] = sy;
     }
 
-    void BillboardNode::addScale(const util::Vector<float, 2>& s)
+    void BillboardNode::addScale(const util::vec2f& s)
     {
       m_scale = s;
     }
@@ -201,32 +201,32 @@ namespace he
       m_scale[1] += sy;
     }
 
-    util::Vector<float, 3> BillboardNode::getPosition() const
+    util::vec3f BillboardNode::getPosition() const
     {
       return m_translate;
     }
 
-    util::Vector<float, 2> BillboardNode::getScale() const
+    util::vec2f BillboardNode::getScale() const
     {
       return m_scale;
     }
 
-    void BillboardNode::setTextureStart(const util::Vector<float, 2>& texStart)
+    void BillboardNode::setTextureStart(const util::vec2f& texStart)
     {
       m_texStart = texStart;
     }
 
-    util::Vector<float, 2> BillboardNode::getTextureStart() const
+    util::vec2f BillboardNode::getTextureStart() const
     {
       return m_texStart;
     }
 
-    void BillboardNode::setTextureEnd(const util::Vector<float, 2>& texEnd)
+    void BillboardNode::setTextureEnd(const util::vec2f& texEnd)
     {
       m_texEnd = texEnd;
     }
 
-    util::Vector<float, 2> BillboardNode::getTextureEnd() const
+    util::vec2f BillboardNode::getTextureEnd() const
     {
       return m_texEnd;
     }

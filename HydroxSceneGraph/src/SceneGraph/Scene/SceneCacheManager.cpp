@@ -40,7 +40,7 @@ namespace he
       m_lodRanges = lodRanges;
     }
 
-    void SceneCacheManager::addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::vec3f& cameraPosition)
     {
       InsertObserverTraverser insertObserverTraverser(allocator, this);
       insertObserverTraverser.doTraverse(rootNode);//insert this scene as an observer to every Transform node
@@ -55,7 +55,7 @@ namespace he
       removeRenderNodesTraverser.doTraverse(rootNode);
     }
 
-    void SceneCacheManager::updateCaches(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
+    void SceneCacheManager::updateCaches(TreeNodeAllocator& allocator, const util::vec3f& cameraPosition, float currentTime, bool isTimeRelative)
     {
       updateAnimationTime(currentTime, isTimeRelative);
       updateTransformNodes(allocator);
@@ -164,7 +164,7 @@ namespace he
       m_dirtyTransforms.clear();
     }
 
-    void SceneCacheManager::updateLODNodes(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition)
+    void SceneCacheManager::updateLODNodes(TreeNodeAllocator& allocator, const util::vec3f& cameraPosition)
     {
       for(std::list<LODNode*>::iterator lit = m_activeLODs.begin(); lit != m_activeLODs.end(); lit++)
       {

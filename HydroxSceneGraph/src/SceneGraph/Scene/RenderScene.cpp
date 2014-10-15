@@ -15,7 +15,7 @@ namespace he
 {
   namespace sg
   {
-    RenderScene::RenderScene(util::EventManager& eventManger, const util::Vector<float, 3>& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) : 
+    RenderScene::RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) : 
       Scene(allocator, rootNode), m_eventManager(eventManger), m_sceneCacheManager(SceneCacheManager(eventManger))
     {
       TransformTraverser transformTraverser(m_allocator);
@@ -39,7 +39,7 @@ namespace he
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::Vector<float, 3>::identity());
+      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::vec3f::identity());
 
       return newNodeIndex;
     }
@@ -54,7 +54,7 @@ namespace he
       transformTraverser.doAscend(newNode);
       transformTraverser.doTraverse(newNode);
 
-      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::Vector<float, 3>::identity());
+      m_sceneCacheManager.addSubTree(m_allocator, newNode, util::vec3f::identity());
 
       return newNodeIndex;
     }
@@ -66,7 +66,7 @@ namespace he
       Scene::removeNode(node);
     }
 
-    NodeIndex RenderScene::addSubTree(Scene& subScene, NodeIndex sceneNode, const util::Vector<float, 3>& cameraPosition, std::string namePrefix)
+    NodeIndex RenderScene::addSubTree(Scene& subScene, NodeIndex sceneNode, const util::vec3f& cameraPosition, std::string namePrefix)
     {
       NodeIndex copiedRootNodeIndex = Scene::addSubTree(subScene, sceneNode, cameraPosition, namePrefix);
 
@@ -93,7 +93,7 @@ namespace he
       m_sceneCacheManager.setLODRanges(lodRanges);
     }
 
-    void RenderScene::updateScene(const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative)
+    void RenderScene::updateScene(const util::vec3f& cameraPosition, float currentTime, bool isTimeRelative)
     {
       m_sceneCacheManager.updateCaches(m_allocator, cameraPosition, currentTime, isTimeRelative);
     }

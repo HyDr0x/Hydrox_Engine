@@ -37,10 +37,10 @@ namespace he
 
       void setLODRanges(const std::vector<float>& lodRanges);
 
-      void addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::Vector<float, 3>& cameraPosition);
+      void addSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode, const util::vec3f& cameraPosition);
       void removeSubTree(TreeNodeAllocator& allocator, TreeNode& rootNode);
 
-      void updateCaches(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition, float currentTime, bool isTimeRelative = true);
+      void updateCaches(TreeNodeAllocator& allocator, const util::vec3f& cameraPosition, float currentTime, bool isTimeRelative = true);
 
       void addNodeToCache(sg::LODNode& lodNode);
       void addNodeToCache(sg::TransformNode& transformNode);
@@ -61,7 +61,7 @@ namespace he
       void updateAnimationTime(float currentTime, bool isTimeRelative);
       void updateAnimatedTransformNodes(TreeNodeAllocator& allocator);
       void updateTransformNodes(TreeNodeAllocator& allocator);
-      void updateLODNodes(TreeNodeAllocator& allocator, const util::Vector<float, 3>& cameraPosition);
+      void updateLODNodes(TreeNodeAllocator& allocator, const util::vec3f& cameraPosition);
 
       util::EventManager& m_eventManager;
 

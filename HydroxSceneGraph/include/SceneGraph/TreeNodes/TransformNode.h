@@ -21,7 +21,7 @@ namespace he
 
       TransformNode(){}
       TransformNode(util::Matrix<float, 4>& trfMatrix, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
-      TransformNode(util::Vector<float, 3>& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
+      TransformNode(util::vec3f& translation, float scale, util::Quaternion<float>& rotation, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0, NodeIndex firstChild = ~0);
       TransformNode(const TransformNode& sourceNode);
       TransformNode(const TreeNode& sourceNode);
       virtual ~TransformNode();
@@ -38,28 +38,28 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      virtual void calculateTransformation(util::Vector<float, 3>& translation, float& scale, util::Quaternion<float>& rotation) const;
+      virtual void calculateTransformation(util::vec3f& translation, float& scale, util::Quaternion<float>& rotation) const;
 
-      //virtual util::Vector<float, 3> getGlobalPosition();
+      //virtual util::vec3f getGlobalPosition();
       //virtual util::Quaternion<float> getGlobalRotation();
       //virtual float getGlobalScale();
 
-      virtual util::Vector<float, 3> getLocalPosition() const;
+      virtual util::vec3f getLocalPosition() const;
       virtual util::Quaternion<float> getLocalRotation() const;
       virtual float getLocalScale() const;
 
       //void setGlobalTranslation(float x, float y, float z);
-      //void setGlobalTranslation(const util::Vector<float, 3>& v);
+      //void setGlobalTranslation(const util::vec3f& v);
 
       //void setGlobalRotation(const util::Quaternion<float>& q);
 
       //void setGlobalScale(float s);
 
       void setLocalTranslation(float x, float y, float z);
-      void setLocalTranslation(const util::Vector<float, 3>& v);
+      void setLocalTranslation(const util::vec3f& v);
 
       void addLocalTranslation(float x, float y, float z);
-      void addLocalTranslation(const util::Vector<float, 3>& v);
+      void addLocalTranslation(const util::vec3f& v);
 
       void setLocalRotation(const util::Quaternion<float>& q);
       void addLocalRotation(const util::Quaternion<float>& q);
@@ -70,10 +70,10 @@ namespace he
       void addLocalRotationY(float angle);
       void setLocalRotationZ(float angle);
       void addLocalRotationZ(float angle);
-      void setLocalRotationXYZ(const util::Vector<float, 3>& angle);
-      void addLocalRotationXYZ(const util::Vector<float, 3>& angle);
-      void setLocalRotationAxis(float angle, const util::Vector<float, 3>& axis);
-      void addLocalRotationAxis(float angle, const util::Vector<float, 3>& axis);
+      void setLocalRotationXYZ(const util::vec3f& angle);
+      void addLocalRotationXYZ(const util::vec3f& angle);
+      void setLocalRotationAxis(float angle, const util::vec3f& axis);
+      void addLocalRotationAxis(float angle, const util::vec3f& axis);
 
       void setLocalScale(float s);
       void addLocalScale(float s);
@@ -84,7 +84,7 @@ namespace he
     protected:
 
       util::Quaternion<float> m_rotation;
-      util::Vector<float, 3> m_translation;
+      util::vec3f m_translation;
       float m_scale;
     };
   }

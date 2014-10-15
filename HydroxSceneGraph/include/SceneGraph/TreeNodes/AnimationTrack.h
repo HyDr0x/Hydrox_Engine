@@ -12,13 +12,14 @@
 namespace he
 {
   namespace sg
-  {    struct GRAPHICAPI AnimationTrack//an animation track, each track represents all the keys for one animation in one node
+  {
+    struct GRAPHICAPI AnimationTrack//an animation track, each track represents all the keys for one animation in one node
     {
       std::string m_animationName;
       float m_duration;
       float m_animationTicksPerSecond;
 
-      std::vector<util::Vector<float, 3>> m_positions;
+      std::vector<util::vec3f> m_positions;
       std::vector<float> m_positionsTime;
 
       std::vector<util::Quaternion<float>> m_rotations;
@@ -30,7 +31,7 @@ namespace he
       unsigned int getSize() const
       {
         unsigned int size = 0;
-        size += m_positions.size() * sizeof(util::Vector<float, 3>);
+        size += m_positions.size() * sizeof(util::vec3f);
         size += m_positionsTime.size() * sizeof(float);
 
         size += m_rotations.size() * sizeof(util::Quaternion<float>);

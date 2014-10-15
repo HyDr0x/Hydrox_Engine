@@ -54,8 +54,8 @@ namespace he
         renderTexture->setTexture(6, 0);
 
         util::Matrix<float, 3> tmpTexTrfMatrix = (*billboarditerator).getTexTransformationMatrix();
-        util::Vector<float, 2> scale = (*billboarditerator).getScale();
-        util::Vector<float, 3> translate = (*billboarditerator).getPosition();
+        util::vec2f scale = (*billboarditerator).getScale();
+        util::vec3f translate = (*billboarditerator).getPosition();
         billboardShader->setUniform(3, GL_FLOAT_MAT3, &tmpTexTrfMatrix[0][0]);
         billboardShader->setUniform(4, GL_FLOAT_VEC2, &scale[0]);
         billboardShader->setUniform(5, GL_FLOAT_VEC3, &translate[0]);

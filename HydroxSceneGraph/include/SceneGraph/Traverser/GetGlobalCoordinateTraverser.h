@@ -9,7 +9,8 @@
 namespace he
 {
   namespace sg
-  {    class GetGlobalCoordinateTraverser : public ConstTraverser
+  {
+    class GetGlobalCoordinateTraverser : public ConstTraverser
     {
     public:
 
@@ -22,7 +23,7 @@ namespace he
       virtual bool ascendTraverse(const TransformNode& treeNode);
 
       float getGlobalScale() const;
-      util::Vector<float, 3> getGlobalTranslation() const;
+      util::vec3f getGlobalTranslation() const;
       util::Quaternion<float> getGlobalRotation() const;
 
     protected:
@@ -30,11 +31,11 @@ namespace he
       virtual void postAscendTraverse();
 
       std::stack<float> m_scaleStack;
-      std::stack<util::Vector<float, 3>> m_translateStack;
+      std::stack<util::vec3f> m_translateStack;
       std::stack<util::Quaternion<float>> m_rotationStack;
 
       float m_globalScale;
-      util::Vector<float, 3> m_globalTranslation;
+      util::vec3f m_globalTranslation;
       util::Quaternion<float> m_globalRotation;
     };
   }

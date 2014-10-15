@@ -67,7 +67,7 @@ namespace he
       {
         m_relfectiveShadowLightNumberChanged = false;
 
-        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_shadowDepthMap, 2, m_shadowPosMaps, m_shadowNormalMaps);
+        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_shadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalMaps, m_shadowLuminousFluxMaps);
       }
 
       unsigned int lightIndex = 0;
@@ -91,7 +91,7 @@ namespace he
 
     void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
     {
-      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(1, util::Vector<float, 4>(0, 0, 0, 0)));
+      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::vec4f>(1, util::vec4f(0, 0, 0, 0)));
 
       db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_directLightShaderHandle);
 
@@ -138,7 +138,7 @@ namespace he
 
     void LightRenderer::setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex)
     {
-      m_renderShadowMapsQuad.clearTargets(1.0f, util::Vector<float, 4>::identity(), std::vector<unsigned int>(1, shadowMapIndex));
+      m_renderShadowMapsQuad.clearTargets(1.0f, util::vec4f::identity(), std::vector<unsigned int>(1, shadowMapIndex));
       m_renderShadowMapsQuad.setWriteFrameBuffer(std::vector<unsigned int>(1, shadowMapIndex));
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
     }
@@ -151,10 +151,11 @@ namespace he
 
     void LightRenderer::setReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex)
     {
-      std::vector<unsigned int> texturendices(2);
+      std::vector<unsigned int> texturendices(3);
       texturendices[0] = shadowMapIndex;
       texturendices[1] = shadowMapIndex + m_reflectiveShadowLights.size();
-      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::Vector<float, 4>::identity(), texturendices);
+      texturendices[2] = shadowMapIndex + 2 * m_reflectiveShadowLights.size();
+      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::vec4f::identity(), texturendices);
       m_renderReflectiveShadowMapsQuad.setWriteFrameBuffer(texturendices);
       m_reflectiveShadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
     }
@@ -222,7 +223,8 @@ namespace he
 
       m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
       m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
-
+      m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
+      
       m_reflectiveShadowLights.push_back(light);
       m_relfectiveShadowLightNumberChanged = true;
     }
@@ -235,6 +237,7 @@ namespace he
       {
         m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
         m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
+        m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapHeight, shadowMapLayer, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
       }
 
       m_reflectiveShadowLights.remove(light);
@@ -243,7 +246,7 @@ namespace he
 
     void LightRenderer::clear() const
     {
-      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::Vector<float, 4>>(1, util::Vector<float, 4>(1.0f, 1.0f, 1.0f, 1.0f)));
+      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::vec4f>(1, util::vec4f(1.0f, 1.0f, 1.0f, 1.0f)));
     }
 
     unsigned int LightRenderer::getShadowLightNumber() const
@@ -269,6 +272,11 @@ namespace he
     util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowNormalMaps() const
     {
       return m_shadowNormalMaps;
+    }
+
+    util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowLuminousFluxMaps() const
+    {
+      return m_shadowLuminousFluxMaps;
     }
 
     void LightRenderer::registerRenderComponentSlots(util::EventManager *eventManager)

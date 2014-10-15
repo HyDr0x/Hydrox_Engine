@@ -19,7 +19,9 @@ namespace he
       util::SingletonManager *singletonManager, 
       const xBar::IGeometryContainer& geometryContainer,
       util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
+      util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
+      util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle) :
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -27,13 +29,44 @@ namespace he
 
       m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
 
+      db::Mesh *mesh = singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
+
       if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        {
+          m_shaderHandle = skinnedNormalShadowMapGenerationShaderHandle;
+        }
+        else
+        {
+          m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+        }
       }
       else
       {
-        m_shaderHandle = staticShadowMapGenerationShaderHandle;
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        {
+          m_shaderHandle = staticNormalShadowMapGenerationShaderHandle;
+        }
+        else
+        {
+          m_shaderHandle = staticShadowMapGenerationShaderHandle;
+        }
+      }
+
+      db::Material *material = singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+
+      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
+
+      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
+      {
+        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
+        m_textureHandles[i].resize(texNum);
+
+        for(unsigned int j = 0; j < texNum; j++)
+        {
+          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
+        }
       }
     }
 
@@ -61,12 +94,12 @@ namespace he
       }
     }
 
-    bool RemoveShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RemoveShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
     {
-      return treeNode->isMesh(m_vertexDeclaration);
+      return treeNode->isShader(m_shaderHandle);
     }
 
-    void RemoveShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RemoveShadowGeometryTraverser::postTraverse(ShaderNode* treeNode)
     {
       if(treeNode->getFirstChild() == nullptr)
       {
@@ -74,12 +107,25 @@ namespace he
       }
     }
 
-    bool RemoveShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RemoveShadowGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      return treeNode->isShader(m_shaderHandle);
+      return treeNode->isTexture(m_textureHandles);
     }
 
-    void RemoveShadowGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RemoveShadowGeometryTraverser::postTraverse(TextureNode* treeNode)
+    {
+      if(treeNode->getFirstChild() == nullptr)
+      {
+        deleteNode(treeNode);
+      }
+    }
+
+    bool RemoveShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    {
+      return treeNode->isMesh(m_vertexDeclaration);
+    }
+
+    void RemoveShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
       if(treeNode->getFirstChild() == nullptr)
       {

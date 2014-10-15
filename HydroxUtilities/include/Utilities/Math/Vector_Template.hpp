@@ -132,8 +132,8 @@ namespace he
       static unsigned int m_vertexcounter;
     };
 
-    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator * (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector( VECTOR_MULTIPLY_OP_SCALAR_LEFT ); }
-    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator / (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector( VECTOR_DIVIDE_OP_SCALAR_LEFT ); }
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator * (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_MULTIPLY_OP_SCALAR_LEFT); }
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator / (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_DIVIDE_OP_SCALAR_LEFT); }
 
     template<typename Type> std::ostream& operator <<(std::ostream& stream, const Vector<Type, VECTOR_NUM_ARGS>& v)
     {

@@ -124,9 +124,9 @@ namespace he
       glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, m_texIndex, 0, layer);
     }
 
-    util::Vector<unsigned int, 3> Texture3D::getResolution() const
+    util::vec3ui Texture3D::getResolution() const
     {
-      return util::Vector<unsigned int, 3>(m_width, m_height, m_depth);
+      return util::vec3ui(m_width, m_height, m_depth);
     }
 
     GLenum Texture3D::getTarget() const

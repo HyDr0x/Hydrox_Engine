@@ -43,14 +43,14 @@ namespace he
 
       Mesh();
       Mesh(GLenum primitiveType,
-           const std::vector<util::Vector<float, 3>>& positions, 
+           const std::vector<util::vec3f>& positions, 
            const std::vector<indexType>& indices = std::vector<indexType>(),
-           const std::vector<std::vector<util::Vector<float, 2>>>& textureCoords = std::vector<std::vector<util::Vector<float, 2>>>(4), 
-           const std::vector<util::Vector<float, 3>>& normals = std::vector<util::Vector<float, 3>>(), 
-           const std::vector<util::Vector<float, 3>>& binormals = std::vector<util::Vector<float, 3>>(), 
-           const std::vector<util::Vector<float, 4>>& boneWeights = std::vector<util::Vector<float, 4>>(),
-           const std::vector<util::Vector<float, 4>>& boneIndices = std::vector<util::Vector<float, 4>>(),
-           const std::vector<util::Vector<float, 4>>& vertexColors = std::vector<util::Vector<float, 4>>()
+           const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
+           const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
+           const std::vector<util::vec3f>& binormals = std::vector<util::vec3f>(), 
+           const std::vector<util::vec4f>& boneWeights = std::vector<util::vec4f>(),
+           const std::vector<util::vec4f>& boneIndices = std::vector<util::vec4f>(),
+           const std::vector<util::vec4f>& vertexColors = std::vector<util::vec4f>()
            );
 
       Mesh(AABB boundingVolume,
@@ -71,19 +71,19 @@ namespace he
 
       void free();
 
-      void setPositions(std::vector<util::Vector<float, 3>> positions);
-      void setTextureCoordinations(std::vector<std::vector<util::Vector<float, 2>>> textureCoords);
-      void setNormals(std::vector<util::Vector<float, 3>> normals);
-      void setBiNormals(std::vector<util::Vector<float, 3>> binormals);
-      void setBoneWeights(std::vector<util::Vector<float, 4>> boneWeights);
-      void setBoneIndices(std::vector<util::Vector<float, 4>> boneIndices);
-      void setVertexColors(std::vector<util::Vector<float, 4>> vertexColors);
+      void setPositions(std::vector<util::vec3f> positions);
+      void setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords);
+      void setNormals(std::vector<util::vec3f> normals);
+      void setBiNormals(std::vector<util::vec3f> binormals);
+      void setBoneWeights(std::vector<util::vec4f> boneWeights);
+      void setBoneIndices(std::vector<util::vec4f> boneIndices);
+      void setVertexColors(std::vector<util::vec4f> vertexColors);
 
       GLuint getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
 
-      util::Vector<float, 3> getBBMin() const;
-      util::Vector<float, 3> getBBMax() const;
+      util::vec3f getBBMin() const;
+      util::vec3f getBBMax() const;
 
       const std::vector<GLubyte>& getVBOBuffer() const;
       GLuint getVertexStride() const;

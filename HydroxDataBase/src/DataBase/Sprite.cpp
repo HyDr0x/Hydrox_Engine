@@ -6,13 +6,13 @@ namespace he
 {
   namespace db
   {
-    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::Vector<unsigned int, 2>& animNumber, const util::Vector<float, 2>& texStart, const util::Vector<float, 2>& texEnd) : 
+    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd) : 
       m_eventManager(eventManager),
       m_textureHandle(textureHandle), 
       m_renderable(renderable), 
       m_transparency(transparency),
       m_animNumber(animNumber), 
-      m_animCount(util::Vector<unsigned int, 2>(0, 0)),
+      m_animCount(util::vec2ui(0, 0)),
       m_texStart(texStart),
       m_texEnd(texEnd),
       m_angle(0.0f),
@@ -126,26 +126,26 @@ namespace he
 
     void Sprite::setAnimation(unsigned int number)
     {
-      m_animCount = util::Vector<unsigned int, 2>(number % m_animNumber[0], number / m_animNumber[0]);
+      m_animCount = util::vec2ui(number % m_animNumber[0], number / m_animNumber[0]);
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
-    void Sprite::setAnimation(const util::Vector<unsigned int, 2>& number)
+    void Sprite::setAnimation(const util::vec2ui& number)
     {
       m_animCount = number;
       assert(m_animCount[1] < m_animNumber[1] && m_animCount[0] < m_animNumber[0]);
     }
 
-    util::Vector<unsigned int, 2> Sprite::getAnimationNumber() const
+    util::vec2ui Sprite::getAnimationNumber() const
     {
       return m_animNumber;
     }
 
-    util::Vector<unsigned int, 2> Sprite::getAnimationCount() const
+    util::vec2ui Sprite::getAnimationCount() const
     {
       return m_animCount;
     }
 
-    void Sprite::setTranslation(const util::Vector<float, 2>& v)
+    void Sprite::setTranslation(const util::vec2f& v)
     {
       m_tlMatrix[2][0] = v[0];
       m_tlMatrix[2][1] = v[1];
@@ -157,7 +157,7 @@ namespace he
       m_tlMatrix[2][1] = y;
     }
 
-    void Sprite::addTranslation(const util::Vector<float, 2>& v)
+    void Sprite::addTranslation(const util::vec2f& v)
     {
       m_tlMatrix[2][0] += v[0];
       m_tlMatrix[2][1] += v[1];
@@ -181,7 +181,7 @@ namespace he
       m_scMatrix[1][1] += s;
     }
 
-    void Sprite::setScale(const util::Vector<float, 2>& s)
+    void Sprite::setScale(const util::vec2f& s)
     {
       m_scMatrix[0][0] = s[0];
       m_scMatrix[1][1] = s[1];
@@ -193,7 +193,7 @@ namespace he
       m_scMatrix[1][1] = sy;
     }
 
-    void Sprite::addScale(const util::Vector<float, 2>& s)
+    void Sprite::addScale(const util::vec2f& s)
     {
       m_scMatrix[0][0] += s[0];
       m_scMatrix[1][1] += s[1];
@@ -221,9 +221,9 @@ namespace he
       m_rtMatrix[0][1] = -m_rtMatrix[1][0];
     }
 
-    util::Vector<float, 2> Sprite::getPosition() const
+    util::vec2f Sprite::getPosition() const
     {
-      return util::Vector<float, 2>(m_tlMatrix[2][0], m_tlMatrix[2][1]);
+      return util::vec2f(m_tlMatrix[2][0], m_tlMatrix[2][1]);
     }
 
     float Sprite::getRotation() const
@@ -231,9 +231,9 @@ namespace he
       return m_angle;
     }
 
-    util::Vector<float, 2> Sprite::getScale() const
+    util::vec2f Sprite::getScale() const
     {
-      return util::Vector<float, 2>(m_scMatrix[0][0], m_scMatrix[1][1]);
+      return util::vec2f(m_scMatrix[0][0], m_scMatrix[1][1]);
     }
 
     void Sprite::setLayer(unsigned char layer)
