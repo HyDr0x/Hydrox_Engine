@@ -1,6 +1,7 @@
 set(
 	HEADER 
 	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/CollisionTests.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Math.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Matrix.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Matrix2.hpp 

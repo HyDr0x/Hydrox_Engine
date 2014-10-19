@@ -38,6 +38,11 @@ namespace he
         return angle / PI * 180.0f;
       }
 
+      inline float cartesianToPolar(float x, float y)
+      {
+        return atan2f(y, x);
+      }
+
       template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
       {
         return Vector<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));

@@ -8,5 +8,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/Singleton.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SingletonBehaviour.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SingletonManager.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SutherlandHodgman.hpp 
 	PARENT_SCOPE 
 )
