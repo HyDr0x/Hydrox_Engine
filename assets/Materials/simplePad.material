@@ -1,0 +1,60 @@
+#Material Data
+###################################
+Diffuse Strength
+0.8
+
+Specular Strength
+0.3
+
+Ambient Strength
+0.2
+
+Specular Exponent
+1.0
+
+###################################
+
+#Textures
+###################################
+Diffuse Map
+../../assets/Textures/dwarf.jpg
+NULL
+NULL
+NULL
+
+Normal Map
+NULL
+NULL
+NULL
+NULL
+
+Specular Map
+NULL
+NULL
+NULL
+NULL
+
+Displacement Map
+NULL
+NULL
+NULL
+NULL
+###################################
+
+#Shader
+###################################
+Shader Name
+../../assets/Shader/Mesh/staticMeshTex
+
+Fragment Shader
+TRUE
+
+Geometry Shader
+FALSE
+
+Tesselation Control Shader
+FALSE
+
+Tesselation Evaluation Shader
+FALSE
+###################################

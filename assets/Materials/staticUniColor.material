@@ -1,0 +1,60 @@
+#Material Data
+###################################
+Diffuse Strength
+1.0
+
+Specular Strength
+1.0
+
+Ambient Strength
+1.0
+
+Specular Exponent
+1.0
+
+###################################
+
+#Textures
+###################################
+Diffuse Map
+NULL
+NULL
+NULL
+NULL
+
+Normal Map
+NULL
+NULL
+NULL
+NULL
+
+Specular Map
+NULL
+NULL
+NULL
+NULL
+
+Displacement Map
+NULL
+NULL
+NULL
+NULL
+###################################
+
+#Shader
+###################################
+Shader Name
+../../assets/Shader/Mesh/staticMeshUniColor
+
+Fragment Shader
+TRUE
+
+Geometry Shader
+FALSE
+
+Tesselation Control Shader
+FALSE
+
+Tesselation Evaluation Shader
+FALSE
+###################################
