@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include <Utilities/Miscellaneous/PointCloudGenerator.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/PrimitiveGenerator/CubeGenerator.h>
 
@@ -292,6 +293,9 @@ namespace he
           }
         }
       }
+
+      util::PointCloudGenerator generator;
+      //std::vector<std::list<util::Cache>> caches = generator.generateCaches(1.0f, util::math::PI_HALF, positions, indices);
 
       return m_modelManager->addObject(db::Mesh(
         primitiveType,

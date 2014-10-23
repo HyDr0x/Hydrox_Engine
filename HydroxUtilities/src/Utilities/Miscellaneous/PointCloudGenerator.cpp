@@ -1,5 +1,6 @@
 #include "Utilities/Miscellaneous/PointCloudGenerator.h"
 
+#include <cassert>
 #include <random>
 #include <cmath>
 
@@ -10,13 +11,17 @@ namespace he
 {
   namespace util
   {
-    std::vector<std::list<PointCloudGenerator::Cache>> PointCloudGenerator::generateCaches(float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
+    std::vector<std::list<Cache>> PointCloudGenerator::generateCaches(float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
     {
-      generateAABB(positions);
+      std::vector<std::vector<vec3f>> triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
+      std::vector<std::list<Cache>> caches;//saves all caches per voxel
+      vec3f bbMin, bbMax;
+
+      generateAABB(positions, bbMin, bbMax);
 
       float boxSize = maxDistance * 0.5f;
       float boxHalfSize = boxSize * 0.5f;
-      vec3f aabbCenter = (m_bbMax - m_bbMin) * 0.5f;
+      vec3f aabbCenter = (bbMax - bbMin) * 0.5f;
 
       std::vector<vec3f> boxPoints(18);//create for each plane 3 points in the right orientation for collision tests later
       boxPoints[0] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
@@ -42,86 +47,129 @@ namespace he
       boxPoints[15] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
       boxPoints[16] = vec3f(boxHalfSize, -boxHalfSize, boxHalfSize);
       boxPoints[17] = vec3f(boxHalfSize, boxHalfSize, -boxHalfSize);
-      vec3i voxelNumber((m_bbMax[0] - m_bbMin[0]) / boxSize + 1, (m_bbMax[1] - m_bbMin[1]) / boxSize + 1, (m_bbMax[2] - m_bbMin[2]) / boxSize + 1);
 
-      unsigned int triangleNumber = 0;
+      vec3i voxelNumber((bbMax[0] - bbMin[0]) / boxSize + 1, (bbMax[1] - bbMin[1]) / boxSize + 1, (bbMax[2] - bbMin[2]) / boxSize + 1);
+      unsigned int triangleNumber = indices.empty() ? triangleNumber = positions.size() : triangleNumber = indices.size();
 
-      if(indices.empty())
+      caches.resize(voxelNumber[0] * voxelNumber[1] * voxelNumber[2]);
+      triangles.resize(voxelNumber[0] * voxelNumber[1] * voxelNumber[2]);
+
+      for(unsigned int x = 0; x < voxelNumber[0]; x++)
       {
-        triangleNumber = positions.size() / 3;
-
-        for(unsigned int x = 0; x < voxelNumber[0]; x++)
+        for(unsigned int y = 0; y < voxelNumber[1]; y++)
         {
-          for(unsigned int y = 0; y < voxelNumber[1]; y++)
+          for(unsigned int z = 0; z < voxelNumber[2]; z++)
           {
-            for(unsigned int z = 0; z < voxelNumber[2]; z++)
+            vec3f boxCenter(bbMin[0] + x * boxSize + boxHalfSize, bbMin[1] + y * boxSize + boxHalfSize, bbMin[2] + z * boxSize + boxHalfSize);
+            unsigned int voxelIndex = x * voxelNumber[1] * voxelNumber[2] + y * voxelNumber[2] + z;
+
+            std::list<PolygonData> polygons;//saves all polygons which lying in the voxel
+            std::vector<std::vector<float>> normalBin(18);//area of the triangles which have that normal
+
+            for(unsigned int i = 0; i < normalBin.size(); i++)
             {
-              vec3f boxCenter(x * boxSize + boxHalfSize - aabbCenter[0], y * boxSize + boxHalfSize - aabbCenter[1], z * boxSize + boxHalfSize - aabbCenter[2]);
-              unsigned int voxelIndex = x * voxelNumber[1] * voxelNumber[2] + y * voxelNumber[2] + z;
+              normalBin[i].resize(normalBin.size(), 0.0f);
+            }
 
-              std::list<PolygonData> polygons;//saves all polygons which lying in the voxel
-              std::vector<std::vector<float>> normalBin(18);//area of the triangles which have that normal
+            unsigned int  thetaQuantizer = 360 / normalBin[0].size();
+            unsigned int  uQuantizer = normalBin[0].size();
 
-              for(unsigned int i = 0; i < normalBin.size(); i++)
+            for(unsigned int i = 0; i < triangleNumber; i += 3)
+            {
+              vec3f t0, t1, t2;
+              if(indices.empty())
               {
-                normalBin[i].resize(normalBin.size(), 0.0f);
+                t0 = positions[i];
+                t1 = positions[i + 1];
+                t2 = positions[i + 2];
+              }
+              else
+              {
+                t0 = positions[indices[i]];
+                t1 = positions[indices[i + 1]];
+                t2 = positions[indices[i + 2]];
               }
 
-              unsigned int  thetaQuantizer = 360 / normalBin[0].size();
-              unsigned int  uQuantizer = normalBin[0].size();
+              vec3f v0(t0 - boxCenter), v1(t1 - boxCenter), v2(t2 - boxCenter);
 
-              for(unsigned int i = 0; i < triangleNumber; i++)
+              vec3f e0 = v1 - v0;
+              vec3f e1 = v2 - v0;
+              vec3f e2 = v2 - v1;
+
+              vec3f normal = math::cross(e0, e1).normalize();
+
+              if(fastTriangleCenteredBoxTest(v0, v1, v2, normal, vec3f(boxHalfSize, boxHalfSize, boxHalfSize)))
               {
-                vec3f boxCenter(x + boxHalfSize, y + boxHalfSize, z + boxHalfSize);
-                vec3f v0(positions[i] - boxCenter), v1(positions[i + 1] - boxCenter), v2(positions[i + 2] - boxCenter);
+                triangles[voxelIndex].push_back(t0);
+                triangles[voxelIndex].push_back(t1);
+                triangles[voxelIndex].push_back(t2);
 
-                vec3f e0 = v1 - v0;
-                vec3f e1 = v2 - v0;
-                vec3f e2 = v2 - v1;
+                std::vector<vec3f> trianglePoints(3);
+                trianglePoints[0] = v0;
+                trianglePoints[1] = v1;
+                trianglePoints[2] = v2;
 
-                vec3f normal = math::cross(e0, e1).normalize();
+                vec3f polygonCentroid;
 
-                bool contains = triangleCenteredBoxTest(v0, v1, v2, normal, vec3f(boxHalfSize, boxHalfSize, boxHalfSize));
+                float area = calculatePolygonAreaCentroid(trianglePoints, boxPoints, polygonCentroid);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
 
-                if(contains)
-                {
-                  m_triangles[voxelIndex].push_back(positions[i]);
-                  m_triangles[voxelIndex].push_back(positions[i + 1]);
-                  m_triangles[voxelIndex].push_back(positions[i + 2]);
+                assert(area > 0.0f);
 
-                  normal = normal.normalize();
-                  vec2ui bin = normalToBin(normal, thetaQuantizer, uQuantizer);
-                  
-                  std::vector<vec3f> trianglePoints(3);
-                  trianglePoints[0] = v0;
-                  trianglePoints[1] = v1;
-                  trianglePoints[2] = v2;
+                normal = normal.normalize();
 
-                  vec3f polygonCentroid;
+                PolygonData data;
+                data.area = area;
+                data.centroid = polygonCentroid + boxCenter;
+                data.normal = normal;
 
-                  float area = calculatePolygonAreaCentroid(trianglePoints, boxPoints, polygonCentroid);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
-
-                  PolygonData data;
-                  data.area = area;
-                  data.centroid = polygonCentroid;
-                  data.normal = normal;
-
-                  normalBin[bin[0]][bin[1]] += area;
-                  polygons.push_back(data);
-                }
+                vec2ui bin = normalToBin(normal, thetaQuantizer, uQuantizer);
+                bin[0] = bin[0] % normalBin.size();
+                bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
+                normalBin[bin[0]][bin[1]] += area;
+                polygons.push_back(data);
               }
+            }
 
-              generateCachesPerVoxel(polygons, normalBin, maxAngle, m_caches[voxelIndex]);
+            if(!polygons.empty())
+            {
+              generateCachesPerVoxel(polygons, normalBin, maxAngle, caches[voxelIndex]);
+              shiftCentroid(caches[voxelIndex], triangles[voxelIndex]);
             }
           }
         }
       }
-      else
-      {
-        triangleNumber = indices.size() / 3;
-      }
 
-      return m_caches;
+      return caches;
+    }
+
+    void PointCloudGenerator::shiftCentroid(std::list<Cache>& caches, std::vector<vec3f>& triangles)
+    {
+      for(std::list<Cache>::iterator cit = caches.begin(); cit != caches.end(); cit++)
+      {
+        unsigned int bestTriangle = 0;
+        vec3f nearestPoint;
+        float error = UINT_MAX;
+
+        for(unsigned int i = 0; i < triangles.size(); i += 3)
+        {
+          vec3f t0(triangles[i]), t1(triangles[i + 1]), t2(triangles[i + 2]);
+          vec3f normal = math::cross(t1 - t0, t2 - t0).normalize();
+          vec3f tmpNearestPoint;
+          float distance, tmpError;
+
+          distance = calculatePointTriangleDistance(t0, t1, t2, cit->position, tmpNearestPoint);
+
+          tmpError = distance * sqrt(math::clamp(1.0f - vec3f::dot(normal, cit->normal), 0.0f, 1.0f));
+
+          if(error > tmpError)
+          {
+            error = tmpError;
+            nearestPoint = tmpNearestPoint;
+          }
+        }
+
+        cit->position = nearestPoint;
+      }
     }
 
     void PointCloudGenerator::generateCachesPerVoxel(std::list<PolygonData> polygons, std::vector<std::vector<float>> normalBin, float maxAngle, std::list<Cache>& outCaches)
@@ -156,8 +204,8 @@ namespace he
 
         if(!emptyBins) break;
 
-        vec2f angle0 = binToCylinder(maxBin[0], thetaQuantizer, maxBin[1], uQuantizer);
-        vec2f angle1 = binToCylinder((maxBin[0] + 1) % normalBin.size(), thetaQuantizer, (maxBin[1] + 1) % normalBin.size(), uQuantizer);
+        vec2f angle0 = binToCylinder(vec2ui(maxBin[0], maxBin[1] == normalBin.size() ? normalBin.size() - 1 : maxBin[1]), thetaQuantizer, uQuantizer);
+        vec2f angle1 = binToCylinder(vec2ui(maxBin[0] + 1, maxBin[1] + 1 > normalBin.size() ? normalBin.size() : maxBin[1]), thetaQuantizer, uQuantizer);
 
         float newTheta = (angle0[0] + angle1[0]) * 0.5f;
         float newU = (angle0[1] + angle1[1]) * 0.5f;
@@ -168,13 +216,25 @@ namespace he
         qNormal[2] = newU;
 
         std::list<PolygonData> cachePolygons;
-        for(std::list<PolygonData>::iterator it = polygons.begin(); it != polygons.end(); it++)
+
+        std::list<PolygonData>::iterator pit = polygons.begin();
+        while(pit != polygons.end())
         {
-          if(vec3f::dot(it->normal, qNormal) < maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
+          if(acosf(vec3f::dot(pit->normal, qNormal)) < maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
           {
-            vec2ui bin = normalToBin(it->normal, thetaQuantizer, uQuantizer);
-            normalBin[bin[0]][bin[1]] -= it->area;
-            cachePolygons.push_back(*it);
+            vec2ui bin = normalToBin(pit->normal, thetaQuantizer, uQuantizer);
+            bin[0] = bin[0] % normalBin.size();
+            bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
+            normalBin[bin[0]][bin[1]] -= pit->area;
+            cachePolygons.push_back(*pit);
+
+            pit = polygons.erase(pit);
+
+            if(polygons.empty()) break;
+          }
+          else
+          {
+            pit++;
           }
         }
 
@@ -191,29 +251,29 @@ namespace he
 
         Cache cache;
         cache.position = summedCentroid / summedArea;
-        cache.normal = summedNormal / summedArea;
+        cache.normal = (summedNormal / summedArea).normalize();
 
         outCaches.push_back(cache);
       }
     }
 
-    void PointCloudGenerator::generateAABB(const std::vector<vec3f>& positions)
+    void PointCloudGenerator::generateAABB(const std::vector<vec3f>& positions, vec3f& bbMin, vec3f& bbMax)
     {
-      m_bbMin = util::vec3f(FLT_MAX, FLT_MAX, FLT_MAX);
-      m_bbMax = util::vec3f(FLT_MIN, FLT_MIN, FLT_MIN);
+      bbMin = util::vec3f(FLT_MAX, FLT_MAX, FLT_MAX);
+      bbMax = util::vec3f(FLT_MIN, FLT_MIN, FLT_MIN);
 
       for(unsigned int i = 0; i < positions.size(); i++)
       {
         for(unsigned int j = 0; j < 3; j++)
         {
-          if(m_bbMin[j] > positions[i][j])
+          if(bbMin[j] > positions[i][j])
           {
-            m_bbMin[j] = positions[i][j];
+            bbMin[j] = positions[i][j];
           }
 
-          if(m_bbMax[j] < positions[i][j])
+          if(bbMax[j] < positions[i][j])
           {
-            m_bbMax[j] = positions[i][j];
+            bbMax[j] = positions[i][j];
           }
         }
       }
@@ -270,6 +330,14 @@ namespace he
         secondPoint = outPoints[i];
       }
 
+      //outPolygonCentroid = vec3f::identity();
+      //for(unsigned int i = 0; i < outPoints.size(); i++)
+      //{
+      //  outPolygonCentroid += outPoints[i];
+      //}
+
+      //outPolygonCentroid /= outPoints.size();
+
       //calculate the angle between the polygon and the z-axis to rotate the polygon so that its perpenidcular to the z plane
       vec3f polygonNormal = math::cross(outPoints[2] - outPoints[0], outPoints[1] - outPoints[0]).normalize();
       vec3f rotationAxis = math::cross(vec3f(0, 0, 1), polygonNormal);
@@ -297,6 +365,7 @@ namespace he
 
       float centroidArea = 1.0f / (6.0f * area);
       outPolygonCentroid = centroidArea * vec3f(cx, cy, 0.0f);
+      outPolygonCentroid[2] = outPoints[0][2];
 
       outPolygonCentroid = rotQuat.invert().toMatrix() * outPolygonCentroid;
 

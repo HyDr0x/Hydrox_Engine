@@ -6,14 +6,13 @@
 
 #include <GL/glew.h>
 
-#include "DataBase/DLLExport.h"
-
 #include <Utilities/Math/Math.hpp>
-
-#include "DataBase/ManagedResource.h"
+#include <Utilities/Miscellaneous/PointCloudGenerator.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
+#include "DataBase/DLLExport.h"
 #include "DataBase/AABB.h"
+#include "DataBase/ManagedResource.h"
 
 #define GLINDEXTYPE GL_UNSIGNED_INT
 
@@ -44,6 +43,7 @@ namespace he
       Mesh();
       Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
+           //const std::vector<util::Cache>& caches = std::vector<util::Cache>(),
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
            const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
@@ -105,6 +105,7 @@ namespace he
       unsigned int m_vertexCount;
       GLuint m_vertexStride;
       std::vector<GLubyte> m_geometryData;
+      //std::vector<GLubyte> m_cacheData;
       std::vector<indexType> m_indexData;
       GLuint m_vertexDeclarationFlags;
       ////////////////////////////////
