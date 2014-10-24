@@ -11,10 +11,12 @@ namespace he
 {
   namespace util
   {
-    std::vector<std::list<Cache>> PointCloudGenerator::generateCaches(float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
+    std::list<Cache> PointCloudGenerator::generateCaches(float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
     {
       std::vector<std::vector<vec3f>> triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
-      std::vector<std::list<Cache>> caches;//saves all caches per voxel
+      std::list<Cache> caches;//saves all caches per voxel
+      std::vector<std::list<PolygonData>> polygons;//saves all polygons which lying in the voxel and then the caches with their area
+
       vec3f bbMin, bbMax;
 
       generateAABB(positions, bbMin, bbMax);
@@ -51,8 +53,8 @@ namespace he
       vec3i voxelNumber((bbMax[0] - bbMin[0]) / boxSize + 1, (bbMax[1] - bbMin[1]) / boxSize + 1, (bbMax[2] - bbMin[2]) / boxSize + 1);
       unsigned int triangleNumber = indices.empty() ? triangleNumber = positions.size() : triangleNumber = indices.size();
 
-      caches.resize(voxelNumber[0] * voxelNumber[1] * voxelNumber[2]);
       triangles.resize(voxelNumber[0] * voxelNumber[1] * voxelNumber[2]);
+      polygons.resize(voxelNumber[0] * voxelNumber[1] * voxelNumber[2]);
 
       for(unsigned int x = 0; x < voxelNumber[0]; x++)
       {
@@ -63,7 +65,7 @@ namespace he
             vec3f boxCenter(bbMin[0] + x * boxSize + boxHalfSize, bbMin[1] + y * boxSize + boxHalfSize, bbMin[2] + z * boxSize + boxHalfSize);
             unsigned int voxelIndex = x * voxelNumber[1] * voxelNumber[2] + y * voxelNumber[2] + z;
 
-            std::list<PolygonData> polygons;//saves all polygons which lying in the voxel
+            
             std::vector<std::vector<float>> normalBin(18);//area of the triangles which have that normal
 
             for(unsigned int i = 0; i < normalBin.size(); i++)
@@ -126,25 +128,99 @@ namespace he
                 bin[0] = bin[0] % normalBin.size();
                 bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
                 normalBin[bin[0]][bin[1]] += area;
-                polygons.push_back(data);
+                polygons[voxelIndex].push_back(data);
               }
             }
 
             if(!polygons.empty())
             {
-              generateCachesPerVoxel(polygons, normalBin, maxAngle, caches[voxelIndex]);
-              shiftCentroid(caches[voxelIndex], triangles[voxelIndex]);
+              generateCachesPerVoxel(polygons[voxelIndex], normalBin, maxAngle);
+              shiftCentroid(polygons[voxelIndex], triangles[voxelIndex]);
             }
           }
         }
       }
 
+      reduceCaches(errorRate, maxAngle, maxDistance, voxelNumber, polygons, caches);
+
       return caches;
     }
 
-    void PointCloudGenerator::shiftCentroid(std::list<Cache>& caches, std::vector<vec3f>& triangles)
+    void removeSimilarCaches(float errorRate, float maxAngle, float maxDistance, vec3i voxelNumber, unsigned int voxelIndex, vec3ui voxelCoords, PointCloudGenerator::PolygonData cache, std::vector<std::list<PointCloudGenerator::PolygonData>>& caches, std::list<Cache>& outCaches)
     {
-      for(std::list<Cache>::iterator cit = caches.begin(); cit != caches.end(); cit++)
+      std::list<PointCloudGenerator::PolygonData> similarCaches;
+
+      for(int nx = -1; nx < 2; nx++)
+      {
+        for(int ny = -1; ny < 2; ny++)
+        {
+          for(int nz = -1; nz < 2; nz++)
+          {
+            if(0 <= voxelCoords[0] + nx && voxelCoords[0] + nx < voxelNumber[0] && 0 <= voxelCoords[1] + ny && voxelCoords[1] + ny < voxelNumber[1] && 0 <= voxelCoords[2] + nz && voxelCoords[2] + nz < voxelNumber[2])
+            {
+              unsigned int newVoxelIndex = voxelIndex + nx * voxelNumber[1] * voxelNumber[2] + ny * voxelNumber[2] + nz;
+
+              std::list<PointCloudGenerator::PolygonData>::iterator cit = caches[newVoxelIndex].begin();
+              while(cit != caches[newVoxelIndex].end())
+              {
+                if(acosf(math::clamp(vec3f::dot(cit->normal, cache.normal), -1.0f, 1.0f)) < maxAngle * errorRate && (cit->centroid - cache.centroid).length() < maxDistance * errorRate)
+                {
+                  similarCaches.push_back(*cit);
+
+                  cit = caches[newVoxelIndex].erase(cit);
+
+                  if(caches[newVoxelIndex].empty()) break;
+                }
+                else
+                {
+                  cit++;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      PointCloudGenerator::PolygonData biggestCache;
+      float maxArea = 0.0f;
+
+      std::list<PointCloudGenerator::PolygonData>::iterator end = similarCaches.end();
+      for(std::list<PointCloudGenerator::PolygonData>::iterator cit = similarCaches.begin(); cit != end; cit++)
+      {
+        if(cit->area > maxArea)
+        {
+          maxArea = cit->area;
+          biggestCache = *cit;
+        }
+      }
+
+      Cache bestCache;
+      bestCache.position = biggestCache.centroid;
+      bestCache.normal = biggestCache.normal;
+      outCaches.push_back(bestCache);
+    }
+
+    void PointCloudGenerator::reduceCaches(float errorRate, float maxAngle, float maxDistance, vec3i voxelNumber, std::vector<std::list<PolygonData>>& caches, std::list<Cache>& outCaches)
+    {
+      for(unsigned int x = 0; x < voxelNumber[0]; x++)
+      {
+        for(unsigned int y = 0; y < voxelNumber[1]; y++)
+        {
+          for(unsigned int z = 0; z < voxelNumber[2]; z++)
+          {
+            unsigned int voxelIndex = x * voxelNumber[1] * voxelNumber[2] + y * voxelNumber[2] + z;
+            while(!caches[voxelIndex].empty())
+            {
+              removeSimilarCaches(errorRate, maxAngle, maxDistance, voxelNumber, voxelIndex, vec3ui(x, y, z), *caches[voxelIndex].begin(), caches, outCaches);
+            }
+          }
+        }
+      }
+    }
+
+    void PointCloudGenerator::shiftCentroid(std::list<PolygonData>& caches, std::vector<vec3f>& triangles)
+    {
+      for(std::list<PolygonData>::iterator cit = caches.begin(); cit != caches.end(); cit++)
       {
         unsigned int bestTriangle = 0;
         vec3f nearestPoint;
@@ -157,7 +233,7 @@ namespace he
           vec3f tmpNearestPoint;
           float distance, tmpError;
 
-          distance = calculatePointTriangleDistance(t0, t1, t2, cit->position, tmpNearestPoint);
+          distance = calculatePointTriangleDistance(t0, t1, t2, cit->centroid, tmpNearestPoint);
 
           tmpError = distance * sqrt(math::clamp(1.0f - vec3f::dot(normal, cit->normal), 0.0f, 1.0f));
 
@@ -168,12 +244,14 @@ namespace he
           }
         }
 
-        cit->position = nearestPoint;
+        cit->centroid = nearestPoint;
       }
     }
 
-    void PointCloudGenerator::generateCachesPerVoxel(std::list<PolygonData> polygons, std::vector<std::vector<float>> normalBin, float maxAngle, std::list<Cache>& outCaches)
+    void PointCloudGenerator::generateCachesPerVoxel(std::list<PolygonData>& polygons, std::vector<std::vector<float>> normalBin, float maxAngle)
     {
+      std::list<PolygonData> outCaches;
+
       unsigned int  thetaQuantizer = 360 / normalBin[0].size();
       unsigned int  uQuantizer = normalBin[0].size();
 
@@ -205,7 +283,7 @@ namespace he
         if(!emptyBins) break;
 
         vec2f angle0 = binToCylinder(vec2ui(maxBin[0], maxBin[1] == normalBin.size() ? normalBin.size() - 1 : maxBin[1]), thetaQuantizer, uQuantizer);
-        vec2f angle1 = binToCylinder(vec2ui(maxBin[0] + 1, maxBin[1] + 1 > normalBin.size() ? normalBin.size() : maxBin[1]), thetaQuantizer, uQuantizer);
+        vec2f angle1 = binToCylinder(vec2ui(maxBin[0] + 1, maxBin[1] + 1 > normalBin.size() ? normalBin.size() : maxBin[1] + 1), thetaQuantizer, uQuantizer);
 
         float newTheta = (angle0[0] + angle1[0]) * 0.5f;
         float newU = (angle0[1] + angle1[1]) * 0.5f;
@@ -220,7 +298,7 @@ namespace he
         std::list<PolygonData>::iterator pit = polygons.begin();
         while(pit != polygons.end())
         {
-          if(acosf(vec3f::dot(pit->normal, qNormal)) < maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
+          if(acosf(math::clamp(vec3f::dot(pit->normal, qNormal), -1.0f, 1.0f)) < maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
           {
             vec2ui bin = normalToBin(pit->normal, thetaQuantizer, uQuantizer);
             bin[0] = bin[0] % normalBin.size();
@@ -249,12 +327,15 @@ namespace he
           summedNormal += it->normal * it->area;
         }
 
-        Cache cache;
-        cache.position = summedCentroid / summedArea;
+        PolygonData cache;
+        cache.centroid = summedCentroid / summedArea;
         cache.normal = (summedNormal / summedArea).normalize();
+        cache.area = summedArea;
 
         outCaches.push_back(cache);
       }
+
+      polygons = outCaches;
     }
 
     void PointCloudGenerator::generateAABB(const std::vector<vec3f>& positions, vec3f& bbMin, vec3f& bbMax)
@@ -341,7 +422,7 @@ namespace he
       //calculate the angle between the polygon and the z-axis to rotate the polygon so that its perpenidcular to the z plane
       vec3f polygonNormal = math::cross(outPoints[2] - outPoints[0], outPoints[1] - outPoints[0]).normalize();
       vec3f rotationAxis = math::cross(vec3f(0, 0, 1), polygonNormal);
-      float zAxisAngle = acosf(vec3f::dot(vec3f(0, 0, 1), polygonNormal));
+      float zAxisAngle = acosf(math::clamp(vec3f::dot(vec3f(0, 0, 1), polygonNormal), -1.0f, 1.0f));
       Quaternion<float> rotQuat = math::createRotAxisQuaternion<float>(zAxisAngle, rotationAxis);
       Matrix<float, 4> rotMatrix = rotQuat.toMatrix();
 
