@@ -1,0 +1,18 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/GroupNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NodeIndex.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeAllocator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeFactory.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/GroupNode.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNode.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeAllocator.inl 
+	${CMAKE_CURRENT_SOURCE_DIR}/TreeNodeFactory.inl 
+	PARENT_SCOPE 
+)

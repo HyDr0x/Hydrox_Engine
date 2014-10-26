@@ -5,6 +5,7 @@ add_subdirectory(Pointer)
 add_subdirectory(PrimitiveGenerator)
 add_subdirectory(Signals)
 add_subdirectory(Timer)
+add_subdirectory(Tree)
 
 set(
 	HEADER 
