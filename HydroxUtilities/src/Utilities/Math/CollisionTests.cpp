@@ -264,50 +264,6 @@ namespace he
       return true;
     }
 
-    bool triangleCenteredBoxTest(vec3f v0, vec3f v1, vec3f v2, vec3f normal, vec3f boxHalfSize)
-    {
-      vec3f e0, e1, e2;
-
-      e0 = v1 - v0;
-      e1 = v2 - v1;
-      e2 = v0 - v2;
-
-      float vmin, vmax;
-
-      findMinMax(v0[0], v1[0], v2[0], vmin, vmax);
-      if(vmin > boxHalfSize[0] || vmax < -boxHalfSize[0]) return false;
-
-      findMinMax(v0[1], v1[1], v2[1], vmin, vmax);
-      if(vmin > boxHalfSize[1] || vmax < -boxHalfSize[1]) return false;
-
-      findMinMax(v0[2], v1[2], v2[2], vmin, vmax);
-      if(vmin > boxHalfSize[2] || vmax < -boxHalfSize[2]) return false;
-
-      //if(!(testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[0], vec3f(1, 0, 0)) &&
-      //  testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[1], vec3f(0, 1, 0)) &&
-      //  testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[2], vec3f(0, 0, 1)) &&
-      //  testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[0], vec3f(-1, 0, 0)) &&
-      //  testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[1], vec3f(0,-1, 0)) &&
-      //  testAABBEdgeWithTriangle(v0, v1, v2, boxHalfSize[2], vec3f(0, 0,-1))))
-      //{
-      //  return false;
-      //}
-
-      vec3f en0 = math::cross(normal, e0).normalize();
-      vec3f en1 = math::cross(normal, e1).normalize();
-      vec3f en2 = math::cross(normal, e2).normalize();
-
-      if(!(testTriangleEdgeWithAABB(v0, v1, v2, boxHalfSize, en0) &&
-           testTriangleEdgeWithAABB(v0, v1, v2, boxHalfSize, en1) &&
-           testTriangleEdgeWithAABB(v0, v1, v2, boxHalfSize, en2) &&
-           testTriangleEdgeWithAABB(v0, v1, v2, boxHalfSize, normal.normalize())))
-      {
-        return false;
-      }
-
-      return true;// box and triangle overlaps
-    }
-
     bool testXAxis(vec3f v0, vec3f v1, float a, float b, vec3f boxHalfSize)
     {
       float p0, p1;
@@ -386,7 +342,7 @@ namespace he
       return true;
     }
 
-    bool fastTriangleCenteredBoxTest(vec3f v0, vec3f v1, vec3f v2, vec3f normal, vec3f boxHalfSize)
+    bool triangleCenteredBoxTest(vec3f v0, vec3f v1, vec3f v2, vec3f normal, vec3f boxHalfSize)
     {
       vec3f e[3];
 

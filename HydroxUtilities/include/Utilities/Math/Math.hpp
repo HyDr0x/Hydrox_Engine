@@ -45,17 +45,17 @@ namespace he
 
       template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
       {
-        return Vector<Type,4>(abs(v1[0]), abs(v1[1]), abs(v1[2]), abs(v1[3]));
+        return Vector<Type, 4>(fabs(v1[0]), fabs(v1[1]), fabs(v1[2]), fabs(v1[3]));
       }
 
       template<typename Type> inline Vector<Type, 3> abs(const Vector<Type, 3>& v1)
       {
-        return Vector<Type,3>(abs(v1[0]), abs(v1[1]), abs(v1[2]));
+        return Vector<Type, 3>(fabs(v1[0]), fabs(v1[1]), fabs(v1[2]));
       }
 
       template<typename Type> inline Vector<Type, 2> abs(const Vector<Type, 2>& v1)
       {
-        return Vector<Type,2>(abs(v1[0]),abs(v1[1]));
+        return Vector<Type, 2>(fabs(v1[0]), fabs(v1[1]));
       }
 
       template<typename Type> inline Vector<Type, 3> cross(const Vector<Type, 3>& v1, const Vector<Type, 3>& v2)

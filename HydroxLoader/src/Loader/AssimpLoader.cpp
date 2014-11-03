@@ -2,7 +2,6 @@
 
 #include <sstream>
 
-#include <Utilities/Miscellaneous/PointCloudGenerator.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/PrimitiveGenerator/CubeGenerator.h>
 
@@ -25,7 +24,12 @@ namespace he
 {
   namespace loader
   {
-    AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : m_singletonManager(singletonManager), m_animationTimeUnit(Seconds)
+    AssimpLoader::AssimpLoader(float errorRate, float maxDistance, float maxAngle, util::SingletonManager *singletonManager) : 
+      m_singletonManager(singletonManager), 
+      m_errorRate(errorRate),
+      m_maxDistance(maxDistance),
+      m_maxAngle(maxAngle),
+      m_animationTimeUnit(Seconds)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -133,7 +137,7 @@ namespace he
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, std::vector<util::PointCloudGenerator::cacheIndexType>(), std::vector<util::PointCloudGenerator::cacheIndexType>(), indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);
@@ -162,6 +166,8 @@ namespace he
       std::vector<util::vec4f> boneIndices;
       std::vector<util::vec4f> boneWeights;
       std::vector<util::vec4f> vertexColors;
+      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes0;
+      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes1;
       std::vector<db::Mesh::indexType> indices;
 
       GLuint primitiveType;
@@ -294,12 +300,17 @@ namespace he
         }
       }
 
-      util::PointCloudGenerator generator;
-      //std::vector<std::list<util::Cache>> caches = generator.generateCaches(1.0f, util::math::PI_HALF, positions, indices);
+      std::vector<util::Cache> caches = m_generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+
+      cacheIndizes0.resize(mesh->mNumVertices);
+      cacheIndizes1.resize(mesh->mNumVertices);
+      m_generator.createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
 
       return m_modelManager->addObject(db::Mesh(
         primitiveType,
         positions,
+        cacheIndizes0,
+        cacheIndizes1,
         indices,
         textureCoords,
         normals,
@@ -388,67 +399,6 @@ namespace he
 
       return geoNodeIndex;
     }
-
-    //sg::TreeNode* AssimpLoader::createSceneNodes(const aiScene *scene, const aiNode *node, const std::vector<util::ResourceHandle>& meshes, sg::GroupNode *parentNode, sg::TreeNode *nextSibling)
-    //{
-    //  sg::TransformNode *transformNode = nullptr;
-
-    //  std::map<std::string, std::vector<sg::AnimationTrack>>::iterator mit = m_animationTracks.find(std::string(node->mName.C_Str()));
-
-    //  if(mit != m_animationTracks.end())
-    //  {
-    //    transformNode = new sg::AnimatedTransformNode(mit->second, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
-    //    m_boneTable[transformNode->getNodeName()] = dynamic_cast<sg::AnimatedTransformNode*>(transformNode);
-    //    transformNode->addDirtyFlag(sg::GroupNode::ANIM_DIRTY);//animations need to be updated
-    //  }
-    //  else
-    //  {
-    //    util::Matrix<float, 4> tmpTransformationMatrix;
-    //    std::copy(&node->mTransformation[0][0], &node->mTransformation[0][0] + 16, &tmpTransformationMatrix[0][0]);
-    //    tmpTransformationMatrix = tmpTransformationMatrix.transpose();
-
-    //    transformNode = new sg::TransformNode(tmpTransformationMatrix, std::string(node->mName.C_Str()), parentNode, nextSibling, nullptr);
-    //    transformNode->addDirtyFlag(sg::GroupNode::TRF_DIRTY);//transformations need to be updated
-    //  }
-
-    //  parentNode = transformNode;
-    //  nextSibling = nullptr;
-
-    //  std::stringstream stream;
-    //  sg::GeoNode *geoNode = nullptr;
-    //  util::Matrix<float, 4> tmpBoneMatrix;
-
-    //  for(unsigned int i = 0; i < node->mNumMeshes; i++)//all meshes are children of the current transformation node
-    //  {
-    //    unsigned int meshIndex = node->mMeshes[i];
-
-    //    stream << i;
-    //    if(!m_inverseBindPoseTable[meshIndex].empty())
-    //    {
-    //      geoNode = new sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
-    //      m_skinnedMeshTable[dynamic_cast<sg::AnimatedGeoNode*>(geoNode)] = m_boneNameTable[meshIndex];
-    //    }
-    //    else
-    //    {
-    //      geoNode = new sg::GeoNode(m_eventManager, meshes[meshIndex], m_defaultMaterial, std::string(node->mName.C_Str()) + std::string("_Mesh") + stream.str(), parentNode, nextSibling);
-    //    }
-    //  
-    //    stream.str("");
-    //    nextSibling = geoNode;
-    //  }
-
-    //  for(unsigned int i = 0; i < node->mNumChildren; i++)//all further child nodes of the current transformation node
-    //  {
-    //    nextSibling = createSceneNodes(scene, node->mChildren[i], meshes, parentNode, nextSibling);
-    //  }
-
-    //  if(node->mNumMeshes != 0 || node->mNumChildren != 0)
-    //  {
-    //    parentNode->setFirstChild(nextSibling);//the last sibling index must be the first childindex
-    //  }
-
-    //  return transformNode;
-    //}
 
     void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
     {

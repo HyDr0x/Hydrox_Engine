@@ -34,7 +34,12 @@ namespace he
 {
   namespace loader
   {
-    HEFLoader::HEFLoader(unsigned int nodeBlockSize) : m_allocator(nodeBlockSize), m_rootNode(~0)
+    HEFLoader::HEFLoader(float errorRate, float maxDistance, float maxAngle, unsigned int nodeBlockSize) : 
+      m_errorRate(errorRate),
+      m_maxDistance(maxDistance),
+      m_maxAngle(maxAngle),
+      m_allocator(nodeBlockSize), 
+      m_rootNode(~0)
     {
     }
 
@@ -66,7 +71,7 @@ namespace he
       }
 
       std::string resourceFilename;
-      MeshLoader meshLoader = MeshLoader(singletonManager);
+      MeshLoader meshLoader = MeshLoader(m_errorRate, m_maxDistance, m_maxAngle, singletonManager);
 
       unsigned int meshMapSize;
       fileStream >> meshMapSize;

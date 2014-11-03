@@ -34,7 +34,7 @@ namespace he
 
       if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
         {
           m_shaderHandle = skinnedNormalShadowMapGenerationShaderHandle;
         }
@@ -45,7 +45,7 @@ namespace he
       }
       else
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::MODEL_BINORMAL)
+        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
         {
           m_shaderHandle = staticNormalShadowMapGenerationShaderHandle;
         }

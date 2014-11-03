@@ -28,11 +28,12 @@ namespace he
         BONEWEIGHTS,
         BONEINDICES,
         COLOR,
+        CACHEINDIZES0,
+        CACHEINDIZES1,
         SPECIAL0,
         SPECIAL1,
         SPECIAL2,
-        SPECIAL3,
-        SPECIAL4,
+        VERTEXDECLARATIONFLAGNUMBER,
       };
 
       RenderShader();

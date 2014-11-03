@@ -12,6 +12,7 @@
 #include "Loader/DLLExport.h"
 
 #include <Utilities/Signals/EventManager.h>
+#include <Utilities/Miscellaneous/PointCloudGenerator.h>
 
 #include <DataBase/ResourceManager.hpp>
 
@@ -48,7 +49,7 @@ namespace he
         Minutes,
       };
 
-      AssimpLoader(util::SingletonManager *singletonManager);
+      AssimpLoader(float errorRate, float maxDistance, float maxAngle, util::SingletonManager *singletonManager);
       AssimpLoader(const AssimpLoader& other);
 
       ~AssimpLoader();
@@ -72,6 +73,10 @@ namespace he
       sg::NodeIndex createTransformNodes(const aiNode *node, sg::NodeIndex parentNode, sg::NodeIndex nextSibling);
       sg::NodeIndex createGeoNodes(std::string meshName, unsigned int meshIndex, sg::NodeIndex parentNode, sg::NodeIndex nextSibling);
 
+      float m_errorRate;
+      float m_maxDistance;
+      float m_maxAngle;
+
       AnimationTimeUnit m_animationTimeUnit;
       float m_animationTimeUnitConvert;
 
@@ -83,6 +88,8 @@ namespace he
       db::MaterialManager *m_materialManager;
       db::TextureManager *m_textureManager;
       db::RenderShaderManager *m_renderShaderManager;
+
+      util::PointCloudGenerator m_generator;
 
       util::ResourceHandle m_defaultMaterial;
 

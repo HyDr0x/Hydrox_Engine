@@ -47,75 +47,89 @@ namespace he
 
       unsigned int vertexStride = 0;
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_POSITION))
       {
         glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::POSITION, 0);
-        vertexStride += sizeof(util::vec3f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_POSITION);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_TEXTURE0))
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
-        vertexStride += sizeof(util::vec2f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE0);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_TEXTURE1))
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE1, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE1, 0);
-        vertexStride += sizeof(util::vec2f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE1);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_TEXTURE2))
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE2, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE2, 0);
-        vertexStride += sizeof(util::vec2f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE2);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_TEXTURE3))
       {
         glVertexAttribFormat(db::RenderShader::TEXTURE3, 2, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::TEXTURE3, 0);
-        vertexStride += sizeof(util::vec2f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE3);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_NORMAL))
       {
         glVertexAttribFormat(db::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::NORMAL, 0);
-        vertexStride += sizeof(util::vec3f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_NORMAL);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
       {
         glVertexAttribFormat(db::RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BINORMAL, 0);
-        vertexStride += sizeof(util::vec3f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BINORMAL);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BONE_WEIGHTS))
       {
         glVertexAttribFormat(db::RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BONEWEIGHTS, 0);
-        vertexStride += sizeof(util::vec4f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BONE_WEIGHTS);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BONE_INDICES))
       {
         glVertexAttribFormat(db::RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::BONEINDICES, 0);
-        vertexStride += sizeof(util::vec4f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BONE_INDICES);
       }
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR) 
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_COLOR))
       {
         glVertexAttribFormat(db::RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
         glVertexAttribBinding(db::RenderShader::COLOR, 0);
-        vertexStride += sizeof(util::vec4f);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_COLOR);
       }
+
+      //if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES0))
+      //{
+      //  glVertexAttribFormat(db::RenderShader::CACHEINDIZES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+      //  glVertexAttribBinding(db::RenderShader::CACHEINDIZES0, 0);
+      //  vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES0);
+      //}
+
+      //if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES1))
+      //{
+      //  glVertexAttribFormat(db::RenderShader::CACHEINDIZES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+      //  glVertexAttribBinding(db::RenderShader::CACHEINDIZES1, 0);
+      //  vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES1);
+      //}
 
       glBindVertexArray(0);
     }
@@ -124,107 +138,23 @@ namespace he
     {
       glBindVertexArray(m_vaoIndex);
 
-      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION)
+      for(unsigned int i = 0; i < db::Mesh::VERTEXDECLARATIONFLAGNUMBER; i++)
       {
-        glEnableVertexAttribArray(db::RenderShader::POSITION);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0)
-      {
-        glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
-      {
-        glEnableVertexAttribArray(db::RenderShader::TEXTURE1);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
-      {
-        glEnableVertexAttribArray(db::RenderShader::TEXTURE2);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
-      {
-        glEnableVertexAttribArray(db::RenderShader::TEXTURE3);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL)
-      {
-        glEnableVertexAttribArray(db::RenderShader::NORMAL);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL)
-      {
-        glEnableVertexAttribArray(db::RenderShader::BINORMAL);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_INDICES)
-      {
-        glEnableVertexAttribArray(db::RenderShader::BONEINDICES);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS)
-      {
-        glEnableVertexAttribArray(db::RenderShader::BONEWEIGHTS);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR)
-      {
-        glEnableVertexAttribArray(db::RenderShader::COLOR);
+        if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(i))
+        {
+          glEnableVertexAttribArray(i);
+        }
       }
     }
 
     void VertexDeclarationNode::unsetVertexArray() const
     {
-      if(m_vertexDeclaration & db::Mesh::MODEL_POSITION)
+      for(unsigned int i = 0; i < db::Mesh::VERTEXDECLARATIONFLAGNUMBER; i++)
       {
-        glDisableVertexAttribArray(db::RenderShader::POSITION);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE0)
-      {
-        glDisableVertexAttribArray(db::RenderShader::TEXTURE0);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE1)
-      {
-        glDisableVertexAttribArray(db::RenderShader::TEXTURE1);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE2)
-      {
-        glDisableVertexAttribArray(db::RenderShader::TEXTURE2);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_TEXTURE3)
-      {
-        glDisableVertexAttribArray(db::RenderShader::TEXTURE3);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_NORMAL)
-      {
-        glDisableVertexAttribArray(db::RenderShader::NORMAL);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BINORMAL)
-      {
-        glDisableVertexAttribArray(db::RenderShader::BINORMAL);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_INDICES)
-      {
-        glDisableVertexAttribArray(db::RenderShader::BONEINDICES);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_BONE_WEIGHTS)
-      {
-        glDisableVertexAttribArray(db::RenderShader::BONEWEIGHTS);
-      }
-
-      if(m_vertexDeclaration & db::Mesh::MODEL_COLOR)
-      {
-        glDisableVertexAttribArray(db::RenderShader::COLOR);
+        if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(i))
+        {
+          glDisableVertexAttribArray(i);
+        }
       }
 
       glBindVertexArray(0);

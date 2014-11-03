@@ -15,6 +15,7 @@
 #include "DataBase/ManagedResource.h"
 
 #define GLINDEXTYPE GL_UNSIGNED_INT
+#define GLCACHEINDEXTYPE GL_UNSIGNED_SHORT
 
 namespace he
 {
@@ -26,24 +27,31 @@ namespace he
 
       enum VertexDeclarationFlags
       {
-        MODEL_POSITION     = 1,
-        MODEL_TEXTURE0     = 2,
-        MODEL_TEXTURE1     = 4,
-        MODEL_TEXTURE2     = 8,
-        MODEL_TEXTURE3     = 16,
-        MODEL_NORMAL       = 32,
-        MODEL_BINORMAL     = 64,
-        MODEL_BONE_WEIGHTS = 128,
-        MODEL_BONE_INDICES = 256,
-        MODEL_COLOR        = 512,
+        MODEL_POSITION,
+        MODEL_TEXTURE0,
+        MODEL_TEXTURE1,
+        MODEL_TEXTURE2,
+        MODEL_TEXTURE3,
+        MODEL_NORMAL,
+        MODEL_BINORMAL,
+        MODEL_BONE_WEIGHTS,
+        MODEL_BONE_INDICES,
+        MODEL_COLOR,
+        //MODEL_CACHEINDIZES0,
+        //MODEL_CACHEINDIZES1,
+        SPECIAL0,
+        SPECIAL1,
+        SPECIAL2,
+        VERTEXDECLARATIONFLAGNUMBER,
       };
 
       typedef GLuint indexType;
-
+      
       Mesh();
       Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
-           //const std::vector<util::Cache>& caches = std::vector<util::Cache>(),
+           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes0,
+           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes1,
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
            const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
@@ -67,7 +75,7 @@ namespace he
 
       ~Mesh();
 
-      Mesh& operator=(const Mesh& other);
+      Mesh& operator=(const Mesh& other); 
 
       void free();
 
@@ -93,6 +101,12 @@ namespace he
       const std::vector<indexType>& getIndexBuffer() const;
       GLuint getIndexCount() const;
       GLuint getPrimitiveCount() const;
+
+      static unsigned int vertexDeclarationFlag(unsigned int index);
+      static unsigned int vertexDeclarationSize(unsigned int index);
+
+      static const unsigned int VERTEXDECLARATIONFLAGS[VERTEXDECLARATIONFLAGNUMBER];
+      static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 
     private:
 

@@ -16,8 +16,12 @@ namespace he
 {
   namespace loader
   {
-    MeshLoader::MeshLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager),
-                                                                       m_modelManager(singletonManager->getService<db::ModelManager>())
+    MeshLoader::MeshLoader(float errorRate, float maxDistance, float maxAngle, util::SingletonManager *singletonManager) : 
+      ResourceLoader(singletonManager),
+      m_modelManager(singletonManager->getService<db::ModelManager>()),
+      m_errorRate(errorRate),
+      m_maxDistance(maxDistance),
+      m_maxAngle(maxAngle)
     {
     }
 
@@ -63,11 +67,19 @@ namespace he
     util::ResourceHandle MeshLoader::getDefaultResource() const
     {
       std::vector<util::vec3f> positions;
+      std::vector<util::vec3f> normals;
       std::vector<db::Mesh::indexType> indices;
-      util::CubeGenerator::generateCube(positions, indices);
+      util::CubeGenerator::generateCube(positions, indices, normals);
+
+      util::PointCloudGenerator generator;
+      std::vector<util::Cache> caches = generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+
+      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes0(positions.size());
+      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes1(positions.size());
+      generator.createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
 
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, indices));
+      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, cacheIndizes0, cacheIndizes1, indices));
     }
   }
 }

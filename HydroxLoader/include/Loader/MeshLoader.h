@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      MeshLoader(util::SingletonManager *singletonManager);
+      MeshLoader(float errorRate, float maxDistance, float maxAngle, util::SingletonManager *singletonManager);
 
       util::ResourceHandle loadResource(std::string filename);
 
@@ -33,6 +33,10 @@ namespace he
         GLuint vertexStride;
         GLuint vboSize;
       };
+
+      float m_errorRate;
+      float m_maxDistance;
+      float m_maxAngle;
 
       db::ModelManager *m_modelManager;
     };

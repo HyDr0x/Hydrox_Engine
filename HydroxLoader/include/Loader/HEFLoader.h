@@ -30,7 +30,7 @@ namespace he
     {
     public:
 
-      HEFLoader(unsigned int nodeBlockSize = 256);
+      HEFLoader(float errorRate, float maxDistance, float maxAngle, unsigned int nodeBlockSize = 256);
 
       sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager);
 
@@ -38,6 +38,10 @@ namespace he
 
       void readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
       void read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::EventManager *eventManager);
+
+      float m_errorRate;
+      float m_maxDistance;
+      float m_maxAngle;
 
       sg::NodeIndex m_rootNode;
       sg::TreeNodeAllocator m_allocator;
