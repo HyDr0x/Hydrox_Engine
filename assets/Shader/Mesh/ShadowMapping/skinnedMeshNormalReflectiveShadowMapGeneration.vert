@@ -2,6 +2,7 @@
 
 #extension ARB_shader_draw_parameters : enable
 
+#include "../../Header/VertexDeclaration.glslh"
 #include "../../Header/LightData.glslh"
 
 #define MAXBONES 64
@@ -18,12 +19,12 @@ layout(std430, binding = 4) buffer relfectiveShadowLightBuffer
 
 layout(location = 2) uniform int lightIndex;
 
-layout(location = 0) in vec3 in_Pos;
-layout(location = 1) in vec2 in_texCoord;
-layout(location = 5) in vec3 in_normal;
-layout(location = 6) in vec3 in_binormal;
-layout(location = 8) in vec4 in_boneWeights;
-layout(location = 9) in vec4 in_boneIndices;
+layout(location = POSITION) in vec3 in_Pos;
+layout(location = TEXTURE0) in vec2 in_texCoord;
+layout(location = NORMAL) in vec3 in_normal;
+layout(location = BINORMAL) in vec3 in_binormal;
+layout(location = BONEWEIGHTS) in vec4 in_boneWeights;
+layout(location = BONEINDICES) in vec4 in_boneIndices;
 
 out vec4 vsout_pos;
 out vec2 vsout_texCoord;

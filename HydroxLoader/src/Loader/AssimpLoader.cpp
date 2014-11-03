@@ -132,12 +132,16 @@ namespace he
       sg::NodeIndex sceneRootNode = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
 
       std::vector<util::vec3f> positions;
+      std::vector<util::vec3f> normals;
       std::vector<db::Mesh::indexType> indices;
-      util::CubeGenerator::generateCube(positions, indices);
+      util::CubeGenerator::generateCube(positions, indices, normals);
+
+      util::PointCloudGenerator generator;
+      std::vector<he::util::Cache> caches = generator.generateCaches(0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, std::vector<util::PointCloudGenerator::cacheIndexType>(), std::vector<util::PointCloudGenerator::cacheIndexType>(), indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);
@@ -166,8 +170,6 @@ namespace he
       std::vector<util::vec4f> boneIndices;
       std::vector<util::vec4f> boneWeights;
       std::vector<util::vec4f> vertexColors;
-      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes0;
-      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes1;
       std::vector<db::Mesh::indexType> indices;
 
       GLuint primitiveType;
@@ -302,15 +304,10 @@ namespace he
 
       std::vector<util::Cache> caches = m_generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
 
-      cacheIndizes0.resize(mesh->mNumVertices);
-      cacheIndizes1.resize(mesh->mNumVertices);
-      m_generator.createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
-
       return m_modelManager->addObject(db::Mesh(
         primitiveType,
         positions,
-        cacheIndizes0,
-        cacheIndizes1,
+        caches,
         indices,
         textureCoords,
         normals,

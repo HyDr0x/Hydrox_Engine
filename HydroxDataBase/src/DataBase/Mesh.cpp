@@ -15,8 +15,8 @@ namespace he
       128,
       256,
       512,
-      //1024,
-      //2048,
+      1024,
+      2048,
       4096,
       8192,
       16384,
@@ -33,8 +33,8 @@ namespace he
       sizeof(util::vec4f),
       sizeof(util::vec4f),
       sizeof(util::vec4f),
-      //sizeof(util::PointCloudGenerator::cacheIndexType),
-      //sizeof(util::PointCloudGenerator::cacheIndexType),
+      sizeof(util::cacheIndexType),
+      sizeof(util::cacheIndexType),
       sizeof(util::vec4f),
       sizeof(util::vec4f),
       sizeof(util::vec4f),
@@ -63,8 +63,7 @@ namespace he
 
     Mesh::Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
-           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes0,
-           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes1,
+           const std::vector<util::Cache>& caches,
            const std::vector<indexType>& indices,
            const std::vector<std::vector<util::vec2f>>& textureCoords, 
            const std::vector<util::vec3f>& normals, 
@@ -98,6 +97,10 @@ namespace he
 
       m_vertexDeclarationFlags = 0;
 
+      std::vector<he::util::cacheIndexType> cacheIndizes0(positions.size());
+      std::vector<he::util::cacheIndexType> cacheIndizes1(positions.size());
+      createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
+
       m_vertexDeclarationFlags |= positions.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_POSITION] : 0;
       m_vertexDeclarationFlags |= textureCoords[0].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE0] : 0;
       m_vertexDeclarationFlags |= textureCoords[1].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE1] : 0;
@@ -108,8 +111,8 @@ namespace he
       m_vertexDeclarationFlags |= boneWeights.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_WEIGHTS] : 0;
       m_vertexDeclarationFlags |= boneIndices.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_INDICES] : 0;
       m_vertexDeclarationFlags |= vertexColors.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_COLOR] : 0;
-      //m_vertexDeclarationFlags |= cacheIndizes0.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES0] : 0;
-      //m_vertexDeclarationFlags |= cacheIndizes1.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES1] : 0;
+      m_vertexDeclarationFlags |= cacheIndizes0.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES0] : 0;
+      m_vertexDeclarationFlags |= cacheIndizes1.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES1] : 0;
 
       m_vertexStride = 0;
       GLuint strides[VERTEXDECLARATIONFLAGNUMBER];
@@ -171,17 +174,17 @@ namespace he
       }
       lokalStride += strides[MODEL_COLOR];
 
-      //for(unsigned int i = 0; i < cacheIndizes0.size(); i++)
-      //{
-      //  std::copy((GLubyte*)&cacheIndizes0[i], (GLubyte*)&cacheIndizes0[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES0], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      //}
-      //lokalStride += strides[MODEL_CACHEINDIZES0];
+      for(unsigned int i = 0; i < cacheIndizes0.size(); i++)
+      {
+        std::copy((GLubyte*)&cacheIndizes0[i], (GLubyte*)&cacheIndizes0[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES0], &m_geometryData[0] + lokalStride + m_vertexStride * i);
+      }
+      lokalStride += strides[MODEL_CACHEINDIZES0];
 
-      //for(unsigned int i = 0; i < cacheIndizes1.size(); i++)
-      //{
-      //  std::copy((GLubyte*)&cacheIndizes1[i], (GLubyte*)&cacheIndizes1[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES1], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      //}
-      //lokalStride += strides[MODEL_CACHEINDIZES1];
+      for(unsigned int i = 0; i < cacheIndizes1.size(); i++)
+      {
+        std::copy((GLubyte*)&cacheIndizes1[i], (GLubyte*)&cacheIndizes1[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES1], &m_geometryData[0] + lokalStride + m_vertexStride * i);
+      }
+      lokalStride += strides[MODEL_CACHEINDIZES1];
 
       m_hash = MurmurHash64A(&m_geometryData[0], size, 0);
 
@@ -420,6 +423,51 @@ namespace he
     GLuint Mesh::getPrimitiveCount() const
     {
       return m_primitiveCount;
+    }
+
+    void Mesh::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
+    {
+      const unsigned int indexNumber = 8;
+
+      for(unsigned int i = 0; i < positions.size(); i++)
+      {
+        std::vector<unsigned int> cacheIndizes(indexNumber, ~0);
+        std::vector<float> cacheWeights(indexNumber, 0);
+        util::vec3f position = positions[i];
+        util::vec3f normal = normals[i];
+
+        for(unsigned int j = 0; j < caches.size(); j++)
+        {
+          float length = (position - caches[j].position).length();
+          float weight = util::vec3f::dot(normal, caches[j].normal) / ((length * length) + 0.0001f);
+
+          unsigned int bestIndex = ~0;
+          float smallestWeight = FLT_MAX;
+
+          for(unsigned int k = 0; k < indexNumber; k++)
+          {
+            if(cacheIndizes[k] == ~0)
+            {
+              bestIndex = k;
+              break;
+            }
+            else if(cacheWeights[k] < weight && cacheWeights[k] < smallestWeight)
+            {
+              bestIndex = k;
+              smallestWeight = cacheWeights[k];
+            }
+          }
+
+          if(bestIndex != ~0)
+          {
+            cacheIndizes[bestIndex] = j;
+            cacheWeights[bestIndex] = weight;
+          }
+        }
+
+        cacheIndizes0[i] = util::cacheIndexType(cacheIndizes[0], cacheIndizes[1], cacheIndizes[2], cacheIndizes[3]);
+        cacheIndizes1[i] = util::cacheIndexType(cacheIndizes[4], cacheIndizes[5], cacheIndizes[6], cacheIndizes[7]);
+      }
     }
   }
 }

@@ -4,6 +4,7 @@
 
 #define MAXBONES 64
 
+#include "../Header/VertexDeclaration.glslh"
 #include "../Header/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer boneMatrixBuffer
@@ -11,13 +12,13 @@ layout(std430, binding = 0) buffer boneMatrixBuffer
 	mat4 boneMatrix[];
 };
 
-layout(location = 0) in vec3 in_Pos;
-layout(location = 1) in vec2 in_texCoord;
-layout(location = 5) in vec3 in_normal;
-layout(location = 6) in vec3 in_binormal;
-layout(location = 8) in vec4 in_boneWeights;
-layout(location = 9) in vec4 in_boneIndices;
-layout(location = 10) in vec4 in_color;
+layout(location = POSITION) in vec3 in_Pos;
+layout(location = TEXTURE0) in vec2 in_texCoord;
+layout(location = NORMAL) in vec3 in_normal;
+layout(location = BINORMAL) in vec3 in_binormal;
+layout(location = BONEWEIGHTS) in vec4 in_boneWeights;
+layout(location = BONEINDICES) in vec4 in_boneIndices;
+layout(location = COLOR) in vec4 in_color;
 
 out vec2 vsout_texCoord;
 out mat3 vsout_tangentToWorld;

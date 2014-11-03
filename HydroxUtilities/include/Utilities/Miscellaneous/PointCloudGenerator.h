@@ -22,11 +22,11 @@ namespace he
       vec4us boneIndizes2;
     };
 
+    typedef util::vec4us cacheIndexType;
+
     class GRAPHICAPI PointCloudGenerator
     {
     public:
-
-      typedef util::vec4us cacheIndexType;
 
       struct PolygonData
       {
@@ -40,8 +40,7 @@ namespace he
       }
 
       std::vector<Cache> generateCaches(float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
-      void createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<cacheIndexType>& cacheIndizes0, std::vector<cacheIndexType>& cacheIndizes1);
-
+      
     private:
 
       inline vec2f binToCylinder(vec2ui bin, unsigned int thetaQ, unsigned int uQ)

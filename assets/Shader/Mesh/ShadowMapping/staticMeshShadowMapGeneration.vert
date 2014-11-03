@@ -2,6 +2,7 @@
 
 #extension ARB_shader_draw_parameters : enable
 
+#include "../../Header/VertexDeclaration.glslh"
 #include "../../Header/LightData.glslh"
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
@@ -16,7 +17,7 @@ layout(std430, binding = 4) buffer shadowLightBuffer
 
 layout(location = 2) uniform int lightIndex;
 
-layout(location = 0) in vec3 in_Pos;
+layout(location = POSITION) in vec3 in_Pos;
 
 void main()
 {																	

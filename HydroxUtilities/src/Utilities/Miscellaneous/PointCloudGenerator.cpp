@@ -47,51 +47,6 @@ namespace he
       return outPositions;
     }
 
-    void PointCloudGenerator::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<cacheIndexType>& cacheIndizes0, std::vector<cacheIndexType>& cacheIndizes1)
-    {
-      const unsigned int indexNumber = 8;
-
-      for(unsigned int i = 0; i < positions.size(); i++)
-      {
-        std::vector<unsigned int> cacheIndizes(indexNumber, ~0);
-        std::vector<float> cacheWeights(indexNumber, 0);
-        util::vec3f position = positions[i];
-        util::vec3f normal = normals[i];
-
-        for(unsigned int j = 0; j < caches.size(); j++)
-        {
-          float length = (position - caches[j].position).length();
-          float weight = util::vec3f::dot(normal, caches[j].normal) / ((length * length) + 0.0001f);
-
-          unsigned int bestIndex = ~0;
-          float smallestWeight = FLT_MAX;
-
-          for(unsigned int k = 0; k < indexNumber; k++)
-          {
-            if(cacheIndizes[k] == ~0)
-            {
-              bestIndex = k;
-              break;
-            }
-            else if(cacheWeights[k] < weight && cacheWeights[k] < smallestWeight)
-            {
-              bestIndex = k;
-              smallestWeight = cacheWeights[k];
-            }
-          }
-
-          if(bestIndex != ~0)
-          {
-            cacheIndizes[bestIndex] = j;
-            cacheWeights[bestIndex] = weight;
-          }
-        }
-
-        cacheIndizes0[i] = cacheIndexType(cacheIndizes[0], cacheIndizes[1], cacheIndizes[2], cacheIndizes[3]);
-        cacheIndizes1[i] = cacheIndexType(cacheIndizes[4], cacheIndizes[5], cacheIndizes[6], cacheIndizes[7]);
-      }
-    }
-
     void PointCloudGenerator::recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions)
     {
       std::vector<vec3f> newPositions;

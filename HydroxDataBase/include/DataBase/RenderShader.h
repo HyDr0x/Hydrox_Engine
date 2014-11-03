@@ -24,7 +24,6 @@ namespace he
         TEXTURE3,
         NORMAL,
         BINORMAL,
-        TANGENT,
         BONEWEIGHTS,
         BONEINDICES,
         COLOR,

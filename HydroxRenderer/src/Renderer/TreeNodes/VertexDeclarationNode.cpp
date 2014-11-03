@@ -117,19 +117,19 @@ namespace he
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_COLOR);
       }
 
-      //if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES0))
-      //{
-      //  glVertexAttribFormat(db::RenderShader::CACHEINDIZES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-      //  glVertexAttribBinding(db::RenderShader::CACHEINDIZES0, 0);
-      //  vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES0);
-      //}
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES0))
+      {
+        glVertexAttribFormat(db::RenderShader::CACHEINDIZES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::CACHEINDIZES0, 0);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES0);
+      }
 
-      //if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES1))
-      //{
-      //  glVertexAttribFormat(db::RenderShader::CACHEINDIZES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-      //  glVertexAttribBinding(db::RenderShader::CACHEINDIZES1, 0);
-      //  vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES1);
-      //}
+      if(m_vertexDeclaration & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_CACHEINDIZES1))
+      {
+        glVertexAttribFormat(db::RenderShader::CACHEINDIZES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+        glVertexAttribBinding(db::RenderShader::CACHEINDIZES1, 0);
+        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDIZES1);
+      }
 
       glBindVertexArray(0);
     }

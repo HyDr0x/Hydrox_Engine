@@ -74,12 +74,8 @@ namespace he
       util::PointCloudGenerator generator;
       std::vector<util::Cache> caches = generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
 
-      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes0(positions.size());
-      std::vector<util::PointCloudGenerator::cacheIndexType> cacheIndizes1(positions.size());
-      generator.createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
-
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, cacheIndizes0, cacheIndizes1, indices));
+      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, indices));
     }
   }
 }

@@ -37,8 +37,8 @@ namespace he
         MODEL_BONE_WEIGHTS,
         MODEL_BONE_INDICES,
         MODEL_COLOR,
-        //MODEL_CACHEINDIZES0,
-        //MODEL_CACHEINDIZES1,
+        MODEL_CACHEINDIZES0,
+        MODEL_CACHEINDIZES1,
         SPECIAL0,
         SPECIAL1,
         SPECIAL2,
@@ -50,8 +50,7 @@ namespace he
       Mesh();
       Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
-           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes0,
-           const std::vector<util::PointCloudGenerator::cacheIndexType>& cacheIndizes1,
+           const std::vector<util::Cache>& caches,
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
            const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
@@ -110,6 +109,8 @@ namespace he
 
     private:
 
+      void createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
+
       AABB m_boundingVolume;
 
       GLuint m_primitiveType;//which type of primitives? (for example GL_TRIANGLES, GL_LINES, GL_POINTS)
@@ -119,7 +120,7 @@ namespace he
       unsigned int m_vertexCount;
       GLuint m_vertexStride;
       std::vector<GLubyte> m_geometryData;
-      //std::vector<GLubyte> m_cacheData;
+      std::vector<util::Cache> m_cacheData;
       std::vector<indexType> m_indexData;
       GLuint m_vertexDeclarationFlags;
       ////////////////////////////////

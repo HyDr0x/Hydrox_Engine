@@ -2,6 +2,7 @@
 
 #extension ARB_shader_draw_parameters : enable
 
+#include "../Header/VertexDeclaration.glslh"
 #include "../Header/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
@@ -9,8 +10,8 @@ layout(std430, binding = 0) buffer transformMatrixBuffer
 	mat4 trfMatrix[];
 };
 
-layout(location = 0) in vec3 in_Pos;
-layout(location = 5) in vec3 in_normal;
+layout(location = POSITION) in vec3 in_Pos;
+layout(location = NORMAL) in vec3 in_normal;
 
 out vec3 vsout_normal;
 flat out uint vsout_instanceIndex;
