@@ -44,6 +44,8 @@ namespace he
       glCullFace(GL_BACK);
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+      glPolygonOffset(1.1f, 4.0f);
+
       m_renderRootNode = new GroupNode();
       m_renderShadowRootNode = new GroupNode();
       m_renderReflectiveShadowRootNode = new GroupNode();

@@ -64,7 +64,7 @@ void main()
 		vec3 shadowTexCoords = vec3(shadowPos.xy, i);
 		float shadowZ = texture(shadowMapsSampler, shadowTexCoords).r;
 		
-		if(shadowPos.z <= shadowZ + 0.001/*+ 0.000138f 0.00007f 0.0135f*/ || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
+		if(shadowPos.z <= shadowZ /*+ 0.001*/ /*+ 0.000138f 0.00007f 0.0135f*/ || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
 		{
 			lightIntensity += vec4(shadowLight[i].light.color.rgb, 1.0f) * (material.z + calculateLightIntensity(shadowLight[i].light, pos, normal, material));
 		}
@@ -85,7 +85,7 @@ void main()
 		vec4 shadowMapPos = reflectiveShadowLight[i].lightViewProj * texture(shadowPosSampler, shadowTexCoords);
 		shadowMapPos /= shadowMapPos.w;
 		
-		if(shadowPos.z <= shadowMapPos.z + 0.0003/*0.001*/ || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
+		if(shadowPos.z <= shadowMapPos.z /*+ 0.0003*/ /*0.001*/ || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
 		{
 			lightIntensity += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * (material.z + calculateLightIntensity(reflectiveShadowLight[i].light, pos, normal, material));
 		}

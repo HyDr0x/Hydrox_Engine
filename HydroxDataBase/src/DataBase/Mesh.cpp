@@ -97,9 +97,11 @@ namespace he
 
       m_vertexDeclarationFlags = 0;
 
+      m_cacheData = caches;
+
       std::vector<he::util::cacheIndexType> cacheIndizes0(positions.size());
       std::vector<he::util::cacheIndexType> cacheIndizes1(positions.size());
-      createCacheIndizes(positions, normals, caches, cacheIndizes0, cacheIndizes1);
+      createCacheIndizes(positions, normals, cacheIndizes0, cacheIndizes1);
 
       m_vertexDeclarationFlags |= positions.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_POSITION] : 0;
       m_vertexDeclarationFlags |= textureCoords[0].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE0] : 0;
@@ -425,7 +427,7 @@ namespace he
       return m_primitiveCount;
     }
 
-    void Mesh::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
+    void Mesh::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
     {
       const unsigned int indexNumber = 8;
 
@@ -436,10 +438,10 @@ namespace he
         util::vec3f position = positions[i];
         util::vec3f normal = normals[i];
 
-        for(unsigned int j = 0; j < caches.size(); j++)
+        for(unsigned int j = 0; j < m_cacheData.size(); j++)
         {
-          float length = (position - caches[j].position).length();
-          float weight = util::vec3f::dot(normal, caches[j].normal) / ((length * length) + 0.0001f);
+          float length = (position - m_cacheData[j].position).length();
+          float weight = util::vec3f::dot(normal, m_cacheData[j].normal) / ((length * length) + 0.0001f);
 
           unsigned int bestIndex = ~0;
           float smallestWeight = FLT_MAX;

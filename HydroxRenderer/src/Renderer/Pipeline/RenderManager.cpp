@@ -131,7 +131,7 @@ namespace he
 
         m_lightRenderer.updateBuffer();
         
-        glPolygonOffset(-1.1f, -4.0f);
+        glEnable(GL_POLYGON_OFFSET_FILL);
         for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
         {
           m_lightRenderer.setShadowMap(4, i);
@@ -145,7 +145,7 @@ namespace he
           m_geometryRasterizer.generateReflectiveShadowMap(i);
           m_lightRenderer.unsetReflectiveShadowMap(4);
         }
-        glPolygonOffset(0.0f, 0.0f);
+        glDisable(GL_POLYGON_OFFSET_FILL);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
 

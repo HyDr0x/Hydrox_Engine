@@ -15,11 +15,10 @@ namespace he
   {
     struct Cache
     {
+      vec4f boneWeights[3];
       vec3f normal;//normalized normal
       vec3f position;
-      vec4us boneIndizes0;
-      vec4us boneIndizes1;
-      vec4us boneIndizes2;
+      vec4us boneIndizes[3];
     };
 
     typedef util::vec4us cacheIndexType;
@@ -30,16 +29,18 @@ namespace he
 
       struct PolygonData
       {
+        vec4f boneWeights[3];
         vec3f centroid;
         vec3f normal;//normalized normal
+        vec4us boneIndizes[3];
         float area;
       };
 
-      PointCloudGenerator() : m_epsilon(0.00001f)
+      PointCloudGenerator() : m_epsilon(0.00001f), m_boneIndices(std::vector<std::vector<vec4us>>())
       {
       }
 
-      std::vector<Cache> generateCaches(float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
+      std::vector<Cache> generateCaches(float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>(), const std::vector<vec4f>& boneWeights = std::vector<vec4f>(), const std::vector<vec4us>& boneIndices = std::vector<vec4us>());
       
     private:
 
@@ -72,13 +73,16 @@ namespace he
         return float(math::cross(e0, e1).length()) * 0.5f;
       }
 
-      void recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
-      void createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
+      void recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices);
+      void createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices);
+      float calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, vec3f& outPolygonCentroid);//first vector contains the three points of the triangle to make all the rays
       void generateCachesPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin);
       void shiftCentroid(unsigned int voxelIndex);
       void reduceCaches();
-      float calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, vec3f& outPolygonCentroid);//first vector contains the three points of the triangle to make all the rays
+      void sortCachesPerTriangle();
       
+      std::vector<std::vector<vec4f>> m_boneWeights;
+      std::vector<std::vector<vec4us>> m_boneIndices;
       std::vector<std::vector<vec3f>> m_triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
       std::vector<std::list<PolygonData>> m_polygons;//saves all polygons which lying in the voxel
       std::vector<std::list<PolygonData>> m_areaCaches;//saves all caches with their area
