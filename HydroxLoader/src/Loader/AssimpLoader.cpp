@@ -137,11 +137,13 @@ namespace he
       util::CubeGenerator::generateCube(positions, indices, normals);
 
       util::PointCloudGenerator generator;
-      std::vector<he::util::Cache> caches = generator.generateCaches(0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
+      std::vector<he::util::Cache> caches;
+      std::vector<he::util::vec2ui> triangleCacheData;
+      generator.generateCaches(caches, triangleCacheData, 0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
     
       MaterialLoader materialLoader(m_singletonManager);
 
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);
@@ -302,12 +304,15 @@ namespace he
         }
       }
 
-      std::vector<util::Cache> caches = m_generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+      std::vector<util::Cache> caches;
+      std::vector<he::util::vec2ui> triangleCacheData;
+      m_generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
 
       return m_modelManager->addObject(db::Mesh(
         primitiveType,
         positions,
         caches,
+        triangleCacheData,
         indices,
         textureCoords,
         normals,

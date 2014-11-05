@@ -34,10 +34,13 @@ namespace he
       meshData.vertexDeclaration = mesh->getVertexDeclarationFlags();
       meshData.vertexStride = mesh->getVertexStride();
       meshData.vboSize = mesh->getVBOSize();
+      meshData.cacheSize = mesh->getCaches().size();
 
       fileStream.write((char*)&meshData, sizeof(meshData));
       fileStream.write((char*)&mesh->getIndexBuffer()[0], sizeof(mesh->getIndexBuffer()[0]) * mesh->getIndexCount());
       fileStream.write((char*)&mesh->getVBOBuffer()[0], sizeof(mesh->getVBOBuffer()[0]) * mesh->getVBOSize());
+      fileStream.write((char*)&mesh->getCaches()[0], sizeof(mesh->getCaches()[0]) * mesh->getCaches().size());
+      fileStream.write((char*)&mesh->getTriangleCacheIndices()[0], sizeof(mesh->getTriangleCacheIndices()[0]) * mesh->getTriangleCacheIndices().size());
       
       fileStream.close();
     }

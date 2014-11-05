@@ -44,11 +44,24 @@ namespace he
 
         std::vector<db::Mesh::indexType> indexData(meshData.indexCount);
         std::vector<GLubyte> geometryData(meshData.vboSize);
+        std::vector<util::Cache> cacheData;
+        std::vector<util::vec2ui> triangleCacheIndices;
 
         file.read((char*)&indexData[0], sizeof(indexData[0]) * meshData.indexCount);
         file.read((char*)&geometryData[0], sizeof(geometryData[0]) * meshData.vboSize);
+        file.read((char*)&cacheData[0], sizeof(cacheData[0]) * meshData.cacheSize);
+        file.read((char*)&triangleCacheIndices[0], sizeof(triangleCacheIndices[0]) * meshData.primitiveCount);
 
-        meshHandle = m_modelManager->addObject(db::Mesh(db::AABB(meshData.bbMin, meshData.bbMax), meshData.primitiveType, meshData.primitiveCount, meshData.vertexCount, meshData.vertexStride, meshData.vertexDeclaration, geometryData, indexData));
+        meshHandle = m_modelManager->addObject(db::Mesh(db::AABB(meshData.bbMin, meshData.bbMax), 
+          meshData.primitiveType, 
+          meshData.primitiveCount, 
+          meshData.vertexCount, 
+          meshData.vertexStride, 
+          meshData.vertexDeclaration, 
+          geometryData, 
+          cacheData, 
+          triangleCacheIndices, 
+          indexData));
       }
       else//wrong filename or file does not exist
       {
@@ -72,10 +85,12 @@ namespace he
       util::CubeGenerator::generateCube(positions, indices, normals);
 
       util::PointCloudGenerator generator;
-      std::vector<util::Cache> caches = generator.generateCaches(m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+      std::vector<util::Cache> caches;
+      std::vector<he::util::vec2ui> triangleCacheData;
+      generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
 
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, indices));
+      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices));
     }
   }
 }

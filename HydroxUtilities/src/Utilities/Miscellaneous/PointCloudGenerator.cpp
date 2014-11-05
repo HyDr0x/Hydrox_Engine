@@ -33,32 +33,19 @@ namespace he
       }
     }
 
-    void createUnindexedTriangles(std::vector<vec3f>& outPositions, std::vector<vec4f> outBoneWeights, std::vector<vec4us>& outBoneIndices, const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices)
+    void createUnindexedTriangles(std::vector<vec3f>& outPositions, const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices)
     {
       for(unsigned int i = 0; i < indices.size(); i += 3)
       {
         outPositions.push_back(positions[indices[i]]);
         outPositions.push_back(positions[indices[i + 1]]);
         outPositions.push_back(positions[indices[i + 2]]);
-
-        if(!boneIndices.empty())
-        {
-          outBoneIndices.push_back(boneIndices[indices[i]]);
-          outBoneIndices.push_back(boneIndices[indices[i + 1]]);
-          outBoneIndices.push_back(boneIndices[indices[i + 2]]);
-
-          outBoneWeights.push_back(boneWeights[indices[i]]);
-          outBoneWeights.push_back(boneWeights[indices[i + 1]]);
-          outBoneWeights.push_back(boneWeights[indices[i + 2]]);
-        }
       }
     }
 
-    void PointCloudGenerator::recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices)
+    void PointCloudGenerator::recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions)
     {
       std::vector<vec3f> newPositions;
-      std::vector<vec4f> newBoneWeights;
-      std::vector<vec4us> newBoneIndices;
 
       float boxHalfSize = (bbMax[0] - bbMin[0]) * 0.5f;
       vec3f boxCenter(bbMin + (bbMax - bbMin) * 0.5f);
@@ -82,17 +69,6 @@ namespace he
           newPositions.push_back(t0);
           newPositions.push_back(t1);
           newPositions.push_back(t2);
-
-          if(!boneIndices.empty())
-          {
-            newBoneWeights.push_back(boneWeights[i]);
-            newBoneWeights.push_back(boneWeights[i + 1]);
-            newBoneWeights.push_back(boneWeights[i + 2]);
-
-            newBoneIndices.push_back(boneIndices[i]);
-            newBoneIndices.push_back(boneIndices[i + 1]);
-            newBoneIndices.push_back(boneIndices[i + 2]);
-          }
         }
       }
 
@@ -100,24 +76,24 @@ namespace he
       {
         if(2.0f * boxHalfSize > m_maxDistance + m_epsilon)
         {
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize), bbMax, newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, boxHalfSize), bbMax + vec3f(-boxHalfSize, 0, 0), newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, 0), bbMax + vec3f(-boxHalfSize, 0, -boxHalfSize), newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, 0), bbMax + vec3f(0, 0, -boxHalfSize), newPositions, newBoneWeights, newBoneIndices);
+          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize), bbMax, newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, boxHalfSize), bbMax + vec3f(-boxHalfSize, 0, 0), newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, 0), bbMax + vec3f(-boxHalfSize, 0, -boxHalfSize), newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, 0), bbMax + vec3f(0, 0, -boxHalfSize), newPositions);
 
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, boxHalfSize), bbMax + vec3f(0, -boxHalfSize, 0), newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(0, 0, boxHalfSize), bbMax + vec3f(-boxHalfSize, -boxHalfSize, 0), newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(0, 0, 0), bbMax + vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize), newPositions, newBoneWeights, newBoneIndices);
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, 0), bbMax + vec3f(0, -boxHalfSize, -boxHalfSize), newPositions, newBoneWeights, newBoneIndices);
+          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, boxHalfSize), bbMax + vec3f(0, -boxHalfSize, 0), newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(0, 0, boxHalfSize), bbMax + vec3f(-boxHalfSize, -boxHalfSize, 0), newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(0, 0, 0), bbMax + vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize), newPositions);
+          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, 0), bbMax + vec3f(0, -boxHalfSize, -boxHalfSize), newPositions);
         }
         else
         {
-          createCaches(bbMin, bbMax, newPositions, newBoneWeights, newBoneIndices);
+          createCaches(bbMin, bbMax, newPositions);
         }
       }
     }
 
-    void PointCloudGenerator::createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices)
+    void PointCloudGenerator::createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions)
     {
       float boxHalfSize = m_maxDistance * 0.5f;
       vec3f boxCenter(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize));
@@ -180,17 +156,6 @@ namespace he
           m_triangles[voxelIndex].push_back(t0);
           m_triangles[voxelIndex].push_back(t1);
           m_triangles[voxelIndex].push_back(t2);
-
-          if(!boneIndices.empty())
-          {
-            m_boneWeights[voxelIndex].push_back(boneWeights[i]);
-            m_boneWeights[voxelIndex].push_back(boneWeights[i + 1]);
-            m_boneWeights[voxelIndex].push_back(boneWeights[i + 2]);
-
-            m_boneIndices[voxelIndex].push_back(boneIndices[i]);
-            m_boneIndices[voxelIndex].push_back(boneIndices[i + 1]);
-            m_boneIndices[voxelIndex].push_back(boneIndices[i + 2]);
-          }
 
           std::vector<vec3f> trianglePoints(3);
           trianglePoints[0] = v0;
@@ -411,8 +376,7 @@ namespace he
       {
         unsigned int bestTriangle = 0;
         vec3f nearestPoint;
-        vec4f boneWeights[3];
-        vec4us boneIndices[3];
+        vec3f triangleVertices[3];
         float error = UINT_MAX;
 
         for(unsigned int i = 0; i < m_triangles[voxelIndex].size(); i += 3)
@@ -430,28 +394,16 @@ namespace he
           {
             error = tmpError;
             nearestPoint = tmpNearestPoint;
-
-            if(!m_boneIndices[voxelIndex].empty())
-            {
-              boneWeights[0] = m_boneWeights[voxelIndex][i];
-              boneWeights[1] = m_boneWeights[voxelIndex][i + 1];
-              boneWeights[2] = m_boneWeights[voxelIndex][i + 2];
-
-              boneIndices[0] = m_boneIndices[voxelIndex][i];
-              boneIndices[1] = m_boneIndices[voxelIndex][i + 1];
-              boneIndices[2] = m_boneIndices[voxelIndex][i + 2];
-            }
+            triangleVertices[0] = t0;
+            triangleVertices[1] = t1;
+            triangleVertices[2] = t2;
           }
         }
 
         cit->centroid = nearestPoint;
-        cit->boneWeights[0] = boneWeights[0];
-        cit->boneWeights[1] = boneWeights[1];
-        cit->boneWeights[2] = boneWeights[2];
-
-        cit->boneIndizes[0] = boneIndices[0];
-        cit->boneIndizes[1] = boneIndices[1];
-        cit->boneIndizes[2] = boneIndices[2];
+        cit->triangleVertices[0] = triangleVertices[0];
+        cit->triangleVertices[1] = triangleVertices[1];
+        cit->triangleVertices[2] = triangleVertices[2];
       }
     }
 
@@ -465,7 +417,7 @@ namespace he
           vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->centroid - m_globalBBMin) / m_maxDistance));
           unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber * m_voxelNumber + voxelIndex3D[1] * m_voxelNumber + voxelIndex3D[2];
 
-          std::list<PointCloudGenerator::PolygonData> similarCaches;
+          std::list<PolygonData> similarCaches;
 
           for(int nx = -1; nx < 2; nx++)
           {
@@ -512,11 +464,11 @@ namespace he
 
           cit = mip->second.erase(cit);
 
-          PointCloudGenerator::PolygonData biggestCache;
+          PolygonData biggestCache;
           float maxArea = 0.0f;
 
-          std::list<PointCloudGenerator::PolygonData>::iterator end = similarCaches.end();
-          for(std::list<PointCloudGenerator::PolygonData>::iterator sit = similarCaches.begin(); sit != end; sit++)
+          std::list<PolygonData>::iterator end = similarCaches.end();
+          for(std::list<PolygonData>::iterator sit = similarCaches.begin(); sit != end; sit++)
           {
             if(sit->area > maxArea)
             {
@@ -525,17 +477,46 @@ namespace he
             }
           }
 
-          Cache bestCache;
-          bestCache.position = biggestCache.centroid;
-          bestCache.normal = biggestCache.normal;
-          m_caches.push_back(bestCache);
+          m_reducedCaches.push_back(biggestCache);
         }
       }
     }
 
-    std::vector<Cache> PointCloudGenerator::generateCaches(float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices, const std::vector<vec4f>& boneWeights, const std::vector<vec4us>& boneIndices)
+    void PointCloudGenerator::sortCachesPerTriangle(const std::vector<vec3f>& positions)
+    {
+      for(unsigned int i = 0; i < positions.size(); i += 3)
+      {
+        vec3f t0 = positions[i];
+        vec3f t1 = positions[i + 1];
+        vec3f t2 = positions[i + 2];
+
+        unsigned int startIndex = ~0;
+        for(unsigned int j = 0; j < m_reducedCaches.size(); j++)
+        {
+          if(math::abs(m_reducedCaches[j].triangleVertices[0] - t0) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
+            math::abs(m_reducedCaches[j].triangleVertices[1] - t1) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
+            math::abs(m_reducedCaches[j].triangleVertices[2] - t2) < vec3f(0.0001f, 0.0001f, 0.0001f))
+          {
+            if(startIndex == ~0)
+            {
+              startIndex = m_caches.size();
+            }
+
+            Cache cache;
+            cache.position = m_reducedCaches[j].centroid;
+            cache.normal = m_reducedCaches[j].normal;
+            m_caches.push_back(cache);
+          }
+        }
+
+        m_triangleCacheIndices.push_back(vec2ui(startIndex, m_caches.size()));
+      }
+    }
+
+    void PointCloudGenerator::generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
     {
       m_caches.clear();
+      m_triangleCacheIndices.clear();
 
       m_errorRate = errorRate;
       m_maxDistance = maxDistance;
@@ -544,18 +525,14 @@ namespace he
       generateAABB(positions, m_globalBBMin, m_globalBBMax);
 
       std::vector<vec3f> trianglePositions;
-      std::vector<vec4f> triangleBoneWeights;
-      std::vector<vec4us> triangleBoneIndices;
 
       if(!indices.empty())
       {
-        createUnindexedTriangles(trianglePositions, triangleBoneWeights, triangleBoneIndices, positions, indices, boneWeights, boneIndices);
+        createUnindexedTriangles(trianglePositions, positions, indices);
       }
       else
       {
         trianglePositions = positions;
-        triangleBoneWeights = boneWeights;
-        triangleBoneIndices = boneIndices;
       }
 
       vec3f boxSize(m_globalBBMax - m_globalBBMin);
@@ -571,19 +548,20 @@ namespace he
       m_polygons.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
       m_areaCaches.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
       m_triangles.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
-      m_boneWeights.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
-      m_boneIndices.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
 
-      recursiveGenerateCaches(m_globalBBMin, m_globalBBMax, trianglePositions, triangleBoneWeights, triangleBoneIndices);
+      recursiveGenerateCaches(m_globalBBMin, m_globalBBMax, trianglePositions);
 
       reduceCaches();
+
+      sortCachesPerTriangle(trianglePositions);
 
       m_triangles.clear();
       m_polygons.clear();
       m_areaCaches.clear();
       m_linearizedAreaCaches.clear();
 
-      return m_caches;
+      outCaches = m_caches;
+      outTriangleCacheIndices = m_triangleCacheIndices;
     }
   }
 }

@@ -64,6 +64,7 @@ namespace he
     Mesh::Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
            const std::vector<util::Cache>& caches,
+           const std::vector<util::vec2ui>& triangleCacheIndices,
            const std::vector<indexType>& indices,
            const std::vector<std::vector<util::vec2f>>& textureCoords, 
            const std::vector<util::vec3f>& normals, 
@@ -98,6 +99,7 @@ namespace he
       m_vertexDeclarationFlags = 0;
 
       m_cacheData = caches;
+      m_triangleCacheIndices = triangleCacheIndices;
 
       std::vector<he::util::cacheIndexType> cacheIndizes0(positions.size());
       std::vector<he::util::cacheIndexType> cacheIndizes1(positions.size());
@@ -205,7 +207,9 @@ namespace he
                unsigned int vertexCount,
                GLuint vertexStride,
                GLuint vertexDeclarationFlags,
-               const std::vector<GLubyte>& vboBuffer, 
+               const std::vector<GLubyte>& vboBuffer,
+               const std::vector<util::Cache>& caches,
+               const std::vector<util::vec2ui>& triangleCacheIndices,
                const std::vector<indexType>& indices
                ) :
                m_boundingVolume(boundingVolume),
@@ -214,7 +218,9 @@ namespace he
                m_vertexCount(vertexCount),
                m_vertexStride(vertexStride),
                m_vertexDeclarationFlags(vertexDeclarationFlags),
-               m_geometryData(vboBuffer), 
+               m_geometryData(vboBuffer),
+               m_cacheData(caches),
+               m_triangleCacheIndices(triangleCacheIndices),
                m_indexData(indices)
     {
       m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
@@ -425,6 +431,16 @@ namespace he
     GLuint Mesh::getPrimitiveCount() const
     {
       return m_primitiveCount;
+    }
+
+    const std::vector<util::Cache>& Mesh::getCaches() const
+    {
+      return m_cacheData;
+    }
+
+    const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
+    {
+      return m_triangleCacheIndices;
     }
 
     void Mesh::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)

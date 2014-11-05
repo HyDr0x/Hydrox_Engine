@@ -37,6 +37,7 @@ namespace he
         GLuint vertexDeclaration;
         GLuint vertexStride;
         GLuint vboSize;
+        GLuint cacheSize;
       };
 
     public:

@@ -51,6 +51,7 @@ namespace he
       Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
            const std::vector<util::Cache>& caches,
+           const std::vector<util::vec2ui>& triangleCacheIndices,
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
            const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
@@ -66,7 +67,9 @@ namespace he
            unsigned int vertexCount,
            GLuint vertexStride,
            GLuint vertexDeclarationFlags,
-           const std::vector<GLubyte>& vboBuffer, 
+           const std::vector<GLubyte>& vboBuffer,
+           const std::vector<util::Cache>& caches,
+           const std::vector<util::vec2ui>& triangleCacheIndices,
            const std::vector<indexType>& indices = std::vector<indexType>()
            );
 
@@ -101,6 +104,9 @@ namespace he
       GLuint getIndexCount() const;
       GLuint getPrimitiveCount() const;
 
+      const std::vector<util::Cache>& getCaches() const;
+      const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
+
       static unsigned int vertexDeclarationFlag(unsigned int index);
       static unsigned int vertexDeclarationSize(unsigned int index);
 
@@ -121,6 +127,7 @@ namespace he
       GLuint m_vertexStride;
       std::vector<GLubyte> m_geometryData;
       std::vector<util::Cache> m_cacheData;
+      std::vector<util::vec2ui> m_triangleCacheIndices;
       std::vector<indexType> m_indexData;
       GLuint m_vertexDeclarationFlags;
       ////////////////////////////////
