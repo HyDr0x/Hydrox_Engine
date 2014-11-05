@@ -252,6 +252,8 @@ namespace he
       m_vertexCount = other.m_vertexCount;
       m_vertexStride = other.m_vertexStride;
       m_geometryData = other.m_geometryData;
+      m_cacheData = other.m_cacheData;
+      m_triangleCacheIndices = other.m_triangleCacheIndices;
       m_indexData = other.m_indexData;
       m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
 

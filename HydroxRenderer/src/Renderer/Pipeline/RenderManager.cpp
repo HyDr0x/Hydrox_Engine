@@ -132,7 +132,7 @@ namespace he
         m_lightRenderer.updateBuffer();
         
         glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.0f, 1.0f);
+        glPolygonOffset(1.1f, 4.0f);
         glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapHeight);
         for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
         {
@@ -170,6 +170,7 @@ namespace he
       shader->useShader();
       //m_gBuffer.getNormalTexture()->setTexture(0, 0);
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->setTexture(0, 0);
+      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)->setTexture(0, 0);
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->setTexture(0, 0);
       m_gBuffer.getColorTexture()->setTexture(0, 0);
       m_lightRenderer.getLightTexture()->setTexture(1, 1);
@@ -177,6 +178,7 @@ namespace he
       m_lightRenderer.getLightTexture()->unsetTexture();
       m_gBuffer.getColorTexture()->unsetTexture();
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->unsetTexture();
+      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)->setTexture(0, 0);
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->unsetTexture();
       //m_gBuffer.getNormalTexture()->unsetTexture();
       shader->useNoShader();

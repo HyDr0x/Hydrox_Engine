@@ -304,6 +304,9 @@ namespace he
         }
       }
 
+      util::Cache data;
+      int tmpTest = sizeof(data);
+
       std::vector<util::Cache> caches;
       std::vector<he::util::vec2ui> triangleCacheData;
       m_generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);

@@ -38,9 +38,9 @@ void main()
 	vec3 tangent = cross(in_normal, in_binormal);
 	
 	mat3 normalWorld = mat3(skinningMatrix);
-	vsout_tangentToWorld[0] = normalWorld * in_binormal;
-	vsout_tangentToWorld[1] = normalWorld * in_normal;
-	vsout_tangentToWorld[2] = normalWorld * tangent;
+	vsout_tangentToWorld[0] = normalWorld * tangent;
+	vsout_tangentToWorld[1] = normalWorld * in_binormal;
+	vsout_tangentToWorld[2] = normalWorld * in_normal;
 	
 	vsout_texCoord = in_texCoord;
 	gl_Position = viewProjectionMatrix * skinningMatrix * vec4(in_Pos, 1.0f);

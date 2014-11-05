@@ -30,9 +30,9 @@ void main()
 	vec3 tangent = cross(in_normal, in_binormal);
 	
 	mat3 normalWorld = mat3(trfMatrix[vsout_instanceIndex]);
-	vsout_tangentToWorld[0] = normalWorld * in_binormal;
-	vsout_tangentToWorld[1] = normalWorld * in_normal;
-	vsout_tangentToWorld[2] = normalWorld * tangent;
+	vsout_tangentToWorld[0] = normalWorld * tangent;
+	vsout_tangentToWorld[1] = normalWorld * in_binormal;
+	vsout_tangentToWorld[2] = normalWorld * in_normal;
 
 	vsout_color = in_color;
 	vsout_texCoord = in_texCoord;

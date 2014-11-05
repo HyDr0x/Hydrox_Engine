@@ -26,6 +26,6 @@ flat in uint vsout_instanceIndex;
 void main()
 {
 	fsout_pos3D = vsout_pos;
-	fsout_normal = vec4(vsout_normal, 1);
+	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, 0);
 	fsout_luminousFlux = reflectiveShadowLight[lightIndex].light.intensity * material[materialIndex[vsout_instanceIndex]].diffuseStrength * texture(colorSampler, vsout_texCoord);
 }

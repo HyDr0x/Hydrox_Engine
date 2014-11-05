@@ -74,16 +74,16 @@ namespace he
       {
         InsertShadowGeometryTraverser insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
           m_staticShadowMapGenerationShaderHandle,
-          m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+          m_staticShadowMapGenerationShaderHandle,
           m_skinnedShadowMapGenerationShaderHandle,
-          m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
+          m_skinnedShadowMapGenerationShaderHandle);
 
         insertShadowTraverser.doTraverse(m_renderShadowRootNode);
 
         InsertShadowGeometryTraverser insertReflectiveShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
-          m_staticShadowMapGenerationShaderHandle,
+          m_staticReflectiveShadowMapGenerationShaderHandle,
           m_staticNormalReflectiveShadowMapGenerationShaderHandle,
-          m_skinnedShadowMapGenerationShaderHandle,
+          m_skinnedReflectiveShadowMapGenerationShaderHandle,
           m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
         insertReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
@@ -97,16 +97,16 @@ namespace he
 
       RemoveShadowGeometryTraverser removeShadowTraverser(m_singletonManager, geometry, 
         m_staticShadowMapGenerationShaderHandle,
-        m_staticNormalReflectiveShadowMapGenerationShaderHandle,
+        m_staticShadowMapGenerationShaderHandle,
         m_skinnedShadowMapGenerationShaderHandle,
-        m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
+        m_skinnedShadowMapGenerationShaderHandle);
 
       removeShadowTraverser.doTraverse(m_renderShadowRootNode);
 
       RemoveShadowGeometryTraverser removeReflectiveShadowTraverser(m_singletonManager, geometry,
-        m_staticShadowMapGenerationShaderHandle,
+        m_staticReflectiveShadowMapGenerationShaderHandle,
         m_staticNormalReflectiveShadowMapGenerationShaderHandle,
-        m_skinnedShadowMapGenerationShaderHandle,
+        m_skinnedReflectiveShadowMapGenerationShaderHandle,
         m_skinnedNormalReflectiveShadowMapGenerationShaderHandle);
 
       removeReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
