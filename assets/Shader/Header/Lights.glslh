@@ -5,12 +5,16 @@
 
 void directLight(out float diffuse, out float specular, in vec3 camPos, in vec3 lightDir, in vec3 worldPos, in vec3 normal, in float diffuseStrength, in float specularStrength, in float specularExponent)
 {
-	float seeable = clamp(dot(lightDir, normal), 0.0f, 1.0f);
+	float seeable = max(dot(lightDir, normal), 0.0f);
 	diffuse = diffuseStrength / PI * seeable;
 	
 	vec3 camDir = normalize(camPos - worldPos);
-	vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
-	specular = seeable * (specularExponent + 8.0f) / 8.0f * PI * specularStrength * pow(clamp(dot(halfVector, normal), 0.0f, 1.0f), specularExponent);
+	
+	//vec3 reflectRay = reflect(-lightDir, normal);
+	//specular = seeable * ((specularExponent + 2.0f) / 2.0f * PI) * specularStrength * pow(max(dot(reflectRay, camDir), 0.0f), specularExponent);
+	
+	vec3 halfVector = normalize(lightDir + camDir);// / length(lightDir + camDir);
+	specular = seeable * ((specularExponent + 8.0f) / 8.0f * PI) * specularStrength * pow(max(dot(halfVector, normal), 0.0f), specularExponent);
 }
 
 float calculateLightIntensity(LightData light, const vec3 worldPos, const vec3 normal, const vec4 material)
@@ -47,7 +51,7 @@ float calculateLightIntensity(LightData light, const vec3 worldPos, const vec3 n
 		directLight(diffuse, specular, eyePos.xyz, lightDir, worldPos, normal, material.x, material.y, material.w);
 		
 		float attenuation = 1.0f / (light.constAttenuation + light.linearAttenuation * distance + light.quadricAttenuation * distance * distance);
-		float spotLightAngle = dot(lightDir, normalize(light.direction.xyz));
+		float spotLightAngle = max(dot(lightDir, normalize(light.direction.xyz)), 0.0f);
 		float spotAttenuation = step(light.direction.w, spotLightAngle) * clamp(pow(spotLightAngle, light.position.w), 0.0f, 1.0f);
 		
 		return spotAttenuation * attenuation * light.intensity * (diffuse + specular);

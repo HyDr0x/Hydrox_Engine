@@ -42,7 +42,7 @@ void main()
 	vsout_tangentToWorld[1] = normalWorld * in_binormal;
 	vsout_tangentToWorld[2] = normalWorld * in_normal;
 	
-	//vsout_tangentToWorld = transpose;(vsout_tangentToWorld);
+	//vsout_tangentToWorld = transpose(vsout_tangentToWorld);
 	
 	vsout_texCoord = in_texCoord;
 	gl_Position = viewProjectionMatrix * skinningMatrix * vec4(in_Pos, 1.0f);
