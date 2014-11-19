@@ -28,7 +28,6 @@
 #include "Loader/RenderShaderLoader.h"
 #include "Loader/MaterialLoader.h"
 #include "Loader/MeshLoader.h"
-#include "Loader/NodeStreaming.h"
 
 namespace he
 {

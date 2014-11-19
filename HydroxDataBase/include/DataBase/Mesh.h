@@ -15,7 +15,7 @@
 #include "DataBase/ManagedResource.h"
 
 #define GLINDEXTYPE GL_UNSIGNED_INT
-#define GLCACHEINDEXTYPE GL_UNSIGNED_SHORT
+#define GLCACHEINDEXTYPE GL_FLOAT
 
 namespace he
 {
@@ -37,8 +37,8 @@ namespace he
         MODEL_BONE_WEIGHTS,
         MODEL_BONE_INDICES,
         MODEL_COLOR,
-        MODEL_CACHEINDIZES0,
-        MODEL_CACHEINDIZES1,
+        MODEL_CACHEINDICES0,
+        MODEL_CACHEINDICES1,
         SPECIAL0,
         SPECIAL1,
         SPECIAL2,
@@ -103,6 +103,7 @@ namespace he
       const std::vector<indexType>& getIndexBuffer() const;
       GLuint getIndexCount() const;
       GLuint getPrimitiveCount() const;
+      GLuint getCacheCount() const;
 
       const std::vector<util::Cache>& getCaches() const;
       const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
@@ -114,7 +115,7 @@ namespace he
       static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 
     private:
-
+      //invalid indices are marked as 0
       void createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
 
       AABB m_boundingVolume;

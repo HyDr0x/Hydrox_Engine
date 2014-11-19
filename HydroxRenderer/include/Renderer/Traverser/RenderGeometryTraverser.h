@@ -18,8 +18,10 @@ namespace he
     {
     public:
 
-      RenderGeometryTraverser(util::SingletonManager *singletonManager, int viewProjectionIndex);
+      RenderGeometryTraverser(util::SingletonManager *singletonManager);
       virtual ~RenderGeometryTraverser();
+
+      virtual bool preTraverse(GroupNode* treeNode);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
       virtual void postTraverse(VertexDeclarationNode* treeNode);
@@ -40,7 +42,7 @@ namespace he
       db::RenderShaderManager *m_renderShaderManager;
       db::TextureManager *m_textureManager;
 
-      int m_viewProjectionIndex;
+      unsigned int m_globalCacheOffset;
     };
   }
 }

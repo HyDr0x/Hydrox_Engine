@@ -104,18 +104,23 @@ namespace he
       m_near = near;
       m_far = far;
 
-      float fov = 0.0f;
+      float width;
 
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        fov = util::math::radToDeg(acosf(m_lightData.direction[3]));
-        m_projectionMatrix = util::math::createPerspective(fov, 1.0f, m_near, m_far);
+        width = tanf(acosf(m_lightData.direction[3]) * 0.5f) * 2.0f * m_near;
+        m_lightData.projectionParameter[0] = m_near;
+        m_lightData.projectionParameter[1] = 2.0f * width;
+        m_projectionMatrix = util::math::createPerspective(-width, width, -width, width, m_near, m_far);
         break;
       case POINTLIGHT:
         break;
       case DIRECTIONALLIGHT:
-        m_projectionMatrix = util::math::createOrthographic(-100.0f, 100.0f, -100.0f, 100.0f, m_near, m_far);
+        width = 100.0f;
+        m_lightData.projectionParameter[0] = m_near;
+        m_lightData.projectionParameter[1] = 2.0f * width;
+        m_projectionMatrix = util::math::createOrthographic(-width, width, -width, width, m_near, m_far);
         break;
       }
     }
@@ -205,14 +210,14 @@ namespace he
       return m_lightData.color;
     }
 
-    void ShadowLightNode::setIntensity(float intensity)
+    void ShadowLightNode::setLuminousFlux(float intensity)
     {
-      m_lightData.intensity = intensity;
+      m_lightData.luminousFlux = intensity;
     }
 
-    float ShadowLightNode::getIntensity() const
+    float ShadowLightNode::getLuminousFlux() const
     {
-      return m_lightData.intensity;
+      return m_lightData.luminousFlux;
     }
 
     void ShadowLightNode::setSpotLightExponent(float spotLightExponent)
@@ -273,7 +278,7 @@ namespace he
       stream >> m_lightData.position;
       stream >> m_lightData.direction;
       stream >> m_lightData.color;
-      stream >> m_lightData.intensity;
+      stream >> m_lightData.luminousFlux;
 
       stream >> m_lightData.constAttenuation;
       stream >> m_lightData.linearAttenuation;
@@ -302,7 +307,7 @@ namespace he
       stream << m_lightData.position << std::endl;
       stream << m_lightData.direction << std::endl;
       stream << m_lightData.color << std::endl;
-      stream << m_lightData.intensity << std::endl;
+      stream << m_lightData.luminousFlux << std::endl;
 
       stream << m_lightData.constAttenuation << std::endl;
       stream << m_lightData.linearAttenuation << std::endl;

@@ -19,8 +19,8 @@ namespace he
       unsigned int maxGeometry;
       unsigned int maxBones;
       unsigned int shadowMapWidth;
-      unsigned int shadowMapHeight;
       unsigned int lightNumber;
+      unsigned int unusedLightIndirectNumber;//the number of unused indirect lights of the reflected shadow map
       unsigned char max2DLayer;
     };
   }

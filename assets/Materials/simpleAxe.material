@@ -50,7 +50,7 @@ Fragment Shader
 TRUE
 
 Geometry Shader
-FALSE
+TRUE
 
 Tesselation Control Shader
 FALSE

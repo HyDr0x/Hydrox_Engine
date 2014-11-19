@@ -43,9 +43,13 @@ namespace he
 
       virtual void frustumCulling() const;
 
+      virtual void rasterizeShadowGeometry() const;
+
       virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();
+
+      virtual unsigned int getCacheNumber() const;
 
     protected:
 
@@ -60,6 +64,10 @@ namespace he
       GPUImmutableBuffer m_bboxesBuffer;
       GPUImmutableBuffer m_commandBuffer;
       GPUImmutableBuffer m_meshInstanceBufferIndex;
+      GPUImmutableBuffer m_triangleIndexOffsetBuffer;//has the offsets into the triangleBuffer for the specific mesh
+      GPUImmutableBuffer m_cacheOffsetBuffer;//has the offsets into the cacheBuffer for the specific mesh
+      GPUImmutableBuffer m_triangleBuffer;//has the indices into the cacheBuffer for the triangle
+      GPUImmutableBuffer m_cacheBuffer;//has all caches for all the meshes sorted to their triangles
 
       GLenum m_primitiveType;
 
@@ -71,6 +79,8 @@ namespace he
 
       unsigned int m_vboSize;
       unsigned int m_iboSize;
+      unsigned int m_triangleNumber;
+      unsigned int m_cacheNumber;
 
       std::map<util::ResourceHandle, ElementGeometry, Less> m_meshes;
     };

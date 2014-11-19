@@ -24,11 +24,17 @@ namespace he
       he::util::ResourceHandle particleShaderHandle;
       he::util::ResourceHandle offscreenBufferShaderHandle;
       he::util::ResourceHandle directLightShaderHandle;
+      he::util::ResourceHandle indirectLightShaderHandle;
+      he::util::ResourceHandle indirectLightInterpolationShaderHandle;
       he::util::ResourceHandle combineShaderHandle;
       he::util::ResourceHandle staticShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skinnedShadowMapGenerationShaderHandle;
+      he::util::ResourceHandle staticReflectiveShadowMapGenerationVertexColorShaderHandle;
+      he::util::ResourceHandle staticNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
       he::util::ResourceHandle staticReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle staticNormalReflectiveShadowMapGenerationShaderHandle;
+      he::util::ResourceHandle skinnedReflectiveShadowMapGenerationVertexColorShaderHandle;
+      he::util::ResourceHandle skinnedNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
       he::util::ResourceHandle skinnedReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skinnedNormalReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skyboxShaderHandle;

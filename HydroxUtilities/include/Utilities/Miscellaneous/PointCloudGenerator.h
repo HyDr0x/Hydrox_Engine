@@ -15,11 +15,14 @@ namespace he
   {
     struct Cache
     {
-      vec3f normal;//normalized normal
       vec3f position;
+      float diffuseStrength;
+      vec3f normal;//normalized normal
+      float specularStrength;
+      vec4f specularExponent;//only x is used as an exponent
     };
 
-    typedef util::vec4us cacheIndexType;
+    typedef util::vec4f cacheIndexType;
 
     class GRAPHICAPI PointCloudGenerator
     {
@@ -36,7 +39,7 @@ namespace he
       PointCloudGenerator() : m_epsilon(0.00001f)
       {
       }
-
+      //OCTREE GENERATION SHOULD BE REPLACED BY UNIFIED TREE MODEL!!!
       void generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, float errorRate, float maxDistance, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
       
     private:

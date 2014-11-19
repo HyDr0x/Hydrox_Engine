@@ -52,8 +52,8 @@ namespace he
       void setColor(util::vec3f color);
       util::vec3f getColor() const;
 
-      void setIntensity(float intensity);
-      float getIntensity() const;
+      void setLuminousFlux(float luminousFlux);
+      float getLuminousFlux() const;
 
       void setSpotLightExponent(float spotLightExponent);
       float getSpotLightExponent() const;

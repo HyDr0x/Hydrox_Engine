@@ -32,6 +32,6 @@ void main()
 	
 	vsout_pos = trfMatrix[vsout_instanceIndex] * vec4(in_Pos, 1.0f);
 	vsout_texCoord = in_texCoord;
-	vsout_normal = mat3(trfMatrix[vsout_instanceIndex]) * in_normal;
+	vsout_normal = normalize(mat3(trfMatrix[vsout_instanceIndex]) * in_normal);
 	gl_Position = reflectiveShadowLight[lightIndex].lightViewProj * vsout_pos;
 }

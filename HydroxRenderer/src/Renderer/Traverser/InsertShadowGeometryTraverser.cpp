@@ -13,7 +13,6 @@
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 namespace he
 {
   namespace renderer
@@ -22,9 +21,7 @@ namespace he
       const xBar::IGeometryContainer& geometryContainer,
       util::SingletonManager *singletonManager,
       util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle) :
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
       m_renderGroup(renderGroup),
       m_singletonManager(singletonManager),
       m_inserted(false)
@@ -34,25 +31,12 @@ namespace he
 
       if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          m_shaderHandle = skinnedNormalShadowMapGenerationShaderHandle;
-        }
-        else
-        {
-          m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
-        }
+        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+
       }
       else
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          m_shaderHandle = staticNormalShadowMapGenerationShaderHandle;
-        }
-        else
-        {
-          m_shaderHandle = staticShadowMapGenerationShaderHandle;
-        }
+        m_shaderHandle = staticShadowMapGenerationShaderHandle;
       }
 
       db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());

@@ -47,6 +47,10 @@ namespace he
       std::vector<float> geometryData(positions.size() * 5);
       for (unsigned int i = 0; i < 12; i++)
       {
+        positions[i * 3 + 0] *= 0.25f;
+        positions[i * 3 + 1] *= 0.25f;
+        positions[i * 3 + 2] *= 0.25f;
+
         unsigned int index = i * 3 * 5;
         //first
         geometryData[index + 0] = positions[i * 3 + 0][0];

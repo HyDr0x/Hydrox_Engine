@@ -37,6 +37,9 @@ NULL
 Shader Name
 ../../assets/Shader/Mesh/staticMeshTex
 
+Fragment Shader
+TRUE
+
 Tesselation Control Shader
 FALSE
 
@@ -44,7 +47,7 @@ Tesselation Evaluation Shader
 FALSE
 
 Geometry Shader
-FALSE
+TRUE
 
 Fragment Shader
 TRUE

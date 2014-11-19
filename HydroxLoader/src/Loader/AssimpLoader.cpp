@@ -141,9 +141,7 @@ namespace he
       std::vector<he::util::vec2ui> triangleCacheData;
       generator.generateCaches(caches, triangleCacheData, 0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
     
-      MaterialLoader materialLoader(m_singletonManager);
-
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), materialLoader.getDefaultResource(), std::string("defaultCubeMesh"), sceneRootNode));
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);

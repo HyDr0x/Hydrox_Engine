@@ -13,8 +13,8 @@ namespace he
 {
   namespace renderer
   {
-    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager, int viewProjectionIndex) :
-      m_viewProjectionIndex(viewProjectionIndex)
+    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager) :
+      m_globalCacheOffset(0)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
@@ -24,6 +24,13 @@ namespace he
 
     RenderGeometryTraverser::~RenderGeometryTraverser()
     {
+    }
+
+    bool RenderGeometryTraverser::preTraverse(GroupNode* treeNode)
+    {
+      m_globalCacheOffset = 0;//reset global cache offset counter
+
+      return true;
     }
 
     bool RenderGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
@@ -43,11 +50,6 @@ namespace he
       db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
 
       shader->useShader();
-
-      if(m_viewProjectionIndex != -1)
-      {
-        db::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
-      }
 
       return true;
     }
@@ -95,7 +97,11 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
+      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_globalCacheOffset);
+
       treeNode->getRenderGroup()->rasterizeGeometry();
+
+      m_globalCacheOffset += treeNode->getRenderGroup()->getCacheNumber();//need to be increased with cache number per node
 
       return true;
     }

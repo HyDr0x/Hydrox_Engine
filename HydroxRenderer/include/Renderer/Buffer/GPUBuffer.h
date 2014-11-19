@@ -25,6 +25,8 @@ namespace he
       void setData(GLuint offset, GLuint size, const void *data) const;
       void getData(GLuint offset, GLuint size, void *data) const;
 
+      void clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const;
+
       void bindBuffer(GLenum target) const;
       void unbindBuffer(GLenum target) const;
 

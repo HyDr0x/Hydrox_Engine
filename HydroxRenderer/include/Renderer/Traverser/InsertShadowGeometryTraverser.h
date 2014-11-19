@@ -32,9 +32,7 @@ namespace he
         const xBar::IGeometryContainer& geometryContainer,
         util::SingletonManager *singletonManager, 
         util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle);
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
 
       virtual ~InsertShadowGeometryTraverser();
 

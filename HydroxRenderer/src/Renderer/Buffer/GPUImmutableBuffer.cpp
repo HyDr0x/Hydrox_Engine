@@ -66,6 +66,13 @@ namespace he
       std::copy((GLubyte*)m_bufferPointer, (GLubyte*)m_bufferPointer + size, (GLubyte*)data + offset);
     }
 
+    void GPUImmutableBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const
+    {
+      glBindBuffer(m_target, m_immutableBufferIndex);
+      glClearBufferData(m_target, internalFormat, format, type, data);
+      glBindBuffer(m_target, 0);
+    }
+
     void GPUImmutableBuffer::bindBuffer(GLenum target) const
     {
       glBindBuffer(target, m_immutableBufferIndex);

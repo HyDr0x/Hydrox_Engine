@@ -3,9 +3,9 @@ struct LightData
 	vec4 position;//w component = spotLightExponent
 	vec4 direction;//w component = spotLightCutoff | cos(lightAngle) so it should be between 0.0f (no cutoff) and 1.0f (full cutoff)
 	
-	vec4 color;//w component = shadow algorithm
+	vec4 color;//w component = unused
 	
-	float intensity;
+	float luminousFlux;
 
 	float constAttenuation;
 	float linearAttenuation;
@@ -15,6 +15,8 @@ struct LightData
 struct ShadowLightData
 {
 	mat4 lightViewProj;
+	
+	vec4 projectionParameter;//x = near, y = nearWidth
 	
 	LightData light;
 };

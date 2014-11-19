@@ -17,6 +17,7 @@ layout(std430, binding = 4) buffer reflectiveShadowLightBuffer
 };
 
 layout(location = 2) uniform int lightIndex;
+layout(location = 3) uniform uint shadowMapWidth;
 
 in vec4 vsout_pos;
 in vec2 vsout_texCoord;
@@ -25,7 +26,11 @@ flat in uint vsout_instanceIndex;
 
 void main()
 {
+	float zNear = reflectiveShadowLight[lightIndex].projectionParameter.x;
+	float nearArea = reflectiveShadowLight[lightIndex].projectionParameter.y;
+	float area = gl_FragCoord.z * gl_FragCoord.z * nearArea * nearArea / (zNear * zNear * shadowMapWidth * shadowMapWidth);
+	
 	fsout_pos3D = vsout_pos;
-	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, 0);
-	fsout_luminousFlux = reflectiveShadowLight[lightIndex].light.intensity * material[materialIndex[vsout_instanceIndex]].diffuseStrength * texture(colorSampler, vsout_texCoord);
+	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, area);
+	fsout_luminousFlux = reflectiveShadowLight[lightIndex].light.luminousFlux * material[materialIndex[vsout_instanceIndex]].diffuseStrength * texture(colorSampler, vsout_texCoord);
 }

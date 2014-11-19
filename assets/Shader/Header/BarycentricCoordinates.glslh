@@ -1,0 +1,21 @@
+vec3 barycentricCoordinates(vec3 p, vec3 a, vec3 b, vec3 c)//using cramers rule
+{
+	vec3 e0 = b - a;
+	vec3 e1 = c - a;
+	vec3 e2 = p - a;
+	
+	float d00 = dot(e0, e0);
+	float d01 = dot(e0, e1);
+	float d11 = dot(e1, e1);
+	float d20 = dot(e2, e0);
+	float d21 = dot(e2, e1);
+	
+	float det = d00 * d11 - d01 * d01;
+	
+	vec3 outVal;
+	outVal.x = (d11 * d20 - d01 * d21) / det;
+	outVal.y = (d00 * d21 - d01 * d20) / det;
+	outVal.z = 1.0f - outVal.x - outVal.y;
+	
+	return outVal;
+}

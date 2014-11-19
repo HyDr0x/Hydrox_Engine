@@ -1,0 +1,5 @@
+struct IndirectLightData
+{
+	vec4 position;
+	vec4 luminousFlux;
+};

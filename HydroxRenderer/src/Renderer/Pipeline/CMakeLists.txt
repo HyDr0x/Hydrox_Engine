@@ -2,8 +2,10 @@ set(
 	SOURCE 
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/FinalCompositing.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/LightRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.cpp 

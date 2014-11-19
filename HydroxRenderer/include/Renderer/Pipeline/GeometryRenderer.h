@@ -11,6 +11,8 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include "Renderer/Buffer/GPUBuffer.h"
+
 namespace he
 {
   namespace xBar
@@ -22,6 +24,14 @@ namespace he
   {
     class GroupNode;
     class IRenderNode;
+    class RenderShaderContainer;
+
+    enum RenderPass
+    {
+      SHADOWPASS,
+      REFLECTIVESHADOWPASS,
+      VIEWPASS,
+    };
 
     class GeometryRenderer
     {
@@ -34,6 +44,8 @@ namespace he
 
       void updateBuffer();
 
+      void frustumCulling(int shadowMapIndex, RenderPass pass);
+
       void generateShadowMap(int shadowMapIndex);
 
       void generateReflectiveShadowMap(int shadowMapIndex);
@@ -44,6 +56,8 @@ namespace he
 
       void removeRenderComponent(const xBar::IGeometryContainer& geometry);
 
+      unsigned int getGlobalCacheNumber() const;
+
     private:
 
       GeometryRenderer(const GeometryRenderer&);
@@ -51,16 +65,10 @@ namespace he
 
       void registerRenderComponentSlots(util::EventManager *eventManager);
 
-      util::ResourceHandle m_frustumCullingShaderHandle;
+      RenderShaderContainer *m_container;
 
-      util::ResourceHandle m_staticShadowMapGenerationShaderHandle;
-      util::ResourceHandle m_skinnedShadowMapGenerationShaderHandle;
-
-      util::ResourceHandle m_staticReflectiveShadowMapGenerationShaderHandle;
-      util::ResourceHandle m_staticNormalReflectiveShadowMapGenerationShaderHandle;
-      util::ResourceHandle m_skinnedReflectiveShadowMapGenerationShaderHandle;
-      util::ResourceHandle m_skinnedNormalReflectiveShadowMapGenerationShaderHandle;
-
+      unsigned int m_globalCacheNumber;
+      
       GroupNode *m_renderRootNode;
       GroupNode *m_renderShadowRootNode;
       GroupNode *m_renderReflectiveShadowRootNode;

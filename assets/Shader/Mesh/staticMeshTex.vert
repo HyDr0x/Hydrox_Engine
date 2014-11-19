@@ -24,7 +24,7 @@ void main()
 	
 	vsout_instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 
-	vsout_normal = mat3(trfMatrix[vsout_instanceIndex]) * in_normal;
+	vsout_normal = normalize(mat3(trfMatrix[vsout_instanceIndex]) * in_normal);
 	
 	mat4 MVP = viewProjectionMatrix * trfMatrix[vsout_instanceIndex];
 	gl_Position = MVP * vec4(in_Pos, 1);

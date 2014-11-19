@@ -115,8 +115,8 @@ namespace he
       m_vertexDeclarationFlags |= boneWeights.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_WEIGHTS] : 0;
       m_vertexDeclarationFlags |= boneIndices.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_INDICES] : 0;
       m_vertexDeclarationFlags |= vertexColors.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_COLOR] : 0;
-      m_vertexDeclarationFlags |= cacheIndizes0.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES0] : 0;
-      m_vertexDeclarationFlags |= cacheIndizes1.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDIZES1] : 0;
+      m_vertexDeclarationFlags |= cacheIndizes0.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDICES0] : 0;
+      m_vertexDeclarationFlags |= cacheIndizes1.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDICES1] : 0;
 
       m_vertexStride = 0;
       GLuint strides[VERTEXDECLARATIONFLAGNUMBER];
@@ -180,15 +180,15 @@ namespace he
 
       for(unsigned int i = 0; i < cacheIndizes0.size(); i++)
       {
-        std::copy((GLubyte*)&cacheIndizes0[i], (GLubyte*)&cacheIndizes0[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES0], &m_geometryData[0] + lokalStride + m_vertexStride * i);
+        std::copy((GLubyte*)&cacheIndizes0[i], (GLubyte*)&cacheIndizes0[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDICES0], &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
-      lokalStride += strides[MODEL_CACHEINDIZES0];
+      lokalStride += strides[MODEL_CACHEINDICES0];
 
       for(unsigned int i = 0; i < cacheIndizes1.size(); i++)
       {
-        std::copy((GLubyte*)&cacheIndizes1[i], (GLubyte*)&cacheIndizes1[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDIZES1], &m_geometryData[0] + lokalStride + m_vertexStride * i);
+        std::copy((GLubyte*)&cacheIndizes1[i], (GLubyte*)&cacheIndizes1[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDICES1], &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
-      lokalStride += strides[MODEL_CACHEINDIZES1];
+      lokalStride += strides[MODEL_CACHEINDICES1];
 
       m_hash = MurmurHash64A(&m_geometryData[0], size, 0);
 
@@ -235,6 +235,8 @@ namespace he
       m_vertexCount = other.m_vertexCount;
       m_vertexStride = other.m_vertexStride;
       m_geometryData = other.m_geometryData;
+      m_cacheData = other.m_cacheData;
+      m_triangleCacheIndices = other.m_triangleCacheIndices;
       m_indexData = other.m_indexData;
       m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
     }
@@ -435,6 +437,11 @@ namespace he
       return m_primitiveCount;
     }
 
+    GLuint Mesh::getCacheCount() const
+    {
+      return m_cacheData.size();
+    }
+
     const std::vector<util::Cache>& Mesh::getCaches() const
     {
       return m_cacheData;
@@ -451,7 +458,7 @@ namespace he
 
       for(unsigned int i = 0; i < positions.size(); i++)
       {
-        std::vector<unsigned int> cacheIndizes(indexNumber, ~0);
+        std::vector<unsigned int> cacheIndices(indexNumber, INT32_MAX);//INT32_MAX instead of UINT32_MAX for parallel offset adding in geometry shader later
         std::vector<float> cacheWeights(indexNumber, 0);
         util::vec3f position = positions[i];
         util::vec3f normal = normals[i];
@@ -466,7 +473,7 @@ namespace he
 
           for(unsigned int k = 0; k < indexNumber; k++)
           {
-            if(cacheIndizes[k] == ~0)
+            if(cacheIndices[k] == INT32_MAX)
             {
               bestIndex = k;
               break;
@@ -480,13 +487,24 @@ namespace he
 
           if(bestIndex != ~0)
           {
-            cacheIndizes[bestIndex] = j;
+            cacheIndices[bestIndex] = j + 1;//index + 1 for comparison in geometry shader later
             cacheWeights[bestIndex] = weight;
           }
         }
 
-        cacheIndizes0[i] = util::cacheIndexType(cacheIndizes[0], cacheIndizes[1], cacheIndizes[2], cacheIndizes[3]);
-        cacheIndizes1[i] = util::cacheIndexType(cacheIndizes[4], cacheIndizes[5], cacheIndizes[6], cacheIndizes[7]);
+        for(unsigned int j = 0; j < indexNumber; j++)
+        {
+          for(unsigned int k = 0; k < indexNumber; k++)
+          {
+            if(j != k && cacheIndices[j] == cacheIndices[k])//no doubled indices
+            {
+              cacheIndices[k] = INT32_MAX;
+            }
+          }
+        }
+
+        cacheIndizes0[i] = util::cacheIndexType(cacheIndices[0], cacheIndices[1], cacheIndices[2], cacheIndices[3]);
+        cacheIndizes1[i] = util::cacheIndexType(cacheIndices[4], cacheIndices[5], cacheIndices[6], cacheIndices[7]);
       }
     }
   }

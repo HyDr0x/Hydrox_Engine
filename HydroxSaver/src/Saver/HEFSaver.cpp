@@ -15,7 +15,6 @@
 #include "Saver/MaterialSaver.h"
 #include "Saver/ILDevilSaver.h"
 #include "Saver/CreateDirectory.h"
-#include "Saver/NodeStreaming.h"
 
 namespace he
 {

@@ -166,6 +166,11 @@ namespace he
 
           float area = calculatePolygonAreaCentroid(trianglePoints, boxPoints, polygonCentroid);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
 
+          if(area == FLT_MAX)//triangle only touched the voxel
+          {
+            continue;
+          }
+
           assert(area > 0.0f);
 
           normal = normal.normalize();
@@ -231,6 +236,11 @@ namespace he
 
           s = e;
         }
+      }
+
+      if(outPoints.size() < 3)//triangle only touched the voxel
+      {
+        return FLT_MAX;
       }
 
       float area = 0.0f;

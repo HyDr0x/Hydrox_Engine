@@ -34,7 +34,7 @@ void main()
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.z)] * in_boneWeights.z);
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.w)] * in_boneWeights.w);
 
-	vsout_normal = mat3(skinningMatrix) * in_normal;
+	vsout_normal = normalize(mat3(skinningMatrix) * in_normal);
 	
 	gl_Position = viewProjectionMatrix * skinningMatrix * vec4(in_Pos, 1.0f);
 }

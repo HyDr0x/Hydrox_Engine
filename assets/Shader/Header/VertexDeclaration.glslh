@@ -8,3 +8,8 @@
 #define BONEWEIGHTS 7
 #define BONEINDICES 8
 #define COLOR 9
+#define CACHEINDICES0 10
+#define CACHEINDICES1 11
+#define SPECIAL0 12
+#define SPECIAL0 13
+#define SPECIAL0 14

@@ -55,6 +55,8 @@ namespace he
 
       virtual void frustumCulling() const override;
 
+      virtual void rasterizeShadowGeometry() const override;
+
       virtual void rasterizeGeometry() const override;
 
       virtual void updateBuffer() override;
@@ -62,6 +64,7 @@ namespace he
       virtual unsigned int getMaxGeometry() const override;
       virtual unsigned int getMaxMaterials() const override;
       virtual unsigned int getMaxBones() const override;
+      virtual unsigned int getCacheNumber() const;
 
     protected:
 

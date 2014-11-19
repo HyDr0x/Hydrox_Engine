@@ -23,9 +23,7 @@ namespace he
         util::SingletonManager *singletonManager, 
         const xBar::IGeometryContainer& geometryContainer, 
         util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle);
+        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
 
       virtual ~RemoveShadowGeometryTraverser();
 

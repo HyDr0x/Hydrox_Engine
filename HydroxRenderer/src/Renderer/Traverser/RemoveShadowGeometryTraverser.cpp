@@ -19,9 +19,7 @@ namespace he
       util::SingletonManager *singletonManager, 
       const xBar::IGeometryContainer& geometryContainer,
       util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle staticNormalShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedNormalShadowMapGenerationShaderHandle) :
+      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
       m_geometryContainer(geometryContainer)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -33,25 +31,12 @@ namespace he
 
       if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          m_shaderHandle = skinnedNormalShadowMapGenerationShaderHandle;
-        }
-        else
-        {
-          m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
-        }
+        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+        
       }
       else
       {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          m_shaderHandle = staticNormalShadowMapGenerationShaderHandle;
-        }
-        else
-        {
-          m_shaderHandle = staticShadowMapGenerationShaderHandle;
-        }
+        m_shaderHandle = staticShadowMapGenerationShaderHandle;
       }
 
       db::Material *material = singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());

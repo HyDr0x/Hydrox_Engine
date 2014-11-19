@@ -15,7 +15,7 @@ flat in uint vsout_instanceIndex;
 
 void main()
 {
-	vec3 normal = vsout_tangentToWorld * normalize(texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f);
+	vec3 normal = normalize(vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f));
 
 	fsout_normal = vec4(normal * 0.5f + 0.5f, 0);
 	

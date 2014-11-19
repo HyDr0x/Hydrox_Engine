@@ -69,7 +69,7 @@ namespace he
           //  printf("ERROR, couldn't convert file %s/n", filename);
           //}
         
-          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerPixel, ilGetData()));
+          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerPixel, ilGetData(), true));
         }
       }
       ilBindImage(0);
@@ -81,7 +81,7 @@ namespace he
     util::ResourceHandle ILDevilLoader::getDefaultResource() const
     {
       util::vec3f textureData = util::vec3f(0.0f, 1.0f, 0.0f);
-      return m_textureManager->addObject(db::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, 3, 24, &textureData[0]));
+      return m_textureManager->addObject(db::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, 3, 24, &textureData[0], true));
     }
 
     void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerPixel)

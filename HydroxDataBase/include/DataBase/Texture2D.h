@@ -18,7 +18,7 @@ namespace he
     public:
 
       Texture2D(){}
-      Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data = nullptr, bool mipmapping = true);
+      Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data = nullptr, bool mipmapping = false);
       Texture2D(const Texture2D&);
 
       ~Texture2D();

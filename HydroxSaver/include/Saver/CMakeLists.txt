@@ -8,7 +8,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/MaterialSaver.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MeshSaver.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/NodeExtractionTraverser.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/NodeStreaming.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShaderSaver.h 
 	PARENT_SCOPE 
 )

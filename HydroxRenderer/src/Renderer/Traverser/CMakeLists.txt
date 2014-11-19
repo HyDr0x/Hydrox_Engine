@@ -4,11 +4,13 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertReflectiveShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveReflectiveShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/ShadowMapTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/UpdateTraverser.cpp 
 	PARENT_SCOPE 

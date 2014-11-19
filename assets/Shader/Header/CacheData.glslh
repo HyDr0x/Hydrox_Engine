@@ -1,0 +1,6 @@
+struct CacheData
+{
+	vec4 position;//w coordinate = diffuse strength
+	vec4 normal;//w coordinate = specular strength
+	vec4 specularExponent;//only x is used as an exponent
+};

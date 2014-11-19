@@ -13,12 +13,14 @@
 #include <DataBase/ResourceManager.hpp>
 #include "Renderer/Pipeline/GBuffer.h"
 #include "Renderer/Pipeline/LightRenderer.h"
+#include "Renderer/Pipeline/IndirectLightRenderer.h"
 #include "Renderer/Pipeline/ParticleRenderer.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
 #include "Renderer/Pipeline/SkyboxRenderer.h"
 #include "Renderer/Pipeline/SpriteRenderer.h"
 #include "Renderer/Pipeline/StringRenderer2D.h"
+#include "Renderer/Pipeline/FinalCompositing.h"
 
 #include "Renderer/Buffer/UBO.h"
 
@@ -93,25 +95,23 @@ namespace he
 
       UBO m_cameraParameterUBO;
 
-      bool m_skyboxRendering;
-      bool m_wireframe;
-
-      util::ResourceHandle m_offscreenBufferShaderHandle;
-      util::ResourceHandle m_combineShaderHandle;
-      Renderquad m_fullscreenRenderQuad;
-
       RenderOptions *m_options;
 
       GBuffer m_gBuffer;
       LightRenderer m_lightRenderer;
+      IndirectLightRenderer m_indirectLightRenderer;
       ParticleRenderer m_particleRenderer;
       GeometryRenderer m_geometryRasterizer;
       BillboardRenderer m_billboardRenderer;
       SkyboxRenderer m_skyboxRenderer;
       SpriteRenderer m_spriteRenderer;
       StringRenderer2D m_stringRenderer;
+      FinalCompositing m_finalCompositing;
 
       GLfloat m_aspectRatio;
+
+      bool m_skyboxRendering;
+      bool m_wireframe;
     };
   }
 }

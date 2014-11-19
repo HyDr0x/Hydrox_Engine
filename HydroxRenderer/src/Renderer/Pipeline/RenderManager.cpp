@@ -66,12 +66,7 @@ namespace he
     {
       m_singletonManager = singletonManager;
 
-      m_options = singletonManager->getService<RenderOptions>();
-
-      RenderShaderContainer *renderShader = singletonManager->getService<RenderShaderContainer>();
-
-      m_offscreenBufferShaderHandle = renderShader->offscreenBufferShaderHandle;
-      m_combineShaderHandle = renderShader->combineShaderHandle;
+      m_options = m_singletonManager->getService<RenderOptions>();
 
       m_geometryRasterizer.initialize(m_singletonManager);
       m_gBuffer.initialize(m_singletonManager);
@@ -79,7 +74,9 @@ namespace he
       m_spriteRenderer.initialize(m_singletonManager);
       m_stringRenderer.initialize(m_singletonManager);
       m_lightRenderer.initialize(m_singletonManager);
-      m_particleRenderer.initialize(m_singletonManager); 
+      m_indirectLightRenderer.initialize(m_singletonManager);
+      m_particleRenderer.initialize(m_singletonManager);
+      m_finalCompositing.initialize(m_singletonManager);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::vec4f) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
@@ -117,11 +114,17 @@ namespace he
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        m_gBuffer.setGBuffer();
-
         m_geometryRasterizer.updateBuffer();
+        m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
+
+        m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
+
+        m_gBuffer.setGBuffer();
+        m_indirectLightRenderer.setBuffer();
+
         m_geometryRasterizer.rasterizeGeometry();
 
+        m_indirectLightRenderer.unsetBuffer();
         m_gBuffer.unsetGBuffer();
 
         if(m_wireframe)
@@ -133,10 +136,11 @@ namespace he
         
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.1f, 4.0f);
-        glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapHeight);
+        glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
         for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
         {
           m_lightRenderer.setShadowMap(4, i);
+          m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
           m_geometryRasterizer.generateShadowMap(i);
           m_lightRenderer.unsetShadowMap(4);
         }
@@ -144,6 +148,7 @@ namespace he
         for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
         {
           m_lightRenderer.setReflectiveShadowMap(4, i);
+          m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
           m_geometryRasterizer.generateReflectiveShadowMap(i);
           m_lightRenderer.unsetReflectiveShadowMap(4);
         }
@@ -151,6 +156,14 @@ namespace he
         glDisable(GL_POLYGON_OFFSET_FILL);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
+
+        m_indirectLightRenderer.calculateIndirectLight(
+          m_gBuffer.getDepthTexture(), 
+          m_gBuffer.getNormalTexture(), 
+          m_gBuffer.getMaterialTexture(), 
+          m_lightRenderer.getReflectiveShadowPosMaps(),
+          m_lightRenderer.getReflectiveShadowNormalMaps(),
+          m_lightRenderer.getReflectiveShadowLuminousFluxMaps());
 
         m_gBuffer.setGBuffer();
 
@@ -163,26 +176,14 @@ namespace he
 
         m_gBuffer.unsetGBuffer();
       }
+
+      //m_gBuffer.getNormalTexture();
+      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0);
+      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0);
+      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0);
+      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0);
+      m_finalCompositing.composeImage(m_indirectLightRenderer.getIndirectLightMap(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
       
-      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
-      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
-
-      shader->useShader();
-      m_gBuffer.getNormalTexture()->setTexture(0, 0);
-      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->setTexture(0, 0);
-      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)->setTexture(0, 0);
-      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->setTexture(0, 0);
-      //m_gBuffer.getColorTexture()->setTexture(0, 0);
-      //m_lightRenderer.getLightTexture()->setTexture(1, 1);
-      m_fullscreenRenderQuad.render();
-      //m_lightRenderer.getLightTexture()->unsetTexture();
-      //m_gBuffer.getColorTexture()->unsetTexture();
-      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)->unsetTexture();
-      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)->setTexture(0, 0);
-      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)->unsetTexture();
-      m_gBuffer.getNormalTexture()->unsetTexture();
-      shader->useNoShader();
-
       m_spriteRenderer.render();
       m_stringRenderer.render();
 

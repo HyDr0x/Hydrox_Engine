@@ -55,6 +55,13 @@ namespace he
       glBindBuffer(m_target, 0);
     }
 
+    void GPUBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const
+    {
+      glBindBuffer(m_target, m_bufferIndex);
+      glClearBufferData(m_target, internalFormat, format, type, data);
+      glBindBuffer(m_target, 0);
+    }
+
     void GPUBuffer::bindBuffer(GLenum target) const
     {
       glBindBuffer(target, m_bufferIndex);

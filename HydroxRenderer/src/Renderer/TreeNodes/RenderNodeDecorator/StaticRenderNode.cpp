@@ -81,6 +81,10 @@ namespace he
       db::ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 
+    void StaticRenderNode::rasterizeShadowGeometry() const
+    {
+    }
+
     void StaticRenderNode::rasterizeGeometry() const
     {
     }
@@ -103,6 +107,11 @@ namespace he
     unsigned int StaticRenderNode::getMaxBones() const
     {
       return m_options->maxBones;
+    }
+
+    unsigned int StaticRenderNode::getCacheNumber() const
+    {
+      return 0;
     }
   }
 }

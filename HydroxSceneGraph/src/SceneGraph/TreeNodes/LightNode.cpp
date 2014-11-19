@@ -137,14 +137,14 @@ namespace he
       return m_lightData.color;
     }
 
-    void LightNode::setIntensity(float intensity)
+    void LightNode::setLuminousFlux(float intensity)
     {
-      m_lightData.intensity = intensity;
+      m_lightData.luminousFlux = intensity;
     }
 
-    float LightNode::getIntensity() const
+    float LightNode::getLuminousFlux() const
     {
-      return m_lightData.intensity;
+      return m_lightData.luminousFlux;
     }
 
     void LightNode::setSpotLightExponent(float spotLightExponent)
@@ -204,7 +204,7 @@ namespace he
       stream >> m_lightData.position;
       stream >> m_lightData.direction;
       stream >> m_lightData.color;
-      stream >> m_lightData.intensity;
+      stream >> m_lightData.luminousFlux;
 
       stream >> m_lightData.constAttenuation;
       stream >> m_lightData.linearAttenuation;
@@ -226,7 +226,7 @@ namespace he
       stream << m_lightData.position << std::endl;
       stream << m_lightData.direction << std::endl;
       stream << m_lightData.color << std::endl;
-      stream << m_lightData.intensity << std::endl;
+      stream << m_lightData.luminousFlux << std::endl;
 
       stream << m_lightData.constAttenuation << std::endl;
       stream << m_lightData.linearAttenuation << std::endl;

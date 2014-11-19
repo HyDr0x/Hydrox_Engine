@@ -64,6 +64,11 @@ namespace he
       m_renderNode->frustumCulling();
     }
 
+    void ARenderNodeDecorator::rasterizeShadowGeometry() const
+    {
+      m_renderNode->rasterizeShadowGeometry();
+    }
+
     void ARenderNodeDecorator::rasterizeGeometry() const
     {
       m_renderNode->rasterizeGeometry();
@@ -87,6 +92,11 @@ namespace he
     unsigned int ARenderNodeDecorator::getMaxBones() const
     {
       return m_renderNode->getMaxBones();
+    }
+
+    unsigned int ARenderNodeDecorator::getCacheNumber() const
+    {
+      return m_renderNode->getCacheNumber();
     }
   }
 }

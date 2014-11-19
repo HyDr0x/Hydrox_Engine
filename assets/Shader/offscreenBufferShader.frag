@@ -18,8 +18,9 @@ void main()
 	if(zn > 100.0f)
 		zn = 0.5f;
 	
-	color = vec4(zn);//vec4(gsout_texCoord.x,gsout_texCoord.y,0,1);*/
-	color = (texture(colorSampler, gsout_texCoord) - 0.5f) * 2.0f;
+	color = vec4(zn);//vec4(gsout_texCoord.x,gsout_texCoord.y, 0, 1);
+	*/
 	
-	//color = texture(colorSampler, gsout_texCoord);
+	//color = texture(colorSampler, gsout_texCoord) * 2.0f - 1.0f;
+	color = texture(colorSampler, gsout_texCoord);
 }

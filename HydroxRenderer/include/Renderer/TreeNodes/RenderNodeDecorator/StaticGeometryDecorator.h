@@ -18,6 +18,8 @@ namespace he
 
       virtual void frustumCulling() const;
 
+      virtual void rasterizeShadowGeometry() const;
+
       virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();

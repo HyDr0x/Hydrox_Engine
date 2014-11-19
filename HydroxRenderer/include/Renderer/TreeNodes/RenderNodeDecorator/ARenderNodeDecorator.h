@@ -46,13 +46,16 @@ namespace he
 
       virtual void frustumCulling() const;
 
+      virtual void rasterizeShadowGeometry() const;
+
       virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();
 
-      unsigned int getMaxGeometry() const;
-      unsigned int getMaxMaterials() const;
-      unsigned int getMaxBones() const;
+      virtual unsigned int getMaxGeometry() const;
+      virtual unsigned int getMaxMaterials() const;
+      virtual unsigned int getMaxBones() const;
+      virtual unsigned int getCacheNumber() const;
 
     protected:
 

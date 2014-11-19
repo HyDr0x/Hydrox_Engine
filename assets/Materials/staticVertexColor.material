@@ -4,13 +4,13 @@ Diffuse Strength
 0.8
 
 Specular Strength
-0.3
+0.9
 
 Ambient Strength
 0.1
 
 Specular Exponent
-1.0
+32.0
 
 ###################################
 

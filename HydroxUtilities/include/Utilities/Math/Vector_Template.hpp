@@ -56,7 +56,10 @@ namespace he
       inline Vector& operator = (const Vector  &v) { VECTOR_ASSIGNEMENT_OP return *this; }
 
       inline Vector operator + (const Vector &v) const { return Vector( VECTOR_PLUS_OP ); }
+      inline Vector operator + (Type s) const { return Vector(VECTOR_PLUS_OP_SCALAR); }
+
       inline Vector operator - (const Vector &v) const { return Vector( VECTOR_MINUS_OP ); }
+      inline Vector operator - (Type s) const { return Vector(VECTOR_MINUS_OP_SCALAR); }
 
       inline Vector operator * (const Vector &v) const { return Vector( VECTOR_MULTIPLY_OP ); }
       inline Vector operator * (Type s) const { return Vector( VECTOR_MULTIPLY_OP_SCALAR ); }
@@ -65,9 +68,14 @@ namespace he
       inline Vector operator / (Type s) const { return Vector( VECTOR_DIVIDE_OP_SCALAR ); }
 
       inline Vector& operator += (const Vector &v) { VECTOR_EQ_PLUS_OP return *this; }
+      inline Vector& operator += (Type s) { VECTOR_EQ_PLUS_OP_SCALAR return *this; }
+
       inline Vector& operator -= (const Vector &v) { VECTOR_EQ_MINUS_OP return *this; }
+      inline Vector& operator -= (Type s) { VECTOR_EQ_MINUS_OP_SCALAR return *this; }
+
       inline Vector& operator *= (const Vector &v) { VECTOR_EQ_MULTIPLY_OP return *this; }
       inline Vector& operator *= (Type s) { VECTOR_EQ_MULTIPLY_OP_SCALAR return *this; }
+
       inline Vector& operator /= (const Vector &v) { VECTOR_EQ_DIVIDE_OP return *this; }
       inline Vector& operator /= (Type s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
 
@@ -77,6 +85,13 @@ namespace he
       inline bool operator <  (const Vector &v) { return VECTOR_COMP_LS }
       inline bool operator >= (const Vector &v) { return VECTOR_COMP_EQ_GR }
       inline bool operator <= (const Vector &v) { return VECTOR_COMP_EQ_LS }
+
+      inline Vector& operator & (const Vector &v) { return Vector( VECTOR_BINOP_EQ ); }
+      inline Vector& operator | (const Vector &v) { return Vector( VECTOR_BINOP_OR ); }
+      inline Vector& operator ^  (const Vector &v) { return Vector( VECTOR_BINOP_XOR ); }
+      inline Vector& operator &=  (const Vector &v) { VECTOR_BINOP_EQ_EQ return *this; }
+      inline Vector& operator |= (const Vector &v) { VECTOR_BINOP_EQ_OR return *this; }
+      inline Vector& operator ^= (const Vector &v) { VECTOR_BINOP_EQ_XOR return *this; }
 
       inline Type& operator [] (unsigned int i) { return m_x[i]; }
       inline const Type& operator [] (unsigned int i) const { return m_x[i]; }
@@ -132,6 +147,8 @@ namespace he
       static unsigned int m_vertexcounter;
     };
 
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator + (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_PLUS_OP_SCALAR_LEFT); }
+    template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator - (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_MINUS_OP_SCALAR_LEFT); }
     template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator * (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_MULTIPLY_OP_SCALAR_LEFT); }
     template<typename Type> Vector<Type, VECTOR_NUM_ARGS> operator / (Type s, const Vector<Type, VECTOR_NUM_ARGS>& v) { return Vector<Type, VECTOR_NUM_ARGS>(VECTOR_DIVIDE_OP_SCALAR_LEFT); }
 
