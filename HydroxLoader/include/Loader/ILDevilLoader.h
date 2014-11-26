@@ -5,7 +5,7 @@
 #include <IL/ilu.h>
 #include <GL/glew.h>
 
-#include "Loader/ShaderLoader.h"
+#include "Loader/ResourceLoader.h"
 
 namespace he
 {

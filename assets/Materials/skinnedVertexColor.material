@@ -45,19 +45,15 @@ NULL
 ###################################
 ShadowShader Name
 ../../assets/Shader/Mesh/ShadowMapping/skinnedReflectiveVertexColor
+../../assets/Shader/Mesh/ShadowMapping/reflectiveVertexColor
+""
+""
+""
 
 Shader Name
 ../../assets/Shader/Mesh/skinnedVertexColor
-
-Fragment Shader
-TRUE
-
-Geometry Shader
-FALSE
-
-Tesselation Control Shader
-FALSE
-
-Tesselation Evaluation Shader
-FALSE
+../../assets/Shader/Mesh/skinnedVertexColor
+""
+""
+""
 ###################################

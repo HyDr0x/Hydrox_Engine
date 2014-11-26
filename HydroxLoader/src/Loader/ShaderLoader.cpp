@@ -3,13 +3,15 @@
 #include <fstream>
 #include <iostream>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
 #include <DataBase/Shader.h>
 
 namespace he
 {
   namespace loader
   {
-    ShaderLoader::ShaderLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager)
+    ShaderLoader::ShaderLoader(util::SingletonManager *singletonManager) : m_singletonManager(singletonManager)
     {
     }
 

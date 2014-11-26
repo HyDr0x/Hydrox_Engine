@@ -45,19 +45,15 @@ NULL
 ###################################
 ShadowShader Name
 ../../assets/Shader/Mesh/ShadowMapping/staticReflectiveUniColor
+../../assets/Shader/Mesh/ShadowMapping/reflectiveUniColor
+""
+""
+""
 
 Shader Name
 ../../assets/Shader/Mesh/staticUniColor
-
-Fragment Shader
-TRUE
-
-Geometry Shader
-FALSE
-
-Tesselation Control Shader
-FALSE
-
-Tesselation Evaluation Shader
-FALSE
+../../assets/Shader/Mesh/uniColor
+""
+""
+""
 ###################################

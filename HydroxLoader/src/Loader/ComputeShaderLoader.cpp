@@ -11,7 +11,7 @@ namespace he
 {
   namespace loader
   {
-    ComputeShaderLoader::ComputeShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), m_computeShaderManager(m_singletonManager->getService<db::ComputeShaderManager>())
+    ComputeShaderLoader::ComputeShaderLoader(util::SingletonManager *singletonManager) : ShaderLoader(singletonManager), ResourceLoader(singletonManager), m_computeShaderManager(singletonManager->getService<db::ComputeShaderManager>())
     {
     }
 

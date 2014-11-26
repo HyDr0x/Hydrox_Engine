@@ -5,6 +5,7 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
+#include <DataBase/ResourceManager.hpp>
 #include <DataBase/RenderShader.h>
 
 namespace he
@@ -19,21 +20,27 @@ namespace he
     {
     }
 
-    util::ResourceHandle RenderShaderLoader::loadResource(std::string filename)
+    util::ResourceHandle RenderShaderLoader::loadResource(
+      std::string filename,
+      std::string vertexFilename,
+      std::string fragmentFilename,
+      std::string geometryFilename,
+      std::string tessControlFilename,
+      std::string tessEvalFilename)
     {
       std::string vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource;
 
-      vertexShaderSource = loadShaderSource(filename + ".vert");
-      fragmentShaderSource = loadShaderSource(filename + ".frag");
-      geometryShaderSource = loadShaderSource(filename + ".geom");
-      tesselationCTRLShaderSource = loadShaderSource(filename + ".control");
-      tesselationEVALShaderSource = loadShaderSource(filename + ".eval");
+      vertexShaderSource = loadShaderSource(vertexFilename + ".vert");
+      fragmentShaderSource = loadShaderSource(fragmentFilename + ".frag");
+      geometryShaderSource = loadShaderSource(geometryFilename + ".geom");
+      tesselationCTRLShaderSource = loadShaderSource(tessControlFilename + ".control");
+      tesselationEVALShaderSource = loadShaderSource(tessEvalFilename + ".eval");
 
       util::ResourceHandle shaderHandle;
 
       if(vertexShaderSource.empty())
       {
-        std::cerr << "ERROR, couldn't open file: " << filename << std::endl;
+        std::cerr << "ERROR, couldn't open file: " << vertexFilename << std::endl;
 
         shaderHandle = getDefaultResource();
       }

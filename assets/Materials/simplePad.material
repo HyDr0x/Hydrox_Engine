@@ -45,19 +45,15 @@ NULL
 ###################################
 ShadowShader Name
 ../../assets/Shader/Mesh/ShadowMapping/staticReflectiveTex
+../../assets/Shader/Mesh/ShadowMapping/reflectiveTex
+""
+""
+""
 
 Shader Name
 ../../assets/Shader/Mesh/staticTex
-
-Fragment Shader
-TRUE
-
-Geometry Shader
-TRUE
-
-Tesselation Control Shader
-FALSE
-
-Tesselation Evaluation Shader
-FALSE
+../../assets/Shader/Mesh/tex
+../../assets/Shader/Mesh/staticTex
+""
+""
 ###################################

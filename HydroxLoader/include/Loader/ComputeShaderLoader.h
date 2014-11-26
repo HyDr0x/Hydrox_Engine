@@ -2,12 +2,13 @@
 #define COMPUTESHADERLOADER_H_
 
 #include "Loader/ShaderLoader.h"
+#include "Loader/ResourceLoader.h"
 
 namespace he
 {
   namespace loader
   {
-    class GRAPHICAPI ComputeShaderLoader : public ShaderLoader
+    class GRAPHICAPI ComputeShaderLoader : public ShaderLoader, public ResourceLoader
     {
     public:
 

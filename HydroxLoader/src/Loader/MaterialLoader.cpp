@@ -47,7 +47,7 @@ namespace he
 
       util::ResourceHandle materialHandle;
 
-      std::string shaderFilename, shadowShaderFilename;
+      std::string shaderFilename[5], shadowShaderFilename[5];
       std::vector<std::vector<std::string>> textureFilenames(db::Material::TEXTURETYPENUM);
 
       std::ifstream file(filename);
@@ -124,12 +124,18 @@ namespace he
             }
             break;
           case SHADOWSHADERNAME:
-            std::getline(file, line);
-            shadowShaderFilename = line;
+            for(unsigned int i = 0; i < 5; i++)
+            {
+              std::getline(file, line);
+              shadowShaderFilename[i] = line;
+            }
             break;
           case SHADERNAME:
-            std::getline(file, line);
-            shaderFilename = line;
+            for(unsigned int i = 0; i < 5; i++)
+            {
+              std::getline(file, line);
+              shaderFilename[i] = line;
+            }
             break;
           case DEFAULT:
           default:
@@ -140,10 +146,10 @@ namespace he
         std::vector<uint64_t> hashes;
 
         RenderShaderLoader renderShaderLoader(m_singletonManager);
-        util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(shaderFilename);
+        util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(filename, shaderFilename[0], shaderFilename[1], shaderFilename[2], shaderFilename[3], shaderFilename[4]);
         hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shaderHandle)->getHash());
 
-        util::ResourceHandle shadowShaderHandle = renderShaderLoader.loadResource(shadowShaderFilename);
+        util::ResourceHandle shadowShaderHandle = renderShaderLoader.loadResource(filename, shadowShaderFilename[0], shadowShaderFilename[1], shadowShaderFilename[2], shadowShaderFilename[3], shadowShaderFilename[4]);
         hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shadowShaderHandle)->getHash());
 
         ILDevilLoader textureLoader(m_singletonManager);
