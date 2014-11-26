@@ -111,7 +111,8 @@ namespace he
       case SPOTLIGHT:
         width = tanf(acosf(m_lightData.direction[3]) * 0.5f) * 2.0f * m_near;
         m_lightData.projectionParameter[0] = m_near;
-        m_lightData.projectionParameter[1] = 2.0f * width;
+        m_lightData.projectionParameter[1] = m_far;
+        m_lightData.projectionParameter[2] = 2.0f * width;
         m_projectionMatrix = util::math::createPerspective(-width, width, -width, width, m_near, m_far);
         break;
       case POINTLIGHT:
@@ -119,7 +120,8 @@ namespace he
       case DIRECTIONALLIGHT:
         width = 100.0f;
         m_lightData.projectionParameter[0] = m_near;
-        m_lightData.projectionParameter[1] = 2.0f * width;
+        m_lightData.projectionParameter[1] = m_far;
+        m_lightData.projectionParameter[2] = 2.0f * width;
         m_projectionMatrix = util::math::createOrthographic(-width, width, -width, width, m_near, m_far);
         break;
       }

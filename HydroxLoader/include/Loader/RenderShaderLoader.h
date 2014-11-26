@@ -17,6 +17,8 @@ namespace he
       util::ResourceHandle loadResource(std::string filename);
 
       util::ResourceHandle getDefaultResource() const;
+
+      util::ResourceHandle getDefaultShadowResource() const;
     };
   }
 }

@@ -40,6 +40,7 @@ namespace he
         NORMALMAP,
         SPECULARMAP,
         DISPLACEMENTMAP,
+        SHADOWSHADERNAME,
         SHADERNAME,
       };
 

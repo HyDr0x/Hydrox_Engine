@@ -22,13 +22,12 @@ layout(location = 3) uniform uint shadowMapWidth;
 in vec4 vsout_pos;
 in vec3 vsout_normal;
 flat in uint vsout_instanceIndex;
-in vec4 vsout_color;
 
 void main()
 {
-	float zNear = reflectiveShadowLight[lightIndex].projectionParameter.x;
-	float nearArea = reflectiveShadowLight[lightIndex].projectionParameter.y;
-	float area = gl_FragCoord.z * gl_FragCoord.z * nearArea * nearArea / (zNear * zNear * shadowMapWidth * shadowMapWidth);
+	vec3 projPar = reflectiveShadowLight[lightIndex].projectionParameter.xyz;//x = near, y = far, z = width
+	float zLinear = 2.0f * projPar.x * projPar.y / (projPar.y + projPar.x - gl_FragCoord.z * (projPar.y - projPar.x));
+	float area = zLinear * zLinear * projPar.z * projPar.z / (projPar.x * projPar.x * shadowMapWidth * shadowMapWidth);
 	
 	fsout_pos3D = vsout_pos;
 	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, area);
@@ -37,5 +36,7 @@ void main()
 	float distance = dot(lightDir, lightDir);
 	lightDir = normalize(lightDir);
 	
-	fsout_luminousFlux = max(dot(lightDir, vsout_normal), 0.0f) * reflectiveShadowLight[lightIndex].light.luminousFlux * material[materialIndex[vsout_instanceIndex]].diffuseStrength * vsout_color / distance;
+	float sr = area / distance;
+	float cosTheta = max(dot(lightDir, vsout_normal), 0.0f);
+	fsout_luminousFlux = sr * cosTheta * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * material[materialIndex[vsout_instanceIndex]].diffuseStrength * vec4(0.5f, 0.5f, 0.5f, 1.0f);
 }

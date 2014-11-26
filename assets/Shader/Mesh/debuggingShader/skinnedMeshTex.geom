@@ -3,12 +3,14 @@
 #extension ARB_shader_draw_parameters : enable
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 3) out;
+layout(line_strip, max_vertices = 24) out;
 
+#include "../Header/CameraUBO.glslh"
 #include "../Header/MaterialData.glslh"
 #include "../Header/CacheData.glslh"
+#include "../Header/BarycentricCoordinates.glslh"
 
-#define UINT32_MAX 4294967295
+#define INT32_MAX 2147483647
 
 layout(location = 3) uniform uint globalCacheOffset;
 
@@ -47,14 +49,16 @@ layout(std430, binding = 9) buffer meshIndexBuffer
 	uint perMeshIndex[];
 };
 
+in mat4 vsout_skinningMatrix[3];
+in vec3 vsout_pos3D[3];
+in vec2 vsout_texCoord[3];
 in vec3 vsout_normal[3];
-in vec4 vsout_color[3];
 in vec4 vsout_cacheIndices0[3];
 in vec4 vsout_cacheIndices1[3];
 in uint vsout_instanceIndex[3];
 
 out vec3 gsout_normal;
-out vec4 gsout_color;
+out vec2 gsout_texCoord;
 flat out uvec4 gsout_cacheIndices[6];
 flat out uint gsout_instanceIndex;
 
@@ -62,24 +66,28 @@ void main()
 {
 	uint meshIndex = perMeshIndex[vsout_instanceIndex[0]];
 	uvec2 triangleCacheBorderIndices = triangleCacheIndices[triangleIndexOffset[meshIndex] + gl_PrimitiveIDIn];
-
+		
 	uint cacheIndexOffsetTMP = cacheIndexOffset[meshIndex];
-
+	
 	//cache transformation and output into global cache buffer
-	if(triangleCacheBorderIndices.x != UINT32_MAX)
+	if(triangleCacheBorderIndices.x < INT32_MAX)
 	{
 		triangleCacheBorderIndices = uvec2(triangleCacheBorderIndices.x + cacheIndexOffsetTMP, triangleCacheBorderIndices.y + cacheIndexOffsetTMP);
 	
 		MaterialData cacheMaterial = material[materialIndex[vsout_instanceIndex[0]]];
-	
+		
+		vec3 barycentric;
+		mat4 skinningMatrix;
 		for(uint i = triangleCacheBorderIndices.x; i < triangleCacheBorderIndices.y; i++)
 		{
-			globalCaches[globalCacheOffset + i].position = vec4((trfMatrix[vsout_instanceIndex[0]] * vec4(caches[i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength);
-			globalCaches[globalCacheOffset + i].normal = vec4(normalize(mat3(trfMatrix[vsout_instanceIndex[0]]) * vec3(caches[i].normal)), cacheMaterial.specularStrength);
+			barycentric = barycentricCoordinates(vec3(caches[i].position), vsout_pos3D[0], vsout_pos3D[1], vsout_pos3D[2]);
+			skinningMatrix = barycentric.x * vsout_skinningMatrix[0] + barycentric.y * vsout_skinningMatrix[1] + barycentric.z * vsout_skinningMatrix[2];
+			globalCaches[globalCacheOffset + i].position = vec4((skinningMatrix * vec4(caches[i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength);
+			globalCaches[globalCacheOffset + i].normal = vec4(normalize(mat3(skinningMatrix) * vec3(caches[i].normal)), cacheMaterial.specularStrength);
 			globalCaches[globalCacheOffset + i].specularExponent.x = cacheMaterial.specularExponent;
 		}
 	}
-
+	
 	uvec4 cacheIndices[6];
 	for(uint i = 0;  i < 3; i++)
 	{
@@ -105,7 +113,7 @@ void main()
 		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].w));
 		cacheIndices[i] *= bitMask;
 	}
-
+	
 	cacheIndices[0] -= uvec4(1);
 	cacheIndices[1] -= uvec4(1);
 	cacheIndices[2] -= uvec4(1);
@@ -113,12 +121,44 @@ void main()
 	cacheIndices[4] -= uvec4(1);
 	cacheIndices[5] -= uvec4(1);
 	
+	if(triangleCacheBorderIndices.x < INT32_MAX)
+	{
+		triangleCacheBorderIndices = uvec2(triangleCacheBorderIndices.x + cacheIndexOffsetTMP, triangleCacheBorderIndices.y + cacheIndexOffsetTMP);
+	
+		MaterialData cacheMaterial = material[materialIndex[vsout_instanceIndex[0]]];
+		
+		for(uint i = triangleCacheBorderIndices.x; i < triangleCacheBorderIndices.y; i++)
+		{
+			gl_Position = viewProjectionMatrix * vec4(globalCaches[globalCacheOffset + i].position.xyz, 1);
+			gsout_instanceIndex = vsout_instanceIndex[0];
+			for(uint i = 0; i < 6; i++)
+			{
+				gsout_cacheIndices[i] = cacheIndices[i];
+			}
+			gsout_texCoord = vsout_texCoord[0];
+			gsout_normal = vsout_normal[0];
+			EmitVertex();
+			
+			gl_Position = viewProjectionMatrix * vec4(globalCaches[globalCacheOffset + i].position.xyz + globalCaches[globalCacheOffset + i].normal.xyz * 0.125f, 1);
+			gsout_instanceIndex = vsout_instanceIndex[1];
+			for(uint i = 0; i < 6; i++)
+			{
+				gsout_cacheIndices[i] = cacheIndices[i];
+			}
+			gsout_texCoord = vsout_texCoord[1];
+			gsout_normal = vsout_normal[1];
+			EmitVertex();
+			EndPrimitive();
+		}
+	}
+	
+	/*
 	gsout_instanceIndex = vsout_instanceIndex[0];
 	for(uint i = 0; i < 6; i++)
 	{
 		gsout_cacheIndices[i] = cacheIndices[i];
 	}
-	gsout_color = vsout_color[0];
+	gsout_texCoord = vsout_texCoord[0];
 	gsout_normal = vsout_normal[0];
 	gl_Position = gl_in[0].gl_Position;
 	EmitVertex();
@@ -128,7 +168,7 @@ void main()
 	{
 		gsout_cacheIndices[i] = cacheIndices[i];
 	}
-	gsout_color = vsout_color[1];
+	gsout_texCoord = vsout_texCoord[1];
 	gsout_normal = vsout_normal[1];
 	gl_Position = gl_in[1].gl_Position;
 	EmitVertex();
@@ -138,9 +178,9 @@ void main()
 	{
 		gsout_cacheIndices[i] = cacheIndices[i];
 	}
-	gsout_color = vsout_color[2];
+	gsout_texCoord = vsout_texCoord[2];
 	gsout_normal = vsout_normal[2];
 	gl_Position = gl_in[2].gl_Position;
 	EmitVertex();
-	EndPrimitive();
+	EndPrimitive();*/
 }

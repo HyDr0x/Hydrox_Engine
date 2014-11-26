@@ -29,6 +29,7 @@ namespace he
       materialFileKeywords[SPECULARMAP] = "Specular Map";
       materialFileKeywords[DISPLACEMENTMAP] = "Displacement Map";
 
+      materialFileKeywords[SHADOWSHADERNAME] = "ShadowShader Name";
       materialFileKeywords[SHADERNAME] = "Shader Name";
 
       db::TextureManager *textureManager = singletonManager->getService<db::TextureManager>();
@@ -79,14 +80,19 @@ namespace he
       }
 
       /////////////////////////SHADER/////////////////////////
+      fileStream << materialFileKeywords[SHADOWSHADERNAME] << std::endl;
+      std::stringstream shadowShaderFilename;
+      shadowShaderFilename << filename << "_shadowshader";
+      fileStream << path << shadowShaderFilename.str() << std::endl;
+
       fileStream << materialFileKeywords[SHADERNAME] << std::endl;
       std::stringstream shaderFilename;
-
       shaderFilename << filename << "_shader";
       fileStream << path << shaderFilename.str() << std::endl;
 
       fileStream << std::endl;
 
+      RenderShaderSaver::save(path, shadowShaderFilename.str(), material->getShadowShaderHandle(), singletonManager);
       RenderShaderSaver::save(path, shaderFilename.str(), material->getShaderHandle(), singletonManager);
       
       fileStream.close();

@@ -30,58 +30,9 @@ namespace he
       db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
       m_vertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
-      {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_COLOR))
-          {
-            m_shaderHandle = container->skinnedNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
-          }
-          else
-          {
-            m_shaderHandle = container->skinnedNormalReflectiveShadowMapGenerationShaderHandle;
-          }
-        }
-        else
-        {
-          if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_COLOR))
-          {
-            m_shaderHandle = container->skinnedReflectiveShadowMapGenerationVertexColorShaderHandle;
-          }
-          else
-          {
-            m_shaderHandle = container->skinnedReflectiveShadowMapGenerationShaderHandle;
-          }
-        }
-      }
-      else
-      {
-        if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_BINORMAL))
-        {
-          if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_COLOR))
-          {
-            m_shaderHandle = container->staticNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
-          }
-          else
-          {
-            m_shaderHandle = container->staticNormalReflectiveShadowMapGenerationShaderHandle;
-          }
-        }
-        else
-        {
-          if(mesh->getVertexDeclarationFlags() & db::Mesh::vertexDeclarationFlag(db::Mesh::MODEL_COLOR))
-          {
-            m_shaderHandle = container->staticReflectiveShadowMapGenerationVertexColorShaderHandle;
-          }
-          else
-          {
-            m_shaderHandle = container->staticReflectiveShadowMapGenerationShaderHandle;
-          }
-        }
-      }
-
       db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+
+      m_shaderHandle = material->getShadowShaderHandle();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 

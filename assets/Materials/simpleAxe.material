@@ -43,8 +43,11 @@ NULL
 
 #Shader
 ###################################
+ShadowShader Name
+../../assets/Shader/Mesh/ShadowMapping/staticReflectiveTex
+
 Shader Name
-../../assets/Shader/Mesh/staticMeshTex
+../../assets/Shader/Mesh/staticTex
 
 Fragment Shader
 TRUE

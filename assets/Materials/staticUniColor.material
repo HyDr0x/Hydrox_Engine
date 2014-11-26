@@ -43,8 +43,11 @@ NULL
 
 #Shader
 ###################################
+ShadowShader Name
+../../assets/Shader/Mesh/ShadowMapping/staticReflectiveUniColor
+
 Shader Name
-../../assets/Shader/Mesh/staticMeshUniColor
+../../assets/Shader/Mesh/staticUniColor
 
 Fragment Shader
 TRUE

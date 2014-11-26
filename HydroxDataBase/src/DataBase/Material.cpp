@@ -8,7 +8,7 @@ namespace he
     {
     }
 
-    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, std::vector<uint64_t> hashes, bool transparency) : m_transparency(transparency)
+    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, util::ResourceHandle shadowShader, std::vector<uint64_t> hashes, bool transparency) : m_transparency(transparency)
     {
       unsigned int length = sizeof(MaterialData) + sizeof(hashes[0]) * hashes.size();
       std::vector<unsigned char> data(length);
@@ -18,6 +18,7 @@ namespace he
       m_hash = MurmurHash64A(&data[0], length, 0);
 
       m_shaderHandle = shader;
+      m_shadowShaderHandle = shadowShader;
       m_textureHandles = textureIndices;
       m_materialData = materialData;
     }
@@ -30,6 +31,7 @@ namespace he
 
       m_textureHandles = other.m_textureHandles;
       m_shaderHandle = other.m_shaderHandle;
+      m_shadowShaderHandle = other.m_shadowShaderHandle;
     }
 
     Material::~Material()
@@ -50,11 +52,13 @@ namespace he
       std::swap(m_materialData, other.m_materialData);
       std::swap(m_textureHandles, other.m_textureHandles);
       std::swap(m_shaderHandle, other.m_shaderHandle);
+      std::swap(m_shadowShaderHandle, other.m_shadowShaderHandle);
     }
 
     void Material::free()
     {
       m_shaderHandle.free();
+      m_shadowShaderHandle.free();
 
       for(int i = 0; i < m_textureHandles.size(); i++)
       {
@@ -99,6 +103,16 @@ namespace he
     util::ResourceHandle Material::getShaderHandle() const
     {
       return m_shaderHandle;
+    }
+
+    void Material::setShadowShaderHandle(util::ResourceHandle shadowShaderHandle)
+    {
+      m_shadowShaderHandle = shadowShaderHandle;
+    }
+
+    util::ResourceHandle Material::getShadowShaderHandle() const
+    {
+      return m_shadowShaderHandle;
     }
 
     void Material::setMaterialData(const Material::MaterialData& material)

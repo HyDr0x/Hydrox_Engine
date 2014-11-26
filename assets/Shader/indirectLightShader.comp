@@ -1,7 +1,6 @@
 #version 440 core
 
 #define WORKGROUPSIZE 64
-#define UINT32_MAX 4294967295
 #define PI 3.14159265359f
 #define Ep 0.0001f
 
@@ -75,20 +74,25 @@ void main()
 		vec3 camDir = normalize(eyePos.xyz - cache.position.xyz);
 		
 		for(uint j = 0; j < lightNumber; j += unusedIndirectLightsNumber)
-		{
+		{/*
 			vec3 texCoords;
 			texCoords.x = uint(j % indirectLightNumberX) / float(indirectLightNumberX);
 			texCoords.y = uint((j % (indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberX)) / float(indirectLightNumberY);
 			texCoords.z = uint(j / float(indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberZ);
+			*/
+			ivec3 texCoords;
+			texCoords.x = int(j % indirectLightNumberX);
+			texCoords.y = int((j % (indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberX));
+			texCoords.z = int(j / float(indirectLightNumberX * indirectLightNumberY));
 			
-			vec3 lightPos = texture(indirectLightPosSampler, texCoords).xyz;
+			vec3 lightPos = texelFetch(indirectLightPosSampler, texCoords, 0).xyz;
 			
-			vec4 lightNormalArea = texture(indirectLightNormalSampler, texCoords);
+			vec4 lightNormalArea = texelFetch(indirectLightNormalSampler, texCoords, 0);
 			
 			vec3 lightNormal = normalize(lightNormalArea.xyz * 2.0f - 1.0f);
 			float lightArea = lightNormalArea.w;
 			
-			vec3 luminousFlux = texture(indirectLightLuminousFluxSampler, texCoords).rgb;
+			vec3 luminousFlux = texelFetch(indirectLightLuminousFluxSampler, texCoords, 0).rgb;
 			
 			vec3 lightDir = lightPos - cache.position.xyz;
 			float quadDistance = dot(lightDir, lightDir);//should be the squared distance, but thats too high

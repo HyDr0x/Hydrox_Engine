@@ -43,8 +43,11 @@ NULL
 
 #Shader
 ###################################
+ShadowShader Name
+../../assets/Shader/Mesh/ShadowMapping/skinnedReflectiveVertexColor
+
 Shader Name
-../../assets/Shader/Mesh/skinnedMeshVertexColor
+../../assets/Shader/Mesh/skinnedVertexColor
 
 Fragment Shader
 TRUE

@@ -69,7 +69,7 @@ void main()
 	//cache transformation and output into global cache buffer
 	if(triangleCacheBorderIndices.x < INT32_MAX)
 	{
-		triangleCacheBorderIndices = uvec2(triangleCacheBorderIndices.x + cacheIndexOffsetTMP, triangleCacheBorderIndices.y + cacheIndexOffsetTMP);
+		triangleCacheBorderIndices += cacheIndexOffsetTMP;
 	
 		MaterialData cacheMaterial = material[materialIndex[vsout_instanceIndex[0]]];
 		
@@ -87,9 +87,9 @@ void main()
 	
 	uvec4 cacheIndices[6];
 	for(uint i = 0;  i < 3; i++)
-	{
-		cacheIndices[2 * i + 0] = uvec4(vsout_cacheIndices0[i]) + cacheIndexOffsetTMP + globalCacheOffset;
-		cacheIndices[2 * i + 1] = uvec4(vsout_cacheIndices1[i]) + cacheIndexOffsetTMP + globalCacheOffset;
+	{//bvec4 cast to ensure that unused indices which are zero wont get offseted
+		cacheIndices[2 * i + 0] = uvec4(vsout_cacheIndices0[i]) + uvec4(bvec4(vsout_cacheIndices0[i])) * (cacheIndexOffsetTMP + globalCacheOffset);
+		cacheIndices[2 * i + 1] = uvec4(vsout_cacheIndices1[i]) + uvec4(bvec4(vsout_cacheIndices1[i])) * (cacheIndexOffsetTMP + globalCacheOffset);
 	}
 	
 	uvec4 bitMask;

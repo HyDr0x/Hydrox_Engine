@@ -29,14 +29,6 @@ namespace he
       he::util::ResourceHandle combineShaderHandle;
       he::util::ResourceHandle staticShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skinnedShadowMapGenerationShaderHandle;
-      he::util::ResourceHandle staticReflectiveShadowMapGenerationVertexColorShaderHandle;
-      he::util::ResourceHandle staticNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
-      he::util::ResourceHandle staticReflectiveShadowMapGenerationShaderHandle;
-      he::util::ResourceHandle staticNormalReflectiveShadowMapGenerationShaderHandle;
-      he::util::ResourceHandle skinnedReflectiveShadowMapGenerationVertexColorShaderHandle;
-      he::util::ResourceHandle skinnedNormalReflectiveShadowMapGenerationVertexColorShaderHandle;
-      he::util::ResourceHandle skinnedReflectiveShadowMapGenerationShaderHandle;
-      he::util::ResourceHandle skinnedNormalReflectiveShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skyboxShaderHandle;
       he::util::ResourceHandle frustumCullingShaderHandle;
     };

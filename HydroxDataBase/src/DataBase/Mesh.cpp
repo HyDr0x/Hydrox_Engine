@@ -459,7 +459,7 @@ namespace he
       for(unsigned int i = 0; i < positions.size(); i++)
       {
         std::vector<unsigned int> cacheIndices(indexNumber, INT32_MAX);//INT32_MAX instead of UINT32_MAX for parallel offset adding in geometry shader later
-        std::vector<float> cacheWeights(indexNumber, 0);
+        std::vector<float> cacheWeights(indexNumber, 0);//default zero
         util::vec3f position = positions[i];
         util::vec3f normal = normals[i];
 

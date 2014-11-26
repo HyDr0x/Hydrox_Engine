@@ -43,8 +43,11 @@ NULL
 
 #Shader
 ###################################
+ShadowShader Name
+../../assets/Shader/Mesh/ShadowMapping/skinnedReflectiveTex
+
 Shader Name
-../../assets/Shader/Mesh/skinnedMeshTex
+../../assets/Shader/Mesh/skinnedTex
 
 Fragment Shader
 TRUE

@@ -1,5 +1,6 @@
 #version 440 core
 
+#define INT32_MAX 2147483647
 #define PI 3.14159265359f
 
 #include "Header/CameraUBO.glslh"
@@ -50,14 +51,15 @@ void main()
 	vec3 camDir = normalize(eyePos.xyz - pos);
 	vec3 reflectCamDir = reflect(-camDir, normal);
 	
-	uint index = uint(gl_FragCoord.x + gl_FragCoord.y * width) * 24;
+	uint index = (uint(gl_FragCoord.x) + uint(gl_FragCoord.y) * width) * 24;
 	
 	float dmax = 0.0f;
 	for(uint i = 0; i < 24; i++)
 	{
-		if(frameCacheIndices[index + i] != ~0)
+		uint cacheIndex = frameCacheIndices[index + i];
+		if(cacheIndex < INT32_MAX)
 		{
-			CacheData cache = caches[frameCacheIndices[index + i]];
+			CacheData cache = caches[cacheIndex];
 			vec3 diff = pos - cache.position.xyz;
 			dmax = max(dmax, dot(diff, diff));
 		}
@@ -74,7 +76,7 @@ void main()
 	for(uint i = 0; i < 24; i++)
 	{
 		uint cacheIndex = frameCacheIndices[index + i];
-		if(cacheIndex != ~0)
+		if(cacheIndex < INT32_MAX)
 		{
 			CacheData cache = caches[cacheIndex];
 			
@@ -93,7 +95,7 @@ void main()
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
 			
-			phiPD += wd * indirectLightD.luminousFlux.xyz;
+			phiPD +=wd * indirectLightD.luminousFlux.xyz;
 			phiPG += wg * indirectLightG.luminousFlux.xyz;
 			
 			wGesD += wd;
@@ -114,6 +116,6 @@ void main()
 	vec3 reflectLightDirG = reflect(-lightDirG, normal);
 	float frg = material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
 	
-	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)), 1.0f);
+	luminousFlux = vec4(float(frameCacheIndices[index]) / 299.0f, 0, 0, 1.0f);//vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)), 1.0f);
 	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)) + (frg * phiPG) / (4.0f * PI * length(pos - Xpg)), 1.0f);
 }

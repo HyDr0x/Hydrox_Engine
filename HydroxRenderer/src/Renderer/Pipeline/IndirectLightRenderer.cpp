@@ -133,13 +133,25 @@ namespace he
       m_indirectLightRenderQuad.unsetWriteFrameBuffer();
 
       renderShader->useNoShader();
+
+      //std::vector<util::vec4ui> frIndex(m_options->width * m_options->height * 6);
+      //m_frameCacheIndexBuffer.getData(0, m_options->width * m_options->height * 6 * sizeof(util::vec4ui), &frIndex[0]);
+      //for(unsigned int i = 0; i < m_options->width * m_options->height * 6; i++)
+      //{
+      //  //if(frIndex[i][0] > 2 && frIndex[i][1] < 10)
+      //  {
+      //    util::vec4ui ttt = frIndex[i];
+      //    int g = 3;
+      //  }
+      //}
     }
 
     void IndirectLightRenderer::setBuffer() const
     {
       GLuint zeros = 0;
       m_zBuffer.clearBuffer(GL_RED, GL_R32UI, GL_UNSIGNED_INT, &zeros);
-      util::vec4ui negativeZeros(~0, ~0, ~0, ~0);
+      //util::vec4ui negativeZeros(~0, ~0, ~0, ~0);
+      util::vec4ui negativeZeros(0, 0, 0, 0);
       m_frameCacheIndexBuffer.clearBuffer(GL_RGBA, GL_RGBA32UI, GL_UNSIGNED_INT, &negativeZeros[0]);
 
       m_globalCacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
@@ -156,9 +168,18 @@ namespace he
       //std::vector<GLuint> zBuff(m_cacheNumber);
       //m_zBuffer.getData(0, sizeof(GLuint) * m_cacheNumber, &zBuff[0]);
 
+      //unsigned int tz = 0;
       //std::vector<util::vec4ui> frIndex(m_options->width * m_options->height * 6);
       //m_frameCacheIndexBuffer.getData(0, m_options->width * m_options->height * 6 * sizeof(util::vec4ui), &frIndex[0]);
-      
+      //for(unsigned int i = 0; i < m_options->width * m_options->height * 6; i++)
+      //{
+      //  //if(frIndex[i][0] > 2 && frIndex[i][1] < 10)
+      //  {
+      //    tz++;
+      //    util::vec4ui ttt = frIndex[i];
+      //    int g = 3;
+      //  }
+      //}
       /*for(unsigned int i = 0; i < m_options->width * m_options->height * 6; i++)
       {
         if(frIndex[i][0] < INT32_MAX - 1 || frIndex[i][1] < INT32_MAX - 1 || frIndex[i][2] < INT32_MAX - 1 || frIndex[i][3] < INT32_MAX - 1)
