@@ -30,7 +30,7 @@ void main()
 	float zLinear = 2.0f * projPar.x * projPar.y / (projPar.y + projPar.x - gl_FragCoord.z * (projPar.y - projPar.x));
 	float area = zLinear * zLinear * projPar.z * projPar.z / (projPar.x * projPar.x * shadowMapWidth * shadowMapWidth);
 	
-	fsout_pos3D = vsout_pos;
+	fsout_pos3D = vec4(vsout_pos.xyz, 0);
 	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, area);
 	
 	vec3 lightDir = reflectiveShadowLight[lightIndex].light.position.xyz - vsout_pos.xyz;

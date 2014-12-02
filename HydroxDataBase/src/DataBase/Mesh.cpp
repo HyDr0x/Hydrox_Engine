@@ -101,16 +101,31 @@ namespace he
       m_cacheData = caches;
       m_triangleCacheIndices = triangleCacheIndices;
 
-      std::vector<he::util::cacheIndexType> cacheIndizes0(positions.size());
-      std::vector<he::util::cacheIndexType> cacheIndizes1(positions.size());
-      createCacheIndizes(positions, normals, cacheIndizes0, cacheIndizes1);
+      std::vector<he::util::cacheIndexType> cacheIndizes0;
+      std::vector<he::util::cacheIndexType> cacheIndizes1;
+      std::vector<util::vec3f> ownNormals;
+      if(m_primitiveType == GL_TRIANGLES)
+      {
+        if(normals.empty())//generate normals if empty
+        {
+          generateNormals(ownNormals, positions, indices);
+        }
+        else
+        {
+          ownNormals = normals;
+        }
+
+        cacheIndizes0.resize(positions.size());
+        cacheIndizes1.resize(positions.size());
+        generateCacheIndizes(positions, ownNormals, cacheIndizes0, cacheIndizes1);
+      }
 
       m_vertexDeclarationFlags |= positions.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_POSITION] : 0;
       m_vertexDeclarationFlags |= textureCoords[0].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE0] : 0;
       m_vertexDeclarationFlags |= textureCoords[1].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE1] : 0;
       m_vertexDeclarationFlags |= textureCoords[2].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE2] : 0;
       m_vertexDeclarationFlags |= textureCoords[3].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE3] : 0;
-      m_vertexDeclarationFlags |= normals.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_NORMAL] : 0;
+      m_vertexDeclarationFlags |= ownNormals.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_NORMAL] : 0;
       m_vertexDeclarationFlags |= binormals.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BINORMAL] : 0;
       m_vertexDeclarationFlags |= boneWeights.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_WEIGHTS] : 0;
       m_vertexDeclarationFlags |= boneIndices.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_INDICES] : 0;
@@ -148,9 +163,9 @@ namespace he
         lokalStride += strides[MODEL_TEXTURE0 + j];
       }
 
-      for(unsigned int i = 0; i < normals.size(); i++)
+      for(unsigned int i = 0; i < ownNormals.size(); i++)
       {
-        std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + VERTEXDECLARATIONSIZE[MODEL_NORMAL], &m_geometryData[0] + lokalStride + m_vertexStride * i);
+        std::copy((GLubyte*)&ownNormals[i], (GLubyte*)&ownNormals[i] + VERTEXDECLARATIONSIZE[MODEL_NORMAL], &m_geometryData[0] + lokalStride + m_vertexStride * i);
       }
       lokalStride += strides[MODEL_NORMAL];
 
@@ -452,7 +467,50 @@ namespace he
       return m_triangleCacheIndices;
     }
 
-    void Mesh::createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
+    void Mesh::generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices)
+    {
+      outNormals.resize(positions.size());
+
+      if(!indices.empty())
+      {
+        std::vector<std::list<util::vec3f>> normals(positions.size());
+
+        for(unsigned int i = 0; i < indices.size(); i += 3)
+        {
+          util::vec3f v0 = positions[indices[i + 0]];
+          util::vec3f v1 = positions[indices[i + 1]];
+          util::vec3f v2 = positions[indices[i + 2]];
+
+          normals[indices[i + 0]].push_back(util::math::cross(v1 - v0, v2 - v0));
+          normals[indices[i + 1]].push_back(util::math::cross(v1 - v0, v2 - v0));
+          normals[indices[i + 2]].push_back(util::math::cross(v1 - v0, v2 - v0));
+        }
+
+        for(unsigned int i = 0; i < normals.size(); i++)
+        {
+          for(std::list<util::vec3f>::iterator it = normals[i].begin(); it != normals[i].end(); it++)
+          {
+            outNormals[i] += *it;
+          }
+          outNormals[i] /= normals[i].size();
+        }
+      }
+      else
+      {
+        for(unsigned int i = 0; i < positions.size(); i += 3)
+        {
+          util::vec3f v0 = positions[i + 0];
+          util::vec3f v1 = positions[i + 1];
+          util::vec3f v2 = positions[i + 2];
+
+          outNormals[i + 0] = util::math::cross(v1 - v0, v2 - v0);
+          outNormals[i + 1] = util::math::cross(v1 - v0, v2 - v0);
+          outNormals[i + 2] = util::math::cross(v1 - v0, v2 - v0);
+        }
+      }
+    }
+
+    void Mesh::generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
     {
       const unsigned int indexNumber = 8;
 

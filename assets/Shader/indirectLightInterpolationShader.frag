@@ -11,14 +11,11 @@ layout(location = 0) uniform sampler2D depthSampler;
 layout(location = 1) uniform sampler2D normalSampler;
 layout(location = 2) uniform sampler2D materialSampler;
 
+layout(location = 3) uniform usampler2DArray cacheIndexSampler;
+
 layout(std430, binding = 0) buffer globalCacheBuffer
 {
 	CacheData caches[];
-};
-
-layout(std430, binding = 1) buffer frameCacheIndicesBuffer
-{
-	uint frameCacheIndices[];
 };
 
 layout(std430, binding = 2) buffer indirectLightDataBuffer
@@ -34,7 +31,7 @@ void main()
 {
 	vec4 tmpPos = vec4(gsout_texCoord, texture(depthSampler, gsout_texCoord).r, 1.0f);
 	
-	if(tmpPos.z == 1.0f) //discard the lighting e.g. for skybox or billboards
+	if(tmpPos.z == 1.0f) //discard the indirect lighting e.g. for skybox or billboards
 	{
 		luminousFlux = vec4(1.0f);
 		return;
@@ -51,16 +48,21 @@ void main()
 	vec3 camDir = normalize(eyePos.xyz - pos);
 	vec3 reflectCamDir = reflect(-camDir, normal);
 	
-	uint index = (uint(gl_FragCoord.x) + uint(gl_FragCoord.y) * width) * 24;
+	uint cacheIndices[24];
+	for(uint i = 0; i < 6; i++)
+	{
+		cacheIndices[(4 * i) + 0] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).x;
+		cacheIndices[(4 * i) + 1] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).y;
+		cacheIndices[(4 * i) + 2] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).z;
+		cacheIndices[(4 * i) + 3] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).w;
+	}
 	
 	float dmax = 0.0f;
 	for(uint i = 0; i < 24; i++)
 	{
-		uint cacheIndex = frameCacheIndices[index + i];
-		if(cacheIndex < INT32_MAX)
+		if(cacheIndices[i] < 300)
 		{
-			CacheData cache = caches[cacheIndex];
-			vec3 diff = pos - cache.position.xyz;
+			vec3 diff = pos - caches[cacheIndices[i]].position.xyz;
 			dmax = max(dmax, dot(diff, diff));
 		}
 	}
@@ -75,12 +77,11 @@ void main()
 	
 	for(uint i = 0; i < 24; i++)
 	{
-		uint cacheIndex = frameCacheIndices[index + i];
-		if(cacheIndex < INT32_MAX)
+		if(cacheIndices[i] < 300)
 		{
-			CacheData cache = caches[cacheIndex];
+			CacheData cache = caches[cacheIndices[i]];
 			
-			float dir = 1.0f - length(pos - cache.position.xyz) / dmax;
+			float dir = max(1.0f - length(pos - cache.position.xyz) / dmax, 0);
 			
 			float wd = dir * sqrt(max(dot(cache.normal.xyz, normal), 0));
 			
@@ -89,13 +90,13 @@ void main()
 			
 			float wg = dir * sqrt(max(dot(reflectCamCacheDir, reflectCamDir), 0));
 			
-			IndirectLightData indirectLightD = indirectLights[2 * cacheIndex + 0];
-			IndirectLightData indirectLightG = indirectLights[2 * cacheIndex + 1];
+			IndirectLightData indirectLightD = indirectLights[2 * cacheIndices[i] + 0];
+			IndirectLightData indirectLightG = indirectLights[2 * cacheIndices[i] + 1];
 			
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
 			
-			phiPD +=wd * indirectLightD.luminousFlux.xyz;
+			phiPD += wd * indirectLightD.luminousFlux.xyz;
 			phiPG += wg * indirectLightG.luminousFlux.xyz;
 			
 			wGesD += wd;
@@ -116,6 +117,6 @@ void main()
 	vec3 reflectLightDirG = reflect(-lightDirG, normal);
 	float frg = material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
 	
-	luminousFlux = vec4(float(frameCacheIndices[index]) / 299.0f, 0, 0, 1.0f);//vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)), 1.0f);
-	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)) + (frg * phiPG) / (4.0f * PI * length(pos - Xpg)), 1.0f);
+	luminousFlux = vec4(Xpd, 1);//vec4((frd * phiPD) / (4.0f * PI * length(pos - Xpd)), 1.0f);
+	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * length(Xpd - pos)),1) + (frg * phiPG) / (4.0f * PI * length(Xpg - pos)), 1.0f);
 }

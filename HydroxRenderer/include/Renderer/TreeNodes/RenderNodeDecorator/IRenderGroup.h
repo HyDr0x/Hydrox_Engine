@@ -32,6 +32,8 @@ namespace he
 
       virtual void rasterizeShadowGeometry() const = 0;
 
+      virtual void rasterizeIndexGeometry() const = 0;
+
       virtual void rasterizeGeometry() const = 0;
 
       virtual void updateBuffer() = 0;

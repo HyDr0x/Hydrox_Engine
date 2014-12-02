@@ -9,7 +9,7 @@ namespace he
 {
   namespace renderer
   {
-    OpenGLDebugLogManager::OpenGLDebugLogManager()
+    OpenGLDebugLogManager::OpenGLDebugLogManager() : m_syncedOutput(false)
     {
     }
 
@@ -59,12 +59,15 @@ namespace he
       glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &m_caps[SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT]);
     }
 
-    void OpenGLDebugLogManager::initDebugMode(bool syncedOutput) const
+    void OpenGLDebugLogManager::initDebugMode(bool syncedOutput)
     {
-      if(syncedOutput)
+      m_syncedOutput = syncedOutput;
+      if(m_syncedOutput)
       {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       }
+
+      glEnable(GL_DEBUG_OUTPUT);
     
       GLDEBUGCALLBACK callback = &getDebugMessage;
       glDebugMessageCallback(callback, nullptr);
@@ -96,11 +99,21 @@ namespace he
 
     void OpenGLDebugLogManager::enableDebugMode() const
     {
+      if(m_syncedOutput)
+      {
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+      }
+
       glEnable(GL_DEBUG_OUTPUT);
     }
 
     void OpenGLDebugLogManager::disableDebugMode() const
     {
+      if(m_syncedOutput)
+      {
+        glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+      }
+
       glDisable(GL_DEBUG_OUTPUT);
     }
 

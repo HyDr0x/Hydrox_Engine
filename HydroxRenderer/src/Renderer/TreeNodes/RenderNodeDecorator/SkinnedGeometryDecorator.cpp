@@ -36,6 +36,15 @@ namespace he
       m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
+    void SkinnedGeometryDecorator::rasterizeIndexGeometry() const
+    {
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_renderNode->rasterizeIndexGeometry();
+
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
     void SkinnedGeometryDecorator::rasterizeGeometry() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

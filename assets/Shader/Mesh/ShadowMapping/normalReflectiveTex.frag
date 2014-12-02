@@ -34,7 +34,7 @@ void main()
 	vec3 normal = normalize(vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f));
 	fsout_normal = vec4(normal * 0.5f + 0.5f, area);
 	
-	fsout_pos3D = vsout_pos;
+	fsout_pos3D = vec4(vsout_pos.xyz, 0);
 	
 	vec3 lightDir = reflectiveShadowLight[lightIndex].light.position.xyz - vsout_pos.xyz;
 	float distance = dot(lightDir, lightDir);

@@ -31,10 +31,9 @@ namespace he
       virtual bool preTraverse(TextureNode* treeNode);
       virtual void postTraverse(TextureNode* treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode* treeNode) = 0;
 
-    private:
+    protected:
 
       void doTraverseDown(TreeNode* treeNode);
 

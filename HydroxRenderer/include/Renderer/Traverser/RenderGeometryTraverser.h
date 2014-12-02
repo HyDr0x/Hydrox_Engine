@@ -41,8 +41,6 @@ namespace he
       db::MaterialManager *m_materialManager;
       db::RenderShaderManager *m_renderShaderManager;
       db::TextureManager *m_textureManager;
-
-      unsigned int m_globalCacheOffset;
     };
   }
 }

@@ -52,8 +52,8 @@ ShadowShader Name
 
 Shader Name
 ../../assets/Shader/Mesh/staticVertexColor
-../../assets/Shader/Mesh/staticVertexColor
-../../assets/Shader/Mesh/staticVertexColor
+../../assets/Shader/Mesh/vertexColor
+""
 ""
 ""
 ###################################

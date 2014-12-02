@@ -22,7 +22,7 @@ namespace he
 
       void gatherSystemInformation();
 
-      void initDebugMode(bool syncedOutput) const;
+      void initDebugMode(bool syncedOutput);
 
       void printSystemInformation() const;
       void printSupportedExtensions() const;
@@ -59,6 +59,8 @@ namespace he
         SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT,
         OPENGLCAPSNUMBER,
       };
+
+      bool m_syncedOutput;
 
       std::string m_vendorName;
       std::string m_graphicCardName;

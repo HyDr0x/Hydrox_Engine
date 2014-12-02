@@ -52,8 +52,8 @@ ShadowShader Name
 
 Shader Name
 ../../assets/Shader/Mesh/skinnedNormalTex
-../../assets/Shader/Mesh/skinnedNormalTex
-../../assets/Shader/Mesh/skinnedNormalTex
+../../assets/Shader/Mesh/normalTex
+""
 ""
 ""
 

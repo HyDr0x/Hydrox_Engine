@@ -31,41 +31,28 @@ namespace he
       virtual ~InsertGeometryTraverser();
 
       virtual bool preTraverse(GroupNode* treeNode);
-      virtual void postTraverse(GroupNode* treeNode);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
-      virtual void postTraverse(VertexDeclarationNode* treeNode);
 
       virtual bool preTraverse(ShaderNode* treeNode);
-      virtual void postTraverse(ShaderNode* treeNode);
 
       virtual bool preTraverse(TextureNode* treeNode);
-      virtual void postTraverse(TextureNode* treeNode);
-
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
-
-      util::SharedPointer<IRenderGroup> getCreatedRenderNode() const;
 
     protected:
 
-      void createNewChildNode(TreeNode* parent);
       void createNewChildNode(GroupNode* parent);
-      void createNewChildNode(VertexDeclarationNode* parent);
       void createNewChildNode(ShaderNode* parent);
       void createNewChildNode(TextureNode* parent);
+      virtual void createNewChildNode(VertexDeclarationNode* parent) = 0;
 
-      void createNewSibling(TreeNode* sibling);
       void createNewSibling(ShaderNode* parent);
       void createNewSibling(VertexDeclarationNode* parent);
       void createNewSibling(TextureNode* sibling);
-      void createNewSibling(RenderNode* sibling);
+      virtual void createNewSibling(RenderNode* sibling) = 0;
 
       util::SingletonManager *m_singletonManager;
 
       const xBar::IGeometryContainer& m_geometryContainer;
-
-      util::SharedPointer<IRenderGroup> m_createdRenderGroup;
 
       util::Flags<xBar::RenderNodeType> m_nodeType;
       GLenum m_primitiveType;

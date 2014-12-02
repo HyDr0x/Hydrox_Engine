@@ -13,8 +13,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager) :
-      m_globalCacheOffset(0)
+    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
@@ -28,8 +27,6 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(GroupNode* treeNode)
     {
-      m_globalCacheOffset = 0;//reset global cache offset counter
-
       return true;
     }
 
@@ -97,11 +94,7 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_globalCacheOffset);
-
       treeNode->getRenderGroup()->rasterizeGeometry();
-
-      m_globalCacheOffset += treeNode->getRenderGroup()->getCacheNumber();//need to be increased with cache number per node
 
       return true;
     }

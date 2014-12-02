@@ -45,7 +45,7 @@ namespace he
         util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const;
 
-      void setBuffer() const;
+      void setBuffer(util::SharedPointer<db::Texture2D> depthTexture);
       void unsetBuffer() const;
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
@@ -60,12 +60,13 @@ namespace he
       util::SingletonManager *m_singletonManager;
 
       GPUBuffer m_indirectLightDataBuffer;//the indirect light for the interpolation
-      GPUBuffer m_frameCacheIndexBuffer;//saves all 24 indices per pixel of the frame buffer
       GPUBuffer m_globalCacheBuffer;//saves all caches of the scene
       GPUBuffer m_zBuffer;//uints 0 = cache is not being used, 1 = cache is being 
 
+      Renderquad m_indirectLightIndicesRenderQuad;
       Renderquad m_indirectLightRenderQuad;
 
+      util::SharedPointer<db::Texture3D> m_frameCacheIndexMap;//saves all 24 indices per pixel of the frame buffer
       util::SharedPointer<db::Texture2D> m_indirectLightMap;
 
       util::ResourceHandle m_indirectLightShaderHandle;

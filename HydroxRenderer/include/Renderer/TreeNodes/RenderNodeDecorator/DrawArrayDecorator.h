@@ -44,6 +44,8 @@ namespace he
 
       virtual void rasterizeShadowGeometry() const;
 
+      virtual void rasterizeIndexGeometry() const;
+
       virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();
@@ -62,6 +64,7 @@ namespace he
       GPUImmutableBuffer m_bboxesBuffer;
       GPUImmutableBuffer m_commandBuffer;
       GPUImmutableBuffer m_meshInstanceBufferIndex;
+      GPUImmutableBuffer m_cacheInstanceOffsetBuffer;//the per instance offset for the global cache index
       GPUImmutableBuffer m_triangleIndexOffsetBuffer;//has the offsets into the triangleBuffer for the specific mesh
       GPUImmutableBuffer m_cacheOffsetBuffer;//has the offsets into the cacheBuffer for the specific mesh
       GPUImmutableBuffer m_triangleBuffer;//has the indices into the cacheBuffer for the triangle
@@ -76,6 +79,7 @@ namespace he
       unsigned int m_vboSize;
       unsigned int m_triangleNumber;
       unsigned int m_cacheNumber;
+      unsigned int m_perInstanceCacheNumber;
 
       std::map<util::ResourceHandle, ArrayGeometry, Less> m_meshes;
     };

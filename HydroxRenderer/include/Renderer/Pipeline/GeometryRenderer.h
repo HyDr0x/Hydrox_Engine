@@ -31,6 +31,7 @@ namespace he
       SHADOWPASS,
       REFLECTIVESHADOWPASS,
       VIEWPASS,
+      INDEXPASS,
     };
 
     class GeometryRenderer
@@ -46,9 +47,9 @@ namespace he
 
       void frustumCulling(int shadowMapIndex, RenderPass pass);
 
-      void generateShadowMap(int shadowMapIndex);
+      void generateShadowMap(int shadowMapIndex, RenderPass pass);
 
-      void generateReflectiveShadowMap(int shadowMapIndex);
+      void rasterizeIndexGeometry();
 
       void rasterizeGeometry();
 
@@ -70,6 +71,7 @@ namespace he
       unsigned int m_globalCacheNumber;
       
       GroupNode *m_renderRootNode;
+      GroupNode *m_renderIndexRootNode;
       GroupNode *m_renderShadowRootNode;
       GroupNode *m_renderReflectiveShadowRootNode;
 

@@ -55,7 +55,10 @@ namespace he
 
       void resizeRenderWindow(unsigned int width, unsigned int height);
 
-      void setBackfaceCulling(GLenum cullingMode) const;
+      void setWindingOrder(GLenum windingOrder) const;
+
+      void enableBackfaceCulling(GLenum cullMode);
+      void disableBackfaceCulling();
 
       void setWireframe(bool wireFrame);
 
@@ -109,6 +112,9 @@ namespace he
       FinalCompositing m_finalCompositing;
 
       GLfloat m_aspectRatio;
+
+      GLenum m_cullMode;
+      bool m_cullModeNotBack;
 
       bool m_skyboxRendering;
       bool m_wireframe;

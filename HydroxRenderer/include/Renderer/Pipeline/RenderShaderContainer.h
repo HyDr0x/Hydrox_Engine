@@ -24,6 +24,8 @@ namespace he
       he::util::ResourceHandle particleShaderHandle;
       he::util::ResourceHandle offscreenBufferShaderHandle;
       he::util::ResourceHandle directLightShaderHandle;
+      he::util::ResourceHandle staticIndexShaderHandle;
+      he::util::ResourceHandle skinnedIndexShaderHandle;
       he::util::ResourceHandle indirectLightShaderHandle;
       he::util::ResourceHandle indirectLightInterpolationShaderHandle;
       he::util::ResourceHandle combineShaderHandle;

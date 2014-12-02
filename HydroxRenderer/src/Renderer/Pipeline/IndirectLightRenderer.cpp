@@ -29,12 +29,13 @@ namespace he
       m_indirectLightShaderHandle = singletonManager->getService<RenderShaderContainer>()->indirectLightShaderHandle;
       m_indirectLightInterpolationShaderHandle = singletonManager->getService<RenderShaderContainer>()->indirectLightInterpolationShaderHandle;
 
-      m_frameCacheIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->width * m_options->height * 6 * sizeof(util::vec4ui), 0, GL_STATIC_DRAW, nullptr);
       m_globalCacheBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 1 * sizeof(util::Cache), 0, GL_STATIC_DRAW, nullptr);
       m_zBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 1 * sizeof(GLuint), 0, GL_STATIC_DRAW, nullptr);
       m_indirectLightDataBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 1 * sizeof(IndirectLight), 0, GL_STATIC_DRAW, nullptr);
 
-      m_indirectLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));
+      m_frameCacheIndexMap = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->width, m_options->height, 6, GL_TEXTURE_2D_ARRAY, GL_UNSIGNED_INT, GL_RGBA32UI, GL_RGBA_INTEGER, 4, 128));
+      
+      m_indirectLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
 
       m_indirectLightRenderQuad.setRenderTargets(1, m_indirectLightMap);
     }
@@ -58,7 +59,22 @@ namespace he
       util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
       util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const
     {
+      //std::vector<util::vec4f> luminousData(m_options->shadowMapWidth * m_options->shadowMapWidth);
+      //reflectiveShadowPosMaps->convertToTexture2D(0)->getTextureData(&luminousData[0]);
+
+      //int ggg = 0;
+      //for(unsigned int i = 0; i < m_options->shadowMapWidth * m_options->shadowMapWidth; i++)
+      //{
+      //  if(luminousData[i][0] < -3)
+      //  {
+      //    util::vec4f ttt = luminousData[i];
+      //    ggg++;
+      //  }
+      //}
+
       db::ComputeShader *computeShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_indirectLightShaderHandle);
+
+      glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
       computeShader->useShader();
 
@@ -73,9 +89,6 @@ namespace he
 
       db::RenderShader::setUniform(6, GL_UNSIGNED_INT, &m_cacheNumber);
       db::RenderShader::setUniform(7, GL_UNSIGNED_INT, &m_options->unusedLightIndirectNumber);
-
-      //std::vector<util::vec4f> luminousData(m_options->shadowMapWidth * m_options->shadowMapWidth);
-      //reflectiveShadowLuminousFluxMaps->getTextureData(&luminousData[0]);
 
       reflectiveShadowPosMaps->setTexture(0, 0);
       reflectiveShadowNormalMaps->setTexture(1, 1);
@@ -96,6 +109,8 @@ namespace he
       reflectiveShadowPosMaps->unsetTexture();
 
       computeShader->useNoShader();
+      
+      glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
       //std::vector<util::Cache> caches(m_cacheNumber);
       //m_globalCacheBuffer.getData(0, sizeof(util::Cache) * m_cacheNumber, &caches[0]);
@@ -115,16 +130,18 @@ namespace he
       depthMap->setTexture(0, 0);
       normalMap->setTexture(1, 1);
       materialMap->setTexture(2, 2);
+      
+      m_frameCacheIndexMap->setTexture(3, 3);
 
       m_globalCacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-      m_frameCacheIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_indirectLightDataBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
       m_indirectLightRenderQuad.render();
 
       m_indirectLightDataBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
-      m_frameCacheIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_globalCacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_frameCacheIndexMap->unsetTexture();
 
       materialMap->unsetTexture();
       normalMap->unsetTexture();
@@ -146,45 +163,63 @@ namespace he
       //}
     }
 
-    void IndirectLightRenderer::setBuffer() const
+      void IndirectLightRenderer::setBuffer(util::SharedPointer<db::Texture2D> depthTexture)
     {
+      m_indirectLightIndicesRenderQuad.setRenderTargets3D(depthTexture, 1, m_frameCacheIndexMap);
+
       GLuint zeros = 0;
       m_zBuffer.clearBuffer(GL_RED, GL_R32UI, GL_UNSIGNED_INT, &zeros);
-      //util::vec4ui negativeZeros(~0, ~0, ~0, ~0);
-      util::vec4ui negativeZeros(0, 0, 0, 0);
-      m_frameCacheIndexBuffer.clearBuffer(GL_RGBA, GL_RGBA32UI, GL_UNSIGNED_INT, &negativeZeros[0]);
+
+      util::vec4ui negativeZeros(UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX);
+      m_indirectLightIndicesRenderQuad.clearTargets(1.0f, std::vector<util::vec4ui>(6, negativeZeros), false);
+
+      m_indirectLightIndicesRenderQuad.setWriteFrameBuffer();
 
       m_globalCacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
-      m_frameCacheIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
-      m_zBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_zBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
     }
 
     void IndirectLightRenderer::unsetBuffer() const
     {
-      m_zBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
-      m_frameCacheIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_zBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
       m_globalCacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+
+      m_indirectLightIndicesRenderQuad.unsetWriteFrameBuffer();
 
       //std::vector<GLuint> zBuff(m_cacheNumber);
       //m_zBuffer.getData(0, sizeof(GLuint) * m_cacheNumber, &zBuff[0]);
 
       //unsigned int tz = 0;
-      //std::vector<util::vec4ui> frIndex(m_options->width * m_options->height * 6);
-      //m_frameCacheIndexBuffer.getData(0, m_options->width * m_options->height * 6 * sizeof(util::vec4ui), &frIndex[0]);
-      //for(unsigned int i = 0; i < m_options->width * m_options->height * 6; i++)
+      //std::vector<util::vec4f> frIndex(m_options->width * m_options->height);
+      //m_frameCacheIndexMap->convertToTexture2D(0)->getTextureData(&frIndex[0]);
+      //for(unsigned int i = 0; i < m_options->width * m_options->height; i++)
       //{
-      //  //if(frIndex[i][0] > 2 && frIndex[i][1] < 10)
+      //  if(frIndex[i][1] > 0 && frIndex[i][1] < INT32_MAX)
       //  {
       //    tz++;
-      //    util::vec4ui ttt = frIndex[i];
+      //    util::vec4f ttt = frIndex[i];
       //    int g = 3;
       //  }
       //}
-      /*for(unsigned int i = 0; i < m_options->width * m_options->height * 6; i++)
+      /*
+      std::vector<util::vec4ui> frIndex(m_options->width * m_options->height * 6);
+      std::vector<util::vec4ui> tmpFrIndex(m_options->width * m_options->height);
+      for(unsigned int i = 0; i < 6; i++)
       {
-        if(frIndex[i][0] < INT32_MAX - 1 || frIndex[i][1] < INT32_MAX - 1 || frIndex[i][2] < INT32_MAX - 1 || frIndex[i][3] < INT32_MAX - 1)
+        m_frameCacheIndexMap->convertToTexture2D(i)->getTextureData(&tmpFrIndex[0]);
+
+        for(unsigned int j = 0; j < m_options->width * m_options->height; j++)
         {
-          util::vec4ui t = frIndex[i];
+          frIndex[i + 6 * j] = tmpFrIndex[j];
+        }
+      }
+
+      for(unsigned int i = 0; i < m_options->width * m_options->height; i++)
+      {
+        //if(frIndex[i][0] < INT32_MAX - 1 || frIndex[i][1] < INT32_MAX - 1 || frIndex[i][2] < INT32_MAX - 1 || frIndex[i][3] < INT32_MAX - 1)
+        if(frIndex[i][0] > 0 || frIndex[i][1] > 0 || frIndex[i][2] > 0 || frIndex[i][3] > 0)
+        {
+          util::vec4ui t = util::math::vector_cast<unsigned int>(frIndex[i * 6]);
         }
 
         if(i >= 3072)
@@ -192,7 +227,7 @@ namespace he
           util::vec4ui v[6];
           for(unsigned int j = 0; j < 6; j++)
           {
-            v[j] = frIndex[i + j];
+            v[j] = util::math::vector_cast<unsigned int>(frIndex[i * 6 + j]);
           }
 
           util::Vector<bool, 4> bitMask;
@@ -214,8 +249,8 @@ namespace he
             v[j] *= util::math::vector_cast<unsigned int>(bitMask);
           }
         }
-      }
-*/
+      }*/
+
       //std::vector<util::Cache> caches(m_cacheNumber);
       //m_globalCacheBuffer.getData(0, sizeof(util::Cache) * m_cacheNumber, &caches[0]);
     }
@@ -223,6 +258,7 @@ namespace he
     util::SharedPointer<db::Texture2D> IndirectLightRenderer::getIndirectLightMap() const
     {
       return m_indirectLightMap;
+      //return m_frameCacheIndexMap->convertToTexture2D(0);
     }
   }
 }

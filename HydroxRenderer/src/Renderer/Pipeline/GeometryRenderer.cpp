@@ -4,13 +4,18 @@
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
-#include "Renderer/Traverser/InsertGeometryTraverser.h"
-#include "Renderer/Traverser/InsertShadowGeometryTraverser.h"
-#include "Renderer/Traverser/InsertReflectiveShadowGeometryTraverser.h"
-#include "Renderer/Traverser/RemoveGeometryTraverser.h"
-#include "Renderer/Traverser/RemoveShadowGeometryTraverser.h"
-#include "Renderer/Traverser/RemoveReflectiveShadowGeometryTraverser.h"
+#include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
+#include "Renderer/Traverser/InsertGeometryTraverserIndexPass.h"
+#include "Renderer/Traverser/InsertGeometryTraverserShadowPass.h"
+#include "Renderer/Traverser/InsertGeometryTraverserReflectiveShadowPass.h"
+
+#include "Renderer/Traverser/RemoveGeometryTraverserRenderPass.h"
+#include "Renderer/Traverser/RemoveGeometryTraverserIndexPass.h"
+#include "Renderer/Traverser/RemoveGeometryTraverserShadowPass.h"
+#include "Renderer/Traverser/RemoveGeometryTraverserReflectiveShadowPass.h"
+
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
+#include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
 #include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
 #include "Renderer/Traverser/FrustumCullingTraverser.h"
 #include "Renderer/Traverser/UpdateTraverser.h"
@@ -25,8 +30,9 @@ namespace he
 {
   namespace renderer
   {
-    GeometryRenderer::GeometryRenderer() : 
-      m_renderRootNode(nullptr), 
+    GeometryRenderer::GeometryRenderer() :
+      m_renderRootNode(nullptr),
+      m_renderIndexRootNode(nullptr),
       m_renderShadowRootNode(nullptr), 
       m_renderReflectiveShadowRootNode(nullptr),
       m_globalCacheNumber(0)
@@ -36,6 +42,7 @@ namespace he
     GeometryRenderer::~GeometryRenderer()
     {
       delete m_renderRootNode;
+      delete m_renderIndexRootNode;
       delete m_renderShadowRootNode;
       delete m_renderReflectiveShadowRootNode;
     }
@@ -54,6 +61,7 @@ namespace he
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
       m_renderRootNode = new GroupNode();
+      m_renderIndexRootNode = new GroupNode();
       m_renderShadowRootNode = new GroupNode();
       m_renderReflectiveShadowRootNode = new GroupNode();
 
@@ -66,20 +74,26 @@ namespace he
     {
       m_globalCacheNumber += m_singletonManager->getService<db::ModelManager>()->getObject(geometry.getMeshHandle())->getCacheCount();
 
-      InsertGeometryTraverser insertTraverser(geometry, m_singletonManager);
+      InsertGeometryTraverserRenderPass insertTraverser(geometry, m_singletonManager);
       insertTraverser.doTraverse(m_renderRootNode);
 
       util::SharedPointer<IRenderGroup> createdRenderGroup = insertTraverser.getCreatedRenderNode();
 
       if(createdRenderGroup)
       {
-        InsertShadowGeometryTraverser insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
+        InsertGeometryTraverserIndexPass insertIndexTraverser(createdRenderGroup, geometry, m_singletonManager, 
+          m_container->staticIndexShaderHandle,
+          m_container->skinnedIndexShaderHandle);
+
+        insertIndexTraverser.doTraverse(m_renderIndexRootNode);
+
+        InsertGeometryTraverserShadowPass insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
           m_container->staticShadowMapGenerationShaderHandle,
           m_container->skinnedShadowMapGenerationShaderHandle);
 
         insertShadowTraverser.doTraverse(m_renderShadowRootNode);
 
-        InsertReflectiveShadowGeometryTraverser insertReflectiveShadowTraverser(createdRenderGroup, geometry, m_singletonManager, m_container);
+        InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser(createdRenderGroup, geometry, m_singletonManager);
 
         insertReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
       }
@@ -89,16 +103,22 @@ namespace he
     {
       m_globalCacheNumber -= m_singletonManager->getService<db::ModelManager>()->getObject(geometry.getMeshHandle())->getCacheCount();
 
-      RemoveGeometryTraverser removeTraverser(m_singletonManager, geometry);
+      RemoveGeometryTraverserRenderPass removeTraverser(m_singletonManager, geometry);
       removeTraverser.doTraverse(m_renderRootNode);
 
-      RemoveShadowGeometryTraverser removeShadowTraverser(m_singletonManager, geometry, 
+      RemoveGeometryTraverserIndexPass removeIndexTraverser(m_singletonManager, geometry,
+        m_container->staticIndexShaderHandle,
+        m_container->skinnedIndexShaderHandle);
+
+      removeIndexTraverser.doTraverse(m_renderIndexRootNode);
+
+      RemoveGeometryTraverserShadowPass removeShadowTraverser(m_singletonManager, geometry,
         m_container->staticShadowMapGenerationShaderHandle,
         m_container->skinnedShadowMapGenerationShaderHandle);
 
       removeShadowTraverser.doTraverse(m_renderShadowRootNode);
 
-      RemoveReflectiveShadowGeometryTraverser removeReflectiveShadowTraverser(m_singletonManager, geometry, m_container);
+      RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser(m_singletonManager, geometry);
 
       removeReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
     }
@@ -107,8 +127,9 @@ namespace he
     {
       UpdateTraverser updateTraverser;
       updateTraverser.doTraverse(m_renderRootNode);
-      updateTraverser.doTraverse(m_renderShadowRootNode);
-      updateTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+      //updateTraverser.doTraverse(m_renderIndexRootNode);
+      //updateTraverser.doTraverse(m_renderShadowRootNode);
+      //updateTraverser.doTraverse(m_renderReflectiveShadowRootNode);
     }
 
     void GeometryRenderer::frustumCulling(int shadowMapIndex, RenderPass pass)
@@ -135,16 +156,25 @@ namespace he
       frustumCullingShader->useNoShader();
     }
 
-    void GeometryRenderer::generateShadowMap(int shadowMapIndex)
+    void GeometryRenderer::generateShadowMap(int shadowMapIndex, RenderPass pass)
     {
       RenderShadowGeometryTraverser renderShadowTraverser(m_singletonManager, shadowMapIndex);
-      renderShadowTraverser.doTraverse(m_renderShadowRootNode);
+
+      switch(pass)
+      {
+      case SHADOWPASS:
+        renderShadowTraverser.doTraverse(m_renderShadowRootNode);
+        break;
+      case REFLECTIVESHADOWPASS:
+        renderShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+        break;
+      }
     }
 
-    void GeometryRenderer::generateReflectiveShadowMap(int shadowMapIndex)
+    void GeometryRenderer::rasterizeIndexGeometry()
     {
-      RenderShadowGeometryTraverser renderShadowTraverser(m_singletonManager, shadowMapIndex);
-      renderShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+      RenderIndexGeometryTraverser renderIndexTraverser(m_singletonManager);
+      renderIndexTraverser.doTraverse(m_renderIndexRootNode);
     }
 
     void GeometryRenderer::rasterizeGeometry()

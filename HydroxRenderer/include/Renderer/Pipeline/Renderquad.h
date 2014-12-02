@@ -36,7 +36,8 @@ namespace he
 
       virtual void render() const;
 
-      void clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors) const;
+      void clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors, bool clearDepth) const;
+      void clearTargets(GLfloat clearDepthValue, std::vector<util::vec4ui>& clearColors, bool clearDepth) const;
       void clearTargets(GLfloat clearDepthValue, util::vec4f clearColor, std::vector<unsigned int> indices = std::vector<unsigned int>()) const;
 
     private:

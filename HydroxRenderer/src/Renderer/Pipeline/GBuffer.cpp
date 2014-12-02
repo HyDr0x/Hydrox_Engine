@@ -79,7 +79,7 @@ namespace he
 
     void GBuffer::clear() const
     {
-      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::vec4f>(4, m_clearColor));
+      m_fullscreenRenderQuad.clearTargets(1.0f, std::vector<util::vec4f>(4, m_clearColor), true);
     }
   }
 }

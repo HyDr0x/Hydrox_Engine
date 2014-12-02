@@ -18,15 +18,11 @@ layout(location = NORMAL) in vec3 in_normal;
 layout(location = BINORMAL) in vec3 in_binormal;
 layout(location = BONEWEIGHTS) in vec4 in_boneWeights;
 layout(location = BONEINDICES) in vec4 in_boneIndices;
-layout(location = CACHEINDICES0) in vec4 in_cacheIndices0;
-layout(location = CACHEINDICES1) in vec4 in_cacheIndices1;
 
 out mat4 vsout_skinningMatrix;
 out vec3 vsout_pos3D;
 out vec2 vsout_texCoord;
 out mat3 vsout_tangentToWorld;
-out vec4 vsout_cacheIndices0;
-out vec4 vsout_cacheIndices1;
 out uint vsout_instanceIndex;
 
 void main()
@@ -50,8 +46,6 @@ void main()
 	
 	//vsout_tangentToWorld = inverse(transpose(vsout_tangentToWorld));
 
-	vsout_cacheIndices0 = in_cacheIndices0;
-	vsout_cacheIndices1 = in_cacheIndices1;
 	vsout_pos3D = in_Pos;
 	vsout_texCoord = in_texCoord;
 	gl_Position = viewProjectionMatrix * vsout_skinningMatrix * vec4(in_Pos, 1.0f);

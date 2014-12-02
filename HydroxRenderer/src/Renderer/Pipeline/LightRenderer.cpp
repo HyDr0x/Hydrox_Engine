@@ -93,8 +93,6 @@ namespace he
 
     void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
     {
-      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::vec4f>(1, util::vec4f(0, 0, 0, 0)));
-
       db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_directLightShaderHandle);
 
       shader->useShader();
@@ -159,7 +157,8 @@ namespace he
       texturendices[0] = shadowMapIndex;
       texturendices[1] = shadowMapIndex + m_reflectiveShadowLights.size();
       texturendices[2] = shadowMapIndex + 2 * m_reflectiveShadowLights.size();
-      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::vec4f::identity(), texturendices);
+      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::vec4f(2047, 2047, 2047, 1), texturendices);
+
       m_renderReflectiveShadowMapsQuad.setWriteFrameBuffer(texturendices);
       m_reflectiveShadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
     }
@@ -250,7 +249,7 @@ namespace he
 
     void LightRenderer::clear() const
     {
-      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::vec4f>(1, util::vec4f(1.0f, 1.0f, 1.0f, 1.0f)));
+      m_renderLightMapQuad.clearTargets(1.0f, std::vector<util::vec4f>(1, util::vec4f(0.0f, 0.0f, 0.0f, 0.0f)), false);
     }
 
     unsigned int LightRenderer::getShadowLightNumber() const

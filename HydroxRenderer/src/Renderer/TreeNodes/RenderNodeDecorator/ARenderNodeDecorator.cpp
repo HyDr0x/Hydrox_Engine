@@ -1,8 +1,5 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
 
-#include "Renderer/Traverser/ConstTraverser.h"
-#include "Renderer/Traverser/InsertShadowGeometryTraverser.h"
-
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
@@ -67,6 +64,11 @@ namespace he
     void ARenderNodeDecorator::rasterizeShadowGeometry() const
     {
       m_renderNode->rasterizeShadowGeometry();
+    }
+
+    void ARenderNodeDecorator::rasterizeIndexGeometry() const
+    {
+      m_renderNode->rasterizeIndexGeometry();
     }
 
     void ARenderNodeDecorator::rasterizeGeometry() const

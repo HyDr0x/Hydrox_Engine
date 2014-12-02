@@ -277,15 +277,29 @@ namespace he
       glDisableVertexAttribArray(db::RenderShader::SPECIAL0);
     }
 
-    void Renderquad::clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors) const
+    void Renderquad::clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors, bool clearDepth) const
     {
       setWriteFrameBuffer();
 
-      glClearBufferfv(GL_DEPTH, 0, &clearDepthValue);
+      if(clearDepth) glClearBufferfv(GL_DEPTH, 0, &clearDepthValue);
 
       for(unsigned int i = 0; i < clearColors.size(); i++)
       {
         glClearBufferfv(GL_COLOR, i, &clearColors[i][0]);
+      }
+
+      unsetWriteFrameBuffer();
+    }
+
+    void Renderquad::clearTargets(GLfloat clearDepthValue, std::vector<util::vec4ui>& clearColors, bool clearDepth) const
+    {
+      setWriteFrameBuffer();
+
+      if(clearDepth) glClearBufferfv(GL_DEPTH, 0, &clearDepthValue);
+
+      for(unsigned int i = 0; i < clearColors.size(); i++)
+      {
+        glClearBufferuiv(GL_COLOR, i, &clearColors[i][0]);
       }
 
       unsetWriteFrameBuffer();

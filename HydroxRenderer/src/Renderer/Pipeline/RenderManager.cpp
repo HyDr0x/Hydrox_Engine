@@ -33,22 +33,33 @@ namespace he
       glViewport(0, 0, width, height);
     }
 
-    void RenderManager::setBackfaceCulling(GLenum cullingMode) const
+    void RenderManager::setWindingOrder(GLenum windingOrder) const
     {
-      glFrontFace(cullingMode);
+      glFrontFace(windingOrder);
+    }
+
+    void RenderManager::enableBackfaceCulling(GLenum cullMode)
+    {
+      glEnable(GL_CULL_FACE);
+
+      m_cullMode = cullMode;
+
+      m_cullModeNotBack = false;
+      if(m_cullMode != GL_BACK)
+      {
+        m_cullModeNotBack = true;
+      }
+    }
+
+    void RenderManager::disableBackfaceCulling()
+    {
+      glDisable(GL_CULL_FACE);
+      m_cullModeNotBack = false;
     }
 
     void RenderManager::setWireframe(bool wireFrame)
     {
       m_wireframe = wireFrame;
-      if(wireFrame)
-      {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      }
-      else
-      {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      }
     }
 
     void RenderManager::enableSkybox(util::ResourceHandle skyboxTextureHandles[6])
@@ -120,18 +131,22 @@ namespace he
         m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
 
         m_gBuffer.setGBuffer();
-        m_indirectLightRenderer.setBuffer();
-
         m_geometryRasterizer.rasterizeGeometry();
-
-        m_indirectLightRenderer.unsetBuffer();
         m_gBuffer.unsetGBuffer();
+
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(GL_FALSE);
+        m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
+        m_geometryRasterizer.rasterizeIndexGeometry();
+        m_indirectLightRenderer.unsetBuffer();
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
         if(m_wireframe)
         {
           glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-
+        
         m_lightRenderer.updateBuffer();
         
         glEnable(GL_POLYGON_OFFSET_FILL);
@@ -141,7 +156,7 @@ namespace he
         {
           m_lightRenderer.setShadowMap(4, i);
           m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
-          m_geometryRasterizer.generateShadowMap(i);
+          m_geometryRasterizer.generateShadowMap(i, SHADOWPASS);
           m_lightRenderer.unsetShadowMap(4);
         }
 
@@ -149,14 +164,14 @@ namespace he
         {
           m_lightRenderer.setReflectiveShadowMap(4, i);
           m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
-          m_geometryRasterizer.generateReflectiveShadowMap(i);
+          m_geometryRasterizer.generateShadowMap(i, REFLECTIVESHADOWPASS);
           m_lightRenderer.unsetReflectiveShadowMap(4);
         }
         glViewport(0, 0, m_options->width, m_options->height);
         glDisable(GL_POLYGON_OFFSET_FILL);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
-
+        
         m_indirectLightRenderer.calculateIndirectLight(
           m_gBuffer.getDepthTexture(), 
           m_gBuffer.getNormalTexture(), 
@@ -164,29 +179,40 @@ namespace he
           m_lightRenderer.getReflectiveShadowPosMaps(),
           m_lightRenderer.getReflectiveShadowNormalMaps(),
           m_lightRenderer.getReflectiveShadowLuminousFluxMaps());
-
+        
         m_gBuffer.setGBuffer();
 
         m_billboardRenderer.render();
 
         if(m_skyboxRendering)     
         {
+          if(m_cullModeNotBack)
+          {
+            glCullFace(GL_BACK);
+          }
+
           m_skyboxRenderer.render();
+
+          if(m_cullModeNotBack)
+          {
+            glCullFace(m_cullMode);
+          }
         }
 
         m_gBuffer.unsetGBuffer();
       }
-
-      //m_gBuffer.getNormalTexture();
-      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0);
-      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0);
-      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0);
-      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0);
+      
+      //m_gBuffer.getColorTexture()
+      //m_gBuffer.getNormalTexture()
+      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)
+      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
+      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
+      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       m_finalCompositing.composeImage(m_indirectLightRenderer.getIndirectLightMap(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
       
       m_spriteRenderer.render();
       m_stringRenderer.render();
-
+      
       m_cameraParameterUBO.unBindBuffer(0);
     }
 

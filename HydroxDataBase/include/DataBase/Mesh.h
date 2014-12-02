@@ -50,8 +50,8 @@ namespace he
       Mesh();
       Mesh(GLenum primitiveType,
            const std::vector<util::vec3f>& positions, 
-           const std::vector<util::Cache>& caches,
-           const std::vector<util::vec2ui>& triangleCacheIndices,
+           const std::vector<util::Cache>& caches = std::vector<util::Cache>(),
+           const std::vector<util::vec2ui>& triangleCacheIndices = std::vector<util::vec2ui>(),
            const std::vector<indexType>& indices = std::vector<indexType>(),
            const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
            const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
@@ -115,8 +115,10 @@ namespace he
       static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 
     private:
+
+      void generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices);
       //invalid indices are marked as 0
-      void createCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
+      void generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
 
       AABB m_boundingVolume;
 
