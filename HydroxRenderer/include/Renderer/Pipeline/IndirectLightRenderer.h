@@ -50,12 +50,15 @@ namespace he
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
+      GPUBuffer& getIndirectLightsBuffer();
+      GPUBuffer& getGlobalCacheBuffer();
+
     private:
       
       IndirectLightRenderer(const IndirectLightRenderer&);
       IndirectLightRenderer& operator=(const IndirectLightRenderer&);
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       util::SingletonManager *m_singletonManager;
 

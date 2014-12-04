@@ -58,7 +58,7 @@ namespace he
       void updatePerMeshBuffer();
       void updatePerInstanceBuffer();
 
-      db::ModelManager *m_modelManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
 
       //per mesh buffer
       GPUImmutableBuffer m_meshVertexBuffer;

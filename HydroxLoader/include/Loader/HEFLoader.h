@@ -37,7 +37,7 @@ namespace he
     private:
 
       void readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager);
-      void read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::EventManager *eventManager);
+      void read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::SharedPointer<util::EventManager> eventManager);
 
       float m_errorRate;
       float m_maxDistance;

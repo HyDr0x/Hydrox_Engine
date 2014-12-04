@@ -8,6 +8,7 @@
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Signals/EventManager.h>
+#include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "Renderer/DLLExport.h"
@@ -28,7 +29,7 @@ namespace he
     {
     public:
 
-      StringTexture2D(util::EventManager *eventManager, const Font& font, const std::string& text, float width, float height);
+      StringTexture2D(util::SharedPointer<util::EventManager> eventManager, const Font& font, const std::string& text, float width, float height);
       StringTexture2D(const StringTexture2D& other);
       ~StringTexture2D();
 
@@ -78,7 +79,7 @@ namespace he
 
       void fillBuffer(std::string text, float width, float height);
 
-      util::EventManager *m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       Font m_font;
 

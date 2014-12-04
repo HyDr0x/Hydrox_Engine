@@ -20,7 +20,7 @@ namespace he
     public:
 
       BillboardNode(){}
-      BillboardNode(util::EventManager *eventManager, util::ResourceHandle textureHandle, util::vec2ui animNumber, util::vec2f texStart, util::vec2f texEnd, 
+      BillboardNode(util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle textureHandle, util::vec2ui animNumber, util::vec2f texStart, util::vec2f texEnd,
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       BillboardNode(const BillboardNode& sourceNode);
       BillboardNode(const TreeNode& sourceNode);
@@ -75,12 +75,12 @@ namespace he
       void setRenderable(bool renderable);
       bool getRenderable() const;
 
-      virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
+      virtual void read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
       virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
 
     private:
 
-      util::EventManager *m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       util::vec2ui m_animNumber;
       util::vec2ui m_currentFrame;

@@ -66,9 +66,9 @@ namespace he
       Scene::removeNode(node);
     }
 
-    NodeIndex RenderScene::addSubTree(Scene& subScene, NodeIndex sceneNode, const util::vec3f& cameraPosition, std::string namePrefix)
+    NodeIndex RenderScene::addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix)
     {
-      NodeIndex copiedRootNodeIndex = Scene::addSubTree(subScene, sceneNode, cameraPosition, namePrefix);
+      NodeIndex copiedRootNodeIndex = Scene::addSubTree(subTree, parentNodeIndex, cameraPosition, namePrefix);
 
       TreeNode& copiedRootNode = getNode<TreeNode>(copiedRootNodeIndex);
 

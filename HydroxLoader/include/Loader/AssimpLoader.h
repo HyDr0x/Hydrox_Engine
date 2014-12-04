@@ -82,12 +82,12 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      util::EventManager *m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
-      db::ModelManager *m_modelManager;
-      db::MaterialManager *m_materialManager;
-      db::TextureManager *m_textureManager;
-      db::RenderShaderManager *m_renderShaderManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
+      util::SharedPointer<db::MaterialManager> m_materialManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
 
       util::PointCloudGenerator m_generator;
 

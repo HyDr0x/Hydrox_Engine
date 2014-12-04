@@ -198,7 +198,7 @@ namespace he
       return m_globalCacheNumber;
     }
 
-    void GeometryRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
+    void GeometryRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void(*)(const xBar::IGeometryContainer &geometry)>(util::EventManager::OnAddGeometryNode);
       eventManager->addSlotToSignal<GeometryRenderer, void(*)(const xBar::IGeometryContainer &geometry), void (GeometryRenderer::*)(const xBar::IGeometryContainer &geometry)>(this, &GeometryRenderer::addRenderComponent, util::EventManager::OnAddGeometryNode);

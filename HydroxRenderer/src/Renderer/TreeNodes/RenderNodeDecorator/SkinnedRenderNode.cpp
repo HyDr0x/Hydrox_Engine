@@ -12,7 +12,7 @@ namespace he
 {
   namespace renderer
   {
-    SkinnedRenderNode::SkinnedRenderNode(RenderOptions *options) :
+    SkinnedRenderNode::SkinnedRenderNode(util::SharedPointer<RenderOptions> options) :
       m_options(options),
       m_instanceNumberChanged(false)
     {

@@ -77,6 +77,25 @@ namespace he
     {
       m_singletonManager = singletonManager;
 
+      db::Material::MaterialData data;
+      data.ambientStrength = 0.1f;
+      data.diffuseStrength = 0.7f;
+      data.specularStrength = 0.2f;
+      data.specularExponent = 4.0f;
+
+      m_trfMatrix = util::Matrix<float, 4>::identity();
+
+      util::ResourceHandle pointShader = m_singletonManager->getService<RenderShaderContainer>()->pointShaderHandle;
+      util::ResourceHandle shadowPointShader = m_singletonManager->getService<RenderShaderContainer>()->shadowPointShaderHandle;
+
+      std::vector< std::vector<util::ResourceHandle> > textures(4);
+      std::vector<uint64_t> hashes;
+      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(pointShader)->getHash());
+      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shadowPointShader)->getHash());
+
+      m_debugMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(db::Material(data, textures, pointShader, shadowPointShader, hashes, false));
+      m_debugMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(db::Mesh());
+
       m_options = m_singletonManager->getService<RenderOptions>();
 
       m_geometryRasterizer.initialize(m_singletonManager);
@@ -88,6 +107,8 @@ namespace he
       m_indirectLightRenderer.initialize(m_singletonManager);
       m_particleRenderer.initialize(m_singletonManager);
       m_finalCompositing.initialize(m_singletonManager);
+
+      glPointSize(4.0f);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::vec4f) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
@@ -113,13 +134,13 @@ namespace he
       m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &eyeVec[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
-
+      
       {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         m_gBuffer.clear();
         m_lightRenderer.clear();
-        
+
         if(m_wireframe)
         {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -146,9 +167,9 @@ namespace he
         {
           glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-        
+
         m_lightRenderer.updateBuffer();
-        
+
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.1f, 4.0f);
         glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
@@ -171,15 +192,38 @@ namespace he
         glDisable(GL_POLYGON_OFFSET_FILL);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
-        
+
         m_indirectLightRenderer.calculateIndirectLight(
-          m_gBuffer.getDepthTexture(), 
-          m_gBuffer.getNormalTexture(), 
-          m_gBuffer.getMaterialTexture(), 
+          m_gBuffer.getDepthTexture(),
+          m_gBuffer.getNormalTexture(),
+          m_gBuffer.getMaterialTexture(),
           m_lightRenderer.getReflectiveShadowPosMaps(),
           m_lightRenderer.getReflectiveShadowNormalMaps(),
           m_lightRenderer.getReflectiveShadowLuminousFluxMaps());
-        
+
+        {/////////////////DEBUG STUFF////////////////
+          //std::vector<IndirectLight> lights(m_geometryRasterizer.getGlobalCacheNumber() * 2);
+
+          //GPUBuffer& lightData = m_indirectLightRenderer.getIndirectLightsBuffer();
+          //lightData.getData(0, lights.size() * sizeof(IndirectLight), &lights[0]);
+
+          //std::vector<util::vec3f> positions(m_geometryRasterizer.getGlobalCacheNumber());
+          //std::vector<util::vec3f> normals(m_geometryRasterizer.getGlobalCacheNumber());
+          //for(unsigned int i = 0; i < positions.size(); i++)
+          //{
+          //  positions[i] = lights[2 * i + 1].position;
+          //  normals[i] = lights[2 * i + 1].luminousFlux;
+          //}
+
+          //xBar::StaticGeometryContainer geomContainer(util::Flags<xBar::RenderNodeType>(0), &m_trfMatrix, m_debugMaterialHandle, m_debugMeshHandle);
+          //removeRenderComponent(geomContainer);
+
+          //m_debugMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(db::Mesh(GL_POINTS, positions, std::vector<util::Cache>(), std::vector<util::vec2ui>(), std::vector<unsigned int>(), std::vector<std::vector<util::vec2f>>(4), normals));
+
+          //xBar::StaticGeometryContainer geomContainer2(util::Flags<xBar::RenderNodeType>(0), &m_trfMatrix, m_debugMaterialHandle, m_debugMeshHandle);
+          //addRenderComponent(geomContainer2);
+        }
+
         m_gBuffer.setGBuffer();
 
         m_billboardRenderer.render();
@@ -208,7 +252,7 @@ namespace he
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
-      m_finalCompositing.composeImage(m_indirectLightRenderer.getIndirectLightMap(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
       
       m_spriteRenderer.render();
       m_stringRenderer.render();

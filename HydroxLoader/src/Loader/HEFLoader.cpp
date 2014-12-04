@@ -53,7 +53,7 @@ namespace he
 
     void HEFLoader::readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager)
     {
-      db::ModelManager *modelManager = singletonManager->getService<db::ModelManager>();
+      util::SharedPointer<db::ModelManager> modelManager = singletonManager->getService<db::ModelManager>();
 
       if(path.back() != '/')
       {
@@ -120,7 +120,7 @@ namespace he
       fileStream.close();
     }
 
-    void HEFLoader::read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::EventManager *eventManager)
+    void HEFLoader::read(std::istream& stream, sg::TreeNodeAllocator& allocator, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles, util::SharedPointer<util::EventManager> eventManager)
     {
       unsigned int nodeTypeNumber;
       stream >> nodeTypeNumber;

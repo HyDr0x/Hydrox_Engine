@@ -41,7 +41,7 @@ namespace he
       void resizeMaterialBuffer();
       void resizeMaterialIndexBuffer();
 
-      db::MaterialManager *m_materialManager;
+      util::SharedPointer<db::MaterialManager>m_materialManager;
 
       UBO m_materialBuffer;
       GPUImmutableBuffer m_materialIndexBuffer;

@@ -32,7 +32,7 @@ namespace he
     {
       m_singletonManager = singletonManager;
 
-      RenderOptions *options = m_singletonManager->getService<RenderOptions>();
+      util::SharedPointer<RenderOptions> options = m_singletonManager->getService<RenderOptions>();
 
       m_depthTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32, nullptr));
       m_colorTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64, nullptr));

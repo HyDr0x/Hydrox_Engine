@@ -16,7 +16,7 @@ namespace he
     public:
 
       AnimatedGeoNode(){}
-      AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, 
+      AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle,
         const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       AnimatedGeoNode(const AnimatedGeoNode& sourceNode);
       AnimatedGeoNode(const TreeNode& sourceNode);
@@ -45,7 +45,7 @@ namespace he
       std::vector<util::Matrix<float, 4>> getInverseBindPoseMatrices() const;
       void setInverseBindPoseMatrices(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices);
 
-      virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
+      virtual void read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
       virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
 
     private:

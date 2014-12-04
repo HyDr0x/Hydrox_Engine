@@ -36,12 +36,12 @@ namespace he
 
     private:
 
-      db::ModelManager *m_modelManager;
-      db::MaterialManager *m_materialManager;
-      db::RenderShaderManager *m_renderShaderManager;
-      db::TextureManager *m_textureManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
+      util::SharedPointer<db::MaterialManager> m_materialManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       int m_viewProjectionIndex;
     };

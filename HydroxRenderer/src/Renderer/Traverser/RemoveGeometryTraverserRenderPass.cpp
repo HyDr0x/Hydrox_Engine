@@ -51,6 +51,7 @@ namespace he
 
     void RemoveGeometryTraverserRenderPass::postTraverse(RenderNode* treeNode)
     {
+      treeNode->getRenderGroup()->removeGeometry(m_geometryContainer);
       if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
       {
         deleteNode(treeNode);

@@ -12,7 +12,7 @@ namespace he
 {
   namespace renderer
   {
-    StaticRenderNode::StaticRenderNode(RenderOptions *options) :
+    StaticRenderNode::StaticRenderNode(util::SharedPointer<RenderOptions> options) :
       m_options(options),
       m_instanceNumberChanged(false)
     {

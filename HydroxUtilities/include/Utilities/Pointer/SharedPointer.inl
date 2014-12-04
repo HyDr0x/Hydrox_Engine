@@ -55,7 +55,7 @@ namespace he
 
     template<typename T> template<typename F> SharedPointer<F> SharedPointer<T>::static_pointer_cast()
     {
-      SharedPointer<F> other = SharedPointer<F>(static_cast<F*>(m_ptr));
+      SharedPointer<F> other(static_cast<F*>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
       (*m_referenceNumber)++;
       return other;
@@ -63,7 +63,7 @@ namespace he
 
     template<typename T> template<typename F> SharedPointer<F> SharedPointer<T>::dynamic_pointer_cast()
     {
-      SharedPointer<F> other = SharedPointer<F>(dynamic_cast<F*>(m_ptr));
+      SharedPointer<F> other(dynamic_cast<F*>(m_ptr));
       other.m_referenceNumber = m_referenceNumber;
       (*m_referenceNumber)++;
       return other;

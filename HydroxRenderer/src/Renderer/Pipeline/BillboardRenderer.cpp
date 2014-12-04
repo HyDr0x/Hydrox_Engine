@@ -79,7 +79,7 @@ namespace he
       m_renderBillboards.remove(billboard);
     }
 
-    void BillboardRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
+    void BillboardRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void (*)(const xBar::BillboardContainer& billboard)>(util::EventManager::OnAddBillboardNode);
       eventManager->addSlotToSignal<BillboardRenderer, void (*)(const xBar::BillboardContainer& billboard), void (BillboardRenderer::*)(const xBar::BillboardContainer& billboard)>(this, &BillboardRenderer::addRenderComponent, util::EventManager::OnAddBillboardNode);

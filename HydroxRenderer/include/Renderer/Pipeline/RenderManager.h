@@ -98,7 +98,7 @@ namespace he
 
       UBO m_cameraParameterUBO;
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       GBuffer m_gBuffer;
       LightRenderer m_lightRenderer;
@@ -118,6 +118,10 @@ namespace he
 
       bool m_skyboxRendering;
       bool m_wireframe;
+
+      util::Matrix<float, 4> m_trfMatrix;
+      util::ResourceHandle m_debugMeshHandle;
+      util::ResourceHandle m_debugMaterialHandle;
     };
   }
 }

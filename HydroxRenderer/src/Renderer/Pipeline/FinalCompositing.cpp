@@ -23,7 +23,7 @@ namespace he
     {
       m_singletonManager = singletonManager;
 
-      RenderShaderContainer *renderShader = m_singletonManager->getService<RenderShaderContainer>();
+      util::SharedPointer<RenderShaderContainer> renderShader = m_singletonManager->getService<RenderShaderContainer>();
       m_offscreenBufferShaderHandle = renderShader->offscreenBufferShaderHandle;
       m_combineShaderHandle = renderShader->combineShaderHandle;
     }
@@ -32,16 +32,16 @@ namespace he
       util::SharedPointer<db::Texture2D> directlightTexture,
       util::SharedPointer<db::Texture2D> indirectlightTexture) const
     {
-      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
-      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
+      //db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_offscreenBufferShaderHandle);
+      db::RenderShader *shader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_combineShaderHandle);
 
       shader->useShader();
       colorTexture->setTexture(0, 0);
-      //directlightTexture->setTexture(1, 1);
-      //indirectlightTexture->setTexture(2, 2);
+      directlightTexture->setTexture(1, 1);
+      indirectlightTexture->setTexture(2, 2);
       m_fullscreenRenderQuad.render();
-      //indirectlightTexture->unsetTexture();
-      //directlightTexture->unsetTexture();
+      indirectlightTexture->unsetTexture();
+      directlightTexture->unsetTexture();
       colorTexture->unsetTexture();
       shader->useNoShader();
     }

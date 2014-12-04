@@ -128,7 +128,7 @@ namespace he
       return m_position;
     }
 
-    void LODNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void LODNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       GroupNode::read(stream, eventManager, resourceHandles);
 

@@ -11,7 +11,7 @@ namespace he
 {
   namespace sg
   {
-    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, 
+    AnimatedGeoNode::AnimatedGeoNode(const std::vector<util::Matrix<float, 4>>& inverseBindPoseMatrices, util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle,
       const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling)
       : GeoNode(eventManager, meshHandle, materialHandle, nodeName, parent, nextSibling), m_inverseBindPoseMatrices(inverseBindPoseMatrices)
     {
@@ -162,7 +162,7 @@ namespace he
       m_inverseBindPoseMatrices = inverseBindPoseMatrices;
     }
 
-    void AnimatedGeoNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void AnimatedGeoNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       GeoNode::read(stream, eventManager, resourceHandles);
 

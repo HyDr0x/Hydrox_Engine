@@ -524,19 +524,21 @@ namespace he
         for(unsigned int j = 0; j < m_cacheData.size(); j++)
         {
           float length = (position - m_cacheData[j].position).length();
-          float weight = util::vec3f::dot(normal, m_cacheData[j].normal) / ((length * length) + 0.0001f);
+          float weight = util::vec3f::dot(normal, m_cacheData[j].normal) / ((length * length) + 0.0001f);//more weight is better
 
           unsigned int bestIndex = ~0;
           float smallestWeight = FLT_MAX;
+          bool full = false;
 
           for(unsigned int k = 0; k < indexNumber; k++)
           {
             if(cacheIndices[k] == INT32_MAX)
             {
               bestIndex = k;
+              full = k == indexNumber - 1;// only overwrite values if all indices are being used
               break;
             }
-            else if(cacheWeights[k] < weight && cacheWeights[k] < smallestWeight)
+            else if(!full && cacheWeights[k] < weight && cacheWeights[k] < smallestWeight)
             {
               bestIndex = k;
               smallestWeight = cacheWeights[k];

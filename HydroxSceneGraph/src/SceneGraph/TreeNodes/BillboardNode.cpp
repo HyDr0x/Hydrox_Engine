@@ -11,7 +11,7 @@ namespace he
 {
   namespace sg
   {
-    BillboardNode::BillboardNode(util::EventManager *eventManager,
+    BillboardNode::BillboardNode(util::SharedPointer<util::EventManager> eventManager,
                                  util::ResourceHandle textureHandle,
                                  util::vec2ui animNumber, 
                                  util::vec2f texStart, 
@@ -260,7 +260,7 @@ namespace he
       return m_renderable;
     }
 
-    void BillboardNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void BillboardNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 

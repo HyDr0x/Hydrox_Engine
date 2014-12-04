@@ -260,5 +260,15 @@ namespace he
       return m_indirectLightMap;
       //return m_frameCacheIndexMap->convertToTexture2D(0);
     }
+
+    GPUBuffer& IndirectLightRenderer::getIndirectLightsBuffer()
+    {
+      return m_indirectLightDataBuffer;
+    }
+
+    GPUBuffer& IndirectLightRenderer::getGlobalCacheBuffer()
+    {
+      return m_globalCacheBuffer;
+    }
   }
 }

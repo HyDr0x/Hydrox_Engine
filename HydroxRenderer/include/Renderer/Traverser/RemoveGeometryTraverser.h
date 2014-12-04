@@ -39,8 +39,8 @@ namespace he
 
       void deleteNode(TreeNode *treeNode);
 
-      db::ModelManager *m_modelManager;
-      db::MaterialManager *m_materialManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
+      util::SharedPointer<db::MaterialManager> m_materialManager;
 
       const xBar::IGeometryContainer& m_geometryContainer;
 

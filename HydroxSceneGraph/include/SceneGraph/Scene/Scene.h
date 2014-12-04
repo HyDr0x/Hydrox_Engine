@@ -39,7 +39,7 @@ namespace he
       virtual NodeIndex addChildNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode);
       virtual void removeNode(const NodeIndex node);
 
-      virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix);
+      virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
       virtual void removeSubTree(const NodeIndex rootNodeIndex);
 
       template<typename T> T& getNode(const std::string& nodeName)

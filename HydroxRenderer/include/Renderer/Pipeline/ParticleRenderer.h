@@ -44,13 +44,13 @@ namespace he
       ParticleRenderer(const ParticleRenderer&);
       ParticleRenderer& operator=(const ParticleRenderer&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
       util::ResourceHandle m_particleShaderHandle;
 
       std::list<const xBar::ParticleEmitterContainer> m_particleEmitter;
 
-      db::ParticleEmitterManager *m_particleEmitterManager;
+      util::SharedPointer<db::ParticleEmitterManager> m_particleEmitterManager;
     };
   }
 }

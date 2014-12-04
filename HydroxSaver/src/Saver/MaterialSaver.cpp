@@ -32,9 +32,9 @@ namespace he
       materialFileKeywords[SHADOWSHADERNAME] = "ShadowShader Name";
       materialFileKeywords[SHADERNAME] = "Shader Name";
 
-      db::TextureManager *textureManager = singletonManager->getService<db::TextureManager>();
-      db::RenderShaderManager *renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      db::MaterialManager *materialManager = singletonManager->getService<db::MaterialManager>();
+      util::SharedPointer<db::TextureManager> textureManager = singletonManager->getService<db::TextureManager>();
+      util::SharedPointer<db::RenderShaderManager> renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      util::SharedPointer<db::MaterialManager> materialManager = singletonManager->getService<db::MaterialManager>();
 
       db::Material *material = materialManager->getObject(materialHandle);
 

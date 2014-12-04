@@ -12,7 +12,7 @@
 namespace he
 {
   namespace sg
-  {    ParticleNode::ParticleNode(util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
+  {    ParticleNode::ParticleNode(util::SharedPointer<util::EventManager> eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager)
     {
@@ -118,7 +118,7 @@ namespace he
       return m_trfMatrix;
     }
 
-    void ParticleNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void ParticleNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 

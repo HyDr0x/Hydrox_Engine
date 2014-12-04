@@ -8,7 +8,7 @@ namespace he
 {
   namespace renderer
   {
-    StringTexture2D::StringTexture2D(util::EventManager *eventManager, const Font& font, const std::string& text, float width, float height) :
+    StringTexture2D::StringTexture2D(util::SharedPointer<util::EventManager> eventManager, const Font& font, const std::string& text, float width, float height) :
       m_font(font),
       m_layer(0),
       m_angle(0.0f),

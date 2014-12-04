@@ -64,9 +64,9 @@ namespace he
       GeometryRenderer(const GeometryRenderer&);
       GeometryRenderer& operator=(const GeometryRenderer&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      RenderShaderContainer *m_container;
+      util::SharedPointer<RenderShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
       

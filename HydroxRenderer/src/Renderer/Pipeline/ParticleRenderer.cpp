@@ -46,7 +46,7 @@ namespace he
       m_particleEmitter.remove(particleEmitter);
     }
 
-    void ParticleRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
+    void ParticleRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void(*)(const xBar::ParticleEmitterContainer& particleEmitter)>(util::EventManager::OnAddParticleNode);
       eventManager->addSlotToSignal<ParticleRenderer, void(*)(const xBar::ParticleEmitterContainer& particleEmitter), void (ParticleRenderer::*)(const xBar::ParticleEmitterContainer& particleEmitter)>(this, &ParticleRenderer::addRenderComponent, util::EventManager::OnAddParticleNode);

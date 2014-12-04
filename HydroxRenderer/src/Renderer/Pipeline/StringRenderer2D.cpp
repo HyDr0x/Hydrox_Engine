@@ -141,7 +141,7 @@ namespace he
       }
     }
 
-    void StringRenderer2D::registerRenderComponentSlots(util::EventManager *eventManager)
+    void StringRenderer2D::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void (*)(const StringTexture2D* StringTexture2D)>(util::EventManager::OnAddStringTexture2D);
       eventManager->addSlotToSignal<StringRenderer2D, void (*)(const StringTexture2D* StringTexture2D), void (StringRenderer2D::*)(const StringTexture2D* StringTexture2D)>(this, &StringRenderer2D::addRenderComponent, util::EventManager::OnAddStringTexture2D);

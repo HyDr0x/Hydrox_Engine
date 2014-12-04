@@ -24,7 +24,7 @@ namespace he
     {
     public:
 
-      StaticRenderNode(RenderOptions *options);
+      StaticRenderNode(util::SharedPointer<RenderOptions> options);
       virtual ~StaticRenderNode();
 
       virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
@@ -72,7 +72,7 @@ namespace he
 
       bool m_instanceNumberChanged;
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       std::list<const xBar::StaticGeometryContainer> m_instances;
       std::list<const xBar::StaticGeometryContainer>::const_iterator m_iter;

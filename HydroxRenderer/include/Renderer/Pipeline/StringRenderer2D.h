@@ -43,7 +43,7 @@ namespace he
       StringRenderer2D(const StringRenderer2D&);
       StringRenderer2D& operator=(const StringRenderer2D&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
       util::ResourceHandle m_stringShaderHandle;
 
@@ -54,8 +54,8 @@ namespace he
       std::list<const StringTexture2D*> m_opaqueStrings;
       std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
-      db::RenderShaderManager *m_renderShaderManager;
-      db::TextureManager *m_textureManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }
 }

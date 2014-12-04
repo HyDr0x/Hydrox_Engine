@@ -21,7 +21,7 @@ namespace he
 
     private:
 
-      db::ComputeShaderManager *m_computeShaderManager;
+      util::SharedPointer<db::ComputeShaderManager> m_computeShaderManager;
     };
   }
 }

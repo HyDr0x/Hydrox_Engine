@@ -39,6 +39,8 @@ namespace he
       T* operator->() const;
       T& operator*() const;
 
+      template<typename T> friend class SharedPointer;
+
     private:
 
       void ownDelete();

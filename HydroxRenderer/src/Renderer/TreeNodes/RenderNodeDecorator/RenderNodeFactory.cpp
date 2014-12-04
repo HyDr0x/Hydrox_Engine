@@ -19,7 +19,7 @@ namespace he
   {
     util::SharedPointer<IRenderGroup> RenderNodeFactory::createRenderNode(util::Flags<xBar::RenderNodeType> nodeType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager)
     {
-      RenderOptions *options = singletonManager->getService<RenderOptions>();
+      util::SharedPointer<RenderOptions> options = singletonManager->getService<RenderOptions>();
 
       switch(nodeType.toInt())
       {

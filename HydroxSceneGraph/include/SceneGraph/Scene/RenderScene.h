@@ -41,7 +41,7 @@ namespace he
       NodeIndex addChildNode(NodeIndex destinationNode, const TreeNode& sourceNode);
       void removeNode(NodeIndex node);
 
-      NodeIndex addSubTree(Scene& subScene, NodeIndex sceneNode, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
+      NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
       void removeSubTree(NodeIndex sceneNode);
 
       void setLODRanges(const std::vector<float>& lodRanges);

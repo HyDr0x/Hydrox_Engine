@@ -78,7 +78,7 @@ namespace he
       return m_index;
     }
 
-    void TreeNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void TreeNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       std::string name;
       std::getline(stream, m_nodeName);

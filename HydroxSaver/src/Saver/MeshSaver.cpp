@@ -18,7 +18,7 @@ namespace he
   {
     void MeshSaver::save(std::string path, std::string filename, const util::ResourceHandle meshHandle, util::SingletonManager *singletonManager)
     {
-      db::ModelManager *modelManager = singletonManager->getService<db::ModelManager>();
+      util::SharedPointer<db::ModelManager> modelManager = singletonManager->getService<db::ModelManager>();
       db::Mesh *mesh = modelManager->getObject(meshHandle);
 
       std::ofstream fileStream;

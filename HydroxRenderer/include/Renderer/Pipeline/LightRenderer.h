@@ -74,9 +74,9 @@ namespace he
       LightRenderer(const LightRenderer&);
       LightRenderer& operator=(const LightRenderer&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       util::SingletonManager *m_singletonManager;
 

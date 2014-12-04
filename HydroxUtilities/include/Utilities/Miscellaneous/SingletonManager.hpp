@@ -6,6 +6,7 @@
 #include <string>
 
 #include "Utilities/Miscellaneous/SingletonBehaviour.hpp"
+#include "Utilities/Pointer/SharedPointer.h"
 
 namespace he
 {
@@ -17,14 +18,14 @@ namespace he
 
       SingletonManager(){}
 
-      template<class T> void addService(T* service)
+      template<class T> void addService(SharedPointer<T> service)
       {
-        m_serviceMap[std::string(typeid(service).name())] = service;
+        m_serviceMap[std::string(typeid(service).name())] = service.dynamic_pointer_cast<SingletonBehaviour>();
       }
 
-      template<class T> T* getService()
+      template<class T> SharedPointer<T> getService()
       {
-        return dynamic_cast<T*>(m_serviceMap[std::string(typeid(T*).name())]);
+        return m_serviceMap[std::string(typeid(SharedPointer<T>).name())].dynamic_pointer_cast<T>();
       }
 
     private:
@@ -32,7 +33,7 @@ namespace he
       SingletonManager(const SingletonManager&);
       SingletonManager& operator=(const SingletonManager&);
 
-      std::map<std::string, SingletonBehaviour*> m_serviceMap;
+      std::map<std::string, SharedPointer<SingletonBehaviour>> m_serviceMap;
     };
   }
 }

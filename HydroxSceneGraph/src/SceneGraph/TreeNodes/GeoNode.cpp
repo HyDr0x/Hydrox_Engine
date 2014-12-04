@@ -11,7 +11,7 @@ namespace he
 {
   namespace sg
   {
-    GeoNode::GeoNode(util::EventManager *eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
+    GeoNode::GeoNode(util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle meshHandle, util::ResourceHandle materialHandle, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager),
       m_meshHandle(meshHandle),
@@ -94,7 +94,7 @@ namespace he
       traverser->postTraverse(*this);
     }
 
-    void GeoNode::setEventManager(util::EventManager *eventManager)
+    void GeoNode::setEventManager(util::SharedPointer<util::EventManager> eventManager)
     {
       m_eventManager = eventManager;
     }
@@ -168,7 +168,7 @@ namespace he
       return m_renderable;
     }
 
-    void GeoNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void GeoNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
       std::string resourceFilename;

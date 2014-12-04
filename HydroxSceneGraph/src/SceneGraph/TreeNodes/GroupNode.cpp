@@ -111,7 +111,7 @@ namespace he
       m_dirtyFlag &= ~dirtyFlag;
     }
 
-    void GroupNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void GroupNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 

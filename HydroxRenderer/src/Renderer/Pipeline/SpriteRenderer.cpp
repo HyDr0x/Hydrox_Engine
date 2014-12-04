@@ -143,7 +143,7 @@ namespace he
       }
     }
 
-    void SpriteRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
+    void SpriteRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void (*)(const db::Sprite* sprite)>(util::EventManager::OnAddSprite);
       eventManager->addSlotToSignal<SpriteRenderer, void (*)(const db::Sprite* sprite), void (SpriteRenderer::*)(const db::Sprite* sprite)>(this, &SpriteRenderer::addRenderComponent, util::EventManager::OnAddSprite);

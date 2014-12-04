@@ -7,7 +7,7 @@
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Signals/EventManager.h>
-
+#include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Math/Math.hpp>
 
 namespace he
@@ -18,7 +18,7 @@ namespace he
     {
     public:
 
-      Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd);
+      Sprite(util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd);
       Sprite(const Sprite& other);
       ~Sprite();
 
@@ -67,7 +67,7 @@ namespace he
 
       Sprite();
 
-      util::EventManager *m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       util::ResourceHandle m_textureHandle;
 

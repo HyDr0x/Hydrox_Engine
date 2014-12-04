@@ -282,7 +282,7 @@ namespace he
       return m_shadowLuminousFluxMaps;
     }
 
-    void LightRenderer::registerRenderComponentSlots(util::EventManager *eventManager)
+    void LightRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);
       eventManager->addSlotToSignal<LightRenderer, void(*)(const xBar::LightContainer& light), void (LightRenderer::*)(const xBar::LightContainer& light)>(this, &LightRenderer::addLight, util::EventManager::OnAddLightNode);

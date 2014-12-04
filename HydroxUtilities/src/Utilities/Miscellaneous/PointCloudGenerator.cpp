@@ -500,18 +500,13 @@ namespace he
         vec3f t1 = positions[i + 1];
         vec3f t2 = positions[i + 2];
 
-        unsigned int startIndex = ~0;
+        unsigned int startIndex = m_caches.size();
         for(unsigned int j = 0; j < m_reducedCaches.size(); j++)
         {
           if(math::abs(m_reducedCaches[j].triangleVertices[0] - t0) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
             math::abs(m_reducedCaches[j].triangleVertices[1] - t1) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
             math::abs(m_reducedCaches[j].triangleVertices[2] - t2) < vec3f(0.0001f, 0.0001f, 0.0001f))
           {
-            if(startIndex == ~0)
-            {
-              startIndex = m_caches.size();
-            }
-
             Cache cache;
             cache.position = m_reducedCaches[j].centroid;
             cache.normal = m_reducedCaches[j].normal;

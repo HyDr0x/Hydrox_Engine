@@ -44,7 +44,7 @@ namespace he
       SpriteRenderer(const SpriteRenderer&);
       SpriteRenderer& operator=(const SpriteRenderer&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
       GLuint m_dummyVBO;
 
@@ -55,8 +55,8 @@ namespace he
       std::list<const db::Sprite*> m_opaqueSprites;
       std::vector<std::list<const db::Sprite*>> m_transparentSprites;
 
-      db::RenderShaderManager *m_renderShaderManager;
-      db::TextureManager *m_textureManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }
 }

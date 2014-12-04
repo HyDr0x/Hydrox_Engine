@@ -24,7 +24,7 @@ namespace he
     {
     public:
 
-      SkinnedRenderNode(RenderOptions *options);
+      SkinnedRenderNode(util::SharedPointer<RenderOptions> options);
       virtual ~SkinnedRenderNode();
 
       virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
@@ -72,7 +72,7 @@ namespace he
 
       bool m_instanceNumberChanged;
 
-      RenderOptions *m_options;
+      util::SharedPointer<RenderOptions> m_options;
 
       std::list<const xBar::SkinnedGeometryContainer> m_instances;
       std::list<const xBar::SkinnedGeometryContainer>::const_iterator m_iter;

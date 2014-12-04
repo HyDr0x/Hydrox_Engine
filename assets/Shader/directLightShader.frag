@@ -87,11 +87,7 @@ void main()
 		
 		if(shadowPos.z <= shadowMapPos.z + 0.0003f || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
 		{
-			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * (material.z + calculateLightIntensity(reflectiveShadowLight[i].light, pos, normal, material));
-		}
-		else
-		{
-			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * material.z;
+			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * calculateLightIntensity(reflectiveShadowLight[i].light, pos, normal, material);
 		}
 	}
 }

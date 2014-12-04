@@ -25,7 +25,7 @@ namespace he
     public:
 
       ShadowLightNode(){}
-      ShadowLightNode(float near, float far, LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
+      ShadowLightNode(float near, float far, LightType lightType, util::SharedPointer<util::EventManager> eventManager, const std::string& nodeName, NodeIndex parent = ~0, NodeIndex nextSibling = ~0);
       ShadowLightNode(const ShadowLightNode& sourceNode);
       ShadowLightNode(const TreeNode& sourceNode);
       virtual ~ShadowLightNode();
@@ -75,7 +75,7 @@ namespace he
       void setQuadricAttenuation(float quadricAttenuation);
       float getQuadricAttenuation() const;
 
-      virtual void read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
+      virtual void read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles);
       virtual void write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const;
 
     private:
@@ -86,7 +86,7 @@ namespace he
       float m_near;
       float m_far;
 
-      util::EventManager *m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       LightType m_lightType;
 

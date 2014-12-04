@@ -6,7 +6,7 @@ namespace he
 {
   namespace db
   {
-    Sprite::Sprite(util::EventManager *eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd) : 
+    Sprite::Sprite(util::SharedPointer<util::EventManager> eventManager, util::ResourceHandle textureHandle, bool renderable, bool transparency, const util::vec2ui& animNumber, const util::vec2f& texStart, const util::vec2f& texEnd) : 
       m_eventManager(eventManager),
       m_textureHandle(textureHandle), 
       m_renderable(renderable), 

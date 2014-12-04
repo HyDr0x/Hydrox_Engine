@@ -39,9 +39,9 @@ namespace he
 
       std::map<std::string, MaterialFileKeywords> m_materialFileKeywords;
 
-      db::MaterialManager *m_materialManager;
-      db::TextureManager *m_textureManager;
-      db::RenderShaderManager *m_renderShaderManager;
+      util::SharedPointer<db::MaterialManager> m_materialManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
     };
   }
 }

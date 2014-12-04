@@ -362,7 +362,7 @@ namespace he
       }
     }
 
-    void AnimatedTransformNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void AnimatedTransformNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TransformNode::read(stream, eventManager, resourceHandles);
 

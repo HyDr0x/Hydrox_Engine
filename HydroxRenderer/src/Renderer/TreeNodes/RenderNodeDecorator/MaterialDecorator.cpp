@@ -58,11 +58,9 @@ namespace he
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        resetInstanceIterator();
-        while (!isEndInstanceIterator())
+        for(std::map<util::ResourceHandle, MaterialIndexData, Less>::iterator it = m_materialHandles.begin(); it != m_materialHandles.end(); it++)
         {
-          const xBar::IGeometryContainer& instance = incInstanceIterator();
-          if (geometryContainer == instance)
+          if(geometryContainer.getMaterialHandle() == it->first)
           {
             m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber--;
             

@@ -39,7 +39,7 @@ namespace he
       float m_maxDistance;
       float m_maxAngle;
 
-      db::ModelManager *m_modelManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
     };
   }
 }

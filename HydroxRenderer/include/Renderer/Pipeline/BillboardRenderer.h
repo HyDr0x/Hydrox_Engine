@@ -39,7 +39,7 @@ namespace he
 
       BillboardRenderer(const BillboardRenderer&);
 
-      void registerRenderComponentSlots(util::EventManager *eventManager);
+      void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
       GLuint m_dummyVBO;
 
@@ -47,8 +47,8 @@ namespace he
 
       std::list<xBar::BillboardContainer> m_renderBillboards;
 
-      db::RenderShaderManager *m_renderShaderManager;
-      db::TextureManager *m_textureManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }
 }

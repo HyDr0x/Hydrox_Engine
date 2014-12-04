@@ -15,7 +15,7 @@ namespace he
 {
   namespace sg
   {
-    LightNode::LightNode(LightType lightType, util::EventManager *eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
+    LightNode::LightNode(LightType lightType, util::SharedPointer<util::EventManager> eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling), 
       m_eventManager(eventManager),
       m_lightType(lightType),
@@ -197,7 +197,7 @@ namespace he
       return m_lightData.quadricAttenuation;
     }
 
-    void LightNode::read(std::istream& stream, util::EventManager *eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
+    void LightNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 

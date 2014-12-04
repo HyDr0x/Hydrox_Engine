@@ -99,16 +99,21 @@ void main()
 			vec3 lightDir = lightPos.xyz - cache.position.xyz;
 			float quadDistance = dot(lightDir, lightDir);
 			lightDir = normalize(lightDir);
-			vec3 reflectRay = reflect(-lightDir, cache.normal.xyz);
-			float reflAngle = pow(max(dot(reflectRay, camDir), 0), cache.specularExponent.x);
 			
-			float F = (max(dot(normalize(lightNormal.xyz), normalize(cache.position.xyz - lightPos.xyz)), 0) * max(dot(normalize(cache.normal.xyz), normalize(lightPos.xyz - cache.position.xyz)), 0)) / (lightArea + PI * quadDistance);
+			vec3 reflectRay = reflect(-lightDir, cache.normal.xyz);
+			float reflAngle = max(pow(dot(reflectRay, camDir), cache.specularExponent.x), 0.00001f);
+			
+			float F = max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)) * dot(cache.normal.xyz, lightDir), 0) / (lightArea + PI * quadDistance);
+			
 			float Wd = Ep + F;
 			float Wg = Ep + reflAngle * F;
+			
 			Xpd += Wd * lightPos.xyz;
 			Xpg += Wg * lightPos.xyz;
+			
 			Lod += luminousFlux * frd * F;
 			Log += luminousFlux * frg * reflAngle * F;
+			
 			Wgesd += Wd;
 			Wgesg += Wg;
 		}
@@ -116,20 +121,19 @@ void main()
 		Xpd /= Wgesd;
 		Xpg /= Wgesg;
 		
-		//Xpd += cache.normal.xyz * 0.125f;
-		//Xpg += cache.normal.xyz * 0.125f;
-		
 		vec3 lightDirD = Xpd - cache.position.xyz;
+		float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.1f);
+		
 		indirectLight[2 * cacheIndex].position.xyz = Xpd;
-		indirectLight[2 * cacheIndex].luminousFlux.xyz = (4.0f * PI * Lod * dot(lightDirD, lightDirD)) / (frd * max(dot(cache.normal.xyz, normalize(lightDirD)), 0));
+		indirectLight[2 * cacheIndex].luminousFlux.xyz = (4.0f * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD);
 		
 		vec3 lightDirG = Xpg - cache.position.xyz;
 		float lightQuadDistance = dot(lightDirG, lightDirG);
-		
 		lightDirG = normalize(lightDirG);
-		float reflAngleG = pow(max(dot(reflect(-lightDirG, cache.normal.xyz), camDir), 0), cache.specularExponent.x);
+		float reflAngleG = max(pow(dot(reflect(-lightDirG, cache.normal.xyz), camDir), cache.specularExponent.x), 0.1f);
+		float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.1f);
 		
 		indirectLight[2 * cacheIndex + 1].position.xyz = Xpg;
-		indirectLight[2 * cacheIndex + 1].luminousFlux.xyz = (4.0f * PI * Log * lightQuadDistance) / (frg * reflAngleG * max(dot(cache.normal.xyz, lightDirG), 0));
+		indirectLight[2 * cacheIndex + 1].luminousFlux.xyz = (4.0f * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG);
 	}
 }
