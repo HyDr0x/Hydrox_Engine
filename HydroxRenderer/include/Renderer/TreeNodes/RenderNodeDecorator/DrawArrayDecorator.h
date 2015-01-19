@@ -2,8 +2,8 @@
 #define DRAWARRAYDECORATOR_H_
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
-
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -58,6 +58,7 @@ namespace he
       void updatePerInstanceBuffer();
 
       util::SharedPointer<db::ModelManager> m_modelManager;
+      util::SharedPointer<RenderOptions> m_options;
 
       //per mesh buffer
       GPUImmutableBuffer m_meshVertexBuffer;

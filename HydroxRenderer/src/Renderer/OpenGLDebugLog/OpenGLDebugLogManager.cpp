@@ -57,6 +57,9 @@ namespace he
       glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &m_caps[MAX_SHADER_STORAGE_BUFFER_BINDINGS]);
       glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &m_caps[MAX_SHADER_STORAGE_BLOCK_SIZE]);
       glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &m_caps[SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT]);
+      glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &m_caps[MAX_ARRAY_TEXTURE_LAYERS]);
+      
+      glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &m_caps[MAX_COLOR_ATTACHMENTS]);
     }
 
     void OpenGLDebugLogManager::initDebugMode(bool syncedOutput)
@@ -132,9 +135,14 @@ namespace he
       glDebugMessageControl(source, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, enable);
     }
 
-    void OpenGLDebugLogManager::getState(GLenum pname, GLint *data)
+    void OpenGLDebugLogManager::getState(GLenum pname, GLint *data) const
     {
       glGetIntegerv(pname, data);
+    }
+
+    GLint OpenGLDebugLogManager::getCapabilities(OpenGLCaps capability) const
+    {
+      return m_caps[capability];
     }
   }
 }

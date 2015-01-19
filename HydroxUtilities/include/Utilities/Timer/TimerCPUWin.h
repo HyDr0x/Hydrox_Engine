@@ -1,5 +1,5 @@
-#ifndef CPUTIMERWIN_H_
-#define CPUTIMERWIN_H_
+#ifndef TIMERCPUWIN_H_
+#define TIMERCPUWIN_H_
 
 #include <iostream>
 #include <string>
@@ -15,18 +15,22 @@ namespace he
   {
     typedef __int64 time;
 
-    class GRAPHICAPI CPUTimerWin
+    class GRAPHICAPI CPUTimer
     {
     public:
 
-      CPUTimerWin(std::string &timerName);
-      ~CPUTimerWin();
+      CPUTimer();
+      CPUTimer(std::string &timerName);
+      ~CPUTimer();
 
       time getTimeDifference();
 
-    private:
+      void start();
+      void stop();
 
-      inline void calculateTimeDifference();
+      time getTime();
+
+    private:
 
       std::string m_timerName;
 

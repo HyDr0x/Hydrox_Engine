@@ -2,16 +2,18 @@
 
 #include <vector>
 
-#include "Renderer/Traverser/Traverser.h"
-
 #include <XBar/SkinnedGeometryContainer.h>
+
+#include "Renderer/Traverser/Traverser.h"
 
 namespace he
 {
   namespace renderer
   {
-    SkinnedGeometryDecorator::SkinnedGeometryDecorator(IRenderGroup *renderNode) : ARenderNodeDecorator(renderNode)
+    SkinnedGeometryDecorator::SkinnedGeometryDecorator(IRenderGroup *renderNode, util::SharedPointer<RenderOptions> options) : ARenderNodeDecorator(renderNode), m_options(options)
     {
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_options->maxBones * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_bboxMatrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
     SkinnedGeometryDecorator::~SkinnedGeometryDecorator()
@@ -58,11 +60,6 @@ namespace he
     {
       unsigned int instanceNumber = getInstanceNumber();
 
-      if(hasInstanceNumberChanged())
-      {
-        resizeBuffer(instanceNumber);
-      }
-
       m_matrixBuffer.setMemoryFence();
       m_bboxMatrixBuffer.setMemoryFence();
 
@@ -72,12 +69,6 @@ namespace he
 
       m_bboxMatrixBuffer.syncWithFence();
       m_matrixBuffer.syncWithFence();
-    }
-
-    void SkinnedGeometryDecorator::resizeBuffer(unsigned int instanceNumber)
-    {
-      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * getMaxBones() * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_bboxMatrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
     void SkinnedGeometryDecorator::fillBuffer()
@@ -99,7 +90,7 @@ namespace he
         }
 
         unsigned int size = sizeof(util::Matrix<float, 4>) * skinningMatrices.size();
-        unsigned int offset = sizeof(util::Matrix<float, 4>) * getMaxBones() * instanceIndex;
+        unsigned int offset = sizeof(util::Matrix<float, 4>) * m_options->maxBones * instanceIndex;
 
         m_matrixBuffer.setData(offset, size, &(skinningMatrices[0][0][0]));
         m_bboxMatrixBuffer.setData(instanceIndex * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &skinnedGeometryContainer.getTransformationMatrix()[0][0]);

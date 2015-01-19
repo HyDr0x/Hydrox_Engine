@@ -63,10 +63,7 @@ namespace he
 
       virtual void updateBuffer() override;
 
-      virtual unsigned int getMaxGeometry() const override;
-      virtual unsigned int getMaxMaterials() const override;
-      virtual unsigned int getMaxBones() const override;
-      virtual unsigned int getCacheNumber() const;
+      virtual unsigned int getCacheNumber() const override;
 
     protected:
 

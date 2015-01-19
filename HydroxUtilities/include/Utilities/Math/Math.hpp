@@ -121,7 +121,13 @@ namespace he
       {
         vec3f z = forwardVector.normalize();
 
-        vec3f x = cross(upVektor.normalize(), z).normalize();
+        vec3f normedUpVec = upVektor.normalize();
+        if(normedUpVec == z)
+        {
+          normedUpVec += 0.00001f;
+        }
+
+        vec3f x = cross(normedUpVec, z).normalize();
         vec3f y = cross(z, x);
 
         Matrix<float, 4> rotMat(x[0], x[1], x[2], 0.0f,
@@ -136,7 +142,6 @@ namespace he
 
       template<typename Type> Matrix<Type,4> rotAxis(const Matrix<Type, 4>& m, float angle, const Vector<Type, 3>& v)
       {
-        angle = degToRad(angle);
         const float sinAngle = sinf(angle);
         const float cosAngle = cosf(angle);
 

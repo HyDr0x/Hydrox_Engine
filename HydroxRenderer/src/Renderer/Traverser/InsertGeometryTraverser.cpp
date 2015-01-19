@@ -22,7 +22,6 @@ namespace he
       m_singletonManager(singletonManager),
       m_inserted(false)
     {
-      
     }
 
     InsertGeometryTraverser::~InsertGeometryTraverser()

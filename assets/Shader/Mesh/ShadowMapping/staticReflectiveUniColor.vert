@@ -23,7 +23,6 @@ layout(location = NORMAL) in vec3 in_normal;
 out vec4 vsout_pos;
 out vec3 vsout_normal;
 flat out uint vsout_instanceIndex;
-out vec4 vsout_color;
 
 void main()
 {

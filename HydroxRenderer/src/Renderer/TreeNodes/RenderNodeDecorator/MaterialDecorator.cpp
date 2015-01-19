@@ -17,8 +17,10 @@ namespace he
       m_materialNumberChanged(false)
     {
       m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_options = singletonManager->getService<RenderOptions>();
 
-      m_materialBuffer.createBuffer(sizeof(db::Material::MaterialData) * getMaxMaterials(), GL_STATIC_DRAW);
+      m_materialBuffer.createBuffer(sizeof(db::Material::MaterialData) * m_options->maxMaterials, GL_STATIC_DRAW);
+      m_materialIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
     MaterialDecorator::~MaterialDecorator()
@@ -29,7 +31,7 @@ namespace he
     {
       if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
       {
-        if(m_materialCount < getMaxMaterials() && m_renderNode->insertGeometry(geometryContainer))
+        if(m_materialCount < m_options->maxMaterials && m_renderNode->insertGeometry(geometryContainer))
         {
           m_materialNumberChanged = true;
 
@@ -148,8 +150,6 @@ namespace he
     void MaterialDecorator::resizeMaterialIndexBuffer()
     {
       unsigned int instanceNumber = getInstanceNumber();
-
-      m_materialIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
       m_materialIndexBuffer.setMemoryFence();
 

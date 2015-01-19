@@ -107,22 +107,21 @@ namespace he
       m_indirectLightRenderer.initialize(m_singletonManager);
       m_particleRenderer.initialize(m_singletonManager);
       m_finalCompositing.initialize(m_singletonManager);
-
-      glPointSize(4.0f);
+      m_tonemapper.initialize(m_singletonManager);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::vec4f) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
     }
 
-    void RenderManager::setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far)
+    void RenderManager::setViewPort(GLuint width, GLuint height, GLfloat zNear, GLfloat zFar)
     {
       m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f), sizeof(GLuint), &width);
       m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + sizeof(GLuint), sizeof(GLuint), &height);
 
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint), sizeof(GLfloat), &near);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &far);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint), sizeof(GLfloat), &zNear);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &zFar);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition, float near, float far)
+    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition)
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
       util::vec4f eyeVec = util::vec4f(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
@@ -245,15 +244,20 @@ namespace he
 
         m_gBuffer.unsetGBuffer();
       }
-      
+
+      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
+      //m_gBuffer.getMaterialTexture()
       //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
-      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-      
+      //m_indirectLightRenderer.getIndirectLightMap()
+      //m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0));
+
       m_spriteRenderer.render();
       m_stringRenderer.render();
       

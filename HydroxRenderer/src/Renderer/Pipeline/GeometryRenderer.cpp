@@ -127,9 +127,6 @@ namespace he
     {
       UpdateTraverser updateTraverser;
       updateTraverser.doTraverse(m_renderRootNode);
-      //updateTraverser.doTraverse(m_renderIndexRootNode);
-      //updateTraverser.doTraverse(m_renderShadowRootNode);
-      //updateTraverser.doTraverse(m_renderReflectiveShadowRootNode);
     }
 
     void GeometryRenderer::frustumCulling(int shadowMapIndex, RenderPass pass)
@@ -181,16 +178,6 @@ namespace he
     {  
       RenderGeometryTraverser renderTraverser(m_singletonManager);
       renderTraverser.doTraverse(m_renderRootNode);
-
-      //std::vector<util::Cache> tmpCaches(m_globalCacheNumber);
-      //m_globalCacheBuffer.getData(0, m_globalCacheNumber * sizeof(util::Cache), &tmpCaches[0]);
-
-      //std::vector<GLuint> tmpZBuffer(m_globalCacheNumber);
-      //m_zBuffer.getData(0, m_globalCacheNumber * sizeof(GLuint), &tmpZBuffer[0]);
-
-      //RenderOptions *renderOptions = m_singletonManager->getService<RenderOptions>();
-      //std::vector<util::vec4ui> tmpFrameBuffer(renderOptions->width * renderOptions->height * 6);
-      //m_frameCacheIndexBuffer.getData(0, renderOptions->width * renderOptions->height * 6 * sizeof(util::vec4ui), &tmpFrameBuffer[0]);
     }
 
     unsigned int GeometryRenderer::getGlobalCacheNumber() const

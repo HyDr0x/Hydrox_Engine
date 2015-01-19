@@ -33,11 +33,11 @@ namespace he
       fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource);
 
       m_shaderSources.push_back(vertexShaderSource);
+      m_shaderSources.push_back(fragmentShaderSource);
+      m_shaderSources.push_back(geometryShaderSource);
       m_shaderSources.push_back(tesselationCTRLShaderSource);
       m_shaderSources.push_back(tesselationEVALShaderSource);
-      m_shaderSources.push_back(geometryShaderSource);
-      m_shaderSources.push_back(fragmentShaderSource);
-
+      
       createProgram(shaderName, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
     }
 

@@ -47,7 +47,11 @@ namespace he
     {
       std::vector<vec3f> newPositions;
 
-      float boxHalfSize = (bbMax[0] - bbMin[0]) * 0.5f;
+      vec3f boxHalfSize = bbMax - bbMin;
+      if(boxHalfSize[0] > m_maxDistance + 0.00001f) boxHalfSize[0] *= 0.5f;
+      if(boxHalfSize[1] > m_maxDistance + 0.00001f) boxHalfSize[1] *= 0.5f;
+      if(boxHalfSize[2] > m_maxDistance + 0.00001f) boxHalfSize[2] *= 0.5f;
+
       vec3f boxCenter(bbMin + (bbMax - bbMin) * 0.5f);
 
       for(unsigned int i = 0; i < positions.size(); i += 3)
@@ -64,7 +68,7 @@ namespace he
 
         vec3f normal = math::cross(e0, e1).normalize();
 
-        if(triangleCenteredBoxTest(v0, v1, v2, normal, vec3f(boxHalfSize, boxHalfSize, boxHalfSize)))
+        if(triangleCenteredBoxTest(v0, v1, v2, normal, boxHalfSize))
         {
           newPositions.push_back(t0);
           newPositions.push_back(t1);
@@ -74,22 +78,49 @@ namespace he
 
       if(!newPositions.empty())
       {
-        if(2.0f * boxHalfSize > m_maxDistance + m_epsilon)
+        for(unsigned int x = 0; x < 2; x++)
         {
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize), bbMax, newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, boxHalfSize), bbMax + vec3f(-boxHalfSize, 0, 0), newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, 0), bbMax + vec3f(-boxHalfSize, 0, -boxHalfSize), newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, 0), bbMax + vec3f(0, 0, -boxHalfSize), newPositions);
+          for(unsigned int y = 0; y < 2; y++)
+          {
+            for(unsigned int z = 0; z < 2; z++)
+            {
+              vec3f minPoint = bbMin + vec3f(x * boxHalfSize[0], y * boxHalfSize[1], z * boxHalfSize[2]);
+              vec3f maxPoint = bbMin + vec3f((x + 1) * boxHalfSize[0], (y + 1) * boxHalfSize[1], (z + 1) * boxHalfSize[2]);
 
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, boxHalfSize), bbMax + vec3f(0, -boxHalfSize, 0), newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(0, 0, boxHalfSize), bbMax + vec3f(-boxHalfSize, -boxHalfSize, 0), newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(0, 0, 0), bbMax + vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize), newPositions);
-          recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, 0), bbMax + vec3f(0, -boxHalfSize, -boxHalfSize), newPositions);
+              vec3f diff = maxPoint - minPoint;
+              float sideMax = std::max(diff[0], std::max(diff[1], diff[2]));
+
+              if(maxPoint <= bbMax + 0.00001f)
+              {
+                if(sideMax > m_maxDistance + 0.00001f)
+                {
+                  recursiveGenerateCaches(minPoint, maxPoint, newPositions);
+                }
+                else
+                {
+                  createCaches(minPoint, maxPoint, newPositions);
+                }
+              }
+            }
+          }
+        }
+
+        /*if(2.0f * boxHalfSize > m_maxDistance + 0.00001f)
+        {
+        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize), bbMax, newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, boxHalfSize), bbMax + vec3f(-boxHalfSize, 0, 0), newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, 0), bbMax + vec3f(-boxHalfSize, 0, -boxHalfSize), newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, 0), bbMax + vec3f(0, 0, -boxHalfSize), newPositions);
+
+        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, boxHalfSize), bbMax + vec3f(0, -boxHalfSize, 0), newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(0, 0, boxHalfSize), bbMax + vec3f(-boxHalfSize, -boxHalfSize, 0), newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(0, 0, 0), bbMax + vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize), newPositions);
+        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, 0), bbMax + vec3f(0, -boxHalfSize, -boxHalfSize), newPositions);
         }
         else
         {
-          createCaches(bbMin, bbMax, newPositions);
-        }
+        createCaches(bbMin, bbMax, newPositions);
+        }*/
       }
     }
 
@@ -125,7 +156,7 @@ namespace he
 
       vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(boxCenter - m_globalBBMin) / m_maxDistance));
 
-      unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber * m_voxelNumber + voxelIndex3D[1] * m_voxelNumber + voxelIndex3D[2];
+      unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
 
       std::vector<std::vector<float>> normalBin(18);//area of the triangles which have that normal
 
@@ -171,8 +202,6 @@ namespace he
             continue;
           }
 
-          assert(area > 0.0f);
-
           normal = normal.normalize();
 
           PolygonData data;
@@ -198,6 +227,7 @@ namespace he
 
     float PointCloudGenerator::calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, vec3f& outPolygonCentroid)
     {
+      float epsilon = 0.00001f;
       std::vector<vec3f> outPoints = inPoints;
 
       vec3f output;
@@ -215,26 +245,31 @@ namespace he
         for(unsigned int j = 0; j < inPoints.size(); j++)//all three triangle edges
         {
           vec3f e = inPoints[j];
-          if(vec3f::dot(planeNormal, e - boxPoints[3 * i]) <= m_epsilon)
+          if(vec3f::dot(planeNormal, e - boxPoints[3 * i]) <= epsilon)
           {
             vec3f triangleEdge = s - e;
-            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && m_epsilon < output[0] && output[0] + m_epsilon < 1.0f)
+            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && epsilon < output[0] && output[0] + epsilon < 1.0f)
             {
               outPoints.push_back(e + output[0] * triangleEdge);
             }
 
             outPoints.push_back(e);
           }
-          else if(vec3f::dot(planeNormal, s - boxPoints[3 * i]) <= m_epsilon)
+          else if(vec3f::dot(planeNormal, s - boxPoints[3 * i]) <= epsilon)
           {
             vec3f triangleEdge = s - e;
-            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && m_epsilon < output[0] && output[0] + m_epsilon < 1.0f)
+            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && epsilon < output[0] && output[0] + epsilon < 1.0f)
             {
               outPoints.push_back(e + output[0] * triangleEdge);
             }
           }
 
           s = e;
+        }
+
+        if(outPoints.size() < 3)//triangle only touched the voxel
+        {
+          return FLT_MAX;
         }
       }
 
@@ -250,6 +285,8 @@ namespace he
         area += calculateTriangleArea(pivotPoint, secondPoint, outPoints[i]);
         secondPoint = outPoints[i];
       }
+
+      assert(area > 0.0f);
 
       //outPolygonCentroid = vec3f::identity();
       //for(unsigned int i = 0; i < outPoints.size(); i++)
@@ -296,12 +333,13 @@ namespace he
 
     void PointCloudGenerator::generateCachesPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin)
     {
+      float epsilon = 0.001f;
       unsigned int  thetaQuantizer = 360 / normalBin[0].size();
       unsigned int  uQuantizer = normalBin[0].size();
 
       unsigned int emptyBins = 1;
 
-      while(emptyBins)
+      while(emptyBins && !m_polygons[voxelIndex].empty())
       {
         emptyBins = normalBin.size() * normalBin.size();
         vec2ui maxBin;
@@ -311,7 +349,7 @@ namespace he
         {
           for(unsigned int j = 0; j < normalBin[i].size(); j++)
           {
-            if(normalBin[i][j] <= m_epsilon)
+            if(normalBin[i][j] <= epsilon)
             {
               emptyBins--;
             }
@@ -338,7 +376,6 @@ namespace he
         qNormal[2] = newU;
 
         std::list<PolygonData> cachePolygons;
-
         std::list<PolygonData>::iterator pit = m_polygons[voxelIndex].begin();
         while(pit != m_polygons[voxelIndex].end())
         {
@@ -425,7 +462,7 @@ namespace he
         while(cit != mip->second.end())
         {
           vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->centroid - m_globalBBMin) / m_maxDistance));
-          unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber * m_voxelNumber + voxelIndex3D[1] * m_voxelNumber + voxelIndex3D[2];
+          unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
 
           std::list<PolygonData> similarCaches;
 
@@ -435,9 +472,9 @@ namespace he
             {
               for(int nz = -1; nz < 2; nz++)
               {
-                if(0 <= voxelIndex3D[0] + nx && voxelIndex3D[0] + nx < m_voxelNumber && 0 <= voxelIndex3D[1] + ny && voxelIndex3D[1] + ny < m_voxelNumber && 0 <= voxelIndex3D[2] + nz && voxelIndex3D[2] + nz < m_voxelNumber)
+                if(0 <= voxelIndex3D[0] + nx && voxelIndex3D[0] + nx < m_voxelNumber[0] && 0 <= voxelIndex3D[1] + ny && voxelIndex3D[1] + ny < m_voxelNumber[1] && 0 <= voxelIndex3D[2] + nz && voxelIndex3D[2] + nz < m_voxelNumber[2])
                 {
-                  unsigned int newVoxelIndex = voxelIndex + nx * m_voxelNumber * m_voxelNumber + ny * m_voxelNumber + nz;
+                  unsigned int newVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
 
                   std::list<PolygonData>::iterator vcit = m_areaCaches[newVoxelIndex].begin();
                   while(vcit != m_areaCaches[newVoxelIndex].end())
@@ -500,13 +537,18 @@ namespace he
         vec3f t1 = positions[i + 1];
         vec3f t2 = positions[i + 2];
 
-        unsigned int startIndex = m_caches.size();
+        unsigned int startIndex = ~0;
         for(unsigned int j = 0; j < m_reducedCaches.size(); j++)
         {
           if(math::abs(m_reducedCaches[j].triangleVertices[0] - t0) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
             math::abs(m_reducedCaches[j].triangleVertices[1] - t1) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
             math::abs(m_reducedCaches[j].triangleVertices[2] - t2) < vec3f(0.0001f, 0.0001f, 0.0001f))
           {
+            if(startIndex == ~0)
+            {
+              startIndex = m_caches.size();
+            }
+
             Cache cache;
             cache.position = m_reducedCaches[j].centroid;
             cache.normal = m_reducedCaches[j].normal;
@@ -529,6 +571,8 @@ namespace he
 
       generateAABB(positions, m_globalBBMin, m_globalBBMax);
 
+      m_globalBBMax = vec3f(std::max(m_globalBBMax[0], maxDistance), std::max(m_globalBBMax[1], maxDistance), std::max(m_globalBBMax[2], maxDistance));
+
       std::vector<vec3f> trianglePositions;
 
       if(!indices.empty())
@@ -542,17 +586,22 @@ namespace he
 
       vec3f boxSize(m_globalBBMax - m_globalBBMin);
 
-      float sideMax = std::max(boxSize[0], std::max(boxSize[1], boxSize[2]));
-      sideMax = maxDistance * pow(2.0f, ceil(log(sideMax / maxDistance) / log(2.0f)));
+      vec3f sideMax;
+      sideMax[0] = maxDistance * pow(2.0f, ceil(log(boxSize[0] / maxDistance) / log(2.0f)));
+      sideMax[1] = maxDistance * pow(2.0f, ceil(log(boxSize[1] / maxDistance) / log(2.0f)));
+      sideMax[2] = maxDistance * pow(2.0f, ceil(log(boxSize[2] / maxDistance) / log(2.0f)));
 
-      m_globalBBMax[0] = m_globalBBMin[0] + sideMax;
-      m_globalBBMax[1] = m_globalBBMin[1] + sideMax;
-      m_globalBBMax[2] = m_globalBBMin[2] + sideMax;
+      m_globalBBMax[0] = m_globalBBMin[0] + sideMax[0];
+      m_globalBBMax[1] = m_globalBBMin[1] + sideMax[1];
+      m_globalBBMax[2] = m_globalBBMin[2] + sideMax[2];
 
-      m_voxelNumber = ceil(sideMax / maxDistance);
-      m_polygons.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
-      m_areaCaches.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
-      m_triangles.resize(m_voxelNumber * m_voxelNumber * m_voxelNumber);
+      m_voxelNumber[0] = ceil(sideMax[0] / maxDistance);
+      m_voxelNumber[1] = ceil(sideMax[1] / maxDistance);
+      m_voxelNumber[2] = ceil(sideMax[2] / maxDistance);
+
+      m_polygons.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
+      m_areaCaches.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
+      m_triangles.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
 
       recursiveGenerateCaches(m_globalBBMin, m_globalBBMax, trianglePositions);
 

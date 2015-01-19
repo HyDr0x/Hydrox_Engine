@@ -1,6 +1,6 @@
 #version 440 core
 
-#define WORKGROUPSIZE 64
+#define WORKGROUPSIZE 128
 #define PI 3.14159265359f
 #define Ep 0.0001f
 
@@ -13,13 +13,12 @@ layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalSampler;
 layout(location = 2) uniform sampler2DArray indirectLightLuminousFluxSampler;
 
-layout(location = 3) uniform uint indirectLightNumberX;
-layout(location = 4) uniform uint indirectLightNumberY;
-layout(location = 5) uniform uint indirectLightNumberZ;
+layout(location = 3) uniform uint indirectLightNumberXY;
+layout(location = 4) uniform uint indirectLightNumberZ;
 
-layout(location = 6) uniform uint cacheNumber;
+layout(location = 5) uniform uint cacheNumber;
 
-layout(location = 7) uniform uint unusedIndirectLightsNumber;
+layout(location = 6) uniform uint unusedLightNumber;
 
 layout(std430, binding = 0) buffer globalCacheBuffer
 {
@@ -50,7 +49,7 @@ void main()
 		return;
 	}
 	
-	uint lightNumber = indirectLightNumberX * indirectLightNumberY * indirectLightNumberZ;
+	uint lightNumber = indirectLightNumberXY * indirectLightNumberXY * indirectLightNumberZ;
 	
 	for(uint i = 0; i < cachesPerThread; i++)
 	{
@@ -69,25 +68,20 @@ void main()
 		
 		CacheData cache = caches[cacheIndex];
 		float frd = cache.position.w / PI;
-		float frg = cache.normal.w * (cache.specularExponent.x + 2.0f) / (2.0f * PI);
+		float frg = cache.normal.w * (cache.specularExponent.x + 8.0f) / (8.0f * PI);
 		
 		vec3 camDir = normalize(eyePos.xyz - cache.position.xyz);
 		
-		for(uint j = 0; j < lightNumber; j += unusedIndirectLightsNumber)
-		{/*
-			vec3 texCoords;
-			texCoords.x = float(j % indirectLightNumberX) / float(indirectLightNumberX);
-			texCoords.y = float((j % (indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberX)) / float(indirectLightNumberY);
-			texCoords.z = float(j / float(indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberZ);
-			*/
+		for(uint j = 0; j < lightNumber; j += unusedLightNumber)
+		{
 			ivec3 texCoords;
-			texCoords.x = int(j % indirectLightNumberX);
-			texCoords.y = int((j % (indirectLightNumberX * indirectLightNumberY)) / float(indirectLightNumberX));
-			texCoords.z = int(j / float(indirectLightNumberX * indirectLightNumberY));
+			texCoords.x = int(j % indirectLightNumberXY);
+			texCoords.y = int((j % (indirectLightNumberXY * indirectLightNumberXY)) / float(indirectLightNumberXY));
+			texCoords.z = int(j / float(indirectLightNumberXY * indirectLightNumberXY));
 			
 			vec4 lightPos = texelFetch(indirectLightPosSampler, texCoords, 0);
 			
-			if(lightPos.w == 1.0f) continue;
+			if(lightPos.w == 0.0f) continue;
 			
 			vec4 lightNormalArea = texelFetch(indirectLightNormalSampler, texCoords, 0);
 			
@@ -100,9 +94,10 @@ void main()
 			float quadDistance = dot(lightDir, lightDir);
 			lightDir = normalize(lightDir);
 			
-			vec3 reflectRay = reflect(-lightDir, cache.normal.xyz);
-			float reflAngle = max(pow(dot(reflectRay, camDir), cache.specularExponent.x), 0.00001f);
-			
+			float reflAngle = max(pow(dot(reflect(-lightDir, cache.normal.xyz), camDir), cache.specularExponent.x), 0.00001f);
+			//vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
+			//float reflAngle = max(pow(dot(halfVector, cache.normal.xyz), cache.specularExponent.x), 0.00001f);
+		
 			float F = max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)) * dot(cache.normal.xyz, lightDir), 0) / (lightArea + PI * quadDistance);
 			
 			float Wd = Ep + F;
@@ -123,7 +118,7 @@ void main()
 		
 		vec3 lightDirD = Xpd - cache.position.xyz;
 		float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.1f);
-		
+
 		indirectLight[2 * cacheIndex].position.xyz = Xpd;
 		indirectLight[2 * cacheIndex].luminousFlux.xyz = (4.0f * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD);
 		
@@ -131,6 +126,8 @@ void main()
 		float lightQuadDistance = dot(lightDirG, lightDirG);
 		lightDirG = normalize(lightDirG);
 		float reflAngleG = max(pow(dot(reflect(-lightDirG, cache.normal.xyz), camDir), cache.specularExponent.x), 0.1f);
+		//vec3 halfVector = (lightDirG + camDir) / length(lightDirG + camDir);
+		//float reflAngleG = max(pow(dot(halfVector, cache.normal.xyz), cache.specularExponent.x), 0.1f);
 		float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.1f);
 		
 		indirectLight[2 * cacheIndex + 1].position.xyz = Xpg;

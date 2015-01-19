@@ -238,7 +238,7 @@ namespace he
 
     void Sprite::setLayer(unsigned char layer)
     {
-      if(m_renderable && m_transparency)
+      if(m_renderable)
       {
         if(m_layer != layer)
         {

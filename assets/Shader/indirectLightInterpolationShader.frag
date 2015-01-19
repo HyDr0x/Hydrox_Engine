@@ -33,7 +33,7 @@ void main()
 	
 	if(tmpPos.z == 1.0f) //discard the indirect lighting e.g. for skybox or billboards
 	{
-		luminousFlux = vec4(1.0f);
+		luminousFlux = vec4(0.0f);
 		return;
 	}
 	
@@ -44,17 +44,18 @@ void main()
 	
 	vec4 material = texture(materialSampler, gsout_texCoord);
 	vec3 normal = normalize(texture(normalSampler, gsout_texCoord).xyz * 2.0f - 1.0f);//vec3(0,1,0);
-	
+
 	vec3 camDir = normalize(eyePos.xyz - pos);
 	vec3 reflectCamDir = reflect(-camDir, normal);
 	
 	uint cacheIndices[24];
 	for(uint i = 0; i < 6; i++)
 	{
-		cacheIndices[(4 * i) + 0] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).x;
-		cacheIndices[(4 * i) + 1] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).y;
-		cacheIndices[(4 * i) + 2] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).z;
-		cacheIndices[(4 * i) + 3] = texture(cacheIndexSampler, vec3(gsout_texCoord, i)).w;
+		uvec4 indices = texture(cacheIndexSampler, vec3(gsout_texCoord, i));
+		cacheIndices[(4 * i) + 0] = indices.x;
+		cacheIndices[(4 * i) + 1] = indices.y;
+		cacheIndices[(4 * i) + 2] = indices.z;
+		cacheIndices[(4 * i) + 3] = indices.w;
 	}
 	
 	float dmax = 0.0f;
@@ -74,37 +75,28 @@ void main()
 	
 	float wGesD = 0.0f;
 	float wGesG = 0.0f;
-	uint counter = 0;
+	
 	for(uint i = 0; i < 24; i++)
 	{
 		if(cacheIndices[i] < INT32_MAX)
 		{
 			CacheData cache = caches[cacheIndices[i]];
 			
-			float dir = max(1.0f - length(pos - cache.position.xyz) / dmax, 0);
+			float dir = max(1.0f - length(pos - cache.position.xyz) / dmax, 0.0001f);
 			
 			float wd = dir * sqrt(max(dot(cache.normal.xyz, normal), 0));
 			
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
-			vec3 reflectCamCacheDir = reflect(-camCacheDir, cache.normal.xyz);
-			
-			float wg = dir * sqrt(max(dot(reflectCamCacheDir, reflectCamDir), 0));
+			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cache.normal.xyz), reflectCamDir), 0));
 			
 			IndirectLightData indirectLightD = indirectLights[2 * cacheIndices[i] + 0];
 			IndirectLightData indirectLightG = indirectLights[2 * cacheIndices[i] + 1];
 			
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
-			/*
-			vec3 singlePhiPD = clamp(wd * indirectLightD.luminousFlux.xyz, vec3(0), vec3(65500));
-			if(65500 - phiPD.x > singlePhiPD.x && 65500 - phiPD.y > singlePhiPD.y && 65500 - phiPD.z > singlePhiPD.z)
-				phiPD += singlePhiPD;
-				
-			vec3 singlePhiPG = clamp(wg * indirectLightG.luminousFlux.xyz, vec3(0), vec3(65500));
-			if(65500 - phiPG.x > singlePhiPG.x && 65500 - phiPG.y > singlePhiPG.y && 65500 - phiPG.z > singlePhiPG.z)
-				phiPG += singlePhiPG;*/
 				
 			phiPD += wd * indirectLightD.luminousFlux.xyz;
+			//phiPD += indirectLightD.luminousFlux.xyz;
 			phiPG += wg * indirectLightG.luminousFlux.xyz;
 			
 			wGesD += wd;
@@ -112,26 +104,33 @@ void main()
 		}
 	}
 
-	Xpd /= wGesD;
-	Xpg /= wGesG;
+	Xpd = wGesD > 0 ? Xpd / wGesD : vec3(0);
+	Xpg = wGesG > 0 ? Xpg / wGesG : vec3(0);
 	
-	phiPD /= wGesD;
-	phiPG /= wGesG;
+	phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
+	phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
+	/*
+	Xpd = Xpd / wGesD;
+	Xpg = Xpg / wGesG;
+	
+	phiPD = phiPD / wGesD;
+	phiPG = phiPG / wGesG;*/
 		
 	vec3 lightDirD = Xpd - pos;
-	float lengthD = length(lightDirD);
+	float lengthD = dot(lightDirD, lightDirD);
 	lightDirD = normalize(lightDirD);
 	float frd = material.x * max(dot(lightDirD, normal), 0);
 			
 	vec3 lightDirG = Xpg - pos;
-	float lengthG = length(lightDirG);
+	float lengthG = dot(lightDirG, lightDirG);
 	lightDirG = normalize(lightDirG);
 	vec3 reflectLightDirG = reflect(-lightDirG, normal);
-	float frg = material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
+	float frg = max(dot(lightDirG, normal), 0) * material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
 	
-	//luminousFlux = vec4(phiPD / 1000.0f, 1);
-	//luminousFlux = vec4(phiPD, 1);
+	//luminousFlux = vec4(1, 0, 0, 1);
+	//luminousFlux = vec4(phiPD / 500.0f, 1);
+	//luminousFlux = vec4(wGesD / 10.0f, 0, 0, 0);
 	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD), 1.0f);
 	//luminousFlux = vec4((frg * phiPG) / (4.0f * PI * lengthG), 1.0f);
-	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + (frg * phiPG) / (4.0f * PI * lengthG), 1.0f);
+	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + max((frg * phiPG) / (4.0f * PI * lengthG), 0.0f), 1.0f);
 }

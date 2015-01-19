@@ -2,7 +2,7 @@
 
 #include "Header/CameraUBO.glslh"
 
-layout(binding = 0) uniform sampler2D colorSampler;
+layout(location = 0) uniform sampler2D colorSampler;
 
 out vec4 color;
 

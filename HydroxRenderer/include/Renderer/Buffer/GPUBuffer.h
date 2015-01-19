@@ -19,10 +19,10 @@ namespace he
 
       void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const void *data);
 
-      void resizeBuffer(GLuint size, const void *data);
+      void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;
 
-      void setData(GLuint offset, GLuint size, const void *data) const;
+      void setData(GLuint offset, GLuint size, const void *data);
       void getData(GLuint offset, GLuint size, void *data) const;
 
       void clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const;

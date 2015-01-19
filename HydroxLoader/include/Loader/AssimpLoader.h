@@ -49,12 +49,14 @@ namespace he
         Minutes,
       };
 
-      AssimpLoader(float errorRate, float maxDistance, float maxAngle, util::SingletonManager *singletonManager);
+      AssimpLoader(util::SingletonManager *singletonManager);
       AssimpLoader(const AssimpLoader& other);
 
       ~AssimpLoader();
 
       AssimpLoader& operator=(const AssimpLoader& other);
+
+      void setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle);
 
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
       AnimationTimeUnit getAnimationTimeUnit() const;

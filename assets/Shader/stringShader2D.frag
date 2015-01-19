@@ -2,7 +2,7 @@
 
 layout(early_fragment_tests) in;
 
-layout(binding = 0) uniform sampler2D texSampler;
+layout(location = 0) uniform sampler2D texSampler;
 
 out vec4 color;
 

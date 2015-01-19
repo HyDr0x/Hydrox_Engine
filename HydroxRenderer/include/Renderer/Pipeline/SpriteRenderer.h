@@ -52,7 +52,7 @@ namespace he
 
       unsigned char m_maxLayer;
 
-      std::list<const db::Sprite*> m_opaqueSprites;
+      std::vector<std::list<const db::Sprite*>> m_opaqueSprites;
       std::vector<std::list<const db::Sprite*>> m_transparentSprites;
 
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;

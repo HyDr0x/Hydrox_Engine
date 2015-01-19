@@ -19,13 +19,13 @@ namespace he
 
       void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data);
 
-      void resizeBuffer(GLuint size, const GLvoid *data);
+      void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;
 
       void setMemoryFence();
       void syncWithFence() const;
 
-      void setData(GLuint offset, GLuint size, const GLvoid *data) const;
+      void setData(GLuint offset, GLuint size, const GLvoid *data);
       void getData(GLuint offset, GLuint size, GLvoid *data) const;
 
       void clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const;

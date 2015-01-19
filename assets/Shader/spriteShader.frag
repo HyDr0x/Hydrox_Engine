@@ -1,6 +1,6 @@
 #version 440 core
 
-layout(binding = 3) uniform sampler2D texSampler;
+layout(location = 3) uniform sampler2D texSampler;
 
 out vec4 color;
 

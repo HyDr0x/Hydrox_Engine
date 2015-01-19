@@ -1,16 +1,16 @@
 #Material Data
 ###################################
 Diffuse Strength
-0.8
+0.5
 
 Specular Strength
-0.9
+0.5
 
 Ambient Strength
 0.1
 
 Specular Exponent
-32.0
+1.0
 
 ###################################
 

@@ -1,0 +1,47 @@
+vec3 RGBtoHSV(vec3 rgbColor)
+{
+	float maxRGB = max(max(rgbColor.r, rgbColor.g), rgbColor.b);
+	float minRGB = min(min(rgbColor.r, rgbColor.g), rgbColor.b);
+	float minmaxDiff = max(maxRGB - minRGB, 0.00001f);
+	float H = 0;
+
+	if(maxRGB == rgbColor.r)
+		H = 60.0f * (rgbColor.g - rgbColor.b) / minmaxDiff;
+	else if(maxRGB == rgbColor.g)
+		H = 60.0f * (2.0f + (rgbColor.b - rgbColor.r) / minmaxDiff);
+	else 
+		H = 60.0f * (4.0f + (rgbColor.r - rgbColor.g) / minmaxDiff);
+
+	if(H < 0) H += 360.0f;
+
+	float S = 0;
+	if(maxRGB != 0)
+		S = minmaxDiff / maxRGB;
+
+	float V = maxRGB;
+
+	return vec3(H, S, V);
+}
+
+vec3 HSVtoRGB(vec3 hsvColor)
+{
+	float tmph = hsvColor.r / 60.0f;
+	float h = floor(tmph);
+	float f = tmph - h;
+	float p = hsvColor.b * (1.0f - hsvColor.g);
+	float q = hsvColor.b * (1.0f - hsvColor.g * f);
+	float t = hsvColor.b * (1.0f - hsvColor.g * (1.0f - f));
+
+	if(h == 0 || h == 6)
+		return vec3(hsvColor.b, t, p);
+	else if(h == 1)
+		return vec3(q, hsvColor.b, p);
+	else if(h == 2)
+		return vec3(p, hsvColor.b, t);
+	else if(h == 3)
+		return vec3(p, q, hsvColor.b);
+	else if(h == 4)
+		return vec3(t, p, hsvColor.b);
+	else 
+		return vec3(hsvColor.b, p, q);
+}

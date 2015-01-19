@@ -79,21 +79,21 @@ namespace he
     }
 
     void TreeNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
-    {
+    {//nodeindex being read by the loader to know which type of node he has to create
       std::string name;
       std::getline(stream, m_nodeName);
       std::getline(stream, m_nodeName);//getline because of white spaces
 
-      unsigned int nodeTypes;
+      unsigned int nodeType;
       unsigned int nodeIndex;
 
-      stream >> nodeTypes;
+      stream >> nodeType;
       stream >> nodeIndex;
-      m_parent = NodeIndex(nodeIndex, (NodeType)nodeTypes);
+      m_parent = NodeIndex(nodeIndex, (NodeType)nodeType);
 
-      stream >> nodeTypes;
+      stream >> nodeType;
       stream >> nodeIndex;
-      m_nextSibling = NodeIndex(nodeIndex, (NodeType)nodeTypes);
+      m_nextSibling = NodeIndex(nodeIndex, (NodeType)nodeType);
     }
 
     void TreeNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const

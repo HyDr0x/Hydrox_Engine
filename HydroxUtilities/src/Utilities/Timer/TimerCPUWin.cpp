@@ -1,10 +1,16 @@
+#ifdef _WIN32
+
 #include "Utilities/Timer/TimerCPUWin.h"
 
 namespace he
 {
   namespace util
   {
-    CPUTimerWin::CPUTimerWin(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
+    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false)
+    {
+    }
+
+    CPUTimer::CPUTimer(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
     {
       LARGE_INTEGER tmpTime;
       QueryPerformanceFrequency(&tmpTime);
@@ -14,7 +20,7 @@ namespace he
       m_cpuTime = tmpTime.QuadPart;
     }
 
-    CPUTimerWin::~CPUTimerWin()
+    CPUTimer::~CPUTimer()
     {
       if(m_showTimerWhenDying)
       {
@@ -27,7 +33,7 @@ namespace he
       }
     }
 
-    time CPUTimerWin::getTimeDifference()
+    time CPUTimer::getTimeDifference()
     {
       LARGE_INTEGER newTime;
       QueryPerformanceCounter(&newTime);
@@ -37,5 +43,29 @@ namespace he
 
       return m_cpuTime;
     }
+
+    void CPUTimer::start()
+    {
+      LARGE_INTEGER tmpTime;
+      QueryPerformanceFrequency(&tmpTime);
+      m_cpuFrequency = double(tmpTime.QuadPart) / 1000000.0;//to get micro seconds
+
+      QueryPerformanceCounter(&tmpTime);
+      m_cpuTime = tmpTime.QuadPart;
+    }
+
+    void CPUTimer::stop()
+    {
+      LARGE_INTEGER newTime;
+      QueryPerformanceCounter(&newTime);
+      m_cpuTime = double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency;
+    }
+
+    time CPUTimer::getTime()
+    {
+      return m_cpuTime;
+    }
   }
 }
+
+#endif

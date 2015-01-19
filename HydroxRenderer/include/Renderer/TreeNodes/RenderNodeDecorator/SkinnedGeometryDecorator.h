@@ -2,8 +2,8 @@
 #define SKINNEDGEOMETRYDECORATOR_H_
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
-
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      SkinnedGeometryDecorator(IRenderGroup *renderNode);
+      SkinnedGeometryDecorator(IRenderGroup *renderNode, util::SharedPointer<RenderOptions> options);
       virtual ~SkinnedGeometryDecorator();
 
       virtual void frustumCulling() const;
@@ -28,8 +28,9 @@ namespace he
 
     protected:
 
-      void resizeBuffer(unsigned int instanceNumber);
       void fillBuffer();
+
+      util::SharedPointer<RenderOptions> m_options;
 
       GPUImmutableBuffer m_matrixBuffer;
       GPUImmutableBuffer m_bboxMatrixBuffer;

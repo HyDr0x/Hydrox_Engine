@@ -2,8 +2,8 @@
 #define STATICGEOMETRYDECORATOR_H_
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/ARenderNodeDecorator.h"
-
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
+#include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
 {
@@ -13,7 +13,7 @@ namespace he
     {
     public:
 
-      StaticGeometryDecorator(IRenderGroup *renderNode);
+      StaticGeometryDecorator(IRenderGroup *renderNode, util::SharedPointer<RenderOptions> options);
       virtual ~StaticGeometryDecorator();
 
       virtual void frustumCulling() const;
@@ -27,6 +27,8 @@ namespace he
       virtual void updateBuffer();
 
     protected:
+
+      util::SharedPointer<RenderOptions> m_options;
 
       GPUImmutableBuffer m_matrixBuffer;
     };

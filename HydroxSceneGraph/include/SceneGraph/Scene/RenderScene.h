@@ -37,12 +37,12 @@ namespace he
       RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode);
       ~RenderScene();
 
-      NodeIndex addParentNode(NodeIndex destinationNode, const TreeNode& sourceNode);
-      NodeIndex addChildNode(NodeIndex destinationNode, const TreeNode& sourceNode);
-      void removeNode(NodeIndex node);
+      virtual NodeIndex addParentNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode) override;
+      virtual NodeIndex addChildNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode) override;
+      virtual void removeNode(NodeIndex node) override;
 
-      NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
-      void removeSubTree(NodeIndex sceneNode);
+      virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string("")) override;
+      virtual void removeSubTree(NodeIndex sceneNode) override;
 
       void setLODRanges(const std::vector<float>& lodRanges);
       void updateScene(const util::vec3f& cameraPosition, float currentTime, bool isTimeRelative = true);

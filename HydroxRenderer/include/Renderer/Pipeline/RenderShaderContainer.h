@@ -33,6 +33,9 @@ namespace he
       he::util::ResourceHandle skinnedShadowMapGenerationShaderHandle;
       he::util::ResourceHandle skyboxShaderHandle;
       he::util::ResourceHandle frustumCullingShaderHandle;
+      he::util::ResourceHandle histogramShaderHandle;
+      he::util::ResourceHandle downSamplingShaderHandle;
+      he::util::ResourceHandle tonemappingShaderHandle;
 
       he::util::ResourceHandle pointShaderHandle;
       he::util::ResourceHandle shadowPointShaderHandle;

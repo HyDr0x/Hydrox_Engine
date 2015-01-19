@@ -24,16 +24,16 @@ namespace he
       switch(nodeType.toInt())
       {
       case xBar::SKINNEDNODE | xBar::INDEXEDNODE:
-        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager));
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager), options), singletonManager));
         break;
       case xBar::INDEXEDNODE:
-        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager)), singletonManager));
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager), options), singletonManager));
         break;
       case xBar::SKINNEDNODE:
-        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager));
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
         break;
       default:
-        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager)), singletonManager));
+        return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
         break;
       };
     }

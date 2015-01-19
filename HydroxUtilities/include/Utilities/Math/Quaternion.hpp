@@ -57,9 +57,11 @@ namespace he
 
       inline vec3f getRotationAxis() const
       {
-        float div = 1.0f / sqrt(1.0f - m_coord[0] * m_coord[0]);
+        Quaternion t = this->normalize();
+        float square = sqrt(1.0f - t[0] * t[0]);
+        float div = square == 0 ? 0.00001f : 1.0f / square;
 
-        return m_coord[0] != 1.0f ? vec3f(m_coord[1], m_coord[2], m_coord[3]) * div : vec3f(0.0f, 0.0f, 1.0f);
+        return t[0] != 1.0f ? vec3f(t[1], t[2], t[3]) * div : vec3f(0.0f, 0.0f, 1.0f);
       }
 
       inline Quaternion conjugate() const

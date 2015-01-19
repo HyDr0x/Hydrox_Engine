@@ -1,5 +1,5 @@
-#ifndef CPUTIMERUNIX_H_
-#define CPUTIMERUNIX_H_
+#ifndef TIMERCPUUNIX_H_
+#define TIMERCPUUNIX_H_
 
 #include <iostream>
 #include <string>
@@ -15,14 +15,20 @@ namespace he
   {
     typedef clock_t time;
 
-    class GRAPHICAPI CPUTimerUnix
+    class GRAPHICAPI CPUTimer
     {
     public:
 
-      CPUTimerUnix(std::string &timerName);
-      ~CPUTimerUnix();
+      CPUTimer();
+      CPUTimer(std::string &timerName);
+      ~CPUTimer();
 
       time getTimeDifference();
+
+      void start();
+      void stop();
+
+      time getTime();
 
     private:
 

@@ -81,21 +81,6 @@ namespace he
       m_renderNode->updateBuffer();
     }
 
-    unsigned int ARenderNodeDecorator::getMaxGeometry() const
-    {
-      return m_renderNode->getMaxGeometry();
-    }
-
-    unsigned int ARenderNodeDecorator::getMaxMaterials() const
-    {
-      return m_renderNode->getMaxMaterials();
-    }
-
-    unsigned int ARenderNodeDecorator::getMaxBones() const
-    {
-      return m_renderNode->getMaxBones();
-    }
-
     unsigned int ARenderNodeDecorator::getCacheNumber() const
     {
       return m_renderNode->getCacheNumber();

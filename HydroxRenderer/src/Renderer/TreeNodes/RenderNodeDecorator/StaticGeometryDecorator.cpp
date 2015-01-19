@@ -1,15 +1,16 @@
 #include "Renderer/TreeNodes/RenderNodeDecorator/StaticGeometryDecorator.h"
 
-#include "Renderer/Traverser/Traverser.h"
-
 #include <XBar/StaticGeometryContainer.h>
+
+#include "Renderer/Traverser/Traverser.h"
 
 namespace he
 {
   namespace renderer
   {
-    StaticGeometryDecorator::StaticGeometryDecorator(IRenderGroup *renderNode) : ARenderNodeDecorator(renderNode)
+    StaticGeometryDecorator::StaticGeometryDecorator(IRenderGroup *renderNode, util::SharedPointer<RenderOptions> options) : ARenderNodeDecorator(renderNode), m_options(options)
     {
+      m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
     }
 
     StaticGeometryDecorator::~StaticGeometryDecorator()
@@ -55,11 +56,6 @@ namespace he
     void StaticGeometryDecorator::updateBuffer()
     {
       unsigned int instanceNumber = getInstanceNumber();
-
-      if(hasInstanceNumberChanged())
-      {
-        m_matrixBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Matrix<float, 4>) * instanceNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      }
 
       m_matrixBuffer.setMemoryFence();
 

@@ -54,9 +54,6 @@ namespace he
 
       virtual void updateBuffer();
 
-      virtual unsigned int getMaxGeometry() const;
-      virtual unsigned int getMaxMaterials() const;
-      virtual unsigned int getMaxBones() const;
       virtual unsigned int getCacheNumber() const;
 
     protected:

@@ -77,7 +77,7 @@ namespace he
         geometryData[index + 9] = (i + 1) % 2;
       }
 
-      m_geometryData.createBuffer(GL_ARRAY_BUFFER, sizeof(float) * 5 * positions.size(), 0, GL_STATIC_DRAW, &geometryData[0]);
+      m_geometryData.createBuffer(GL_ARRAY_BUFFER, sizeof(float) * 5 * positions.size(), sizeof(float) * 5 * positions.size(), GL_STATIC_DRAW, &geometryData[0]);
 
       glGenVertexArrays(1, &m_skyBoxVAO);
       glBindVertexArray(m_skyBoxVAO);

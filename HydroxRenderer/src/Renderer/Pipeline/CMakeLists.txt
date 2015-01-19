@@ -13,5 +13,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/StringRenderer2D.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Tonemapper.cpp 
 	PARENT_SCOPE 
 )

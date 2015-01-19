@@ -1,15 +1,21 @@
+#ifndef _WIN32
+
 #include "Utilities/Timer/TimerCPUUnix.h"
 
 namespace he
 {
   namespace util
   {
-    CPUTimerUnix::CPUTimerUnix(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
+    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false)
+    {
+    }
+
+    CPUTimer::CPUTimer(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
     {
       m_cpuTime = clock();
     }
 
-    CPUTimerUnix::~CPUTimerUnix()
+    CPUTimer::~CPUTimer()
     {
       if(m_showTimerWhenDying)
       {
@@ -21,7 +27,7 @@ namespace he
       }
     }
 
-    time CPUTimerUnix::getTimeDifference()
+    time CPUTimer::getTimeDifference()
     {
       m_cpuTime = clock() - m_cpuTime;
       m_cpuTime /= (CLOCKS_PER_SEC * 0.001f);
@@ -30,5 +36,23 @@ namespace he
 
       return m_cpuTime;
     }
+
+    void CPUTimer::start()
+    {
+      m_cpuTime = clock();
+    }
+
+    void CPUTimer::stop()
+    {
+      m_cpuTime = clock() - m_cpuTime;
+      m_cpuTime /= (CLOCKS_PER_SEC * 0.001f);
+    }
+
+    time CPUTimer::getTime()
+    {
+      return m_cpuTime;
+    }
   }
 }
+
+#endif

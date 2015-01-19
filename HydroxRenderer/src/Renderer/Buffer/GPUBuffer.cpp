@@ -1,6 +1,7 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 
-#include <assert.h>
+#include <cassert>
+#include <vector>
 
 namespace he
 {
@@ -21,16 +22,17 @@ namespace he
       m_target = target;
       m_usage = usage;
       m_bufferBlockSize = bufferBlockSize;
+      m_currentBufferSize = 0;
 
-      resizeBuffer(size, data);
+      setData(0, size, data);
     }
 
-    void GPUBuffer::resizeBuffer(GLuint size, const void *data)
+    void GPUBuffer::resizeBuffer(GLuint size)
     {
-      m_currentBufferSize = (size / m_bufferBlockSize + 1) * m_bufferBlockSize;
+      m_currentBufferSize = ceil(size / float(m_bufferBlockSize)) * m_bufferBlockSize;
 
       glBindBuffer(m_target, m_bufferIndex);
-      glBufferData(m_target, m_currentBufferSize, data, m_usage);
+      glBufferData(m_target, m_currentBufferSize, nullptr, m_usage);
       glBindBuffer(m_target, 0);
     }
 
@@ -39,12 +41,26 @@ namespace he
       return size < m_currentBufferSize;
     }
 
-    void GPUBuffer::setData(GLuint offset, GLuint size, const void *data) const
+    void GPUBuffer::setData(GLuint offset, GLuint size, const void *data)
     {
-      assert(offset + size <= m_currentBufferSize);
+      if(offset + size > m_currentBufferSize)//is the old buffer big enough for the new data?
+      {
+        if(m_currentBufferSize > 0)
+        {
+          GLuint oldBufferSize = m_currentBufferSize;
+          std::vector<GLubyte> oldData(oldBufferSize);
+          getData(0, oldBufferSize, &oldData[0]);//get the old data
+          resizeBuffer(offset + size);//resize the buffer
+          setData(0, oldBufferSize, &oldData[0]);//fill it with the old data
+        }
+        else
+        {
+          resizeBuffer(offset + size);//resize the buffer
+        }
+      }
 
       glBindBuffer(m_target, m_bufferIndex);
-      glBufferSubData(m_target, offset, size, data);
+      glBufferSubData(m_target, offset, size, data);//fill the buffer with the new data
       glBindBuffer(m_target, 0);
     }
 

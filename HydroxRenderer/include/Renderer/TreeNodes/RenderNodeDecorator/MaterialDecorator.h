@@ -8,6 +8,8 @@
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 
+#include "Renderer/Pipeline/RenderOptions.h"
+
 namespace he
 {
   namespace renderer
@@ -42,6 +44,7 @@ namespace he
       void resizeMaterialIndexBuffer();
 
       util::SharedPointer<db::MaterialManager>m_materialManager;
+      util::SharedPointer<RenderOptions> m_options;
 
       UBO m_materialBuffer;
       GPUImmutableBuffer m_materialIndexBuffer;

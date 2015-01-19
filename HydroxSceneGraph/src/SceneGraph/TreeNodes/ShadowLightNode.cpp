@@ -109,7 +109,7 @@ namespace he
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        width = tanf(acosf(m_lightData.direction[3]) * 0.5f) * 2.0f * m_near;
+        width = tanf(acosf(m_lightData.direction[3]) * 0.5f) * 2.25f * m_near;
         m_lightData.projectionParameter[0] = m_near;
         m_lightData.projectionParameter[1] = m_far;
         m_lightData.projectionParameter[2] = 2.0f * width;
@@ -293,7 +293,9 @@ namespace he
       stream >> m_near;
       stream >> m_far;
 
-      stream >> m_reflectiveShadow;
+      unsigned int fakeBool;
+      stream >> fakeBool;
+      m_reflectiveShadow = (bool)fakeBool;
 
       setShadowProjection(m_near, m_far);
 
@@ -320,7 +322,7 @@ namespace he
       stream << m_near << std::endl;
       stream << m_far << std::endl;
 
-      stream << m_reflectiveShadow;
+      stream << m_reflectiveShadow << std::endl;
     }
   }
 }

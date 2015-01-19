@@ -94,7 +94,7 @@ namespace he
       float m_errorRate;
       float m_maxDistance;
       float m_maxAngle;
-      unsigned int m_voxelNumber;
+      vec3ui m_voxelNumber;
     };
   }
 }

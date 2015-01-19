@@ -18,10 +18,10 @@ namespace he
 
       std::vector<std::string> shaderType(5);
       shaderType[0] = ".vert";
-      shaderType[1] = ".tctrl";
-      shaderType[2] = ".teval";
+      shaderType[1] = ".frag";
       shaderType[3] = ".geom";
-      shaderType[4] = ".frag";
+      shaderType[4] = ".tctrl"; 
+      shaderType[2] = ".teval";
 
       std::vector<std::string> shaderSources = shader->getShaderSources();
 

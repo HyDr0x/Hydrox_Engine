@@ -17,6 +17,32 @@ namespace he
     {
     public:
 
+      enum OpenGLCaps
+      {
+        MAX_TEXTURE_UNITS,
+        MAX_VERTEX_TEXTURE_IMAGE_UNITS,
+        MAX_TEXTURE_IMAGE_UNITS,
+        MAX_COMBINED_TEXTURE_IMAGE_UNITS,
+
+        MAX_VERTEX_SHADER_STORAGE_BLOCKS,
+        MAX_GEOMETRY_SHADER_STORAGE_BLOCKS,
+        MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS,
+        MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS,
+        MAX_FRAGMENT_SHADER_STORAGE_BLOCKS,
+        MAX_COMPUTE_SHADER_STORAGE_BLOCKS,
+        MAX_COMBINED_SHADER_STORAGE_BLOCKS,
+
+        MAX_SHADER_STORAGE_BUFFER_BINDINGS,
+        MAX_SHADER_STORAGE_BLOCK_SIZE,
+        SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT,
+
+        MAX_COLOR_ATTACHMENTS,
+
+        MAX_ARRAY_TEXTURE_LAYERS,
+
+        OPENGLCAPSNUMBER,
+      };
+
       OpenGLDebugLogManager();
       ~OpenGLDebugLogManager();
 
@@ -37,28 +63,10 @@ namespace he
       void setEventType(GLenum type, bool enable) const;
       void setEventSource(GLenum source, bool enable) const;
 
-      void getState(GLenum pname, GLint *data);
+      void getState(GLenum pname, GLint *data) const;
+      GLint getCapabilities(OpenGLCaps capability) const;
 
     private:
-
-      enum OpenGLCaps
-      {
-        MAX_TEXTURE_UNITS,
-        MAX_VERTEX_TEXTURE_IMAGE_UNITS,
-        MAX_TEXTURE_IMAGE_UNITS,
-        MAX_COMBINED_TEXTURE_IMAGE_UNITS,
-        MAX_VERTEX_SHADER_STORAGE_BLOCKS,
-        MAX_GEOMETRY_SHADER_STORAGE_BLOCKS,
-        MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS,
-        MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS,
-        MAX_FRAGMENT_SHADER_STORAGE_BLOCKS,
-        MAX_COMPUTE_SHADER_STORAGE_BLOCKS,
-        MAX_COMBINED_SHADER_STORAGE_BLOCKS,
-        MAX_SHADER_STORAGE_BUFFER_BINDINGS,
-        MAX_SHADER_STORAGE_BLOCK_SIZE,
-        SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT,
-        OPENGLCAPSNUMBER,
-      };
 
       bool m_syncedOutput;
 

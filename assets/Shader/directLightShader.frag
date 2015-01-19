@@ -51,6 +51,8 @@ void main()
 	vec4 material = texture(materialSampler, gsout_texCoord);
 	vec3 normal = normalize(texture(normalSampler, gsout_texCoord).xyz * 2.0f - 1.0f);//vec3(0,1,0);
 	
+	luminousFlux = vec4(0);
+	
 	for(uint i = 0; i < lightNumber; i++)
 	{
 		luminousFlux += vec4(light[i].color.rgb, 1.0f) * (material.z + calculateLightIntensity(light[i], pos, normal, material));

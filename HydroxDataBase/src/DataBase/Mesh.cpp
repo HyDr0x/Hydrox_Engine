@@ -516,32 +516,33 @@ namespace he
 
       for(unsigned int i = 0; i < positions.size(); i++)
       {
-        std::vector<unsigned int> cacheIndices(indexNumber, INT32_MAX);//INT32_MAX instead of UINT32_MAX for parallel offset adding in geometry shader later
+        std::vector<unsigned int> cacheIndices(indexNumber, 0);//INT32_MAX instead of UINT32_MAX for parallel offset adding in geometry shader later
         std::vector<float> cacheWeights(indexNumber, 0);//default zero
+        bool full = false;
+
         util::vec3f position = positions[i];
         util::vec3f normal = normals[i];
 
         for(unsigned int j = 0; j < m_cacheData.size(); j++)
         {
           float length = (position - m_cacheData[j].position).length();
-          float weight = util::vec3f::dot(normal, m_cacheData[j].normal) / ((length * length) + 0.0001f);//more weight is better
+          float weight = util::vec3f::dot(normal, m_cacheData[j].normal) / (length * length + 0.0001f);//more weight is better
 
           unsigned int bestIndex = ~0;
-          float smallestWeight = FLT_MAX;
-          bool full = false;
-
+          float lastOverwrittenWeight = weight;
+          
           for(unsigned int k = 0; k < indexNumber; k++)
           {
-            if(cacheIndices[k] == INT32_MAX)
+            if(cacheIndices[k] == 0)
             {
               bestIndex = k;
               full = k == indexNumber - 1;// only overwrite values if all indices are being used
               break;
             }
-            else if(!full && cacheWeights[k] < weight && cacheWeights[k] < smallestWeight)
+            else if(full && cacheWeights[k] < lastOverwrittenWeight)
             {
               bestIndex = k;
-              smallestWeight = cacheWeights[k];
+              lastOverwrittenWeight = cacheWeights[k];
             }
           }
 
@@ -558,7 +559,7 @@ namespace he
           {
             if(j != k && cacheIndices[j] == cacheIndices[k])//no doubled indices
             {
-              cacheIndices[k] = INT32_MAX;
+              cacheIndices[k] = 0;
             }
           }
         }

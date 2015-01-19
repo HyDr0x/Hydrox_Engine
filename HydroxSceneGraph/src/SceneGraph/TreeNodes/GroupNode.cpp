@@ -115,10 +115,12 @@ namespace he
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 
-      unsigned int type;
-      stream >> type;
-      m_firstChild.nodeType = (NodeType)type;
-      stream >> m_firstChild.index;
+      unsigned int nodeType;
+      unsigned int nodeIndex;
+
+      stream >> nodeType;
+      stream >> nodeIndex;
+      m_firstChild = NodeIndex(nodeIndex, (NodeType)nodeType);
 
       m_dirtyFlag = DEFAULT;
     }

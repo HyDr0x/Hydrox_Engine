@@ -80,15 +80,38 @@ namespace he
       }
 
       /////////////////////////SHADER/////////////////////////
+      he::db::RenderShader *shadowShader = renderShaderManager->getObject(material->getShadowShaderHandle());
+      he::db::RenderShader *renderShader = renderShaderManager->getObject(material->getShadowShaderHandle());
+
       fileStream << materialFileKeywords[SHADOWSHADERNAME] << std::endl;
       std::stringstream shadowShaderFilename;
       shadowShaderFilename << filename << "_shadowshader";
-      fileStream << path << shadowShaderFilename.str() << std::endl;
+      for(unsigned int i = 0; i < shadowShader->getShaderSources().size(); i++)
+      {
+        if(!shadowShader->getShaderSources()[i].empty())
+        {
+          fileStream << path << shadowShaderFilename.str() << std::endl;
+        }
+        else
+        {
+          fileStream << "" << std::endl;
+        }
+      }
 
       fileStream << materialFileKeywords[SHADERNAME] << std::endl;
       std::stringstream shaderFilename;
       shaderFilename << filename << "_shader";
-      fileStream << path << shaderFilename.str() << std::endl;
+      for(unsigned int i = 0; i < renderShader->getShaderSources().size(); i++)
+      {
+        if(!renderShader->getShaderSources()[i].empty())
+        {
+          fileStream << path << shaderFilename.str() << std::endl;
+        }
+        else
+        {
+          fileStream << "" << std::endl;
+        }
+      }
 
       fileStream << std::endl;
 

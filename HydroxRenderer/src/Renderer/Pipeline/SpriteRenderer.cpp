@@ -37,6 +37,7 @@ namespace he
 
       m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
 
+      m_opaqueSprites.resize(m_maxLayer);
       m_transparentSprites.resize(m_maxLayer);
 
       glGenBuffers(1, &m_dummyVBO);
@@ -60,23 +61,26 @@ namespace he
 
       spriteShader->useShader();
 
-      for(std::list<const db::Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites.begin(); spriteIDIterator != m_opaqueSprites.end(); spriteIDIterator++)
+      for(unsigned int i = 0; i < m_opaqueSprites.size(); i++)
       {
-        renderSprite = (*spriteIDIterator);
-        if(renderSprite->getRenderable())
+        for(std::list<const db::Sprite*>::const_iterator spriteIDIterator = m_opaqueSprites[i].begin(); spriteIDIterator != m_opaqueSprites[i].end(); spriteIDIterator++)
         {
-          renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
+          renderSprite = (*spriteIDIterator);
+          if(renderSprite->getRenderable())
+          {
+            renderTexture = m_textureManager->getObject(renderSprite->getTextureHandle());
 
-          renderTexture->setTexture(3, 0);
-          
-          util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
-          util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
-          float z = renderSprite->getLayer() / (float)m_maxLayer;
-          db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-          db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-          db::RenderShader::setUniform(2, GL_FLOAT, &z);
+            renderTexture->setTexture(3, 0);
 
-          glDrawArrays(GL_POINTS, 0, 1);
+            util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
+            util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
+            float z = renderSprite->getLayer() / (float)m_maxLayer;
+            db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            db::RenderShader::setUniform(2, GL_FLOAT, &z);
+
+            glDrawArrays(GL_POINTS, 0, 1);
+          }
         }
       }
 
@@ -127,7 +131,7 @@ namespace he
       }
       else
       {
-        m_opaqueSprites.push_back(sprite);
+        m_opaqueSprites[sprite->getLayer()].push_back(sprite);
       }
     }
 
@@ -139,7 +143,7 @@ namespace he
       }
       else
       {
-        m_opaqueSprites.remove(sprite);
+        m_opaqueSprites[sprite->getLayer()].remove(sprite);
       }
     }
 

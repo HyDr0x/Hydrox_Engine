@@ -98,21 +98,6 @@ namespace he
       m_instanceNumberChanged = false;
     }
 
-    unsigned int StaticRenderNode::getMaxGeometry() const
-    {
-      return m_options->maxGeometry;
-    }
-
-    unsigned int StaticRenderNode::getMaxMaterials() const
-    {
-      return m_options->maxMaterials;
-    }
-
-    unsigned int StaticRenderNode::getMaxBones() const
-    {
-      return m_options->maxBones;
-    }
-
     unsigned int StaticRenderNode::getCacheNumber() const
     {
       return 0;

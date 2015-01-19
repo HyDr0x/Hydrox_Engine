@@ -46,8 +46,10 @@ namespace he
 
       shader->useShader();
 
+      unsigned int reflectiveShadoMapResolution = sqrt((m_options->shadowMapWidth * m_options->shadowMapWidth) / float(m_options->unusedLightIndirectNumber));
+
       db::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_options->shadowMapWidth);
+      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &reflectiveShadoMapResolution);
 
       return true;
     }

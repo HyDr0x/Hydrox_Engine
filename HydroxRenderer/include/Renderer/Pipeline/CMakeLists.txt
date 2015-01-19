@@ -15,5 +15,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/SpriteRenderer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/StringRenderer2D.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Tonemapper.h 
 	PARENT_SCOPE 
 )

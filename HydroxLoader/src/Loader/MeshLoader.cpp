@@ -44,8 +44,8 @@ namespace he
 
         std::vector<db::Mesh::indexType> indexData(meshData.indexCount);
         std::vector<GLubyte> geometryData(meshData.vboSize);
-        std::vector<util::Cache> cacheData;
-        std::vector<util::vec2ui> triangleCacheIndices;
+        std::vector<util::Cache> cacheData(meshData.cacheSize);
+        std::vector<util::vec2ui> triangleCacheIndices(meshData.primitiveCount);
 
         file.read((char*)&indexData[0], sizeof(indexData[0]) * meshData.indexCount);
         file.read((char*)&geometryData[0], sizeof(geometryData[0]) * meshData.vboSize);

@@ -1,6 +1,7 @@
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
 
-#include <assert.h>
+#include <cassert>
+#include <vector>
 
 namespace he
 {
@@ -21,19 +22,20 @@ namespace he
       m_target = target;
       m_flags = flags;
       m_bufferBlockSize = bufferBlockSize;
+      m_currentBufferSize = 0;
 
-      resizeBuffer(size, data);
+      setData(0, size, data);
     }
 
-    void GPUImmutableBuffer::resizeBuffer(GLuint size, const GLvoid *data)
+    void GPUImmutableBuffer::resizeBuffer(GLuint size)
     {
-      m_currentBufferSize = (size / m_bufferBlockSize + 1) * m_bufferBlockSize;
+      m_currentBufferSize = ceil(size / float(m_bufferBlockSize)) * m_bufferBlockSize;
 
       glDeleteBuffers(1, &m_immutableBufferIndex);//necessary because of immutable storage
       glGenBuffers(1, &m_immutableBufferIndex);
 
       glBindBuffer(m_target, m_immutableBufferIndex);
-      glBufferStorage(m_target, m_currentBufferSize, data, m_flags);
+      glBufferStorage(m_target, m_currentBufferSize, nullptr, m_flags);
       m_bufferPointer = glMapBufferRange(m_target, 0, m_currentBufferSize, m_flags);
       glBindBuffer(m_target, 0);
     }
@@ -54,9 +56,23 @@ namespace he
       glClientWaitSync(m_memoryFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000);
     }
     
-    void GPUImmutableBuffer::setData(GLuint offset, GLuint size, const GLvoid *data) const
+    void GPUImmutableBuffer::setData(GLuint offset, GLuint size, const GLvoid *data)
     {
-      assert(offset + size <= m_currentBufferSize);
+      if(offset + size > m_currentBufferSize)
+      {
+        if(m_currentBufferSize > 0)
+        {
+          GLuint oldBufferSize = m_currentBufferSize;
+          std::vector<GLubyte> oldData(oldBufferSize);
+          getData(0, oldBufferSize, &oldData[0]);//get the old data
+          resizeBuffer(offset + size);//resize the buffer
+          setData(0, oldBufferSize, &oldData[0]);//fill it with the old data
+        }
+        else
+        {
+          resizeBuffer(offset + size);//resize the buffer
+        }
+      }
 
       std::copy((GLubyte*)data, (GLubyte*)data + size, (GLubyte*)m_bufferPointer + offset);
     }

@@ -112,10 +112,11 @@ namespace he
       read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());
 
       unsigned int nodeType;
+      unsigned int nodeIndex;
       fileStream >> nodeType;
-      m_rootNode.nodeType = (sg::NodeType)nodeType;
+      fileStream >> nodeIndex;
 
-      fileStream >> m_rootNode.index;
+      m_rootNode = sg::NodeIndex(nodeIndex, (sg::NodeType)nodeType);
 
       fileStream.close();
     }

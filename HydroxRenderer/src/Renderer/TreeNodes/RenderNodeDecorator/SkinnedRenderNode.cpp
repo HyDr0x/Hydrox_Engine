@@ -98,21 +98,6 @@ namespace he
       m_instanceNumberChanged = false;
     }
 
-    unsigned int SkinnedRenderNode::getMaxGeometry() const
-    {
-      return m_options->maxGeometry;
-    }
-
-    unsigned int SkinnedRenderNode::getMaxMaterials() const
-    {
-      return m_options->maxMaterials;
-    }
-
-    unsigned int SkinnedRenderNode::getMaxBones() const
-    {
-      return m_options->maxBones;
-    }
-
     unsigned int SkinnedRenderNode::getCacheNumber() const
     {
       return 0;

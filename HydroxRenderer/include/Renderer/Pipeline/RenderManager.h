@@ -21,6 +21,7 @@
 #include "Renderer/Pipeline/SpriteRenderer.h"
 #include "Renderer/Pipeline/StringRenderer2D.h"
 #include "Renderer/Pipeline/FinalCompositing.h"
+#include "Renderer/Pipeline/Tonemapper.h"
 
 #include "Renderer/Buffer/UBO.h"
 
@@ -69,9 +70,9 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void setViewPort(GLuint width, GLuint height, GLfloat near, GLfloat far);
+      void setViewPort(GLuint width, GLuint height, GLfloat zNear, GLfloat zFar);
 
-      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition, float near, float far);
+      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition);
 
       void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
@@ -110,6 +111,7 @@ namespace he
       SpriteRenderer m_spriteRenderer;
       StringRenderer2D m_stringRenderer;
       FinalCompositing m_finalCompositing;
+      Tonemapper m_tonemapper;
 
       GLfloat m_aspectRatio;
 

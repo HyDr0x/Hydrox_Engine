@@ -40,8 +40,6 @@ namespace he
       void updateBuffer();
       void render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
 
-      util::SharedPointer<db::Texture2D> getLightTexture() const;
-
       void setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
       void unsetShadowMap(unsigned int bindingPoint);
 
@@ -63,6 +61,8 @@ namespace he
 
       unsigned int getReflectiveShadowLightNumber() const;
 
+      util::SharedPointer<db::Texture2D> getLightTexture() const;
+
       util::SharedPointer<db::Texture3D> getShadowMaps() const;
 
       util::SharedPointer<db::Texture3D> getReflectiveShadowPosMaps() const;
@@ -82,6 +82,9 @@ namespace he
 
       util::SharedPointer<db::Texture2D> m_shadowDepthMap;
 
+      std::list<const xBar::LightContainer> m_lights;
+      GPUImmutableBuffer m_lightBuffer;
+
       std::list<const xBar::ShadowLightContainer> m_shadowLights;
       util::SharedPointer<db::Texture3D> m_shadowMaps;
       GPUImmutableBuffer m_shadowedLightBuffer;
@@ -94,19 +97,17 @@ namespace he
       GPUImmutableBuffer m_reflectiveShadowedLightBuffer;
       Renderquad m_renderReflectiveShadowMapsQuad;
 
-      std::list<const xBar::LightContainer> m_lights;
-      GPUImmutableBuffer m_lightBuffer;
-
       Renderquad m_renderLightMapQuad;
       util::SharedPointer<db::Texture2D> m_lightTexture;
 
       util::ResourceHandle m_directLightShaderHandle;
 
       GLint m_maxShadowMapsPerTextureArray;
+      GLint m_maxColorAttachments;
 
       bool m_lightNumberChanged;
       bool m_shadowLightNumberChanged;
-      bool m_relfectiveShadowLightNumberChanged;
+      bool m_reflectiveShadowLightNumberChanged;
     };
   }
 }
