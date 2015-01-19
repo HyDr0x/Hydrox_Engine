@@ -29,6 +29,8 @@ namespace he
 
       void free();
 
+      void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
+
       void setTexture(GLint location, GLuint slot);
       void unsetTexture() const;
 

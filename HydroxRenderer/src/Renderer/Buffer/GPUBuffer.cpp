@@ -17,7 +17,7 @@ namespace he
       glDeleteBuffers(1, &m_bufferIndex);
     }
 
-    void GPUBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const void *data)
+    void GPUBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const GLvoid *data)
     {
       m_target = target;
       m_usage = usage;
@@ -41,7 +41,7 @@ namespace he
       return size < m_currentBufferSize;
     }
 
-    void GPUBuffer::setData(GLuint offset, GLuint size, const void *data)
+    void GPUBuffer::setData(GLuint offset, GLuint size, const GLvoid *data)
     {
       if(offset + size > m_currentBufferSize)//is the old buffer big enough for the new data?
       {
@@ -71,7 +71,7 @@ namespace he
       glBindBuffer(m_target, 0);
     }
 
-    void GPUBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const
+    void GPUBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const GLvoid *data) const
     {
       glBindBuffer(m_target, m_bufferIndex);
       glClearBufferData(m_target, internalFormat, format, type, data);

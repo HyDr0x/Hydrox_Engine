@@ -17,15 +17,15 @@ namespace he
       GPUBuffer();
       ~GPUBuffer();
 
-      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const void *data);
+      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const GLvoid *data = nullptr);
 
       void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;
 
-      void setData(GLuint offset, GLuint size, const void *data);
-      void getData(GLuint offset, GLuint size, void *data) const;
+      void setData(GLuint offset, GLuint size, const GLvoid *data);
+      void getData(GLuint offset, GLuint size, GLvoid *data) const;
 
-      void clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const;
+      void clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const GLvoid *data) const;
 
       void bindBuffer(GLenum target) const;
       void unbindBuffer(GLenum target) const;

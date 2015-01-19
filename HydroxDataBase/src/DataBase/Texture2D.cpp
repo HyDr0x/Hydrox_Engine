@@ -84,6 +84,11 @@ namespace he
       glDeleteTextures(1, &m_texIndex);
     }
 
+    void Texture2D::bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, m_texIndex, level, GL_FALSE, 0, access, format);
+    }
+
     void Texture2D::setTexture(GLint location, GLuint slot)
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");

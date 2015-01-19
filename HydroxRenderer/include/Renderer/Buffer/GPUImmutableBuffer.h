@@ -17,7 +17,7 @@ namespace he
       GPUImmutableBuffer();
       ~GPUImmutableBuffer();
 
-      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data);
+      void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data = nullptr);
 
       void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;

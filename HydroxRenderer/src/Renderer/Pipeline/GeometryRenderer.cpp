@@ -14,10 +14,6 @@
 #include "Renderer/Traverser/RemoveGeometryTraverserShadowPass.h"
 #include "Renderer/Traverser/RemoveGeometryTraverserReflectiveShadowPass.h"
 
-#include "Renderer/Traverser/RenderGeometryTraverser.h"
-#include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
-#include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
-#include "Renderer/Traverser/FrustumCullingTraverser.h"
 #include "Renderer/Traverser/UpdateTraverser.h"
 
 #include "Renderer/TreeNodes/GroupNode.h"
@@ -65,9 +61,19 @@ namespace he
       m_renderShadowRootNode = new GroupNode();
       m_renderReflectiveShadowRootNode = new GroupNode();
 
-      m_container = singletonManager->getService<RenderShaderContainer>();
+      m_container = m_singletonManager->getService<RenderShaderContainer>();
 
-      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
+      std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURENUMBER);
+      samplerObjects[db::Material::DIFFUSETEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
+      samplerObjects[db::Material::NORMALTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
+      samplerObjects[db::Material::SPECULARTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
+      samplerObjects[db::Material::DISPLACEMENTTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
+
+      m_renderGeometryTraverser.initialize(m_singletonManager, samplerObjects);
+      m_renderIndexGeometryTraverser.initialize(m_singletonManager);
+      m_renderShadowGeometryTraverser.initialize(m_singletonManager);
+
+      registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
     }
 
     void GeometryRenderer::addRenderComponent(const xBar::IGeometryContainer& geometry)
@@ -155,29 +161,27 @@ namespace he
 
     void GeometryRenderer::generateShadowMap(int shadowMapIndex, RenderPass pass)
     {
-      RenderShadowGeometryTraverser renderShadowTraverser(m_singletonManager, shadowMapIndex);
+      m_renderShadowGeometryTraverser.setViewProjectionIndex(shadowMapIndex);
 
       switch(pass)
       {
       case SHADOWPASS:
-        renderShadowTraverser.doTraverse(m_renderShadowRootNode);
+        m_renderShadowGeometryTraverser.doTraverse(m_renderShadowRootNode);
         break;
       case REFLECTIVESHADOWPASS:
-        renderShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+        m_renderShadowGeometryTraverser.doTraverse(m_renderReflectiveShadowRootNode);
         break;
       }
     }
 
     void GeometryRenderer::rasterizeIndexGeometry()
     {
-      RenderIndexGeometryTraverser renderIndexTraverser(m_singletonManager);
-      renderIndexTraverser.doTraverse(m_renderIndexRootNode);
+      m_renderIndexGeometryTraverser.doTraverse(m_renderIndexRootNode);
     }
 
     void GeometryRenderer::rasterizeGeometry()
     {  
-      RenderGeometryTraverser renderTraverser(m_singletonManager);
-      renderTraverser.doTraverse(m_renderRootNode);
+      m_renderGeometryTraverser.doTraverse(m_renderRootNode);
     }
 
     unsigned int GeometryRenderer::getGlobalCacheNumber() const

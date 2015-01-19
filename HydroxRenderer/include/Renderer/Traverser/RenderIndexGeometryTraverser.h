@@ -1,14 +1,12 @@
 #ifndef RENDERINDEXGEOMETRYTRAVERSER_H_
 #define RENDERINDEXGEOMETRYTRAVERSER_H_
 
-#include <vector>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include "Renderer/Traverser/Traverser.h"
-
 #include <DataBase/ResourceManager.hpp>
+
+#include "Renderer/Traverser/Traverser.h"
 
 namespace he
 {
@@ -18,8 +16,10 @@ namespace he
     {
     public:
 
-      RenderIndexGeometryTraverser(util::SingletonManager *singletonManager);
+      RenderIndexGeometryTraverser();
       virtual ~RenderIndexGeometryTraverser();
+
+      void initialize(util::SingletonManager *singletonManager);
 
       virtual bool preTraverse(GroupNode* treeNode);
 

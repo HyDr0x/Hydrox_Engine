@@ -13,16 +13,22 @@ namespace he
 {
   namespace renderer
   {
-    RenderGeometryTraverser::RenderGeometryTraverser(util::SingletonManager *singletonManager)
+    RenderGeometryTraverser::RenderGeometryTraverser()
+    {
+    }
+
+    RenderGeometryTraverser::~RenderGeometryTraverser()
+    {
+    }
+
+    void RenderGeometryTraverser::initialize(util::SingletonManager *singletonManager, std::vector<util::SharedPointer<SamplerObject>> samplerObjects)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-    }
 
-    RenderGeometryTraverser::~RenderGeometryTraverser()
-    {
+      m_samplerObjects = samplerObjects;
     }
 
     bool RenderGeometryTraverser::preTraverse(GroupNode* treeNode)
@@ -68,6 +74,7 @@ namespace he
       {
         for(unsigned int j = 0; j < textureHandles[i].size(); j++)
         {
+          m_samplerObjects[i]->bindSampler(slotOffset + j);
           db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
           texture->setTexture(static_cast<GLint>(slotOffset + j), slotOffset + j);
         }
@@ -88,6 +95,7 @@ namespace he
         {
           db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
           texture->unsetTexture();
+          m_samplerObjects[i]->unbindSampler();
         }
       }
     }

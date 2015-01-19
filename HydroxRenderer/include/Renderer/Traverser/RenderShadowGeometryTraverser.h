@@ -1,8 +1,6 @@
 #ifndef RENDERSHADOWGEOMETRYTRAVERSER_H_
 #define RENDERSHADOWGEOMETRYTRAVERSER_H_
 
-#include <vector>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
@@ -19,8 +17,12 @@ namespace he
     {
     public:
 
-      RenderShadowGeometryTraverser(util::SingletonManager *singletonManager, int viewProjectionIndex);
+      RenderShadowGeometryTraverser();
       virtual ~RenderShadowGeometryTraverser();
+
+      void initialize(util::SingletonManager *singletonManager);
+
+      void setViewProjectionIndex(int viewProjectionIndex);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
       virtual void postTraverse(VertexDeclarationNode* treeNode);

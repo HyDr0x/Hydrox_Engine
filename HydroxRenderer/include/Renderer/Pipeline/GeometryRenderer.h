@@ -13,6 +13,11 @@
 
 #include "Renderer/Buffer/GPUBuffer.h"
 
+#include "Renderer/Traverser/RenderGeometryTraverser.h"
+#include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
+#include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
+#include "Renderer/Traverser/FrustumCullingTraverser.h"
+
 namespace he
 {
   namespace xBar
@@ -69,6 +74,11 @@ namespace he
       util::SharedPointer<RenderShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
+
+      FrustumCullingTraverser m_frustumCullingTraverser;
+      RenderGeometryTraverser m_renderGeometryTraverser;
+      RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
+      RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
       
       GroupNode *m_renderRootNode;
       GroupNode *m_renderIndexRootNode;

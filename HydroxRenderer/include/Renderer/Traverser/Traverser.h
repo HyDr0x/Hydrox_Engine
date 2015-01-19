@@ -1,5 +1,5 @@
-#ifndef TRAVERSER_H_
-#define TRAVERSER_H_
+#ifndef TRAVERSERRENDERER_H_
+#define TRAVERSERRENDERER_H_
 
 namespace he
 {

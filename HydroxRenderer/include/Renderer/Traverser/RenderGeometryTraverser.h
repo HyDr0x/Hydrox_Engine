@@ -1,14 +1,15 @@
 #ifndef RENDERGEOMETRYTRAVERSER_H_
 #define RENDERGEOMETRYTRAVERSER_H_
 
-#include <vector>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+
+#include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
 
-#include <DataBase/ResourceManager.hpp>
+#include "Renderer/Pipeline/SamplerObject.h"
 
 namespace he
 {
@@ -18,8 +19,10 @@ namespace he
     {
     public:
 
-      RenderGeometryTraverser(util::SingletonManager *singletonManager);
+      RenderGeometryTraverser();
       virtual ~RenderGeometryTraverser();
+
+      void initialize(util::SingletonManager *singletonManager, std::vector<util::SharedPointer<SamplerObject>> samplerObjects);
 
       virtual bool preTraverse(GroupNode* treeNode);
 
@@ -41,6 +44,8 @@ namespace he
       util::SharedPointer<db::MaterialManager> m_materialManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
+
+      std::vector<util::SharedPointer<SamplerObject>> m_samplerObjects;
     };
   }
 }

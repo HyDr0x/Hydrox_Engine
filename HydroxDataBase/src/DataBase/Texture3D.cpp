@@ -84,6 +84,11 @@ namespace he
       glDeleteTextures(1, &m_texIndex);
     }
 
+    void Texture3D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, m_texIndex, level, layered, layer, access, format);
+    }
+
     void Texture3D::setTexture(GLint location, GLuint slot)
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");

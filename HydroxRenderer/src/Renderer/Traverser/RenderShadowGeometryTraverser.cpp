@@ -13,8 +13,15 @@ namespace he
 {
   namespace renderer
   {
-    RenderShadowGeometryTraverser::RenderShadowGeometryTraverser(util::SingletonManager *singletonManager, int viewProjectionIndex) :
-      m_viewProjectionIndex(viewProjectionIndex)
+    RenderShadowGeometryTraverser::RenderShadowGeometryTraverser()
+    {
+    }
+
+    RenderShadowGeometryTraverser::~RenderShadowGeometryTraverser()
+    {
+    }
+
+    void RenderShadowGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
@@ -24,8 +31,9 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
     }
 
-    RenderShadowGeometryTraverser::~RenderShadowGeometryTraverser()
+    void RenderShadowGeometryTraverser::setViewProjectionIndex(int viewProjectionIndex)
     {
+      m_viewProjectionIndex = viewProjectionIndex;
     }
 
     bool RenderShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
