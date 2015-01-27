@@ -75,8 +75,8 @@ void main()
 		for(uint i = triangleCacheBorderIndices.x; i < triangleCacheBorderIndices.y; i++)
 		{
 			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].position = vec4((trfMatrix[vsout_instanceIndex[0]] * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength);
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].normal = vec4(normalize(mat3(trfMatrix[vsout_instanceIndex[0]]) * vec3(caches[cacheIndexOffsetTMP + i].normal)), cacheMaterial.specularStrength);
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].specularExponent.x = cacheMaterial.specularExponent;
+			vec3 normal = normalize(mat3(trfMatrix[vsout_instanceIndex[0]]) * caches[cacheIndexOffsetTMP + i].normal.xyz);
+			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].normal = vec4(normal.xy, cacheMaterial.specularStrength, cacheMaterial.specularExponent);
 		}
 	}
 

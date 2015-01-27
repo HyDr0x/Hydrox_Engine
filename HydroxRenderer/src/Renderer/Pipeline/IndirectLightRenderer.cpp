@@ -34,6 +34,8 @@ namespace he
       m_zBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->globalCacheBlockSize, 1 * sizeof(util::Cache), GL_STATIC_DRAW, nullptr);
       m_indirectLightDataBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(IndirectLight) * m_options->globalCacheBlockSize * 2, 1 * sizeof(util::Cache), GL_STATIC_DRAW, nullptr);
 
+      //m_globalCacheBuffer2 = util::SharedPointer<db::Texture2D>(new db::Texture2D(64, 64, GL_TEXTURE_2D, GL_FLOAT, ));
+
       m_frameCacheIndexMap = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->width, m_options->height, 6, GL_TEXTURE_2D_ARRAY, GL_UNSIGNED_INT, GL_RGBA32UI, GL_RGBA_INTEGER, 4, 128));
       
       m_indirectLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));

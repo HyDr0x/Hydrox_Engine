@@ -82,8 +82,8 @@ void main()
 			barycentric = barycentricCoordinates(vec3(caches[i].position), vsout_pos3D[0], vsout_pos3D[1], vsout_pos3D[2]);
 			skinningMatrix = barycentric.x * vsout_skinningMatrix[0] + barycentric.y * vsout_skinningMatrix[1] + barycentric.z * vsout_skinningMatrix[2];
 			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].position = vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength);
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].normal = vec4(normalize(mat3(skinningMatrix) * vec3(caches[cacheIndexOffsetTMP + i].normal)), cacheMaterial.specularStrength);
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].specularExponent.x = cacheMaterial.specularExponent;
+			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
+			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].normal = vec4(normal.xy, cacheMaterial.specularStrength, cacheMaterial.specularExponent);
 		}
 	}
 	

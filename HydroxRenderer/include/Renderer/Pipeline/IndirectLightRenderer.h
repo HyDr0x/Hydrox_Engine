@@ -65,11 +65,12 @@ namespace he
 
       GPUBuffer m_indirectLightDataBuffer;//the indirect light for the interpolation
       GPUBuffer m_globalCacheBuffer;//saves all caches of the scene
-      GPUBuffer m_zBuffer;//uints 0 = cache is not being used, 1 = cache is being
+      GPUBuffer m_zBuffer;//uints 0 = cache is not being used, 1 = cache is being used
 
-      util::SharedPointer<db::Texture2D> m_indirectLightDataBuffer2;
-      TBO m_globalCacheBuffer2;//saves all caches of the scene
-      TBO m_zBuffer2;
+      util::SharedPointer<db::Texture2D> m_indirectLightDataBuffer2;//the indirect light for the interpolation
+      util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer2;//saves all caches positions and diffuse strength of the scene
+      util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer2;//saves all caches normals and specular strength and exponent of the scene
+      util::SharedPointer<db::Texture2D> m_zBuffer2;
 
       Renderquad m_indirectLightIndicesRenderQuad;
       Renderquad m_indirectLightRenderQuad;

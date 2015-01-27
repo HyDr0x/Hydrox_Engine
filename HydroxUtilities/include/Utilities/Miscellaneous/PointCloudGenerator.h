@@ -17,9 +17,7 @@ namespace he
     {
       vec3f position;
       float diffuseStrength;
-      vec3f normal;//normalized normal
-      float specularStrength;
-      vec4f specularExponent;//only x is used as an exponent
+      vec4f normal;//normalized normal [xyz], after the writing to the globalCacheBuffer normal.z becomes specularStrength and normal.w becomes specularExponent 
     };
 
     typedef util::vec4f cacheIndexType;

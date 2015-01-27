@@ -82,12 +82,14 @@ void main()
 		{
 			CacheData cache = caches[cacheIndices[i]];
 			
+			vec3 cacheNormal = vec3(cache.normal.xy, sqrt(1.0f - cache.normal.x * cache.normal.x - cache.normal.y * cache.normal.y));
+			
 			float dir = max(1.0f - length(pos - cache.position.xyz) / dmax, 0.0001f);
 			
-			float wd = dir * sqrt(max(dot(cache.normal.xyz, normal), 0));
+			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0));
 			
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
-			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cache.normal.xyz), reflectCamDir), 0));
+			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
 			
 			IndirectLightData indirectLightD = indirectLights[2 * cacheIndices[i] + 0];
 			IndirectLightData indirectLightG = indirectLights[2 * cacheIndices[i] + 1];
