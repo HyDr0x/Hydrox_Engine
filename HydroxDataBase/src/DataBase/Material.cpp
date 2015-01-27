@@ -8,17 +8,19 @@ namespace he
     {
     }
 
-    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, util::ResourceHandle shadowShader, std::vector<uint64_t> hashes, bool transparency) : m_transparency(transparency)
+    Material::Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, std::vector<uint64_t> hashes, bool transparency) : m_transparency(transparency)
     {
-      unsigned int length = sizeof(MaterialData) + sizeof(hashes[0]) * hashes.size();
+      unsigned int length = sizeof(MaterialData) + sizeof(uint64_t) * hashes.size();
       std::vector<unsigned char> data(length);
       std::copy(&materialData, &materialData + 1, (MaterialData*)&data[0]);
-      std::copy(&hashes[0], &hashes[0] + hashes.size(), (uint64_t*)&data[sizeof(MaterialData)]);
+
+      if(!hashes.empty())
+      {
+        std::copy(&hashes[0], &hashes[0] + hashes.size(), (uint64_t*)&data[sizeof(MaterialData)]);
+      }
 
       m_hash = MurmurHash64A(&data[0], length, 0);
 
-      m_shaderHandle = shader;
-      m_shadowShaderHandle = shadowShader;
       m_textureHandles = textureIndices;
       m_materialData = materialData;
     }
@@ -30,8 +32,6 @@ namespace he
       m_materialData = other.m_materialData; 
 
       m_textureHandles = other.m_textureHandles;
-      m_shaderHandle = other.m_shaderHandle;
-      m_shadowShaderHandle = other.m_shadowShaderHandle;
     }
 
     Material::~Material()
@@ -51,15 +51,10 @@ namespace he
       std::swap(m_hash, other.m_hash);
       std::swap(m_materialData, other.m_materialData);
       std::swap(m_textureHandles, other.m_textureHandles);
-      std::swap(m_shaderHandle, other.m_shaderHandle);
-      std::swap(m_shadowShaderHandle, other.m_shadowShaderHandle);
     }
 
     void Material::free()
     {
-      m_shaderHandle.free();
-      m_shadowShaderHandle.free();
-
       for(int i = 0; i < m_textureHandles.size(); i++)
       {
         for(int j = 0; j < m_textureHandles[i].size(); j++)
@@ -95,24 +90,28 @@ namespace he
       return m_textureHandles[texType][slot];
     }
 
-    void Material::setShaderHandle(util::ResourceHandle shaderHandle)
+    std::vector< std::vector<util::ResourceHandle> > Material::getTextureHandles() const
     {
-      m_shaderHandle = shaderHandle;
+      return m_textureHandles;
     }
 
-    util::ResourceHandle Material::getShaderHandle() const
+    bool Material::equalTextureHandles(const std::vector<std::vector<util::ResourceHandle>>& textureHandles) const
     {
-      return m_shaderHandle;
-    }
+      bool inserted = true;
 
-    void Material::setShadowShaderHandle(util::ResourceHandle shadowShaderHandle)
-    {
-      m_shadowShaderHandle = shadowShaderHandle;
-    }
+      for(unsigned int j = 0; j < textureHandles.size(); j++)
+      {
+        for(unsigned int k = 0; k < textureHandles[j].size(); k++)
+        {
+          if(textureHandles[j][k] != m_textureHandles[j][k])
+          {
+            inserted = false;
+            break;
+          }
+        }
+      }
 
-    util::ResourceHandle Material::getShadowShaderHandle() const
-    {
-      return m_shadowShaderHandle;
+      return inserted;
     }
 
     void Material::setMaterialData(const Material::MaterialData& material)

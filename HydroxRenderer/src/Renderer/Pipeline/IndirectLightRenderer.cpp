@@ -5,9 +5,9 @@
 
 #include <DataBase/ComputeShader.h>
 #include <DataBase/ResourceManager.hpp>
+#include <DataBase/ShaderContainer.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 
 namespace he
 {
@@ -27,8 +27,8 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
       m_singletonManager = singletonManager;
 
-      m_indirectLightShaderHandle = singletonManager->getService<RenderShaderContainer>()->indirectLightShaderHandle;
-      m_indirectLightInterpolationShaderHandle = singletonManager->getService<RenderShaderContainer>()->indirectLightInterpolationShaderHandle;
+      m_indirectLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getComputeShader(m_singletonManager, db::ShaderContainer::INDIRECTLIGHT);
+      m_indirectLightInterpolationShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::INDIRECTLIGHTINTERPOLATION, util::Flags<db::VertexDeclarationFlags>(8192));
 
       m_globalCacheBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Cache) * m_options->globalCacheBlockSize, 1 * sizeof(util::Cache), GL_STATIC_DRAW, nullptr);
       m_zBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->globalCacheBlockSize, 1 * sizeof(util::Cache), GL_STATIC_DRAW, nullptr);

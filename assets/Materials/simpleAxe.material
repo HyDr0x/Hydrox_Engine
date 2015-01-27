@@ -23,7 +23,7 @@ NULL
 NULL
 
 Normal Map
-NULL
+../../assets/Textures/dwarfNormal.png
 NULL
 NULL
 NULL
@@ -39,21 +39,4 @@ NULL
 NULL
 NULL
 NULL
-###################################
-
-#Shader
-###################################
-ShadowShader Name
-../../assets/Shader/Mesh/ShadowMapping/staticReflectiveTex
-../../assets/Shader/Mesh/ShadowMapping/reflectiveTex
-""
-""
-""
-
-Shader Name
-../../assets/Shader/Mesh/staticTex
-../../assets/Shader/Mesh/tex
-""
-""
-""
 ###################################

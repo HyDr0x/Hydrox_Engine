@@ -14,9 +14,7 @@ namespace he
 
       RemoveGeometryTraverserShadowPass(
         util::SingletonManager *singletonManager, 
-        const xBar::IGeometryContainer& geometryContainer, 
-        util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
+        const xBar::IGeometryContainer& geometryContainer);
 
       virtual ~RemoveGeometryTraverserShadowPass();
 

@@ -21,21 +21,22 @@ namespace he
     {
       util::SharedPointer<RenderOptions> options = singletonManager->getService<RenderOptions>();
 
-      switch(nodeType.toInt())
+      if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE)) == nodeType)
       {
-      case xBar::SKINNEDNODE | xBar::INDEXEDNODE:
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawElementsDecorator(new SkinnedRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager), options), singletonManager));
-        break;
-      case xBar::INDEXEDNODE:
+      }
+      else if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE)) == nodeType)
+      {
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawElementsDecorator(new StaticRenderNode(options), GLINDEXTYPE, primitiveType, vertexStride, singletonManager), options), singletonManager));
-        break;
-      case xBar::SKINNEDNODE:
+      }
+      else if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE)) == nodeType)
+      {
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
-        break;
-      default:
+      }
+      else if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE)) == nodeType)
+      {
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
-        break;
-      };
+      }
     }
   }
 }

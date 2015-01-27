@@ -1,6 +1,6 @@
 #include "Renderer/Pipeline/BillboardRenderer.h"
 
-#include "Renderer/Pipeline/RenderShaderContainer.h"
+#include <DataBase/ShaderContainer.h>
 
 namespace he
 {
@@ -24,7 +24,7 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_billboardShaderHandle = singletonManager->getService<RenderShaderContainer>()->billboardShaderHandle;
+      m_billboardShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::BILLBOARD, util::Flags<db::VertexDeclarationFlags>(8192));
 
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);

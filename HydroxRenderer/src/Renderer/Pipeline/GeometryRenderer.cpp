@@ -2,6 +2,8 @@
 
 #include <XBar/IGeometryContainer.h>
 
+#include <DataBase/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
 #include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
@@ -19,7 +21,6 @@
 #include "Renderer/TreeNodes/GroupNode.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -27,12 +28,12 @@ namespace he
   namespace renderer
   {
     GeometryRenderer::GeometryRenderer() :
-      m_renderRootNode(nullptr),
-      m_renderIndexRootNode(nullptr),
-      m_renderShadowRootNode(nullptr), 
-      m_renderReflectiveShadowRootNode(nullptr),
       m_globalCacheNumber(0)
     {
+      m_renderRootNode = new GroupNode();
+      m_renderIndexRootNode = new GroupNode();
+      m_renderShadowRootNode = new GroupNode();
+      m_renderReflectiveShadowRootNode = new GroupNode();
     }
 
     GeometryRenderer::~GeometryRenderer()
@@ -56,12 +57,7 @@ namespace he
       glCullFace(GL_BACK);
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-      m_renderRootNode = new GroupNode();
-      m_renderIndexRootNode = new GroupNode();
-      m_renderShadowRootNode = new GroupNode();
-      m_renderReflectiveShadowRootNode = new GroupNode();
-
-      m_container = m_singletonManager->getService<RenderShaderContainer>();
+      m_container = m_singletonManager->getService<db::ShaderContainer>();
 
       std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURENUMBER);
       samplerObjects[db::Material::DIFFUSETEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
@@ -87,15 +83,11 @@ namespace he
 
       if(createdRenderGroup)
       {
-        InsertGeometryTraverserIndexPass insertIndexTraverser(createdRenderGroup, geometry, m_singletonManager, 
-          m_container->staticIndexShaderHandle,
-          m_container->skinnedIndexShaderHandle);
+        InsertGeometryTraverserIndexPass insertIndexTraverser(createdRenderGroup, geometry, m_singletonManager);
 
         insertIndexTraverser.doTraverse(m_renderIndexRootNode);
 
-        InsertGeometryTraverserShadowPass insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager,
-          m_container->staticShadowMapGenerationShaderHandle,
-          m_container->skinnedShadowMapGenerationShaderHandle);
+        InsertGeometryTraverserShadowPass insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager);
 
         insertShadowTraverser.doTraverse(m_renderShadowRootNode);
 
@@ -112,15 +104,11 @@ namespace he
       RemoveGeometryTraverserRenderPass removeTraverser(m_singletonManager, geometry);
       removeTraverser.doTraverse(m_renderRootNode);
 
-      RemoveGeometryTraverserIndexPass removeIndexTraverser(m_singletonManager, geometry,
-        m_container->staticIndexShaderHandle,
-        m_container->skinnedIndexShaderHandle);
+      RemoveGeometryTraverserIndexPass removeIndexTraverser(m_singletonManager, geometry);
 
       removeIndexTraverser.doTraverse(m_renderIndexRootNode);
 
-      RemoveGeometryTraverserShadowPass removeShadowTraverser(m_singletonManager, geometry,
-        m_container->staticShadowMapGenerationShaderHandle,
-        m_container->skinnedShadowMapGenerationShaderHandle);
+      RemoveGeometryTraverserShadowPass removeShadowTraverser(m_singletonManager, geometry);
 
       removeShadowTraverser.doTraverse(m_renderShadowRootNode);
 
@@ -135,12 +123,12 @@ namespace he
       updateTraverser.doTraverse(m_renderRootNode);
     }
 
-    void GeometryRenderer::frustumCulling(int shadowMapIndex, RenderPass pass)
+    void GeometryRenderer::frustumCulling(int cameraIndex, RenderPass pass)
     {
-      db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_container->frustumCullingShaderHandle);
+      db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_container->getComputeShader(m_singletonManager, db::ShaderContainer::FRUSTUMCULLING));
       frustumCullingShader->useShader();
 
-      db::ComputeShader::setUniform(1, GL_INT, &shadowMapIndex);
+      db::ComputeShader::setUniform(1, GL_INT, &cameraIndex);
       FrustumCullingTraverser frustumCullingTraverser;
       
       switch(pass)
@@ -159,9 +147,9 @@ namespace he
       frustumCullingShader->useNoShader();
     }
 
-    void GeometryRenderer::generateShadowMap(int shadowMapIndex, RenderPass pass)
+    void GeometryRenderer::generateShadowMap(int cameraIndex, RenderPass pass)
     {
-      m_renderShadowGeometryTraverser.setViewProjectionIndex(shadowMapIndex);
+      m_renderShadowGeometryTraverser.setViewProjectionIndex(cameraIndex);
 
       switch(pass)
       {

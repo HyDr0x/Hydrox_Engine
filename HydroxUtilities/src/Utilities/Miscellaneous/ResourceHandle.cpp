@@ -48,6 +48,11 @@ namespace he
       return m_id == other.m_id && m_referenceCounter == other.m_referenceCounter;
     }
 
+    bool ResourceHandle::operator!=(const ResourceHandle& other) const
+    {
+      return m_id != other.m_id || m_referenceCounter != other.m_referenceCounter;
+    }
+
     void ResourceHandle::free()
     {
       if(m_referenceCounter != nullptr && --(*m_referenceCounter) == 0)

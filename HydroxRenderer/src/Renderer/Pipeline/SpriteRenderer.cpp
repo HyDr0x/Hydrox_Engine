@@ -6,9 +6,9 @@
 #include <DataBase/Sprite.h>
 #include <DataBase/RenderShader.h>
 #include <DataBase/Texture2D.h>
+#include <DataBase/ShaderContainer.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 
 namespace he
 {
@@ -33,7 +33,7 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_spriteShaderHandle = singletonManager->getService<RenderShaderContainer>()->spriteShaderHandle;
+      m_spriteShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::SPRITE, util::Flags<db::VertexDeclarationFlags>(8192));
 
       m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
 

@@ -10,6 +10,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/Mesh.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleEmitter.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShaderContainer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceManager.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Shader.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Sprite.h 

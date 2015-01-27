@@ -3,8 +3,8 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <DataBase/RenderShader.h>
+#include <DataBase/ShaderContainer.h>
 
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -25,10 +25,10 @@ namespace he
       m_logLuminanceRange = util::vec2f(0, 0);
       m_options = singletonManager->getService<RenderOptions>();
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      util::SharedPointer<RenderShaderContainer> renderShader = singletonManager->getService<RenderShaderContainer>();
+      util::SharedPointer<db::ShaderContainer> renderShader = singletonManager->getService<db::ShaderContainer>();
 
-      m_histogramShaderHandle = renderShader->histogramShaderHandle;
-      m_tonemappingShaderHandle = renderShader->tonemappingShaderHandle;
+      m_histogramShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::HISTOGRAM, util::Flags<db::VertexDeclarationFlags>(1));
+      m_tonemappingShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::TONEMAPPING, util::Flags<db::VertexDeclarationFlags>(8192));
 
       createHistogramVertices();
     }

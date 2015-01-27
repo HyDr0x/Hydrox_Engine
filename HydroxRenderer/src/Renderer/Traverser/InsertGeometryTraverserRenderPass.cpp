@@ -1,6 +1,8 @@
 #include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
 
 #include <DataBase/Mesh.h>
+#include <DataBase/ShaderContainer.h>
+#include <DataBase/ResourceManager.hpp>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -19,21 +21,31 @@ namespace he
   {
     InsertGeometryTraverserRenderPass::InsertGeometryTraverserRenderPass(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager) :
       InsertGeometryTraverser(geometryContainer, singletonManager),
+      m_singletonManager(singletonManager),
       m_createdRenderGroup(util::SharedPointer<IRenderGroup>())
     {
-      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(m_geometryContainer.getMeshHandle());
-      m_vertexDeclaration = mesh->getVertexDeclarationFlags();
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
+
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
       m_primitiveType = mesh->getPrimitiveType();
       m_vertexStride = mesh->getVertexStride();
       m_nodeType = m_geometryContainer.getNodeType();
 
       if(mesh->getIndexCount())
       {
-        m_nodeType |= util::Flags<xBar::RenderNodeType>(xBar::RenderNodeType::INDEXEDNODE);
+        m_nodeType |= util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE);
+      }
+      else
+      {
+        m_nodeType |= util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE);
       }
 
-      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(m_geometryContainer.getMaterialHandle());
-      m_shaderHandle = material->getShaderHandle();
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
+
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 0, m_meshVertexDeclaration);
+
+      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 

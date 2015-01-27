@@ -5,6 +5,9 @@
 
 #include "Loader/ShaderLoader.h"
 
+#include <DataBase/ShaderContainer.h>
+#include <DataBase/Mesh.h>
+
 namespace he
 {
   namespace loader
@@ -16,16 +19,15 @@ namespace he
       RenderShaderLoader(util::SingletonManager *singletonManager);
       ~RenderShaderLoader();
 
-      util::ResourceHandle loadResource(std::string filename,
+      util::ResourceHandle loadResource(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+                                        std::string filename,
                                         std::string vertexFilename, 
                                         std::string fragmentFilename = std::string(),
                                         std::string geometryFilename = std::string(),
                                         std::string tessControlFilename = std::string(),
                                         std::string tessEvalFilename = std::string());
 
-      util::ResourceHandle getDefaultResource() const;
-
-      util::ResourceHandle getDefaultShadowResource() const;
+      void loadIndexfile(std::string path, std::string shaderIndexFilename);
     };
   }
 }

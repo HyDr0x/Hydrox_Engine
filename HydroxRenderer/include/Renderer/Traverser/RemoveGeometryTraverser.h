@@ -6,9 +6,10 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include "Renderer/Traverser/Traverser.h"
-
+#include <DataBase/ShaderContainer.h>
 #include <DataBase/ResourceManager.hpp>
+
+#include "Renderer/Traverser/Traverser.h"
 
 namespace he
 {
@@ -41,10 +42,13 @@ namespace he
 
       util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::MaterialManager> m_materialManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::ShaderContainer> m_renderShaderContainer;
 
       const xBar::IGeometryContainer& m_geometryContainer;
 
-      unsigned int m_vertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
     };

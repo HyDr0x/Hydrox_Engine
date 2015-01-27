@@ -23,6 +23,8 @@ namespace he
       virtual void createNewChildNode(VertexDeclarationNode* parent);
       virtual void createNewSibling(RenderNode* sibling);
 
+      util::SingletonManager *m_singletonManager;
+
       util::SharedPointer<IRenderGroup> m_createdRenderGroup;
     };
   }

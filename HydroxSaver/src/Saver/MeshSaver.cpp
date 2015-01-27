@@ -31,7 +31,7 @@ namespace he
       meshData.primitiveCount = mesh->getPrimitiveCount();
       meshData.indexCount = mesh->getIndexCount();
       meshData.vertexCount = mesh->getVertexCount();
-      meshData.vertexDeclaration = mesh->getVertexDeclarationFlags();
+      meshData.vertexDeclaration = mesh->getVertexDeclarationFlags().toInt();
       meshData.vertexStride = mesh->getVertexStride();
       meshData.vboSize = mesh->getVBOSize();
       meshData.cacheSize = mesh->getCaches().size();

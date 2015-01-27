@@ -1,6 +1,8 @@
 #include "Renderer/Traverser/InsertGeometryTraverserReflectiveShadowPass.h"
 
 #include <DataBase/Mesh.h>
+#include <DataBase/ShaderContainer.h>
+#include <DataBase/ResourceManager.hpp>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -24,12 +26,14 @@ namespace he
       InsertGeometryTraverser(geometryContainer, singletonManager),
       m_sharedRenderGroup(sharedRenderGroup)
     {
-      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
-      m_vertexDeclaration = mesh->getVertexDeclarationFlags();
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
 
-      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = material->getShadowShaderHandle();
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 2, m_meshVertexDeclaration);
+
+      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 

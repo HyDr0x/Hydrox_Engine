@@ -40,20 +40,3 @@ NULL
 NULL
 NULL
 ###################################
-
-#Shader
-###################################
-ShadowShader Name
-../../assets/Shader/Mesh/ShadowMapping/skinnedReflectiveVertexColor
-../../assets/Shader/Mesh/ShadowMapping/reflectiveVertexColor
-""
-""
-""
-
-Shader Name
-../../assets/Shader/Mesh/skinnedVertexColor
-../../assets/Shader/Mesh/skinnedVertexColor
-""
-""
-""
-###################################

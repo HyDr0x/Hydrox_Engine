@@ -24,8 +24,6 @@ namespace he
         NORMALMAP,
         SPECULARMAP,
         DISPLACEMENTMAP,
-        SHADOWSHADERNAME,
-        SHADERNAME,
       };
 
       MaterialLoader(util::SingletonManager *singletonManager);
@@ -41,7 +39,6 @@ namespace he
 
       util::SharedPointer<db::MaterialManager> m_materialManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
     };
   }
 }

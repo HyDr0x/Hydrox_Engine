@@ -2,6 +2,8 @@
 
 #include <XBar/IGeometryContainer.h>
 
+#include <DataBase/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -10,8 +12,6 @@
 #include "Renderer/TreeNodes/RenderNode.h"
 
 #include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
-
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 
 namespace he
 {
@@ -22,17 +22,14 @@ namespace he
       const xBar::IGeometryContainer& geometryContainer) :
       RemoveGeometryTraverser(singletonManager, geometryContainer)
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
-      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
 
-      m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      db::Mesh *mesh = singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 1, m_meshVertexDeclaration);
 
-      db::Material *material = singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
-
-      m_shaderHandle = material->getShadowShaderHandle();
-
+      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)

@@ -25,11 +25,15 @@ namespace he
     class IGeometryContainer;
   }
 
+  namespace db
+  {
+    class ShaderContainer;
+  }
+
   namespace renderer
   {
     class GroupNode;
     class IRenderNode;
-    class RenderShaderContainer;
 
     enum RenderPass
     {
@@ -50,9 +54,9 @@ namespace he
 
       void updateBuffer();
 
-      void frustumCulling(int shadowMapIndex, RenderPass pass);
+      void frustumCulling(int cameraIndex, RenderPass pass);
 
-      void generateShadowMap(int shadowMapIndex, RenderPass pass);
+      void generateShadowMap(int cameraIndex, RenderPass pass);
 
       void rasterizeIndexGeometry();
 
@@ -71,7 +75,9 @@ namespace he
 
       void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      util::SharedPointer<RenderShaderContainer> m_container;
+      util::SingletonManager *m_singletonManager;
+
+      util::SharedPointer<db::ShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
 
@@ -79,13 +85,11 @@ namespace he
       RenderGeometryTraverser m_renderGeometryTraverser;
       RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
       RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
-      
+
       GroupNode *m_renderRootNode;
       GroupNode *m_renderIndexRootNode;
       GroupNode *m_renderShadowRootNode;
       GroupNode *m_renderReflectiveShadowRootNode;
-
-      util::SingletonManager *m_singletonManager;
     };
   }
 }

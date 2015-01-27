@@ -8,12 +8,13 @@ namespace he
     {
     }
 
-    RenderShader::RenderShader(const std::string& shaderName,
+    RenderShader::RenderShader(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+                               const std::string& shaderName,
                                const std::string& vertexShaderSource, 
                                const std::string& fragmentShaderSource, 
                                const std::string& geometryShaderSource, 
                                const std::string& tesselationCTRLShaderSource, 
-                               const std::string& tesselationEVALShaderSource)
+                               const std::string& tesselationEVALShaderSource) : m_vertexDecaration(vertexDecaration)
     {
       std::string data = std::string();
       data += vertexShaderSource + tesselationCTRLShaderSource + tesselationEVALShaderSource + geometryShaderSource + fragmentShaderSource;
@@ -46,6 +47,7 @@ namespace he
       m_hash = other.m_hash;
       m_program = other.m_program;
       m_shaderSources = other.m_shaderSources;
+      m_vertexDecaration = other.m_vertexDecaration;
     }
 
     RenderShader::~RenderShader()
@@ -57,6 +59,7 @@ namespace he
       m_hash = other.m_hash;
       m_program = other.m_program;
       m_shaderSources = other.m_shaderSources;
+      m_vertexDecaration = other.m_vertexDecaration;
 
       return *this;
     }
@@ -90,6 +93,11 @@ namespace he
     std::vector<std::string> RenderShader::getShaderSources() const
     {
       return m_shaderSources;
+    }
+
+    util::Flags<db::VertexDeclarationFlags> RenderShader::getVertexDeclaration()
+    {
+      return m_vertexDecaration;
     }
 
     bool RenderShader::createProgram(std::string shaderName, GLuint vertexShader, 

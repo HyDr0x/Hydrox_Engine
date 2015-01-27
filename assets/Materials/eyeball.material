@@ -40,21 +40,3 @@ NULL
 NULL
 NULL
 ###################################
-
-#Shader
-###################################
-ShadowShader Name
-../../assets/Shader/Mesh/ShadowMapping/skinnedNormalReflectiveTex
-../../assets/Shader/Mesh/ShadowMapping/normalReflectiveTex
-""
-""
-""
-
-Shader Name
-../../assets/Shader/Mesh/skinnedNormalTex
-../../assets/Shader/Mesh/normalTex
-""
-""
-""
-
-###################################

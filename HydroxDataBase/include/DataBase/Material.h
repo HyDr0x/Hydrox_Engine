@@ -53,7 +53,7 @@ namespace he
 
       Material();
       Material(const Material& other);
-      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, util::ResourceHandle shader, util::ResourceHandle shadowShader, std::vector<uint64_t> hashes, bool transparency);
+      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, std::vector<uint64_t> hashes, bool transparency);
       ~Material();
 
       Material& operator=(Material other);
@@ -65,12 +65,8 @@ namespace he
 
       void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle);
       util::ResourceHandle getTextureHandle(TextureType texType, unsigned int slot) const;
-
-      void setShaderHandle(util::ResourceHandle shaderHandle);
-      util::ResourceHandle getShaderHandle() const;
-
-      void setShadowShaderHandle(util::ResourceHandle shadowShaderHandle);
-      util::ResourceHandle getShadowShaderHandle() const;
+      std::vector< std::vector<util::ResourceHandle> > getTextureHandles() const;
+      bool equalTextureHandles(const std::vector<std::vector<util::ResourceHandle>>& textureHandles) const;
 
       void setMaterialData(const MaterialData& material);
       const MaterialData& getMaterialData() const;
@@ -82,9 +78,6 @@ namespace he
       void swap(Material& other);
 
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
-      util::ResourceHandle m_shaderHandle;//specifies the shader of the submesh in the shaderManager for the render pass
-      util::ResourceHandle m_shadowShaderHandle;//specifies the shader of the model in the shaderManager for the shadow mapping render pass
-
       MaterialData m_materialData;
 
       bool m_transparency;

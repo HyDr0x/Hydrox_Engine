@@ -29,9 +29,6 @@ namespace he
       materialFileKeywords[SPECULARMAP] = "Specular Map";
       materialFileKeywords[DISPLACEMENTMAP] = "Displacement Map";
 
-      materialFileKeywords[SHADOWSHADERNAME] = "ShadowShader Name";
-      materialFileKeywords[SHADERNAME] = "Shader Name";
-
       util::SharedPointer<db::TextureManager> textureManager = singletonManager->getService<db::TextureManager>();
       util::SharedPointer<db::RenderShaderManager> renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       util::SharedPointer<db::MaterialManager> materialManager = singletonManager->getService<db::MaterialManager>();
@@ -79,45 +76,6 @@ namespace he
         fileStream << std::endl;
       }
 
-      /////////////////////////SHADER/////////////////////////
-      he::db::RenderShader *shadowShader = renderShaderManager->getObject(material->getShadowShaderHandle());
-      he::db::RenderShader *renderShader = renderShaderManager->getObject(material->getShadowShaderHandle());
-
-      fileStream << materialFileKeywords[SHADOWSHADERNAME] << std::endl;
-      std::stringstream shadowShaderFilename;
-      shadowShaderFilename << filename << "_shadowshader";
-      for(unsigned int i = 0; i < shadowShader->getShaderSources().size(); i++)
-      {
-        if(!shadowShader->getShaderSources()[i].empty())
-        {
-          fileStream << path << shadowShaderFilename.str() << std::endl;
-        }
-        else
-        {
-          fileStream << "" << std::endl;
-        }
-      }
-
-      fileStream << materialFileKeywords[SHADERNAME] << std::endl;
-      std::stringstream shaderFilename;
-      shaderFilename << filename << "_shader";
-      for(unsigned int i = 0; i < renderShader->getShaderSources().size(); i++)
-      {
-        if(!renderShader->getShaderSources()[i].empty())
-        {
-          fileStream << path << shaderFilename.str() << std::endl;
-        }
-        else
-        {
-          fileStream << "" << std::endl;
-        }
-      }
-
-      fileStream << std::endl;
-
-      RenderShaderSaver::save(path, shadowShaderFilename.str(), material->getShadowShaderHandle(), singletonManager);
-      RenderShaderSaver::save(path, shaderFilename.str(), material->getShaderHandle(), singletonManager);
-      
       fileStream.close();
     }
   }

@@ -18,6 +18,10 @@ namespace he
     RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
       m_geometryContainer(geometryContainer)
     {
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
     }
 
     RemoveGeometryTraverser::~RemoveGeometryTraverser()
@@ -46,7 +50,7 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
     {
-      return treeNode->isMesh(m_vertexDeclaration);
+      return treeNode->isMesh(m_meshVertexDeclaration);
     }
 
     void RemoveGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)

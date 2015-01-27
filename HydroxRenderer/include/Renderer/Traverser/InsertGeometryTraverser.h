@@ -3,13 +3,13 @@
 
 #include <vector>
 
-#include <DataBase/ResourceManager.hpp>
-
 #include <Utilities/Pointer/SharedPointer.h>
-
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/Flags.hpp>
+
+#include <DataBase/ResourceManager.hpp>
+#include <DataBase/ShaderContainer.h>
 
 #include "Renderer/Traverser/Traverser.h"
 #include "Renderer/TreeNodes/RenderNodeDecorator/RenderNodeFactory.h"
@@ -50,14 +50,18 @@ namespace he
       void createNewSibling(TextureNode* sibling);
       virtual void createNewSibling(RenderNode* sibling) = 0;
 
-      util::SingletonManager *m_singletonManager;
+      util::SharedPointer<db::ModelManager> m_modelManager;
+      util::SharedPointer<db::MaterialManager> m_materialManager;
+      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::ShaderContainer> m_renderShaderContainer;
 
       const xBar::IGeometryContainer& m_geometryContainer;
 
       util::Flags<xBar::RenderNodeType> m_nodeType;
       GLenum m_primitiveType;
       GLuint m_vertexStride;
-      unsigned int m_vertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
 

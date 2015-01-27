@@ -17,8 +17,7 @@ namespace he
   {
     MaterialLoader::MaterialLoader(util::SingletonManager *singletonManager) : ResourceLoader(singletonManager),
                                                                                m_materialManager(singletonManager->getService<db::MaterialManager>()),
-                                                                               m_textureManager(singletonManager->getService<db::TextureManager>()),
-                                                                               m_renderShaderManager(singletonManager->getService<db::RenderShaderManager>())
+                                                                               m_textureManager(singletonManager->getService<db::TextureManager>())
     {
       m_materialFileKeywords["Diffuse Strength"] = DIFFUSESTRENGTH;
       m_materialFileKeywords["Specular Strength"] = SPECULARSTRENGTH;
@@ -29,9 +28,6 @@ namespace he
       m_materialFileKeywords["Normal Map"] = NORMALMAP;
       m_materialFileKeywords["Specular Map"] = SPECULARMAP;
       m_materialFileKeywords["Displacement Map"] = DISPLACEMENTMAP;
-
-      m_materialFileKeywords["ShadowShader Name"] = SHADOWSHADERNAME;
-      m_materialFileKeywords["Shader Name"] = SHADERNAME;
     }
 
     MaterialLoader::~MaterialLoader()
@@ -47,7 +43,6 @@ namespace he
 
       util::ResourceHandle materialHandle;
 
-      std::string shaderFilename[5], shadowShaderFilename[5];
       std::vector<std::vector<std::string>> textureFilenames(db::Material::TEXTURETYPENUM);
 
       std::ifstream file(filename);
@@ -123,20 +118,6 @@ namespace he
               }
             }
             break;
-          case SHADOWSHADERNAME:
-            for(unsigned int i = 0; i < 5; i++)
-            {
-              std::getline(file, line);
-              shadowShaderFilename[i] = line;
-            }
-            break;
-          case SHADERNAME:
-            for(unsigned int i = 0; i < 5; i++)
-            {
-              std::getline(file, line);
-              shaderFilename[i] = line;
-            }
-            break;
           case DEFAULT:
           default:
             continue;//unknown command
@@ -144,13 +125,6 @@ namespace he
         }
 
         std::vector<uint64_t> hashes;
-
-        RenderShaderLoader renderShaderLoader(m_singletonManager);
-        util::ResourceHandle shaderHandle = renderShaderLoader.loadResource(filename, shaderFilename[0], shaderFilename[1], shaderFilename[2], shaderFilename[3], shaderFilename[4]);
-        hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shaderHandle)->getHash());
-
-        util::ResourceHandle shadowShaderHandle = renderShaderLoader.loadResource(filename, shadowShaderFilename[0], shadowShaderFilename[1], shadowShaderFilename[2], shadowShaderFilename[3], shadowShaderFilename[4]);
-        hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shadowShaderHandle)->getHash());
 
         ILDevilLoader textureLoader(m_singletonManager);
 
@@ -169,7 +143,7 @@ namespace he
           }
         }
 
-        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, shaderHandle, shadowShaderHandle, hashes, false));
+        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, hashes, false));
       }
       else//wrong filename or file does not exist
       {
@@ -187,12 +161,8 @@ namespace he
 
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
-      RenderShaderLoader renderShaderLoader(m_singletonManager);
-
       std::vector<uint64_t> hashes;
-      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(renderShaderLoader.getDefaultResource())->getHash());
-
-      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), renderShaderLoader.getDefaultResource(), renderShaderLoader.getDefaultShadowResource(), hashes, false));
+      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), hashes, false));
     }
   }
 }

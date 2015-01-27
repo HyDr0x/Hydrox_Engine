@@ -40,8 +40,6 @@ namespace he
         NORMALMAP,
         SPECULARMAP,
         DISPLACEMENTMAP,
-        SHADOWSHADERNAME,
-        SHADERNAME,
       };
 
       static void save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager);

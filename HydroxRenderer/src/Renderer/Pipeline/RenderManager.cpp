@@ -1,12 +1,13 @@
 #include "Renderer/Pipeline/RenderManager.h"
 
+#include <DataBase/ShaderContainer.h>
+
 #include <XBar/LightContainer.h>
 #include <XBar/BillboardContainer.h>
 #include <XBar/StaticGeometryContainer.h>
 #include <XBar/SkinnedGeometryContainer.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
-#include "Renderer/Pipeline/RenderShaderContainer.h"
 
 namespace he
 {
@@ -83,19 +84,6 @@ namespace he
       data.specularStrength = 0.2f;
       data.specularExponent = 4.0f;
 
-      m_trfMatrix = util::Matrix<float, 4>::identity();
-
-      util::ResourceHandle pointShader = m_singletonManager->getService<RenderShaderContainer>()->pointShaderHandle;
-      util::ResourceHandle shadowPointShader = m_singletonManager->getService<RenderShaderContainer>()->shadowPointShaderHandle;
-
-      std::vector< std::vector<util::ResourceHandle> > textures(4);
-      std::vector<uint64_t> hashes;
-      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(pointShader)->getHash());
-      hashes.push_back(m_singletonManager->getService<db::RenderShaderManager>()->getObject(shadowPointShader)->getHash());
-
-      m_debugMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(db::Material(data, textures, pointShader, shadowPointShader, hashes, false));
-      m_debugMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(db::Mesh());
-
       m_options = m_singletonManager->getService<RenderOptions>();
 
       m_geometryRasterizer.initialize(m_singletonManager);
@@ -155,7 +143,7 @@ namespace he
         m_gBuffer.unsetGBuffer();
 
         glDepthFunc(GL_LEQUAL);
-        glDepthMask(GL_FALSE);
+        glDepthMask(GL_FALSE);//depth read only
         m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
         m_geometryRasterizer.rasterizeIndexGeometry();
         m_indirectLightRenderer.unsetBuffer();

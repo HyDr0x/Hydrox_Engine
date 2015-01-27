@@ -12,9 +12,7 @@ namespace he
 
       RemoveGeometryTraverserIndexPass(
         util::SingletonManager *singletonManager,
-        const xBar::IGeometryContainer& geometryContainer,
-        util::ResourceHandle staticIndexGenerationShaderHandle,
-        util::ResourceHandle skinnedIndexGenerationShaderHandle);
+        const xBar::IGeometryContainer& geometryContainer);
 
       virtual ~RemoveGeometryTraverserIndexPass();
 

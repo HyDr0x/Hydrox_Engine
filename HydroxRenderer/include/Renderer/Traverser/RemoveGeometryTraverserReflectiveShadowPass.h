@@ -8,7 +8,7 @@ namespace he
   namespace xBar  {    class IGeometryContainer;  }
 
   namespace renderer
-  {    class RenderShaderContainer;    class RemoveGeometryTraverserReflectiveShadowPass : public RemoveGeometryTraverser
+  {    class RemoveGeometryTraverserReflectiveShadowPass : public RemoveGeometryTraverser
     {
     public:
 

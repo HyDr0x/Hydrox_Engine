@@ -14,8 +14,10 @@ namespace he
   {
     enum GRAPHICAPI RenderNodeType
     {
-      SKINNEDNODE = 1,
-      INDEXEDNODE = 2,
+      STATICNODE,
+      SKINNEDNODE,
+      NONINDEXEDNODE,
+      INDEXEDNODE,
     };
 
     class GRAPHICAPI IGeometryContainer : public AContainer

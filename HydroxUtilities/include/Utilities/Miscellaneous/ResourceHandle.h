@@ -21,6 +21,7 @@ namespace he
       ResourceHandle& operator=(ResourceHandle other);
 
       inline bool operator==(const ResourceHandle& other) const;
+      inline bool operator!=(const ResourceHandle& other) const;
 
       void free();
 

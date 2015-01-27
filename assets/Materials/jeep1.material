@@ -33,17 +33,3 @@ NULL
 NULL
 NULL
 NULL
-
-ShadowShader Name
-../../assets/Shader/Mesh/ShadowMapping/staticReflectiveTex
-../../assets/Shader/Mesh/ShadowMapping/reflectiveTex
-""
-""
-""
-
-Shader Name
-../../assets/Shader/Mesh/staticTex
-../../assets/Shader/Mesh/tex
-""
-""
-""

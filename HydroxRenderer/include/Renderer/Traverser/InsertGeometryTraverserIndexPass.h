@@ -14,9 +14,7 @@ namespace he
       InsertGeometryTraverserIndexPass(
         util::SharedPointer<IRenderGroup> sharedRenderGroup,
         const xBar::IGeometryContainer& geometryContainer, 
-        util::SingletonManager *singletonManager, 
-        util::ResourceHandle staticIndexGenerationShaderHandle,
-        util::ResourceHandle skinnedIndexGenerationShaderHandle);
+        util::SingletonManager *singletonManager);
 
       virtual ~InsertGeometryTraverserIndexPass();
 

@@ -6,6 +6,9 @@
 #include <GL/glew.h>
 
 #include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/Flags.hpp>
+
+#include <DataBase/Mesh.h>
 
 #include "Renderer/TreeNodes/GroupNode.h"
 
@@ -26,17 +29,19 @@ namespace he
       bool preTraverse(ConstTraverser* traverser) const;
       void postTraverse(ConstTraverser* traverser) const;
 
-      void initialize(GLuint vertexDeclaration);
+      void initialize(util::Flags<db::VertexDeclarationFlags> shaderVertexDeclaration,
+        util::Flags<db::VertexDeclarationFlags> meshVertexDeclaration);
 
       void setVertexArray() const;
       void unsetVertexArray() const;
 
-      bool isMesh(GLuint vertexDeclaration) const;
+      bool isMesh(util::Flags<db::VertexDeclarationFlags> meshVertexDeclaration) const;
 
     private:
 
       GLuint m_vaoIndex;
-      GLuint m_vertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
+      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
     };
   }
 }

@@ -19,9 +19,12 @@ namespace he
   {
     InsertGeometryTraverser::InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager) :
       m_geometryContainer(geometryContainer),
-      m_singletonManager(singletonManager),
       m_inserted(false)
     {
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
     }
 
     InsertGeometryTraverser::~InsertGeometryTraverser()
@@ -40,7 +43,7 @@ namespace he
 
     bool InsertGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
     {
-      m_inserted = treeNode->isMesh(m_vertexDeclaration);
+      m_inserted = treeNode->isMesh(m_meshVertexDeclaration);
 
       if(m_inserted)
       {
@@ -107,7 +110,7 @@ namespace he
     void InsertGeometryTraverser::createNewChildNode(TextureNode* parent)
     {
       VertexDeclarationNode *treeNode = new VertexDeclarationNode();
-      treeNode->initialize(m_vertexDeclaration);
+      treeNode->initialize(m_shaderVertexDeclaration, m_meshVertexDeclaration);
 
       parent->setFirstChild(treeNode);
       treeNode->setParent(parent);
@@ -143,7 +146,7 @@ namespace he
     void InsertGeometryTraverser::createNewSibling(VertexDeclarationNode* sibling)
     {
       VertexDeclarationNode *treeNode = new VertexDeclarationNode();
-      treeNode->initialize(m_vertexDeclaration);
+      treeNode->initialize(m_shaderVertexDeclaration, m_meshVertexDeclaration);
 
       sibling->setNextSibling(treeNode);
       treeNode->setParent(sibling->getParent());

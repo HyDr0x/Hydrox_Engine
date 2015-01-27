@@ -1,6 +1,8 @@
 #include "Renderer/Traverser/InsertGeometryTraverserShadowPass.h"
 
 #include <DataBase/Mesh.h>
+#include <DataBase/ShaderContainer.h>
+#include <DataBase/ResourceManager.hpp>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -19,26 +21,18 @@ namespace he
   {
     InsertGeometryTraverserShadowPass::InsertGeometryTraverserShadowPass(util::SharedPointer<IRenderGroup> sharedRenderGroup,
       const xBar::IGeometryContainer& geometryContainer,
-      util::SingletonManager *singletonManager,
-      util::ResourceHandle staticShadowMapGenerationShaderHandle,
-      util::ResourceHandle skinnedShadowMapGenerationShaderHandle) :
+      util::SingletonManager *singletonManager) :
       InsertGeometryTraverser(geometryContainer, singletonManager),
       m_sharedRenderGroup(sharedRenderGroup)
     {
-      db::Mesh *mesh = m_singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
-      m_vertexDeclaration = mesh->getVertexDeclarationFlags();
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
 
-      if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
-      {
-        m_shaderHandle = skinnedShadowMapGenerationShaderHandle;
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      }
-      else
-      {
-        m_shaderHandle = staticShadowMapGenerationShaderHandle;
-      }
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 3, m_meshVertexDeclaration);
 
-      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 

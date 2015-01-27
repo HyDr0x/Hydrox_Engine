@@ -14,9 +14,7 @@ namespace he
       InsertGeometryTraverserShadowPass(
         util::SharedPointer<IRenderGroup> sharedRenderGroup,
         const xBar::IGeometryContainer& geometryContainer,
-        util::SingletonManager *singletonManager, 
-        util::ResourceHandle staticShadowMapGenerationShaderHandle,
-        util::ResourceHandle skinnedShadowMapGenerationShaderHandle);
+        util::SingletonManager *singletonManager);
 
       virtual ~InsertGeometryTraverserShadowPass();
 

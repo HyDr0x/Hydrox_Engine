@@ -4,24 +4,6 @@ namespace he
 {
   namespace db
   {
-    const unsigned int Mesh::VERTEXDECLARATIONFLAGS[] = {
-      1,
-      2,
-      4,
-      8,
-      16,
-      32,
-      64,
-      128,
-      256,
-      512,
-      1024,
-      2048,
-      4096,
-      8192,
-      16384,
-    };
-
     const unsigned int Mesh::VERTEXDECLARATIONSIZE[] = {
       sizeof(util::vec3f),
       sizeof(util::vec2f),
@@ -40,12 +22,6 @@ namespace he
       sizeof(util::vec4f),
     };
 
-    unsigned int Mesh::vertexDeclarationFlag(unsigned int index)
-    {
-      assert(index < VERTEXDECLARATIONFLAGNUMBER);
-      return VERTEXDECLARATIONFLAGS[index];
-    }
-
     unsigned int Mesh::vertexDeclarationSize(unsigned int index)
     {
       assert(index < VERTEXDECLARATIONFLAGNUMBER);
@@ -57,7 +33,6 @@ namespace he
       m_primitiveCount = 0;
       m_vertexCount = 0;
       m_vertexStride = 0;
-      m_vertexDeclarationFlags = 0;
       m_primitiveType = GL_TRIANGLES;
     }
 
@@ -96,8 +71,6 @@ namespace he
 
       m_vertexCount = static_cast<unsigned int>(positions.size());
 
-      m_vertexDeclarationFlags = 0;
-
       m_cacheData = caches;
       m_triangleCacheIndices = triangleCacheIndices;
 
@@ -120,24 +93,24 @@ namespace he
         generateCacheIndizes(positions, ownNormals, cacheIndizes0, cacheIndizes1);
       }
 
-      m_vertexDeclarationFlags |= positions.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_POSITION] : 0;
-      m_vertexDeclarationFlags |= textureCoords[0].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE0] : 0;
-      m_vertexDeclarationFlags |= textureCoords[1].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE1] : 0;
-      m_vertexDeclarationFlags |= textureCoords[2].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE2] : 0;
-      m_vertexDeclarationFlags |= textureCoords[3].size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_TEXTURE3] : 0;
-      m_vertexDeclarationFlags |= ownNormals.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_NORMAL] : 0;
-      m_vertexDeclarationFlags |= binormals.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BINORMAL] : 0;
-      m_vertexDeclarationFlags |= boneWeights.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_WEIGHTS] : 0;
-      m_vertexDeclarationFlags |= boneIndices.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_BONE_INDICES] : 0;
-      m_vertexDeclarationFlags |= vertexColors.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_COLOR] : 0;
-      m_vertexDeclarationFlags |= cacheIndizes0.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDICES0] : 0;
-      m_vertexDeclarationFlags |= cacheIndizes1.size() != 0 ? VERTEXDECLARATIONFLAGS[MODEL_CACHEINDICES1] : 0;
+      m_vertexDeclaration |= positions.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_POSITION) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= textureCoords[0].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE0) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= textureCoords[1].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE1) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= textureCoords[2].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE2) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= textureCoords[3].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE3) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= ownNormals.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_NORMAL) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= binormals.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BINORMAL) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= boneWeights.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_WEIGHTS) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= boneIndices.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_INDICES) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= vertexColors.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_COLOR) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= cacheIndizes0.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_CACHEINDICES0) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= cacheIndizes1.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_CACHEINDICES1) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
 
       m_vertexStride = 0;
       GLuint strides[VERTEXDECLARATIONFLAGNUMBER];
       for(unsigned int i = 0; i < VERTEXDECLARATIONFLAGNUMBER; i++)
       {
-        strides[i] = m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        strides[i] = m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
         m_vertexStride += strides[i];
       }
       
@@ -232,7 +205,7 @@ namespace he
                m_primitiveCount(primitiveCount),
                m_vertexCount(vertexCount),
                m_vertexStride(vertexStride),
-               m_vertexDeclarationFlags(vertexDeclarationFlags),
+               m_vertexDeclaration(vertexDeclarationFlags),
                m_geometryData(vboBuffer),
                m_cacheData(caches),
                m_triangleCacheIndices(triangleCacheIndices),
@@ -253,7 +226,7 @@ namespace he
       m_cacheData = other.m_cacheData;
       m_triangleCacheIndices = other.m_triangleCacheIndices;
       m_indexData = other.m_indexData;
-      m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
+      m_vertexDeclaration = other.m_vertexDeclaration;
     }
 
     Mesh::~Mesh()
@@ -272,7 +245,7 @@ namespace he
       m_cacheData = other.m_cacheData;
       m_triangleCacheIndices = other.m_triangleCacheIndices;
       m_indexData = other.m_indexData;
-      m_vertexDeclarationFlags = other.m_vertexDeclarationFlags;
+      m_vertexDeclaration = other.m_vertexDeclaration;
 
       return *this;
     }
@@ -285,7 +258,7 @@ namespace he
 
     void Mesh::setPositions(std::vector<util::vec3f> positions)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_POSITION]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_POSITION).toInt());
 
       for(unsigned int i = 0; i < positions.size(); i++)
       {
@@ -297,10 +270,10 @@ namespace he
     {
       assert(textureCoords.size() == 4);
 
-      GLuint strides[5];
-      for(unsigned int i = 0; i < 5; i++)
+      GLuint strides[4];
+      for(unsigned int i = 0; i < 4; i++)
       {
-        strides[i] = m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        strides[i] = m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       GLuint lokalStride = 0;
@@ -311,7 +284,7 @@ namespace he
 
         for(unsigned int i = 0; i < textureCoords[j].size(); i++)
         {
-          assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_TEXTURE0 + i]);
+          assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE0 + i).toInt());
           std::copy((GLubyte*)&textureCoords[i], (GLubyte*)&textureCoords[i] + sizeof(textureCoords[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
         }
       }
@@ -319,12 +292,12 @@ namespace he
 
     void Mesh::setNormals(std::vector<util::vec3f> normals)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_NORMAL]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_NORMAL).toInt());
 
       GLuint lokalStride = 0;
       for(unsigned int i = 0; i < 5; i++)
       {
-        lokalStride += m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       for(unsigned int i = 0; i < normals.size(); i++)
@@ -335,12 +308,12 @@ namespace he
 
     void Mesh::setBiNormals(std::vector<util::vec3f> binormals)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_BINORMAL]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BINORMAL).toInt());
 
       GLuint lokalStride = 0;
       for(unsigned int i = 0; i < 6; i++)
       {
-        lokalStride += m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       for(unsigned int i = 0; i < binormals.size(); i++)
@@ -351,12 +324,12 @@ namespace he
 
     void Mesh::setBoneWeights(std::vector<util::vec4f> boneWeights)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_BONE_WEIGHTS]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_WEIGHTS).toInt());
 
       GLuint lokalStride = 0;
       for(unsigned int i = 0; i < 7; i++)
       {
-        lokalStride += m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       for(unsigned int i = 0; i < boneWeights.size(); i++)
@@ -367,12 +340,12 @@ namespace he
 
     void Mesh::setBoneIndices(std::vector<util::vec4f> boneIndices)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_BONE_INDICES]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_INDICES).toInt());
 
       GLuint lokalStride = 0;
       for(unsigned int i = 0; i < 8; i++)
       {
-        lokalStride += m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       for(unsigned int i = 0; i < boneIndices.size(); i++)
@@ -383,12 +356,12 @@ namespace he
 
     void Mesh::setVertexColors(std::vector<util::vec4f> vertexColors)
     {
-      assert(m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[MODEL_COLOR]);
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_COLOR).toInt());
 
       GLuint lokalStride = 0;
       for(unsigned int i = 0; i < 9; i++)
       {
-        lokalStride += m_vertexDeclarationFlags & VERTEXDECLARATIONFLAGS[i] ? VERTEXDECLARATIONSIZE[i] : 0;
+        lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
       for(unsigned int i = 0; i < vertexColors.size(); i++)
@@ -397,9 +370,9 @@ namespace he
       }
     }
 
-    GLuint Mesh::getVertexDeclarationFlags() const
+    util::Flags<Mesh::VertexDeclaration> Mesh::getVertexDeclarationFlags() const
     {
-      return m_vertexDeclarationFlags;
+      return m_vertexDeclaration;
     }
 
     GLuint Mesh::getPrimitiveType() const

@@ -17,29 +17,17 @@ namespace he
   {
     RemoveGeometryTraverserIndexPass::RemoveGeometryTraverserIndexPass(
       util::SingletonManager *singletonManager, 
-      const xBar::IGeometryContainer& geometryContainer,
-      util::ResourceHandle staticIndexGenerationShaderHandle,
-      util::ResourceHandle skinnedIndexGenerationShaderHandle) :
+      const xBar::IGeometryContainer& geometryContainer) :
       RemoveGeometryTraverser(singletonManager, geometryContainer)
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
-      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
 
-      m_vertexDeclaration = m_modelManager->getObject(m_geometryContainer.getMeshHandle())->getVertexDeclarationFlags();
+      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      db::Mesh *mesh = singletonManager->getService<db::ModelManager>()->getObject(geometryContainer.getMeshHandle());
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 1, m_meshVertexDeclaration);
 
-      if(geometryContainer.getNodeType() == util::Flags<xBar::RenderNodeType>(xBar::SKINNEDNODE))
-      {
-        m_shaderHandle = staticIndexGenerationShaderHandle;
-        
-      }
-      else
-      {
-        m_shaderHandle = skinnedIndexGenerationShaderHandle;
-      }
-
-      db::Material *material = singletonManager->getService<db::MaterialManager>()->getObject(geometryContainer.getMaterialHandle());
+      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 

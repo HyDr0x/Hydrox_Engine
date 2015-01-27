@@ -6,6 +6,9 @@
 #include "DataBase/DLLExport.h"
 
 #include "DataBase/Shader.h"
+#include "DataBase/Mesh.h"
+
+#include <Utilities/Miscellaneous/Flags.hpp>
 
 namespace he
 {
@@ -36,12 +39,14 @@ namespace he
       };
 
       RenderShader();
-      RenderShader(const std::string& shaderName,
+      RenderShader(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+                   const std::string& shaderName,
                    const std::string& vertexShaderSource, 
                    const std::string& fragmentShaderSource = std::string(), 
                    const std::string& geometryShaderSource = std::string(), 
                    const std::string& tesselationCTRLShaderSource = std::string(), 
                    const std::string& tesselationEVALShaderSource = std::string());
+
       RenderShader(const RenderShader& other);
 
       ~RenderShader();
@@ -52,6 +57,8 @@ namespace he
 
       std::vector<std::string> getShaderSources() const;
 
+      util::Flags<db::VertexDeclarationFlags> getVertexDeclaration();
+
     private:
 
       bool createProgram(std::string shaderName, GLuint vertexShader, 
@@ -61,6 +68,7 @@ namespace he
                                                  GLuint fragmentShader);
 
       std::vector<std::string> m_shaderSources;
+      util::Flags<db::VertexDeclarationFlags> m_vertexDecaration;
     };
 
   }

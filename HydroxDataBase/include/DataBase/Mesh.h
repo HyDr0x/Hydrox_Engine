@@ -2,11 +2,12 @@
 #define MESH_H_
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 #include <GL/glew.h>
 
 #include <Utilities/Math/Math.hpp>
+#include <Utilities/Miscellaneous/Flags.hpp>
 #include <Utilities/Miscellaneous/PointCloudGenerator.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
@@ -25,7 +26,7 @@ namespace he
     {
     public:
 
-      enum VertexDeclarationFlags
+      enum VertexDeclaration
       {
         MODEL_POSITION,
         MODEL_TEXTURE0,
@@ -89,7 +90,7 @@ namespace he
       void setBoneIndices(std::vector<util::vec4f> boneIndices);
       void setVertexColors(std::vector<util::vec4f> vertexColors);
 
-      GLuint getVertexDeclarationFlags() const;
+      util::Flags<VertexDeclaration> getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
 
       util::vec3f getBBMin() const;
@@ -108,17 +109,15 @@ namespace he
       const std::vector<util::Cache>& getCaches() const;
       const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
 
-      static unsigned int vertexDeclarationFlag(unsigned int index);
       static unsigned int vertexDeclarationSize(unsigned int index);
-
-      static const unsigned int VERTEXDECLARATIONFLAGS[VERTEXDECLARATIONFLAGNUMBER];
-      static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 
     private:
 
       void generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices);
       //invalid indices are marked as 0
       void generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
+
+      static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 
       AABB m_boundingVolume;
 
@@ -132,9 +131,11 @@ namespace he
       std::vector<util::Cache> m_cacheData;
       std::vector<util::vec2ui> m_triangleCacheIndices;
       std::vector<indexType> m_indexData;
-      GLuint m_vertexDeclarationFlags;
+      util::Flags<VertexDeclaration> m_vertexDeclaration;
       ////////////////////////////////
     };
+
+    typedef db::Mesh::VertexDeclaration VertexDeclarationFlags;
   }
 }
 
