@@ -47,9 +47,9 @@ namespace he
 
       m_fullscreenRenderQuad.render();
 
-      indirectlightTexture->unsetTexture();
-      directlightTexture->unsetTexture();
-      colorTexture->unsetTexture();
+      indirectlightTexture->unsetTexture(2);
+      directlightTexture->unsetTexture(1);
+      colorTexture->unsetTexture(0);
       m_fullscreenRenderQuad.unsetWriteFrameBuffer();
       shader->useNoShader();
     }
@@ -63,7 +63,7 @@ namespace he
 
       m_fullscreenRenderQuad.render();
 
-      texture->unsetTexture();
+      texture->unsetTexture(0);
       shader->useNoShader();
     }
 

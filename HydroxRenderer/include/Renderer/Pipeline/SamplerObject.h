@@ -14,13 +14,12 @@ namespace he
       SamplerObject(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
       ~SamplerObject();
 
-      void bindSampler(GLint slot);
-      void unbindSampler() const;
+      void bindSampler(GLint slot) const;
+      void unbindSampler(GLint slot) const;
 
     private:
 
       GLuint m_samplerIndex;
-      GLint m_slot;
     };
   }
 }

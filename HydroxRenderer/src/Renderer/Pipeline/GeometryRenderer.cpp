@@ -164,6 +164,7 @@ namespace he
 
     void GeometryRenderer::rasterizeIndexGeometry()
     {
+      m_renderIndexGeometryTraverser.setGlobalBufferResolution(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
       m_renderIndexGeometryTraverser.doTraverse(m_renderIndexRootNode);
     }
 

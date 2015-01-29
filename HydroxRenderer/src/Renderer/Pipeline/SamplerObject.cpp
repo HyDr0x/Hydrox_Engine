@@ -20,17 +20,16 @@ namespace he
       glDeleteSamplers(1, &m_samplerIndex);
     }
 
-    void SamplerObject::bindSampler(GLint slot)
+    void SamplerObject::bindSampler(GLint slot) const
     {
-      m_slot = slot;
-      glActiveTexture(GL_TEXTURE0 + m_slot);
-      glBindSampler(m_slot, m_samplerIndex);
+      glActiveTexture(GL_TEXTURE0 + slot);
+      glBindSampler(slot, m_samplerIndex);
     }
 
-    void SamplerObject::unbindSampler() const
+    void SamplerObject::unbindSampler(GLint slot) const
     {
-      glActiveTexture(GL_TEXTURE0 + m_slot);
-      glBindSampler(m_slot, 0);
+      glActiveTexture(GL_TEXTURE0 + slot);
+      glBindSampler(slot, 0);
     }
   }
 }

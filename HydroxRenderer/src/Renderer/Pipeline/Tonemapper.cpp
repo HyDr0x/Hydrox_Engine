@@ -80,7 +80,7 @@ namespace he
 
       glDrawArrays(GL_POINTS, 0, m_options->width * m_options->height);
 
-      combinedTexture->unsetTexture();
+      combinedTexture->unsetTexture(0);
 
       m_histogramVertices.unbindVertexBuffer(0);
       glDisableVertexAttribArray(db::RenderShader::POSITION);
@@ -154,7 +154,7 @@ namespace he
 
       m_histogramRenderQuad.render();
 
-      combinedTexture->unsetTexture();
+      combinedTexture->unsetTexture(0);
 
       toneMappingShader->useNoShader();
     }

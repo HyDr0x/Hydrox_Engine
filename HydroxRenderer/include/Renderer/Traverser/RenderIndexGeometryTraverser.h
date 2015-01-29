@@ -21,6 +21,8 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
+      void setGlobalBufferResolution(unsigned int globalBufferResolution);
+
       virtual bool preTraverse(GroupNode* treeNode);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
@@ -40,6 +42,7 @@ namespace he
       util::SharedPointer<db::TextureManager> m_textureManager;
 
       unsigned int m_globalCacheOffset;
+      unsigned int m_globalBufferResolution;
     };
   }
 }

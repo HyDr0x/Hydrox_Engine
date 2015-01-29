@@ -40,11 +40,11 @@ namespace he
 
     void SkinnedGeometryDecorator::rasterizeIndexGeometry() const
     {
-      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
 
       m_renderNode->rasterizeIndexGeometry();
 
-      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
     }
 
     void SkinnedGeometryDecorator::rasterizeGeometry() const

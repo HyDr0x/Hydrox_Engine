@@ -43,6 +43,7 @@ namespace he
         m_extensions += std::string(extensionName) + std::string("/n");
       }
 
+      glGetIntegerv(GL_MAX_IMAGE_UNITS, &m_caps[MAX_IMAGE_UNITS]);
       glGetIntegerv(GL_MAX_TEXTURE_UNITS, &m_caps[MAX_TEXTURE_UNITS]);
       glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &m_caps[MAX_VERTEX_TEXTURE_IMAGE_UNITS]);
       glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_caps[MAX_TEXTURE_IMAGE_UNITS]);

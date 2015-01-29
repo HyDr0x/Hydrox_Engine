@@ -13,8 +13,7 @@ namespace he
       m_internalFormat(internalFormat),
       m_format(format),
       m_channelNumber(channelNumber),
-      m_bitsPerPixel(bitsPerPixel),
-      m_slot(0)
+      m_bitsPerPixel(bitsPerPixel)
     {
       if(data != nullptr)
       {
@@ -53,7 +52,6 @@ namespace he
       m_internalFormat = other.m_internalFormat;
       m_format = other.m_format;
       m_type = other.m_type;
-      m_slot = other.m_slot;
       m_bitsPerPixel = other.m_bitsPerPixel;
       m_channelNumber = other.m_channelNumber;
     }
@@ -72,7 +70,6 @@ namespace he
       m_internalFormat = other.m_internalFormat;
       m_format = other.m_format;
       m_type = other.m_type;
-      m_slot = other.m_slot;
       m_bitsPerPixel = other.m_bitsPerPixel;
       m_channelNumber = other.m_channelNumber;
 
@@ -84,25 +81,35 @@ namespace he
       glDeleteTextures(1, &m_texIndex);
     }
 
+    void Texture2D::clearTexture(const void *data) const
+    {
+      glBindTexture(m_target, m_texIndex);
+      glClearTexImage(m_texIndex, 0, m_format, m_type, data);
+      glBindTexture(m_target, 0);
+    }
+
     void Texture2D::bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format)
     {
       glBindImageTexture(unit, m_texIndex, level, GL_FALSE, 0, access, format);
     }
 
-    void Texture2D::setTexture(GLint location, GLuint slot)
+    void Texture2D::unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, 0, level, GL_FALSE, 0, access, format);
+    }
+
+    void Texture2D::setTexture(GLint location, GLuint slot) const
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");
 
-      m_slot = slot;
-
-      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_target, m_texIndex);
       glUniform1i(location, slot);
     }
 
-    void Texture2D::unsetTexture() const
+    void Texture2D::unsetTexture(GLuint slot) const
     {
-      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_target, 0);
     }
 

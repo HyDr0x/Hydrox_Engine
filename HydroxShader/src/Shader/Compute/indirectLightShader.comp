@@ -8,32 +8,28 @@
 #include "../../../include/Shader/IndirectLightData.glslh"
 #include "../../../include/Shader/CacheData.glslh"
 #include "../../../include/Shader/CameraUBO.glslh"
+#include "../../../include/Shader/Encodings.glslh"
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalSampler;
 layout(location = 2) uniform sampler2DArray indirectLightLuminousFluxSampler;
 
-layout(location = 3) uniform uint indirectLightNumberXY;
-layout(location = 4) uniform uint indirectLightNumberZ;
+layout(rgba32f, binding = 0) readonly uniform image2D globalCachePositionBuffer;
+layout(rgba32f, binding = 1) readonly uniform image2D globalCacheNormalBuffer;
 
-layout(location = 5) uniform uint cacheNumber;
+layout(rgba32f, binding = 2) writeonly uniform image2D indirectLightPositionBuffer;
+layout(rgba32f, binding = 3) writeonly uniform image2D indirectLightNormalBuffer;
 
-layout(location = 6) uniform uint unusedLightNumber;
+layout(r8, binding = 4) readonly uniform image2D zBuffer;
 
-layout(std430, binding = 0) buffer globalCacheBuffer
-{
-	CacheData caches[];
-};
+layout(location = 8) uniform uint indirectLightNumberXY;
+layout(location = 9) uniform uint indirectLightNumberZ;
 
-layout(std430, binding = 1) buffer zBuffer
-{
-	uint zValues[];
-};
+layout(location = 10) uniform uint cacheNumber;
 
-layout(std430, binding = 2) buffer indirectLightDataBuffer
-{
-	IndirectLightData indirectLight[];
-};
+layout(location = 11) uniform uint unusedLightNumber;
+
+layout(location = 12) uniform uint bufferResolution;
 
 layout(local_size_x = WORKGROUPSIZE) in;
 
@@ -53,9 +49,9 @@ void main()
 	
 	for(uint i = 0; i < cachesPerThread; i++)
 	{
-		uint cacheIndex = cacheOffset + i;
+		ivec2 cacheCoord = ivec2(mod(cacheOffset + i, bufferResolution), (cacheOffset + i) / bufferResolution);
 		
-		if(zValues[cacheIndex] == 0)
+		if(imageLoad(zBuffer, cacheCoord).x == 0)
 		{
 			continue;
 		}
@@ -66,13 +62,16 @@ void main()
 		float Wgesd = 0.0f;
 		float Wgesg = 0.0f;
 		
-		CacheData cache = caches[cacheIndex];
+		CacheData cache;
+		cache.position = imageLoad(globalCachePositionBuffer, cacheCoord);
+		cache.normal = imageLoad(globalCacheNormalBuffer, cacheCoord);
+		
 		float frd = cache.position.w / PI;
 		float frg = cache.normal.z * (cache.normal.w + 8.0f) / (8.0f * PI);
 		
 		vec3 camDir = normalize(eyePos.xyz - cache.position.xyz);
 		
-		vec3 cacheNormal = vec3(cache.normal.xy, sqrt(1.0f - cache.normal.x * cache.normal.x - cache.normal.y * cache.normal.y));
+		vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 		
 		for(uint j = 0; j < lightNumber; j += unusedLightNumber)
 		{
@@ -121,8 +120,8 @@ void main()
 		vec3 lightDirD = Xpd - cache.position.xyz;
 		float lightAngleD = max(dot(cacheNormal, normalize(lightDirD)), 0.1f);
 
-		indirectLight[2 * cacheIndex].position.xyz = Xpd;
-		indirectLight[2 * cacheIndex].luminousFlux.xyz = (4.0f * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD);
+		imageStore(indirectLightPositionBuffer, ivec2(2 * cacheCoord.x, cacheCoord.y), vec4(Xpd, 0));
+		imageStore(indirectLightNormalBuffer, ivec2(2 * cacheCoord.x, cacheCoord.y), vec4((4.0f * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0));
 		
 		vec3 lightDirG = Xpg - cache.position.xyz;
 		float lightQuadDistance = dot(lightDirG, lightDirG);
@@ -132,7 +131,7 @@ void main()
 		//float reflAngleG = max(pow(dot(halfVector, cacheNormal), cache.normal.w), 0.1f);
 		float lightAngleG = max(dot(lightDirG, cacheNormal), 0.1f);
 		
-		indirectLight[2 * cacheIndex + 1].position.xyz = Xpg;
-		indirectLight[2 * cacheIndex + 1].luminousFlux.xyz = (4.0f * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG);
+		imageStore(indirectLightPositionBuffer, ivec2(2 * cacheCoord.x + 1, cacheCoord.y), vec4(Xpg, 0));
+		imageStore(indirectLightNormalBuffer, ivec2(2 * cacheCoord.x + 1, cacheCoord.y), vec4((4.0f * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0));
 	}
 }

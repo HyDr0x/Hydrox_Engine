@@ -27,10 +27,13 @@ namespace he
 
       void free();
 
-      void bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
+      void clearTexture(const void *data) const;
 
-      void setTexture(GLint location, GLuint slot);
-      void unsetTexture() const;
+      void bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
+      void unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
+
+      void setTexture(GLint location, GLuint slot) const;
+      void unsetTexture(GLuint slot) const;
 
       void generateMipMapps() const;
 
@@ -59,7 +62,6 @@ namespace he
       GLenum m_internalFormat;
       GLenum m_format;
       GLenum m_type;
-      GLuint m_slot;
       GLuint m_channelNumber;
       GLuint m_bitsPerPixel;
     };

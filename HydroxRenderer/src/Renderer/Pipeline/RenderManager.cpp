@@ -239,12 +239,13 @@ namespace he
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
       //m_gBuffer.getMaterialTexture()
+      //m_gBuffer.getDepthTexture()
       //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0));
+      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

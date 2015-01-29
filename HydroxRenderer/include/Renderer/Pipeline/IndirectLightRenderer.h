@@ -51,9 +51,6 @@ namespace he
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
-      GPUBuffer& getIndirectLightsBuffer();
-      GPUBuffer& getGlobalCacheBuffer();
-
     private:
       
       IndirectLightRenderer(const IndirectLightRenderer&);
@@ -63,14 +60,15 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      GPUBuffer m_indirectLightDataBuffer;//the indirect light for the interpolation
-      GPUBuffer m_globalCacheBuffer;//saves all caches of the scene
-      GPUBuffer m_zBuffer;//uints 0 = cache is not being used, 1 = cache is being used
+      unsigned int m_bufferResolution;//to a power of two up rounded texture resolution
 
-      util::SharedPointer<db::Texture2D> m_indirectLightDataBuffer2;//the indirect light for the interpolation
-      util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer2;//saves all caches positions and diffuse strength of the scene
-      util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer2;//saves all caches normals and specular strength and exponent of the scene
-      util::SharedPointer<db::Texture2D> m_zBuffer2;
+      util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer;//saves all caches positions and diffuse strength of the scene
+      util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
+      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer;//the position of the indirect light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer;//the luminous flux of the indirect light for the interpolation
+      
+      util::SharedPointer<db::Texture2D> m_clearTexture;//clears the zBuffer with zeros
+      util::SharedPointer<db::Texture2D> m_zBuffer;//ubytes 0 = cache is not being used, 1 = cache is being used
 
       Renderquad m_indirectLightIndicesRenderQuad;
       Renderquad m_indirectLightRenderQuad;

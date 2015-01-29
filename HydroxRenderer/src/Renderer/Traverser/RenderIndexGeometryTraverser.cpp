@@ -29,6 +29,11 @@ namespace he
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
     }
 
+    void RenderIndexGeometryTraverser::setGlobalBufferResolution(unsigned int globalBufferResolution)
+    {
+      m_globalBufferResolution = globalBufferResolution;
+    }
+
     bool RenderIndexGeometryTraverser::preTraverse(GroupNode* treeNode)
     {
       m_globalCacheOffset = 0;//reset global cache offset counter
@@ -54,6 +59,8 @@ namespace he
 
       shader->useShader();
 
+      db::RenderShader::setUniform(1, GL_UNSIGNED_INT, &m_globalBufferResolution);
+
       return true;
     }
 
@@ -66,7 +73,7 @@ namespace he
 
     bool RenderIndexGeometryTraverser::preTraverse(RenderNode* treeNode)
     {
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_globalCacheOffset);
+      db::RenderShader::setUniform(0, GL_UNSIGNED_INT, &m_globalCacheOffset);
 
       treeNode->getRenderGroup()->rasterizeIndexGeometry();
 

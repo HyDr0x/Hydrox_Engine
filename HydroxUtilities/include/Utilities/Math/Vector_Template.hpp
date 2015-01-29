@@ -111,7 +111,7 @@ namespace he
       { 
         Vector<Type, VECTOR_NUM_ARGS> result;
 
-        double l = 1.0 / length();
+        double l = 1.0 / (length() + FLT_MIN);
 
         for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
         {

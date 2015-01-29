@@ -1,6 +1,6 @@
 #version 440 core
 
-#extension ARB_shader_draw_parameters : enable
+#extension GL_ARB_shader_draw_parameters : enable
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
@@ -9,50 +9,45 @@ layout(triangle_strip, max_vertices = 3) out;
 #include "../../../../include/Shader/MaterialData.glslh"
 #include "../../../../include/Shader/CacheData.glslh"
 #include "../../../../include/Shader/BarycentricCoordinates.glslh"
+#include "../../../../include/Shader/Encodings.glslh"
 
 #define INT32_MAX 2147483647
 
-layout(location = 3) uniform uint globalCacheOffset;
+layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
+layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
 
-layout(std430, binding = 0) buffer transformMatrixBuffer
-{
-	mat4 trfMatrix[];
-};
-
-layout(std430, binding = 2) buffer globalCacheBuffer
-{
-	CacheData globalCaches[];
-};
-
-layout(std430, binding = 3) buffer triangleIndexOffsetBuffer
+layout(std430, binding = 4) buffer triangleIndexOffsetBuffer
 {
 	uint triangleIndexOffset[];
 };
 
-layout(std430, binding = 4) buffer cacheOffsetBuffer
+layout(std430, binding = 5) buffer cacheOffsetBuffer
 {
 	uint cacheIndexOffset[];
 };
 
-layout(std430, binding = 5) buffer triangleBuffer
+layout(std430, binding = 6) buffer triangleBuffer
 {
 	uvec2 triangleCacheIndices[];
 };
 
-layout(std430, binding = 6) buffer cacheBuffer
+layout(std430, binding = 7) buffer cacheBuffer
 {
 	CacheData caches[];
 };
 
-layout(std430, binding = 7) buffer meshIndexBuffer
+layout(std430, binding = 8) buffer meshIndexBuffer
 {
 	uint perMeshIndex[];
 };
 
-layout(std430, binding = 8) buffer instanceCacheOffsetBuffer
+layout(std430, binding = 9) buffer instanceCacheOffsetBuffer
 {
 	uint perInstanceCacheOffset[];
 };
+
+layout(location = 0) uniform uint globalCacheOffset;
+layout(location = 1) uniform uint bufferResolution;
 
 in mat4 vsout_skinningMatrix[3];
 in vec3 vsout_pos3D[3];
@@ -81,9 +76,14 @@ void main()
 		{
 			barycentric = barycentricCoordinates(vec3(caches[i].position), vsout_pos3D[0], vsout_pos3D[1], vsout_pos3D[2]);
 			skinningMatrix = barycentric.x * vsout_skinningMatrix[0] + barycentric.y * vsout_skinningMatrix[1] + barycentric.z * vsout_skinningMatrix[2];
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].position = vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength);
+			
+			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
+			ivec2 coord = ivec2(mod(index, bufferResolution), index / bufferResolution);
+			
+			imageStore(globalCachePositionBuffer, coord, vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength));
+			
 			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
-			globalCaches[globalCacheOffset + perInstanceCacheOffsetTMP + i].normal = vec4(normal.xy, cacheMaterial.specularStrength, cacheMaterial.specularExponent);
+			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularStrength, cacheMaterial.specularExponent));
 		}
 	}
 	

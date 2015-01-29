@@ -113,7 +113,7 @@ namespace he
 
       m_geometryData.unbindVertexBuffer(0);
 
-      renderTexture->unsetTexture();
+      renderTexture->unsetTexture(0);
       skyboxShader->useNoShader();
       
       glBindVertexArray(0);

@@ -89,14 +89,18 @@ namespace he
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
+      GLuint slotOffset = 0;
+
       for(unsigned int i = 0; i < textureHandles.size(); i++)
       {
         for(unsigned int j = 0; j < textureHandles[i].size(); j++)
         {
           db::Texture2D *texture = m_textureManager->getObject(textureHandles[i][j]);
-          texture->unsetTexture();
-          m_samplerObjects[i]->unbindSampler();
+          texture->unsetTexture(slotOffset + j);
+          m_samplerObjects[i]->unbindSampler(slotOffset + j);
         }
+
+        slotOffset += static_cast<GLuint>(textureHandles[i].size());
       }
     }
 

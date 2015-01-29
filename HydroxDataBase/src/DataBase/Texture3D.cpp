@@ -14,8 +14,7 @@ namespace he
       m_internalFormat(internalFormat),
       m_format(format),
       m_channelNumber(channelNumber),
-      m_bitsPerPixel(bitsPerPixel),
-      m_slot(0)
+      m_bitsPerPixel(bitsPerPixel)
     {
       if(data != nullptr)
       {
@@ -56,7 +55,6 @@ namespace he
       m_internalFormat = other.m_internalFormat;
       m_format = other.m_format;
       m_type = other.m_type;
-      m_slot = other.m_slot;
     }
 
     Texture3D& Texture3D::operator=(const Texture3D& other)
@@ -70,7 +68,6 @@ namespace he
       m_internalFormat = other.m_internalFormat;
       m_format = other.m_format;
       m_type = other.m_type;
-      m_slot = other.m_slot;
 
       return *this;
     }
@@ -84,25 +81,35 @@ namespace he
       glDeleteTextures(1, &m_texIndex);
     }
 
+    void Texture3D::clearTexture(const void *data) const
+    {
+      glBindTexture(m_target, m_texIndex);
+      glClearTexImage(m_texIndex, 0, m_format, m_type, data);
+      glBindTexture(m_target, 0);
+    }
+
     void Texture3D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
     {
       glBindImageTexture(unit, m_texIndex, level, layered, layer, access, format);
     }
 
-    void Texture3D::setTexture(GLint location, GLuint slot)
+    void Texture3D::unbindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, 0, level, layered, layer, access, format);
+    }
+
+    void Texture3D::setTexture(GLint location, GLuint slot) const
     {
       assert(slot < 31 && "ERROR, texture slot too high/n");
 
-      m_slot = slot;
-
-      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_target, m_texIndex);
       glUniform1i(location, slot);
     }
 
-    void Texture3D::unsetTexture() const
+    void Texture3D::unsetTexture(GLuint slot) const
     {
-      glActiveTexture(GL_TEXTURE0 + m_slot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_target, 0);
     }
 

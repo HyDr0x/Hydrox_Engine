@@ -6,6 +6,7 @@
 #include "../../../include/Shader/CameraUBO.glslh"
 #include "../../../include/Shader/CacheData.glslh"
 #include "../../../include/Shader/IndirectLightData.glslh"
+#include "../../../include/Shader/Encodings.glslh"
 
 layout(location = 0) uniform sampler2D depthSampler;
 layout(location = 1) uniform sampler2D normalSampler;
@@ -13,15 +14,13 @@ layout(location = 2) uniform sampler2D materialSampler;
 
 layout(location = 3) uniform usampler2DArray cacheIndexSampler;
 
-layout(std430, binding = 0) buffer globalCacheBuffer
-{
-	CacheData caches[];
-};
+layout(rgba32f, binding = 0) readonly uniform image2D globalCachePositionBuffer;
+layout(rgba32f, binding = 1) readonly uniform image2D globalCacheNormalBuffer;
 
-layout(std430, binding = 2) buffer indirectLightDataBuffer
-{
-	IndirectLightData indirectLights[];
-};
+layout(rgba32f, binding = 2) readonly uniform image2D indirectLightPositionBuffer;
+layout(rgba32f, binding = 3) readonly uniform image2D indirectLightLuminousFluxBuffer;
+
+layout(location = 8) uniform uint bufferResolution;
 
 out vec4 luminousFlux;
 
@@ -63,7 +62,8 @@ void main()
 	{
 		if(cacheIndices[i] < INT32_MAX)
 		{
-			vec3 diff = pos - caches[cacheIndices[i]].position.xyz;
+			ivec2 coord = ivec2(mod(cacheIndices[i], bufferResolution), cacheIndices[i] / bufferResolution);
+			vec3 diff = pos - imageLoad(globalCachePositionBuffer, coord).xyz;
 			dmax = max(dmax, dot(diff, diff));
 		}
 	}
@@ -80,9 +80,12 @@ void main()
 	{
 		if(cacheIndices[i] < INT32_MAX)
 		{
-			CacheData cache = caches[cacheIndices[i]];
+			ivec2 coord = ivec2(mod(cacheIndices[i], bufferResolution), cacheIndices[i] / bufferResolution);
+			CacheData cache;
+			cache.position = imageLoad(globalCachePositionBuffer, coord);
+			cache.normal = imageLoad(globalCacheNormalBuffer, coord);
 			
-			vec3 cacheNormal = vec3(cache.normal.xy, sqrt(1.0f - cache.normal.x * cache.normal.x - cache.normal.y * cache.normal.y));
+			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
 			float dir = max(1.0f - length(pos - cache.position.xyz) / dmax, 0.0001f);
 			
@@ -91,14 +94,18 @@ void main()
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
 			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
 			
-			IndirectLightData indirectLightD = indirectLights[2 * cacheIndices[i] + 0];
-			IndirectLightData indirectLightG = indirectLights[2 * cacheIndices[i] + 1];
+			IndirectLightData indirectLightD;
+			indirectLightD.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x, coord.y));
+			indirectLightD.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x, coord.y));
+			
+			IndirectLightData indirectLightG;
+			indirectLightG.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x + 1, coord.y));
+			indirectLightG.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x + 1, coord.y));
 			
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
 				
 			phiPD += wd * indirectLightD.luminousFlux.xyz;
-			//phiPD += indirectLightD.luminousFlux.xyz;
 			phiPG += wg * indirectLightG.luminousFlux.xyz;
 			
 			wGesD += wd;

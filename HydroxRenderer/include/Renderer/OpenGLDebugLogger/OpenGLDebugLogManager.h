@@ -19,6 +19,7 @@ namespace he
 
       enum OpenGLCaps
       {
+        MAX_IMAGE_UNITS,
         MAX_TEXTURE_UNITS,
         MAX_VERTEX_TEXTURE_IMAGE_UNITS,
         MAX_TEXTURE_IMAGE_UNITS,

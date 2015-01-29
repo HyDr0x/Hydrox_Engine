@@ -128,11 +128,11 @@ namespace he
 
       m_renderLightMapQuad.render();
 
-      if(m_shadowPosMaps) m_shadowPosMaps->unsetTexture();
-      if(m_shadowMaps) m_shadowMaps->unsetTexture();
-      materialMap->unsetTexture();
-      normalMap->unsetTexture();
-      depthMap->unsetTexture();
+      if(m_shadowPosMaps) m_shadowPosMaps->unsetTexture(4);
+      if(m_shadowMaps) m_shadowMaps->unsetTexture(3);
+      materialMap->unsetTexture(2);
+      normalMap->unsetTexture(1);
+      depthMap->unsetTexture(0);
 
       m_renderLightMapQuad.unsetWriteFrameBuffer();
       m_reflectiveShadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
