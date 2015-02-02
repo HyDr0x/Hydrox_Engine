@@ -1,7 +1,7 @@
 #include "SceneGraph/TreeNodes/TreeNode.h"
 
 #include <typeinfo>
-#include <assert.h>
+#include <cassert>
 
 namespace he
 {

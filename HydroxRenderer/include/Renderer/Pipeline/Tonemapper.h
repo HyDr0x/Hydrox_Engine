@@ -53,6 +53,8 @@ namespace he
 
       util::SharedPointer<RenderOptions> m_options;
 
+      const unsigned int m_histogramBins;
+
       util::SharedPointer<db::Texture2D> m_histogram;
 
       GLuint m_histogramVAO;

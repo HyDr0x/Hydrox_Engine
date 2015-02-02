@@ -1,6 +1,6 @@
 #include "SceneGraph/Scene/SceneCacheManager.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "SceneGraph/Traverser/InsertObserverTraverser.h"
 #include "SceneGraph/Traverser/AddNodesTraverser.h"

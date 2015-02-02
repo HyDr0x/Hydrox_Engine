@@ -43,7 +43,7 @@ namespace he
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 0, m_meshVertexDeclaration);
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::GBUFFER, m_meshVertexDeclaration);
 
       m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 

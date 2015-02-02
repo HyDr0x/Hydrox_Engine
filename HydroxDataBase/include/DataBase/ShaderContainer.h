@@ -23,12 +23,15 @@ namespace he
       enum RenderPass
       {
         GBUFFER,
-        INDEX,
+        POINTINDEX,
+        LINEINDEX,
+        TRIANGLEINDEX,
         REFLECTIVESHADOW,
         SHADOW,
         COMBINE,
         DIRECTLIGHT,
         DOWNSAMPLING,
+        INDIRECTLIGHTPROXYLIGHTCREATION,
         INDIRECTLIGHTINTERPOLATION,
         OFFSCREENBUFFER,
         TONEMAPPING,
@@ -43,7 +46,6 @@ namespace he
       enum ComputeShader
       {
         FRUSTUMCULLING,
-        INDIRECTLIGHT,
         COMPUTESHADERNUMBER
       };
 

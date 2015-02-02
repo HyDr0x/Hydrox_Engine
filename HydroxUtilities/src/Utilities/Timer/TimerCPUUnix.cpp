@@ -6,7 +6,7 @@ namespace he
 {
   namespace util
   {
-    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false)
+    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false), m_cpuTime(0)
     {
     }
 

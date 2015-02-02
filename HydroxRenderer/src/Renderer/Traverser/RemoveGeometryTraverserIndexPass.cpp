@@ -25,7 +25,19 @@ namespace he
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 1, m_meshVertexDeclaration);
+      switch(mesh->getPrimitiveType())
+      {
+      case GL_POINTS:
+        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::POINTINDEX, m_meshVertexDeclaration);
+        break;
+      case GL_LINES:
+        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::LINEINDEX, m_meshVertexDeclaration);
+        break;
+      case GL_TRIANGLES:
+      default:
+        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::TRIANGLEINDEX, m_meshVertexDeclaration);
+        break;
+      }
 
       m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
 

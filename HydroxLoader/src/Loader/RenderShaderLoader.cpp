@@ -64,7 +64,7 @@ namespace he
 
       std::ifstream file(path + shaderIndexFilename);
       std::string line;
-      unsigned int renderPass = UINT32_MAX;
+      unsigned int renderPass = 0;
       unsigned int vertexDeclaration = UINT32_MAX;
 
       if(file.is_open())
@@ -82,12 +82,12 @@ namespace he
           size_t pos = line.find("RenderPass");
           if(pos != std::string::npos)
           {
-            renderPass = atoi(line.substr(pos + 11).c_str());
+            renderPass++;
             continue;
           }
 
           pos = line.find("VertexDeclaration");
-          if(pos != std::string::npos && renderPass != UINT32_MAX)
+          if(pos != std::string::npos && renderPass - 1 < UINT32_MAX)
           {
             vertexDeclaration = atoi(line.substr(pos + 18).c_str());
 
@@ -105,7 +105,7 @@ namespace he
               }
             }
 
-            container->m_renderPassShader[renderPass].push_back(loadResource(util::Flags<db::VertexDeclarationFlags>(vertexDeclaration), shaderFileNames[0], shaderFileNames[1], shaderFileNames[2], shaderFileNames[3], shaderFileNames[4], shaderFileNames[5]));
+            container->m_renderPassShader[renderPass - 1].push_back(loadResource(util::Flags<db::VertexDeclarationFlags>(vertexDeclaration), shaderFileNames[0], shaderFileNames[1], shaderFileNames[2], shaderFileNames[3], shaderFileNames[4], shaderFileNames[5]));
 
             continue;
           }

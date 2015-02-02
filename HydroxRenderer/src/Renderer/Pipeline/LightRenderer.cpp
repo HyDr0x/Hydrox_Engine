@@ -267,44 +267,6 @@ namespace he
       return m_shadowLuminousFluxMaps;
     }
 
-    /*void LightRenderer::downSampleReflectiveShadowMaps()
-    {
-      GLuint resolution = m_options->shadowMapWidth / m_options->unusedLightIndirectNumber;
-      glViewport(0, 0, resolution, resolution);
-
-      db::RenderShader *downSampleShader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_reflectiveShadowMapDownSampleShaderHandle);
-      downSampleShader->useShader();
-
-      unsigned int shadowMapNumber = m_reflectiveShadowLights.size();
-      for(unsigned int i = 0; i < shadowMapNumber; i++)
-      {
-        std::vector<unsigned int> texturendices(3);
-        texturendices[0] = i;
-        texturendices[1] = i + m_reflectiveShadowLights.size();
-        texturendices[2] = i + 2 * m_reflectiveShadowLights.size();
-
-        m_renderReflectiveShadowMapsDownSampledQuad.setWriteFrameBuffer(texturendices);
-
-        db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &i);
-
-        m_shadowPosMaps->setTexture(0, 0);
-        m_shadowNormalMaps->setTexture(1, 1);
-        m_shadowLuminousFluxMaps->setTexture(2, 2);
-
-        m_renderReflectiveShadowMapsDownSampledQuad.render();
-
-        m_shadowLuminousFluxMaps->unsetTexture();
-        m_shadowNormalMaps->unsetTexture();
-        m_shadowPosMaps->unsetTexture();
-
-        m_renderReflectiveShadowMapsDownSampledQuad.unsetWriteFrameBuffer();
-      }
-
-      downSampleShader->useNoShader();
-
-      glViewport(0, 0, m_options->width, m_options->height);
-    }*/
-
     void LightRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
       eventManager->addNewSignal<void(*)(const xBar::LightContainer& light)>(util::EventManager::OnAddLightNode);

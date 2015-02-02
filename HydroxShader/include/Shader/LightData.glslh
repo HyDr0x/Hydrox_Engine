@@ -20,3 +20,5 @@ struct ShadowLightData
 	
 	LightData light;
 };
+
+#define DIRECTIONAL_LIGHT_POSITION 8388608

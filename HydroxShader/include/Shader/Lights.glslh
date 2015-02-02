@@ -1,5 +1,4 @@
 #define PI 3.14159265359f
-#define DIRECTIONAL_LIGHT_POSITION 8388608
 
 #include "LightData.glslh"
 
@@ -20,7 +19,7 @@ float calculateLightIntensity(LightData light, const vec3 worldPos, const vec3 n
 {
 	if(light.position.x == DIRECTIONAL_LIGHT_POSITION)//DIRECTIONAL LIGHT
 	{
-		vec3 lightDir = normalize(-light.direction.xyz);
+		vec3 lightDir = normalize(light.direction.xyz);
 		float seeable = max(dot(lightDir, normal), 0.0f);
 		
 		float brdf = calculateBRDF(normalize(eyePos.xyz - worldPos), lightDir, normal, material.x, material.y, material.w);

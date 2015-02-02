@@ -6,7 +6,7 @@ namespace he
 {
   namespace util
   {
-    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false)
+    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false), m_cpuTime(0)
     {
     }
 
@@ -26,7 +26,7 @@ namespace he
       {
         LARGE_INTEGER newTime;
         QueryPerformanceCounter(&newTime);
-        m_cpuTime = double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency; 
+        m_cpuTime = time(double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency); 
 
         std::cout << m_timerName << std::endl;
         std::cout << "CPU Time: " << m_cpuTime << " m" << MICROSIGN << std::endl;
@@ -37,7 +37,7 @@ namespace he
     {
       LARGE_INTEGER newTime;
       QueryPerformanceCounter(&newTime);
-      m_cpuTime = double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency; 
+      m_cpuTime = time(double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency);
 
       m_showTimerWhenDying = false;
 
@@ -58,7 +58,7 @@ namespace he
     {
       LARGE_INTEGER newTime;
       QueryPerformanceCounter(&newTime);
-      m_cpuTime = double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency;
+      m_cpuTime = time(double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency);
     }
 
     time CPUTimer::getTime()

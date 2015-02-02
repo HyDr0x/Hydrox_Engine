@@ -59,7 +59,7 @@ namespace he
 
       m_container = m_singletonManager->getService<db::ShaderContainer>();
 
-      std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURENUMBER);
+      std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURETYPENUM);
       samplerObjects[db::Material::DIFFUSETEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
       samplerObjects[db::Material::NORMALTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
       samplerObjects[db::Material::SPECULARTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
@@ -164,7 +164,7 @@ namespace he
 
     void GeometryRenderer::rasterizeIndexGeometry()
     {
-      m_renderIndexGeometryTraverser.setGlobalBufferResolution(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
+      m_renderIndexGeometryTraverser.setGlobalBufferResolution(static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f)))));
       m_renderIndexGeometryTraverser.doTraverse(m_renderIndexRootNode);
     }
 

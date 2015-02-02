@@ -56,7 +56,7 @@ namespace he
       for(unsigned int i = 0; i < db::Material::TEXTURETYPENUM; i++)
       {
         fileStream << materialFileKeywords[MaterialFileKeywords(i + TEXTUREOFFSET + 1)] << std::endl;
-        for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
+        for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
         {
           if(j < material->getTextureNumber((db::Material::TextureType)i))
           {

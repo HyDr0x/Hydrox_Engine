@@ -121,8 +121,10 @@ namespace he
       m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &eyeVec[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
-      
+
       {
+          //CPUTIMER("MainloopCPUTimer", 0)
+          GPUTIMER("MainloopOGLTimer", 1)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_gBuffer.clear();
@@ -136,8 +138,8 @@ namespace he
         m_geometryRasterizer.updateBuffer();
         m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
 
-        m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
-
+        //m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
+          
         m_gBuffer.setGBuffer();
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
@@ -156,22 +158,22 @@ namespace he
         }
 
         m_lightRenderer.updateBuffer();
-
+        
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.1f, 4.0f);
         glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
         for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
         {
           m_lightRenderer.setShadowMap(4, i);
-          m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
+          //m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
           m_geometryRasterizer.generateShadowMap(i, SHADOWPASS);
           m_lightRenderer.unsetShadowMap(4);
         }
-
+        
         for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
         {
           m_lightRenderer.setReflectiveShadowMap(4, i);
-          m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
+          //m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
           m_geometryRasterizer.generateShadowMap(i, REFLECTIVESHADOWPASS);
           m_lightRenderer.unsetReflectiveShadowMap(4);
         }
@@ -179,7 +181,7 @@ namespace he
         glDisable(GL_POLYGON_OFFSET_FILL);
 
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
-
+        
         m_indirectLightRenderer.calculateIndirectLight(
           m_gBuffer.getDepthTexture(),
           m_gBuffer.getNormalTexture(),
@@ -240,12 +242,13 @@ namespace he
       //m_gBuffer.getNormalTexture()
       //m_gBuffer.getMaterialTexture()
       //m_gBuffer.getDepthTexture()
+      //m_lightRenderer.getLightTexture()
       //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      //m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

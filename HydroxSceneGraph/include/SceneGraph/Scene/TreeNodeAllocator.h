@@ -48,6 +48,8 @@ namespace he
 
     private:
 
+      void swap(TreeNodeAllocator& other);
+
       typedef TreeNode* (*ConvertTreeNodeAddress)(TreeNode* adress, unsigned int offset);
 
       void resize(NodeIndex index);

@@ -1,9 +1,11 @@
 #include "Renderer/TreeNodes/RenderNode.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "Renderer/Traverser/Traverser.h"
 #include "Renderer/Traverser/ConstTraverser.h"
+
+#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {

@@ -8,7 +8,7 @@
 
 #include <Utilities/Math/Math.hpp>
 #include <Utilities/Miscellaneous/Flags.hpp>
-#include <Utilities/Miscellaneous/PointCloudGenerator.h>
+#include <Utilities/Miscellaneous/CacheGenerator.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include "DataBase/DLLExport.h"

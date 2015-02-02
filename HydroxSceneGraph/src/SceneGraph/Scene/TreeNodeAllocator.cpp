@@ -1,6 +1,6 @@
 #include "SceneGraph/Scene/TreeNodeAllocator.h"
 
-#include <assert.h>
+#include <cassert>
 #include <algorithm>
 #include <new>
 
@@ -144,7 +144,7 @@ namespace he
     TreeNodeAllocator& TreeNodeAllocator::operator=(TreeNodeAllocator other)
     {
       using namespace std;//for ADL
-      swap(*this, other);
+      swap(other);
 
       return *this;
     }
@@ -241,7 +241,7 @@ namespace he
       }
 
       using namespace std;//using ADL
-      swap(*this, other);//copy swap idiom
+      swap(other);//copy swap idiom
 
       //for(std::map<NodeType, std::vector<TreeNode*>>::iterator it = m_treeNodes.begin(); it != m_treeNodes.end(); it++)
       //{
@@ -337,6 +337,16 @@ namespace he
     unsigned int TreeNodeAllocator::getNodeBlockNumber(NodeType type) const
     {
       return m_treeNodes[type].size();
+    }
+
+    void TreeNodeAllocator::swap(TreeNodeAllocator& other)
+    {
+      std::swap(m_treeNodeFactory, other.m_treeNodeFactory);
+      std::swap(m_freeSlots, other.m_freeSlots);
+      std::swap(m_nodeSizes, other.m_nodeSizes);
+      std::swap(m_nodeAddressConvert, other.m_nodeAddressConvert);
+      std::swap(m_treeNodes, other.m_treeNodes);
+      std::swap(m_nodeBlockSize, other.m_nodeBlockSize);
     }
   }
 }

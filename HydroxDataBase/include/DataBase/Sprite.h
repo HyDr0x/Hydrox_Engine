@@ -1,7 +1,7 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
-#include <assert.h>
+#include <cassert>
 
 #include "DataBase/DLLExport.h"
 

@@ -1,6 +1,6 @@
 #include "DataBase/Texture2D.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace he
 {

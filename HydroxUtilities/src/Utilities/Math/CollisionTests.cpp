@@ -46,7 +46,7 @@ namespace he
       }
       else//no collision!
       {
-        outPos = vec3f(UINT_MAX, UINT_MAX, UINT_MAX);
+        outPos = vec3f(FLT_MAX, FLT_MAX, FLT_MAX);
         return false;
       }
 
@@ -122,7 +122,7 @@ namespace he
         tPoints1[1] = t2;
         tPoints1[2] = t2;
 
-        float distance = UINT_MAX;
+        float distance = FLT_MAX;
         float lineProj0, lineProj1, pointProj;
         float vmin, vmax;
 
@@ -292,7 +292,7 @@ namespace he
 
     bool testYAxis(vec3f v0, vec3f v1, float a, float b, vec3f boxHalfSize)
     {
-      float p0, p1, p2;
+      float p0, p1;
 
       p0 = -a * v0[0] + b * v0[2];//vec3f::dot(v0, f);
       p1 = -a * v1[0] + b * v1[2];//vec3f::dot(v1, f);
@@ -318,7 +318,7 @@ namespace he
 
     bool testZAxis(vec3f v0, vec3f v1, float a, float b, vec3f boxHalfSize)
     {
-      float p0, p1, p2;
+      float p0, p1;
 
       p0 = a * v0[0] - b * v0[1];//vec3f::dot(v0, f);
       p1 = a * v1[0] - b * v1[1];//vec3f::dot(v1, f);

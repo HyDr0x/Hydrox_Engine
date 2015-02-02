@@ -42,13 +42,13 @@ namespace he
     {
     }
 
-    sg::Scene* HEFLoader::load(std::string path, std::string filename, util::SingletonManager *singletonManager)
+    sg::Scene HEFLoader::load(std::string path, std::string filename, util::SingletonManager *singletonManager)
     {
       m_rootNode = ~0;
 
       readFromFile(path, filename, singletonManager);
 
-      return new sg::Scene(m_allocator, m_rootNode);
+      return sg::Scene(m_allocator, m_rootNode);
     }
 
     void HEFLoader::readFromFile(std::string path, std::string filename, util::SingletonManager *singletonManager)

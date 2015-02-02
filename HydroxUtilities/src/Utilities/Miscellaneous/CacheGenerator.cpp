@@ -595,9 +595,9 @@ namespace he
       m_globalBBMax[1] = m_globalBBMin[1] + sideMax[1];
       m_globalBBMax[2] = m_globalBBMin[2] + sideMax[2];
 
-      m_voxelNumber[0] = ceil(sideMax[0] / m_maxDistance);
-      m_voxelNumber[1] = ceil(sideMax[1] / m_maxDistance);
-      m_voxelNumber[2] = ceil(sideMax[2] / m_maxDistance);
+      m_voxelNumber[0] = static_cast<unsigned int>(ceil(sideMax[0] / m_maxDistance));
+      m_voxelNumber[1] = static_cast<unsigned int>(ceil(sideMax[1] / m_maxDistance));
+      m_voxelNumber[2] = static_cast<unsigned int>(ceil(sideMax[2] / m_maxDistance));
 
       m_polygons.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
       m_areaCaches.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);

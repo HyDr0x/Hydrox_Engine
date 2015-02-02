@@ -64,14 +64,17 @@ namespace he
 
       util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer;//saves all caches positions and diffuse strength of the scene
       util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
-      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer;//the position of the indirect light for the interpolation
-      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer;//the luminous flux of the indirect light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightPositionDBuffer;//the position of the indirect diffuse proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxDBuffer;//the luminous flux of the indirect diffuse proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightPositionGBuffer;//the position of the indirect specular proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxGBuffer;//the luminous flux of the indirect specular proxy light for the interpolation
       
       util::SharedPointer<db::Texture2D> m_clearTexture;//clears the zBuffer with zeros
       util::SharedPointer<db::Texture2D> m_zBuffer;//ubytes 0 = cache is not being used, 1 = cache is being used
 
       Renderquad m_indirectLightIndicesRenderQuad;
       Renderquad m_indirectLightRenderQuad;
+      Renderquad m_indirectLightProxyLightCreationRenderQuad;
 
       util::SharedPointer<db::Texture3D> m_frameCacheIndexMap;//saves all 24 indices per pixel of the frame buffer
       util::SharedPointer<db::Texture2D> m_indirectLightMap;

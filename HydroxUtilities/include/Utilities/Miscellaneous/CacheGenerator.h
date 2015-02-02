@@ -1,5 +1,5 @@
-#ifndef POINTCLOUDGENERATOR_H_
-#define POINTCLOUDGENERATOR_H_
+#ifndef CACHEGENERATOR_H_
+#define CACHEGENERATOR_H_
 
 #include <vector>
 #include <list>

@@ -23,13 +23,13 @@ namespace he
     public:
 
       Scene(const TreeNodeAllocator& m_allocator, NodeIndex rootNode);
-      Scene(const Scene& object);
+      Scene(const Scene& other);
       virtual ~Scene();
 
-      Scene& operator=(Scene& other);
+      Scene& operator=(Scene other);
 
       NodeIndex getRootNode();
-      const NodeIndex const getRootNode() const;
+      NodeIndex getRootNode() const;
 
       NodeIndex searchNode(const std::string& nodeName);
 
@@ -37,10 +37,10 @@ namespace he
 
       virtual NodeIndex addParentNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode);
       virtual NodeIndex addChildNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode);
-      virtual void removeNode(const NodeIndex node);
+      virtual void removeNode(NodeIndex node);
 
       virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
-      virtual void removeSubTree(const NodeIndex rootNodeIndex);
+      virtual void removeSubTree(NodeIndex rootNodeIndex);
 
       template<typename T> T& getNode(const std::string& nodeName)
       {
@@ -75,6 +75,10 @@ namespace he
       NodeIndex m_rootNode;//the root node
 
       TreeNodeAllocator m_allocator;
+
+    private:
+
+      void Scene::swap(Scene& other);
     };
   }
 }

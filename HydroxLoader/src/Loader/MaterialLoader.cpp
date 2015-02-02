@@ -64,22 +64,22 @@ namespace he
           {
           case DIFFUSESTRENGTH:
             std::getline(file, line);
-            materialData.diffuseStrength = std::strtod(line.c_str(), nullptr);
+            materialData.diffuseStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
           case SPECULARSTRENGTH:
             std::getline(file, line);
-            materialData.specularStrength = std::strtod(line.c_str(), nullptr);
+            materialData.specularStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
           case AMBIENTSTRENGTH:
             std::getline(file, line);
-            materialData.ambientStrength = std::strtod(line.c_str(), nullptr);
+            materialData.ambientStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
           case SPECULAREXPONENT:
             std::getline(file, line);
-            materialData.specularExponent = std::strtod(line.c_str(), nullptr);
+            materialData.specularExponent = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
           case DIFFUSETEXTURE:
-            for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
+            for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -89,7 +89,7 @@ namespace he
             }
             break;
           case NORMALMAP:
-            for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
+            for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -99,7 +99,7 @@ namespace he
             }
             break;
           case SPECULARMAP:
-            for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
+            for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))
@@ -109,7 +109,7 @@ namespace he
             }
             break;
           case DISPLACEMENTMAP:
-            for(unsigned int j = 0; j < db::Material::TEXTURENUMBER; j++)
+            for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
               if(line != std::string("NULL"))

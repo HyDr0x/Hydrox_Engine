@@ -52,7 +52,9 @@ namespace he
 
     private:
 
-      //SceneCacheManager(const SceneCacheManager& object) : m_eventManager(object.m_eventManager){}
+      SceneCacheManager();
+      SceneCacheManager(const SceneCacheManager& object);
+      SceneCacheManager& operator=(const SceneCacheManager&);
 
       void registerNodeCacheSlots();
 

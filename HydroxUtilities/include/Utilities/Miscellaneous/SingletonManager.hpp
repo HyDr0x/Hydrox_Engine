@@ -2,7 +2,7 @@
 #define SINGLETONMANAGER_H_
 
 #include <map>
-#include <assert.h>
+#include <cassert>
 #include <string>
 
 #include "Utilities/Miscellaneous/SingletonBehaviour.hpp"

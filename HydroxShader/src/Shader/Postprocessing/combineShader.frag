@@ -7,7 +7,6 @@ layout(location = 1) uniform sampler2D lightSampler;
 layout(location = 2) uniform sampler2D indirectLightSampler;
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 luminance;
 
 in vec2 gsout_texCoord;
 
@@ -22,9 +21,7 @@ void main()
 	
 	//color = (indirectLight + light) * albedo;
 	
-	vec4 hsvColor = vec4(RGBtoHSV(((indirectLight + light) * albedo).rgb), 1.0f);
-	color = hsvColor;
-	luminance = vec4(hsvColor.b, 0, 0, 0);
+	color = vec4(RGBtoHSV(((indirectLight + light) * albedo).rgb), 1.0f);
 	
 	/*vec3 normalColor = ((indirectLight + light) * albedo).rgb;
 	float Y = dot(vec3(0.299f, 0.587f, 0.114f), normalColor);

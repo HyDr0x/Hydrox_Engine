@@ -3,7 +3,7 @@
 
 #include <stack>
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -12,7 +12,7 @@
 #include "Loader/DLLExport.h"
 
 #include <Utilities/Signals/EventManager.h>
-#include <Utilities/Miscellaneous/PointCloudGenerator.h>
+#include <Utilities/Miscellaneous/CacheGenerator.h>
 
 #include <DataBase/ResourceManager.hpp>
 
@@ -67,13 +67,19 @@ namespace he
 
     private:
 
-      void loadAnimatedSkeleton(const aiScene *scene);
       void loadMeshesFromAssimp(const aiScene *scene, bool yAxisFlipped);
-      void attachBonesToSkinnedMesh();
       util::ResourceHandle loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped);
+
+      void loadAnimatedSkeleton(const aiScene *scene);
+      
+
       sg::NodeIndex loadSceneGraphFromAssimp(std::string filename, const aiScene *scene);
       sg::NodeIndex createTransformNodes(const aiNode *node, sg::NodeIndex parentNode, sg::NodeIndex nextSibling);
       sg::NodeIndex createGeoNodes(std::string meshName, unsigned int meshIndex, sg::NodeIndex parentNode, sg::NodeIndex nextSibling);
+
+      void attachBonesToSkinnedMesh();
+
+      void loadMaterialsFromAssimp(std::string path, const aiScene *scene);
 
       float m_errorRate;
       float m_maxDistance;
@@ -91,7 +97,7 @@ namespace he
       util::SharedPointer<db::TextureManager> m_textureManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
 
-      util::PointCloudGenerator m_generator;
+      util::CacheGenerator m_generator;
 
       util::ResourceHandle m_defaultMaterial;
 
@@ -101,6 +107,8 @@ namespace he
       std::vector<std::vector<util::Matrix<float, 4>>> m_inverseBindPoseTable;//all the boneMatrices per mesh
       std::vector<std::vector<std::string>> m_boneNameTable;
       std::vector<util::ResourceHandle> m_meshes;//contains the mesh id's of the scene
+      std::vector<unsigned int> m_materialIndex;//the index into the material array
+      std::vector<util::ResourceHandle> m_materials;//contains the material id's of the scene
 
       std::map<sg::NodeIndex, std::vector<std::string>, sg::NodeIndex::Less> m_skinnedMeshTable;//names of the skinned geo nodes
       std::map<std::string, sg::NodeIndex> m_boneTable;//names of the bones for skinning

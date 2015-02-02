@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 #include <GL/glew.h>

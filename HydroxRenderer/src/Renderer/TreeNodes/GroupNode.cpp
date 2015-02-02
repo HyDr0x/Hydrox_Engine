@@ -1,6 +1,6 @@
 #include "Renderer/TreeNodes/GroupNode.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "Renderer/Traverser/Traverser.h"
 #include "Renderer/Traverser/ConstTraverser.h"

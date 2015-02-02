@@ -1,6 +1,6 @@
 #include "SceneGraph/Scene/RenderScene.h"
 
-#include <assert.h>
+#include <cassert>
 #include <stack>
 
 #include "SceneGraph/Scene/SceneCacheManager.h"
@@ -16,7 +16,7 @@ namespace he
   namespace sg
   {
     RenderScene::RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) : 
-      Scene(allocator, rootNode), m_eventManager(eventManger), m_sceneCacheManager(SceneCacheManager(eventManger))
+      Scene(allocator, rootNode), m_eventManager(eventManger), m_sceneCacheManager(eventManger)
     {
       TransformTraverser transformTraverser(m_allocator);
       transformTraverser.doTraverse(getNode<TreeNode>(m_rootNode));

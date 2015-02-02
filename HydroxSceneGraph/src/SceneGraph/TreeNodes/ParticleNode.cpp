@@ -1,6 +1,6 @@
 #include "SceneGraph/TreeNodes/ParticleNode.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <Utilities/Signals/EventManager.h>
 

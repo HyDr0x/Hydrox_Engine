@@ -1,5 +1,5 @@
-#ifndef CONSTTRAVERSER_H_
-#define CONSTTRAVERSER_H_
+#ifndef CONSTTRAVERSERRENDERER_H_
+#define CONSTTRAVERSERRENDERER_H_
 
 #include "Renderer/DLLExport.h"
 

@@ -27,7 +27,7 @@ namespace he
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, 1, m_meshVertexDeclaration);
+      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::REFLECTIVESHADOW, m_meshVertexDeclaration);
 
       m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);

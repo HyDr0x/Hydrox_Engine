@@ -54,7 +54,7 @@ namespace he
 
       shader->useShader();
 
-      unsigned int reflectiveShadoMapResolution = sqrt((m_options->shadowMapWidth * m_options->shadowMapWidth) / float(m_options->unusedLightIndirectNumber));
+      unsigned int reflectiveShadoMapResolution = static_cast<unsigned int>(sqrt((m_options->shadowMapWidth * m_options->shadowMapWidth) / float(m_options->unusedLightIndirectNumber)));
 
       db::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
       db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &reflectiveShadoMapResolution);

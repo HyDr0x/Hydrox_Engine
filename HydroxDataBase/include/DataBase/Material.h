@@ -3,7 +3,7 @@
 
 #include <map>
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 #include "DataBase/DLLExport.h"
 
@@ -28,8 +28,6 @@ namespace he
         SPECULARTEX,
         TEXTURETYPENUM
       };
-
-      static const unsigned int TEXTURENUMBER = 4;
 
       struct MaterialData
       {

@@ -1,6 +1,6 @@
 #version 440 core
 
-layout(location = 0) out float histoCounterOut;
+layout(location = 0) out uint histoCounterOut;
 
 void main()
 {

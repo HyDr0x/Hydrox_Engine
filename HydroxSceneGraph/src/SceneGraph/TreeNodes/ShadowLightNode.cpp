@@ -1,6 +1,6 @@
 #include "SceneGraph/TreeNodes/ShadowLightNode.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <Utilities/Signals/EventManager.h>
 
@@ -118,7 +118,7 @@ namespace he
       case POINTLIGHT:
         break;
       case DIRECTIONALLIGHT:
-        width = 100.0f;
+        width = 20.0f;
         m_lightData.projectionParameter[0] = m_near;
         m_lightData.projectionParameter[1] = m_far;
         m_lightData.projectionParameter[2] = 2.0f * width;
@@ -192,7 +192,7 @@ namespace he
     void ShadowLightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
-      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis() * -1.0f;
+      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis() * -1.0f;//negate it, zaxis inverted in view space and shader need the negated lightDir anyways
 
       m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.direction, util::vec3f(0.0f, 1.0f, 0.0f));
     }

@@ -1,6 +1,6 @@
 #include "SceneGraph/Scene/Scene.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "SceneGraph/TreeNodes/GroupNode.h"
 
@@ -19,18 +19,26 @@ namespace he
     {
     }
 
-    Scene::Scene(const Scene& object) : m_allocator(object.getTreeNodeAllocator()), m_rootNode(object.getRootNode())
+    Scene::Scene(const Scene& other) : m_allocator(other.getTreeNodeAllocator()), m_rootNode(other.getRootNode())
     {
-      addSubTree(object, m_rootNode, he::util::vec3f::identity(), "");
+      //addSubTree(object, m_rootNode, he::util::vec3f::identity(), "");
     }
 
     Scene::~Scene()
     {
     }
 
-    Scene& Scene::operator=(Scene& other)
+    void Scene::swap(Scene& other)
     {
-      addSubTree(other, m_rootNode, he::util::vec3f::identity(), "");
+      std::swap(m_rootNode, other.m_rootNode);
+      std::swap(m_allocator, other.m_allocator);
+    }
+
+    Scene& Scene::operator=(Scene other)
+    {
+      //addSubTree(other, m_rootNode, he::util::vec3f::identity(), "");
+      using namespace std;//for ADL
+      swap(other);
 
       return *this;
     }
@@ -40,7 +48,7 @@ namespace he
       return m_rootNode;
     }
 
-    const NodeIndex const Scene::getRootNode() const
+    NodeIndex Scene::getRootNode() const
     {
       return m_rootNode;
     }

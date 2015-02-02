@@ -37,7 +37,7 @@ void main()
 {	
 	vec4 tmpPos = vec4(gsout_texCoord, texture(depthSampler, gsout_texCoord).r, 1.0f);
 	
-	if(tmpPos.z == 1.0f) //discard the lighting e.g. for skybox or billboards
+	if(tmpPos.z == 1.0f) //discard the lighting for background e.g. for skybox
 	{
 		luminousFlux = vec4(1.0f);
 		return;
@@ -87,7 +87,7 @@ void main()
 		vec4 shadowMapPos = reflectiveShadowLight[i].lightViewProj * texture(shadowPosSampler, shadowTexCoords);
 		shadowMapPos /= shadowMapPos.w;
 		
-		if(shadowPos.z <= shadowMapPos.z + 0.0003f || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
+		if(shadowPos.z <= shadowMapPos.z + 0.003f || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
 		{
 			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * calculateLightIntensity(reflectiveShadowLight[i].light, pos, normal, material);
 		}

@@ -33,7 +33,7 @@ namespace he
       {
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new SkinnedGeometryDecorator(new DrawArrayDecorator(new SkinnedRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
       }
-      else if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE)) == nodeType)
+      else //if((util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE)) == nodeType)
       {
         return util::SharedPointer<IRenderGroup>(new MaterialDecorator(new StaticGeometryDecorator(new DrawArrayDecorator(new StaticRenderNode(options), primitiveType, vertexStride, singletonManager), options), singletonManager));
       }

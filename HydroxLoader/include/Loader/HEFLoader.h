@@ -32,7 +32,7 @@ namespace he
 
       HEFLoader(float errorRate, float maxDistance, float maxAngle, unsigned int nodeBlockSize = 256);
 
-      sg::Scene* load(std::string path, std::string filename, util::SingletonManager *singletonManager);
+      sg::Scene load(std::string path, std::string filename, util::SingletonManager *singletonManager);
 
     private:
 

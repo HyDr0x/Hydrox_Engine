@@ -49,7 +49,7 @@ namespace he
 
         file.read((char*)&indexData[0], sizeof(indexData[0]) * meshData.indexCount);
         file.read((char*)&geometryData[0], sizeof(geometryData[0]) * meshData.vboSize);
-        file.read((char*)&cacheData[0], sizeof(cacheData[0]) * meshData.cacheSize);
+        if(meshData.cacheSize > 0) file.read((char*)&cacheData[0], sizeof(cacheData[0]) * meshData.cacheSize);
         file.read((char*)&triangleCacheIndices[0], sizeof(triangleCacheIndices[0]) * meshData.primitiveCount);
 
         meshHandle = m_modelManager->addObject(db::Mesh(db::AABB(meshData.bbMin, meshData.bbMax), 
@@ -84,7 +84,7 @@ namespace he
       std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices, normals);
 
-      util::PointCloudGenerator generator;
+      util::CacheGenerator generator;
       std::vector<util::Cache> caches;
       std::vector<he::util::vec2ui> triangleCacheData;
       generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);

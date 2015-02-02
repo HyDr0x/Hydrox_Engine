@@ -11,7 +11,7 @@ namespace he
 {
   namespace renderer
   {
-    Tonemapper::Tonemapper()
+    Tonemapper::Tonemapper() : m_histogramBins(16)
     {
     }
 
@@ -31,6 +31,8 @@ namespace he
       m_tonemappingShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::TONEMAPPING, util::Flags<db::VertexDeclarationFlags>(8192));
 
       createHistogramVertices();
+
+      m_timer.start();//to get a better starting time
     }
 
     void Tonemapper::doToneMapping(util::SharedPointer<db::Texture2D> combinedTexture)
@@ -50,7 +52,7 @@ namespace he
 
       m_histogramVertices.createBuffer(GL_ARRAY_BUFFER, m_options->width * m_options->height * sizeof(util::vec2f), m_options->width * m_options->height * sizeof(util::vec2f), GL_STATIC_DRAW, &vertices[0]);
 
-      m_histogram = util::SharedPointer<db::Texture2D>(new db::Texture2D(16, 1, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+      m_histogram = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R32UI, GL_RED_INTEGER, 1, 32));
 
       m_histogramRenderQuad.setRenderTargets(1, m_histogram);
 
@@ -68,7 +70,7 @@ namespace he
       glDepthMask(GL_FALSE);
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
-      glViewport(0, 0, 16, 1);
+      glViewport(0, 0, m_histogramBins, 1);
       m_histogramRenderQuad.setWriteFrameBuffer();
       db::RenderShader *shader = m_renderShaderManager->getObject(m_histogramShaderHandle);
       shader->useShader();
@@ -91,13 +93,13 @@ namespace he
       glDisable(GL_BLEND);
       glDepthMask(GL_TRUE);
 
-      std::vector<float> histogram(16);
+      std::vector<GLuint> histogram(m_histogramBins);
 
       m_histogram->getTextureData(&histogram[0]);
 
       unsigned int pixelNumber = 0, maxPixelNumber = 0;
 
-      for(unsigned int i = 0; i < 16; i++)
+      for(unsigned int i = 0; i < histogram.size(); i++)
       {
         pixelNumber += histogram[i];
         if(i >= m_options->usedHistogramBins)
@@ -119,7 +121,8 @@ namespace he
     {
       m_logLuminanceRangeNew[0] = std::max<int>(m_logLuminanceRangeNew[0], -1);
 
-      util::vec2f luminanceDifference = util::math::vector_cast<float>(m_logLuminanceRangeNew)-m_logLuminanceRange;
+      util::vec2f luminanceDifference = util::math::vector_cast<float>(m_logLuminanceRangeNew) - m_logLuminanceRange;
+
       luminanceDifference[0] = luminanceDifference[0] > 0.0f ? 1.0f : luminanceDifference[0] < 0.0f ? -1.0f : 0.0f;
       luminanceDifference[1] = luminanceDifference[1] > 0.0f ? 1.0f : luminanceDifference[1] < 0.0f ? -1.0f : 0.0f;
 
@@ -127,9 +130,15 @@ namespace he
 
       if(luminanceDifference[0] != 0 || luminanceDifference[1] != 0)
       {
-        util::time timeDiff = m_timer.getTime() * 0.001f;
+        float timeDiff = static_cast<util::time>(float(m_timer.getTime()) * 0.001f);
 
-        m_logLuminanceRange = m_logLuminanceRange + luminanceDifference * timeDiff * m_options->logLuminancePerMS;
+        m_logLuminanceRange += luminanceDifference * timeDiff * m_options->logLuminancePerMS;
+
+        m_logLuminanceRange[0] = std::min<float>(m_logLuminanceRange[0], m_histogramBins);
+        m_logLuminanceRange[1] = std::min<float>(m_logLuminanceRange[1], m_histogramBins);
+
+        m_logLuminanceRange[0] = std::max<float>(m_logLuminanceRange[0], -1.0f);
+        m_logLuminanceRange[1] = std::max<float>(m_logLuminanceRange[1], -1.0f);
 
         if(luminanceDifference[0] > 0) m_logLuminanceRange[0] = util::math::clamp<float>(m_logLuminanceRange[0], m_logLuminanceRange[0], m_logLuminanceRangeNew[0]);
         else m_logLuminanceRange[0] = util::math::clamp<float>(m_logLuminanceRange[0], m_logLuminanceRangeNew[0], m_logLuminanceRange[0]);
@@ -139,6 +148,7 @@ namespace he
 
         m_luminanceRange[0] = m_logLuminanceRange[0] < 0 ? util::math::clamp(m_luminanceRange[0] + luminanceDifference[0] * timeDiff * m_options->logLuminancePerMS, 0.0f, 1.0f) : std::pow(2.0f, m_logLuminanceRange[0]);
         m_luminanceRange[1] = std::pow(2.0f, m_logLuminanceRange[1]);
+
       }
 
       m_timer.start();

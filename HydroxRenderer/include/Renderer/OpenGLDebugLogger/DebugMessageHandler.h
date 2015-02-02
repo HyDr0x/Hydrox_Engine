@@ -10,7 +10,7 @@ namespace he
   namespace renderer
   {
     #ifndef APIENTRY
-    #define GLAPIENTRY __stdcall
+      #define GLAPIENTRY __stdcall
     #endif
 
     static std::string getStringForType(GLenum type);

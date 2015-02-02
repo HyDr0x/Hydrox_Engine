@@ -1,6 +1,6 @@
 #include "SceneGraph/TreeNodes/GeoNode.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "SceneGraph/Traverser/ConstTraverser.h"
 #include "SceneGraph/Traverser/Traverser.h"

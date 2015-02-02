@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <stdarg.h>
-#include <assert.h>
+#include <cassert>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Pointer/SharedPointer.h>

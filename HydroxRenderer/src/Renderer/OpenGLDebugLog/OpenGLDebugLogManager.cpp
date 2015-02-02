@@ -36,7 +36,7 @@ namespace he
       GLint maxExtensions = 0;
       glGetIntegerv(GL_NUM_EXTENSIONS, &maxExtensions);
 
-      for(GLuint i = 0; i < maxExtensions; i++)
+      for(GLuint i = 0; i < GLuint(maxExtensions); i++)
       {
         const char* extensionName = (const char*)glGetStringi(GL_EXTENSIONS, i);
 

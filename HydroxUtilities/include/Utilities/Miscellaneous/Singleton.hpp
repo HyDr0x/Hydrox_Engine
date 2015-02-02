@@ -2,7 +2,7 @@
 #define SINGLETON_HPP_
 
 #include <map>
-#include <assert.h>
+#include <cassert>
 #include <string>
 
 namespace he

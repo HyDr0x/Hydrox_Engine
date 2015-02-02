@@ -92,6 +92,10 @@ namespace he
         cacheIndizes1.resize(positions.size());
         generateCacheIndizes(positions, ownNormals, cacheIndizes0, cacheIndizes1);
       }
+      else
+      {
+        ownNormals = normals;
+      }
 
       m_vertexDeclaration |= positions.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_POSITION) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
       m_vertexDeclaration |= textureCoords[0].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE0) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);

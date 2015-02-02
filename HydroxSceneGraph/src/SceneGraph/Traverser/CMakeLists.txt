@@ -5,6 +5,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/AnimationControlTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ConstTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CopyTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DebugCacheTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/DeleteTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GetGlobalCoordinateTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertObserverTraverser.cpp 

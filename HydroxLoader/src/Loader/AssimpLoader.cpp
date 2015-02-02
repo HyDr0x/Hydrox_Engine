@@ -102,7 +102,7 @@ namespace he
     {
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
-      const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords);
+      const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords ^ aiProcess_CalcTangentSpace);
 
       if(!assimpScene)
       {
@@ -113,6 +113,8 @@ namespace he
       else
       {  
         loadMeshesFromAssimp(assimpScene, yAxisFlipped);
+
+        loadMaterialsFromAssimp(path, assimpScene);
 
         loadAnimatedSkeleton(assimpScene);
 
@@ -134,29 +136,10 @@ namespace he
       return scene;
     }
 
-    sg::Scene* AssimpLoader::loadDefaultSceneGraph()
-    {
-      sg::NodeIndex sceneRootNode = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
-
-      std::vector<util::vec3f> positions;
-      std::vector<util::vec3f> normals;
-      std::vector<db::Mesh::indexType> indices;
-      util::CubeGenerator::generateCube(positions, indices, normals);
-
-      util::PointCloudGenerator generator;
-      std::vector<he::util::Cache> caches;
-      std::vector<he::util::vec2ui> triangleCacheData;
-      generator.generateCaches(caches, triangleCacheData, 0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
-    
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
-      ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
-
-      return new sg::Scene(m_allocator, sceneRootNode);
-    }
-
     void AssimpLoader::loadMeshesFromAssimp(const aiScene *scene, bool yAxisFlipped)
     {
       m_meshes.resize(scene->mNumMeshes);
+      m_materialIndex.resize(scene->mNumMeshes);
       m_inverseBindPoseTable.resize(scene->mNumMeshes);
       m_boneNameTable.resize(scene->mNumMeshes);
 
@@ -165,6 +148,7 @@ namespace he
       for(unsigned int i = 0; i != scene->mNumMeshes; i++)
       {
         m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
+        m_materialIndex[i] = scene->mMeshes[i]->mMaterialIndex;
       }
     }
 
@@ -311,8 +295,11 @@ namespace he
 
       std::vector<util::Cache> caches;
       std::vector<he::util::vec2ui> triangleCacheData;
-      m_generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
-
+      if(primitiveType == GL_TRIANGLES)
+      {
+        m_generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+      }
+      
       return m_modelManager->addObject(db::Mesh(
         primitiveType,
         positions,
@@ -325,6 +312,63 @@ namespace he
         boneWeights,
         boneIndices,
         vertexColors));
+    }
+
+    void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
+    {
+      for(unsigned int i = 0; i < scene->mNumAnimations; i++)
+      {
+        std::string animationName = scene->mAnimations[i]->mName.C_Str();
+
+        for(unsigned int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
+        {
+          aiNodeAnim *channel = scene->mAnimations[i]->mChannels[j];
+
+          std::string nodeName = std::string(channel->mNodeName.C_Str());
+          if(m_animationTracks[nodeName].empty())
+          {
+            m_animationTracks[nodeName].resize(scene->mNumAnimations);
+          }
+
+          sg::AnimationTrack& animationTrack = m_animationTracks[nodeName][i];
+
+          animationTrack.m_positions.resize(channel->mNumPositionKeys);
+          animationTrack.m_positionsTime.resize(channel->mNumPositionKeys);
+
+          animationTrack.m_rotations.resize(channel->mNumRotationKeys);
+          animationTrack.m_rotationsTime.resize(channel->mNumRotationKeys);
+
+          animationTrack.m_scales.resize(channel->mNumScalingKeys);
+          animationTrack.m_scalesTime.resize(channel->mNumScalingKeys);
+
+          animationTrack.m_animationName = animationName;
+          animationTrack.m_duration = scene->mAnimations[i]->mDuration;
+          animationTrack.m_animationTicksPerSecond = scene->mAnimations[i]->mTicksPerSecond == 0.0 ? m_animationTimeUnitConvert : scene->mAnimations[i]->mTicksPerSecond * m_animationTimeUnitConvert;
+
+          for(unsigned int k = 0; k < channel->mNumPositionKeys; k++)
+          {
+            aiVector3D position = channel->mPositionKeys[k].mValue;
+            animationTrack.m_positions[k] = util::vec3f(position.x, position.y, position.z);
+            animationTrack.m_positionsTime[k] = channel->mPositionKeys[k].mTime;
+          }
+
+          for(unsigned int k = 0; k < channel->mNumRotationKeys; k++)
+          {
+            aiQuaternion rotation = channel->mRotationKeys[k].mValue;
+            animationTrack.m_rotations[k] = util::Quaternion<float>(rotation.w, rotation.x, rotation.y, rotation.z).invert();
+            animationTrack.m_rotationsTime[k] = channel->mRotationKeys[k].mTime;
+          }
+
+          for(unsigned int k = 0; k < channel->mNumScalingKeys; k++)
+          {
+            aiVector3D scale = channel->mScalingKeys[k].mValue;
+            assert(abs(scale.x - scale.y) < 0.001f && abs(scale.x - scale.z) < 0.001f && abs(scale.y - scale.z) < 0.001f);
+
+            animationTrack.m_scales[k] = scale.x;
+            animationTrack.m_scalesTime[k] = channel->mScalingKeys[k].mTime;
+          }
+        }
+      }
     }
 
     sg::NodeIndex AssimpLoader::loadSceneGraphFromAssimp(std::string filename, const aiScene *scene)
@@ -396,72 +440,15 @@ namespace he
 
       if(!m_inverseBindPoseTable[meshIndex].empty())
       {
-        geoNodeIndex = m_allocator.insert(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName, parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::AnimatedGeoNode(m_inverseBindPoseTable[meshIndex], m_eventManager, m_meshes[meshIndex], m_materials[m_materialIndex[meshIndex]], meshName, parentNode, nextSibling));
         m_skinnedMeshTable[geoNodeIndex] = m_boneNameTable[meshIndex];
       }
       else
       {
-        geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_defaultMaterial, meshName, parentNode, nextSibling));
+        geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_meshes[meshIndex], m_materials[m_materialIndex[meshIndex]], meshName, parentNode, nextSibling));
       }
 
       return geoNodeIndex;
-    }
-
-    void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
-    {
-      for(unsigned int i = 0; i < scene->mNumAnimations; i++)
-      {
-        std::string animationName = scene->mAnimations[i]->mName.C_Str();
-
-        for(unsigned int j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
-        {
-          aiNodeAnim *channel = scene->mAnimations[i]->mChannels[j];
-
-          std::string nodeName = std::string(channel->mNodeName.C_Str());
-          if(m_animationTracks[nodeName].empty())
-          {
-            m_animationTracks[nodeName].resize(scene->mNumAnimations);
-          }
-
-          sg::AnimationTrack& animationTrack = m_animationTracks[nodeName][i];
-
-          animationTrack.m_positions.resize(channel->mNumPositionKeys);
-          animationTrack.m_positionsTime.resize(channel->mNumPositionKeys);
-
-          animationTrack.m_rotations.resize(channel->mNumRotationKeys);
-          animationTrack.m_rotationsTime.resize(channel->mNumRotationKeys);
-
-          animationTrack.m_scales.resize(channel->mNumScalingKeys);
-          animationTrack.m_scalesTime.resize(channel->mNumScalingKeys);
-
-          animationTrack.m_animationName = animationName;
-          animationTrack.m_duration = scene->mAnimations[i]->mDuration;
-          animationTrack.m_animationTicksPerSecond = scene->mAnimations[i]->mTicksPerSecond == 0.0 ? m_animationTimeUnitConvert : scene->mAnimations[i]->mTicksPerSecond * m_animationTimeUnitConvert;
-
-          for(unsigned int k = 0; k < channel->mNumPositionKeys; k++)
-          {
-            aiVector3D position = channel->mPositionKeys[k].mValue;
-            animationTrack.m_positions[k] = util::vec3f(position.x, position.y, position.z);
-            animationTrack.m_positionsTime[k] = channel->mPositionKeys[k].mTime;
-          }
-
-          for(unsigned int k = 0; k < channel->mNumRotationKeys; k++)
-          {
-            aiQuaternion rotation = channel->mRotationKeys[k].mValue;
-            animationTrack.m_rotations[k] = util::Quaternion<float>(rotation.w, rotation.x, rotation.y, rotation.z).invert();
-            animationTrack.m_rotationsTime[k] = channel->mRotationKeys[k].mTime;
-          }
-
-          for(unsigned int k = 0; k < channel->mNumScalingKeys; k++)
-          {
-            aiVector3D scale = channel->mScalingKeys[k].mValue;
-            assert(abs(scale.x - scale.y) < 0.001f && abs(scale.x - scale.z) < 0.001f && abs(scale.y - scale.z) < 0.001f);
-
-            animationTrack.m_scales[k] = scale.x;
-            animationTrack.m_scalesTime[k] = channel->mScalingKeys[k].mTime;
-          }
-        }
-      }
     }
 
     void AssimpLoader::attachBonesToSkinnedMesh()
@@ -475,6 +462,84 @@ namespace he
           animNode.setSkinnedMesh(geoNode);
           animNode.setBoneIndex(i);
         }
+      }
+    }
+
+    sg::Scene* AssimpLoader::loadDefaultSceneGraph()
+    {
+      sg::NodeIndex sceneRootNode = m_allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("defaultCube")));
+
+      std::vector<util::vec3f> positions;
+      std::vector<util::vec3f> normals;
+      std::vector<db::Mesh::indexType> indices;
+      util::CubeGenerator::generateCube(positions, indices, normals);
+
+      util::CacheGenerator generator;
+      std::vector<he::util::Cache> caches;
+      std::vector<he::util::vec2ui> triangleCacheData;
+      generator.generateCaches(caches, triangleCacheData, 0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
+
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
+      ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
+
+      return new sg::Scene(m_allocator, sceneRootNode);
+    }
+
+    void AssimpLoader::loadMaterialsFromAssimp(std::string path, const aiScene *scene)
+    {
+      m_materials.resize(scene->mNumMaterials);
+      std::vector<std::vector<util::ResourceHandle>> textures(db::Material::TEXTURETYPENUM);
+      ILDevilLoader texLoader(m_singletonManager);
+      aiString texPath;
+
+      for(unsigned int i = 0; i < m_materials.size(); i++)
+      {
+        std::vector<uint64_t> hashes;
+
+        textures[db::Material::DIFFUSETEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DIFFUSE));
+        textures[db::Material::NORMALTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_NORMALS));
+        textures[db::Material::DISPLACEMENTTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
+        textures[db::Material::SPECULARTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
+
+        for(unsigned int k = 0; k != textures[db::Material::DIFFUSETEX].size(); k++)
+        {
+          scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
+          textures[db::Material::DIFFUSETEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::DIFFUSETEX][k]);
+          hashes.push_back(texture->getHash());
+        }
+
+        for(unsigned int k = 0; k != textures[db::Material::NORMALTEX].size(); k++)
+        {
+          scene->mMaterials[i]->GetTexture(aiTextureType_NORMALS, 0, &texPath);
+          textures[db::Material::NORMALTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::NORMALTEX][k]);
+          hashes.push_back(texture->getHash());
+        }
+
+        for(unsigned int k = 0; k != textures[db::Material::DISPLACEMENTTEX].size(); k++)
+        {
+          scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
+          textures[db::Material::DISPLACEMENTTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::DISPLACEMENTTEX][k]);
+          hashes.push_back(texture->getHash());
+        }
+
+        for(unsigned int k = 0; k != textures[db::Material::SPECULARTEX].size(); k++)
+        {
+          scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
+          textures[db::Material::SPECULARTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::SPECULARTEX][k]);
+          hashes.push_back(texture->getHash());
+        }
+
+        db::Material::MaterialData matData;
+        matData.diffuseStrength = 0.5f;
+        matData.specularStrength = 0.5f;
+        matData.ambientStrength = 0.1f;
+        matData.specularExponent = 1.0f;
+
+        m_materials[i] = m_materialManager->addObject(db::Material(matData, textures, hashes, false));
       }
     }
   }

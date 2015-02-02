@@ -96,15 +96,15 @@ namespace he
       inline Type& operator [] (unsigned int i) { return m_x[i]; }
       inline const Type& operator [] (unsigned int i) const { return m_x[i]; }
 
-      inline double length() const
+      inline float length() const
       { 
-        double length = 0;
+        float length = 0;
 
         for(unsigned int i = 0; i != VECTOR_NUM_ARGS; i++)
         {
           length += m_x[i] * m_x[i];
         }
-        return sqrt(length); 
+        return static_cast<float>(sqrt(length)); 
       }
 
       inline Vector normalize() const
