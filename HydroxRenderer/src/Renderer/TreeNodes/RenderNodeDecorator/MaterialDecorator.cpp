@@ -81,12 +81,12 @@ namespace he
       return deleted;
     }
 
-    void MaterialDecorator::rasterizeShadowGeometry() const
+    void MaterialDecorator::rasterizeReflectiveShadowGeometry() const
     {
       m_materialIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_materialBuffer.bindBuffer(1);
 
-      m_renderNode->rasterizeShadowGeometry();
+      m_renderNode->rasterizeReflectiveShadowGeometry();
 
       m_materialBuffer.unBindBuffer(1);
       m_materialIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);

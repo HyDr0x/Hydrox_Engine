@@ -16,6 +16,7 @@
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
 #include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
 #include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
+#include "Renderer/Traverser/RenderReflectiveShadowGeometryTraverser.h"
 #include "Renderer/Traverser/FrustumCullingTraverser.h"
 
 namespace he
@@ -56,7 +57,9 @@ namespace he
 
       void frustumCulling(int cameraIndex, RenderPass pass);
 
-      void generateShadowMap(int cameraIndex, RenderPass pass);
+      void generateShadowMap(int cameraIndex);
+
+      void generateReflectiveShadowMap(int cameraIndex);
 
       void rasterizeIndexGeometry();
 
@@ -85,6 +88,7 @@ namespace he
       RenderGeometryTraverser m_renderGeometryTraverser;
       RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
       RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
+      RenderReflectiveShadowGeometryTraverser m_renderReflectiveShadowGeometryTraverser;
 
       GroupNode *m_renderRootNode;
       GroupNode *m_renderIndexRootNode;

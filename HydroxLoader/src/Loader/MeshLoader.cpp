@@ -85,9 +85,11 @@ namespace he
       util::CubeGenerator::generateCube(positions, indices, normals);
 
       util::CacheGenerator generator;
+      generator.initialize(m_errorRate, m_maxDistance, m_maxAngle);
+
       std::vector<util::Cache> caches;
       std::vector<he::util::vec2ui> triangleCacheData;
-      generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+      generator.generateCaches(caches, triangleCacheData, positions, indices);
 
       RenderShaderLoader renderShaderLoader(m_singletonManager);
       return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices));

@@ -52,7 +52,7 @@ namespace he
 
       m_histogramVertices.createBuffer(GL_ARRAY_BUFFER, m_options->width * m_options->height * sizeof(util::vec2f), m_options->width * m_options->height * sizeof(util::vec2f), GL_STATIC_DRAW, &vertices[0]);
 
-      m_histogram = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R32UI, GL_RED_INTEGER, 1, 32));
+      m_histogram = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
 
       m_histogramRenderQuad.setRenderTargets(1, m_histogram);
 
@@ -67,6 +67,8 @@ namespace he
     void Tonemapper::createHistogram(util::SharedPointer<db::Texture2D> combinedTexture)
     {
       m_histogramRenderQuad.clearTargets(0, util::vec4f(0, 0, 0, 0));
+
+      //glPointSize(1.0f);
       glDepthMask(GL_FALSE);
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
@@ -93,7 +95,7 @@ namespace he
       glDisable(GL_BLEND);
       glDepthMask(GL_TRUE);
 
-      std::vector<GLuint> histogram(m_histogramBins);
+      std::vector<GLfloat> histogram(m_histogramBins);
 
       m_histogram->getTextureData(&histogram[0]);
 

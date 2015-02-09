@@ -26,8 +26,6 @@ layout(location = 5) uniform sampler2D zBuffer;
 layout(location = 6) uniform uint reflectiveShadowMapWidth;
 layout(location = 7) uniform uint reflectiveShadowMapNumber;
 
-layout(location = 8) uniform uint unusedLightNumber;
-
 in vec2 gsout_texCoord;
 
 void main()
@@ -56,7 +54,7 @@ void main()
 	
 	uint lightNumber = reflectiveShadowMapWidth * reflectiveShadowMapWidth * reflectiveShadowMapNumber;
 	
-	for(uint j = 0; j < lightNumber; j += unusedLightNumber)
+	for(uint j = 0; j < lightNumber; j++)
 	{
 		ivec3 texCoords;
 		texCoords.x = int(j % reflectiveShadowMapWidth);

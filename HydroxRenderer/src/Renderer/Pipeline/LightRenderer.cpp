@@ -50,6 +50,7 @@ namespace he
 
       m_lightTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
       m_shadowDepthMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->shadowMapWidth, m_options->shadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
+      m_reflectiveShadowDepthMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
 
       m_renderLightMapQuad.setRenderTargets(1, m_lightTexture);
     }
@@ -74,11 +75,11 @@ namespace he
       {
         m_reflectiveShadowLightNumberChanged = false;
 
-        m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
-        m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
-        m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
+        m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
+        m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
+        m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
 
-        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_shadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalMaps, m_shadowLuminousFluxMaps);
+        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_reflectiveShadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalMaps, m_shadowLuminousFluxMaps);
       }
 
       unsigned int lightIndex = 0;
@@ -112,30 +113,23 @@ namespace he
       GLuint shadowLightNumber = m_shadowLights.size();
       db::RenderShader::setUniform(6, GL_UNSIGNED_INT, &shadowLightNumber);
 
-      GLuint reflectiveShadowLightNumber = m_reflectiveShadowLights.size();
-      db::RenderShader::setUniform(7, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
-
       m_lightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-      m_reflectiveShadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_renderLightMapQuad.setWriteFrameBuffer();
       
       depthMap->setTexture(0, 0);
       normalMap->setTexture(1, 1);
       materialMap->setTexture(2, 2);
       if(m_shadowMaps) m_shadowMaps->setTexture(3, 3);
-      if(m_shadowPosMaps) m_shadowPosMaps->setTexture(4, 4);
 
       m_renderLightMapQuad.render();
 
-      if(m_shadowPosMaps) m_shadowPosMaps->unsetTexture(4);
       if(m_shadowMaps) m_shadowMaps->unsetTexture(3);
       materialMap->unsetTexture(2);
       normalMap->unsetTexture(1);
       depthMap->unsetTexture(0);
 
       m_renderLightMapQuad.unsetWriteFrameBuffer();
-      m_reflectiveShadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_shadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_lightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -215,6 +209,8 @@ namespace he
       {
         m_reflectiveShadowLights.push_back(light);
         m_reflectiveShadowLightNumberChanged = true;
+
+        addShadowLight(light);
       }
     }
 
@@ -222,6 +218,8 @@ namespace he
     {
       if(m_reflectiveShadowLights.size() > 0)
       {
+        removeShadowLight(light);
+
         m_reflectiveShadowLights.remove(light);
         m_reflectiveShadowLightNumberChanged = true;
       }

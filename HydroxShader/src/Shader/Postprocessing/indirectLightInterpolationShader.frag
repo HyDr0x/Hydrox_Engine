@@ -140,9 +140,9 @@ void main()
 	float frg = max(dot(lightDirG, normal), 0) * material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
 	
 	//luminousFlux = vec4(1, 0, 0, 1);
-	//luminousFlux = vec4(phiPD / 500.0f, 1);
+	//luminousFlux = vec4(phiPD / 5000.0f, 1);
 	//luminousFlux = vec4(wGesD / 10.0f, 0, 0, 0);
-	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD), 1.0f);
+	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD), 1.0f);
 	//luminousFlux = vec4((frg * phiPG) / (4.0f * PI * lengthG), 1.0f);
-	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + max((frg * phiPG) / (4.0f * PI * lengthG), 0.0f), 1.0f);
+	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + max((frg * phiPG) / (4.0f * PI * lengthG), 0.0f), 1.0f);
 }

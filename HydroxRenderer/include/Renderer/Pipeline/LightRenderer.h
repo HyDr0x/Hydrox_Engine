@@ -80,17 +80,19 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      util::SharedPointer<db::Texture2D> m_shadowDepthMap;
+      
 
       std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
 
       std::list<const xBar::ShadowLightContainer> m_shadowLights;
+      util::SharedPointer<db::Texture2D> m_shadowDepthMap;
       util::SharedPointer<db::Texture3D> m_shadowMaps;
       GPUImmutableBuffer m_shadowedLightBuffer;
       Renderquad m_renderShadowMapsQuad;
 
       std::list<const xBar::ShadowLightContainer> m_reflectiveShadowLights;
+      util::SharedPointer<db::Texture2D> m_reflectiveShadowDepthMap;
       util::SharedPointer<db::Texture3D> m_shadowPosMaps;
       util::SharedPointer<db::Texture3D> m_shadowNormalMaps;
       util::SharedPointer<db::Texture3D> m_shadowLuminousFluxMaps;

@@ -17,6 +17,7 @@ namespace he
       TreeNode(nodeName, parent, nextSibling),
       m_lightType(lightType),
       m_eventManager(eventManager),
+      m_directionalWidth(10.0f),
       m_renderable(false),
       m_reflectiveShadow(false)
     {
@@ -118,13 +119,17 @@ namespace he
       case POINTLIGHT:
         break;
       case DIRECTIONALLIGHT:
-        width = 20.0f;
         m_lightData.projectionParameter[0] = m_near;
         m_lightData.projectionParameter[1] = m_far;
-        m_lightData.projectionParameter[2] = 2.0f * width;
-        m_projectionMatrix = util::math::createOrthographic(-width, width, -width, width, m_near, m_far);
+        m_lightData.projectionParameter[2] = 2.0f * m_directionalWidth;
+        m_projectionMatrix = util::math::createOrthographic(-m_directionalWidth, m_directionalWidth, -m_directionalWidth, m_directionalWidth, m_near, m_far);
         break;
       }
+    }
+
+    void ShadowLightNode::setDirectionalLightWidth(float width)
+    {
+      m_directionalWidth = width;
     }
 
     util::Matrix<float, 4> ShadowLightNode::getShadowProjectionMatrix() const

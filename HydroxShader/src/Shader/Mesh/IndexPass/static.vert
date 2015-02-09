@@ -22,6 +22,7 @@ void main()
 {
 	vsout_cacheIndices0 = in_cacheIndices0;
 	vsout_cacheIndices1 = in_cacheIndices1;
+	
 	vsout_instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 	
 	mat4 MVP = viewProjectionMatrix * trfMatrix[vsout_instanceIndex];

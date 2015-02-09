@@ -82,13 +82,15 @@ namespace he
 
       void free();
 
-      void setPositions(std::vector<util::vec3f> positions);
-      void setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords);
-      void setNormals(std::vector<util::vec3f> normals);
-      void setBiNormals(std::vector<util::vec3f> binormals);
-      void setBoneWeights(std::vector<util::vec4f> boneWeights);
-      void setBoneIndices(std::vector<util::vec4f> boneIndices);
-      void setVertexColors(std::vector<util::vec4f> vertexColors);
+      void copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int numberOfElements, const GLubyte *data);
+
+      //void setPositions(std::vector<util::vec3f> positions);
+      //void setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords);
+      //void setNormals(std::vector<util::vec3f> normals);
+      //void setBiNormals(std::vector<util::vec3f> binormals);
+      //void setBoneWeights(std::vector<util::vec4f> boneWeights);
+      //void setBoneIndices(std::vector<util::vec4f> boneIndices);
+      //void setVertexColors(std::vector<util::vec4f> vertexColors);
 
       util::Flags<VertexDeclaration> getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
@@ -114,10 +116,10 @@ namespace he
     private:
 
       void generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices);
-      //invalid indices are marked as 0
-      void generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
 
       static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
+
+      static const unsigned int CACHEINDEXSIZE = 8;
 
       AABB m_boundingVolume;
 

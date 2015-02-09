@@ -26,9 +26,6 @@ namespace he
   {
     AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : 
       m_singletonManager(singletonManager), 
-      m_errorRate(1.0f),
-      m_maxDistance(65536.0f),
-      m_maxAngle(util::math::PI),
       m_animationTimeUnit(Seconds)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
@@ -68,9 +65,7 @@ namespace he
 
     void AssimpLoader::setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle)
     {
-      m_errorRate = errorRate;
-      m_maxDistance = maxDistance;
-      m_maxAngle = maxAngle;
+      m_generator.initialize(errorRate, maxDistance, maxAngle);
     }
 
     void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
@@ -297,7 +292,7 @@ namespace he
       std::vector<he::util::vec2ui> triangleCacheData;
       if(primitiveType == GL_TRIANGLES)
       {
-        m_generator.generateCaches(caches, triangleCacheData, m_errorRate, m_maxDistance, m_maxAngle, positions, indices);
+        m_generator.generateCaches(caches, triangleCacheData, positions, indices);
       }
       
       return m_modelManager->addObject(db::Mesh(
@@ -477,7 +472,7 @@ namespace he
       util::CacheGenerator generator;
       std::vector<he::util::Cache> caches;
       std::vector<he::util::vec2ui> triangleCacheData;
-      generator.generateCaches(caches, triangleCacheData, 0.15f, 8.0f, he::util::math::PI_HALF, positions, indices);
+      generator.generateCaches(caches, triangleCacheData, positions, indices);
 
       sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);

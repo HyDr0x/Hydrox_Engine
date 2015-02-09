@@ -98,96 +98,58 @@ namespace he
       return false;
     }
 
-    float calculatePointTriangleDistance(vec3f t0, vec3f t1, vec3f t2, vec3f point, vec3f& nearestPoint)
+    float calculatePointPolygonDistance(std::vector<vec3f> polygonPoints, vec3f point, vec3f& nearestPoint)
     {
-      vec3f triangleNormal = math::cross(t1 - t0, t2 - t0);
+      vec3f polygonNormal = math::cross(polygonPoints[1] - polygonPoints[0], polygonPoints[2] - polygonPoints[0]);
       vec3f pointPlanePos;
 
-      linePlaneCollision(point, triangleNormal, t0, t1, t2, pointPlanePos);
+      linePlaneCollision(point, polygonNormal, polygonPoints[0], polygonPoints[1], polygonPoints[2], pointPlanePos);
 
       if(0.0f <= pointPlanePos[1] && pointPlanePos[1] <= 1.0f && 0.0f <= pointPlanePos[2] && pointPlanePos[2] <= 1.0f && pointPlanePos[1] + pointPlanePos[2] <= 1.0f)
       {
-        vec3f direction = pointPlanePos[0] * triangleNormal;
+        vec3f direction = pointPlanePos[0] * polygonNormal;
         nearestPoint = point + direction;
         return direction.length();//point lies, projected on the triangle plane, in the triangle
       }
       else
       {
-        vec3f e[3], tPoints0[3], tPoints1[3];
-        tPoints0[0] = t0;
-        tPoints0[1] = t0;
-        tPoints0[2] = t1;
+        vec3f edge, pivotPoint;;
 
-        tPoints1[0] = t1;
-        tPoints1[1] = t2;
-        tPoints1[2] = t2;
+        unsigned int index;
 
         float distance = FLT_MAX;
-        float lineProj0, lineProj1, pointProj;
-        float vmin, vmax;
+        float pointProj;
 
-        for(unsigned int i = 0; i < 3; i++)
+        for(unsigned int i = 0; i < polygonPoints.size(); i++)
         {
-          e[i] = (tPoints1[i] - tPoints0[i]).normalize();
+          index = (i + 1) % polygonPoints.size();
 
-          lineProj0 = vec3f::dot(tPoints0[i] - tPoints0[i], e[i]);
-          lineProj1 = vec3f::dot(tPoints1[i] - tPoints0[i], e[i]);
-          pointProj = vec3f::dot(point - tPoints0[i], e[i]);
+          edge = polygonPoints[index] - polygonPoints[i];
+          float edgeLength = edge.length();
+          edge = edge.normalize();
 
-          vmin = std::min(lineProj0, lineProj1);
-          vmax = std::max(lineProj0, lineProj1);
+          /* lineProj0 = vec3f::dot(polygonPoints[i] - polygonPoints[i], edge);
+          lineProj1 = vec3f::dot(polygonPoints[index] - polygonPoints[i], edge);*/
+          pointProj = vec3f::dot(point - polygonPoints[i], edge);
 
-          if(vmin < pointProj && pointProj < vmax)
+          if(0 < pointProj && pointProj < edgeLength)//is the projection on the line between the polygon points which spans the line?
           {
-            vec3f linePoint = tPoints0[i] + pointProj * e[i];
-            float tmpDistance = (linePoint - point).length();
-            if(distance > tmpDistance)
-            {
-              nearestPoint = linePoint;
-              distance = tmpDistance;
-            }
+            pivotPoint = polygonPoints[i] + pointProj * edge;
           }
-          else if(pointProj < vmin)
+          else if(pointProj < 0)
           {
-            if(lineProj0 == vmin)
-            {
-              float tmpDistance = (tPoints0[i] - point).length();
-              if(distance > tmpDistance)
-              {
-                nearestPoint = tPoints0[i];
-                distance = tmpDistance;
-              }
-            }
-            else
-            {
-              float tmpDistance = (tPoints1[i] - point).length();
-              if(distance > tmpDistance)
-              {
-                nearestPoint = tPoints1[i];
-                distance = tmpDistance;
-              }
-            }
+            pivotPoint = polygonPoints[i];
           }
           else
           {
-            if(lineProj0 == vmax)
-            {
-              float tmpDistance = (tPoints0[i] - point).length();
-              if(distance > tmpDistance)
-              {
-                nearestPoint = tPoints0[i];
-                distance = tmpDistance;
-              }
-            }
-            else
-            {
-              float tmpDistance = (tPoints1[i] - point).length();
-              if(distance > tmpDistance)
-              {
-                nearestPoint = tPoints1[i];
-                distance = tmpDistance;
-              }
-            }
+            pivotPoint = polygonPoints[index];
+          }
+
+          float tmpDistance = (pivotPoint - point).length();
+          if(distance > tmpDistance)
+          {
+            nearestPoint = pivotPoint;
+            distance = tmpDistance;
           }
         }
 

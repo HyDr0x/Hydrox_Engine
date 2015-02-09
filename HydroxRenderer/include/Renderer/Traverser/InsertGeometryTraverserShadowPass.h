@@ -22,8 +22,10 @@ namespace he
 
     protected:
 
-      void createNewChildNode(VertexDeclarationNode* parent);
-      void createNewSibling(RenderNode* sibling);
+      virtual void createNewChildNode(ShaderNode* parent);
+
+      virtual void createNewChildNode(VertexDeclarationNode* parent);
+      virtual void createNewSibling(RenderNode* sibling);
 
       util::SharedPointer<IRenderGroup> m_sharedRenderGroup;
     };

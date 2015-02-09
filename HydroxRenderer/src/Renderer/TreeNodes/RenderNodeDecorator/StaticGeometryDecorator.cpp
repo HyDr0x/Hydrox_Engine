@@ -35,6 +35,15 @@ namespace he
       m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
+    void StaticGeometryDecorator::rasterizeReflectiveShadowGeometry() const
+    {
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_renderNode->rasterizeReflectiveShadowGeometry();
+
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
     void StaticGeometryDecorator::rasterizeIndexGeometry() const
     {
       m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);

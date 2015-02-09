@@ -33,19 +33,6 @@ namespace he
       m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::SHADOW, m_meshVertexDeclaration);
 
       m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
-
-      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
-
-      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
-      {
-        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
-        m_textureHandles[i].resize(texNum);
-
-        for(unsigned int j = 0; j < texNum; j++)
-        {
-          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
-        }
-      }
     }
 
     InsertGeometryTraverserShadowPass::~InsertGeometryTraverserShadowPass()
@@ -63,6 +50,15 @@ namespace he
       }
 
       return false;
+    }
+
+    void InsertGeometryTraverserShadowPass::createNewChildNode(ShaderNode* parent)
+    {
+      VertexDeclarationNode *treeNode = new VertexDeclarationNode();
+      treeNode->initialize(m_shaderVertexDeclaration, m_meshVertexDeclaration);
+
+      parent->setFirstChild(treeNode);
+      treeNode->setParent(parent);
     }
 
     void InsertGeometryTraverserShadowPass::createNewChildNode(VertexDeclarationNode* parent)

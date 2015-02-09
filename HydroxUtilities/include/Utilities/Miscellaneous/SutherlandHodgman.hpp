@@ -51,6 +51,11 @@ namespace he
 
           s = e;
         }
+
+        if(outPoints.size() < 3)//triangle only touched the voxel
+        {
+          return;
+        }
       }
     }
   }

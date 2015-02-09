@@ -43,16 +43,49 @@ namespace he
       }
     }
 
+    void CacheGenerator::initialize(float errorRate, float maxDistance, float maxAngle)
+    {
+      m_epsilon = 0.0001f;
+
+      m_errorRate = errorRate;
+      m_maxDistance = maxDistance;
+      m_maxAngle = maxAngle;
+
+      float boxHalfSize = m_maxDistance * 0.5f;
+
+      m_boxPoints.resize(18);//create for each plane 3 points in the right orientation for collision tests later
+      m_boxPoints[0] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
+      m_boxPoints[1] = vec3f(boxHalfSize, -boxHalfSize, -boxHalfSize);
+      m_boxPoints[2] = vec3f(-boxHalfSize, -boxHalfSize, boxHalfSize);
+
+      m_boxPoints[3] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
+      m_boxPoints[4] = vec3f(-boxHalfSize, boxHalfSize, -boxHalfSize);
+      m_boxPoints[5] = vec3f(boxHalfSize, -boxHalfSize, -boxHalfSize);
+
+      m_boxPoints[6] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
+      m_boxPoints[7] = vec3f(-boxHalfSize, -boxHalfSize, boxHalfSize);
+      m_boxPoints[8] = vec3f(-boxHalfSize, boxHalfSize, -boxHalfSize);
+
+      m_boxPoints[9] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
+      m_boxPoints[10] = vec3f(boxHalfSize, boxHalfSize, -boxHalfSize);
+      m_boxPoints[11] = vec3f(-boxHalfSize, boxHalfSize, boxHalfSize);
+
+      m_boxPoints[12] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
+      m_boxPoints[13] = vec3f(-boxHalfSize, boxHalfSize, boxHalfSize);
+      m_boxPoints[14] = vec3f(boxHalfSize, -boxHalfSize, boxHalfSize);
+
+      m_boxPoints[15] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
+      m_boxPoints[16] = vec3f(boxHalfSize, -boxHalfSize, boxHalfSize);
+      m_boxPoints[17] = vec3f(boxHalfSize, boxHalfSize, -boxHalfSize);
+    }
+
     void CacheGenerator::recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions)
     {
       std::vector<vec3f> newPositions;
 
-      vec3f boxHalfSize = bbMax - bbMin;
-      if(boxHalfSize[0] > m_maxDistance + 0.00001f) boxHalfSize[0] *= 0.5f;
-      if(boxHalfSize[1] > m_maxDistance + 0.00001f) boxHalfSize[1] *= 0.5f;
-      if(boxHalfSize[2] > m_maxDistance + 0.00001f) boxHalfSize[2] *= 0.5f;
+      vec3f boxSize = bbMax - bbMin;
 
-      vec3f boxCenter(bbMin + (bbMax - bbMin) * 0.5f);
+      vec3f boxCenter(bbMin + boxSize * 0.5f);
 
       for(unsigned int i = 0; i < positions.size(); i += 3)
       {
@@ -68,7 +101,7 @@ namespace he
 
         vec3f normal = math::cross(e0, e1).normalize();
 
-        if(triangleCenteredBoxTest(v0, v1, v2, normal, boxHalfSize))
+        if(triangleCenteredBoxTest(v0, v1, v2, normal, boxSize * 0.5f))
         {
           newPositions.push_back(t0);
           newPositions.push_back(t1);
@@ -78,84 +111,50 @@ namespace he
 
       if(!newPositions.empty())
       {
-        for(unsigned int x = 0; x < 2; x++)
+        float sideMax = std::max(boxSize[0], std::max(boxSize[1], boxSize[2]));
+        if(sideMax > m_maxDistance + m_epsilon)
         {
-          for(unsigned int y = 0; y < 2; y++)
+          vec3f newBoxSize;
+          newBoxSize[0] = boxSize[0] > m_maxDistance + m_epsilon ? boxSize[0] * 0.5f : boxSize[0];
+          newBoxSize[1] = boxSize[1] > m_maxDistance + m_epsilon ? boxSize[1] * 0.5f : boxSize[1];
+          newBoxSize[2] = boxSize[2] > m_maxDistance + m_epsilon ? boxSize[2] * 0.5f : boxSize[2];
+
+          for(unsigned int x = 0; x < 2; x++)
           {
-            for(unsigned int z = 0; z < 2; z++)
+            for(unsigned int y = 0; y < 2; y++)
             {
-              vec3f minPoint = bbMin + vec3f(x * boxHalfSize[0], y * boxHalfSize[1], z * boxHalfSize[2]);
-              vec3f maxPoint = bbMin + vec3f((x + 1) * boxHalfSize[0], (y + 1) * boxHalfSize[1], (z + 1) * boxHalfSize[2]);
-
-              vec3f diff = maxPoint - minPoint;
-              float sideMax = std::max(diff[0], std::max(diff[1], diff[2]));
-
-              if(maxPoint <= bbMax + 0.00001f)
+              for(unsigned int z = 0; z < 2; z++)
               {
-                if(sideMax > m_maxDistance + 0.00001f)
+                vec3f newbbMin = bbMin + vec3f(x * newBoxSize[0], y * newBoxSize[1], z * newBoxSize[2]);
+                vec3f newbbMax = bbMin + vec3f((x + 1) * newBoxSize[0], (y + 1) * newBoxSize[1], (z + 1) * newBoxSize[2]);
+
+                vec3f newBoxSize = newbbMax - newbbMin;
+                float newSideMax = std::max(newBoxSize[0], std::max(newBoxSize[1], newBoxSize[2]));
+
+                if(newbbMax <= bbMax + m_epsilon)
                 {
-                  recursiveGenerateCaches(minPoint, maxPoint, newPositions);
-                }
-                else
-                {
-                  createCaches(minPoint, maxPoint, newPositions);
+                  recursiveGenerateCaches(newbbMin, newbbMax, newPositions);
                 }
               }
             }
           }
         }
-
-        /*if(2.0f * boxHalfSize > m_maxDistance + 0.00001f)
-        {
-        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize), bbMax, newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, boxHalfSize), bbMax + vec3f(-boxHalfSize, 0, 0), newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(0, boxHalfSize, 0), bbMax + vec3f(-boxHalfSize, 0, -boxHalfSize), newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, boxHalfSize, 0), bbMax + vec3f(0, 0, -boxHalfSize), newPositions);
-
-        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, boxHalfSize), bbMax + vec3f(0, -boxHalfSize, 0), newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(0, 0, boxHalfSize), bbMax + vec3f(-boxHalfSize, -boxHalfSize, 0), newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(0, 0, 0), bbMax + vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize), newPositions);
-        recursiveGenerateCaches(bbMin + vec3f(boxHalfSize, 0, 0), bbMax + vec3f(0, -boxHalfSize, -boxHalfSize), newPositions);
-        }
         else
         {
-        createCaches(bbMin, bbMax, newPositions);
-        }*/
+          createCaches(bbMin, bbMax, newPositions);
+        }
       }
     }
 
     void CacheGenerator::createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions)
     {
+      bbMin = math::vector_cast<float>(math::vector_cast<unsigned int>((bbMin - m_globalBBMin) / m_maxDistance + 0.5f)) * m_maxDistance + m_globalBBMin;
+      bbMax = bbMin + m_maxDistance;
       float boxHalfSize = m_maxDistance * 0.5f;
+
       vec3f boxCenter(bbMin + vec3f(boxHalfSize, boxHalfSize, boxHalfSize));
 
-      std::vector<vec3f> boxPoints(18);//create for each plane 3 points in the right orientation for collision tests later
-      boxPoints[0] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
-      boxPoints[1] = vec3f(boxHalfSize, -boxHalfSize, -boxHalfSize);
-      boxPoints[2] = vec3f(-boxHalfSize, -boxHalfSize, boxHalfSize);
-
-      boxPoints[3] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
-      boxPoints[4] = vec3f(-boxHalfSize, boxHalfSize, -boxHalfSize);
-      boxPoints[5] = vec3f(boxHalfSize, -boxHalfSize, -boxHalfSize);
-
-      boxPoints[6] = vec3f(-boxHalfSize, -boxHalfSize, -boxHalfSize);
-      boxPoints[7] = vec3f(-boxHalfSize, -boxHalfSize, boxHalfSize);
-      boxPoints[8] = vec3f(-boxHalfSize, boxHalfSize, -boxHalfSize);
-
-      boxPoints[9] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
-      boxPoints[10] = vec3f(boxHalfSize, boxHalfSize, -boxHalfSize);
-      boxPoints[11] = vec3f(-boxHalfSize, boxHalfSize, boxHalfSize);
-
-      boxPoints[12] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
-      boxPoints[13] = vec3f(-boxHalfSize, boxHalfSize, boxHalfSize);
-      boxPoints[14] = vec3f(boxHalfSize, -boxHalfSize, boxHalfSize);
-
-      boxPoints[15] = vec3f(boxHalfSize, boxHalfSize, boxHalfSize);
-      boxPoints[16] = vec3f(boxHalfSize, -boxHalfSize, boxHalfSize);
-      boxPoints[17] = vec3f(boxHalfSize, boxHalfSize, -boxHalfSize);
-
       vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(boxCenter - m_globalBBMin) / m_maxDistance));
-
       voxelIndex3D = vec3ui(std::min(voxelIndex3D[0], m_voxelNumber[0] - 1), std::min(voxelIndex3D[1], m_voxelNumber[1] - 1), std::min(voxelIndex3D[2], m_voxelNumber[2] - 1));
 
       unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
@@ -168,7 +167,7 @@ namespace he
       }
 
       unsigned int  thetaQuantizer = 360 / normalBin[0].size();
-      unsigned int  uQuantizer = normalBin[0].size();
+      unsigned int  phiQuantizer = normalBin[0].size();
 
       for(unsigned int i = 0; i < positions.size(); i += 3)
       {
@@ -176,47 +175,49 @@ namespace he
         vec3f t1 = positions[i + 1];
         vec3f t2 = positions[i + 2];
 
-        vec3f v0(t0 - boxCenter), v1(t1 - boxCenter), v2(t2 - boxCenter);
+        std::vector<vec3f> trianglePoints(3);
+        trianglePoints[0] = t0 - boxCenter;
+        trianglePoints[1] = t1 - boxCenter;
+        trianglePoints[2] = t2 - boxCenter;
 
-        vec3f e0 = v1 - v0;
-        vec3f e1 = v2 - v0;
-        vec3f e2 = v2 - v1;
+        vec3f normal = math::cross(trianglePoints[1] - trianglePoints[0], trianglePoints[2] - trianglePoints[0]).normalize();
 
-        vec3f normal = math::cross(e0, e1).normalize();
+        m_triangles[voxelIndex].push_back(t0);
+        m_triangles[voxelIndex].push_back(t1);
+        m_triangles[voxelIndex].push_back(t2);
 
-        if(triangleCenteredBoxTest(v0, v1, v2, normal, vec3f(boxHalfSize, boxHalfSize, boxHalfSize)))
+        vec3f polygonCentroid;
+        std::vector<vec3f> polygonPoints;
+        float area = calculatePolygonAreaCentroid(trianglePoints, polygonCentroid, polygonPoints);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
+
+        if(area == 0)//triangle only touched the voxel
         {
-          m_triangles[voxelIndex].push_back(t0);
-          m_triangles[voxelIndex].push_back(t1);
-          m_triangles[voxelIndex].push_back(t2);
-
-          std::vector<vec3f> trianglePoints(3);
-          trianglePoints[0] = v0;
-          trianglePoints[1] = v1;
-          trianglePoints[2] = v2;
-
-          vec3f polygonCentroid;
-
-          float area = calculatePolygonAreaCentroid(trianglePoints, boxPoints, polygonCentroid);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
-
-          if(area == FLT_MAX)//triangle only touched the voxel
-          {
-            continue;
-          }
-
-          normal = normal.normalize();
-
-          PolygonData data;
-          data.area = area;
-          data.centroid = polygonCentroid + boxCenter;
-          data.normal = normal;
-
-          vec2ui bin = normalToBin(normal, thetaQuantizer, uQuantizer);
-          bin[0] = bin[0] % normalBin.size();
-          bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
-          normalBin[bin[0]][bin[1]] += area;
-          m_polygons[voxelIndex].push_back(data);
+          continue;
         }
+
+        for(unsigned int i = 0; i < polygonPoints.size(); i++)
+        {
+          polygonPoints[i] += boxCenter;
+        }
+
+        PolygonData data;
+        data.polygonPoints = polygonPoints;
+        data.triangleVertices[0] = t0;
+        data.triangleVertices[1] = t1;
+        data.triangleVertices[2] = t2;
+        data.area = area;
+        data.centroid = polygonCentroid + boxCenter;
+        data.normal = normal;
+
+        /////ASSERTION
+        //assert(bbMin[0] - 0.001f <= data.centroid[0] && data.centroid[0] <= bbMax[0] + 0.001f && bbMin[1] - 0.001f <= data.centroid[1] && data.centroid[1] <= bbMax[1] + 0.001f && bbMin[2] - 0.001f <= data.centroid[2] && data.centroid[2] <= bbMax[2] + 0.001f);
+        /////
+
+        vec2ui bin = normalToBin(normal, thetaQuantizer, phiQuantizer);
+        bin[0] = bin[0] % normalBin.size();
+        bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
+        normalBin[bin[0]][bin[1]] += area;
+        m_polygons[voxelIndex].push_back(data);
       }
 
       if(!m_polygons[voxelIndex].empty())
@@ -227,108 +228,42 @@ namespace he
       }
     }
 
-    float CacheGenerator::calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, vec3f& outPolygonCentroid)
-    {
-      float epsilon = 0.00001f;
-      std::vector<vec3f> outPoints = inPoints;
-
-      vec3f output;
-      //sutherland-hodgman algorithm
-      for(unsigned int i = 0; i < 6; i++)//all 6 box planes
-      {
-        inPoints = outPoints;
-        outPoints.clear();
-
-        vec3f planeE0 = boxPoints[3 * i + 1] - boxPoints[3 * i];
-        vec3f planeE1 = boxPoints[3 * i + 2] - boxPoints[3 * i];
-        vec3f planeNormal = math::cross(planeE0, planeE1);
-
-        vec3f s = inPoints[inPoints.size() - 1];
-        for(unsigned int j = 0; j < inPoints.size(); j++)//all three triangle edges
-        {
-          vec3f e = inPoints[j];
-          if(vec3f::dot(planeNormal, e - boxPoints[3 * i]) <= epsilon)
-          {
-            vec3f triangleEdge = s - e;
-            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && epsilon < output[0] && output[0] + epsilon < 1.0f)
-            {
-              outPoints.push_back(e + output[0] * triangleEdge);
-            }
-
-            outPoints.push_back(e);
-          }
-          else if(vec3f::dot(planeNormal, s - boxPoints[3 * i]) <= epsilon)
-          {
-            vec3f triangleEdge = s - e;
-            if(linePlaneCollision(e, triangleEdge, boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2], output) && epsilon < output[0] && output[0] + epsilon < 1.0f)
-            {
-              outPoints.push_back(e + output[0] * triangleEdge);
-            }
-          }
-
-          s = e;
-        }
-
-        if(outPoints.size() < 3)//triangle only touched the voxel
-        {
-          return FLT_MAX;
-        }
-      }
+    float CacheGenerator::calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, vec3f& outPolygonCentroid, std::vector<vec3f>& outPoints)
+    {   
+      suhterlandHodgman(inPoints, m_boxPoints, outPoints);
 
       if(outPoints.size() < 3)//triangle only touched the voxel
       {
-        return FLT_MAX;
+        return 0;
       }
 
       float area = 0.0f;
       vec3f pivotPoint(outPoints[0]), secondPoint(outPoints[1]);
+      std::vector<float> triangelAreas;
+      std::vector<vec3f> triangleCentroids;
       for(unsigned int i = 2; i < outPoints.size(); i++)//triangulation through fan triangulation
       {
-        area += calculateTriangleArea(pivotPoint, secondPoint, outPoints[i]);
+        triangelAreas.push_back(calculateTriangleArea(pivotPoint, secondPoint, outPoints[i]));
+        triangleCentroids.push_back((pivotPoint + secondPoint + outPoints[i]) / 3.0f);
+        area += triangelAreas.back();
         secondPoint = outPoints[i];
       }
 
       assert(area > 0.0f);
 
-      //outPolygonCentroid = vec3f::identity();
-      //for(unsigned int i = 0; i < outPoints.size(); i++)
-      //{
-      //  outPolygonCentroid += outPoints[i];
-      //}
-
-      //outPolygonCentroid /= outPoints.size();
-
-      //calculate the angle between the polygon and the z-axis to rotate the polygon so that its perpenidcular to the z plane
-      vec3f polygonNormal = math::cross(outPoints[2] - outPoints[0], outPoints[1] - outPoints[0]).normalize();
-      vec3f rotationAxis = math::cross(vec3f(0, 0, 1), polygonNormal);
-      float zAxisAngle = acosf(math::clamp(vec3f::dot(vec3f(0, 0, 1), polygonNormal), -1.0f, 1.0f));
-      Quaternion<float> rotQuat = math::createRotAxisQuaternion<float>(zAxisAngle, rotationAxis);
-      Matrix<float, 4> rotMatrix = rotQuat.toMatrix();
-
-      for(unsigned int i = 0; i < outPoints.size(); i++)//rotate the points parallel to the xy plane
+      vec3f centroid = vec3f::identity();
+      for(unsigned int i = 0; i < triangleCentroids.size(); i++)//rotate the points parallel to the xy plane
       {
-        outPoints[i] = rotMatrix * outPoints[i];
+        centroid[0] += triangleCentroids[i][0] * triangelAreas[i];
+        centroid[1] += triangleCentroids[i][1] * triangelAreas[i];
+        centroid[2] += triangleCentroids[i][2] * triangelAreas[i];
       }
 
-      //calculate the centroid
-      float cx = 0.0f;
-      float cy = 0.0f;
-      for(unsigned int i = 0; i < outPoints.size(); i++)//calculate the centroid of the convex polygon
-      {
-        unsigned int index = (i + 1) % outPoints.size();
-        vec3f p0 = outPoints[i];
-        vec3f p1 = outPoints[index];
+      centroid[0] /= area;
+      centroid[1] /= area;
+      centroid[2] /= area;
 
-        cx += (p0[0] + p1[0]) * (p0[0] * p1[1] - p1[0] * p0[1]);
-        cy += (p0[1] + p1[1]) * (p0[0] * p1[1] - p1[0] * p0[1]);
-      }
-
-      float centroidArea = 1.0f / (6.0f * area);
-      outPolygonCentroid[0] = centroidArea * cx;
-      outPolygonCentroid[1] = centroidArea * cy;
-      outPolygonCentroid[2] = outPoints[0][2];
-
-      outPolygonCentroid = rotQuat.invert().toMatrix() * outPolygonCentroid;
+      outPolygonCentroid = centroid;
 
       return area;
     }
@@ -337,11 +272,13 @@ namespace he
     {
       float epsilon = 0.001f;
       unsigned int  thetaQuantizer = 360 / normalBin[0].size();
-      unsigned int  uQuantizer = normalBin[0].size();
+      unsigned int  phiQuantizer = normalBin[0].size();
 
       unsigned int emptyBins = 1;
 
-      while(emptyBins && !m_polygons[voxelIndex].empty())
+      std::list<PolygonData> polygons = m_polygons[voxelIndex];
+
+      while(emptyBins && !polygons.empty())
       {
         emptyBins = normalBin.size() * normalBin.size();
         vec2ui maxBin;
@@ -364,10 +301,8 @@ namespace he
           }
         }
 
-        if(!emptyBins) break;
-
-        vec2f angle0 = binToCylinder(vec2ui(maxBin[0], maxBin[1] == normalBin.size() ? normalBin.size() - 1 : maxBin[1]), thetaQuantizer, uQuantizer);
-        vec2f angle1 = binToCylinder(vec2ui(maxBin[0] + 1, maxBin[1] + 1 > normalBin.size() ? normalBin.size() : maxBin[1] + 1), thetaQuantizer, uQuantizer);
+        vec2f angle0 = binToCylinder(vec2ui(maxBin[0], maxBin[1] == normalBin.size() ? normalBin.size() - 1 : maxBin[1]), thetaQuantizer, phiQuantizer);
+        vec2f angle1 = binToCylinder(vec2ui(maxBin[0] + 1, maxBin[1] + 1 > normalBin.size() ? normalBin.size() : maxBin[1] + 1), thetaQuantizer, phiQuantizer);
 
         float newTheta = (angle0[0] + angle1[0]) * 0.5f;
         float newU = (angle0[1] + angle1[1]) * 0.5f;
@@ -378,20 +313,20 @@ namespace he
         qNormal[2] = newU;
 
         std::list<PolygonData> cachePolygons;
-        std::list<PolygonData>::iterator pit = m_polygons[voxelIndex].begin();
-        while(pit != m_polygons[voxelIndex].end())
+        std::list<PolygonData>::iterator pit = polygons.begin();
+        while(pit != polygons.end())
         {
           if(acosf(math::clamp(vec3f::dot(pit->normal, qNormal), -1.0f, 1.0f)) < m_maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
           {
-            vec2ui bin = normalToBin(pit->normal, thetaQuantizer, uQuantizer);
+            vec2ui bin = normalToBin(pit->normal, thetaQuantizer, phiQuantizer);
             bin[0] = bin[0] % normalBin.size();
             bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
             normalBin[bin[0]][bin[1]] -= pit->area;
             cachePolygons.push_back(*pit);
 
-            pit = m_polygons[voxelIndex].erase(pit);
+            pit = polygons.erase(pit);
 
-            if(m_polygons[voxelIndex].empty()) break;
+            if(polygons.empty()) break;
           }
           else
           {
@@ -410,10 +345,15 @@ namespace he
           summedNormal += it->normal * it->area;
         }
 
-        PolygonData cache;
-        cache.centroid = summedCentroid / summedArea;
+        RawCache cache;
+        cache.position = summedCentroid / summedArea;
         cache.normal = (summedNormal / summedArea).normalize();
         cache.area = summedArea;
+
+        /////ASSERTION
+        //vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cache.position - m_globalBBMin) / m_maxDistance));
+        //assert(voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2] == voxelIndex);
+        /////
 
         m_areaCaches[voxelIndex].push_back(cache);
       }
@@ -421,35 +361,38 @@ namespace he
 
     void CacheGenerator::shiftCentroid(unsigned int voxelIndex)
     {
-      for(std::list<PolygonData>::iterator cit = m_areaCaches[voxelIndex].begin(); cit != m_areaCaches[voxelIndex].end(); cit++)
+      for(std::list<RawCache>::iterator cit = m_areaCaches[voxelIndex].begin(); cit != m_areaCaches[voxelIndex].end(); cit++)
       {
-        unsigned int bestTriangle = 0;
         vec3f nearestPoint;
         vec3f triangleVertices[3];
-        float error = UINT_MAX;
+        float error = FLT_MAX;
 
-        for(unsigned int i = 0; i < m_triangles[voxelIndex].size(); i += 3)
+        for(std::list<PolygonData>::iterator pit = m_polygons[voxelIndex].begin(); pit != m_polygons[voxelIndex].end(); pit++)
         {
-          vec3f t0(m_triangles[voxelIndex][i]), t1(m_triangles[voxelIndex][i + 1]), t2(m_triangles[voxelIndex][i + 2]);
-          vec3f normal = math::cross(t1 - t0, t2 - t0).normalize();
           vec3f tmpNearestPoint;
           float distance, tmpError;
 
-          distance = calculatePointTriangleDistance(t0, t1, t2, cit->centroid, tmpNearestPoint);
+          distance = calculatePointPolygonDistance(pit->polygonPoints, cit->position, tmpNearestPoint);
 
-          tmpError = distance * sqrt(math::clamp(1.0f - vec3f::dot(normal, cit->normal), 0.0f, 1.0f));
+          tmpError = distance * (sqrt(math::clamp(1.0f - vec3f::dot(pit->normal, cit->normal), 0.0f, 1.0f)) + 0.01f);//the distance would be senseless without normal penalty term
 
           if(error > tmpError)
           {
             error = tmpError;
             nearestPoint = tmpNearestPoint;
-            triangleVertices[0] = t0;
-            triangleVertices[1] = t1;
-            triangleVertices[2] = t2;
+            triangleVertices[0] = pit->triangleVertices[0];
+            triangleVertices[1] = pit->triangleVertices[1];
+            triangleVertices[2] = pit->triangleVertices[2];
           }
         }
 
-        cit->centroid = nearestPoint;
+        /////ASSERTION
+        //vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(nearestPoint - m_globalBBMin) / m_maxDistance));
+        //vec3ui NVoxelIndex3D(voxelIndex / (m_voxelNumber[1] * m_voxelNumber[2]), (voxelIndex % (m_voxelNumber[1] * m_voxelNumber[2])) / m_voxelNumber[2], voxelIndex % m_voxelNumber[2]);
+        //assert(voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2] == voxelIndex);
+        /////
+
+        cit->position = nearestPoint;
         cit->triangleVertices[0] = triangleVertices[0];
         cit->triangleVertices[1] = triangleVertices[1];
         cit->triangleVertices[2] = triangleVertices[2];
@@ -458,13 +401,88 @@ namespace he
 
     void CacheGenerator::reduceCaches()
     {
+      for(std::map<unsigned int, std::list<RawCache>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
+      {
+        std::list<RawCache>::iterator cit = mip->second.begin();
+        while(cit != mip->second.end())
+        {
+          vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->position - m_globalBBMin) / m_maxDistance));
+          unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
+
+          std::list<RawCache> similarCaches;
+
+          for(int nx = -1; nx < 2; nx++)
+          {
+            for(int ny = -1; ny < 2; ny++)
+            {
+              for(int nz = -1; nz < 2; nz++)
+              {
+                if(0 <= voxelIndex3D[0] + nx && voxelIndex3D[0] + nx < m_voxelNumber[0] && 0 <= voxelIndex3D[1] + ny && voxelIndex3D[1] + ny < m_voxelNumber[1] && 0 <= voxelIndex3D[2] + nz && voxelIndex3D[2] + nz < m_voxelNumber[2])
+                {
+                  unsigned int neighborVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
+
+                  std::list<RawCache>::iterator vcit = m_areaCaches[neighborVoxelIndex].begin();
+                  while(vcit != m_areaCaches[neighborVoxelIndex].end())
+                  {
+                    if(acosf(math::clamp(vec3f::dot(vcit->normal, cit->normal), -1.0f, 1.0f)) < m_maxAngle * m_errorRate && (vcit->position - cit->position).length() < m_maxDistance * m_errorRate)
+                    {
+                      if(vcit->area != cit->area || vcit->normal != cit->normal || vcit->position != cit->position)//is it diffrent to the actual cache?
+                      {
+                        for(std::list<RawCache>::iterator dit = m_linearizedAreaCaches[neighborVoxelIndex].begin(); dit != m_linearizedAreaCaches[neighborVoxelIndex].end(); dit++)//if yes we need to erase the similar cache from the global iterating list so that we dont take the cache twice
+                        {
+                          if(vcit->area == dit->area && vcit->normal == dit->normal && vcit->position == dit->position)
+                          {
+                            m_linearizedAreaCaches[neighborVoxelIndex].erase(dit);//if we found the cache, remove it from the global iterating list
+                            break;
+                          }
+                        }
+                      }
+
+                      similarCaches.push_back(*vcit);
+
+                      vcit = m_areaCaches[neighborVoxelIndex].erase(vcit);
+
+                      if(m_areaCaches[neighborVoxelIndex].empty()) break;
+                    }
+                    else
+                    {
+                      vcit++;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          cit = mip->second.erase(cit);
+
+          RawCache biggestCache;
+          float maxArea = 0.0f;
+
+          std::list<RawCache>::iterator end = similarCaches.end();
+          for(std::list<RawCache>::iterator sit = similarCaches.begin(); sit != end; sit++)
+          {
+            if(sit->area > maxArea)
+            {
+              maxArea = sit->area;
+              biggestCache = *sit;
+            }
+          }
+
+          m_reducedCaches.push_back(biggestCache);
+        }
+      }
+    }
+    /*
+    void CacheGenerator::reduceCaches()
+    {
       for(std::map<unsigned int, std::list<PolygonData>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
       {
         std::list<PolygonData>::iterator cit = mip->second.begin();
         while(cit != mip->second.end())
         {
           vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->centroid - m_globalBBMin) / m_maxDistance));
-          unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
+          unsigned int voxelIndex = mip->first;
 
           std::list<PolygonData> similarCaches;
 
@@ -476,20 +494,20 @@ namespace he
               {
                 if(0 <= voxelIndex3D[0] + nx && voxelIndex3D[0] + nx < m_voxelNumber[0] && 0 <= voxelIndex3D[1] + ny && voxelIndex3D[1] + ny < m_voxelNumber[1] && 0 <= voxelIndex3D[2] + nz && voxelIndex3D[2] + nz < m_voxelNumber[2])
                 {
-                  unsigned int newVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
+                  unsigned int neighborVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
 
-                  std::list<PolygonData>::iterator vcit = m_areaCaches[newVoxelIndex].begin();
-                  while(vcit != m_areaCaches[newVoxelIndex].end())
+                  std::list<PolygonData>::iterator vcit = m_areaCaches[neighborVoxelIndex].begin();
+                  while(vcit != m_areaCaches[neighborVoxelIndex].end())
                   {
                     if(acosf(math::clamp(vec3f::dot(vcit->normal, cit->normal), -1.0f, 1.0f)) < m_maxAngle * m_errorRate && (vcit->centroid - cit->centroid).length() < m_maxDistance * m_errorRate)
                     {
                       if(vcit->area != cit->area || vcit->normal != cit->normal || vcit->centroid != cit->centroid)//is it diffrent to the actual cache?
                       {
-                        for(std::list<PolygonData>::iterator dit = m_linearizedAreaCaches[newVoxelIndex].begin(); dit != m_linearizedAreaCaches[newVoxelIndex].end(); dit++)//if yes we need to erase the similar cache from the global iterating list so that we dont take the cache twice
+                        for(std::list<PolygonData>::iterator dit = m_linearizedAreaCaches[neighborVoxelIndex].begin(); dit != m_linearizedAreaCaches[neighborVoxelIndex].end(); dit++)//if yes we need to erase the similar cache from the global iterating list so that we dont take the cache twice
                         {
                           if(vcit->area == dit->area && vcit->normal == dit->normal && vcit->centroid == dit->centroid)
                           {
-                            m_linearizedAreaCaches[newVoxelIndex].erase(dit);//if we found the cache, remove it from the global iterating list
+                            m_linearizedAreaCaches[neighborVoxelIndex].erase(dit);//if we found the cache, remove it from the global iterating list
                             break;
                           }
                         }
@@ -497,9 +515,9 @@ namespace he
 
                       similarCaches.push_back(*vcit);
 
-                      vcit = m_areaCaches[newVoxelIndex].erase(vcit);
+                      vcit = m_areaCaches[neighborVoxelIndex].erase(vcit);
 
-                      if(m_areaCaches[newVoxelIndex].empty()) break;
+                      if(m_areaCaches[neighborVoxelIndex].empty()) break;
                     }
                     else
                     {
@@ -529,7 +547,7 @@ namespace he
           m_reducedCaches.push_back(biggestCache);
         }
       }
-    }
+    }*/
 
     void CacheGenerator::sortCachesPerTriangle(const std::vector<vec3f>& positions)
     {
@@ -540,11 +558,12 @@ namespace he
         vec3f t2 = positions[i + 2];
 
         unsigned int startIndex = ~0;
-        for(unsigned int j = 0; j < m_reducedCaches.size(); j++)
+        std::vector<RawCache>::iterator rit = m_reducedCaches.begin();
+        while(rit != m_reducedCaches.end())
         {
-          if(math::abs(m_reducedCaches[j].triangleVertices[0] - t0) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
-            math::abs(m_reducedCaches[j].triangleVertices[1] - t1) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
-            math::abs(m_reducedCaches[j].triangleVertices[2] - t2) < vec3f(0.0001f, 0.0001f, 0.0001f))
+          if(math::abs(rit->triangleVertices[0] - t0) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
+            math::abs(rit->triangleVertices[1] - t1) < vec3f(0.0001f, 0.0001f, 0.0001f) &&
+            math::abs(rit->triangleVertices[2] - t2) < vec3f(0.0001f, 0.0001f, 0.0001f))
           {
             if(startIndex == ~0)
             {
@@ -552,9 +571,16 @@ namespace he
             }
 
             Cache cache;
-            cache.position = m_reducedCaches[j].centroid;
-            cache.normal = m_reducedCaches[j].normal;
+            cache.position = rit->position;
+            cache.normal = rit->normal;
             m_caches.push_back(cache);
+
+            rit = m_reducedCaches.erase(rit);
+            if(m_reducedCaches.empty()) break;
+          }
+          else
+          {
+            rit++;
           }
         }
 
@@ -562,34 +588,19 @@ namespace he
       }
     }
 
-    void CacheGenerator::generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, float errorRate, unsigned int subdivision, float maxAngle, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
+    void CacheGenerator::generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
     {
       m_caches.clear();
       m_triangleCacheIndices.clear();
-
-      m_errorRate = errorRate;
-      m_maxAngle = maxAngle;
 
       generateAABB(positions, m_globalBBMin, m_globalBBMax);
 
       vec3f boxSize(m_globalBBMax - m_globalBBMin);
 
-      float largestSide = std::max(boxSize[0], std::max(boxSize[1], boxSize[2]));
-
-      m_maxDistance = largestSide / subdivision;
-
-      m_globalBBMax = vec3f(std::max(m_globalBBMax[0], m_maxDistance), std::max(m_globalBBMax[1], m_maxDistance), std::max(m_globalBBMax[2], m_maxDistance));
-
-      boxSize = vec3f(m_globalBBMax - m_globalBBMin);
-
-      boxSize[0] = std::max(boxSize[0], 1.0f);
-      boxSize[1] = std::max(boxSize[1], 1.0f);
-      boxSize[2] = std::max(boxSize[2], 1.0f);
-
       vec3f sideMax;
-      sideMax[0] = m_maxDistance * pow(2.0f, ceil(log(boxSize[0] / m_maxDistance) / log(2.0f)));
-      sideMax[1] = m_maxDistance * pow(2.0f, ceil(log(boxSize[1] / m_maxDistance) / log(2.0f)));
-      sideMax[2] = m_maxDistance * pow(2.0f, ceil(log(boxSize[2] / m_maxDistance) / log(2.0f)));
+      sideMax[0] = m_maxDistance * pow(2.0f, std::max(ceil(log(boxSize[0] / m_maxDistance) / log(2.0f)), 0.0f));
+      sideMax[1] = m_maxDistance * pow(2.0f, std::max(ceil(log(boxSize[1] / m_maxDistance) / log(2.0f)), 0.0f));
+      sideMax[2] = m_maxDistance * pow(2.0f, std::max(ceil(log(boxSize[2] / m_maxDistance) / log(2.0f)), 0.0f));
 
       m_globalBBMax[0] = m_globalBBMin[0] + sideMax[0];
       m_globalBBMax[1] = m_globalBBMin[1] + sideMax[1];

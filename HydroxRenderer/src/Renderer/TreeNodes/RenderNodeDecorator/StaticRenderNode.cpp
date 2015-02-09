@@ -85,6 +85,10 @@ namespace he
     {
     }
 
+    void StaticRenderNode::rasterizeReflectiveShadowGeometry() const
+    {
+    }
+
     void StaticRenderNode::rasterizeIndexGeometry() const
     {
     }

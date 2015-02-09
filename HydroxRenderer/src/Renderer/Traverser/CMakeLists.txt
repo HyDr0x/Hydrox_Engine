@@ -15,6 +15,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserShadowPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderIndexGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderReflectiveShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/UpdateTraverser.cpp 

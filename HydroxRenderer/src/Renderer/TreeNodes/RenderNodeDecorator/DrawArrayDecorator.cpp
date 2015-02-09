@@ -119,6 +119,19 @@ namespace he
       m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
     }
 
+    void DrawArrayDecorator::rasterizeReflectiveShadowGeometry() const
+    {
+      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+
+      m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
+      m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
+
+      glMultiDrawArraysIndirect(m_primitiveType, nullptr, getInstanceNumber(), sizeof(DrawArraysIndirectCommand));
+
+      m_meshVertexBuffer.unbindVertexBuffer(0);
+      m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
+    }
+
     void DrawArrayDecorator::rasterizeIndexGeometry() const
     {
       glMemoryBarrier(GL_COMMAND_BARRIER_BIT);

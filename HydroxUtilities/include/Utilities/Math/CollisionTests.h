@@ -2,6 +2,7 @@
 #define COLLISIONTESTS_HPP_
 
 #include <math.h>
+#include <vector>
 
 #include "math.hpp"
 #include "Quaternion.hpp"
@@ -18,7 +19,7 @@ namespace he
 
     GRAPHICAPI bool planeCenteredBoxCollision(vec3f planeNormal, vec3f v, vec3f boxHalfSize);
 
-    GRAPHICAPI float calculatePointTriangleDistance(vec3f t0, vec3f t1, vec3f t2, vec3f point, vec3f& nearestPoint);
+    GRAPHICAPI float calculatePointPolygonDistance(std::vector<vec3f> polygonPoints, vec3f point, vec3f& nearestPoint);
 
     void findMinMax(float a, float b, float c, float& min, float& max);
     bool testAABBEdgeWithTriangle(vec3f v0, vec3f v1, vec3f v2, float boxHalfSize, vec3f e);

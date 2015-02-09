@@ -40,14 +40,14 @@ namespace he
 
     protected:
 
-      void createNewChildNode(GroupNode* parent);
-      void createNewChildNode(ShaderNode* parent);
-      void createNewChildNode(TextureNode* parent);
+      virtual void createNewChildNode(GroupNode* parent);
+      virtual void createNewChildNode(ShaderNode* parent);
+      virtual void createNewChildNode(TextureNode* parent);
       virtual void createNewChildNode(VertexDeclarationNode* parent) = 0;
 
-      void createNewSibling(ShaderNode* parent);
-      void createNewSibling(VertexDeclarationNode* parent);
-      void createNewSibling(TextureNode* sibling);
+      virtual void createNewSibling(ShaderNode* parent);
+      virtual void createNewSibling(VertexDeclarationNode* parent);
+      virtual void createNewSibling(TextureNode* sibling);
       virtual void createNewSibling(RenderNode* sibling) = 0;
 
       util::SharedPointer<db::ModelManager> m_modelManager;

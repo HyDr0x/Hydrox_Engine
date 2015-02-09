@@ -23,6 +23,8 @@
 
 #include "Renderer/Pipeline/RenderOptions.h"
 
+#include <Utilities/Timer/Timer.h>
+
 namespace he
 {
   namespace renderer
@@ -68,6 +70,7 @@ namespace he
       m_renderGeometryTraverser.initialize(m_singletonManager, samplerObjects);
       m_renderIndexGeometryTraverser.initialize(m_singletonManager);
       m_renderShadowGeometryTraverser.initialize(m_singletonManager);
+      m_renderReflectiveShadowGeometryTraverser.initialize(m_singletonManager);
 
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
     }
@@ -147,19 +150,18 @@ namespace he
       frustumCullingShader->useNoShader();
     }
 
-    void GeometryRenderer::generateShadowMap(int cameraIndex, RenderPass pass)
+    void GeometryRenderer::generateShadowMap(int cameraIndex)
     {
       m_renderShadowGeometryTraverser.setViewProjectionIndex(cameraIndex);
+      m_renderShadowGeometryTraverser.doTraverse(m_renderShadowRootNode);
+    }
 
-      switch(pass)
-      {
-      case SHADOWPASS:
-        m_renderShadowGeometryTraverser.doTraverse(m_renderShadowRootNode);
-        break;
-      case REFLECTIVESHADOWPASS:
-        m_renderShadowGeometryTraverser.doTraverse(m_renderReflectiveShadowRootNode);
-        break;
-      }
+    void GeometryRenderer::generateReflectiveShadowMap(int cameraIndex)
+    {
+      //CPUTIMER("cpuCompute", 0)
+      //GPUTIMER("gpuCompute", 1)
+      m_renderReflectiveShadowGeometryTraverser.setViewProjectionIndex(cameraIndex);
+      m_renderReflectiveShadowGeometryTraverser.doTraverse(m_renderReflectiveShadowRootNode);
     }
 
     void GeometryRenderer::rasterizeIndexGeometry()

@@ -85,6 +85,10 @@ namespace he
     {
     }
 
+    void SkinnedRenderNode::rasterizeReflectiveShadowGeometry() const
+    {
+    }
+
     void SkinnedRenderNode::rasterizeIndexGeometry() const
     {
     }

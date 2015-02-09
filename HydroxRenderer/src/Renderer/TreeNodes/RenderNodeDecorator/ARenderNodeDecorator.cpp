@@ -66,6 +66,11 @@ namespace he
       m_renderNode->rasterizeShadowGeometry();
     }
 
+    void ARenderNodeDecorator::rasterizeReflectiveShadowGeometry() const
+    {
+      m_renderNode->rasterizeReflectiveShadowGeometry();
+    }
+
     void ARenderNodeDecorator::rasterizeIndexGeometry() const
     {
       m_renderNode->rasterizeIndexGeometry();

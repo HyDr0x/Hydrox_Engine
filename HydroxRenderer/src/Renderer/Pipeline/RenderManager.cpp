@@ -123,8 +123,8 @@ namespace he
       m_cameraParameterUBO.bindBuffer(0);
 
       {
-          //CPUTIMER("MainloopCPUTimer", 0)
-          GPUTIMER("MainloopOGLTimer", 1)
+        //CPUTIMER("cpuCompute", 0)
+        //GPUTIMER("gpuCompute", 1)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_gBuffer.clear();
@@ -140,9 +140,11 @@ namespace he
 
         //m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
           
+        glPointSize(8.0f);
         m_gBuffer.setGBuffer();
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
+        glPointSize(1.0f);
 
         glDepthFunc(GL_LEQUAL);
         glDepthMask(GL_FALSE);//depth read only
@@ -158,28 +160,35 @@ namespace he
         }
 
         m_lightRenderer.updateBuffer();
-        
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(1.1f, 4.0f);
-        glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
-        for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
         {
-          m_lightRenderer.setShadowMap(4, i);
-          //m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
-          m_geometryRasterizer.generateShadowMap(i, SHADOWPASS);
-          m_lightRenderer.unsetShadowMap(4);
+          //CPUTIMER("cpuCompute", 0)
+          //GPUTIMER("gpuCompute", 1)
+          glEnable(GL_POLYGON_OFFSET_FILL);
+          glPolygonOffset(1.1f, 4.0f);
+          glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
+          for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
+          {
+            m_lightRenderer.setShadowMap(4, i);
+            //m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
+            m_geometryRasterizer.generateShadowMap(i);
+            m_lightRenderer.unsetShadowMap(4);
+          }
+        }
+        glViewport(0, 0, m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth);
+        {
+          //CPUTIMER("cpuCompute", 0)
+          //GPUTIMER("gpuCompute", 1)
+          for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
+          {
+            m_lightRenderer.setReflectiveShadowMap(4, i);
+            //m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
+            m_geometryRasterizer.generateReflectiveShadowMap(i);
+            m_lightRenderer.unsetReflectiveShadowMap(4);
+          }
+          glViewport(0, 0, m_options->width, m_options->height);
+          glDisable(GL_POLYGON_OFFSET_FILL);
         }
         
-        for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
-        {
-          m_lightRenderer.setReflectiveShadowMap(4, i);
-          //m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
-          m_geometryRasterizer.generateShadowMap(i, REFLECTIVESHADOWPASS);
-          m_lightRenderer.unsetReflectiveShadowMap(4);
-        }
-        glViewport(0, 0, m_options->width, m_options->height);
-        glDisable(GL_POLYGON_OFFSET_FILL);
-
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
         
         m_indirectLightRenderer.calculateIndirectLight(
@@ -248,7 +257,7 @@ namespace he
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

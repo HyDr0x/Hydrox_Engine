@@ -71,7 +71,6 @@ namespace he
       util::ResourceHandle loadVertices(const aiMesh *mesh, unsigned int meshIndex, bool yAxisFlipped);
 
       void loadAnimatedSkeleton(const aiScene *scene);
-      
 
       sg::NodeIndex loadSceneGraphFromAssimp(std::string filename, const aiScene *scene);
       sg::NodeIndex createTransformNodes(const aiNode *node, sg::NodeIndex parentNode, sg::NodeIndex nextSibling);
@@ -80,10 +79,6 @@ namespace he
       void attachBonesToSkinnedMesh();
 
       void loadMaterialsFromAssimp(std::string path, const aiScene *scene);
-
-      float m_errorRate;
-      float m_maxDistance;
-      float m_maxAngle;
 
       AnimationTimeUnit m_animationTimeUnit;
       float m_animationTimeUnitConvert;

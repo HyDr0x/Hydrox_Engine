@@ -1,5 +1,5 @@
-#ifndef RENDERSHADOWGEOMETRYTRAVERSER_H_
-#define RENDERSHADOWGEOMETRYTRAVERSER_H_
+#ifndef RENDERREFLECTIVESHADOWGEOMETRYTRAVERSER_H_
+#define RENDERREFLECTIVESHADOWGEOMETRYTRAVERSER_H_
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
@@ -13,12 +13,12 @@ namespace he
 {
   namespace renderer
   {
-    class RenderShadowGeometryTraverser : public Traverser
+    class RenderReflectiveShadowGeometryTraverser : public Traverser
     {
     public:
 
-      RenderShadowGeometryTraverser();
-      virtual ~RenderShadowGeometryTraverser();
+      RenderReflectiveShadowGeometryTraverser();
+      virtual ~RenderReflectiveShadowGeometryTraverser();
 
       void initialize(util::SingletonManager *singletonManager);
 
@@ -30,6 +30,9 @@ namespace he
       virtual bool preTraverse(ShaderNode* treeNode);
       virtual void postTraverse(ShaderNode* treeNode);
 
+      virtual bool preTraverse(TextureNode* treeNode);
+      virtual void postTraverse(TextureNode* treeNode);
+
       virtual bool preTraverse(RenderNode* treeNode);
       virtual void postTraverse(RenderNode* treeNode);
 
@@ -37,6 +40,7 @@ namespace he
 
       util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<db::TextureManager> m_textureManager;
 
       util::SharedPointer<RenderOptions> m_options;
 

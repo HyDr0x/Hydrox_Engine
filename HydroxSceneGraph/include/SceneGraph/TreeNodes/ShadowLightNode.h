@@ -43,6 +43,7 @@ namespace he
       virtual void postTraverse(ConstTraverser* traverser) const;
 
       void setShadowProjection (float near, float far);
+      void setDirectionalLightWidth(float width);
 
       util::Matrix<float, 4> getShadowProjectionMatrix() const;
 
@@ -85,6 +86,7 @@ namespace he
       util::Matrix<float, 4> m_projectionMatrix;
       float m_near;
       float m_far;
+      float m_directionalWidth;
 
       util::SharedPointer<util::EventManager> m_eventManager;
 

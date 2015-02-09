@@ -57,6 +57,8 @@ namespace he
 
       virtual void rasterizeShadowGeometry() const override;
 
+      virtual void rasterizeReflectiveShadowGeometry() const override;
+
       virtual void rasterizeIndexGeometry() const override;
 
       virtual void rasterizeGeometry() const override;

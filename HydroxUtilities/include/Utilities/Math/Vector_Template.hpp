@@ -133,7 +133,7 @@ namespace he
         return sum;
       }
 
-      inline static Vector lerp(const Vector<Type, VECTOR_NUM_ARGS>& a, const Vector<Type, VECTOR_NUM_ARGS>& b, Type t)
+      inline static Vector lerp(const Vector<Type, VECTOR_NUM_ARGS>& a, const Vector<Type, VECTOR_NUM_ARGS>& b, float t)
       {
         return a * (1.0f - t) + b * t;
       }

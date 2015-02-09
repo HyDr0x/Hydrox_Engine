@@ -30,7 +30,7 @@ namespace he
       virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
       virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
 
-      virtual void rasterizeShadowGeometry() const;
+      virtual void rasterizeReflectiveShadowGeometry() const;
 
       virtual void rasterizeIndexGeometry() const;
 
