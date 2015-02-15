@@ -74,7 +74,7 @@ void main()
 		mat4 skinningMatrix;
 		for(uint i = triangleCacheBorderIndices.x; i < triangleCacheBorderIndices.y; i++)
 		{
-			barycentric = barycentricCoordinates(vec3(caches[i].position), vsout_pos3D[0], vsout_pos3D[1], vsout_pos3D[2]);
+			barycentric = barycentricCoordinates(caches[cacheIndexOffsetTMP + i].position.xyz, vsout_pos3D[0], vsout_pos3D[1], vsout_pos3D[2]);
 			skinningMatrix = barycentric.x * vsout_skinningMatrix[0] + barycentric.y * vsout_skinningMatrix[1] + barycentric.z * vsout_skinningMatrix[2];
 			
 			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
@@ -93,7 +93,7 @@ void main()
 		cacheIndices[2 * i + 0] = uvec4(vsout_cacheIndices0[i]) + uvec4(bvec4(vsout_cacheIndices0[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
 		cacheIndices[2 * i + 1] = uvec4(vsout_cacheIndices1[i]) + uvec4(bvec4(vsout_cacheIndices1[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
 	}
-	/*
+	
 	uvec4 bitMask;
 	
 	for(uint i = 0; i < 6; i++)
@@ -119,7 +119,7 @@ void main()
 	cacheIndices[3] -= uvec4(1);
 	cacheIndices[4] -= uvec4(1);
 	cacheIndices[5] -= uvec4(1);
-	*/
+	
 	for(uint i = 0; i < 6; i++)
 	{
 		gsout_cacheIndices[i] = cacheIndices[i];

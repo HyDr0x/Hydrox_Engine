@@ -1,5 +1,8 @@
 #include "DataBase/Mesh.h"
 
+#include <stdarg.h>
+
+#include <Utilities/Miscellaneous/CacheGenerator.h>
 #include <Utilities/Miscellaneous/CacheIndicesGenerator.h>
 
 #include "DataBase/Material.h"
@@ -8,6 +11,39 @@ namespace he
 {
   namespace db
   {
+    void sortCacheIndices(std::vector<util::vec2f>& indices, util::vec2f newValue)
+    {
+      std::vector<util::vec2f> sortedIndices(indices.size());
+
+      float highestWeight = 0.0f;
+      float bestIndex = FLT_MAX;
+
+      for(unsigned int i = 0; i < indices.size(); i++)
+      {
+        if(newValue[1] > indices[i][1])
+        {
+          bestIndex = i;
+          break;
+        }
+
+        sortedIndices[i] = indices[i];
+      }
+
+      if(bestIndex == FLT_MAX)
+      {
+        return;
+      }
+
+      sortedIndices[bestIndex] = newValue;
+
+      for(unsigned int i = bestIndex; i < indices.size() - 1; i++)
+      {
+        sortedIndices[i + 1] = indices[i];
+      }
+
+      indices = sortedIndices;
+    }
+
     const unsigned int Mesh::VERTEXDECLARATIONSIZE[] = {
       sizeof(util::vec3f),
       sizeof(util::vec2f),
@@ -34,26 +70,17 @@ namespace he
 
     Mesh::Mesh()
     {
+      m_vertexDeclaration = util::Flags<VertexElements>(0);
       m_primitiveCount = 0;
       m_vertexCount = 0;
       m_vertexStride = 0;
       m_primitiveType = GL_TRIANGLES;
     }
 
-    Mesh::Mesh(GLenum primitiveType,
-           const std::vector<util::vec3f>& positions, 
-           const std::vector<util::Cache>& caches,
-           const std::vector<util::vec2ui>& triangleCacheIndices,
-           const std::vector<indexType>& indices,
-           const std::vector<std::vector<util::vec2f>>& textureCoords, 
-           const std::vector<util::vec3f>& normals, 
-           const std::vector<util::vec3f>& binormals, 
-           const std::vector<util::vec4f>& boneWeights,
-           const std::vector<util::vec4f>& boneIndices,
-           const std::vector<util::vec4f>& vertexColors) : m_boundingVolume(positions)
+    Mesh::Mesh(GLenum primitiveType, unsigned int vertexCount, std::vector<indexType> indices, std::vector<VertexElements> flags) :
+      m_vertexCount(vertexCount),
+      m_indexData(indices)
     {
-      assert(textureCoords.size() == Material::TEXTURETYPENUM);
-
       m_primitiveType = primitiveType;
 
       unsigned int verticesPerPrimitive;
@@ -71,168 +98,29 @@ namespace he
         break;
       }
 
-      m_primitiveCount = static_cast<unsigned int>(indices.size()) / verticesPerPrimitive;
-
-      m_vertexCount = static_cast<unsigned int>(positions.size());
-
-      m_indexData = indices;
-      m_cacheData = caches;
-      m_triangleCacheIndices = triangleCacheIndices;
-
-      std::vector<he::util::cacheIndexType> cacheIndizes0;
-      std::vector<he::util::cacheIndexType> cacheIndizes1;
-      std::vector<util::vec3f> newNormals;
-
-      util::CacheIndicesGenerator cacheIndicesGenerator;
-
-      if(m_primitiveType == GL_TRIANGLES)
+      if(m_indexData.empty())
       {
-        if(normals.empty())//generate normals if empty
-        {
-          generateNormals(newNormals, positions, m_indexData);
-        }
-
-        if(!m_indexData.empty())
-        {
-          cacheIndicesGenerator.generateCacheIndizes(positions, newNormals, m_indexData, m_cacheData, cacheIndizes0, cacheIndizes1);
-        }
-        else
-        {
-          cacheIndicesGenerator.generateCacheIndizes(positions, newNormals, m_cacheData, cacheIndizes0, cacheIndizes1);
-        }
+        m_primitiveCount = static_cast<unsigned int>(m_vertexCount) / verticesPerPrimitive;
+      }
+      else
+      {
+        m_primitiveCount = static_cast<unsigned int>(m_indexData.size()) / verticesPerPrimitive;
       }
 
-      if(!normals.empty())
+      for(unsigned int i = 0; i < flags.size(); i++)
       {
-        newNormals = normals;
+        m_vertexDeclaration |= util::Flags<VertexElements>::convertToFlag(flags[i]);
       }
 
-      m_vertexDeclaration |= positions.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_POSITION) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      for(unsigned int j = 0; j < textureCoords.size(); j++)
-      {
-        m_vertexDeclaration |= textureCoords[j].size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE0 + j) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      }
-      m_vertexDeclaration |= newNormals.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_NORMAL) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= binormals.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BINORMAL) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= boneWeights.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_WEIGHTS) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= boneIndices.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_INDICES) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= vertexColors.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_COLOR) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= cacheIndizes0.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_CACHEINDICES0) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
-      m_vertexDeclaration |= cacheIndizes1.size() != 0 ? util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_CACHEINDICES1) : util::Flags<VertexDeclarationFlags>::convertToFlag(0);
+      m_vertexDeclaration |= util::Flags<VertexElements>::convertToFlag(MODEL_CACHEINDICES0) | util::Flags<VertexElements>::convertToFlag(MODEL_CACHEINDICES1);//we need those indices in every model
 
       m_vertexStride = 0;
-      GLuint strides[VERTEXDECLARATIONFLAGNUMBER];
       for(unsigned int i = 0; i < VERTEXDECLARATIONFLAGNUMBER; i++)
       {
-        strides[i] = m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-        m_vertexStride += strides[i];
-      }
-      
-      m_vertexStride += m_vertexStride % 4;
-
-      if(cacheIndicesGenerator.getNewVertexNumber() != 0)
-      {
-        std::vector<util::vec3f> newPositions = positions;
-
-        const std::vector<util::VertexDataStructure>& vertices = cacheIndicesGenerator.getVertexDataStructure();
-        const std::list<util::vec2ui>& newVertexEdges = cacheIndicesGenerator.getNewVertexEdgeIndices();
-
-        unsigned int vertexIndex = 0;
-        for(std::list<util::vec2ui>::const_iterator it = newVertexEdges.begin(); it != newVertexEdges.end(); it++, vertexIndex++)
-        {
-          unsigned int vertexIndex0 = (*it)[0], vertexIndex1 = (*it)[1];
-
-          newPositions.push_back(vertices[vertexIndex].position);
-          for(unsigned int j = 0; j < textureCoords.size(); j++)
-          {
-            if((m_vertexDeclaration & util::Flags<VertexDeclaration>::convertToFlag(MODEL_TEXTURE0 + j)).toInt())
-            {
-              textureCoords[j].push_back(util::vec2f::lerp(textureCoords[j][vertexIndex0], textureCoords[j][vertexIndex1], 0.5f));
-            }
-          }
-          newNormals.push_back(vertices[vertexIndex].normal);
-        }
-
-        m_vertexCount = cacheIndicesGenerator.getNewVertexNumber();
+        m_vertexStride += m_vertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
       }
 
-      GLint size = m_vertexCount * m_vertexStride;
-
-      m_geometryData.resize(size);
-
-      copyDataIntoGeometryBuffer(MODEL_POSITION, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
-
-      for(unsigned int j = 0; j < textureCoords.size(); j++)
-      {
-        copyDataIntoGeometryBuffer(MODEL_TEXTURE0 + j, textureCoords[j].size(), reinterpret_cast<const GLubyte*>(&textureCoords[j][0]));
-      }
-
-      copyDataIntoGeometryBuffer(MODEL_NORMAL, newNormals.size(), reinterpret_cast<const GLubyte*>(&newNormals[0]));
-      copyDataIntoGeometryBuffer(MODEL_BINORMAL, binormals.size(), reinterpret_cast<const GLubyte*>(&binormals[0]));
-      copyDataIntoGeometryBuffer(MODEL_BONE_WEIGHTS, boneWeights.size(), reinterpret_cast<const GLubyte*>(&boneWeights[0]));
-      copyDataIntoGeometryBuffer(MODEL_BONE_INDICES, boneIndices.size(), reinterpret_cast<const GLubyte*>(&boneIndices[0]));
-      copyDataIntoGeometryBuffer(MODEL_COLOR, vertexColors.size(), reinterpret_cast<const GLubyte*>(&vertexColors[0]));
-      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, cacheIndizes0.size(), reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
-      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, cacheIndizes1.size(), reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
-
-      /*for(unsigned int i = 0; i < positions.size(); i++)
-      {
-        std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + VERTEXDECLARATIONSIZE[MODEL_POSITION], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_POSITION];
-
-      for(unsigned int j = 0; j < textureCoords.size(); j++)
-      {
-        for(unsigned int i = 0; i < textureCoords[j].size(); i++)
-        {
-          std::copy((GLubyte*)&textureCoords[j][i], (GLubyte*)&textureCoords[j][i] + VERTEXDECLARATIONSIZE[MODEL_TEXTURE0 + j], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-        }
-        lokalStride += strides[MODEL_TEXTURE0 + j];
-      }
-
-      for(unsigned int i = 0; i < ownNormals.size(); i++)
-      {
-        std::copy((GLubyte*)&ownNormals[i], (GLubyte*)&ownNormals[i] + VERTEXDECLARATIONSIZE[MODEL_NORMAL], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_NORMAL];
-
-      for(unsigned int i = 0; i < binormals.size(); i++)
-      {
-        std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + VERTEXDECLARATIONSIZE[MODEL_BINORMAL], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_BINORMAL];
-
-      for(unsigned int i = 0; i < boneWeights.size(); i++)
-      {
-        std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + VERTEXDECLARATIONSIZE[MODEL_BONE_WEIGHTS], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_BONE_WEIGHTS];
-
-      for(unsigned int i = 0; i < boneIndices.size(); i++)
-      {
-        std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + VERTEXDECLARATIONSIZE[MODEL_BONE_INDICES], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_BONE_INDICES];
-
-      for(unsigned int i = 0; i < vertexColors.size(); i++)
-      {
-        std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + VERTEXDECLARATIONSIZE[MODEL_COLOR], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_COLOR];
-
-      for(unsigned int i = 0; i < cacheIndizes0.size(); i++)
-      {
-        std::copy((GLubyte*)&cacheIndizes0[i], (GLubyte*)&cacheIndizes0[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDICES0], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_CACHEINDICES0];
-
-      for(unsigned int i = 0; i < cacheIndizes1.size(); i++)
-      {
-        std::copy((GLubyte*)&cacheIndizes1[i], (GLubyte*)&cacheIndizes1[i] + VERTEXDECLARATIONSIZE[MODEL_CACHEINDICES1], &m_geometryData[0] + lokalStride + m_vertexStride * i);
-      }
-      lokalStride += strides[MODEL_CACHEINDICES1];*/
-
-      m_hash = MurmurHash64A(&m_geometryData[0], size, 0);
+      m_geometryData.resize(m_vertexStride * m_vertexCount);
     }
 
     Mesh::Mesh(AABB boundingVolume,
@@ -279,20 +167,20 @@ namespace he
     {
     }
 
-    Mesh& Mesh::operator=(const Mesh& other)
+    Mesh& Mesh::operator=(Mesh other)
     {
-      m_hash = other.m_hash;
-      m_boundingVolume = other.m_boundingVolume;
-      m_primitiveType = other.m_primitiveType;
-      m_primitiveCount = other.m_primitiveCount;
-      m_vertexCount = other.m_vertexCount;
-      m_vertexStride = other.m_vertexStride;
-      m_geometryData = other.m_geometryData;
-      m_cacheData = other.m_cacheData;
-      m_triangleCacheIndices = other.m_triangleCacheIndices;
-      m_indexData = other.m_indexData;
-      m_vertexDeclaration = other.m_vertexDeclaration;
-
+      std::swap(m_hash, other.m_hash);
+      std::swap(m_boundingVolume, other.m_boundingVolume);
+      std::swap(m_primitiveType, other.m_primitiveType);
+      std::swap(m_primitiveCount, other.m_primitiveCount);
+      std::swap(m_vertexCount, other.m_vertexCount);
+      std::swap(m_vertexStride, other.m_vertexStride);
+      std::swap(m_geometryData, other.m_geometryData);
+      std::swap(m_cacheData, other.m_cacheData);
+      std::swap(m_triangleCacheIndices, other.m_triangleCacheIndices);
+      std::swap(m_indexData, other.m_indexData);
+      std::swap(m_vertexDeclaration, other.m_vertexDeclaration);
+      
       return *this;
     }
 
@@ -300,123 +188,260 @@ namespace he
     {
       m_geometryData.clear();
       m_indexData.clear();
+      m_cacheData.clear();
+      m_triangleCacheIndices.clear();
+
+      m_vertexDeclaration = util::Flags<VertexElements>(0);
+      m_primitiveCount = 0;
+      m_vertexCount = 0;
+      m_vertexStride = 0;
+      m_primitiveType = GL_TRIANGLES;
     }
 
-    //void Mesh::setPositions(std::vector<util::vec3f> positions)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_POSITION).toInt());
+    void Mesh::generateCaches(float errorRate, float maxDistance, float maxAngle, bool createCaches)
+    {
+      std::vector<util::vec3f> positions(m_vertexCount);
+      std::vector<util::vec3f> normals(m_vertexCount);
+      std::vector<he::util::cacheIndexType> cacheIndizes0;
+      std::vector<he::util::cacheIndexType> cacheIndizes1;
 
-    //  for(unsigned int i = 0; i < positions.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&positions[i], (GLubyte*)&positions[i] + sizeof(positions[0]), &m_geometryData[0] + m_vertexStride * i);
-    //  }
-    //}
+      if(createCaches)
+      {
+        util::CacheGenerator generator;
+        generator.initialize(errorRate, maxDistance, maxAngle);
 
-    //void Mesh::setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords)
-    //{
-    //  assert(textureCoords.size() == 4);
+        getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+        getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
 
-    //  GLuint strides[4];
-    //  for(unsigned int i = 0; i < 4; i++)
-    //  {
-    //    strides[i] = m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+        //if(!m_indexData.empty())
+        //{
+        //  generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions, indices);
+        //}
+        //else
+        //{
+        //  generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions);
+        //}
 
-    //  GLuint lokalStride = 0;
+        //cacheIndizes0.resize(positions.size());
+        //cacheIndizes1.resize(positions.size());
 
-    //  for(unsigned int j = 0; j < textureCoords.size(); j++)
-    //  {
-    //    lokalStride += strides[j];
+        //for(unsigned int i = 0; i < positions.size(); i++)
+        //{
+        //  const unsigned int CACHEINDEXSIZE = 8;
 
-    //    for(unsigned int i = 0; i < textureCoords[j].size(); i++)
-    //    {
-    //      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_TEXTURE0 + i).toInt());
-    //      std::copy((GLubyte*)&textureCoords[i], (GLubyte*)&textureCoords[i] + sizeof(textureCoords[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //    }
-    //  }
-    //}
+        //  std::vector<util::vec2f> cacheIndices(CACHEINDEXSIZE, util::vec2f(INT32_MAX, 0.0f));
 
-    //void Mesh::setNormals(std::vector<util::vec3f> normals)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_NORMAL).toInt());
+        //  for(unsigned int j = 0; j < caches.size(); j++)
+        //  {
+        //    float length = (positions[i] - caches[j].position).length();
+        //    if(length <= maxDistance)
+        //    {
+        //      float weight = util::vec3f::dot(normals[i], caches[j].normal) / (length * length + 0.0001f);//more weight is better
 
-    //  GLuint lokalStride = 0;
-    //  for(unsigned int i = 0; i < 5; i++)
-    //  {
-    //    lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+        //      if(weight > cacheIndices.back()[1])
+        //      {
+        //        sortCacheIndices(cacheIndices, util::vec2f(float(j), weight));
+        //      }
+        //    }
+        //  }
 
-    //  for(unsigned int i = 0; i < normals.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&normals[i], (GLubyte*)&normals[i] + sizeof(normals[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //  }
-    //}
+        //  for(unsigned int j = 0; j < CACHEINDEXSIZE; j++)//convert the indices into the shader accessable format (invalid: INT32_MAX --> 0, valid: x --> x + 1)
+        //  {
+        //    cacheIndices[j][0] = cacheIndices[j][0] == INT32_MAX ? 0 : cacheIndices[j][0] + 1;
+        //  }
 
-    //void Mesh::setBiNormals(std::vector<util::vec3f> binormals)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BINORMAL).toInt());
+        //  cacheIndizes0[i] = util::cacheIndexType(cacheIndices[0][0], cacheIndices[1][0], cacheIndices[2][0], cacheIndices[3][0]);
+        //  cacheIndizes1[i] = util::cacheIndexType(cacheIndices[4][0], cacheIndices[5][0], cacheIndices[6][0], cacheIndices[7][0]);
+        //}
 
-    //  GLuint lokalStride = 0;
-    //  for(unsigned int i = 0; i < 6; i++)
-    //  {
-    //    lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+        util::CacheIndicesGenerator cacheIndicesGenerator(maxDistance);
 
-    //  for(unsigned int i = 0; i < binormals.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&binormals[i], (GLubyte*)&binormals[i] + sizeof(binormals[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //  }
-    //}
+        if(!m_indexData.empty())
+        {
+          generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions, m_indexData);
+          cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_indexData, m_cacheData, cacheIndizes0, cacheIndizes1);
+        }
+        else
+        {
+          generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions);
+          cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
+        }
 
-    //void Mesh::setBoneWeights(std::vector<util::vec4f> boneWeights)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_WEIGHTS).toInt());
+        if(cacheIndicesGenerator.getNewVertexNumber() != 0)
+        {
+          std::vector<std::vector<util::vec2f>> textureCoordinates;
+          std::vector<util::vec3f> binormals;
+          std::vector<util::vec4f> boneWeights;
+          std::vector<util::vec4f> boneIndices;
+          std::vector<util::vec4f> vertexColors;
 
-    //  GLuint lokalStride = 0;
-    //  for(unsigned int i = 0; i < 7; i++)
-    //  {
-    //    lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+          for(unsigned int j = 0; j < textureCoordinates.size(); j++)
+          {
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_TEXTURE0 + j)).toInt())
+            {
+              getDataFromGeometryBuffer(MODEL_TEXTURE0 + j, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&textureCoordinates[j][0]));
+            }
+          }
 
-    //  for(unsigned int i = 0; i < boneWeights.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&boneWeights[i], (GLubyte*)&boneWeights[i] + sizeof(boneWeights[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //  }
-    //}
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BINORMAL)).toInt())
+          {
+            getDataFromGeometryBuffer(MODEL_BINORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&binormals[0]));
+          }
 
-    //void Mesh::setBoneIndices(std::vector<util::vec4f> boneIndices)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_BONE_INDICES).toInt());
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_WEIGHTS)).toInt())
+          {
+            getDataFromGeometryBuffer(MODEL_BONE_WEIGHTS, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&boneWeights[0]));
+          }
 
-    //  GLuint lokalStride = 0;
-    //  for(unsigned int i = 0; i < 8; i++)
-    //  {
-    //    lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_INDICES)).toInt())
+          {
+            getDataFromGeometryBuffer(MODEL_BONE_INDICES, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&boneIndices[0]));
+          }
 
-    //  for(unsigned int i = 0; i < boneIndices.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&boneIndices[i], (GLubyte*)&boneIndices[i] + sizeof(boneIndices[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //  }
-    //}
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_COLOR)).toInt())
+          {
+            getDataFromGeometryBuffer(MODEL_COLOR, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&vertexColors[0]));
+          }
 
-    //void Mesh::setVertexColors(std::vector<util::vec4f> vertexColors)
-    //{
-    //  assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(MODEL_COLOR).toInt());
+          const std::vector<util::VertexDataStructure>& vertices = cacheIndicesGenerator.getVertexDataStructure();
+          const std::list<util::vec2ui>& newVertexEdges = cacheIndicesGenerator.getNewVertexEdgeIndices();
 
-    //  GLuint lokalStride = 0;
-    //  for(unsigned int i = 0; i < 9; i++)
-    //  {
-    //    lokalStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-    //  }
+          unsigned int vertexIndex = m_vertexCount;
+          for(std::list<util::vec2ui>::const_iterator it = newVertexEdges.begin(); it != newVertexEdges.end(); it++, vertexIndex++)
+          {
+            unsigned int vertexIndex0 = (*it)[0], vertexIndex1 = (*it)[1];
 
-    //  for(unsigned int i = 0; i < vertexColors.size(); i++)
-    //  {
-    //    std::copy((GLubyte*)&vertexColors[i], (GLubyte*)&vertexColors[i] + sizeof(vertexColors[0]), &m_geometryData[0] + m_vertexStride * i + lokalStride);
-    //  }
-    //}
+            positions.push_back(vertices[vertexIndex].position);
 
-    util::Flags<Mesh::VertexDeclaration> Mesh::getVertexDeclarationFlags() const
+            for(unsigned int j = 0; j < textureCoordinates.size(); j++)
+            {
+              if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_TEXTURE0 + j)).toInt())
+              {
+                textureCoordinates[j].push_back(util::vec2f::lerp(textureCoordinates[j][vertexIndex0], textureCoordinates[j][vertexIndex1], 0.5f));
+              }
+            }
+
+            normals.push_back(vertices[vertexIndex].normal);
+
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BINORMAL)).toInt())
+            {
+              binormals.push_back(util::vec3f::lerp(binormals[vertexIndex0], binormals[vertexIndex1], 0.5f));
+            }
+
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_WEIGHTS)).toInt())
+            {
+              boneWeights.push_back(util::vec4f::lerp(boneWeights[vertexIndex0], boneWeights[vertexIndex1], 0.5f));
+            }
+
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_INDICES)).toInt())
+            {
+              boneIndices.push_back(util::vec4f::lerp(boneIndices[vertexIndex0], boneIndices[vertexIndex1], 0.5f));
+            }
+
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_COLOR)).toInt())
+            {
+              vertexColors.push_back(util::vec4f::lerp(vertexColors[vertexIndex0], vertexColors[vertexIndex1], 0.5f));
+            }
+          }
+
+          m_vertexCount += cacheIndicesGenerator.getNewVertexNumber();
+
+          m_geometryData.resize(m_vertexStride * m_vertexCount);
+
+          unsigned int verticesPerPrimitive;
+          switch(m_primitiveType)
+          {
+          case GL_POINTS:
+            verticesPerPrimitive = 1;
+            break;
+          case GL_LINES:
+            verticesPerPrimitive = 2;
+            break;
+          case GL_TRIANGLES:
+          default:
+            verticesPerPrimitive = 3;
+            break;
+          }
+
+          m_primitiveCount = static_cast<unsigned int>(m_indexData.size()) / verticesPerPrimitive;
+
+          copyDataIntoGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&positions[0]));
+
+          for(unsigned int j = 0; j < textureCoordinates.size(); j++)
+          {
+            if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_TEXTURE0 + j)).toInt())
+            {
+              copyDataIntoGeometryBuffer(MODEL_TEXTURE0 + j, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&textureCoordinates[j][0]));
+            }
+          }
+          copyDataIntoGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&normals[0]));
+
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BINORMAL)).toInt())
+          {
+            copyDataIntoGeometryBuffer(MODEL_BINORMAL, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&binormals[0]));
+          }
+
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_WEIGHTS)).toInt())
+          {
+            copyDataIntoGeometryBuffer(MODEL_BONE_WEIGHTS, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&boneWeights[0]));
+          }
+
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_BONE_INDICES)).toInt())
+          {
+            copyDataIntoGeometryBuffer(MODEL_BONE_INDICES, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&boneIndices[0]));
+          }
+
+          if((m_vertexDeclaration & util::Flags<VertexElements>::convertToFlag(MODEL_COLOR)).toInt())
+          {
+            copyDataIntoGeometryBuffer(MODEL_COLOR, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&vertexColors[0]));
+          }
+        }
+
+        copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
+        copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
+      }
+      else
+      {
+        cacheIndizes0.resize(positions.size(), util::vec4f::identity());
+        cacheIndizes1.resize(positions.size(), util::vec4f::identity());
+      }
+    }
+
+    void Mesh::getDataFromGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, GLubyte *data) const
+    {
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(vertexDeclaration).toInt());
+
+      GLuint localStride = 0;
+      for(unsigned int i = 0; i < vertexDeclaration; i++)
+      {
+        localStride += m_vertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
+      }
+
+      for(unsigned int i = offset; i < numberOfElements; i++)
+      {
+        std::copy(&m_geometryData[i * m_vertexStride + localStride], &m_geometryData[i * m_vertexStride + localStride + VERTEXDECLARATIONSIZE[vertexDeclaration]], &data[VERTEXDECLARATIONSIZE[vertexDeclaration] * i]);
+      }
+    }
+
+    void Mesh::copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, const GLubyte *data)
+    {
+      assert(m_vertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(vertexDeclaration).toInt());
+
+      GLuint localStride = 0;
+      for(unsigned int i = 0; i < vertexDeclaration; i++)
+      {
+        localStride += m_vertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
+      }
+
+      for(unsigned int i = offset; i < numberOfElements; i++)
+      {
+        std::copy(&data[i * VERTEXDECLARATIONSIZE[vertexDeclaration]], &data[(i + 1) * VERTEXDECLARATIONSIZE[vertexDeclaration]], &m_geometryData[localStride + m_vertexStride * i]);
+      }
+
+      m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
+    }
+
+    VertexElementFlags Mesh::getVertexDeclarationFlags() const
     {
       return m_vertexDeclaration;
     }
@@ -484,24 +509,6 @@ namespace he
     const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
     {
       return m_triangleCacheIndices;
-    }
-
-    void Mesh::copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int numberOfElements, const GLubyte *data)
-    {
-      assert(m_vertexDeclaration.toInt() & util::Flags<VertexDeclaration>::convertToFlag(vertexDeclaration).toInt());
-
-      unsigned int size = numberOfElements * VERTEXDECLARATIONSIZE[vertexDeclaration];
-
-      GLuint localStride = 0;
-      for(unsigned int i = 0; i < vertexDeclaration; i++)
-      {
-        localStride += m_vertexDeclaration.toInt() & util::Flags<VertexDeclarationFlags>::convertToFlag(i).toInt() ? VERTEXDECLARATIONSIZE[i] : 0;
-      }
-
-      for(unsigned int i = 0; i < size; i += VERTEXDECLARATIONSIZE[vertexDeclaration])
-      {
-        std::copy(&data[i], &data[i] + VERTEXDECLARATIONSIZE[vertexDeclaration], &m_geometryData[0] + localStride + m_vertexStride * i);
-      }
     }
 
     void Mesh::generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices)

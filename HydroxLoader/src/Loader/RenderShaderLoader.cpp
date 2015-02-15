@@ -22,7 +22,7 @@ namespace he
     }
 
     util::ResourceHandle RenderShaderLoader::loadResource(
-      util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+      util::Flags<VertexElements> vertexDecaration,
       std::string filename,
       std::string vertexFilename,
       std::string fragmentFilename,
@@ -105,7 +105,7 @@ namespace he
               }
             }
 
-            container->m_renderPassShader[renderPass - 1].push_back(loadResource(util::Flags<db::VertexDeclarationFlags>(vertexDeclaration), shaderFileNames[0], shaderFileNames[1], shaderFileNames[2], shaderFileNames[3], shaderFileNames[4], shaderFileNames[5]));
+            container->m_renderPassShader[renderPass - 1].push_back(loadResource(util::Flags<VertexElements>(vertexDeclaration), shaderFileNames[0], shaderFileNames[1], shaderFileNames[2], shaderFileNames[3], shaderFileNames[4], shaderFileNames[5]));
 
             continue;
           }

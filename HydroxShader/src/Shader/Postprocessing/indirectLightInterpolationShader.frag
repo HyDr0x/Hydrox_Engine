@@ -121,28 +121,22 @@ void main()
 	
 	phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
 	phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
-	/*
-	Xpd = Xpd / wGesD;
-	Xpg = Xpg / wGesG;
-	
-	phiPD = phiPD / wGesD;
-	phiPG = phiPG / wGesG;*/
 		
 	vec3 lightDirD = Xpd - pos;
-	float lengthD = dot(lightDirD, lightDirD);
+	float lengthD = dot(lightDirD, lightDirD);//phd says: length(lightDirD);
 	lightDirD = normalize(lightDirD);
 	float frd = material.x * max(dot(lightDirD, normal), 0);
 			
 	vec3 lightDirG = Xpg - pos;
-	float lengthG = dot(lightDirG, lightDirG);
+	float lengthG = dot(lightDirG, lightDirG);//phd says: length(lightDirG);
 	lightDirG = normalize(lightDirG);
 	vec3 reflectLightDirG = reflect(-lightDirG, normal);
 	float frg = max(dot(lightDirG, normal), 0) * material.y * pow(max(dot(reflectLightDirG, camDir), 0), material.w);
 	
 	//luminousFlux = vec4(1, 0, 0, 1);
-	//luminousFlux = vec4(phiPD / 5000.0f, 1);
+	luminousFlux = vec4(phiPD / 2000.0f, 1);
 	//luminousFlux = vec4(wGesD / 10.0f, 0, 0, 0);
 	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD), 1.0f);
 	//luminousFlux = vec4((frg * phiPG) / (4.0f * PI * lengthG), 1.0f);
-	luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + max((frg * phiPG) / (4.0f * PI * lengthG), 0.0f), 1.0f);
+	//luminousFlux = vec4((frd * phiPD) / (4.0f * PI * lengthD) + max((frg * phiPG) / (4.0f * PI * lengthG), 0.0f), 1.0f);
 }

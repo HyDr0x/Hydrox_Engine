@@ -39,7 +39,7 @@ namespace he
       };
 
       RenderShader();
-      RenderShader(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+      RenderShader(util::Flags<VertexElements> vertexDecaration,
                    const std::string& shaderName,
                    const std::string& vertexShaderSource, 
                    const std::string& fragmentShaderSource = std::string(), 
@@ -57,7 +57,7 @@ namespace he
 
       std::vector<std::string> getShaderSources() const;
 
-      util::Flags<db::VertexDeclarationFlags> getVertexDeclaration();
+      util::Flags<VertexElements> getVertexDeclaration();
 
     private:
 
@@ -68,7 +68,7 @@ namespace he
                                                  GLuint fragmentShader);
 
       std::vector<std::string> m_shaderSources;
-      util::Flags<db::VertexDeclarationFlags> m_vertexDecaration;
+      util::Flags<VertexElements> m_vertexDecaration;
     };
 
   }

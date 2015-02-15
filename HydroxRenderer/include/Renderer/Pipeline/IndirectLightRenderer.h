@@ -46,7 +46,7 @@ namespace he
         util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const;
 
-      void setBuffer(util::SharedPointer<db::Texture2D> depthTexture);
+      void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
       void unsetBuffer() const;
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
@@ -69,7 +69,6 @@ namespace he
       util::SharedPointer<db::Texture2D> m_indirectLightPositionGBuffer;//the position of the indirect specular proxy light for the interpolation
       util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxGBuffer;//the luminous flux of the indirect specular proxy light for the interpolation
       
-      util::SharedPointer<db::Texture2D> m_clearTexture;//clears the zBuffer with zeros
       util::SharedPointer<db::Texture2D> m_zBuffer;//ubytes 0 = cache is not being used, 1 = cache is being used
 
       Renderquad m_indirectLightIndicesRenderQuad;
@@ -81,6 +80,8 @@ namespace he
 
       util::ResourceHandle m_indirectLightShaderHandle;
       util::ResourceHandle m_indirectLightInterpolationShaderHandle;
+
+      GLsync m_gBufferSync;
 
       GLuint m_cacheNumber;
     };

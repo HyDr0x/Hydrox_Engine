@@ -65,7 +65,9 @@ namespace he
 
     void AssimpLoader::setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle)
     {
-      m_generator.initialize(errorRate, maxDistance, maxAngle);
+      m_errorRate = errorRate;
+      m_maxDistance = maxDistance;
+      m_maxAngle = maxAngle;
     }
 
     void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
@@ -95,9 +97,12 @@ namespace he
 
     sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped)
     {
+      std::cout << "Assimp Loads Scene" << std::endl;
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
-      const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality ^ aiProcess_GenUVCoords ^ aiProcess_CalcTangentSpace);
+
+      unsigned int deleteAssimpOptions = ~(aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
+      const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality & deleteAssimpOptions);
 
       if(!assimpScene)
       {
@@ -106,18 +111,32 @@ namespace he
         scene = loadDefaultSceneGraph();
       }
       else
-      {  
+      {
+        m_fileInformation.filename = filename;
+        m_fileInformation.meshNumber = assimpScene->mNumMeshes;
+        m_fileInformation.materialNumber = assimpScene->mNumMaterials;
+        m_fileInformation.animationNumber = assimpScene->mNumAnimations;
+        m_fileInformation.cacheNumber = 0;
+        m_fileInformation.faceNumber = 0;
+        m_fileInformation.vertexNumber = 0;
+
+        std::cout << "Mesh Conversion" << std::endl;
         loadMeshesFromAssimp(assimpScene, yAxisFlipped);
 
+        std::cout << "Materials Conversion" << std::endl;
         loadMaterialsFromAssimp(path, assimpScene);
 
+        std::cout << "Skeleton Conversion" << std::endl;
         loadAnimatedSkeleton(assimpScene);
 
+        std::cout << "SceneGraph Conversion" << std::endl;
         sg::NodeIndex rootNode = loadSceneGraphFromAssimp(filename, assimpScene);
 
         attachBonesToSkinnedMesh();
 
         scene = new sg::Scene(m_allocator, rootNode);
+
+        std::cout << "Finished!" << std::endl;
 
         m_animationTracks.clear();
         m_inverseBindPoseTable.clear();
@@ -140,10 +159,19 @@ namespace he
 
       util::ResourceHandle materialHandle;
 
+      std::cout << "Total Mesh Number: " << scene->mNumMeshes << std::endl;
+
       for(unsigned int i = 0; i != scene->mNumMeshes; i++)
       {
         m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
+
+        m_fileInformation.cacheNumber += m_modelManager->getObject(m_meshes[i])->getCacheCount();
+        m_fileInformation.faceNumber += m_modelManager->getObject(m_meshes[i])->getPrimitiveCount();
+        m_fileInformation.vertexNumber += m_modelManager->getObject(m_meshes[i])->getVertexCount();
+
         m_materialIndex[i] = scene->mMeshes[i]->mMaterialIndex;
+
+        std::cout << "(" << i + 1 << "/" << scene->mNumMeshes << ")" << std::endl;
       }
     }
 
@@ -178,6 +206,52 @@ namespace he
         break;
       }
 
+      std::vector<VertexElements> vertexElements;
+
+      if(mesh->HasPositions()) vertexElements.push_back(db::Mesh::MODEL_POSITION);
+      for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
+      {
+        if(mesh->HasTextureCoords(j) && mesh->mNumUVComponents[j] != 0)
+        {
+          vertexElements.push_back(VertexElements(db::Mesh::MODEL_TEXTURE0 + j));
+        }
+      }
+      if(mesh->HasNormals()) vertexElements.push_back(db::Mesh::MODEL_NORMAL);
+      if(mesh->HasTangentsAndBitangents()) vertexElements.push_back(db::Mesh::MODEL_BINORMAL);
+      if(mesh->HasBones())
+      {
+        vertexElements.push_back(db::Mesh::MODEL_BONE_WEIGHTS);
+        vertexElements.push_back(db::Mesh::MODEL_BONE_INDICES);
+      }
+      if(mesh->HasVertexColors(0)) vertexElements.push_back(db::Mesh::MODEL_COLOR);
+
+      if(mesh->HasFaces())
+      {
+        indices.resize(mesh->mNumFaces * indicesPerFace);
+
+        for(unsigned int j = 0; j < mesh->mNumFaces; j++)
+        {
+          if(mesh->mFaces[j].mNumIndices != indicesPerFace)
+          {
+            std::cerr << "Invalid number of indices per face!" << std::endl;
+            std::cerr << "Expected number: " << indicesPerFace << std::endl;
+            std::cerr << "Actual number: " << mesh->mFaces[j].mNumIndices << std::endl;
+
+            if(mesh->mFaces[j].mNumIndices > 3)
+            {
+              std::cerr << "No quads or polygons allowed!" << std::endl;
+            }
+          }
+
+          for(unsigned int k = 0; k < indicesPerFace; k++)
+          {
+            indices[j * indicesPerFace + k] = static_cast<db::Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
+          }
+        }
+      }
+
+      db::Mesh newMesh(GL_TRIANGLES, mesh->mNumVertices, indices, vertexElements);
+
       if(mesh->HasPositions())
       {
         positions.resize(mesh->mNumVertices);
@@ -186,6 +260,9 @@ namespace he
         {
           positions[i] = util::vec3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         }
+
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
+
       }
 
       for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
@@ -210,6 +287,8 @@ namespace he
 
             textureCoords[j][i] = util::vec2f(mesh->mTextureCoords[j][i][0], tmpYCoordinates);//if the model is from DX the y-axis must be flipped
           }
+
+          newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_TEXTURE0 + j, 0, textureCoords[j].size(), reinterpret_cast<const GLubyte*>(&textureCoords[j][0]));
         }
       }
 
@@ -220,6 +299,8 @@ namespace he
         {
           normals[i] = util::vec3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         }
+
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
       }
 
       if(mesh->HasTangentsAndBitangents())
@@ -229,6 +310,8 @@ namespace he
         {
           binormals[i] = util::vec3f(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         }
+
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_BINORMAL, 0, binormals.size(), reinterpret_cast<const GLubyte*>(&binormals[0]));
       }
 
       if(mesh->HasBones())
@@ -262,6 +345,9 @@ namespace he
             }
           }
         }
+
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_BONE_WEIGHTS, 0, boneWeights.size(), reinterpret_cast<const GLubyte*>(&boneWeights[0]));
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_BONE_INDICES, 0, boneIndices.size(), reinterpret_cast<const GLubyte*>(&boneIndices[0]));
       }
 
       if(mesh->HasVertexColors(0))
@@ -272,41 +358,13 @@ namespace he
         {
           vertexColors[i] = util::vec4f(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
         }
+
+        newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_COLOR, 0, vertexColors.size(), reinterpret_cast<const GLubyte*>(&vertexColors[0]));
       }
 
-      if(mesh->HasFaces())
-      {
-        indices.resize(mesh->mNumFaces * indicesPerFace);
+      newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
 
-        for(unsigned int j = 0; j < mesh->mNumFaces; j++)
-        {
-          for(unsigned int k = 0; k < mesh->mFaces[j].mNumIndices; k++)
-          {
-            assert(mesh->mFaces[j].mNumIndices < 4 && "NO QUADS OR POLYGON PRIMITIVES ALLOWED!");
-            indices[j * indicesPerFace + k] = static_cast<db::Mesh::indexType>(mesh->mFaces[j].mIndices[k]);
-          }
-        }
-      }
-
-      std::vector<util::Cache> caches;
-      std::vector<he::util::vec2ui> triangleCacheData;
-      if(primitiveType == GL_TRIANGLES)
-      {
-        m_generator.generateCaches(caches, triangleCacheData, positions, indices);
-      }
-      
-      return m_modelManager->addObject(db::Mesh(
-        primitiveType,
-        positions,
-        caches,
-        triangleCacheData,
-        indices,
-        textureCoords,
-        normals,
-        binormals,
-        boneWeights,
-        boneIndices,
-        vertexColors));
+      return m_modelManager->addObject(newMesh);
     }
 
     void AssimpLoader::loadAnimatedSkeleton(const aiScene *scene)
@@ -469,12 +527,16 @@ namespace he
       std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices, normals);
 
-      util::CacheGenerator generator;
-      std::vector<he::util::Cache> caches;
-      std::vector<he::util::vec2ui> triangleCacheData;
-      generator.generateCaches(caches, triangleCacheData, positions, indices);
+      std::vector<VertexElements> vertexElements;
+      vertexElements.push_back(db::Mesh::MODEL_POSITION);
+      vertexElements.push_back(db::Mesh::MODEL_NORMAL);
 
-      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices)), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
+      db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+      mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
+      mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
+      mesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+
+      sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(mesh), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
 
       return new sg::Scene(m_allocator, sceneRootNode);
@@ -536,6 +598,20 @@ namespace he
 
         m_materials[i] = m_materialManager->addObject(db::Material(matData, textures, hashes, false));
       }
+    }
+
+    void AssimpLoader::printStatusInformations()
+    {
+      std::cout << std::endl;
+      std::cout << "File Informations:" << std::endl;
+      std::cout << "Filename: " << m_fileInformation.filename << std::endl;
+      std::cout << "Mesh Number: " << m_fileInformation.meshNumber << std::endl;
+      std::cout << "Material Number: " << m_fileInformation.materialNumber << std::endl;
+      std::cout << "Animation Number: " << m_fileInformation.animationNumber << std::endl;
+      std::cout << "Face Number: " << m_fileInformation.faceNumber << std::endl;
+      std::cout << "Vertex Number: " << m_fileInformation.vertexNumber << std::endl;
+      std::cout << "Cache Number: " << m_fileInformation.cacheNumber << std::endl;
+      std::cout << std::endl;
     }
   }
 }

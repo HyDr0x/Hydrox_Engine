@@ -5,7 +5,6 @@
 #include <Utilities/PrimitiveGenerator/CubeGenerator.h>
 #include <DataBase/ShaderContainer.h>
 
-
 namespace he
 {
   namespace renderer
@@ -25,7 +24,7 @@ namespace he
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_textureArrayManager = singletonManager->getService<db::TextureArrayManager>();
 
-      m_skyboxShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::SKYBOX, util::Flags<db::VertexDeclarationFlags>(3));
+      m_skyboxShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::SKYBOX, util::Flags<VertexElements>(3));
 
       db::Texture2D *texture;
       texture = m_textureManager->getObject(skyboxTextureHandles[0]);

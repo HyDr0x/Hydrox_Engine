@@ -8,7 +8,7 @@ namespace he
     {
     }
 
-    RenderShader::RenderShader(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+    RenderShader::RenderShader(util::Flags<VertexElements> vertexDecaration,
                                const std::string& shaderName,
                                const std::string& vertexShaderSource, 
                                const std::string& fragmentShaderSource, 
@@ -95,7 +95,7 @@ namespace he
       return m_shaderSources;
     }
 
-    util::Flags<db::VertexDeclarationFlags> RenderShader::getVertexDeclaration()
+    util::Flags<VertexElements> RenderShader::getVertexDeclaration()
     {
       return m_vertexDecaration;
     }

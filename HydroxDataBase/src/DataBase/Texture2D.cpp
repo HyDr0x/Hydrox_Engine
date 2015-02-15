@@ -1,6 +1,7 @@
 #include "DataBase/Texture2D.h"
 
 #include <cassert>
+#include <vector>
 
 namespace he
 {
@@ -13,7 +14,8 @@ namespace he
       m_internalFormat(internalFormat),
       m_format(format),
       m_channelNumber(channelNumber),
-      m_bitsPerPixel(bitsPerPixel)
+      m_bitsPerPixel(bitsPerPixel),
+      m_mipmapping(mipmapping)
     {
       if(data != nullptr)
       {
@@ -35,7 +37,7 @@ namespace he
 
       glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, data);
 
-      if(mipmapping)
+      if(m_mipmapping)
       {
         glGenerateMipmap(m_target);
       }
@@ -44,36 +46,69 @@ namespace he
 
     Texture2D::Texture2D(const Texture2D& other)
     {
-      m_hash = other.m_hash;
-      m_width = other.m_width;
-      m_height = other.m_height;
-      m_texIndex = other.m_texIndex;
-      m_target = other.m_target;
-      m_internalFormat = other.m_internalFormat;
-      m_format = other.m_format;
-      m_type = other.m_type;
-      m_bitsPerPixel = other.m_bitsPerPixel;
-      m_channelNumber = other.m_channelNumber;
+      if(other.m_texIndex != 0)
+      {
+        m_hash = other.m_hash;
+        m_width = other.m_width;
+        m_height = other.m_height;
+        m_target = other.m_target;
+        m_internalFormat = other.m_internalFormat;
+        m_format = other.m_format;
+        m_type = other.m_type;
+        m_bitsPerPixel = other.m_bitsPerPixel;
+        m_channelNumber = other.m_channelNumber;
+        m_mipmapping = other.m_mipmapping;
+
+        std::vector<GLubyte> data(m_width * m_height * (m_bitsPerPixel / 8.0f));
+
+        other.getTextureData(&data[0]);
+
+        glGenTextures(1, &m_texIndex);
+        glBindTexture(m_target, m_texIndex);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, &data[0]);
+
+        if(m_mipmapping)
+        {
+          glGenerateMipmap(m_target);
+        }
+        glBindTexture(m_target, 0);
+      }
+      else
+      {
+        m_texIndex = other.m_texIndex;
+      }
     }
 
     Texture2D::~Texture2D()
     {
+      glDeleteTextures(1, &m_texIndex);
     }
 
-    Texture2D& Texture2D::operator=(const Texture2D& other)
+    Texture2D& Texture2D::operator=(Texture2D other)//copy swap idiom
     {
-      m_hash = other.m_hash;
-      m_width = other.m_width;
-      m_height = other.m_height;
-      m_texIndex = other.m_texIndex;
-      m_target = other.m_target;
-      m_internalFormat = other.m_internalFormat;
-      m_format = other.m_format;
-      m_type = other.m_type;
-      m_bitsPerPixel = other.m_bitsPerPixel;
-      m_channelNumber = other.m_channelNumber;
+      swap(other);
 
       return *this;
+    }
+
+    void Texture2D::swap(Texture2D& other)
+    {
+      std::swap(m_hash, other.m_hash);
+      std::swap(m_width, other.m_width);
+      std::swap(m_height, other.m_height);
+      std::swap(m_target, other.m_target);
+      std::swap(m_texIndex, other.m_texIndex);
+      std::swap(m_internalFormat, other.m_internalFormat);
+      std::swap(m_format, other.m_format);
+      std::swap(m_type, other.m_type);
+      std::swap(m_bitsPerPixel, other.m_bitsPerPixel);
+      std::swap(m_channelNumber, other.m_channelNumber);
+      std::swap(m_mipmapping, other.m_mipmapping);
     }
 
     void Texture2D::free()
@@ -113,8 +148,9 @@ namespace he
       glBindTexture(m_target, 0);
     }
 
-    void Texture2D::generateMipMapps() const
+    void Texture2D::generateMipMapps()
     {
+      m_mipmapping = true;
       glBindTexture(m_target, m_texIndex);
         glGenerateMipmap(m_target);
       glBindTexture(m_target, 0);

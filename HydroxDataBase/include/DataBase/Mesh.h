@@ -26,7 +26,7 @@ namespace he
     {
     public:
 
-      enum VertexDeclaration
+      enum VertexDeclarationElements
       {
         MODEL_POSITION,
         MODEL_TEXTURE0,
@@ -49,18 +49,7 @@ namespace he
       typedef GLuint indexType;
       
       Mesh();
-      Mesh(GLenum primitiveType,
-           const std::vector<util::vec3f>& positions, 
-           const std::vector<util::Cache>& caches = std::vector<util::Cache>(),
-           const std::vector<util::vec2ui>& triangleCacheIndices = std::vector<util::vec2ui>(),
-           const std::vector<indexType>& indices = std::vector<indexType>(),
-           const std::vector<std::vector<util::vec2f>>& textureCoords = std::vector<std::vector<util::vec2f>>(4), 
-           const std::vector<util::vec3f>& normals = std::vector<util::vec3f>(), 
-           const std::vector<util::vec3f>& binormals = std::vector<util::vec3f>(), 
-           const std::vector<util::vec4f>& boneWeights = std::vector<util::vec4f>(),
-           const std::vector<util::vec4f>& boneIndices = std::vector<util::vec4f>(),
-           const std::vector<util::vec4f>& vertexColors = std::vector<util::vec4f>()
-           );
+      Mesh(GLenum primitiveType, unsigned int vertexCount, std::vector<indexType> indices, std::vector<VertexDeclarationElements> flags);
 
       Mesh(AABB boundingVolume,
            GLenum primitiveType,
@@ -78,21 +67,16 @@ namespace he
 
       ~Mesh();
 
-      Mesh& operator=(const Mesh& other); 
+      Mesh& operator=(Mesh other); 
 
       void free();
 
-      void copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int numberOfElements, const GLubyte *data);
+      void generateCaches(float errorRate, float maxDistance, float maxAngle, bool createCaches = true);
 
-      //void setPositions(std::vector<util::vec3f> positions);
-      //void setTextureCoordinations(std::vector<std::vector<util::vec2f>> textureCoords);
-      //void setNormals(std::vector<util::vec3f> normals);
-      //void setBiNormals(std::vector<util::vec3f> binormals);
-      //void setBoneWeights(std::vector<util::vec4f> boneWeights);
-      //void setBoneIndices(std::vector<util::vec4f> boneIndices);
-      //void setVertexColors(std::vector<util::vec4f> vertexColors);
+      void getDataFromGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, GLubyte *data) const;
+      void copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, const GLubyte *data);
 
-      util::Flags<VertexDeclaration> getVertexDeclarationFlags() const;
+      util::Flags<VertexDeclarationElements> getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
 
       util::vec3f getBBMin() const;
@@ -133,12 +117,13 @@ namespace he
       std::vector<util::Cache> m_cacheData;
       std::vector<util::vec2ui> m_triangleCacheIndices;
       std::vector<indexType> m_indexData;
-      util::Flags<VertexDeclaration> m_vertexDeclaration;
+      util::Flags<VertexDeclarationElements> m_vertexDeclaration;
       ////////////////////////////////
     };
-
-    typedef db::Mesh::VertexDeclaration VertexDeclarationFlags;
   }
+
+  typedef db::Mesh::VertexDeclarationElements VertexElements;
+  typedef util::Flags<VertexElements> VertexElementFlags;
 }
 
 #endif

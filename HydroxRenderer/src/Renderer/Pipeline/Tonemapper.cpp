@@ -27,8 +27,8 @@ namespace he
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       util::SharedPointer<db::ShaderContainer> renderShader = singletonManager->getService<db::ShaderContainer>();
 
-      m_histogramShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::HISTOGRAM, util::Flags<db::VertexDeclarationFlags>(1));
-      m_tonemappingShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::TONEMAPPING, util::Flags<db::VertexDeclarationFlags>(8192));
+      m_histogramShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::HISTOGRAM, util::Flags<VertexElements>(1));
+      m_tonemappingShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::TONEMAPPING, util::Flags<VertexElements>(8192));
 
       createHistogramVertices();
 

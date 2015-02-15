@@ -25,8 +25,8 @@ namespace he
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       util::SharedPointer<db::ShaderContainer> renderShader = singletonManager->getService<db::ShaderContainer>();
 
-      m_offscreenBufferShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::OFFSCREENBUFFER, util::Flags<db::VertexDeclarationFlags>(8192));
-      m_combineShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::COMBINE, util::Flags<db::VertexDeclarationFlags>(8192));
+      m_offscreenBufferShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::OFFSCREENBUFFER, util::Flags<VertexElements>(8192));
+      m_combineShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::COMBINE, util::Flags<VertexElements>(8192));
 
       m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
 

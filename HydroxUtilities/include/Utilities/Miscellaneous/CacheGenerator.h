@@ -89,8 +89,7 @@ namespace he
       
       std::vector<std::vector<vec3f>> m_triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
       std::vector<std::list<PolygonData>> m_polygons;//saves all polygons which lying in the voxel
-      std::vector<std::list<RawCache>> m_areaCaches;//saves all caches with their area
-      std::map<unsigned int, std::list<RawCache>> m_linearizedAreaCaches;
+      std::map<unsigned int, std::list<RawCache>> m_linearizedAreaCaches;//saves all caches with their area
       std::vector<RawCache> m_reducedCaches;
       std::vector<Cache> m_caches;
       std::vector<vec2ui> m_triangleCacheIndices;

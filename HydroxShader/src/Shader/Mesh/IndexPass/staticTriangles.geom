@@ -90,7 +90,7 @@ void main()
 		cacheIndices[2 * i + 0] = uvec4(vsout_cacheIndices0[i]) + uvec4(bvec4(vsout_cacheIndices0[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
 		cacheIndices[2 * i + 1] = uvec4(vsout_cacheIndices1[i]) + uvec4(bvec4(vsout_cacheIndices1[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
 	}
-	/*
+	
 	uvec4 bitMask;
 	
 	for(uint i = 0; i < 6; i++)
@@ -116,7 +116,7 @@ void main()
 	cacheIndices[3] -= uvec4(1);
 	cacheIndices[4] -= uvec4(1);
 	cacheIndices[5] -= uvec4(1);
-	*/
+	
 	for(uint i = 0; i < 6; i++)
 	{
 		gsout_cacheIndices[i] = cacheIndices[i];

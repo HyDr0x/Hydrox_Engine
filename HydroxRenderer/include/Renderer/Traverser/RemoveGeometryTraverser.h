@@ -13,10 +13,14 @@
 
 namespace he
 {
-  namespace xBar  {    class IGeometryContainer;  }
+  namespace xBar
+  {
+    class IGeometryContainer;
+  }
 
   namespace renderer
-  {    class RemoveGeometryTraverser : public Traverser
+  {
+    class RemoveGeometryTraverser : public Traverser
     {
     public:
 
@@ -47,8 +51,8 @@ namespace he
 
       const xBar::IGeometryContainer& m_geometryContainer;
 
-      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
-      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
+      util::Flags<VertexElements> m_shaderVertexDeclaration;
+      util::Flags<VertexElements> m_meshVertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
     };

@@ -3,15 +3,14 @@
 #include <cassert>
 #include <random>
 #include <cmath>
-
+#include <algorithm>
 
 namespace he
 {
   namespace util
   {
-    CacheIndicesGenerator::CacheIndicesGenerator() : m_newVertexNumber(0)
+    CacheIndicesGenerator::CacheIndicesGenerator(float maxDistance) : m_newVertexNumber(0), m_maxDistance(maxDistance)
     {
-
     }
 
     void CacheIndicesGenerator::generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1)
@@ -34,18 +33,18 @@ namespace he
               {
                 if(cacheIndices[k].size() < CACHEINDEXSIZE)
                 {
-                  cacheIndices[k].insert(cit, util::vec2f(float(j), weight));
+                  cacheIndices[k].insert(cit, util::vec2f(float(j + 1), weight));
                 }
                 else
                 {
-                  (*cit) = util::vec2f(float(j), weight);
+                  (*cit) = util::vec2f(float(j + 1), weight);
                 }
               }
             }
 
             if(!inserted && cacheIndices[k].size() < CACHEINDEXSIZE)//if the new weight is the lowest we need to push it to the back
             {
-              cacheIndices[k].push_back(util::vec2f(float(j), weight));
+              cacheIndices[k].push_back(util::vec2f(float(j + 1), weight));
             }
           }
         }
@@ -54,7 +53,7 @@ namespace he
         {
           if(cacheIndices[k].size() < CACHEINDEXSIZE)
           {
-            cacheIndices[k].resize(CACHEINDEXSIZE, util::vec2f(INT32_MAX, 0));
+            cacheIndices[k].resize(CACHEINDEXSIZE, util::vec2f(0, 0));
           }
 
           cacheIndizes0[i + k] = util::cacheIndexType(cacheIndices[k][0][0], cacheIndices[k][1][0], cacheIndices[k][2][0], cacheIndices[k][3][0]);
@@ -65,12 +64,12 @@ namespace he
 
     void CacheIndicesGenerator::createVertexDataStructure(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, const std::vector<unsigned int>& indices)
     {
-      for(unsigned int i = 0; i < positions.size(); i++)
+      for(unsigned int i = 0; i < positions.size(); i++)//create the vertices
       {
-        m_vertexDataStructure[i] = VertexDataStructure(positions[i], normals[i], caches, i);
+        m_vertexDataStructure[i] = VertexDataStructure(positions[i], normals[i], caches, i, CACHEINDEXSIZE, m_maxDistance);
       }
 
-      for(unsigned int i = 0; i < positions.size(); i++)
+      for(unsigned int i = 0; i < positions.size(); i++)//create the neighbor indices
       {
         std::unordered_set<unsigned int> inNeighbors;
 
@@ -88,27 +87,56 @@ namespace he
           }
         }
       }
+
+      std::vector<bool> alreadyInserted(m_vertexDataStructure.size());//a vector whichs saves indices of already inserted vertices
+      std::list<unsigned int> actualParentList, nextParentList;//one saves the indices of all parents for the next level, the other has the indices of all parents of the actual level
+
+      while(m_nextVertexIndex.size() < m_vertexDataStructure.size())
+      {
+        if(actualParentList.empty())
+        {
+          for(unsigned int i = 0; i < alreadyInserted.size(); i++)//look if a not visited from the mesh unconnected vertex exist
+          {
+            if(!alreadyInserted[i])
+            {
+              m_nextVertexIndex.push_back(i);
+              alreadyInserted[i] = true;
+              actualParentList.push_back(i);
+              break;
+            }
+          }
+        }
+
+        for(std::list<unsigned int>::iterator pit = actualParentList.begin(); pit != actualParentList.end(); pit++)//find the other two neighbors of the two triangles
+        {
+          for(std::unordered_set<unsigned int>::iterator nit = m_vertexDataStructure[*pit].neighbors.begin(); nit != m_vertexDataStructure[*pit].neighbors.end(); nit++)//find the unconnected next sibling
+          {
+            if(std::find(nextParentList.begin(), nextParentList.end(), *nit) == nextParentList.end() && !alreadyInserted[*nit])
+            {
+              m_nextVertexIndex.push_back(*nit);
+              nextParentList.push_back(*nit);
+              alreadyInserted[*nit] = true;
+            }
+          }
+        }
+
+        actualParentList.clear();
+        std::swap(nextParentList, actualParentList);
+      }
     }
 
     void CacheIndicesGenerator::insertNewVertex(const std::vector<util::Cache>& caches, unsigned int vertexIndex0, unsigned int vertexIndex1, std::vector<unsigned int>& inoutIndices)
     {
       m_newVertexEdges.push_back(util::vec2ui(vertexIndex0, vertexIndex1));
 
-      unsigned int vertexIndex2 = UINT32_MAX, vertexIndex3 = UINT32_MAX;
+      std::vector<unsigned int> neighborVertexIndices;
 
       for(std::unordered_set<unsigned int>::iterator nit0 = m_vertexDataStructure[vertexIndex0].neighbors.begin(); nit0 != m_vertexDataStructure[vertexIndex0].neighbors.end(); nit0++)//find the other two neighbors of the two triangles
       {
         std::unordered_set<unsigned int>::iterator nit1 = m_vertexDataStructure[vertexIndex1].neighbors.find(*nit0);
         if(nit1 != m_vertexDataStructure[vertexIndex1].neighbors.end())
         {
-          if(vertexIndex2 == UINT32_MAX)
-          {
-            vertexIndex2 = *nit0;
-          }
-          else
-          {
-            vertexIndex3 = *nit0;
-          }
+          neighborVertexIndices.push_back(*nit0);
         }
       }
 
@@ -116,44 +144,25 @@ namespace he
       m_vertexDataStructure[vertexIndex1].neighbors.erase(m_vertexDataStructure[vertexIndex1].neighbors.find(vertexIndex0));
 
       util::vec3f newPosition = util::vec3f::lerp(m_vertexDataStructure[vertexIndex0].position, m_vertexDataStructure[vertexIndex1].position, 0.5f);
-      util::vec3f newNormal = util::vec3f::lerp(m_vertexDataStructure[vertexIndex0].normal, m_vertexDataStructure[vertexIndex1].normal, 0.5f);
+      util::vec3f newNormal = util::vec3f::lerp(m_vertexDataStructure[vertexIndex0].normal, m_vertexDataStructure[vertexIndex1].normal, 0.5f).normalize();
 
-      VertexDataStructure newVertex(newPosition, newNormal, caches, m_vertexDataStructure.size());
+      VertexDataStructure newVertex(newPosition, newNormal, caches, m_vertexDataStructure.size(), CACHEINDEXSIZE, m_maxDistance);
 
       //add the new neighbors
-      newVertex.neighbors.insert(&vertexIndex0);
-      newVertex.neighbors.insert(&vertexIndex1);
-      newVertex.neighbors.insert(vertexIndex2);
-      newVertex.neighbors.insert(vertexIndex3);
+      newVertex.neighbors.insert(vertexIndex0);
+      newVertex.neighbors.insert(vertexIndex1);
+      for(unsigned int i = 0; i < neighborVertexIndices.size(); i++)
+      {
+        newVertex.neighbors.insert(neighborVertexIndices[i]);
+      }
 
       for(std::unordered_set<unsigned int>::iterator nit = newVertex.neighbors.begin(); nit != newVertex.neighbors.end(); nit++)
       {
-        m_vertexDataStructure[*nit].neighbors.insert(&newVertex);
+        m_vertexDataStructure[*nit].neighbors.insert(newVertex.index);
       }
 
       m_vertexDataStructure.push_back(newVertex);
-
-      //////////Insert New Triangles//////////
-      //first triangle subdivision
-      inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
-      inoutIndices.push_back(newVertex.index);
-      inoutIndices.push_back(m_vertexDataStructure[vertexIndex2].index);
-
-      inoutIndices.push_back(newVertex.index);
-      inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
-      inoutIndices.push_back(m_vertexDataStructure[vertexIndex2].index);
-
-      if(vertexIndex3 != UINT32_MAX)
-      {
-        //second triangle subdivision
-        inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
-        inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
-        inoutIndices.push_back(newVertex.index);
-
-        inoutIndices.push_back(newVertex.index);
-        inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
-        inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
-      }
+      m_nextVertexIndex.push_back(newVertex.index);
 
       //////////Erase old Triangles//////////
       for(unsigned int i = 0; i < inoutIndices.size(); i += 3)
@@ -166,9 +175,69 @@ namespace he
           inoutIndices[i + 2] = UINT32_MAX;
         }
       }
+
+      //////////Insert New Triangles//////////
+      //first triangle subdivision
+      for(unsigned int i = 0; i < neighborVertexIndices.size(); i++)
+      {
+        util::vec3f e0 = m_vertexDataStructure[neighborVertexIndices[i]].position - m_vertexDataStructure[vertexIndex0].position;
+        util::vec3f e1 = newVertex.position - m_vertexDataStructure[vertexIndex0].position;
+
+        //util::vec3f e0 = m_vertexDataStructure[vertexIndex2].position - newVertex.position;
+        //util::vec3f e1 = m_vertexDataStructure[vertexIndex0].position  - newVertex.position;
+
+        if(util::vec3f::dot(util::math::cross(e0, e1), m_vertexDataStructure[vertexIndex0].normal) > 0.0f)
+        {
+          inoutIndices.push_back(newVertex.index);
+          inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
+          inoutIndices.push_back(m_vertexDataStructure[neighborVertexIndices[i]].index);
+
+          inoutIndices.push_back(newVertex.index);
+          inoutIndices.push_back(m_vertexDataStructure[neighborVertexIndices[i]].index);
+          inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
+        }
+        else
+        {
+          inoutIndices.push_back(m_vertexDataStructure[neighborVertexIndices[i]].index);
+          inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
+          inoutIndices.push_back(newVertex.index);
+
+          inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
+          inoutIndices.push_back(m_vertexDataStructure[neighborVertexIndices[i]].index);
+          inoutIndices.push_back(newVertex.index);
+        }
+      }
+
+      //if(vertexIndex3 != UINT32_MAX)
+      //{
+      //  util::vec3f e0 = m_vertexDataStructure[vertexIndex3].position - newVertex.position;
+      //  util::vec3f e1 = m_vertexDataStructure[vertexIndex0].position - newVertex.position;
+
+      //  //second triangle subdivision
+      //  if(util::vec3f::dot(util::math::cross(e0, e1), m_vertexDataStructure[vertexIndex0].normal) > 0.0f)
+      //  {
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
+      //    inoutIndices.push_back(newVertex.index);
+
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
+      //    inoutIndices.push_back(newVertex.index);
+      //  }
+      //  else
+      //  {
+      //    inoutIndices.push_back(newVertex.index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex0].index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
+
+      //    inoutIndices.push_back(newVertex.index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex3].index);
+      //    inoutIndices.push_back(m_vertexDataStructure[vertexIndex1].index);
+      //  }
+      //}
     }
 
-    void CacheIndicesGenerator::getCacheInterpolationEdges(VertexDataStructure& vertex, std::list<unsigned int>& verticesWithSameCacheIndices)//returns the indices of the vertices which have less than CACHEINDEXSIZE distinct cache-indices
+    void CacheIndicesGenerator::getCacheInterpolationEdges(VertexDataStructure& vertex, std::unordered_set<unsigned int>& verticesWithSameCacheIndices)//returns the indices of the vertices which have less than CACHEINDEXSIZE distinct cache-indices
     {
       unsigned int usedCacheSlots = 0;
       for(unsigned int j = 0; j < vertex.cacheIndices.size(); j++)//count the used cache-slots
@@ -179,41 +248,54 @@ namespace he
         }
       }
 
-      for(unsigned int j = 0; j < vertex.cacheIndices.size(); j++)
+      for(std::unordered_set<unsigned int>::iterator nit = vertex.neighbors.begin(); nit != vertex.neighbors.end(); nit++)
       {
-        if(vertex.cacheIndices[j][0] == INT32_MAX)
-        {
-          continue;
-        }
+        std::list<unsigned int> equalCacheIndices;
+        unsigned int validCacheIndicesNumber = 0;
 
-        for(std::unordered_set<unsigned int>::iterator nit = vertex.neighbors.begin(); nit != vertex.neighbors.end(); nit++)
+        for(unsigned int k = 0; k < m_vertexDataStructure[*nit].cacheIndices.size(); k++)
         {
-          bool hasTheCache = false;
-          unsigned int validCacheIndicesNumber = 0;
-          for(unsigned int k = 0; k < m_vertexDataStructure[*nit].cacheIndices.size(); k++)
+          if(m_vertexDataStructure[*nit].cacheIndices[k][0] != INT32_MAX)
           {
-            if(m_vertexDataStructure[*nit].cacheIndices[k][0] != INT32_MAX)
-            {
-              validCacheIndicesNumber++;
-            }
-
-            if(m_vertexDataStructure[*nit].cacheIndices[k][0] != INT32_MAX && m_vertexDataStructure[*nit].cacheIndices[k][0] == vertex.cacheIndices[j][0])
-            {
-              hasTheCache = true;
-            }
+            validCacheIndicesNumber++;
           }
 
-          if(hasTheCache && validCacheIndicesNumber == CACHEINDEXSIZE)
+          for(unsigned int j = 0; j < vertex.cacheIndices.size(); j++)
           {
-            if(usedCacheSlots > CACHEINDEXSIZE)//do we have more cache indices than necessary?
+            if(vertex.cacheIndices[j][0] == INT32_MAX)
             {
-              usedCacheSlots--;
-              vertex.cacheIndices[j] = util::vec2f(INT32_MAX, 0.0f);
+              continue;
             }
-            else//if not create a new vertex
+
+            if(m_vertexDataStructure[*nit].cacheIndices[k][0] != INT32_MAX && m_vertexDataStructure[*nit].cacheIndices[k][0] == vertex.cacheIndices[j][0] && equalCacheIndices.size() < CACHEINDEXSIZE)
             {
-              verticesWithSameCacheIndices.push_back(*nit);
+              equalCacheIndices.push_back(vertex.cacheIndices[j][0]);//collect equal cache-indices, but not more than we will invalidate
             }
+          }
+        }
+
+        if(validCacheIndicesNumber - equalCacheIndices.size() < CACHEINDEXSIZE)//if more than CACHEINDEXSIZE indices are equal (we will only kill CACHEINDEXSIZE indices, not more) and there are not enough indices ...
+        {
+          if(usedCacheSlots - equalCacheIndices.size() >= CACHEINDEXSIZE)//... look if we have more cache indices than necessary
+          {
+            unsigned int countDown = equalCacheIndices.size() - std::max<int>(validCacheIndicesNumber - int(CACHEINDEXSIZE), 0);//guarantees that not more indices are being deleted than necessary
+            for(std::list<unsigned int>::iterator it = equalCacheIndices.begin(); it != equalCacheIndices.end(); it++, countDown--)//if yes eliminate those equal cache-indices
+            {
+              if(countDown == 0) break;
+              for(unsigned int j = 0; j < vertex.cacheIndices.size(); j++)
+              {
+                if(vertex.cacheIndices[j][0] == *it)
+                {
+                  usedCacheSlots--;
+                  vertex.cacheIndices[j] = util::vec2f(INT32_MAX, 0.0f);
+                  break;
+                }
+              }
+            }
+          }
+          else//if not create a new vertex
+          {
+            //verticesWithSameCacheIndices.insert(*nit);
           }
         }
       }
@@ -229,6 +311,11 @@ namespace he
         {
           vertex.cacheIndices[j - unusedCacheSlots] = vertex.cacheIndices[j];
         }
+      }
+
+      for(unsigned int j = vertex.cacheIndices.size() - unusedCacheSlots; j < vertex.cacheIndices.size(); j++)//resort the cache-indices so that valid indices are tight together
+      {
+        vertex.cacheIndices[j] = util::vec2f(INT32_MAX, 0.0f);
       }
 
       vertex.cacheIndices.resize(CACHEINDEXSIZE);
@@ -256,22 +343,26 @@ namespace he
     {
       m_vertexDataStructure.resize(positions.size());
 
-      std::list<unsigned int> verticesWithSameCacheIndices;
-
       createVertexDataStructure(positions, normals, caches, indices);
 
       unsigned int oldVertexNumber = m_vertexDataStructure.size();
 
-      for(unsigned int i = 0; i < m_vertexDataStructure.size(); i++)
+      unsigned int vertexCounter = 0;
+      for(std::list<unsigned int>::iterator vit = m_nextVertexIndex.begin(); vit != m_nextVertexIndex.end(); vit++, vertexCounter++)
       {
-        getCacheInterpolationEdges(m_vertexDataStructure[i], verticesWithSameCacheIndices);
+        std::unordered_set<unsigned int> verticesWithSameCacheIndices;
 
-        for(std::list<unsigned int>::iterator it = verticesWithSameCacheIndices.begin(); it != verticesWithSameCacheIndices.end(); it++)
+        getCacheInterpolationEdges(m_vertexDataStructure[*vit], verticesWithSameCacheIndices);
+
+        if(vertexCounter < oldVertexNumber)
         {
-          insertNewVertex(caches, i, *it, indices);
+          for(std::unordered_set<unsigned int>::iterator it = verticesWithSameCacheIndices.begin(); it != verticesWithSameCacheIndices.end(); it++)
+          {
+            insertNewVertex(caches, *vit, *it, indices);
+          }
         }
 
-        eraseDoubledIndices(m_vertexDataStructure[i]);
+        eraseDoubledIndices(m_vertexDataStructure[*vit]);
       }
 
       cacheIndizes0.resize(m_vertexDataStructure.size());
@@ -279,11 +370,16 @@ namespace he
 
       for(unsigned int i = 0; i < m_vertexDataStructure.size(); i++)//assign the preprocessed indices to the final format
       {
+        for(unsigned int j = 0; j < CACHEINDEXSIZE; j++)//convert the indices into the shader accessable format (invalid: INT32_MAX --> 0, valid: x --> x + 1)
+        {
+          m_vertexDataStructure[i].cacheIndices[j][0] = m_vertexDataStructure[i].cacheIndices[j][0] == INT32_MAX ? 0 : m_vertexDataStructure[i].cacheIndices[j][0] + 1;
+        }
+
         cacheIndizes0[i] = util::cacheIndexType(m_vertexDataStructure[i].cacheIndices[0][0], m_vertexDataStructure[i].cacheIndices[1][0], m_vertexDataStructure[i].cacheIndices[2][0], m_vertexDataStructure[i].cacheIndices[3][0]);
         cacheIndizes1[i] = util::cacheIndexType(m_vertexDataStructure[i].cacheIndices[4][0], m_vertexDataStructure[i].cacheIndices[5][0], m_vertexDataStructure[i].cacheIndices[6][0], m_vertexDataStructure[i].cacheIndices[7][0]);
       }
 
-      std::vector<unsigned int> newIndices(indices.size());
+      std::vector<unsigned int> newIndices;
 
       for(unsigned int i = 0; i < indices.size(); i += 3)
       {

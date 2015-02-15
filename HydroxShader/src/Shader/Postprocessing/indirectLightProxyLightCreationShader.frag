@@ -30,7 +30,7 @@ in vec2 gsout_texCoord;
 
 void main()
 {
-	if(texture(zBuffer, gsout_texCoord).r == 0) //discard the indirect lighting e.g. for skybox or billboards
+	if(texture(zBuffer, gsout_texCoord).r == 0) //discard the indirect lighting where the cache is being occluded
 	{
 		return;
 	}

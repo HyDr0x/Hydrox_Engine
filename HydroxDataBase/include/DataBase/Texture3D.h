@@ -19,13 +19,13 @@ namespace he
     {
     public:
 
-      Texture3D(){}
+      Texture3D() : m_texIndex(0) {}
       Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data = nullptr, bool mipmapping = false);
-      Texture3D(const Texture3D&);
+      Texture3D(const Texture3D& other);
 
       ~Texture3D();
 
-      Texture3D& operator=(const Texture3D& other);
+      Texture3D& operator=(Texture3D other);
 
       void free();
 
@@ -37,7 +37,7 @@ namespace he
       void setTexture(GLint location, GLuint slot) const;
       void unsetTexture(GLuint slot) const;
 
-      void generateMipMapps() const;
+      void generateMipMapps();
 
       void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint edgeModeR, GLint magFilter, GLint minFilter) const;
 
@@ -59,6 +59,8 @@ namespace he
 
     private:
 
+      void swap(Texture3D& other);
+
       GLsizei m_width, m_height, m_depth;
       GLuint m_texIndex;
       GLenum m_target;
@@ -67,6 +69,7 @@ namespace he
       GLenum m_type;
       GLuint m_channelNumber;
       GLuint m_bitsPerPixel;
+      bool m_mipmapping;
     };
   }
 }

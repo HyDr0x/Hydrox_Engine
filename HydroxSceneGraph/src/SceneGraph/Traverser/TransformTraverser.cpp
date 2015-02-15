@@ -198,7 +198,7 @@ namespace he
       }
       else
       {
-        treeNode.transformPosition(m_translateStack.top(), m_scaleStack.top(), util::Quaternion<float>::identity());
+        treeNode.transformPosition(util::vec3f::identity(), 1.0f, util::Quaternion<float>::identity());
       }
 
       return true;
@@ -210,7 +210,10 @@ namespace he
 
     bool TransformTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
-      treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      if(!m_translateStack.empty() && !m_scaleStack.empty() && !m_rotationStack.empty())
+      {
+        treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      }
 
       return true;
     }
@@ -221,7 +224,10 @@ namespace he
 
     bool TransformTraverser::preTraverse(GeoNode& treeNode)
     {
-      treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      if(!m_translateStack.empty() && !m_scaleStack.empty() && !m_rotationStack.empty())
+      {
+        treeNode.setTransformationMatrix(util::math::createTransformationMatrix(m_translateStack.top(), m_scaleStack.top(), m_rotationStack.top()));
+      }
 
       return true;
     }
@@ -253,7 +259,10 @@ namespace he
 
     bool TransformTraverser::preTraverse(LightNode& treeNode)
     {
-      treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      if(!m_translateStack.empty() && !m_rotationStack.empty())
+      {
+        treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      }
 
       return true;
     }
@@ -264,7 +273,10 @@ namespace he
 
     bool TransformTraverser::preTraverse(ShadowLightNode& treeNode)
     {
-      treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      if(!m_translateStack.empty() && !m_rotationStack.empty())
+      {
+        treeNode.applyTransformation(m_translateStack.top(), m_rotationStack.top());
+      }
 
       return true;
     }

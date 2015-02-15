@@ -41,6 +41,7 @@ namespace he
     //copy swap idiom
     Material& Material::operator=(Material other)//CTor of other called for auto construction
     {
+      using namespace std;//for ADL
       swap(other);//swap both
 
       return *this;

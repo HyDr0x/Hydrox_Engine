@@ -224,7 +224,6 @@ namespace he
       {
         generateCachesPerVoxel(voxelIndex, normalBin);
         shiftCentroid(voxelIndex);
-        m_linearizedAreaCaches[voxelIndex].insert(m_linearizedAreaCaches[voxelIndex].end(), m_areaCaches[voxelIndex].begin(), m_areaCaches[voxelIndex].end());
       }
     }
 
@@ -252,7 +251,7 @@ namespace he
       assert(area > 0.0f);
 
       vec3f centroid = vec3f::identity();
-      for(unsigned int i = 0; i < triangleCentroids.size(); i++)//rotate the points parallel to the xy plane
+      for(unsigned int i = 0; i < triangleCentroids.size(); i++)
       {
         centroid[0] += triangleCentroids[i][0] * triangelAreas[i];
         centroid[1] += triangleCentroids[i][1] * triangelAreas[i];
@@ -312,6 +311,8 @@ namespace he
         qNormal[1] = sqrt(1.0f - newU * newU) * sinf(newTheta);
         qNormal[2] = newU;
 
+        qNormal = qNormal.normalize();
+
         std::list<PolygonData> cachePolygons;
         std::list<PolygonData>::iterator pit = polygons.begin();
         while(pit != polygons.end())
@@ -355,13 +356,13 @@ namespace he
         //assert(voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2] == voxelIndex);
         /////
 
-        m_areaCaches[voxelIndex].push_back(cache);
+        m_linearizedAreaCaches[voxelIndex].push_back(cache);
       }
     }
 
     void CacheGenerator::shiftCentroid(unsigned int voxelIndex)
     {
-      for(std::list<RawCache>::iterator cit = m_areaCaches[voxelIndex].begin(); cit != m_areaCaches[voxelIndex].end(); cit++)
+      for(std::list<RawCache>::iterator cit = m_linearizedAreaCaches[voxelIndex].begin(); cit != m_linearizedAreaCaches[voxelIndex].end(); cit++)
       {
         vec3f nearestPoint;
         vec3f triangleVertices[3];
@@ -374,7 +375,7 @@ namespace he
 
           distance = calculatePointPolygonDistance(pit->polygonPoints, cit->position, tmpNearestPoint);
 
-          tmpError = distance * (sqrt(math::clamp(1.0f - vec3f::dot(pit->normal, cit->normal), 0.0f, 1.0f)) + 0.01f);//the distance would be senseless without normal penalty term
+          tmpError = distance * (sqrt(1.0f - math::clamp(vec3f::dot(pit->normal, cit->normal), 0.0f, 1.0f)) + 0.01f);//the distance would be senseless without normal penalty term
 
           if(error > tmpError)
           {
@@ -399,8 +400,14 @@ namespace he
       }
     }
 
-    void CacheGenerator::reduceCaches()
+    void CacheGenerator::reduceCaches()//could be improved, at the moment caches are being deleted immediatly even if there could be another more cache with a bigger area which could delete the cache which deleted other caches
     {
+      //unsigned int tmpSize = 0;
+      //for(std::map<unsigned int, std::list<RawCache>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
+      //{
+      //  tmpSize += mip->second.size();
+      //}
+
       for(std::map<unsigned int, std::list<RawCache>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
       {
         std::list<RawCache>::iterator cit = mip->second.begin();
@@ -409,8 +416,6 @@ namespace he
           vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->position - m_globalBBMin) / m_maxDistance));
           unsigned int voxelIndex = voxelIndex3D[0] * m_voxelNumber[1] * m_voxelNumber[2] + voxelIndex3D[1] * m_voxelNumber[2] + voxelIndex3D[2];
 
-          std::list<RawCache> similarCaches;
-
           for(int nx = -1; nx < 2; nx++)
           {
             for(int ny = -1; ny < 2; ny++)
@@ -421,28 +426,18 @@ namespace he
                 {
                   unsigned int neighborVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
 
-                  std::list<RawCache>::iterator vcit = m_areaCaches[neighborVoxelIndex].begin();
-                  while(vcit != m_areaCaches[neighborVoxelIndex].end())
+                  if(neighborVoxelIndex == voxelIndex) continue;// there can't be similar caches in the same voxel
+
+                  std::list<RawCache>::iterator vcit = m_linearizedAreaCaches[neighborVoxelIndex].begin();
+                  while(vcit != m_linearizedAreaCaches[neighborVoxelIndex].end())
                   {
-                    if(acosf(math::clamp(vec3f::dot(vcit->normal, cit->normal), -1.0f, 1.0f)) < m_maxAngle * m_errorRate && (vcit->position - cit->position).length() < m_maxDistance * m_errorRate)
+                    if(acosf(math::clamp(vec3f::dot(vcit->normal, cit->normal), -1.0f, 1.0f)) < m_maxAngle * m_errorRate && (vcit->position - cit->position).length() < m_maxDistance * m_errorRate &&
+                      (vcit->area != cit->area || vcit->normal != cit->normal || vcit->position != cit->position) && //is it diffrent to the actual cache?
+                      vcit->area < cit->area)//which one has the biggest area?
                     {
-                      if(vcit->area != cit->area || vcit->normal != cit->normal || vcit->position != cit->position)//is it diffrent to the actual cache?
-                      {
-                        for(std::list<RawCache>::iterator dit = m_linearizedAreaCaches[neighborVoxelIndex].begin(); dit != m_linearizedAreaCaches[neighborVoxelIndex].end(); dit++)//if yes we need to erase the similar cache from the global iterating list so that we dont take the cache twice
-                        {
-                          if(vcit->area == dit->area && vcit->normal == dit->normal && vcit->position == dit->position)
-                          {
-                            m_linearizedAreaCaches[neighborVoxelIndex].erase(dit);//if we found the cache, remove it from the global iterating list
-                            break;
-                          }
-                        }
-                      }
+                      vcit = m_linearizedAreaCaches[neighborVoxelIndex].erase(vcit);//if we found the cache, remove it from the global iterating list
 
-                      similarCaches.push_back(*vcit);
-
-                      vcit = m_areaCaches[neighborVoxelIndex].erase(vcit);
-
-                      if(m_areaCaches[neighborVoxelIndex].empty()) break;
+                      if(m_linearizedAreaCaches[neighborVoxelIndex].empty()) break;
                     }
                     else
                     {
@@ -454,100 +449,18 @@ namespace he
             }
           }
 
-          cit = mip->second.erase(cit);
+          cit++;
+        }
+      }
 
-          RawCache biggestCache;
-          float maxArea = 0.0f;
-
-          std::list<RawCache>::iterator end = similarCaches.end();
-          for(std::list<RawCache>::iterator sit = similarCaches.begin(); sit != end; sit++)
-          {
-            if(sit->area > maxArea)
-            {
-              maxArea = sit->area;
-              biggestCache = *sit;
-            }
-          }
-
-          m_reducedCaches.push_back(biggestCache);
+      for(std::map<unsigned int, std::list<RawCache>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
+      {
+        for(std::list<RawCache>::iterator cit = mip->second.begin(); cit != mip->second.end(); cit++)
+        {
+          m_reducedCaches.push_back(*cit);
         }
       }
     }
-    /*
-    void CacheGenerator::reduceCaches()
-    {
-      for(std::map<unsigned int, std::list<PolygonData>>::iterator mip = m_linearizedAreaCaches.begin(); mip != m_linearizedAreaCaches.end(); mip++)
-      {
-        std::list<PolygonData>::iterator cit = mip->second.begin();
-        while(cit != mip->second.end())
-        {
-          vec3ui voxelIndex3D(math::vector_cast<unsigned int>(math::abs<float>(cit->centroid - m_globalBBMin) / m_maxDistance));
-          unsigned int voxelIndex = mip->first;
-
-          std::list<PolygonData> similarCaches;
-
-          for(int nx = -1; nx < 2; nx++)
-          {
-            for(int ny = -1; ny < 2; ny++)
-            {
-              for(int nz = -1; nz < 2; nz++)
-              {
-                if(0 <= voxelIndex3D[0] + nx && voxelIndex3D[0] + nx < m_voxelNumber[0] && 0 <= voxelIndex3D[1] + ny && voxelIndex3D[1] + ny < m_voxelNumber[1] && 0 <= voxelIndex3D[2] + nz && voxelIndex3D[2] + nz < m_voxelNumber[2])
-                {
-                  unsigned int neighborVoxelIndex = voxelIndex + nx * m_voxelNumber[1] * m_voxelNumber[2] + ny * m_voxelNumber[2] + nz;
-
-                  std::list<PolygonData>::iterator vcit = m_areaCaches[neighborVoxelIndex].begin();
-                  while(vcit != m_areaCaches[neighborVoxelIndex].end())
-                  {
-                    if(acosf(math::clamp(vec3f::dot(vcit->normal, cit->normal), -1.0f, 1.0f)) < m_maxAngle * m_errorRate && (vcit->centroid - cit->centroid).length() < m_maxDistance * m_errorRate)
-                    {
-                      if(vcit->area != cit->area || vcit->normal != cit->normal || vcit->centroid != cit->centroid)//is it diffrent to the actual cache?
-                      {
-                        for(std::list<PolygonData>::iterator dit = m_linearizedAreaCaches[neighborVoxelIndex].begin(); dit != m_linearizedAreaCaches[neighborVoxelIndex].end(); dit++)//if yes we need to erase the similar cache from the global iterating list so that we dont take the cache twice
-                        {
-                          if(vcit->area == dit->area && vcit->normal == dit->normal && vcit->centroid == dit->centroid)
-                          {
-                            m_linearizedAreaCaches[neighborVoxelIndex].erase(dit);//if we found the cache, remove it from the global iterating list
-                            break;
-                          }
-                        }
-                      }
-
-                      similarCaches.push_back(*vcit);
-
-                      vcit = m_areaCaches[neighborVoxelIndex].erase(vcit);
-
-                      if(m_areaCaches[neighborVoxelIndex].empty()) break;
-                    }
-                    else
-                    {
-                      vcit++;
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          cit = mip->second.erase(cit);
-
-          PolygonData biggestCache;
-          float maxArea = 0.0f;
-
-          std::list<PolygonData>::iterator end = similarCaches.end();
-          for(std::list<PolygonData>::iterator sit = similarCaches.begin(); sit != end; sit++)
-          {
-            if(sit->area > maxArea)
-            {
-              maxArea = sit->area;
-              biggestCache = *sit;
-            }
-          }
-
-          m_reducedCaches.push_back(biggestCache);
-        }
-      }
-    }*/
 
     void CacheGenerator::sortCachesPerTriangle(const std::vector<vec3f>& positions)
     {
@@ -611,7 +524,6 @@ namespace he
       m_voxelNumber[2] = static_cast<unsigned int>(ceil(sideMax[2] / m_maxDistance));
 
       m_polygons.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
-      m_areaCaches.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
       m_triangles.resize(m_voxelNumber[0] * m_voxelNumber[1] * m_voxelNumber[2]);
 
       std::vector<vec3f> trianglePositions;
@@ -632,7 +544,6 @@ namespace he
 
       m_triangles.clear();
       m_polygons.clear();
-      m_areaCaches.clear();
       m_linearizedAreaCaches.clear();
 
       outCaches = m_caches;

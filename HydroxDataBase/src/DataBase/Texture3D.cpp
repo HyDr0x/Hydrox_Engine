@@ -1,12 +1,14 @@
 #include "DataBase/Texture3D.h"
 
 #include <cassert>
+#include <vector>
 
 namespace he
 {
   namespace db
   {
-    Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data, bool mipmapping) : m_target(target),
+    Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data, bool mipmapping) : 
+      m_target(target),
       m_width(width),
       m_height(height),
       m_depth(depth),
@@ -14,7 +16,8 @@ namespace he
       m_internalFormat(internalFormat),
       m_format(format),
       m_channelNumber(channelNumber),
-      m_bitsPerPixel(bitsPerPixel)
+      m_bitsPerPixel(bitsPerPixel),
+      m_mipmapping(mipmapping)
     {
       if(data != nullptr)
       {
@@ -37,7 +40,7 @@ namespace he
 
       glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, data);
 
-      if (mipmapping)
+      if(m_mipmapping)
       {
         glGenerateMipmap(m_target);
       }
@@ -46,34 +49,71 @@ namespace he
 
     Texture3D::Texture3D(const Texture3D& other)
     {
-      m_hash = other.m_hash;
-      m_width = other.m_width;
-      m_depth = other.m_depth;
-      m_height = other.m_height;
-      m_texIndex = other.m_texIndex;
-      m_target = other.m_target;
-      m_internalFormat = other.m_internalFormat;
-      m_format = other.m_format;
-      m_type = other.m_type;
+      if(other.m_texIndex != 0)
+      {
+        m_hash = other.m_hash;
+        m_width = other.m_width;
+        m_height = other.m_height;
+        m_depth = other.m_depth;
+        m_target = other.m_target;
+        m_internalFormat = other.m_internalFormat;
+        m_format = other.m_format;
+        m_type = other.m_type;
+        m_bitsPerPixel = other.m_bitsPerPixel;
+        m_channelNumber = other.m_channelNumber;
+        m_mipmapping = other.m_mipmapping;
+
+        std::vector<GLubyte> data(m_width * m_height * m_depth * (m_bitsPerPixel / 8.0f));
+
+        other.getTextureData(&data[0]);
+
+        glGenTextures(1, &m_texIndex);
+        glBindTexture(m_target, m_texIndex);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, &data[0]);
+
+        if(m_mipmapping)
+        {
+          glGenerateMipmap(m_target);
+        }
+        glBindTexture(m_target, 0);
+      }
+      else
+      {
+        m_texIndex = other.m_texIndex;
+      }
     }
 
-    Texture3D& Texture3D::operator=(const Texture3D& other)
+    Texture3D& Texture3D::operator=(Texture3D other)//copy swap idiom
     {
-      m_hash = other.m_hash;
-      m_width = other.m_width;
-      m_height = other.m_height;
-      m_depth = other.m_depth;
-      m_texIndex = other.m_texIndex;
-      m_target = other.m_target;
-      m_internalFormat = other.m_internalFormat;
-      m_format = other.m_format;
-      m_type = other.m_type;
+      swap(other);
 
       return *this;
     }
 
     Texture3D::~Texture3D()
     {
+      glDeleteTextures(1, &m_texIndex);
+    }
+
+    void Texture3D::swap(Texture3D& other)
+    {
+      std::swap(m_hash, other.m_hash);
+      std::swap(m_width, other.m_width);
+      std::swap(m_height, other.m_height);
+      std::swap(m_depth, other.m_depth);
+      std::swap(m_target, other.m_target);
+      std::swap(m_texIndex, other.m_texIndex);
+      std::swap(m_internalFormat, other.m_internalFormat);
+      std::swap(m_format, other.m_format);
+      std::swap(m_type, other.m_type);
+      std::swap(m_bitsPerPixel, other.m_bitsPerPixel);
+      std::swap(m_channelNumber, other.m_channelNumber);
+      std::swap(m_mipmapping, other.m_mipmapping);
     }
 
     void Texture3D::free()
@@ -113,8 +153,10 @@ namespace he
       glBindTexture(m_target, 0);
     }
 
-    void Texture3D::generateMipMapps() const
+    void Texture3D::generateMipMapps()
     {
+      m_mipmapping = true;
+
       glBindTexture(m_target, m_texIndex);
         glGenerateMipmap(m_target);
       glBindTexture(m_target, 0);

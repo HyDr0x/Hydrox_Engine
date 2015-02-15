@@ -12,7 +12,6 @@
 #include "Loader/DLLExport.h"
 
 #include <Utilities/Signals/EventManager.h>
-#include <Utilities/Miscellaneous/CacheGenerator.h>
 
 #include <DataBase/ResourceManager.hpp>
 
@@ -37,6 +36,17 @@ namespace he
 
   namespace loader
   {
+    struct FileInformations
+    {
+      std::string filename;
+      unsigned int cacheNumber;
+      unsigned int vertexNumber;
+      unsigned int faceNumber;
+      unsigned int meshNumber;
+      unsigned int materialNumber;
+      unsigned int animationNumber;
+    };
+
     class GRAPHICAPI AssimpLoader
     {
     public:
@@ -65,6 +75,8 @@ namespace he
 
       sg::Scene* loadDefaultSceneGraph();
 
+      void printStatusInformations();
+
     private:
 
       void loadMeshesFromAssimp(const aiScene *scene, bool yAxisFlipped);
@@ -92,8 +104,6 @@ namespace he
       util::SharedPointer<db::TextureManager> m_textureManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
 
-      util::CacheGenerator m_generator;
-
       util::ResourceHandle m_defaultMaterial;
 
       sg::TreeNodeAllocator m_allocator;
@@ -107,6 +117,12 @@ namespace he
 
       std::map<sg::NodeIndex, std::vector<std::string>, sg::NodeIndex::Less> m_skinnedMeshTable;//names of the skinned geo nodes
       std::map<std::string, sg::NodeIndex> m_boneTable;//names of the bones for skinning
+
+      FileInformations m_fileInformation;
+
+      float m_errorRate;
+      float m_maxDistance;
+      float m_maxAngle;
     };
   }
 }

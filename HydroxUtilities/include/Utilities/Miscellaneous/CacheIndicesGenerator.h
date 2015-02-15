@@ -19,28 +19,30 @@ namespace he
     {
       VertexDataStructure(){}
 
-      VertexDataStructure(util::vec3f inPosition, util::vec3f inNormal, const std::vector<util::Cache>& caches, unsigned int vertexIndex)
+      VertexDataStructure(util::vec3f inPosition, util::vec3f inNormal, const std::vector<util::Cache>& caches, unsigned int vertexIndex, unsigned int cacheIndexSize, float maxDistance)
       {
-        const unsigned int CACHEINDEXSIZE = 8;
-
         position = inPosition;
         normal = inNormal;
-        cacheIndices.resize(3 * CACHEINDEXSIZE, util::vec2f(INT32_MAX, 0.0f));
+        cacheIndices.resize(3 * cacheIndexSize, util::vec2f(INT32_MAX, 0.0f));
         index = vertexIndex;
 
         for(unsigned int j = 0; j < caches.size(); j++)
         {
           float length = (position - caches[j].position).length();
-          float weight = util::vec3f::dot(normal, caches[j].normal) / (length * length + 0.0001f);//more weight is better
 
-          if(weight > cacheIndices.back()[1])
+          //if(length <= maxDistance)
           {
-            sortCacheIndices(cacheIndices, util::vec2f(float(j), weight));
+            float weight = util::vec3f::dot(normal, caches[j].normal) / (length * length + 0.0001f);//more weight is better
+
+            if(weight > cacheIndices.back()[1])
+            {
+              sortCacheIndices(cacheIndices, util::vec2f(float(j), weight));
+            }
           }
         }
       }
 
-      std::unordered_set<unsigned int> neighbors;//indices of the neighbors
+      std::unordered_set<unsigned int> neighbors;//indices of the neighbor vertices
       std::vector<util::vec2f> cacheIndices;//x = index | y = weight
       util::vec3f position;
       util::vec3f normal;
@@ -87,7 +89,7 @@ namespace he
     {
     public:
 
-      CacheIndicesGenerator();
+      CacheIndicesGenerator(float maxDistance);
 
       void generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
       void generateCacheIndizes(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, std::vector<unsigned int>& indices, const std::vector<util::Cache>& caches, std::vector<util::cacheIndexType>& cacheIndizes0, std::vector<util::cacheIndexType>& cacheIndizes1);
@@ -100,7 +102,7 @@ namespace he
 
       void createVertexDataStructure(const std::vector<util::vec3f>& positions, const std::vector<util::vec3f>& normals, const std::vector<util::Cache>& caches, const std::vector<unsigned int>& indices);
       void insertNewVertex(const std::vector<util::Cache>& caches, unsigned int vertexIndex0, unsigned int vertexIndex1, std::vector<unsigned int>& inoutIndices);
-      void getCacheInterpolationEdges(VertexDataStructure& vertex, std::list<unsigned int>& verticesWithSameCacheIndices);
+      void getCacheInterpolationEdges(VertexDataStructure& vertex, std::unordered_set<unsigned int>& verticesWithSameCacheIndices);
       void eraseDoubledIndices(VertexDataStructure& vertex);
 
       static const unsigned int CACHEINDEXSIZE = 8;
@@ -108,8 +110,11 @@ namespace he
       std::vector<VertexDataStructure> m_vertexDataStructure;
 
       std::list<util::vec2ui> m_newVertexEdges;//x = vertex0 | y = vertex1 between those vertices is a new one being created
+      std::list<unsigned int> m_nextVertexIndex;//the list which represents the order in which the vertices should be visited for the cache-index-creation algorithm
 
       unsigned int m_newVertexNumber;
+
+      float m_maxDistance;
     };
   }
 }

@@ -1,5 +1,7 @@
 #include "SceneGraph/Traverser/DebugCacheTraverser.h"
 
+#include <Utilities/PrimitiveGenerator/DiscGenerator.h>
+
 #include "SceneGraph/Scene/TreeNodeAllocator.h"
 
 #include "SceneGraph/TreeNodes/TransformNode.h"
@@ -10,7 +12,7 @@ namespace he
 {
   namespace sg
   {
-    DebugCacheTraverser::DebugCacheTraverser(const TreeNodeAllocator& allocator, util::SingletonManager *singletonManager, util::ResourceHandle debugMaterial) : ConstTraverser(allocator), m_scene(TreeNodeAllocator(), NodeIndex())
+    DebugCacheTraverser::DebugCacheTraverser(he::util::SharedPointer<he::sg::Scene> scene, util::SingletonManager *singletonManager, util::ResourceHandle debugMaterial) : Traverser(scene->getTreeNodeAllocator()), m_scene(scene)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -18,62 +20,150 @@ namespace he
 
       m_debugMaterial = debugMaterial;
 
-      TreeNodeAllocator newAllocator;
-      NodeIndex rootNodeIndex = newAllocator.insert(TransformNode(util::Matrix<float, 4>::identity(), std::string("rootNode")));
-      m_scene = Scene(newAllocator, rootNodeIndex);
-      m_rootNodeIndex = m_scene.getRootNode();
+      m_inverseScaling = 1.0f;
     }
 
     DebugCacheTraverser::~DebugCacheTraverser()
     {
     }
 
-    bool DebugCacheTraverser::preTraverse(const GeoNode& treeNode)
+    bool DebugCacheTraverser::preTraverse(TransformNode& treeNode)
+    {
+      m_inverseScaling *= 1.0f / treeNode.getLocalScale();
+
+      return true;
+    }
+
+    void DebugCacheTraverser::postTraverse(TransformNode& treeNode)
+    {
+      m_inverseScaling *= treeNode.getLocalScale();
+    }
+
+    bool DebugCacheTraverser::preTraverse(GeoNode& treeNode)
     {
       db::Mesh *mesh = m_modelManager->getObject(treeNode.getMeshHandle());
       
       if(mesh->getCacheCount() > 0)
       {
         std::vector<util::Cache> caches = mesh->getCaches();
-        std::vector<util::vec3f> positions(caches.size());
+
+        /*std::vector<util::vec3f> positions(caches.size());
         std::vector<util::vec3f> normals(caches.size());
         for(unsigned int i = 0; i < caches.size(); i++)
         {
           positions[i] = caches[i].position;
           normals[i] = caches[i].normal;
+        }*/
+
+        unsigned int vertexOffset;
+        std::vector<util::vec3f> positions;
+        std::vector<util::vec3f> normals;
+        std::vector<db::Mesh::indexType> indices;
+
+        for(unsigned int i = 0; i < caches.size(); i++)
+        {
+          std::vector<util::vec3f> cacheDiscPositions;
+          std::vector<util::vec3f> cacheDiscNormals;
+          std::vector<db::Mesh::indexType> cacheDiscIndices;
+
+          vertexOffset = positions.size();
+
+          util::DiscGenerator::generateDisc(m_inverseScaling * 0.05f, caches[i].normal, cacheDiscPositions, cacheDiscIndices, cacheDiscNormals, 20);
+
+          for(unsigned int j = 0; j < cacheDiscPositions.size(); j++)
+          {
+            positions.push_back(cacheDiscPositions[j] + caches[i].position + 0.01f * caches[i].normal);
+            normals.push_back(cacheDiscNormals[j]);
+          }
+
+          for(unsigned int j = 0; j < cacheDiscIndices.size(); j++)
+          {
+            indices.push_back(cacheDiscIndices[j] + vertexOffset);
+          }
         }
 
-        he::util::ResourceHandle pointHandle = m_modelManager->addObject(he::db::Mesh(GL_POINTS, positions, std::vector<util::Cache>(), std::vector<util::vec2ui>(), std::vector<db::Mesh::indexType>(), std::vector<std::vector<util::vec2f>>(4), normals));
-        GeoNode geoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));
-        m_scene.addChildNode(m_rootNodeIndex, geoNode);
+        std::vector<VertexElements> vertexElements;
+        vertexElements.push_back(db::Mesh::MODEL_POSITION);
+        vertexElements.push_back(db::Mesh::MODEL_NORMAL);
+
+        db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+        mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
+        mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
+        mesh.generateCaches(0, 0, 0, false);
+
+        util::ResourceHandle pointHandle = m_modelManager->addObject(mesh);
+        m_debugGeoNodes[treeNode.getParent()] = GeoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));
       }
 
       return true;
     }
 
-    bool DebugCacheTraverser::preTraverse(const AnimatedGeoNode& treeNode)
+
+    bool DebugCacheTraverser::preTraverse(AnimatedGeoNode& treeNode)
     {
       db::Mesh *mesh = m_modelManager->getObject(treeNode.getMeshHandle());
-      std::vector<util::Cache> caches = mesh->getCaches();
 
-      std::vector<util::vec3f> positions(caches.size());
-      std::vector<util::vec3f> normals(caches.size());
-      for(unsigned int i = 0; i < caches.size(); i++)
+      if(mesh->getCacheCount() > 0)
       {
+        std::vector<util::Cache> caches = mesh->getCaches();
+
+        /*std::vector<util::vec3f> positions(caches.size());
+        std::vector<util::vec3f> normals(caches.size());
+        for(unsigned int i = 0; i < caches.size(); i++)
+        {
         positions[i] = caches[i].position;
         normals[i] = caches[i].normal;
-      }
+        }*/
 
-      he::util::ResourceHandle pointHandle = m_modelManager->addObject(he::db::Mesh(GL_POINTS, positions, std::vector<util::Cache>(), std::vector<util::vec2ui>(), std::vector<db::Mesh::indexType>(), std::vector<std::vector<util::vec2f>>(4), normals));
-      GeoNode geoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));
-      m_scene.addChildNode(m_rootNodeIndex, geoNode);
+        unsigned int vertexOffset;
+        std::vector<util::vec3f> positions;
+        std::vector<util::vec3f> normals;
+        std::vector<db::Mesh::indexType> indices;
+
+        for(unsigned int i = 0; i < caches.size(); i++)
+        {
+          std::vector<util::vec3f> cacheDiscPositions;
+          std::vector<util::vec3f> cacheDiscNormals;
+          std::vector<db::Mesh::indexType> cacheDiscIndices;
+
+          vertexOffset = positions.size();
+
+          util::DiscGenerator::generateDisc(m_inverseScaling * 0.05f, caches[i].normal, cacheDiscPositions, cacheDiscIndices, cacheDiscNormals, 20);
+
+          for(unsigned int j = 0; j < cacheDiscPositions.size(); j++)
+          {
+            positions.push_back(cacheDiscPositions[j] + caches[i].position + 0.001f * caches[i].normal);
+            normals.push_back(cacheDiscNormals[j]);
+          }
+
+          for(unsigned int j = 0; j < cacheDiscIndices.size(); j++)
+          {
+            indices.push_back(cacheDiscIndices[j] + vertexOffset);
+          }
+        }
+
+        std::vector<VertexElements> vertexElements;
+        vertexElements.push_back(db::Mesh::MODEL_POSITION);
+        vertexElements.push_back(db::Mesh::MODEL_NORMAL);
+
+        db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+        mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
+        mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
+        mesh.generateCaches(0, 0, 0, false);
+
+        util::ResourceHandle pointHandle = m_modelManager->addObject(mesh);
+        m_debugGeoNodes[treeNode.getParent()] = GeoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));
+      }
 
       return true;
     }
 
-    const Scene& DebugCacheTraverser::getDebugScene() const
+    void DebugCacheTraverser::applyDebugNodes()
     {
-      return m_scene;
+      for(std::map<sg::NodeIndex, sg::GeoNode, sg::NodeIndex::Less>::iterator it = m_debugGeoNodes.begin(); it != m_debugGeoNodes.end(); it++)
+      {
+        m_scene->addChildNode(it->first, it->second);
+      }
     }
   }
 }

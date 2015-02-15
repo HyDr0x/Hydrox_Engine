@@ -29,7 +29,7 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_stringShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::STRING2D, util::Flags<db::VertexDeclarationFlags>(3));
+      m_stringShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::STRING2D, util::Flags<VertexElements>(3));
 
       m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
       m_transparentStrings.resize(m_maxLayer);

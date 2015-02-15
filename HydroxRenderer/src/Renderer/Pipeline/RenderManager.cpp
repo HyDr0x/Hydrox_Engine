@@ -139,20 +139,21 @@ namespace he
         m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
 
         //m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
-          
-        glPointSize(8.0f);
+        
         m_gBuffer.setGBuffer();
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
-        glPointSize(1.0f);
 
-        glDepthFunc(GL_LEQUAL);
-        glDepthMask(GL_FALSE);//depth read only
-        m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
-        m_geometryRasterizer.rasterizeIndexGeometry();
-        m_indirectLightRenderer.unsetBuffer();
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
+        {
+          GPUTIMER("IndirectLightIndexTimer", 1)
+          glDepthMask(GL_FALSE);
+          glDepthFunc(GL_LEQUAL);
+          m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
+          m_geometryRasterizer.rasterizeIndexGeometry();
+          m_indirectLightRenderer.unsetBuffer();
+          glDepthFunc(GL_LESS);
+          glDepthMask(GL_TRUE);
+        }
 
         if(m_wireframe)
         {
@@ -244,8 +245,8 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-      m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+      //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
 
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
@@ -257,7 +258,7 @@ namespace he
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

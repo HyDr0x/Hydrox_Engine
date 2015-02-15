@@ -1,5 +1,7 @@
 #include "Renderer/Pipeline/Renderquad.h"
 
+#include <stdarg.h>
+
 #include <Utilities/Math/Math.hpp>
 
 #include <DataBase/RenderShader.h>

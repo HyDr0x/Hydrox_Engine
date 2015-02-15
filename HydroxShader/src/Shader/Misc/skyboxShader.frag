@@ -16,5 +16,5 @@ void main()
 	fsout_color = texture(texSampler, vsout_texCoord);
 	fsout_normal = vec3(0);
 	fsout_material = vec4(0);
-	fsout_pos = vec4(55555);
+	fsout_pos = vec4(55555.0f);
 }

@@ -19,7 +19,7 @@ namespace he
       RenderShaderLoader(util::SingletonManager *singletonManager);
       ~RenderShaderLoader();
 
-      util::ResourceHandle loadResource(util::Flags<db::VertexDeclarationFlags> vertexDecaration,
+      util::ResourceHandle loadResource(util::Flags<VertexElements> vertexDecaration,
                                         std::string filename,
                                         std::string vertexFilename, 
                                         std::string fragmentFilename = std::string(),

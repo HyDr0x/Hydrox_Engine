@@ -13,8 +13,7 @@ namespace he
 {
   namespace renderer
   {
-    IndirectLightRenderer::IndirectLightRenderer() : 
-      m_cacheNumber(0)
+    IndirectLightRenderer::IndirectLightRenderer() : m_cacheNumber(0)
     {
     }
 
@@ -27,8 +26,8 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
       m_singletonManager = singletonManager;
 
-      m_indirectLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(m_singletonManager, db::ShaderContainer::INDIRECTLIGHTPROXYLIGHTCREATION, util::Flags<db::VertexDeclarationFlags>(8192));
-      m_indirectLightInterpolationShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::INDIRECTLIGHTINTERPOLATION, util::Flags<db::VertexDeclarationFlags>(8192));
+      m_indirectLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(m_singletonManager, db::ShaderContainer::INDIRECTLIGHTPROXYLIGHTCREATION, util::Flags<VertexElements>(8192));
+      m_indirectLightInterpolationShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::INDIRECTLIGHTINTERPOLATION, util::Flags<VertexElements>(8192));
 
       m_bufferResolution = 0;
 
@@ -75,12 +74,12 @@ namespace he
       util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const
     {
       {
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);//wait until the cache data is written into the global cache image buffers
+
         //CPUTIMER("cpuCompute", 0)
         //GPUTIMER("gpuCompute", 1)
 
         db::RenderShader *renderShader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_indirectLightShaderHandle);
-
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
         glViewport(0, 0, m_bufferResolution, m_bufferResolution);
         renderShader->useShader();
@@ -118,7 +117,7 @@ namespace he
         renderShader->useNoShader();
 
         glViewport(0, 0, m_options->width, m_options->height);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);//wait until the proxy light data is written into the image buffer
       }
       {
         //CPUTIMER("cpuCompute", 0)
@@ -170,12 +169,20 @@ namespace he
       }
     }
 
-    void IndirectLightRenderer::setBuffer(util::SharedPointer<db::Texture2D> depthTexture)
+    void IndirectLightRenderer::setBuffer(util::SharedPointer<db::Texture2D> depthBuffer)
     {
-      m_indirectLightIndicesRenderQuad.setRenderTargets3D(depthTexture, 1, m_frameCacheIndexMap);
+      m_gBufferSync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+      GLenum state;
+      do
+      {
+        state = glClientWaitSync(m_gBufferSync, GL_SYNC_FLUSH_COMMANDS_BIT, 1000000);
+      } while(state != GL_CONDITION_SATISFIED && state != GL_ALREADY_SIGNALED);
 
       GLubyte zeros = 0;
       m_zBuffer->clearTexture(&zeros);
+
+      m_indirectLightIndicesRenderQuad.setRenderTargets3D(depthBuffer, 1, m_frameCacheIndexMap);
 
       util::vec4ui negativeZeros(UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX);
       m_indirectLightIndicesRenderQuad.clearTargets(1.0f, std::vector<util::vec4ui>(6, negativeZeros), false);
@@ -186,6 +193,8 @@ namespace he
       m_globalCacheNormalBuffer->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
       m_zBuffer->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R8UI);
+
+      glDeleteSync(m_gBufferSync);
     }
 
     void IndirectLightRenderer::unsetBuffer() const

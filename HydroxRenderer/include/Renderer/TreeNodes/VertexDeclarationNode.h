@@ -29,19 +29,19 @@ namespace he
       bool preTraverse(ConstTraverser* traverser) const;
       void postTraverse(ConstTraverser* traverser) const;
 
-      void initialize(util::Flags<db::VertexDeclarationFlags> shaderVertexDeclaration,
-        util::Flags<db::VertexDeclarationFlags> meshVertexDeclaration);
+      void initialize(util::Flags<VertexElements> shaderVertexDeclaration,
+        util::Flags<VertexElements> meshVertexDeclaration);
 
       void setVertexArray() const;
       void unsetVertexArray() const;
 
-      bool isMesh(util::Flags<db::VertexDeclarationFlags> meshVertexDeclaration) const;
+      bool isMesh(util::Flags<VertexElements> meshVertexDeclaration) const;
 
     private:
 
       GLuint m_vaoIndex;
-      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
-      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
+      util::Flags<VertexElements> m_shaderVertexDeclaration;
+      util::Flags<VertexElements> m_meshVertexDeclaration;
     };
   }
 }

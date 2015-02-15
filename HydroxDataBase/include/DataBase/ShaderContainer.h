@@ -55,7 +55,7 @@ namespace he
         m_computeShader.resize(COMPUTESHADERNUMBER);
       }
 
-      util::ResourceHandle getRenderShader(util::SingletonManager *singletonManager, unsigned int pass, util::Flags<db::VertexDeclarationFlags> meshVertexDeclaration) const
+      util::ResourceHandle getRenderShader(util::SingletonManager *singletonManager, unsigned int pass, util::Flags<VertexElements> meshVertexDeclaration) const
       {
         util::SharedPointer<db::RenderShaderManager> shaderManager = singletonManager->getService<db::RenderShaderManager>();
 
@@ -64,7 +64,7 @@ namespace he
 
         for(unsigned int i = 0; i < m_renderPassShader[pass].size(); i++)
         {
-          util::Flags<db::VertexDeclarationFlags> shaderVertexDeclaration = shaderManager->getObject(m_renderPassShader[pass][i])->getVertexDeclaration();
+          util::Flags<VertexElements> shaderVertexDeclaration = shaderManager->getObject(m_renderPassShader[pass][i])->getVertexDeclaration();
           unsigned int bitNumber = (shaderVertexDeclaration & meshVertexDeclaration).raisedFlagNumber();
           unsigned int shaderBitNumber = shaderVertexDeclaration.raisedFlagNumber();
 

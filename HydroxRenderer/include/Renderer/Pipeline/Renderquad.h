@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <iostream>
-#include <stdarg.h>
 #include <cassert>
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>

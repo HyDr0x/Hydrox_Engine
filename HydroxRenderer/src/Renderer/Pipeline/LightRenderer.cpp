@@ -38,7 +38,7 @@ namespace he
 
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
 
-      m_directLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::DIRECTLIGHT, util::Flags<db::VertexDeclarationFlags>(8192));
+      m_directLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::DIRECTLIGHT, util::Flags<VertexElements>(8192));
 
       m_lightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(db::Light) * m_options->lightNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_shadowedLightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(db::ShadowLight) * m_options->lightNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);

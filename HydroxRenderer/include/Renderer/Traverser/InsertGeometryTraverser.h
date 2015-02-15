@@ -60,8 +60,8 @@ namespace he
       util::Flags<xBar::RenderNodeType> m_nodeType;
       GLenum m_primitiveType;
       GLuint m_vertexStride;
-      util::Flags<db::VertexDeclarationFlags> m_shaderVertexDeclaration;
-      util::Flags<db::VertexDeclarationFlags> m_meshVertexDeclaration;
+      util::Flags<VertexElements> m_shaderVertexDeclaration;
+      util::Flags<VertexElements> m_meshVertexDeclaration;
       util::ResourceHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
 

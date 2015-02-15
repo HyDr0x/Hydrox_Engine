@@ -49,7 +49,7 @@ namespace he
         return m_objectHash.count(object.getHash());
       }
 
-      util::ResourceHandle addObject(CLASS& object)
+      util::ResourceHandle addObject(const CLASS& object)
       {
         uint64_t hash = object.getHash();
 

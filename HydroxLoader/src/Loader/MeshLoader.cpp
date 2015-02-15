@@ -84,15 +84,18 @@ namespace he
       std::vector<db::Mesh::indexType> indices;
       util::CubeGenerator::generateCube(positions, indices, normals);
 
-      util::CacheGenerator generator;
-      generator.initialize(m_errorRate, m_maxDistance, m_maxAngle);
-
-      std::vector<util::Cache> caches;
-      std::vector<he::util::vec2ui> triangleCacheData;
-      generator.generateCaches(caches, triangleCacheData, positions, indices);
-
       RenderShaderLoader renderShaderLoader(m_singletonManager);
-      return m_modelManager->addObject(db::Mesh(GL_TRIANGLES, positions, caches, triangleCacheData, indices));
+
+      std::vector<VertexElements> vertexElements;
+      vertexElements.push_back(db::Mesh::MODEL_POSITION);
+      vertexElements.push_back(db::Mesh::MODEL_NORMAL);
+
+      db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+      mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
+      mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
+      mesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+
+      return m_modelManager->addObject(mesh);
     }
   }
 }
