@@ -245,8 +245,8 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-      //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
 
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
@@ -258,7 +258,7 @@ namespace he
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();
