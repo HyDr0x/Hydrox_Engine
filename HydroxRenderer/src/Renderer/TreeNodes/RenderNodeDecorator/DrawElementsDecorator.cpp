@@ -149,21 +149,21 @@ namespace he
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
       m_meshIndexBuffer.bindBuffer(GL_ELEMENT_ARRAY_BUFFER);
-      m_triangleIndexOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
-      m_cacheOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_triangleBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 8);
-      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
+      m_triangleIndexOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_cacheOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_triangleBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
+      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
 
       glMultiDrawElementsIndirect(m_primitiveType, m_indexType, nullptr, getInstanceNumber(), 0);
 
-      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
-      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 8);
-      m_cacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-      m_triangleBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_triangleIndexOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
+      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
+      m_cacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+      m_triangleBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_triangleIndexOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_meshIndexBuffer.unbindBuffer(GL_ELEMENT_ARRAY_BUFFER);
       m_meshVertexBuffer.unbindVertexBuffer(0);
       m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);

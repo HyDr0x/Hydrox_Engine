@@ -68,12 +68,9 @@ namespace he
 
     bool InsertGeometryTraverserReflectiveShadowPass::preTraverse(RenderNode* treeNode)
     {
-      m_inserted = false;
-
-      if(treeNode->getNextSibling() == nullptr)
+      if(!m_stopTraversal && treeNode->getNextSibling() == nullptr)
       {
         createNewSibling(treeNode);
-        m_stopTraversal = m_inserted = true;
       }
 
       return false;
@@ -81,6 +78,8 @@ namespace he
 
     void InsertGeometryTraverserReflectiveShadowPass::createNewChildNode(VertexDeclarationNode* parent)
     {
+      m_stopTraversal = true;
+
       RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
 
       parent->setFirstChild(treeNode);
@@ -89,6 +88,8 @@ namespace he
 
     void InsertGeometryTraverserReflectiveShadowPass::createNewSibling(RenderNode* sibling)
     {
+      m_stopTraversal = true;
+
       RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
 
       sibling->setNextSibling(treeNode);

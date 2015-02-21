@@ -16,32 +16,32 @@ layout(triangle_strip, max_vertices = 3) out;
 layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
 layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
 
-layout(std430, binding = 4) buffer triangleIndexOffsetBuffer
+layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
 	uint triangleIndexOffset[];
 };
 
-layout(std430, binding = 5) buffer cacheOffsetBuffer
+layout(std430, binding = 3) buffer cacheOffsetBuffer
 {
 	uint cacheIndexOffset[];
 };
 
-layout(std430, binding = 6) buffer triangleBuffer
+layout(std430, binding = 4) buffer triangleBuffer
 {
 	uvec2 triangleCacheIndices[];
 };
 
-layout(std430, binding = 7) buffer cacheBuffer
+layout(std430, binding = 5) buffer cacheBuffer
 {
 	CacheData caches[];
 };
 
-layout(std430, binding = 8) buffer meshIndexBuffer
+layout(std430, binding = 6) buffer meshIndexBuffer
 {
 	uint perMeshIndex[];
 };
 
-layout(std430, binding = 9) buffer instanceCacheOffsetBuffer
+layout(std430, binding = 7) buffer instanceCacheOffsetBuffer
 {
 	uint perInstanceCacheOffset[];
 };
