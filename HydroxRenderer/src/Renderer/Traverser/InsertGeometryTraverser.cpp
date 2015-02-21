@@ -17,18 +17,23 @@ namespace he
 {
   namespace renderer
   {
-    InsertGeometryTraverser::InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager) :
-      m_geometryContainer(geometryContainer),
-      m_inserted(false)
+    InsertGeometryTraverser::InsertGeometryTraverser()
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
-      m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
     }
 
     InsertGeometryTraverser::~InsertGeometryTraverser()
     {
+    }
+
+    void InsertGeometryTraverser::insertGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    {
+      m_geometryContainer = geometryContainer;
+      m_inserted = false;
+
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
     }
 
     bool InsertGeometryTraverser::preTraverse(GroupNode* treeNode)

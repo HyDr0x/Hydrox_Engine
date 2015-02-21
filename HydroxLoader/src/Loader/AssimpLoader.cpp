@@ -208,6 +208,12 @@ namespace he
 
       std::vector<VertexElements> vertexElements;
 
+      if(primitiveType == GL_TRIANGLES)
+      {
+        vertexElements.push_back(db::Mesh::MODEL_CACHEINDICES0);
+        vertexElements.push_back(db::Mesh::MODEL_CACHEINDICES1);
+      }
+
       if(mesh->HasPositions()) vertexElements.push_back(db::Mesh::MODEL_POSITION);
       for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
       {
@@ -216,13 +222,15 @@ namespace he
           vertexElements.push_back(VertexElements(db::Mesh::MODEL_TEXTURE0 + j));
         }
       }
-      if(mesh->HasNormals()) vertexElements.push_back(db::Mesh::MODEL_NORMAL);
+
+      vertexElements.push_back(db::Mesh::MODEL_NORMAL);//normals have to be there, if not they have to be generated
       if(mesh->HasTangentsAndBitangents()) vertexElements.push_back(db::Mesh::MODEL_BINORMAL);
       if(mesh->HasBones())
       {
         vertexElements.push_back(db::Mesh::MODEL_BONE_WEIGHTS);
         vertexElements.push_back(db::Mesh::MODEL_BONE_INDICES);
       }
+
       if(mesh->HasVertexColors(0)) vertexElements.push_back(db::Mesh::MODEL_COLOR);
 
       if(mesh->HasFaces())
@@ -250,7 +258,7 @@ namespace he
         }
       }
 
-      db::Mesh newMesh(GL_TRIANGLES, mesh->mNumVertices, indices, vertexElements);
+      db::Mesh newMesh(GL_TRIANGLES, mesh->mNumVertices, vertexElements, indices);
 
       if(mesh->HasPositions())
       {
@@ -301,6 +309,10 @@ namespace he
         }
 
         newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
+      }
+      else
+      {
+        newMesh.generateNormals();
       }
 
       if(mesh->HasTangentsAndBitangents())
@@ -531,7 +543,7 @@ namespace he
       vertexElements.push_back(db::Mesh::MODEL_POSITION);
       vertexElements.push_back(db::Mesh::MODEL_NORMAL);
 
-      db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+      db::Mesh mesh(GL_TRIANGLES, positions.size(), vertexElements, indices);
       mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
       mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
       mesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);

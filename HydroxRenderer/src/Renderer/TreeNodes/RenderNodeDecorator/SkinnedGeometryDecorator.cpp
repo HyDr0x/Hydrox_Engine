@@ -49,11 +49,20 @@ namespace he
 
     void SkinnedGeometryDecorator::rasterizeIndexGeometry() const
     {
-      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       m_renderNode->rasterizeIndexGeometry();
 
-      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+
+    void SkinnedGeometryDecorator::rasterizeIndirectLightingGeometry() const
+    {
+      m_matrixBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_renderNode->rasterizeIndirectLightingGeometry();
+
+      m_matrixBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     void SkinnedGeometryDecorator::rasterizeGeometry() const

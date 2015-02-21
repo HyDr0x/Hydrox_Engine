@@ -37,6 +37,11 @@ namespace he
       return *this;
     }
 
+    ResourceHandle::operator bool() const
+    {
+      return m_id != ~0 && m_referenceCounter != nullptr;
+    }
+
     void ResourceHandle::swap(ResourceHandle& other)
     {
       std::swap(m_id, other.m_id);

@@ -38,7 +38,6 @@ namespace he
 
     private:
 
-      util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
 

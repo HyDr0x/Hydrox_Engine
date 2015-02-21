@@ -22,11 +22,11 @@ namespace he
     {
     }
 
-    bool SkinnedRenderNode::containsContainer(const xBar::IGeometryContainer& geometryContainer)
+    bool SkinnedRenderNode::containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       for(std::list<const xBar::SkinnedGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
       {
-        if((*instanceIterator) == geometryContainer)
+        if((*instanceIterator) == *geometryContainer)
         {
           return true;
         }
@@ -35,7 +35,7 @@ namespace he
       return false;
     }
 
-    bool SkinnedRenderNode::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool SkinnedRenderNode::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       if(m_instances.size() >= m_options->maxGeometry)
       {
@@ -44,16 +44,16 @@ namespace he
 
       m_instanceNumberChanged = true;
 
-      m_instances.push_back(dynamic_cast<const xBar::SkinnedGeometryContainer&>(geometryContainer));
+      m_instances.push_back(*geometryContainer.dynamic_pointer_cast<const xBar::SkinnedGeometryContainer>());
 
       return true;
     }
 
-    bool SkinnedRenderNode::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool SkinnedRenderNode::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       for(std::list<const xBar::SkinnedGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
       {
-        if((*instanceIterator) == geometryContainer)
+        if((*instanceIterator) == *geometryContainer)
         {
           m_instances.erase(instanceIterator);
           m_instanceNumberChanged = true;
@@ -90,6 +90,10 @@ namespace he
     }
 
     void SkinnedRenderNode::rasterizeIndexGeometry() const
+    {
+    }
+
+    void SkinnedRenderNode::rasterizeIndirectLightingGeometry() const
     {
     }
 

@@ -27,10 +27,10 @@ namespace he
       SkinnedRenderNode(util::SharedPointer<RenderOptions> options);
       virtual ~SkinnedRenderNode();
 
-      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
 
-      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) override;
-      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) override;
+      virtual bool insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer) override;
+      virtual bool removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer) override;
 
       inline virtual bool isEndInstanceIterator() const
       {
@@ -60,6 +60,8 @@ namespace he
       virtual void rasterizeReflectiveShadowGeometry() const override;
 
       virtual void rasterizeIndexGeometry() const override;
+
+      virtual void rasterizeIndirectLightingGeometry() const override;
 
       virtual void rasterizeGeometry() const override;
 

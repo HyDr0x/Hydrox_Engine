@@ -86,8 +86,8 @@ namespace he
 
       m_options = m_singletonManager->getService<RenderOptions>();
 
-      m_geometryRasterizer.initialize(m_singletonManager);
       m_gBuffer.initialize(m_singletonManager);
+      m_geometryRasterizer.initialize(m_singletonManager, m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
       m_billboardRenderer.initialize(m_singletonManager);
       m_spriteRenderer.initialize(m_singletonManager);
       m_stringRenderer.initialize(m_singletonManager);
@@ -145,7 +145,7 @@ namespace he
         m_gBuffer.unsetGBuffer();
 
         {
-          GPUTIMER("IndirectLightIndexTimer", 1)
+          //GPUTIMER("IndirectLightIndexTimer", 1)
           glDepthMask(GL_FALSE);
           glDepthFunc(GL_LEQUAL);
           m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
@@ -193,12 +193,13 @@ namespace he
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
         
         m_indirectLightRenderer.calculateIndirectLight(
-          m_gBuffer.getDepthTexture(),
-          m_gBuffer.getNormalTexture(),
-          m_gBuffer.getMaterialTexture(),
           m_lightRenderer.getReflectiveShadowPosMaps(),
           m_lightRenderer.getReflectiveShadowNormalMaps(),
           m_lightRenderer.getReflectiveShadowLuminousFluxMaps());
+
+        m_indirectLightRenderer.setCacheAndProxyLights();
+        m_geometryRasterizer.generateIndirectLightMap();
+        m_indirectLightRenderer.unsetCacheAndProxyLights();
 
         {/////////////////DEBUG STUFF////////////////
           //std::vector<IndirectLight> lights(m_geometryRasterizer.getGlobalCacheNumber() * 2);
@@ -281,14 +282,14 @@ namespace he
       m_billboardRenderer.addRenderComponent(billboard);
     }
 
-    void RenderManager::addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry)
+    void RenderManager::addRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer> staticGeometry)
     {
-      m_geometryRasterizer.addRenderComponent(staticGeometry);
+      m_geometryRasterizer.addRenderComponent(staticGeometry.dynamic_pointer_cast<const xBar::IGeometryContainer>());
     }
 
-    void RenderManager::addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry)
+    void RenderManager::addRenderComponent(util::SharedPointer<const xBar::SkinnedGeometryContainer> skinnedGeometry)
     {
-      m_geometryRasterizer.addRenderComponent(skinnedGeometry);
+      m_geometryRasterizer.addRenderComponent(skinnedGeometry.dynamic_pointer_cast<const xBar::IGeometryContainer>());
     }
 
     void RenderManager::addRenderComponent(const xBar::LightContainer& light)
@@ -316,14 +317,14 @@ namespace he
       m_billboardRenderer.removeRenderComponent(billboard);
     }
 
-    void RenderManager::removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry)
+    void RenderManager::removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer> staticGeometry)
     {
-      m_geometryRasterizer.removeRenderComponent(staticGeometry);
+      m_geometryRasterizer.removeRenderComponent(staticGeometry.dynamic_pointer_cast<const xBar::IGeometryContainer>());
     }
 
-    void RenderManager::removeRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry)
+    void RenderManager::removeRenderComponent(util::SharedPointer<const xBar::SkinnedGeometryContainer> skinnedGeometry)
     {
-      m_geometryRasterizer.removeRenderComponent(skinnedGeometry);
+      m_geometryRasterizer.removeRenderComponent(skinnedGeometry.dynamic_pointer_cast<const xBar::IGeometryContainer>());
     }
 
     void RenderManager::removeRenderComponent(const xBar::LightContainer& light)

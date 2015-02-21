@@ -31,10 +31,10 @@ namespace he
       ARenderNodeDecorator(IRenderGroup *renderNode);
       virtual ~ARenderNodeDecorator() = 0;
 
-      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
 
-      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
+      virtual bool removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
 
       virtual bool isEndInstanceIterator() const;
       virtual void resetInstanceIterator();
@@ -51,6 +51,8 @@ namespace he
       virtual void rasterizeReflectiveShadowGeometry() const;
 
       virtual void rasterizeIndexGeometry() const;
+
+      virtual void rasterizeIndirectLightingGeometry() const;
 
       virtual void rasterizeGeometry() const;
 

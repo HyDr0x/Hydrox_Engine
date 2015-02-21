@@ -15,17 +15,30 @@ namespace he
 {
   namespace renderer
   {
-    RemoveGeometryTraverserRenderPass::RemoveGeometryTraverserRenderPass(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
-      RemoveGeometryTraverser(singletonManager, geometryContainer)
+    RemoveGeometryTraverserRenderPass::RemoveGeometryTraverserRenderPass()
     {
-      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
-      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
+    }
+
+    RemoveGeometryTraverserRenderPass::~RemoveGeometryTraverserRenderPass()
+    {
+    }
+
+    void RemoveGeometryTraverserRenderPass::removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    {
+      m_geometryContainer = geometryContainer;
+
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
       m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::GBUFFER, m_meshVertexDeclaration);
 
-      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)
@@ -38,10 +51,13 @@ namespace he
           m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
         }
       }
-    }
 
-    RemoveGeometryTraverserRenderPass::~RemoveGeometryTraverserRenderPass()
-    {
+      if(m_shaderHandle)
+      {
+        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+
+        doTraverse(treeNode);
+      }
     }
 
     bool RemoveGeometryTraverserRenderPass::preTraverse(RenderNode* treeNode)

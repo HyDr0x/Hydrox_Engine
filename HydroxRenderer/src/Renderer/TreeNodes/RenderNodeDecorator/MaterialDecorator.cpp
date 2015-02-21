@@ -27,15 +27,15 @@ namespace he
     {
     }
 
-    bool MaterialDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool MaterialDecorator::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
-      if(!m_materialHandles.count(geometryContainer.getMaterialHandle()))
+      if(!m_materialHandles.count(geometryContainer->getMaterialHandle()))
       {
         if(m_materialCount < m_options->maxMaterials && m_renderNode->insertGeometry(geometryContainer))
         {
           m_materialNumberChanged = true;
 
-          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber = 1;
+          m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber = 1;
 
           m_materialCount++;
 
@@ -46,7 +46,7 @@ namespace he
       {
         if(m_renderNode->insertGeometry(geometryContainer))
         {
-          m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber++;
+          m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber++;
 
           return true;
         }
@@ -55,21 +55,21 @@ namespace he
       return false;
     }
 
-    bool MaterialDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool MaterialDecorator::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
         for(std::map<util::ResourceHandle, MaterialIndexData, Less>::iterator it = m_materialHandles.begin(); it != m_materialHandles.end(); it++)
         {
-          if(geometryContainer.getMaterialHandle() == it->first)
+          if(geometryContainer->getMaterialHandle() == it->first)
           {
-            m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber--;
+            m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber--;
             
-            if(m_materialHandles[geometryContainer.getMaterialHandle()].instanceNumber == 0)
+            if(m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber == 0)
             {
               m_materialNumberChanged = true;
-              m_materialHandles.erase(geometryContainer.getMaterialHandle());
+              m_materialHandles.erase(geometryContainer->getMaterialHandle());
 
               m_materialCount--;
             }

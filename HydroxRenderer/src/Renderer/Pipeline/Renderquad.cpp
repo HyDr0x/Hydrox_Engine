@@ -62,7 +62,15 @@ namespace he
       {
         fboBuffer[i] = GL_COLOR_ATTACHMENT0 + indices[i];
       }
-      glDrawBuffers(fboBuffer.size(), &fboBuffer[0]);
+
+      if(!fboBuffer.empty())
+      {
+        glDrawBuffers(fboBuffer.size(), &fboBuffer[0]);
+      }
+      else
+      {
+        glDrawBuffers(GL_NONE, nullptr);
+      }
     }
 
     void Renderquad::unsetWriteFrameBuffer() const

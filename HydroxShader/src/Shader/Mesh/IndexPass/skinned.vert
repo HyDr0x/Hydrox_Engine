@@ -7,7 +7,7 @@
 #include "../../../../include/Shader/VertexDeclaration.glslh"
 #include "../../../../include/Shader/CameraUBO.glslh"
 
-layout(std430, binding = 3) buffer boneMatrixBuffer
+layout(std430, binding = 0) buffer boneMatrixBuffer
 {
 	mat4 boneMatrix[];
 };

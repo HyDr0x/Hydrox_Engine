@@ -17,6 +17,7 @@
 #include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
 #include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
 #include "Renderer/Traverser/RenderReflectiveShadowGeometryTraverser.h"
+#include "Renderer/Traverser/RenderIndirectLightingGeometryTraverser.h"
 #include "Renderer/Traverser/FrustumCullingTraverser.h"
 
 namespace he
@@ -51,7 +52,7 @@ namespace he
       GeometryRenderer();
       ~GeometryRenderer();
 
-      void initialize(util::SingletonManager *singletonManager);
+      void initialize(util::SingletonManager *singletonManager, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
 
       void updateBuffer();
 
@@ -61,13 +62,15 @@ namespace he
 
       void generateReflectiveShadowMap(int cameraIndex);
 
+      void generateIndirectLightMap();
+
       void rasterizeIndexGeometry();
 
       void rasterizeGeometry();
 
-      void addRenderComponent(const xBar::IGeometryContainer& geometry);
+      void addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
-      void removeRenderComponent(const xBar::IGeometryContainer& geometry);
+      void removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
       unsigned int getGlobalCacheNumber() const;
 
@@ -83,17 +86,20 @@ namespace he
       util::SharedPointer<db::ShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
+      unsigned int m_bufferResolution;
 
       FrustumCullingTraverser m_frustumCullingTraverser;
       RenderGeometryTraverser m_renderGeometryTraverser;
       RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
       RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
       RenderReflectiveShadowGeometryTraverser m_renderReflectiveShadowGeometryTraverser;
+      RenderIndirectLightingGeometryTraverser m_renderIndirectLightingGeometryTraverser;
 
       GroupNode *m_renderRootNode;
       GroupNode *m_renderIndexRootNode;
       GroupNode *m_renderShadowRootNode;
       GroupNode *m_renderReflectiveShadowRootNode;
+      GroupNode *m_renderIndirectLightRootNode;
     };
   }
 }

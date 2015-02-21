@@ -16,32 +16,32 @@ layout(triangle_strip, max_vertices = 3) out;
 layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
 layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
 
-layout(std430, binding = 4) buffer triangleIndexOffsetBuffer
+layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
 	uint triangleIndexOffset[];
 };
 
-layout(std430, binding = 5) buffer cacheOffsetBuffer
+layout(std430, binding = 3) buffer cacheOffsetBuffer
 {
 	uint cacheIndexOffset[];
 };
 
-layout(std430, binding = 6) buffer triangleBuffer
+layout(std430, binding = 4) buffer triangleBuffer
 {
 	uvec2 triangleCacheIndices[];
 };
 
-layout(std430, binding = 7) buffer cacheBuffer
+layout(std430, binding = 5) buffer cacheBuffer
 {
 	CacheData caches[];
 };
 
-layout(std430, binding = 8) buffer meshIndexBuffer
+layout(std430, binding = 6) buffer meshIndexBuffer
 {
 	uint perMeshIndex[];
 };
 
-layout(std430, binding = 9) buffer instanceCacheOffsetBuffer
+layout(std430, binding = 7) buffer instanceCacheOffsetBuffer
 {
 	uint perInstanceCacheOffset[];
 };
@@ -92,25 +92,6 @@ void main()
 	{//bvec4 cast to ensure that unused indices which are zero wont get offseted
 		cacheIndices[2 * i + 0] = uvec4(vsout_cacheIndices0[i]) + uvec4(bvec4(vsout_cacheIndices0[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
 		cacheIndices[2 * i + 1] = uvec4(vsout_cacheIndices1[i]) + uvec4(bvec4(vsout_cacheIndices1[i])) * (perInstanceCacheOffsetTMP + globalCacheOffset);
-	}
-	
-	uvec4 bitMask;
-	
-	for(uint i = 0; i < 6; i++)
-	{
-		bitMask = uvec4(1);
-		uint index = (2 + (i / 2) * 2) % 6;
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].x));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].y));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].z));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].w));
-		
-		index++;
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].x));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].y));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].z));
-		bitMask &= uvec4(bvec4(cacheIndices[i] - cacheIndices[index].w));
-		cacheIndices[i] *= uvec4(bitMask);
 	}
 
 	cacheIndices[0] -= uvec4(1);

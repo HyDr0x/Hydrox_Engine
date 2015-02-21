@@ -86,10 +86,9 @@ namespace he
         vertexElements.push_back(db::Mesh::MODEL_POSITION);
         vertexElements.push_back(db::Mesh::MODEL_NORMAL);
 
-        db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+        db::Mesh mesh(GL_TRIANGLES, positions.size(), vertexElements, indices);
         mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
         mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
-        mesh.generateCaches(0, 0, 0, false);
 
         util::ResourceHandle pointHandle = m_modelManager->addObject(mesh);
         m_debugGeoNodes[treeNode.getParent()] = GeoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));
@@ -146,10 +145,9 @@ namespace he
         vertexElements.push_back(db::Mesh::MODEL_POSITION);
         vertexElements.push_back(db::Mesh::MODEL_NORMAL);
 
-        db::Mesh mesh(GL_TRIANGLES, positions.size(), indices, vertexElements);
+        db::Mesh mesh(GL_TRIANGLES, positions.size(), vertexElements, indices);
         mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
         mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
-        mesh.generateCaches(0, 0, 0, false);
 
         util::ResourceHandle pointHandle = m_modelManager->addObject(mesh);
         m_debugGeoNodes[treeNode.getParent()] = GeoNode(m_eventManager, pointHandle, m_debugMaterial, treeNode.getNodeName() + std::string("_AsPoints"));

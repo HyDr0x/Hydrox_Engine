@@ -37,9 +37,9 @@ namespace he
     {
     }
 
-    bool DrawArrayDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
-      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
 
       if(m_primitiveType != mesh->getPrimitiveType())
       {
@@ -48,11 +48,11 @@ namespace he
 
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        if(!m_meshes.count(geometryContainer.getMeshHandle()))
+        if(!m_meshes.count(geometryContainer->getMeshHandle()))
         {
           m_meshNumberChanged = true;
 
-          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
+          m_meshes[geometryContainer->getMeshHandle()].instanceNumber = 0;
 
           m_vboSize += mesh->getVBOSize();
           m_triangleNumber += mesh->getPrimitiveCount();
@@ -60,7 +60,7 @@ namespace he
         }
 
         m_perInstanceCacheNumber += mesh->getCacheCount();
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
+        m_meshes[geometryContainer->getMeshHandle()].instanceNumber++;
 
         return true;
       }
@@ -68,17 +68,17 @@ namespace he
      return false;
     }
 
-    bool DrawArrayDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+        db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
 
         m_perInstanceCacheNumber -= mesh->getCacheCount();
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber--;
+        m_meshes[geometryContainer->getMeshHandle()].instanceNumber--;
 
-        if(!m_meshes[geometryContainer.getMeshHandle()].instanceNumber)
+        if(!m_meshes[geometryContainer->getMeshHandle()].instanceNumber)
         {
           m_meshNumberChanged = true;
 
@@ -86,7 +86,7 @@ namespace he
           m_triangleNumber -= mesh->getPrimitiveCount();
           m_cacheNumber -= mesh->getCacheCount();
 
-          m_meshes.erase(geometryContainer.getMeshHandle());
+          m_meshes.erase(geometryContainer->getMeshHandle());
         }
       }
 
@@ -138,21 +138,36 @@ namespace he
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
-      m_triangleIndexOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
-      m_cacheOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_triangleBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 8);
-      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
+      m_triangleIndexOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_cacheOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_triangleBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
+      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
 
       glMultiDrawArraysIndirect(m_primitiveType, nullptr, getInstanceNumber(), sizeof(DrawArraysIndirectCommand));
 
-      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 9);
-      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 8);
-      m_cacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-      m_triangleBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_triangleIndexOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
+      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
+      m_cacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+      m_triangleBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_triangleIndexOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_meshVertexBuffer.unbindVertexBuffer(0);
+      m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
+    }
+
+    void DrawArrayDecorator::rasterizeIndirectLightingGeometry() const
+    {
+      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+
+      m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
+      m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
+      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+
+      glMultiDrawArraysIndirect(m_primitiveType, nullptr, getInstanceNumber(), sizeof(DrawArraysIndirectCommand));
+
+      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_meshVertexBuffer.unbindVertexBuffer(0);
       m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
     }

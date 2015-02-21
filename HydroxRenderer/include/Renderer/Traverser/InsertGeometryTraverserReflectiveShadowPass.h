@@ -11,19 +11,18 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverserReflectiveShadowPass(
-        util::SharedPointer<IRenderGroup> sharedRenderGroup,
-        const xBar::IGeometryContainer& geometryContainer,
-        util::SingletonManager *singletonManager);
+      InsertGeometryTraverserReflectiveShadowPass();
 
       virtual ~InsertGeometryTraverserReflectiveShadowPass();
+
+      virtual void insertGeometry(TreeNode *treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
       virtual bool preTraverse(RenderNode* treeNode);
 
     protected:
 
-      void createNewChildNode(VertexDeclarationNode* parent);
-      void createNewSibling(RenderNode* sibling);
+      virtual void createNewChildNode(VertexDeclarationNode* parent);
+      virtual void createNewSibling(RenderNode* sibling);
 
       util::SharedPointer<IRenderGroup> m_sharedRenderGroup;
     };

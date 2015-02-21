@@ -27,8 +27,10 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverser(const xBar::IGeometryContainer& geometryContainer, util::SingletonManager *singletonManager);
+      InsertGeometryTraverser();
       virtual ~InsertGeometryTraverser();
+
+      virtual void insertGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
       virtual bool preTraverse(GroupNode* treeNode);
 
@@ -55,7 +57,7 @@ namespace he
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
       util::SharedPointer<db::ShaderContainer> m_renderShaderContainer;
 
-      const xBar::IGeometryContainer& m_geometryContainer;
+      util::SharedPointer<const xBar::IGeometryContainer> m_geometryContainer;
 
       util::Flags<xBar::RenderNodeType> m_nodeType;
       GLenum m_primitiveType;

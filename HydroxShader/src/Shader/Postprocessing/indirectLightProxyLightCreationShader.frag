@@ -34,7 +34,7 @@ void main()
 	{
 		return;
 	}
-	
+
 	vec3 Lod = vec3(0.0f), Xpd = vec3(0.0f);
 	vec3 Log = vec3(0.0f), Xpg = vec3(0.0f);
 	

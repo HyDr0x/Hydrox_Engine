@@ -27,15 +27,12 @@ namespace he
       m_singletonManager = singletonManager;
 
       m_indirectLightShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(m_singletonManager, db::ShaderContainer::INDIRECTLIGHTPROXYLIGHTCREATION, util::Flags<VertexElements>(8192));
-      m_indirectLightInterpolationShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::INDIRECTLIGHTINTERPOLATION, util::Flags<VertexElements>(8192));
-
       m_bufferResolution = 0;
 
-      m_frameCacheIndexMap = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->width, m_options->height, 6, GL_TEXTURE_2D_ARRAY, GL_UNSIGNED_INT, GL_RGBA32UI, GL_RGBA_INTEGER, 4, 128));
-      
+      m_depthBuffer = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
       m_indirectLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
 
-      m_indirectLightRenderQuad.setRenderTargets(1, m_indirectLightMap);
+      m_indirectLightRenderQuad.setRenderTargets(m_depthBuffer, 1, m_indirectLightMap);
     }
 
     void IndirectLightRenderer::updateBuffer(unsigned int cacheNumber)
@@ -66,9 +63,6 @@ namespace he
     }
 
     void IndirectLightRenderer::calculateIndirectLight(
-      util::SharedPointer<db::Texture2D> depthMap,
-      util::SharedPointer<db::Texture2D> normalMap,
-      util::SharedPointer<db::Texture2D> materialMap,
       util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
       util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
       util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const
@@ -119,54 +113,6 @@ namespace he
         glViewport(0, 0, m_options->width, m_options->height);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);//wait until the proxy light data is written into the image buffer
       }
-      {
-        //CPUTIMER("cpuCompute", 0)
-        //GPUTIMER("gpuCompute", 1)
-
-        db::RenderShader *renderShader = m_singletonManager->getService<db::RenderShaderManager>()->getObject(m_indirectLightInterpolationShaderHandle);
-
-        renderShader->useShader();
-
-        m_indirectLightRenderQuad.setWriteFrameBuffer();
-
-        depthMap->setTexture(0, 0);
-        normalMap->setTexture(1, 1);
-        materialMap->setTexture(2, 2);
-
-        m_frameCacheIndexMap->setTexture(3, 3);
-
-        m_globalCachePositionBuffer->bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_globalCacheNormalBuffer->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        m_indirectLightPositionDBuffer->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_indirectLightLuminousFluxDBuffer->bindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        m_indirectLightPositionGBuffer->bindImageTexture(4, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_indirectLightLuminousFluxGBuffer->bindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        db::RenderShader::setUniform(8, GL_UNSIGNED_INT, &m_bufferResolution);
-
-        m_indirectLightRenderQuad.render();
-
-        m_indirectLightLuminousFluxGBuffer->unbindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_indirectLightPositionGBuffer->unbindImageTexture(4, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        m_indirectLightLuminousFluxDBuffer->unbindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_indirectLightPositionDBuffer->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        m_globalCacheNormalBuffer->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_globalCachePositionBuffer->unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
-
-        m_frameCacheIndexMap->unsetTexture(3);
-
-        materialMap->unsetTexture(2);
-        normalMap->unsetTexture(1);
-        depthMap->unsetTexture(0);
-
-        m_indirectLightRenderQuad.unsetWriteFrameBuffer();
-
-        renderShader->useNoShader();
-      }
     }
 
     void IndirectLightRenderer::setBuffer(util::SharedPointer<db::Texture2D> depthBuffer)
@@ -182,7 +128,7 @@ namespace he
       GLubyte zeros = 0;
       m_zBuffer->clearTexture(&zeros);
 
-      m_indirectLightIndicesRenderQuad.setRenderTargets3D(depthBuffer, 1, m_frameCacheIndexMap);
+      m_indirectLightIndicesRenderQuad.setRenderTargets(depthBuffer, 0);
 
       util::vec4ui negativeZeros(UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX);
       m_indirectLightIndicesRenderQuad.clearTargets(1.0f, std::vector<util::vec4ui>(6, negativeZeros), false);
@@ -205,6 +151,37 @@ namespace he
       m_globalCachePositionBuffer->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
       m_indirectLightIndicesRenderQuad.unsetWriteFrameBuffer();
+    }
+
+    void IndirectLightRenderer::setCacheAndProxyLights() const
+    {
+      util::vec4f clearColor(0.0f, 0.0f, 0.0f, 0.0f);
+      m_indirectLightRenderQuad.clearTargets(1.0f, clearColor);
+
+      m_indirectLightRenderQuad.setWriteFrameBuffer();
+
+      m_globalCachePositionBuffer->bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_globalCacheNormalBuffer->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_indirectLightPositionDBuffer->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_indirectLightLuminousFluxDBuffer->bindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_indirectLightPositionGBuffer->bindImageTexture(4, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_indirectLightLuminousFluxGBuffer->bindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
+    }
+
+    void IndirectLightRenderer::unsetCacheAndProxyLights() const
+    {
+      m_indirectLightLuminousFluxGBuffer->unbindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_indirectLightPositionGBuffer->unbindImageTexture(4, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_indirectLightLuminousFluxDBuffer->unbindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_indirectLightPositionDBuffer->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_globalCacheNormalBuffer->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_globalCachePositionBuffer->unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_indirectLightRenderQuad.unsetWriteFrameBuffer();
     }
 
     util::SharedPointer<db::Texture2D> IndirectLightRenderer::getIndirectLightMap() const
@@ -246,6 +223,9 @@ namespace he
       //m_globalCacheNormalBuffer->getTextureData(&cacheNormal[0]);
 
       return m_indirectLightMap;
+      //return m_TMPTEXTURE;
+      //return m_indirectLightPositionDBuffer;
+      //return m_globalCacheNormalBuffer;
       //return m_zBuffer;
       //return m_frameCacheIndexMap->convertToTexture2D(3);
       //return m_indirectLightLuminousFluxDBuffer;

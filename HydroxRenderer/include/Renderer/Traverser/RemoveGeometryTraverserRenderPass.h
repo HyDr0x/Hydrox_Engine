@@ -10,8 +10,10 @@ namespace he
     {
     public:
 
-      RemoveGeometryTraverserRenderPass(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer);
+      RemoveGeometryTraverserRenderPass();
       virtual ~RemoveGeometryTraverserRenderPass();
+
+      virtual void removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
       virtual bool preTraverse(RenderNode* treeNode);
       virtual void postTraverse(RenderNode* treeNode);

@@ -15,17 +15,23 @@ namespace he
 {
   namespace renderer
   {
-    RemoveGeometryTraverser::RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer) :
-      m_geometryContainer(geometryContainer)
+    RemoveGeometryTraverser::RemoveGeometryTraverser()
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
-      m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      
     }
 
     RemoveGeometryTraverser::~RemoveGeometryTraverser()
     {
+    }
+
+    void RemoveGeometryTraverser::removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    {
+      m_geometryContainer = geometryContainer;
+
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
     }
 
     void RemoveGeometryTraverser::doTraverseDown(TreeNode* treeNode)

@@ -24,6 +24,8 @@ namespace he
 
       virtual void rasterizeIndexGeometry() const;
 
+      virtual void rasterizeIndirectLightingGeometry() const;
+
       virtual void rasterizeGeometry() const;
 
       virtual void updateBuffer();

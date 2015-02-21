@@ -5,16 +5,19 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserIndexPass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserIndirectLightingPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserReflectiveShadowPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserRenderPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserShadowPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserIndexPass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserIndirectLightingPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserReflectiveShadowPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserRenderPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserShadowPass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderIndexGeometryTraverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderIndirectLightingGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderReflectiveShadowGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShadowGeometryTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 

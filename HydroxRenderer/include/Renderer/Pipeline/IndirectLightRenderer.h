@@ -39,15 +39,16 @@ namespace he
       void initialize(util::SingletonManager *singletonManager);
 
       void updateBuffer(unsigned int cacheNumber);
-      void calculateIndirectLight(util::SharedPointer<db::Texture2D> depthMap, 
-        util::SharedPointer<db::Texture2D> normalMap, 
-        util::SharedPointer<db::Texture2D> materialMap, 
+      void calculateIndirectLight(
         util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const;
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
       void unsetBuffer() const;
+
+      void setCacheAndProxyLights() const;
+      void unsetCacheAndProxyLights() const;
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
@@ -62,6 +63,7 @@ namespace he
 
       unsigned int m_bufferResolution;//to a power of two up rounded texture resolution
 
+      util::SharedPointer<db::Texture2D> m_depthBuffer;
       util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer;//saves all caches positions and diffuse strength of the scene
       util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
       util::SharedPointer<db::Texture2D> m_indirectLightPositionDBuffer;//the position of the indirect diffuse proxy light for the interpolation
@@ -75,11 +77,9 @@ namespace he
       Renderquad m_indirectLightRenderQuad;
       Renderquad m_indirectLightProxyLightCreationRenderQuad;
 
-      util::SharedPointer<db::Texture3D> m_frameCacheIndexMap;//saves all 24 indices per pixel of the frame buffer
       util::SharedPointer<db::Texture2D> m_indirectLightMap;
 
       util::ResourceHandle m_indirectLightShaderHandle;
-      util::ResourceHandle m_indirectLightInterpolationShaderHandle;
 
       GLsync m_gBufferSync;
 

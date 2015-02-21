@@ -5,16 +5,19 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserIndexPass.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserIndirectLightingPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserReflectiveShadowPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserRenderPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/InsertGeometryTraverserShadowPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserIndexPass.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserIndirectLightingPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserReflectiveShadowPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserRenderPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveGeometryTraverserShadowPass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderIndexGeometryTraverser.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderIndirectLightingGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderReflectiveShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderShadowGeometryTraverser.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.cpp 
