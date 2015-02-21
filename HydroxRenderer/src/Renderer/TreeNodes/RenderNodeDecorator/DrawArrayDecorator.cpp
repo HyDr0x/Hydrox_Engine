@@ -37,9 +37,9 @@ namespace he
     {
     }
 
-    bool DrawArrayDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
-      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
 
       if(m_primitiveType != mesh->getPrimitiveType())
       {
@@ -48,11 +48,11 @@ namespace he
 
       if(m_renderNode->insertGeometry(geometryContainer))
       {
-        if(!m_meshes.count(geometryContainer.getMeshHandle()))
+        if(!m_meshes.count(geometryContainer->getMeshHandle()))
         {
           m_meshNumberChanged = true;
 
-          m_meshes[geometryContainer.getMeshHandle()].instanceNumber = 0;
+          m_meshes[geometryContainer->getMeshHandle()].instanceNumber = 0;
 
           m_vboSize += mesh->getVBOSize();
           m_triangleNumber += mesh->getPrimitiveCount();
@@ -60,7 +60,7 @@ namespace he
         }
 
         m_perInstanceCacheNumber += mesh->getCacheCount();
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber++;
+        m_meshes[geometryContainer->getMeshHandle()].instanceNumber++;
 
         return true;
       }
@@ -68,17 +68,17 @@ namespace he
      return false;
     }
 
-    bool DrawArrayDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool DrawArrayDecorator::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
+        db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
 
         m_perInstanceCacheNumber -= mesh->getCacheCount();
-        m_meshes[geometryContainer.getMeshHandle()].instanceNumber--;
+        m_meshes[geometryContainer->getMeshHandle()].instanceNumber--;
 
-        if(!m_meshes[geometryContainer.getMeshHandle()].instanceNumber)
+        if(!m_meshes[geometryContainer->getMeshHandle()].instanceNumber)
         {
           m_meshNumberChanged = true;
 
@@ -86,7 +86,7 @@ namespace he
           m_triangleNumber -= mesh->getPrimitiveCount();
           m_cacheNumber -= mesh->getCacheCount();
 
-          m_meshes.erase(geometryContainer.getMeshHandle());
+          m_meshes.erase(geometryContainer->getMeshHandle());
         }
       }
 

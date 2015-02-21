@@ -103,14 +103,16 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_meshHandle = meshHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
     }
 
@@ -123,14 +125,16 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_materialHandle = materialHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
     }
 
@@ -153,11 +157,13 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> staticGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_renderable = renderable;

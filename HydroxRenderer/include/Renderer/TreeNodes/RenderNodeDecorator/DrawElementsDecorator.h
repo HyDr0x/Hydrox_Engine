@@ -38,8 +38,8 @@ namespace he
       DrawElementsDecorator(IRenderGroup *renderNode, GLenum indexType, GLenum primitiveType, GLuint vertexStride, util::SingletonManager *singletonManager);
       virtual ~DrawElementsDecorator();
 
-      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
+      virtual bool removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
 
       virtual void frustumCulling() const;
 

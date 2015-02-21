@@ -16,10 +16,10 @@ namespace he
 
       virtual ~IRenderGroup() = 0 {}
 
-      virtual bool containsContainer(const xBar::IGeometryContainer& geometryContainer) = 0;
+      virtual bool containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer) = 0;
 
-      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
-      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer) = 0;
+      virtual bool insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer) = 0;
+      virtual bool removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer) = 0;
 
       virtual bool isEndInstanceIterator() const = 0;
       virtual void resetInstanceIterator() = 0;

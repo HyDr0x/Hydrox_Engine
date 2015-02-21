@@ -65,9 +65,9 @@ namespace he
 
       void rasterizeGeometry();
 
-      void addRenderComponent(const xBar::IGeometryContainer& geometry);
+      void addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
-      void removeRenderComponent(const xBar::IGeometryContainer& geometry);
+      void removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
       unsigned int getGlobalCacheNumber() const;
 

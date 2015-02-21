@@ -22,11 +22,11 @@ namespace he
     {
     }
 
-    bool StaticRenderNode::containsContainer(const xBar::IGeometryContainer& geometryContainer)
+    bool StaticRenderNode::containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       for(std::list<const xBar::StaticGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
       {
-        if((*instanceIterator) == geometryContainer)
+        if((*instanceIterator) == *geometryContainer)
         {
           return true;
         }
@@ -35,7 +35,7 @@ namespace he
       return false;
     }
 
-    bool StaticRenderNode::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool StaticRenderNode::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       if(m_instances.size() >= m_options->maxGeometry)
       {
@@ -44,16 +44,16 @@ namespace he
 
       m_instanceNumberChanged = true;
 
-      m_instances.push_back(dynamic_cast<const xBar::StaticGeometryContainer&>(geometryContainer));
+      m_instances.push_back(*geometryContainer.dynamic_pointer_cast<const xBar::StaticGeometryContainer>());
 
       return true;
     }
 
-    bool StaticRenderNode::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool StaticRenderNode::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       for(std::list<const xBar::StaticGeometryContainer>::iterator instanceIterator = m_instances.begin(); instanceIterator != m_instances.end(); instanceIterator++)
       {
-        if((*instanceIterator) == geometryContainer)
+        if((*instanceIterator) == *geometryContainer)
         {
           m_instances.erase(instanceIterator);
           m_instanceNumberChanged = true;

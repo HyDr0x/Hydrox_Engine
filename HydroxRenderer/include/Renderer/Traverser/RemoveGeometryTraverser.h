@@ -24,8 +24,11 @@ namespace he
     {
     public:
 
-      RemoveGeometryTraverser(util::SingletonManager *singletonManager, const xBar::IGeometryContainer& geometryContainer);
+      RemoveGeometryTraverser();
+
       virtual ~RemoveGeometryTraverser();
+
+      virtual void removeGeometry(TreeNode *rootNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
       virtual bool preTraverse(VertexDeclarationNode* treeNode);
       virtual void postTraverse(VertexDeclarationNode* treeNode);
@@ -49,7 +52,7 @@ namespace he
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
       util::SharedPointer<db::ShaderContainer> m_renderShaderContainer;
 
-      const xBar::IGeometryContainer& m_geometryContainer;
+      util::SharedPointer<const xBar::IGeometryContainer> m_geometryContainer;
 
       util::Flags<VertexElements> m_shaderVertexDeclaration;
       util::Flags<VertexElements> m_meshVertexDeclaration;

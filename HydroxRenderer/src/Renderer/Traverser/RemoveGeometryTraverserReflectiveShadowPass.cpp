@@ -17,35 +17,48 @@ namespace he
 {
   namespace renderer
   {
-    RemoveGeometryTraverserReflectiveShadowPass::RemoveGeometryTraverserReflectiveShadowPass(
-      util::SingletonManager *singletonManager, 
-      const xBar::IGeometryContainer& geometryContainer) :
-      RemoveGeometryTraverser(singletonManager, geometryContainer)
+    RemoveGeometryTraverserReflectiveShadowPass::RemoveGeometryTraverserReflectiveShadowPass()
     {
-      db::Mesh *mesh = m_modelManager->getObject(geometryContainer.getMeshHandle());
-      db::Material *material = m_materialManager->getObject(geometryContainer.getMaterialHandle());
+    }
+
+    RemoveGeometryTraverserReflectiveShadowPass::~RemoveGeometryTraverserReflectiveShadowPass()
+    {
+    }
+
+    void RemoveGeometryTraverserReflectiveShadowPass::removeGeometry(TreeNode *rootNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    {
+      m_geometryContainer = geometryContainer;
+
+      m_modelManager = singletonManager->getService<db::ModelManager>();
+      m_materialManager = singletonManager->getService<db::MaterialManager>();
+      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+
+      db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
+      db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
       m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::REFLECTIVESHADOW, m_meshVertexDeclaration);
 
-      m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
-      m_textureHandles.resize(db::Material::TEXTURETYPENUM);
-
-      for(unsigned int i = 0; i < m_textureHandles.size(); i++)
+      if(m_shaderHandle)
       {
-        unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
-        m_textureHandles[i].resize(texNum);
+        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
-        for(unsigned int j = 0; j < texNum; j++)
+        for(unsigned int i = 0; i < m_textureHandles.size(); i++)
         {
-          m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
-        }
-      }
-    }
+          unsigned int texNum = material->getTextureNumber((db::Material::TextureType)i);
+          m_textureHandles[i].resize(texNum);
 
-    RemoveGeometryTraverserReflectiveShadowPass::~RemoveGeometryTraverserReflectiveShadowPass()
-    {
+          for(unsigned int j = 0; j < texNum; j++)
+          {
+            m_textureHandles[i][j] = material->getTextureHandle((db::Material::TextureType)i, j);
+          }
+        }
+
+        doTraverse(rootNode);
+      }
     }
 
     bool RemoveGeometryTraverserReflectiveShadowPass::preTraverse(RenderNode* treeNode)

@@ -35,7 +35,6 @@ namespace he
 
     private:
 
-      util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
 
       util::SharedPointer<RenderOptions> m_options;

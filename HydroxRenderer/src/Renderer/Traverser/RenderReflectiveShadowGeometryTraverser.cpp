@@ -23,7 +23,6 @@ namespace he
 
     void RenderReflectiveShadowGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
 

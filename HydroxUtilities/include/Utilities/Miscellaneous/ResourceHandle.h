@@ -20,6 +20,8 @@ namespace he
 
       ResourceHandle& operator=(ResourceHandle other);
 
+      operator bool();
+
       inline bool operator==(const ResourceHandle& other) const;
       inline bool operator!=(const ResourceHandle& other) const;
 

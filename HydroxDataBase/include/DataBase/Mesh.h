@@ -49,7 +49,7 @@ namespace he
       typedef GLuint indexType;
       
       Mesh();
-      Mesh(GLenum primitiveType, unsigned int vertexCount, std::vector<indexType> indices, std::vector<VertexDeclarationElements> flags);
+      Mesh(GLenum primitiveType, unsigned int vertexCount, std::vector<VertexDeclarationElements> flags, std::vector<indexType> indices = std::vector<indexType>());
 
       Mesh(AABB boundingVolume,
            GLenum primitiveType,
@@ -71,7 +71,8 @@ namespace he
 
       void free();
 
-      void generateCaches(float errorRate, float maxDistance, float maxAngle, bool createCaches = true);
+      void generateNormals();
+      void generateCaches(float errorRate, float maxDistance, float maxAngle);
 
       void getDataFromGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, GLubyte *data) const;
       void copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, const GLubyte *data);
@@ -98,8 +99,6 @@ namespace he
       static unsigned int vertexDeclarationSize(unsigned int index);
 
     private:
-
-      void generateNormals(std::vector<util::vec3f>& outNormals, const std::vector<util::vec3f>& positions, const std::vector<indexType>& indices);
 
       static const unsigned int VERTEXDECLARATIONSIZE[VERTEXDECLARATIONFLAGNUMBER];
 

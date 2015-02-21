@@ -77,16 +77,16 @@ namespace he
       void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
       void addRenderComponent(const xBar::BillboardContainer& billboard);
-      void addRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
-      void addRenderComponent(const xBar::SkinnedGeometryContainer& skinnedGeometry);
+      void addRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer> staticGeometry);
+      void addRenderComponent(util::SharedPointer<const xBar::SkinnedGeometryContainer> skinnedGeometry);
       void addRenderComponent(const xBar::LightContainer& light);
       void addRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter);
 
       void removeRenderComponent(const db::Sprite* sprite);
       void removeRenderComponent(const StringTexture2D* string);
       void removeRenderComponent(const xBar::BillboardContainer& billboard);
-      void removeRenderComponent(const xBar::StaticGeometryContainer& staticGeometry);
-      void removeRenderComponent(const xBar::SkinnedGeometryContainer& staticGeometry);
+      void removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer> staticGeometry);
+      void removeRenderComponent(util::SharedPointer<const xBar::SkinnedGeometryContainer> skinnedGeometry);
       void removeRenderComponent(const xBar::LightContainer& light);
       void removeRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter);
 

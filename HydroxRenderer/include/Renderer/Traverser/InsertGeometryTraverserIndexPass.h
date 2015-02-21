@@ -11,10 +11,9 @@ namespace he
     {
     public:
 
-      InsertGeometryTraverserIndexPass(
-        util::SharedPointer<IRenderGroup> sharedRenderGroup,
-        const xBar::IGeometryContainer& geometryContainer, 
-        util::SingletonManager *singletonManager);
+      InsertGeometryTraverserIndexPass();
+
+      virtual void insertGeometry(TreeNode *rootNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
       virtual ~InsertGeometryTraverserIndexPass();
 

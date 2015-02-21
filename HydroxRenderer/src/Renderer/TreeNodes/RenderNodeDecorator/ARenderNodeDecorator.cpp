@@ -16,17 +16,17 @@ namespace he
       delete m_renderNode;
     }
 
-    bool ARenderNodeDecorator::containsContainer(const xBar::IGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::containsContainer(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       return m_renderNode->containsContainer(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::insertGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       return m_renderNode->insertGeometry(geometryContainer);
     }
 
-    bool ARenderNodeDecorator::removeGeometry(const xBar::IGeometryContainer& geometryContainer)
+    bool ARenderNodeDecorator::removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer)
     {
       return m_renderNode->removeGeometry(geometryContainer);
     }

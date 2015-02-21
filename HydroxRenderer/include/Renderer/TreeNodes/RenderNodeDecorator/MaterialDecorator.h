@@ -27,8 +27,8 @@ namespace he
       MaterialDecorator(IRenderGroup *renderNode, util::SingletonManager *singletonManager);
       virtual ~MaterialDecorator();
 
-      virtual bool insertGeometry(const xBar::IGeometryContainer& geometryContainer);
-      virtual bool removeGeometry(const xBar::IGeometryContainer& geometryContainer);
+      virtual bool insertGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
+      virtual bool removeGeometry(util::SharedPointer<const xBar::IGeometryContainer> geometryContainer);
 
       virtual void rasterizeReflectiveShadowGeometry() const;
 

@@ -94,14 +94,16 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_meshHandle = meshHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
     }
 
@@ -109,14 +111,16 @@ namespace he
     {
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_materialHandle = materialHandle;
 
       if(m_renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
     }
 
@@ -124,11 +128,13 @@ namespace he
     {
       if(!m_renderable && renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnAddGeometryNode)->execute(geometry);
       }
       else if(m_renderable && !renderable)
       {
-        m_eventManager->raiseSignal<void(*)(const xBar::IGeometryContainer& skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        util::SharedPointer<const xBar::IGeometryContainer> geometry(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle));
+        m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> skinnedGeometry)>(util::EventManager::OnRemoveGeometryNode)->execute(geometry);
       }
 
       m_renderable = renderable;

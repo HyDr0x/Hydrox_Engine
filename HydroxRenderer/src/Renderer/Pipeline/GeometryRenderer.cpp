@@ -75,49 +75,43 @@ namespace he
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
     }
 
-    void GeometryRenderer::addRenderComponent(const xBar::IGeometryContainer& geometry)
+    void GeometryRenderer::addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      m_globalCacheNumber += m_singletonManager->getService<db::ModelManager>()->getObject(geometry.getMeshHandle())->getCacheCount();
+      m_globalCacheNumber += m_singletonManager->getService<db::ModelManager>()->getObject(geometry->getMeshHandle())->getCacheCount();
 
-      InsertGeometryTraverserRenderPass insertTraverser(geometry, m_singletonManager);
-      insertTraverser.doTraverse(m_renderRootNode);
+      InsertGeometryTraverserRenderPass insertTraverser;
+      insertTraverser.insertGeometry(m_renderRootNode, geometry, m_singletonManager);
 
       util::SharedPointer<IRenderGroup> createdRenderGroup = insertTraverser.getCreatedRenderNode();
 
       if(createdRenderGroup)
       {
-        InsertGeometryTraverserIndexPass insertIndexTraverser(createdRenderGroup, geometry, m_singletonManager);
+        InsertGeometryTraverserIndexPass insertIndexTraverser;
+        insertIndexTraverser.insertGeometry(m_renderIndexRootNode, createdRenderGroup, geometry, m_singletonManager);
 
-        insertIndexTraverser.doTraverse(m_renderIndexRootNode);
+        InsertGeometryTraverserShadowPass insertShadowTraverser;
+        insertShadowTraverser.insertGeometry(m_renderShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
 
-        InsertGeometryTraverserShadowPass insertShadowTraverser(createdRenderGroup, geometry, m_singletonManager);
-
-        insertShadowTraverser.doTraverse(m_renderShadowRootNode);
-
-        InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser(createdRenderGroup, geometry, m_singletonManager);
-
-        insertReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+        InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser;
+        insertReflectiveShadowTraverser.insertGeometry(m_renderReflectiveShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
       }
     }
 
-    void GeometryRenderer::removeRenderComponent(const xBar::IGeometryContainer& geometry)
+    void GeometryRenderer::removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      m_globalCacheNumber -= m_singletonManager->getService<db::ModelManager>()->getObject(geometry.getMeshHandle())->getCacheCount();
+      m_globalCacheNumber -= m_singletonManager->getService<db::ModelManager>()->getObject(geometry->getMeshHandle())->getCacheCount();
 
-      RemoveGeometryTraverserRenderPass removeTraverser(m_singletonManager, geometry);
-      removeTraverser.doTraverse(m_renderRootNode);
+      RemoveGeometryTraverserRenderPass removeTraverser;
+      removeTraverser.removeGeometry(m_renderRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserIndexPass removeIndexTraverser(m_singletonManager, geometry);
+      RemoveGeometryTraverserIndexPass removeIndexTraverser;
+      removeIndexTraverser.removeGeometry(m_renderIndexRootNode, geometry, m_singletonManager);
 
-      removeIndexTraverser.doTraverse(m_renderIndexRootNode);
+      RemoveGeometryTraverserShadowPass removeShadowTraverser;
+      removeShadowTraverser.removeGeometry(m_renderShadowRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserShadowPass removeShadowTraverser(m_singletonManager, geometry);
-
-      removeShadowTraverser.doTraverse(m_renderShadowRootNode);
-
-      RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser(m_singletonManager, geometry);
-
-      removeReflectiveShadowTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+      RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser;
+      removeReflectiveShadowTraverser.removeGeometry(m_renderReflectiveShadowRootNode, geometry, m_singletonManager);
     }
 
     void GeometryRenderer::updateBuffer()
@@ -182,11 +176,11 @@ namespace he
 
     void GeometryRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)
     {
-      eventManager->addNewSignal<void(*)(const xBar::IGeometryContainer &geometry)>(util::EventManager::OnAddGeometryNode);
-      eventManager->addSlotToSignal<GeometryRenderer, void(*)(const xBar::IGeometryContainer &geometry), void (GeometryRenderer::*)(const xBar::IGeometryContainer &geometry)>(this, &GeometryRenderer::addRenderComponent, util::EventManager::OnAddGeometryNode);
+      eventManager->addNewSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> geometry)>(util::EventManager::OnAddGeometryNode);
+      eventManager->addSlotToSignal<GeometryRenderer, void(*)(util::SharedPointer<const xBar::IGeometryContainer> geometry), void (GeometryRenderer::*)(util::SharedPointer<const xBar::IGeometryContainer> geometry)>(this, &GeometryRenderer::addRenderComponent, util::EventManager::OnAddGeometryNode);
       
-      eventManager->addNewSignal<void(*)(const xBar::IGeometryContainer& geometry)>(util::EventManager::OnRemoveGeometryNode);
-      eventManager->addSlotToSignal<GeometryRenderer, void(*)(const xBar::IGeometryContainer& geometry), void (GeometryRenderer::*)(const xBar::IGeometryContainer& geometry)>(this, &GeometryRenderer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
+      eventManager->addNewSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> geometry)>(util::EventManager::OnRemoveGeometryNode);
+      eventManager->addSlotToSignal<GeometryRenderer, void(*)(util::SharedPointer<const xBar::IGeometryContainer> geometry), void (GeometryRenderer::*)(util::SharedPointer<const xBar::IGeometryContainer> geometry)>(this, &GeometryRenderer::removeRenderComponent, util::EventManager::OnRemoveGeometryNode);
     }
   }
 }

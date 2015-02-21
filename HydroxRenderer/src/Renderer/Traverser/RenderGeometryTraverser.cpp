@@ -23,8 +23,6 @@ namespace he
 
     void RenderGeometryTraverser::initialize(util::SingletonManager *singletonManager, std::vector<util::SharedPointer<SamplerObject>> samplerObjects)
     {
-      m_modelManager = singletonManager->getService<db::ModelManager>();
-      m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
 

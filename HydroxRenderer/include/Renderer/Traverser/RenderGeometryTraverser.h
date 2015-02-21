@@ -40,8 +40,6 @@ namespace he
 
     private:
 
-      util::SharedPointer<db::ModelManager> m_modelManager;
-      util::SharedPointer<db::MaterialManager> m_materialManager;
       util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
 
