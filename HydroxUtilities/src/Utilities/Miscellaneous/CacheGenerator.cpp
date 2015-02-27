@@ -128,9 +128,6 @@ namespace he
                 vec3f newbbMin = bbMin + vec3f(x * newBoxSize[0], y * newBoxSize[1], z * newBoxSize[2]);
                 vec3f newbbMax = bbMin + vec3f((x + 1) * newBoxSize[0], (y + 1) * newBoxSize[1], (z + 1) * newBoxSize[2]);
 
-                vec3f newBoxSize = newbbMax - newbbMin;
-                float newSideMax = std::max(newBoxSize[0], std::max(newBoxSize[1], newBoxSize[2]));
-
                 if(newbbMax <= bbMax + m_epsilon)
                 {
                   recursiveGenerateCaches(newbbMin, newbbMax, newPositions);

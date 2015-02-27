@@ -3,6 +3,7 @@ set(
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheIndicesGenerator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DelaunayTriangulation.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.cpp 
 	PARENT_SCOPE 

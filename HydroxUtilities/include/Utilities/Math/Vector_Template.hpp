@@ -79,16 +79,16 @@ namespace he
       inline Vector& operator /= (const Vector &v) { VECTOR_EQ_DIVIDE_OP return *this; }
       inline Vector& operator /= (Type s) { VECTOR_EQ_DIVIDE_OP_SCALAR return *this; }
 
-      inline bool operator == (const Vector &v) { return VECTOR_COMP_EQ }
-      inline bool operator != (const Vector &v) { return VECTOR_COMP_UQ }
-      inline bool operator >  (const Vector &v) { return VECTOR_COMP_GR }
-      inline bool operator <  (const Vector &v) { return VECTOR_COMP_LS }
-      inline bool operator >= (const Vector &v) { return VECTOR_COMP_EQ_GR }
-      inline bool operator <= (const Vector &v) { return VECTOR_COMP_EQ_LS }
+      inline bool operator == (const Vector &v) const { return VECTOR_COMP_EQ }
+      inline bool operator != (const Vector &v) const { return VECTOR_COMP_UQ }
+      inline bool operator >  (const Vector &v) const { return VECTOR_COMP_GR }
+      inline bool operator <  (const Vector &v) const { return VECTOR_COMP_LS }
+      inline bool operator >= (const Vector &v) const { return VECTOR_COMP_EQ_GR }
+      inline bool operator <= (const Vector &v) const { return VECTOR_COMP_EQ_LS }
 
-      inline Vector& operator & (const Vector &v) { return Vector( VECTOR_BINOP_EQ ); }
-      inline Vector& operator | (const Vector &v) { return Vector( VECTOR_BINOP_OR ); }
-      inline Vector& operator ^  (const Vector &v) { return Vector( VECTOR_BINOP_XOR ); }
+      inline Vector& operator & (const Vector &v) const { return Vector(VECTOR_BINOP_EQ); }
+      inline Vector& operator | (const Vector &v) const { return Vector(VECTOR_BINOP_OR); }
+      inline Vector& operator ^  (const Vector &v) const { return Vector(VECTOR_BINOP_XOR); }
       inline Vector& operator &=  (const Vector &v) { VECTOR_BINOP_EQ_EQ return *this; }
       inline Vector& operator |= (const Vector &v) { VECTOR_BINOP_EQ_OR return *this; }
       inline Vector& operator ^= (const Vector &v) { VECTOR_BINOP_EQ_XOR return *this; }

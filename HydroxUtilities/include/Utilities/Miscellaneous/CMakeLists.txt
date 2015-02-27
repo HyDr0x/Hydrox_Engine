@@ -3,6 +3,7 @@ set(
 	${HEADER}
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheGenerator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheIndicesGenerator.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DelaunayTriangulation.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Flags.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.h 
