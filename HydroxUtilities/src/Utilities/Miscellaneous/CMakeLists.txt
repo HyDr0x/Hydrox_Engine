@@ -3,7 +3,10 @@ set(
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheIndicesGenerator.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/clipper.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SutherlandHodgman.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/VoronoiGenerator.cpp 
 	PARENT_SCOPE 
 )

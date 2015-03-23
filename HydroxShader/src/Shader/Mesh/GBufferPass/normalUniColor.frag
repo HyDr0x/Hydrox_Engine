@@ -18,7 +18,7 @@ void main()
 
 	fsout_normal = vec4(normal * 0.5f + 0.5f, 0);
 	
-	fsout_color = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+	fsout_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	
 	MaterialData thisMaterial = material[materialIndex[vsout_instanceIndex]];
 	

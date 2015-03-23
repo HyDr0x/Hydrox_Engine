@@ -2,7 +2,7 @@
 
 layout(early_fragment_tests) in;
 
-layout(r8, binding = 2) writeonly uniform image2D zBuffer;
+layout(r8, binding = 3) writeonly uniform image2D zBuffer;
 
 layout(location = 1) uniform uint bufferResolution;
 

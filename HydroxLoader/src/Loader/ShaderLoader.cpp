@@ -19,20 +19,21 @@ namespace he
     {
     }
 
-    void ShaderLoader::setDynamicDefines(std::vector<std::string>& dynamicDefines)
+    void ShaderLoader::setDynamicDefines(std::vector<std::pair<std::string, std::string>>& dynamicDefines)
     {
       m_dynamicDefines = dynamicDefines;
     }
 
     std::string ShaderLoader::loadShaderSource(std::string filename)
     {
-      std::string rawSource = loadShaderFiles(filename);
+      std::string rawSource = loadShaderFileSource(filename);
+
       preprocessDefinesShaderSource(rawSource);
 
       return rawSource;
     }
 
-    std::string ShaderLoader::loadShaderFiles(std::string filename)
+    std::string ShaderLoader::loadShaderFileSource(std::string filename)
     {
       if(filename == std::string())
       {
@@ -74,7 +75,6 @@ namespace he
     {
       size_t stringPos;
       std::string includeString = "#include";
-      std::string defineString = "#define";
 
       do
       {
@@ -85,7 +85,7 @@ namespace he
           size_t filenameStart = source.find('"', stringPos) + 1;
           size_t filenameEnd = source.find('"', filenameStart + 1);
           std::string filename = path + source.substr(filenameStart, filenameEnd - filenameStart);
-          std::string includeSource = loadShaderFiles(filename);
+          std::string includeSource = loadShaderFileSource(filename);
           source.replace(stringPos, filenameEnd + 2 - stringPos, includeSource, 0, std::string::npos);
         }
 
@@ -95,9 +95,19 @@ namespace he
     void ShaderLoader::preprocessDefinesShaderSource(std::string& source)
     {
       size_t stringPos;
-      std::string defineString = "#define";
+      std::string defineString = "#define ";
 
-      do
+      for(unsigned int i = 0; i < m_dynamicDefines.size(); i++)//copy paste dynamic defines
+      {
+        stringPos = source.find(defineString + m_dynamicDefines[i].first);
+        if(stringPos != std::string::npos)
+        {
+          size_t defineOffset = defineString.length() +  m_dynamicDefines[i].first.length();
+          source.insert(stringPos + defineOffset, std::string(" ") + m_dynamicDefines[i].second);
+        }
+      }
+
+      do//replace define names with numbers
       {
         stringPos = source.find(defineString);
 
@@ -126,17 +136,6 @@ namespace he
         }
 
       } while(stringPos != std::string::npos);
-
-      for(unsigned int i = 0; i < m_dynamicDefines.size(); i++)
-      {
-        stringPos = source.find(m_dynamicDefines[i]);
-        if(stringPos != std::string::npos)
-        {
-          size_t defineOffset = m_dynamicDefines[i].find(" ");
-          source.insert(stringPos + defineOffset, m_dynamicDefines[i], defineOffset, std::string::npos);
-          m_dynamicDefines.erase(m_dynamicDefines.begin() + i);
-        }
-      }
     }
   }
 }

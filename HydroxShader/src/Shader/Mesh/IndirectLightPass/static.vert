@@ -2,6 +2,7 @@
 
 #extension GL_ARB_shader_draw_parameters : enable
 
+#define EPSILON 0.00001
 #define INT32_MAX 2147483647
 
 #include "../../../../include/Shader/VertexDeclaration.glslh"
@@ -43,15 +44,17 @@ out vec3 vsout_Xpd;
 out vec3 vsout_phiPD;
 out vec3 vsout_Xpg;
 out vec3 vsout_phiPG;
+out float cacheProxyMinDistanceD;
+out float cacheProxyMinDistanceG;
 
 void main()
 {
 	uint instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 
-	vec3 pos3D = (trfMatrix[instanceIndex] * vec4(in_pos, 1.0f)).xyz;
+	vsout_pos3D = (trfMatrix[instanceIndex] * vec4(in_pos, 1.0f)).xyz;
 	vec3 normal = normalize(mat3(trfMatrix[instanceIndex]) * in_normal);
 
-	vec3 camDir = normalize(eyePos.xyz - pos3D);
+	vec3 camDir = normalize(eyePos.xyz - vsout_pos3D);
 	vec3 reflectCamDir = reflect(-camDir, normal);
 
 	uvec4 cacheIndicesTMP[2];
@@ -78,7 +81,7 @@ void main()
 		if(cacheIndices[i] < INT32_MAX)
 		{
 			ivec2 coord = ivec2(mod(cacheIndices[i], bufferResolution), cacheIndices[i] / bufferResolution);
-			vec3 diff = pos3D - imageLoad(globalCachePositionBuffer, coord).xyz;
+			vec3 diff = vsout_pos3D - imageLoad(globalCachePositionBuffer, coord).xyz;
 			dmax = max(dmax, dot(diff, diff));
 		}
 	}
@@ -91,6 +94,9 @@ void main()
 	float wGesD = 0.0f;
 	float wGesG = 0.0f;
 	
+	cacheProxyMinDistanceD = 0.0f;
+	cacheProxyMinDistanceG = 0.0f;
+		
 	for(uint i = 0; i < 8; i++)
 	{
 		if(cacheIndices[i] < INT32_MAX)
@@ -102,12 +108,12 @@ void main()
 			
 			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
-			float dir = max(1.0f - length(pos3D - cache.position.xyz) / dmax, 0.0001f);
+			float dir = max(1.0f - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0001f);
 			
-			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0));
+			float wd = EPSILON + dir * sqrt(max(dot(cacheNormal, normal), 0));
 			
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
-			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
+			float wg = EPSILON + dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
 			
 			IndirectLightData indirectLightD;
 			indirectLightD.position = imageLoad(indirectLightPositionDBuffer, coord);
@@ -116,6 +122,9 @@ void main()
 			IndirectLightData indirectLightG;
 			indirectLightG.position = imageLoad(indirectLightPositionGBuffer, coord);
 			indirectLightG.luminousFlux = imageLoad(indirectLightLuminousFluxGBuffer, coord);
+			
+			cacheProxyMinDistanceD += wd * indirectLightD.position.w;
+			cacheProxyMinDistanceG += wg * indirectLightG.position.w;
 			
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
@@ -133,8 +142,9 @@ void main()
 	
 	vsout_phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
 	vsout_phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
-
-	vsout_pos3D = pos3D;
 	
-	gl_Position = viewProjectionMatrix * vec4(pos3D, 1);
+	cacheProxyMinDistanceD = wGesD > 0 ? cacheProxyMinDistanceD / wGesD : 0;
+	cacheProxyMinDistanceG = wGesG > 0 ? cacheProxyMinDistanceG / wGesG : 0;
+	
+	gl_Position = viewProjectionMatrix * vec4(vsout_pos3D, 1);
 }

@@ -2,6 +2,7 @@
 
 #extension GL_ARB_shader_draw_parameters : enable
 
+#define EPSILON 0.00001
 #define INT32_MAX 2147483647
 #define MAXBONES 64
 
@@ -46,10 +47,12 @@ out vec3 vsout_Xpd;
 out vec3 vsout_phiPD;
 out vec3 vsout_Xpg;
 out vec3 vsout_phiPG;
+out float cacheProxyMinDistanceD;
+out float cacheProxyMinDistanceG;
 
 void main()
 {
-	mat4 skinningMatrix = mat4(0.0f);
+	mat4 skinningMatrix = mat4(0.0);
 	
 	uint instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 	uint globalInstanceID = MAXBONES * instanceIndex;
@@ -59,7 +62,7 @@ void main()
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.z)] * in_boneWeights.z);
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.w)] * in_boneWeights.w);
 
-	vsout_pos3D = (skinningMatrix * vec4(in_pos, 1.0f)).xyz;
+	vsout_pos3D = (skinningMatrix * vec4(in_pos, 1.0)).xyz;
 	vec3 normal = normalize(mat3(skinningMatrix) * in_normal);
 	
 	vec3 camDir = normalize(eyePos.xyz - vsout_pos3D);
@@ -96,11 +99,14 @@ void main()
 	
 	dmax = sqrt(dmax);
 	
-	vec3 Xpd = vec3(0.0f), phiPD = vec3(0.0f);
-	vec3 Xpg = vec3(0.0f), phiPG = vec3(0.0f);
+	vec3 Xpd = vec3(0.0), phiPD = vec3(0.0);
+	vec3 Xpg = vec3(0.0), phiPG = vec3(0.0);
 	
-	float wGesD = 0.0f;
-	float wGesG = 0.0f;
+	float wGesD = 0.0;
+	float wGesG = 0.0;
+	
+	cacheProxyMinDistanceD = 0.0f;
+	cacheProxyMinDistanceG = 0.0f;
 	
 	for(uint i = 0; i < 8; i++)
 	{
@@ -113,12 +119,12 @@ void main()
 			
 			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
-			float dir = max(1.0f - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0001f);
+			float dir = max(1.0 - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0001);
 			
-			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0));
+			float wd = EPSILON + dir * sqrt(max(dot(cacheNormal, normal), 0));
 			
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
-			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
+			float wg = EPSILON + dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
 			
 			IndirectLightData indirectLightD;
 			indirectLightD.position = imageLoad(indirectLightPositionDBuffer, coord);
@@ -127,6 +133,9 @@ void main()
 			IndirectLightData indirectLightG;
 			indirectLightG.position = imageLoad(indirectLightPositionGBuffer, coord);
 			indirectLightG.luminousFlux = imageLoad(indirectLightLuminousFluxGBuffer, coord);
+			
+			cacheProxyMinDistanceD += wd * indirectLightD.position.w;
+			cacheProxyMinDistanceG += wg * indirectLightG.position.w;
 			
 			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
@@ -145,5 +154,8 @@ void main()
 	vsout_phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
 	vsout_phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
 	
-	gl_Position = viewProjectionMatrix * vec4(vsout_pos3D, 1.0f);
+	cacheProxyMinDistanceD = wGesD > 0 ? cacheProxyMinDistanceD / wGesD : 0;
+	cacheProxyMinDistanceG = wGesG > 0 ? cacheProxyMinDistanceG / wGesG : 0;
+	
+	gl_Position = viewProjectionMatrix * vec4(vsout_pos3D, 1.0);
 }

@@ -71,6 +71,7 @@ namespace he
 
       void free();
 
+      void generateBoundingVolume();
       void generateNormals();
       void generateCaches(float errorRate, float maxDistance, float maxAngle);
 

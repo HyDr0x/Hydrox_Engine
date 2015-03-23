@@ -1,10 +1,11 @@
+//encode the z-component as the length of the 2D normal, to be able to decode the normalized direction with only two components
 vec2 encodeNormal(in vec3 normal)
 {
-	return normal.z != 1.0f ? (normal.z * 0.5f + 0.5f) * normalize(normal.xy + 0.00001f) : vec2(1.0f, 0.0f);
+	return normal.z < 1.0 - 0.00001 ? (normal.z * 0.5 + 0.5) * normalize(normal.xy + 0.00001) : vec2(1.0, 0.0f);
 }
 
 vec3 decodeNormal(in vec2 normal)
 {
-	float z = length(normal) * 2.0f - 1.0f;
-	return vec3(sqrt((1.0f - z * z) / (dot(normal, normal) + 0.00001f)) * normal, z);
+	float z = length(normal) * 2.0 - 1.0;
+	return z > -1.0 + 0.00001 ? vec3(sqrt((1.0 - z * z) / (dot(normal, normal) + 0.00001)) * normal, z) : vec3(0.0, 0.0, -1.0);
 }

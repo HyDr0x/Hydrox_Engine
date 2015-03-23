@@ -15,6 +15,7 @@ layout(triangle_strip, max_vertices = 3) out;
 
 layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
 layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
+layout(r16f, binding = 2) writeonly uniform image2D globalCacheAreaBuffer;
 
 layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
@@ -84,6 +85,11 @@ void main()
 			
 			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
 			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularStrength, cacheMaterial.specularExponent));
+		
+			//extract matrix scale for area, expect uniform scale!
+			float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
+		
+			imageStore(globalCacheAreaBuffer, coord, scale * caches[cacheIndexOffsetTMP + i].area);
 		}
 	}
 	

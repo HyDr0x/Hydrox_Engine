@@ -79,6 +79,14 @@ namespace he
         m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
         m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
 
+        /*m_shadowPosMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);
+        m_shadowNormalMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);
+        m_shadowLuminousFluxMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);*/
+
+        //m_shadowPosMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
+        //m_shadowNormalMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
+        //m_shadowLuminousFluxMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
+
         m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_reflectiveShadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalMaps, m_shadowLuminousFluxMaps);
       }
 
@@ -155,7 +163,7 @@ namespace he
       texturendices[0] = shadowMapIndex;
       texturendices[1] = shadowMapIndex + m_reflectiveShadowLights.size();
       texturendices[2] = shadowMapIndex + 2 * m_reflectiveShadowLights.size();
-      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::vec4f(2047, 2047, 2047, 0), texturendices);
+      m_renderReflectiveShadowMapsQuad.clearTargets(1.0f, util::vec4f(0, 0, 0, 0), texturendices);
 
       m_renderReflectiveShadowMapsQuad.setWriteFrameBuffer(texturendices);
       m_reflectiveShadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
@@ -263,6 +271,11 @@ namespace he
     util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowLuminousFluxMaps() const
     {
       return m_shadowLuminousFluxMaps;
+    }
+
+    const GPUImmutableBuffer& LightRenderer::getReflectiveShadowLights() const
+    {
+      return m_reflectiveShadowedLightBuffer;
     }
 
     void LightRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)

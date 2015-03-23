@@ -68,6 +68,7 @@ namespace he
       util::SharedPointer<db::Texture3D> getReflectiveShadowPosMaps() const;
       util::SharedPointer<db::Texture3D> getReflectiveShadowNormalMaps() const;
       util::SharedPointer<db::Texture3D> getReflectiveShadowLuminousFluxMaps() const;
+      const GPUImmutableBuffer& getReflectiveShadowLights() const;
 
     private:
       

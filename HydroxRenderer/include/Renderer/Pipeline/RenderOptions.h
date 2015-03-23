@@ -17,6 +17,7 @@ namespace he
       unsigned int height;//vertical resolution
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
+      unsigned int giLightSampleNumber;//number of sampled lights for global illumination
       unsigned int lightNumber;//max number of supported lights
 
       unsigned char max2DLayer;//const number of layer for 2D sprites

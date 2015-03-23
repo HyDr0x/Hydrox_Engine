@@ -18,22 +18,29 @@ add_library(Hydrox_Utilities SHARED ${SOURCE} ${HEADER})
 find_package(GLEW)
 find_package(OPENGL)
 
+set(VORO_INCLUDE_DIR "default" CACHE STRING "description")
+set(VORO_LIBRARY_DBG "default" CACHE STRING "description")
+set(VORO_LIBRARY_REL "default" CACHE STRING "description")
+
 set(
   INCLUDES 
   ${CMAKE_CURRENT_SOURCE_DIR}/include 
   ${GLEW_INCLUDE_DIRS} 
+	${VORO_INCLUDE_DIR}
 )
 
 include_directories(${INCLUDES})
 
 set(
   DEBUG_LIBRARIES 
-  debug ${GLEW_LIBRARIES}
+  debug ${GLEW_LIBRARIES} 
+	debug ${VORO_LIBRARY_DBG} 
 )
 
 set(
   RELEASE_LIBRARIES 
-  optimized ${GLEW_LIBRARIES}
+  optimized ${GLEW_LIBRARIES} 
+	optimized ${VORO_LIBRARY_REL} 
 )
 
 set(

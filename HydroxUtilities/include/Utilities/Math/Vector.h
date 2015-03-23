@@ -117,11 +117,11 @@
 #define VECTOR_EQ_MULTIPLY_OP_SCALAR m_x[0] *= s; m_x[1] *= s;
 #define VECTOR_EQ_DIVIDE_OP_SCALAR   m_x[0] /= s; m_x[1] /= s;
 #define VECTOR_COMP_EQ    m_x[0] == v.m_x[0] && m_x[1] == v.m_x[1];
-#define VECTOR_COMP_UQ    m_x[0] != v.m_x[0] || m_x[1] ||  v.m_x[1];
-#define VECTOR_COMP_GR    m_x[0] >  v.m_x[0] && m_x[1] >   v.m_x[1];
-#define VECTOR_COMP_LS    m_x[0] <  v.m_x[0] && m_x[1] <   v.m_x[1];
-#define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0] && m_x[1] >=  v.m_x[1];
-#define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0] && m_x[1] <=  v.m_x[1];
+#define VECTOR_COMP_UQ    m_x[0] != v.m_x[0] || m_x[1] != v.m_x[1];
+#define VECTOR_COMP_GR    m_x[0] >  v.m_x[0] && m_x[1] >  v.m_x[1];
+#define VECTOR_COMP_LS    m_x[0] <  v.m_x[0] && m_x[1] <  v.m_x[1];
+#define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0] && m_x[1] >= v.m_x[1];
+#define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0] && m_x[1] <= v.m_x[1];
 #define VECTOR_BINOP_EQ   m_x[0] & v.m_x[0], m_x[1] & v.m_x[1]
 #define VECTOR_BINOP_OR   m_x[0] | v.m_x[0], m_x[1] | v.m_x[1]
 #define VECTOR_BINOP_XOR  m_x[0] ^ v.m_x[0], m_x[1] ^ v.m_x[1]

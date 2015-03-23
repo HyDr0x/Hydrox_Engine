@@ -122,7 +122,7 @@ namespace he
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
-      {
+      {//everything in here should be packed in an render pass interface and the blocks like gbuffer etc. in a technique interface which gets passed to a render pass 
         //CPUTIMER("cpuCompute", 0)
         //GPUTIMER("gpuCompute", 1)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -144,7 +144,7 @@ namespace he
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
 
-        {
+        {//create global cache map and z buffer
           //GPUTIMER("IndirectLightIndexTimer", 1)
           glDepthMask(GL_FALSE);
           glDepthFunc(GL_LEQUAL);
@@ -195,9 +195,10 @@ namespace he
         m_indirectLightRenderer.calculateIndirectLight(
           m_lightRenderer.getReflectiveShadowPosMaps(),
           m_lightRenderer.getReflectiveShadowNormalMaps(),
-          m_lightRenderer.getReflectiveShadowLuminousFluxMaps());
+          m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
+          m_lightRenderer.getReflectiveShadowLights());
 
-        m_indirectLightRenderer.setCacheAndProxyLights();
+        m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
         m_geometryRasterizer.generateIndirectLightMap();
         m_indirectLightRenderer.unsetCacheAndProxyLights();
 
@@ -246,8 +247,8 @@ namespace he
         m_gBuffer.unsetGBuffer();
       }
 
-      m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-      m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+      //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
 
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
@@ -259,7 +260,7 @@ namespace he
       //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();

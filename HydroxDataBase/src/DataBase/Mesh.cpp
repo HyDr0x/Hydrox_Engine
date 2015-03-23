@@ -163,6 +163,64 @@ namespace he
       m_primitiveType = GL_TRIANGLES;
     }
 
+    void Mesh::generateBoundingVolume()
+    {
+      std::vector<util::vec3f> positions(m_vertexCount);
+
+      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+
+      m_boundingVolume = AABB(positions);
+    }
+
+    void Mesh::generateNormals()
+    {
+      std::vector<util::vec3f> positions(m_vertexCount);
+
+      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+
+      std::vector<util::vec3f> outNormals(positions.size());
+
+      if(!m_indexData.empty())
+      {
+        std::vector<std::list<util::vec3f>> normals(positions.size());
+
+        for(unsigned int i = 0; i < m_indexData.size(); i += 3)
+        {
+          util::vec3f v0 = positions[m_indexData[i + 0]];
+          util::vec3f v1 = positions[m_indexData[i + 1]];
+          util::vec3f v2 = positions[m_indexData[i + 2]];
+
+          normals[m_indexData[i + 0]].push_back(util::math::cross(v1 - v0, v2 - v0));
+          normals[m_indexData[i + 1]].push_back(util::math::cross(v1 - v0, v2 - v0));
+          normals[m_indexData[i + 2]].push_back(util::math::cross(v1 - v0, v2 - v0));
+        }
+
+        for(unsigned int i = 0; i < normals.size(); i++)
+        {
+          for(std::list<util::vec3f>::iterator it = normals[i].begin(); it != normals[i].end(); it++)
+          {
+            outNormals[i] += *it;
+          }
+          outNormals[i] /= normals[i].size();
+        }
+      }
+      else
+      {
+        for(unsigned int i = 0; i < positions.size(); i += 3)
+        {
+          util::vec3f v0 = positions[i + 0];
+          util::vec3f v1 = positions[i + 1];
+          util::vec3f v2 = positions[i + 2];
+
+          outNormals[i + 0] = util::math::cross(v1 - v0, v2 - v0);
+          outNormals[i + 1] = util::math::cross(v1 - v0, v2 - v0);
+          outNormals[i + 2] = util::math::cross(v1 - v0, v2 - v0);
+        }
+      }
+
+      copyDataIntoGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&outNormals[0]));
+    }
+
     void Mesh::generateCaches(float errorRate, float maxDistance, float maxAngle)
     {
       std::vector<util::vec3f> positions(m_vertexCount);
@@ -171,7 +229,7 @@ namespace he
       std::vector<he::util::cacheIndexType> cacheIndizes1;
 
       util::CacheGenerator generator;
-      generator.initialize(errorRate, maxDistance, maxAngle);
+      generator.initialize(errorRate, maxDistance, maxAngle, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax());
 
       getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
       getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
@@ -295,55 +353,6 @@ namespace he
     const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
     {
       return m_triangleCacheIndices;
-    }
-
-    void Mesh::generateNormals()
-    {
-      std::vector<util::vec3f> positions(m_vertexCount);
-
-      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
-
-      std::vector<util::vec3f> outNormals(positions.size());
-
-      if(!m_indexData.empty())
-      {
-        std::vector<std::list<util::vec3f>> normals(positions.size());
-
-        for(unsigned int i = 0; i < m_indexData.size(); i += 3)
-        {
-          util::vec3f v0 = positions[m_indexData[i + 0]];
-          util::vec3f v1 = positions[m_indexData[i + 1]];
-          util::vec3f v2 = positions[m_indexData[i + 2]];
-
-          normals[m_indexData[i + 0]].push_back(util::math::cross(v1 - v0, v2 - v0));
-          normals[m_indexData[i + 1]].push_back(util::math::cross(v1 - v0, v2 - v0));
-          normals[m_indexData[i + 2]].push_back(util::math::cross(v1 - v0, v2 - v0));
-        }
-
-        for(unsigned int i = 0; i < normals.size(); i++)
-        {
-          for(std::list<util::vec3f>::iterator it = normals[i].begin(); it != normals[i].end(); it++)
-          {
-            outNormals[i] += *it;
-          }
-          outNormals[i] /= normals[i].size();
-        }
-      }
-      else
-      {
-        for(unsigned int i = 0; i < positions.size(); i += 3)
-        {
-          util::vec3f v0 = positions[i + 0];
-          util::vec3f v1 = positions[i + 1];
-          util::vec3f v2 = positions[i + 2];
-
-          outNormals[i + 0] = util::math::cross(v1 - v0, v2 - v0);
-          outNormals[i + 1] = util::math::cross(v1 - v0, v2 - v0);
-          outNormals[i + 2] = util::math::cross(v1 - v0, v2 - v0);
-        }
-      }
-
-      copyDataIntoGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&outNormals[0]));
     }
   }
 }

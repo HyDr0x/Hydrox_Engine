@@ -374,6 +374,7 @@ namespace he
         newMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_COLOR, 0, vertexColors.size(), reinterpret_cast<const GLubyte*>(&vertexColors[0]));
       }
 
+      newMesh.generateBoundingVolume();
       newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
 
       return m_modelManager->addObject(newMesh);

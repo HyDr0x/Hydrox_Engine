@@ -9,7 +9,8 @@
 #include <DataBase/Texture3D.h>
 
 #include "Renderer/Buffer/GPUBuffer.h"
-#include "Renderer/Buffer/TBO.h"
+#include "Renderer/Buffer/GPUImmutableBuffer.h"
+#include "Renderer/Buffer/UBO.h"
 #include "Renderer/Pipeline/Renderquad.h"
 
 namespace he
@@ -42,7 +43,8 @@ namespace he
       void calculateIndirectLight(
         util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
-        util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps) const;
+        util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps,
+        const GPUImmutableBuffer& reflectiveShadowLightBuffer) const;
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
       void unsetBuffer() const;
@@ -57,17 +59,24 @@ namespace he
       IndirectLightRenderer(const IndirectLightRenderer&);
       IndirectLightRenderer& operator=(const IndirectLightRenderer&);
 
+      void createSamplingPattern();
+
       util::SharedPointer<RenderOptions> m_options;
 
       util::SingletonManager *m_singletonManager;
 
       unsigned int m_bufferResolution;//to a power of two up rounded texture resolution
 
+      UBO m_samplingPatternBuffer;
+
       util::SharedPointer<db::Texture2D> m_depthBuffer;
+
       util::SharedPointer<db::Texture2D> m_globalCachePositionBuffer;//saves all caches positions and diffuse strength of the scene
       util::SharedPointer<db::Texture2D> m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
+      util::SharedPointer<db::Texture2D> m_globalCacheAreaBuffer;//saves all caches area
+
       util::SharedPointer<db::Texture2D> m_indirectLightPositionDBuffer;//the position of the indirect diffuse proxy light for the interpolation
-      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxDBuffer;//the luminous flux of the indirect diffuse proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxDBuffer;//the luminous flux of the indirect diffuse proxy light for the soft shadows
       util::SharedPointer<db::Texture2D> m_indirectLightPositionGBuffer;//the position of the indirect specular proxy light for the interpolation
       util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxGBuffer;//the luminous flux of the indirect specular proxy light for the interpolation
       

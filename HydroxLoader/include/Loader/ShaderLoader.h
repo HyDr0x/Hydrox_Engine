@@ -22,18 +22,21 @@ namespace he
       ShaderLoader(util::SingletonManager *singletonManager);
       virtual ~ShaderLoader();
 
-      void setDynamicDefines(std::vector<std::string>& dynamicDefines);
+      void setDynamicDefines(std::vector<std::pair<std::string, std::string>>& dynamicDefines);
 
     protected:
 
       std::string loadShaderSource(std::string filename);
-      std::string loadShaderFiles(std::string filename);
+      
+      util::SingletonManager *m_singletonManager;
+
+    private:
+
+      std::string loadShaderFileSource(std::string filename);
       void preprocessIncludesShaderSource(std::string& source, std::string path);
       void preprocessDefinesShaderSource(std::string& source);
 
-      util::SingletonManager *m_singletonManager;
-
-      std::vector<std::string> m_dynamicDefines;
+      std::vector<std::pair<std::string, std::string>> m_dynamicDefines;//first is define name, second define value
     };
   }
 }

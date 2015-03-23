@@ -1,6 +1,8 @@
 set(
 	SOURCE 
 	${SOURCE} 
-	${CMAKE_CURRENT_SOURCE_DIR}/CollisionTests.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Plane.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Triangle.cpp 
 	PARENT_SCOPE 
 )

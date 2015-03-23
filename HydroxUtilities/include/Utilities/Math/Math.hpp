@@ -23,6 +23,11 @@ namespace he
         return a < intervalStart ? intervalStart : a > intervalEnd ? intervalEnd : a;
       }
 
+      inline bool floatSafeEqual(float a, float b)
+      {
+        return fabs(a - b) <= (0.00001f * std::max<float>(1.0f, std::max<float>(fabs(a), fabs(b))));
+      }
+
       inline float round(float val)
       {
         return (float)static_cast<int>(val + 0.5f);
@@ -41,6 +46,21 @@ namespace he
       inline float cartesianToPolar(float x, float y)
       {
         return atan2f(y, x);
+      }
+
+      template<typename Type> inline Vector<Type, 4> sqrt(const Vector<Type, 4>& v1)
+      {
+        return Vector<Type, 4>(std::sqrt(v1[0]), std::sqrt(v1[1]), std::sqrt(v1[2]), std::sqrt(v1[3]));
+      }
+
+      template<typename Type> inline Vector<Type, 3> sqrt(const Vector<Type, 3>& v1)
+      {
+        return Vector<Type, 3>(std::sqrt(v1[0]), std::sqrt(v1[1]), std::sqrt(v1[2]));
+      }
+
+      template<typename Type> inline Vector<Type, 2> sqrt(const Vector<Type, 2>& v1)
+      {
+        return Vector<Type, 2>(std::sqrt(v1[0]), std::sqrt(v1[1]));
       }
 
       template<typename Type> inline Vector<Type, 4> abs(const Vector<Type, 4>& v1)
@@ -165,9 +185,9 @@ namespace he
 
       template<typename Type> void decomposeMatrix(Matrix<Type, 4>& matrix, Vector<Type, 3>& angle, Vector<Type, 3>& position, Vector<Type, 3>& scale)
       {
-        scale[0] = sqrt(matrix[0][0] * matrix[0][0] + matrix[0][1] * matrix[0][1] + matrix[0][2] * matrix[0][2]);
-        scale[1] = sqrt(matrix[1][0] * matrix[1][0] + matrix[1][1] * matrix[1][1] + matrix[1][2] * matrix[1][2]);
-        scale[2] = sqrt(matrix[2][0] * matrix[2][0] + matrix[2][1] * matrix[2][1] + matrix[2][2] * matrix[2][2]);
+        scale[0] = std::sqrt(matrix[0][0] * matrix[0][0] + matrix[0][1] * matrix[0][1] + matrix[0][2] * matrix[0][2]);
+        scale[1] = std::sqrt(matrix[1][0] * matrix[1][0] + matrix[1][1] * matrix[1][1] + matrix[1][2] * matrix[1][2]);
+        scale[2] = std::sqrt(matrix[2][0] * matrix[2][0] + matrix[2][1] * matrix[2][1] + matrix[2][2] * matrix[2][2]);
 
         matrix[0][0] /= scale[0];
         matrix[0][1] /= scale[0];

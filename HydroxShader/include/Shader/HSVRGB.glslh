@@ -1,4 +1,4 @@
-vec3 RGBtoHSV(vec3 rgbColor)
+vec3 RGBtoHSV(in vec3 rgbColor)
 {
 	float maxRGB = max(max(rgbColor.r, rgbColor.g), rgbColor.b);
 	float minRGB = min(min(rgbColor.r, rgbColor.g), rgbColor.b);
@@ -23,7 +23,7 @@ vec3 RGBtoHSV(vec3 rgbColor)
 	return vec3(H, S, V);
 }
 
-vec3 HSVtoRGB(vec3 hsvColor)
+vec3 HSVtoRGB(in vec3 hsvColor)
 {
 	float tmph = hsvColor.r / 60.0f;
 	float h = floor(tmph);

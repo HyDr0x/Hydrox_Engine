@@ -6,6 +6,7 @@
 #include <map>
 
 #include "Utilities/Math/Math.hpp"
+#include "Utilities/Math/Polygon.h"
 
 #include "Utilities/DLLExport.h"
 
@@ -18,6 +19,7 @@ namespace he
       vec3f position;
       float diffuseStrength;
       vec4f normal;//normalized normal [xyz], after the writing to the globalCacheBuffer normal.z becomes specularStrength and normal.w becomes specularExponent 
+      vec4f area;//only x is used, the rest is padding
     };
 
     typedef util::vec4f cacheIndexType;
@@ -28,22 +30,25 @@ namespace he
 
       struct PolygonData
       {
-        std::vector<vec3f> polygonPoints;//the points which define the polygon
+        PolygonData(std::vector<vec3f> polygonPoints) : polygon(polygonPoints)
+        {}
+
+        PolygonData(const Polygon& otherPolygon) : polygon(otherPolygon)
+        {}
+
+        Polygon polygon;
         vec3f triangleVertices[3];//the triangle from which the polygon was created
-        vec3f centroid;//centroid of the polygon
-        vec3f normal;//normalized normal
-        float area;//area of the polygon
       };
 
       struct RawCache
       {
-        vec3f triangleVertices[3];//the triangle in which the cache lies
         vec3f position;//position of the cache
         vec3f normal;//normalized normal
         float area;//area which the cache represents
+        vec3f triangleVertices[3];//the triangle in which the cache lies
       };
 
-      void initialize(float errorRate, float maxDistance, float maxAngle);
+      void initialize(float errorRate, float maxDistance, float maxAngle, vec3f bbMin, vec3f bbMax);
 
       //OCTREE GENERATION SHOULD BE REPLACED BY UNIFIED TREE MODEL!!!
       void generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
@@ -71,17 +76,9 @@ namespace he
         return bin;
       }
 
-      inline float calculateTriangleArea(vec3f v0, vec3f v1, vec3f v2)
-      {
-        vec3f e0 = v1 - v0;
-        vec3f e1 = v2 - v0;
-
-        return float(math::cross(e0, e1).length()) * 0.5f;
-      }
-
       void recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
       void createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
-      float calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, vec3f& outPolygonCentroid, std::vector<vec3f>& outPoints);//first vector contains the three points of the triangle to make all the rays
+      Polygon calculatePolygon(std::vector<vec3f> inPoints);//first vector contains the three points of the triangle to make all the rays
       void generateCachesPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin);
       void shiftCentroid(unsigned int voxelIndex);
       void reduceCaches();
@@ -91,7 +88,7 @@ namespace he
       std::vector<std::list<PolygonData>> m_polygons;//saves all polygons which lying in the voxel
       std::map<unsigned int, std::list<RawCache>> m_linearizedAreaCaches;//saves all caches with their area
       std::vector<RawCache> m_reducedCaches;
-      std::vector<Cache> m_caches;
+      std::vector<RawCache> m_caches;
       std::vector<vec2ui> m_triangleCacheIndices;
 
       std::vector<vec3f> m_boxPoints;//create for each plane 3 points in the right orientation for the sutherland hodgman algorithm

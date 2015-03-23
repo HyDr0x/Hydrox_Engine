@@ -4,35 +4,15 @@
 #include <random>
 #include <cmath>
 
-#include "Utilities/Math/CollisionTests.h"
-#include "Utilities/Miscellaneous/SutherlandHodgman.hpp"
+#include <Utilities/Miscellaneous/VoronoiGenerator.h>
+
+#include "Utilities/Miscellaneous/SutherlandHodgman.h"
+#include "Utilities/Math/Triangle.h"
 
 namespace he
 {
   namespace util
   {
-    void generateAABB(const std::vector<vec3f>& positions, vec3f& bbMin, vec3f& bbMax)
-    {
-      bbMin = util::vec3f(FLT_MAX, FLT_MAX, FLT_MAX);
-      bbMax = util::vec3f(FLT_MIN, FLT_MIN, FLT_MIN);
-
-      for(unsigned int i = 0; i < positions.size(); i++)
-      {
-        for(unsigned int j = 0; j < 3; j++)
-        {
-          if(bbMin[j] > positions[i][j])
-          {
-            bbMin[j] = positions[i][j];
-          }
-
-          if(bbMax[j] < positions[i][j])
-          {
-            bbMax[j] = positions[i][j];
-          }
-        }
-      }
-    }
-
     void createUnindexedTriangles(std::vector<vec3f>& outPositions, const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices)
     {
       for(unsigned int i = 0; i < indices.size(); i += 3)
@@ -43,9 +23,12 @@ namespace he
       }
     }
 
-    void CacheGenerator::initialize(float errorRate, float maxDistance, float maxAngle)
+    void CacheGenerator::initialize(float errorRate, float maxDistance, float maxAngle, vec3f bbMin, vec3f bbMax)
     {
       m_epsilon = 0.0001f;
+
+      m_globalBBMin = bbMin;
+      m_globalBBMax = bbMax;
 
       m_errorRate = errorRate;
       m_maxDistance = maxDistance;
@@ -93,15 +76,9 @@ namespace he
         vec3f t1 = positions[i + 1];
         vec3f t2 = positions[i + 2];
 
-        vec3f v0(t0 - boxCenter), v1(t1 - boxCenter), v2(t2 - boxCenter);
+        Triangle triangle(t0, t1, t2);
 
-        vec3f e0 = v1 - v0;
-        vec3f e1 = v2 - v0;
-        vec3f e2 = v2 - v1;
-
-        vec3f normal = math::cross(e0, e1).normalize();
-
-        if(triangleCenteredBoxTest(v0, v1, v2, normal, boxSize * 0.5f))
+        if(triangle.collisionCenteredBoxTest(boxCenter, boxSize * 0.5f))
         {
           newPositions.push_back(t0);
           newPositions.push_back(t1);
@@ -186,28 +163,22 @@ namespace he
         m_triangles[voxelIndex].push_back(t1);
         m_triangles[voxelIndex].push_back(t2);
 
-        vec3f polygonCentroid;
-        std::vector<vec3f> polygonPoints;
-        float area = calculatePolygonAreaCentroid(trianglePoints, polygonCentroid, polygonPoints);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
+        Polygon polygon = cutPolygonBox(trianglePoints, m_boxPoints);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
 
-        if(area == 0)//triangle only touched the voxel
+        if(polygon.getPointNumber() < 3)//triangle only touched the voxel
         {
           continue;
         }
 
-        for(unsigned int i = 0; i < polygonPoints.size(); i++)
+        for(unsigned int i = 0; i < polygon.getPointNumber(); i++)
         {
-          polygonPoints[i] += boxCenter;
+          polygon.setPoint(i, polygon[i] + boxCenter);
         }
 
-        PolygonData data;
-        data.polygonPoints = polygonPoints;
+        PolygonData data(polygon);
         data.triangleVertices[0] = t0;
         data.triangleVertices[1] = t1;
         data.triangleVertices[2] = t2;
-        data.area = area;
-        data.centroid = polygonCentroid + boxCenter;
-        data.normal = normal;
 
         /////ASSERTION
         //assert(bbMin[0] - 0.001f <= data.centroid[0] && data.centroid[0] <= bbMax[0] + 0.001f && bbMin[1] - 0.001f <= data.centroid[1] && data.centroid[1] <= bbMax[1] + 0.001f && bbMin[2] - 0.001f <= data.centroid[2] && data.centroid[2] <= bbMax[2] + 0.001f);
@@ -216,7 +187,7 @@ namespace he
         vec2ui bin = normalToBin(normal, thetaQuantizer, phiQuantizer);
         bin[0] = bin[0] % normalBin.size();
         bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
-        normalBin[bin[0]][bin[1]] += area;
+        normalBin[bin[0]][bin[1]] += polygon.getArea();
         m_polygons[voxelIndex].push_back(data);
       }
 
@@ -225,46 +196,6 @@ namespace he
         generateCachesPerVoxel(voxelIndex, normalBin);
         shiftCentroid(voxelIndex);
       }
-    }
-
-    float CacheGenerator::calculatePolygonAreaCentroid(std::vector<vec3f> inPoints, vec3f& outPolygonCentroid, std::vector<vec3f>& outPoints)
-    {   
-      suhterlandHodgman(inPoints, m_boxPoints, outPoints);
-
-      if(outPoints.size() < 3)//triangle only touched the voxel
-      {
-        return 0;
-      }
-
-      float area = 0.0f;
-      vec3f pivotPoint(outPoints[0]), secondPoint(outPoints[1]);
-      std::vector<float> triangelAreas;
-      std::vector<vec3f> triangleCentroids;
-      for(unsigned int i = 2; i < outPoints.size(); i++)//triangulation through fan triangulation
-      {
-        triangelAreas.push_back(calculateTriangleArea(pivotPoint, secondPoint, outPoints[i]));
-        triangleCentroids.push_back((pivotPoint + secondPoint + outPoints[i]) / 3.0f);
-        area += triangelAreas.back();
-        secondPoint = outPoints[i];
-      }
-
-      assert(area > 0.0f);
-
-      vec3f centroid = vec3f::identity();
-      for(unsigned int i = 0; i < triangleCentroids.size(); i++)
-      {
-        centroid[0] += triangleCentroids[i][0] * triangelAreas[i];
-        centroid[1] += triangleCentroids[i][1] * triangelAreas[i];
-        centroid[2] += triangleCentroids[i][2] * triangelAreas[i];
-      }
-
-      centroid[0] /= area;
-      centroid[1] /= area;
-      centroid[2] /= area;
-
-      outPolygonCentroid = centroid;
-
-      return area;
     }
 
     void CacheGenerator::generateCachesPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin)
@@ -317,12 +248,12 @@ namespace he
         std::list<PolygonData>::iterator pit = polygons.begin();
         while(pit != polygons.end())
         {
-          if(acosf(math::clamp(vec3f::dot(pit->normal, qNormal), -1.0f, 1.0f)) < m_maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
+          if(acosf(math::clamp(vec3f::dot(pit->polygon.getNormal(), qNormal), -1.0f, 1.0f)) < m_maxAngle)//take the normal only if the angle to the normal-bin is not larger than 'maxAngle'
           {
-            vec2ui bin = normalToBin(pit->normal, thetaQuantizer, phiQuantizer);
+            vec2ui bin = normalToBin(pit->polygon.getNormal(), thetaQuantizer, phiQuantizer);
             bin[0] = bin[0] % normalBin.size();
             bin[1] = bin[1] == normalBin.size() ? normalBin.size() - 1 : bin[1];
-            normalBin[bin[0]][bin[1]] -= pit->area;
+            normalBin[bin[0]][bin[1]] -= pit->polygon.getArea();
             cachePolygons.push_back(*pit);
 
             pit = polygons.erase(pit);
@@ -341,9 +272,9 @@ namespace he
 
         for(std::list<PolygonData>::iterator it = cachePolygons.begin(); it != cachePolygons.end(); it++)
         {
-          summedArea += it->area;
-          summedCentroid += it->centroid * it->area;
-          summedNormal += it->normal * it->area;
+          summedArea += it->polygon.getArea();
+          summedCentroid += it->polygon.getCentroid() * it->polygon.getArea();
+          summedNormal += it->polygon.getNormal() * it->polygon.getArea();
         }
 
         RawCache cache;
@@ -373,9 +304,9 @@ namespace he
           vec3f tmpNearestPoint;
           float distance, tmpError;
 
-          distance = calculatePointPolygonDistance(pit->polygonPoints, cit->position, tmpNearestPoint);
+          distance = pit->polygon.calculatePointPolygonDistance(cit->position, tmpNearestPoint);
 
-          tmpError = distance * (sqrt(1.0f - math::clamp(vec3f::dot(pit->normal, cit->normal), 0.0f, 1.0f)) + 0.01f);//the distance would be senseless without normal penalty term
+          tmpError = distance * (sqrt(1.0f - math::clamp(vec3f::dot(pit->polygon.getNormal(), cit->normal), 0.0f, 1.0f)) + 0.01f);//the distance would be senseless without normal penalty term
 
           if(error > tmpError)
           {
@@ -483,10 +414,7 @@ namespace he
               startIndex = m_caches.size();
             }
 
-            Cache cache;
-            cache.position = rit->position;
-            cache.normal = rit->normal;
-            m_caches.push_back(cache);
+            m_caches.push_back(*rit);
 
             rit = m_reducedCaches.erase(rit);
             if(m_reducedCaches.empty()) break;
@@ -505,8 +433,6 @@ namespace he
     {
       m_caches.clear();
       m_triangleCacheIndices.clear();
-
-      generateAABB(positions, m_globalBBMin, m_globalBBMax);
 
       vec3f boxSize(m_globalBBMax - m_globalBBMin);
 
@@ -546,7 +472,17 @@ namespace he
       m_polygons.clear();
       m_linearizedAreaCaches.clear();
 
-      outCaches = m_caches;
+      util::VoronoiGenerator voronoiGenerator;
+      voronoiGenerator.generateCacheArea(trianglePositions, m_caches, m_globalBBMin, m_globalBBMax);
+
+      outCaches.resize(m_caches.size());
+      for(unsigned int i = 0; i < m_caches.size(); i++)
+      {
+        outCaches[i].position = m_caches[i].position;
+        outCaches[i].normal = m_caches[i].normal;
+        outCaches[i].area[0] = m_caches[i].area;
+      }
+
       outTriangleCacheIndices = m_triangleCacheIndices;
     }
   }

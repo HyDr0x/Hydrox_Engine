@@ -14,6 +14,7 @@ layout(triangle_strip, max_vertices = 3) out;
 
 layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
 layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
+layout(r16f, binding = 2) writeonly uniform image2D globalCacheAreaBuffer;
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
 {
@@ -77,10 +78,17 @@ void main()
 			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
 			ivec2 coord = ivec2(mod(index, bufferResolution), index / bufferResolution);
 			
-			imageStore(globalCachePositionBuffer, coord, vec4((trfMatrix[vsout_instanceIndex[0]] * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength));
+			mat4 modelMatrix = trfMatrix[vsout_instanceIndex[0]];
 			
-			vec3 normal = normalize(mat3(trfMatrix[vsout_instanceIndex[0]]) * caches[cacheIndexOffsetTMP + i].normal.xyz);
+			imageStore(globalCachePositionBuffer, coord, vec4((modelMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength));
+			
+			vec3 normal = normalize(mat3(modelMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
 			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularStrength, cacheMaterial.specularExponent));
+			
+			//extract matrix scale for area, expect uniform scale!
+			float scale = sqrt(modelMatrix[0][0] * modelMatrix[0][0] + modelMatrix[0][1] * modelMatrix[0][1] + modelMatrix[0][2] * modelMatrix[0][2]);
+			
+			imageStore(globalCacheAreaBuffer, coord, scale * caches[cacheIndexOffsetTMP + i].area);
 		}
 	}
 	
