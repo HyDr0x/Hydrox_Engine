@@ -23,7 +23,7 @@ namespace he
 
       bool collisionPlane(const Plane& plane, vec3f& outPos, vec3f& outDirection) const;
       bool collisionLine(vec3f pos, vec3f direction, vec3f& output) const;
-      bool collisionCenteredBox(vec3f boxCenter, vec3f boxHalfSize) const;
+      bool collisionCenteredBox(vec3f boxCenter, vec3f boxHalfSize, float epsilon) const;
       bool isPointBehind(vec3f v, float epsilon = 0.0f) const;
 
       vec3f getPosition() const;

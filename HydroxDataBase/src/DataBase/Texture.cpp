@@ -1,193 +1,113 @@
-#include "Renderer/Resources/Texture2D.h"
+#include "DataBase/Texture.h"
 
-#include <assert.h>
+#include <cassert>
+#include <vector>
 
 namespace he
 {
-	namespace renderer
+  namespace db
 	{
-	
-
-    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data, bool mipmapping) : m_target(target),
+    Texture::Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) : 
+      m_target(target),
       m_width(width),
       m_height(height),
       m_type(type),
       m_internalFormat(internalFormat),
       m_format(format),
-      m_slot(0)
-    {
-      unsigned int bytesPerPixel;
-      unsigned int components = 0;
-
-      switch (m_internalFormat)
-      {
-      case GL_RGB16:
-        bytesPerPixel = 6;
-        components = 3;
-        break;
-      case GL_RGB32F:
-        bytesPerPixel = 12;
-        components = 3;
-        break;
-      case GL_RGB8:
-        bytesPerPixel = 3;
-        components = 3;
-        break;
-      case GL_RGBA16:
-        bytesPerPixel = 8;
-        components = 4;
-        break;
-      case GL_RGBA32F:
-        bytesPerPixel = 16;
-        components = 4;
-        break;
-      case GL_RGBA8:
-      default:
-        bytesPerPixel = 4;
-        components = 4;
-      }
-
-      unsigned int length = m_width * m_height * bytesPerPixel;
-      m_hash = MurmurHash64A(data, length, 0);
-
-      glGenTextures(1, &m_texIndex);
-      glBindTexture(m_target, m_texIndex);
-      glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-      glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, data);
-
-      if (mipmapping)
-      {
-        glGenerateMipmap(m_target);
-      }
-	    glBindTexture(m_target, 0);
-    }
-
-    Texture2D::Texture2D(const Texture2D& o)
-    {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_height = o.m_height;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
-    }
-
-    Texture2D& Texture2D::operator=(const Texture2D& o)
-    {
-      m_hash = o.m_hash;
-      m_width = o.m_width;
-      m_height = o.m_height;
-	    m_texIndex = o.m_texIndex;
-	    m_target = o.m_target;
-      m_internalFormat = o.m_internalFormat;
-      m_format = o.m_format;
-      m_type = o.m_type;
-	    m_slot = o.m_slot;
-
-      return *this;
-    }
-
-    Texture2D::~Texture2D()
+      m_channelNumber(channelNumber),
+      m_bitsPerComponent(bitsPerComponent),
+      m_mipmapping(mipmapping)
     {
     }
 
-    void Texture2D::free()
+    Texture::~Texture()
     {
       glDeleteTextures(1, &m_texIndex);
     }
 
-    void Texture2D::setTexture(GLint location, GLuint slot)
+    void Texture::free()
     {
-      assert(slot < 31 && "ERROR, texture slot too high\n");
+      glDeleteTextures(1, &m_texIndex);
+    }
 
-	    m_slot = slot;
+    void Texture::clearTexture(const void *data)
+    {
+      glBindTexture(m_target, m_texIndex);
+      glClearTexImage(m_texIndex, 0, m_format, m_type, data);
+      glBindTexture(m_target, 0);
 
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, m_texIndex);
+      m_dirtyHash = true;
+    }
+
+    void Texture::setTexture(GLint location, GLuint slot) const
+    {
+      assert(slot < 31 && "ERROR, texture slot too high/n");
+
+      glActiveTexture(GL_TEXTURE0 + slot);
+      glBindTexture(m_target, m_texIndex);
       glUniform1i(location, slot);
     }
 
-    void Texture2D::unsetTexture()
+    void Texture::unsetTexture(GLuint slot) const
     {
-	    glActiveTexture(GL_TEXTURE0 + m_slot);
-	    glBindTexture(m_target, 0);
+      glActiveTexture(GL_TEXTURE0 + slot);
+      glBindTexture(m_target, 0);
     }
 
-    void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter)
+    void Texture::generateMipMapps()
     {
-	    glBindTexture(m_target, m_texIndex);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, edgeModeS);
-		    glTexParameteri(m_target, GL_TEXTURE_WRAP_T, edgeModeT);
-		    glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
-		    glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
-	    glBindTexture(m_target, 0);
+      m_mipmapping = true;
+      glBindTexture(m_target, m_texIndex);
+      glGenerateMipmap(m_target);
+      glBindTexture(m_target, 0);
     }
 
-    util::Vector<unsigned int, 2> Texture2D::getResolution()
+    GLuint Texture::getIndex() const
     {
-	    return util::Vector<unsigned int, 2>(m_width, m_height);
+      return m_texIndex;
     }
 
-    GLenum Texture2D::getTarget()
+    GLenum Texture::getTarget() const
     {
-	    return m_target;
+      return m_target;
     }
 
-    GLenum Texture2D::getInternalFormat()
+    GLenum Texture::getInternalFormat() const
     {
       return m_internalFormat;
     }
 
-    GLenum Texture2D::getFormat()
+    GLenum Texture::getFormat() const
     {
       return m_format;
     }
 
-    GLenum Texture2D::getType()
+    GLenum Texture::getType() const
     {
       return m_type;
     }
 
-    unsigned int Texture2D::getTextureSize()
+    GLuint Texture::getChannelNumber() const
     {
-      unsigned int bytesPerPixel;
-
-      switch (m_internalFormat)
-      {
-      case GL_RGB16:
-        bytesPerPixel = 6;
-        break;
-      case GL_RGB32F:
-        bytesPerPixel = 12;
-        break;
-      case GL_RGB8:
-        bytesPerPixel = 3;
-        break;
-      case GL_RGBA16:
-        bytesPerPixel = 8;
-        break;
-      case GL_RGBA32F:
-        bytesPerPixel = 16;
-        break;
-      case GL_RGBA8:
-      default:
-        bytesPerPixel = 4;
-      }
-
-      return m_width * m_height * bytesPerPixel;
+      return m_channelNumber;
     }
 
-    void Texture2D::getTextureData(GLvoid* data)
+    GLuint Texture::getBitsPerComponent() const
+    {
+      return m_bitsPerComponent;
+    }
+
+    void Texture::getTextureData(GLvoid* data) const
     {
       glBindTexture(m_target, m_texIndex);
       glGetTexImage(m_target, 0, m_format, m_type, data);
+      glBindTexture(m_target, 0);
+    }
+
+    void Texture::getTextureData(GLenum format, GLenum type, GLvoid* data) const
+    {
+      glBindTexture(m_target, m_texIndex);
+      glGetTexImage(m_target, 0, format, type, data);
       glBindTexture(m_target, 0);
     }
 	}

@@ -22,8 +22,8 @@ namespace he
         m_cpuTime = clock() - m_cpuTime;
         m_cpuTime /= (CLOCKS_PER_SEC * 0.001f);
 
-        std::cout << m_timerName << std::endl;
-        std::cout << "CPU Time: " << m_cpuTime << " ms" << std::endl;
+        std::clog << m_timerName << std::endl;
+        std::clog << "CPU Time: " << m_cpuTime << " ms" << std::endl;
       }
     }
 

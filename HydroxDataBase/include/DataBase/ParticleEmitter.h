@@ -15,6 +15,10 @@ namespace he
 
       void free();
 
+    protected:
+
+      virtual void updateHash();
+
     private:
     };
 

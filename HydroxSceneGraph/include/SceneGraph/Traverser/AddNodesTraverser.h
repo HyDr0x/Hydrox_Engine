@@ -15,7 +15,7 @@ namespace he
     {
     public:
 
-      AddNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager, std::vector<float> lodRanges, util::vec3f camPos);
+      AddNodesTraverser(TreeNodeAllocator& allocator, util::SharedPointer<util::EventManager> eventManager, std::vector<float> lodRanges, util::vec3f camPos);
       virtual ~AddNodesTraverser();
 
       virtual bool preTraverse(AnimatedTransformNode& treeNode);
@@ -44,7 +44,7 @@ namespace he
 
     protected:
 
-      util::EventManager& m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       util::vec3f m_camPos;
       std::vector<float> m_lodRanges;

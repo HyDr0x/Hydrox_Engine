@@ -12,10 +12,8 @@ namespace he
 {
   namespace util
   {
-    void sutherlandHodgman(Plane clippingPlane, const Polygon& polygon, Polygon& clippedPolygon)
+    void sutherlandHodgman(Plane clippingPlane, const Polygon& polygon, float epsilon, Polygon& clippedPolygon)
     {
-      float epsilon = 0.00001f;
-
       std::vector<vec3f> outPoints;
 
       vec3f output;
@@ -47,6 +45,26 @@ namespace he
       }
 
       clippedPolygon = Polygon(outPoints);
+    }
+
+    Polygon cutPolygonBox(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, float epsilon)
+    {
+      Polygon inPolygon, outPolygon(inPoints);
+
+      for(unsigned int i = 0; i < 6; i++)//all 6 box planes
+      {
+        inPolygon = outPolygon;
+        outPolygon.clear();
+
+        sutherlandHodgman(Plane(boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2]), inPolygon, epsilon, outPolygon);
+
+        if(outPolygon.getPointNumber() < 3)//polygon only touched the voxel
+        {
+          break;
+        }
+      }
+
+      return outPolygon;
     }
 
     static bool polygonLineCollision(const Polygon& polygon, vec3f p, vec3f direction, vec3f& output, vec2ui& edgeIndices)
@@ -295,26 +313,6 @@ namespace he
 
       outPolygon = Polygon(outPolygons[outsidePolygonIndex].getPoints(), insidePolygons);
       return collision;
-    }
-
-    Polygon cutPolygonBox(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints)
-    {
-      Polygon inPolygon, outPolygon(inPoints);
-
-      for(unsigned int i = 0; i < 6; i++)//all 6 box planes
-      {
-        inPolygon = outPolygon;
-        outPolygon.clear();
-
-        sutherlandHodgman(Plane(boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2]), inPolygon, outPolygon);
-
-        if(outPolygon.getPointNumber() < 3)//polygon only touched the voxel
-        {
-          break;
-        }
-      }
-
-      return outPolygon;
     }
   }
 }

@@ -19,8 +19,8 @@ namespace he
         glDeleteQueries(1, &m_query);
         m_openGLTime /= 1000;
 
-        std::cout << m_timerName << std::endl;
-        std::cout << "OpenGL Time: " << m_openGLTime << " m" << MICROSIGN << std::endl;
+        std::clog << m_timerName << std::endl;
+        std::clog << "OpenGL Time: " << m_openGLTime << " m" << MICROSIGN << std::endl;
       }
     }
 

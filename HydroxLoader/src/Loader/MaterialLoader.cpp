@@ -8,7 +8,6 @@
 
 #include <DataBase/Material.h>
 
-#include "Loader/RenderShaderLoader.h"
 #include "Loader/ILDevilLoader.h"
 
 namespace he
@@ -23,6 +22,10 @@ namespace he
       m_materialFileKeywords["Specular Strength"] = SPECULARSTRENGTH;
       m_materialFileKeywords["Ambient Strength"] = AMBIENTSTRENGTH;
       m_materialFileKeywords["Specular Exponent"] = SPECULAREXPONENT;
+
+      m_materialFileKeywords["Transparency"] = TRANSPARENCY;
+      m_materialFileKeywords["Debug"] = RENDERDEBUG;
+      m_materialFileKeywords["Unicolor"] = UNICOLOR;
 
       m_materialFileKeywords["Diffuse Map"] = DIFFUSETEXTURE;
       m_materialFileKeywords["Normal Map"] = NORMALMAP;
@@ -47,6 +50,10 @@ namespace he
 
       std::ifstream file(filename);
       std::string line;
+
+      bool debugMaterial = false;
+      bool transparency = false;
+      util::vec4f uniColor;
 
       if(file.is_open())
       {
@@ -77,6 +84,17 @@ namespace he
           case SPECULAREXPONENT:
             std::getline(file, line);
             materialData.specularExponent = static_cast<float>(std::strtod(line.c_str(), nullptr));
+            break;
+          case TRANSPARENCY:
+            std::getline(file, line);
+            transparency = static_cast<bool>(std::strtod(line.c_str(), nullptr));
+            break;
+          case RENDERDEBUG:
+            std::getline(file, line);
+            debugMaterial = static_cast<bool>(std::strtod(line.c_str(), nullptr));
+            break;
+          case UNICOLOR:
+            file >> uniColor;
             break;
           case DIFFUSETEXTURE:
             for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
@@ -124,11 +142,11 @@ namespace he
           }
         }
 
-        std::vector<uint64_t> hashes;
+        std::vector<std::vector<uint64_t>> hashes(db::Material::TEXTURETYPENUM);
 
         ILDevilLoader textureLoader(m_singletonManager);
 
-        std::vector<std::vector<util::ResourceHandle>> textureHandles(textureFilenames.size());
+        std::vector<std::vector<util::ResourceHandle>> textureHandles(db::Material::TEXTURETYPENUM);
 
         for(unsigned int i = 0; i < textureFilenames.size(); i++)
         {
@@ -138,12 +156,12 @@ namespace he
             {
               textureHandles[i].push_back(textureLoader.loadResource(textureFilenames[i][j]));
               db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textureHandles[i][j]);
-              hashes.push_back(texture->getHash());
+              hashes[i].push_back(texture->getHash());
             }
           }
         }
 
-        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, hashes, false));
+        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, hashes, transparency, debugMaterial, uniColor));
       }
       else//wrong filename or file does not exist
       {
@@ -161,8 +179,8 @@ namespace he
 
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
-      std::vector<uint64_t> hashes;
-      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), hashes, false));
+      std::vector<std::vector<uint64_t>> hashes(db::Material::TEXTURETYPENUM);
+      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), hashes, false, true));
     }
   }
 }

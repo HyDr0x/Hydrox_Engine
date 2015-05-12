@@ -1,5 +1,7 @@
 #include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -23,7 +25,7 @@ namespace he
 
     void RenderIndexGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
     void RenderIndexGeometryTraverser::setGlobalBufferResolution(unsigned int globalBufferResolution)
@@ -31,46 +33,46 @@ namespace he
       m_globalBufferResolution = globalBufferResolution;
     }
 
-    bool RenderIndexGeometryTraverser::preTraverse(GroupNode* treeNode)
+    bool RenderIndexGeometryTraverser::preTraverse(GroupNode * treeNode)
     {
       m_globalCacheOffset = 0;//reset global cache offset counter
 
       return true;
     }
 
-    bool RenderIndexGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RenderIndexGeometryTraverser::preTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->setVertexArray();
 
       return true;
     }
 
-    void RenderIndexGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RenderIndexGeometryTraverser::postTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->unsetVertexArray();
     }
 
-    bool RenderIndexGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RenderIndexGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useShader();
+      shader.useShader();
 
-      db::RenderShader::setUniform(1, GL_UNSIGNED_INT, &m_globalBufferResolution);
+      sh::RenderShader::setUniform(1, GL_UNSIGNED_INT, &m_globalBufferResolution);
 
       return true;
     }
 
-    void RenderIndexGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RenderIndexGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
-    bool RenderIndexGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderIndexGeometryTraverser::preTraverse(RenderNode * treeNode)
     {
-      db::RenderShader::setUniform(0, GL_UNSIGNED_INT, &m_globalCacheOffset);
+      sh::RenderShader::setUniform(0, GL_UNSIGNED_INT, &m_globalCacheOffset);
 
       treeNode->getRenderGroup()->rasterizeIndexGeometry();
 
@@ -79,7 +81,7 @@ namespace he
       return true;
     }
 
-    void RenderIndexGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderIndexGeometryTraverser::postTraverse(RenderNode * treeNode)
     {
     }
   }

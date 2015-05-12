@@ -11,7 +11,7 @@ namespace he
     {
     public:
 
-      GroupNode(GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr, TreeNode* firstChild = nullptr);
+      GroupNode(GroupNode * parent = nullptr, util::SharedPointer<TreeNode> nextSibling = util::SharedPointer<TreeNode>(), util::SharedPointer<TreeNode> firstChild = util::SharedPointer<TreeNode>());
       virtual ~GroupNode();
 
       virtual bool preTraverse(Traverser* traverser);
@@ -20,13 +20,13 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const;
       virtual void postTraverse(ConstTraverser* traverser) const;
 
-      TreeNode* getFirstChild() const;
+      util::SharedPointer<TreeNode> getFirstChild() const;
 
-      void setFirstChild(TreeNode* firstChild);
+      void setFirstChild(util::SharedPointer<TreeNode> firstChild);
 
     protected:
 
-      TreeNode* m_firstChild;
+      util::SharedPointer<TreeNode> m_firstChild;
     };
   }
 }

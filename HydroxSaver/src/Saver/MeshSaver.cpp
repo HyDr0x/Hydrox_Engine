@@ -7,7 +7,8 @@
 
 #include <DataBase/Material.h>
 #include <DataBase/Texture2D.h>
-#include <DataBase/RenderShader.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include "Saver/RenderShaderSaver.h"
 #include "Saver/ILDevilSaver.h"
@@ -40,7 +41,7 @@ namespace he
       fileStream.write((char*)&mesh->getIndexBuffer()[0], sizeof(mesh->getIndexBuffer()[0]) * mesh->getIndexCount());
       fileStream.write((char*)&mesh->getVBOBuffer()[0], sizeof(mesh->getVBOBuffer()[0]) * mesh->getVBOSize());
       if(meshData.cacheSize > 0) fileStream.write((char*)&mesh->getCaches()[0], sizeof(mesh->getCaches()[0]) * mesh->getCaches().size());
-      fileStream.write((char*)&mesh->getTriangleCacheIndices()[0], sizeof(mesh->getTriangleCacheIndices()[0]) * mesh->getTriangleCacheIndices().size());
+      if(meshData.cacheSize > 0) fileStream.write((char*)&mesh->getTriangleCacheIndices()[0], sizeof(mesh->getTriangleCacheIndices()[0]) * mesh->getTriangleCacheIndices().size());
       
       fileStream.close();
     }

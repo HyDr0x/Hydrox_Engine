@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <Utilities/Pointer/SharedPointer.h>
+
 namespace he
 {
   namespace renderer
@@ -16,7 +18,7 @@ namespace he
     {
     public:
 
-      TreeNode(GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      TreeNode(GroupNode * parent = nullptr, util::SharedPointer<TreeNode> nextSibling = util::SharedPointer<TreeNode>());
       virtual ~TreeNode() = 0;
 
       virtual bool preTraverse(Traverser* traverser) = 0;
@@ -25,17 +27,17 @@ namespace he
       virtual bool preTraverse(ConstTraverser* traverser) const = 0;
       virtual void postTraverse(ConstTraverser* traverser) const = 0;
 
-      virtual TreeNode* getFirstChild() const;
-      TreeNode* getNextSibling() const;
+      virtual util::SharedPointer<TreeNode> getFirstChild() const;
+      util::SharedPointer<TreeNode> getNextSibling() const;
       GroupNode* getParent() const;
 
-      void setNextSibling(TreeNode* nextSibling);
-      void setParent(GroupNode* parent);
+      void setNextSibling(util::SharedPointer<TreeNode> nextSibling);
+      void setParent(GroupNode *parent);
 
     protected:
 
-      GroupNode* m_parent;
-      TreeNode* m_nextSibling;
+      GroupNode *m_parent;
+      util::SharedPointer<TreeNode> m_nextSibling;
 
     private:
 

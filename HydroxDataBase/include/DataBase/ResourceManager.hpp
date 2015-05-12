@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <algorithm>
 
 #include <Utilities/Observer/Observer.hpp>
 #include <Utilities/Miscellaneous/SingletonBehaviour.hpp>
@@ -14,8 +15,6 @@
 #include "DataBase/Mesh.h"
 #include "DataBase/Material.h"
 #include "DataBase/ParticleEmitter.h"
-#include "DataBase/RenderShader.h"
-#include "DataBase/ComputeShader.h"
 #include "DataBase/Texture2D.h"
 #include "DataBase/Texture3D.h"
 
@@ -35,7 +34,10 @@ namespace he
       {
         for(unsigned int i = 0; i < m_objectsCache.size(); i++)
         {
-          m_objectsCache[i].free();
+          if(std::find(m_list.begin(), m_list.end(), i) == m_list.end())
+          {
+            m_objectsCache[i].free();
+          }
         }
       }
 
@@ -44,12 +46,12 @@ namespace he
         return &m_objectsCache[handle.getID()];
       }
 
-      bool isCached(CLASS& object) const
+      bool isCached(CLASS& object)
       {
         return m_objectHash.count(object.getHash());
       }
 
-      util::ResourceHandle addObject(const CLASS& object)
+      util::ResourceHandle addObject(CLASS& object)
       {
         uint64_t hash = object.getHash();
 
@@ -113,16 +115,12 @@ namespace he
     template class GRAPHICAPI ResourceManager<Mesh>;
     template class GRAPHICAPI ResourceManager<Material>;
     template class GRAPHICAPI ResourceManager<ParticleEmitter>;
-    template class GRAPHICAPI ResourceManager<RenderShader>;
-    template class GRAPHICAPI ResourceManager<ComputeShader>;
     template class GRAPHICAPI ResourceManager<Texture2D>;
     template class GRAPHICAPI ResourceManager<Texture3D>;
 
     typedef ResourceManager<Mesh> ModelManager;
     typedef ResourceManager<Material> MaterialManager;
     typedef ResourceManager<ParticleEmitter> ParticleEmitterManager;
-    typedef ResourceManager<RenderShader> RenderShaderManager;
-    typedef ResourceManager<ComputeShader> ComputeShaderManager;
     typedef ResourceManager<Texture2D> TextureManager;
     typedef ResourceManager<Texture3D> TextureArrayManager;
   }

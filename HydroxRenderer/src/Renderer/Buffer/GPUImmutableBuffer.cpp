@@ -10,6 +10,7 @@ namespace he
     GPUImmutableBuffer::GPUImmutableBuffer()
     {
       m_immutableBufferIndex = 0;
+      m_memoryFence = 0;
     }
 
     GPUImmutableBuffer::~GPUImmutableBuffer()
@@ -45,9 +46,15 @@ namespace he
       return size < m_currentBufferSize;
     }
 
+    GLuint GPUImmutableBuffer::getBufferSize() const
+    {
+      return m_currentBufferSize;
+    }
+
     void GPUImmutableBuffer::setMemoryFence()
     {
       glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
+      glDeleteSync(m_memoryFence);
       m_memoryFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     }
 

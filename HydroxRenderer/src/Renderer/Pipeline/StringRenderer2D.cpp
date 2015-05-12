@@ -1,7 +1,5 @@
 #include "Renderer/Pipeline/StringRenderer2D.h"
 
-#include <DataBase/ShaderContainer.h>
-
 #include "Renderer/String/StringTexture2D.h"
 
 #include "Renderer/Pipeline/RenderOptions.h"
@@ -24,12 +22,12 @@ namespace he
 
     void StringRenderer2D::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
-      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
+      m_stringShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::STRING2D, sh::ShaderSlotFlags(3));
 
-      m_stringShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::STRING2D, util::Flags<VertexElements>(3));
+      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
       m_transparentStrings.resize(m_maxLayer);
@@ -37,14 +35,14 @@ namespace he
       glGenVertexArrays(1, &m_stringVAO);
       glBindVertexArray(m_stringVAO);
 
-      glVertexAttribFormat(db::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec2f));
+      glVertexAttribFormat(sh::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribFormat(sh::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec2f));
 
-      glVertexAttribBinding(db::RenderShader::POSITION, 0);
-      glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
+      glVertexAttribBinding(sh::RenderShader::POSITION, 0);
+      glVertexAttribBinding(sh::RenderShader::TEXTURE0, 0);
 
-      glEnableVertexAttribArray(db::RenderShader::POSITION);
-      glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
+      glEnableVertexAttribArray(sh::RenderShader::TEXTURE0);
 
       glBindVertexArray(0);
     }
@@ -60,9 +58,9 @@ namespace he
 
       const StringTexture2D *renderString;
       db::Texture2D *renderTexture;
-      db::RenderShader *stringShader = m_renderShaderManager->getObject(m_stringShaderHandle);
+      const sh::RenderShader& stringShader = m_renderShaderContainer->getRenderShader(m_stringShaderHandle);
 
-      stringShader->useShader();
+      stringShader.useShader();
 
       for (std::list<const StringTexture2D*>::const_iterator stringIDIterator = m_opaqueStrings.begin(); stringIDIterator != m_opaqueStrings.end(); stringIDIterator++)
       {
@@ -74,8 +72,8 @@ namespace he
 
           util::Matrix<float, 3> worldMatrix = renderString->getTransformationMatrix();
           float z = renderString->getLayer() / (float)m_maxLayer;
-          db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-          db::RenderShader::setUniform(5, GL_FLOAT, &z);
+          sh::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+          sh::RenderShader::setUniform(5, GL_FLOAT, &z);
 
           renderString->render();
         }
@@ -100,15 +98,15 @@ namespace he
 
             util::Matrix<float, 3> worldMatrix = renderString->getTransformationMatrix();
             float z = renderString->getLayer() / (float)m_maxLayer;
-            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-            db::RenderShader::setUniform(5, GL_FLOAT, &z);
+            sh::RenderShader::setUniform(1, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            sh::RenderShader::setUniform(5, GL_FLOAT, &z);
 
             renderString->render();
           }
         }
       }
 
-      stringShader->useNoShader();
+      stringShader.useNoShader();
 
       glBindVertexArray(0);
 

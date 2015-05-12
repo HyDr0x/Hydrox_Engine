@@ -12,9 +12,9 @@ namespace he
 {
   namespace util
   {
-    void sutherlandHodgman(Plane clippingPlane, const Polygon& polygon, Polygon& clippedPolygon);//construct a polygon that lies behind the plane
+    void sutherlandHodgman(Plane clippingPlane, const Polygon& polygon, float epsilon, Polygon& clippedPolygon);//construct a polygon that lies behind the plane
     bool polygonUnion2D(Polygon tracePolygon, Polygon clippingPolygon, Polygon& outPolygon);//constructs the union from two planar polygons that lie in the same plane, returns true if they have been connected and false if not (means no colision)
-    Polygon cutPolygonBox(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints);
+    Polygon cutPolygonBox(std::vector<vec3f> inPoints, std::vector<vec3f> boxPoints, float epsilon);
   }
 }
 

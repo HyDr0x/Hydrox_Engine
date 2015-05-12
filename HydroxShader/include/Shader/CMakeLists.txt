@@ -1,0 +1,10 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DLLExport.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderShader.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShaderContainer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/Shader.h 
+	PARENT_SCOPE 
+)

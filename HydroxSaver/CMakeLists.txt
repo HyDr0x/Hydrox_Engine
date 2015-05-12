@@ -26,6 +26,7 @@ set(
   ${HYDROX_SG_INCLUDE} 
   ${HYDROX_RE_INCLUDE} 
 	${HYDROX_DB_INCLUDE} 
+	${HYDROX_SH_INCLUDE} 
   ${GLEW_INCLUDE_DIRS} 
   ${IL_INCLUDE_DIR} 
 )
@@ -38,6 +39,7 @@ set(
   debug ${HYDROX_SG_LIB_DBG}${LIBSUFFIX} 
   debug ${HYDROX_RE_LIB_DBG}${LIBSUFFIX} 
 	debug ${HYDROX_DB_LIB_DBG}${LIBSUFFIX} 
+	debug ${HYDROX_SH_LIB_DBG}${LIBSUFFIX} 
   debug ${GLEW_LIBRARIES}
 )
 
@@ -47,6 +49,7 @@ set(
   optimized ${HYDROX_SG_LIB_REL}${LIBSUFFIX} 
   optimized ${HYDROX_RE_LIB_REL}${LIBSUFFIX} 
 	optimized ${HYDROX_DB_LIB_REL}${LIBSUFFIX} 
+	optimized ${HYDROX_SH_LIB_REL}${LIBSUFFIX} 
   optimized ${GLEW_LIBRARIES} 
 )
 

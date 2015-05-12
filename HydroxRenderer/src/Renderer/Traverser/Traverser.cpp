@@ -15,7 +15,7 @@ namespace he
     {
     }
 
-    void Traverser::doTraverse(TreeNode *treeNode)
+    void Traverser::doTraverse(util::SharedPointer<TreeNode> treeNode)
     {
       if(treeNode->preTraverse(this))
       {
@@ -24,9 +24,9 @@ namespace he
       treeNode->postTraverse(this);
     }
 
-    void Traverser::doTraverseDown(TreeNode* treeNode)
+    void Traverser::doTraverseDown(util::SharedPointer<TreeNode> treeNode)
     {
-      while(treeNode != nullptr)
+      while(treeNode)
       {
         if(treeNode->preTraverse(this))
         {
@@ -43,57 +43,57 @@ namespace he
       }
     }
 
-    bool Traverser::preTraverse(TreeNode* treeNode)
+    bool Traverser::preTraverse(TreeNode *treeNode)
     {
       return true;
     }
 
-    void Traverser::postTraverse(TreeNode* treeNode)
+    void Traverser::postTraverse(TreeNode *treeNode)
     {
     }
 
-    bool Traverser::preTraverse(GroupNode* treeNode)
-    {
-      return true;
-    }
-
-    void Traverser::postTraverse(GroupNode* treeNode)
-    {
-    }
-
-    bool Traverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool Traverser::preTraverse(GroupNode *treeNode)
     {
       return true;
     }
 
-    void Traverser::postTraverse(VertexDeclarationNode* treeNode)
+    void Traverser::postTraverse(GroupNode *treeNode)
     {
     }
 
-    bool Traverser::preTraverse(ShaderNode* treeNode)
-    {
-      return true;
-    }
-
-    void Traverser::postTraverse(ShaderNode* treeNode)
-    {
-    }
-
-    bool Traverser::preTraverse(TextureNode* treeNode)
+    bool Traverser::preTraverse(VertexDeclarationNode *treeNode)
     {
       return true;
     }
 
-    void Traverser::postTraverse(TextureNode* treeNode)
+    void Traverser::postTraverse(VertexDeclarationNode *treeNode)
     {
     }
 
-    bool Traverser::preTraverse(RenderNode* treeNode)
+    bool Traverser::preTraverse(ShaderNode *treeNode)
     {
       return true;
     }
 
-    void Traverser::postTraverse(RenderNode* treeNode)
+    void Traverser::postTraverse(ShaderNode *treeNode)
+    {
+    }
+
+    bool Traverser::preTraverse(TextureNode *treeNode)
+    {
+      return true;
+    }
+
+    void Traverser::postTraverse(TextureNode *treeNode)
+    {
+    }
+
+    bool Traverser::preTraverse(RenderNode *treeNode)
+    {
+      return true;
+    }
+
+    void Traverser::postTraverse(RenderNode *treeNode)
     {
     }
   }

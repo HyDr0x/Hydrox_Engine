@@ -5,7 +5,7 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/ResourceManager.hpp>
+#include <DataBase/Texture2D.h>
 
 #include "Renderer/Traverser/Traverser.h"
 
@@ -13,6 +13,11 @@
 
 namespace he
 {
+  namespace sh
+  {
+    class ShaderContainer;
+  }
+
   namespace renderer
   {
     class RenderIndirectLightingGeometryTraverser : public Traverser
@@ -26,20 +31,20 @@ namespace he
 
       void setGlobalBufferResolution(unsigned int globalBufferResolution);
 
-      virtual bool preTraverse(GroupNode* treeNode);
+      virtual bool preTraverse(GroupNode * treeNode);
 
-      virtual bool preTraverse(VertexDeclarationNode* treeNode);
-      virtual void postTraverse(VertexDeclarationNode* treeNode);
+      virtual bool preTraverse(VertexDeclarationNode * treeNode);
+      virtual void postTraverse(VertexDeclarationNode * treeNode);
 
-      virtual bool preTraverse(ShaderNode* treeNode);
-      virtual void postTraverse(ShaderNode* treeNode);
+      virtual bool preTraverse(ShaderNode * treeNode);
+      virtual void postTraverse(ShaderNode * treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
+      virtual void postTraverse(RenderNode * treeNode);
 
     private:
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
 
       util::SharedPointer<db::Texture2D> m_normalMap;
       util::SharedPointer<db::Texture2D> m_materialMap;

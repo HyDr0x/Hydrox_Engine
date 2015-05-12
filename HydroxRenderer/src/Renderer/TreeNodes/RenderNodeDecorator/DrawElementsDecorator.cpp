@@ -14,12 +14,9 @@ namespace he
       m_indexType(indexType), 
       m_primitiveType(primitiveType),
       m_vertexStride(vertexStride),
-      m_vboSize(0),
-      m_iboSize(0),
-      m_triangleNumber(0),
       m_cacheNumber(0),
       m_perInstanceCacheNumber(0),
-      m_meshNumberChanged(false)
+      m_updateMeshData(false)
     {
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_options = singletonManager->getService<RenderOptions>();
@@ -54,17 +51,12 @@ namespace he
       {
         if(!m_meshes.count(geometryContainer->getMeshHandle()))
         {
-          m_meshNumberChanged = true;
+          m_updateMeshData = true;
 
           m_meshes[geometryContainer->getMeshHandle()].instanceNumber = 0;
-
-          m_vboSize += mesh->getVBOSize();
-          m_iboSize += mesh->getIndexCount() * sizeof(GLINDEXTYPE);
-          m_triangleNumber += mesh->getPrimitiveCount();
-          m_cacheNumber += mesh->getCacheCount();
+          m_meshHashes[geometryContainer->getMeshHandle()] = mesh->getHash();
         }
 
-        m_perInstanceCacheNumber += mesh->getCacheCount();
         m_meshes[geometryContainer->getMeshHandle()].instanceNumber++;
 
         return true;
@@ -80,19 +72,14 @@ namespace he
       {
         db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
 
-        m_perInstanceCacheNumber -= mesh->getCacheCount();
         m_meshes[geometryContainer->getMeshHandle()].instanceNumber--;
 
         if(!m_meshes[geometryContainer->getMeshHandle()].instanceNumber)
         {
-          m_meshNumberChanged = true;
-
-          m_vboSize -= mesh->getVBOSize();
-          m_iboSize -= mesh->getIndexCount() * sizeof(GLuint);
-          m_triangleNumber -= mesh->getPrimitiveCount();
-          m_cacheNumber -= mesh->getCacheCount();
+          m_updateMeshData = true;
 
           m_meshes.erase(geometryContainer->getMeshHandle());
+          m_meshHashes.erase(geometryContainer->getMeshHandle());
         }
       }
 
@@ -203,7 +190,19 @@ namespace he
 
     void DrawElementsDecorator::updateBuffer()
     {
-      if (m_meshNumberChanged)
+      for(std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less>::iterator meshIterator = m_meshHashes.begin(); meshIterator != m_meshHashes.end(); meshIterator++)
+      {
+        db::Mesh *mesh = m_modelManager->getObject(meshIterator->first);
+
+        if(mesh->getHash() != meshIterator->second)
+        {
+          meshIterator->second = mesh->getHash();
+          m_updateMeshData = true;//we need to update the mesh data
+          break;
+        }
+      }
+
+      if(m_updateMeshData)
       {
         updatePerMeshBuffer();
 
@@ -214,11 +213,9 @@ namespace he
         m_cacheOffsetBuffer.syncWithFence();
         m_triangleBuffer.syncWithFence();
         m_cacheBuffer.syncWithFence();
-
-        m_meshNumberChanged = false;
       }
 
-      if(hasInstanceNumberChanged())
+      if(hasInstanceNumberChanged() || m_updateMeshData)
       {
         updatePerInstanceBuffer();
 
@@ -226,6 +223,8 @@ namespace he
         m_meshInstanceBufferIndex.syncWithFence();
         m_cacheInstanceOffsetBuffer.syncWithFence();
       }
+
+      m_updateMeshData = false;
 
       m_renderNode->updateBuffer();
     }
@@ -237,9 +236,6 @@ namespace he
 
     void DrawElementsDecorator::updatePerMeshBuffer()
     {
-      unsigned int triangleNumber = std::max<unsigned int>(m_triangleNumber, 1);
-      unsigned int cacheNumber = std::max<unsigned int>(m_cacheNumber, 1);
-
       m_meshVertexBuffer.setMemoryFence();
       m_meshIndexBuffer.setMemoryFence();
       m_bboxesBuffer.setMemoryFence();
@@ -253,7 +249,7 @@ namespace he
       unsigned int indexOffset = 0;
       unsigned int triangleOffset = 0;
       unsigned int cacheOffset = 0;
-      for(std::map<util::ResourceHandle, ElementGeometry, Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, bufferIndex++)
+      for(std::map<util::ResourceHandle, ElementGeometry, util::ResourceHandle::Less>::iterator meshIterator = m_meshes.begin(); meshIterator != m_meshes.end(); meshIterator++, bufferIndex++)
       {
         db::Mesh *mesh = m_modelManager->getObject(meshIterator->first);
 
@@ -277,6 +273,8 @@ namespace he
         m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 0) * sizeof(util::vec4f), sizeof(util::vec3f), &mesh->getBBMin()[0]);
         m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 1) * sizeof(util::vec4f), sizeof(util::vec3f), &mesh->getBBMax()[0]);
       }
+
+      m_cacheNumber = cacheOffset;
     }
 
     void DrawElementsDecorator::updatePerInstanceBuffer()
@@ -309,6 +307,8 @@ namespace he
         perInstanceCacheOffsetCounter += mesh->getCacheCount();
         instanceCounter++;
       }
+
+      m_perInstanceCacheNumber = perInstanceCacheOffsetCounter;
     }
   }
 }

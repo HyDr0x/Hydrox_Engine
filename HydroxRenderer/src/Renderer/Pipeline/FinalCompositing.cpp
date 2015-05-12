@@ -2,9 +2,6 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/RenderShader.h>
-#include <DataBase/ShaderContainer.h>
-
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -22,13 +19,12 @@ namespace he
     void FinalCompositing::initialize(util::SingletonManager *singletonManager)
     {
       m_options = singletonManager->getService<RenderOptions>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      util::SharedPointer<db::ShaderContainer> renderShader = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_offscreenBufferShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::OFFSCREENBUFFER, util::Flags<VertexElements>(8192));
-      m_combineShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::COMBINE, util::Flags<VertexElements>(8192));
+      m_composeShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(8192));
+      m_debugOutputShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(8192));
 
-      m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 64));
+      m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
       m_fullscreenRenderQuad.setRenderTargets(1, m_combinedImage);
     }
@@ -37,9 +33,9 @@ namespace he
       util::SharedPointer<db::Texture2D> directlightTexture,
       util::SharedPointer<db::Texture2D> indirectlightTexture) const
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(m_combineShaderHandle);
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_composeShaderHandle);
 
-      shader->useShader();
+      shader.useShader();
       m_fullscreenRenderQuad.setWriteFrameBuffer();
       colorTexture->setTexture(0, 0);
       directlightTexture->setTexture(1, 1);
@@ -51,20 +47,20 @@ namespace he
       directlightTexture->unsetTexture(1);
       colorTexture->unsetTexture(0);
       m_fullscreenRenderQuad.unsetWriteFrameBuffer();
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
     void FinalCompositing::renderDebugOutput(util::SharedPointer<db::Texture2D> texture) const
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(m_offscreenBufferShaderHandle);
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_debugOutputShaderHandle);
 
-      shader->useShader();
+      shader.useShader();
       texture->setTexture(0, 0);
 
       m_fullscreenRenderQuad.render();
 
       texture->unsetTexture(0);
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
     util::SharedPointer<db::Texture2D> FinalCompositing::getCombinedTexture() const
@@ -85,26 +81,26 @@ namespace he
       util::vec2i normalizeTexCoord(newWidth, newHeight);
       util::vec2f textureOffset(1.0f / (2.0f * newWidth), 1.0f / (2.0f * newHeight));
 
-      db::RenderShader *shader = m_renderShaderManager->getObject(m_histogramShaderHandle);
+      sh::RenderShader *shader = m_renderShaderContainer->getObject(m_histogramShaderHandle);
       shader->useShader();
-      db::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
+      sh::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
 
       for(unsigned int i = 0; i < downSamplingSteps; i++)
       {
         if(filterImageSize[0] > newWidth)
         {
           filterImageSize[0] = newWidth;
-          db::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
+          sh::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
         }
-        db::RenderShader::setUniform(1, GL_INT_VEC2, &samplingV[0]);
-        db::RenderShader::setUniform(3, GL_INT_VEC2, &normalizeTexCoord[0]);
+        sh::RenderShader::setUniform(1, GL_INT_VEC2, &samplingV[0]);
+        sh::RenderShader::setUniform(3, GL_INT_VEC2, &normalizeTexCoord[0]);
         
         
         newWidth = std::max(newWidth * filterSampling, 1.0f);
         glViewport(0, 0, newWidth, newHeight);
         normalizeTexCoord[0] = newWidth;
         textureOffset[0] = 1.0f / (2.0f * newWidth);
-        db::RenderShader::setUniform(4, GL_FLOAT_VEC2, &textureOffset[0]);
+        sh::RenderShader::setUniform(4, GL_FLOAT_VEC2, &textureOffset[0]);
 
         m_downSampleImage0->setTexture(0, 0);
         m_downSamplingRenderQuad.setRenderTargets(1, m_downSampleImage1);
@@ -130,22 +126,22 @@ namespace he
         if(i == 0)
         {
           filterImageSize[1] = 0;
-          db::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
+          sh::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
         }
 
         if(filterImageSize[0] > newHeight)
         {
           filterImageSize[0] = newHeight;
-          db::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
+          sh::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
         }
-        db::RenderShader::setUniform(1, GL_INT_VEC2, &samplingH[0]);
-        db::RenderShader::setUniform(3, GL_INT_VEC2, &normalizeTexCoord[0]);
+        sh::RenderShader::setUniform(1, GL_INT_VEC2, &samplingH[0]);
+        sh::RenderShader::setUniform(3, GL_INT_VEC2, &normalizeTexCoord[0]);
 
         newHeight = std::max(newHeight * filterSampling, 1.0f);
         glViewport(0, 0, newWidth, newHeight);
         normalizeTexCoord[1] = newHeight;
         textureOffset[1] = 1.0f / (2.0f * newHeight);
-        db::RenderShader::setUniform(4, GL_FLOAT_VEC2, &textureOffset[0]);
+        sh::RenderShader::setUniform(4, GL_FLOAT_VEC2, &textureOffset[0]);
 
         m_downSampleImage0->setTexture(0, 0);
         m_downSamplingRenderQuad.setRenderTargets(1, m_downSampleImage1);
@@ -175,13 +171,13 @@ namespace he
 
       glViewport(0, 0, m_options->width, m_options->height);
       
-      db::RenderShader *toneMappingShader = m_renderShaderManager->getObject(m_tonemappingShaderHandle);
+      sh::RenderShader *toneMappingShader = m_renderShaderContainer->getObject(m_tonemappingShaderHandle);
       toneMappingShader->useShader();
 
       float s = 2.5f;
       float halfLuminanceRange = 25.0f;
-      db::RenderShader::setUniform(2, GL_FLOAT, &s);
-      db::RenderShader::setUniform(3, GL_FLOAT, &halfLuminanceRange);
+      sh::RenderShader::setUniform(2, GL_FLOAT, &s);
+      sh::RenderShader::setUniform(3, GL_FLOAT, &halfLuminanceRange);
 
       m_tonemappingImage->setTexture(0, 0);
       m_downSampleImage0->setTexture(1, 1);//maxLuminance at (0, 0)

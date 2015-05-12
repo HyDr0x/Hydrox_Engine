@@ -5,17 +5,17 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Signals/EventManager.h>
+
 #include <DataBase/ResourceManager.hpp>
+#include <DataBase/Texture2D.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include <XBar/BillboardContainer.h>
 
 #include "Renderer/Buffer/GPUBuffer.h"
-
-#include <DataBase/RenderShader.h>
-#include <DataBase/Texture2D.h>
-
-#include <Utilities/Miscellaneous/SingletonManager.hpp>
-#include <Utilities/Signals/EventManager.h>
 
 namespace he
 {
@@ -43,11 +43,11 @@ namespace he
 
       GLuint m_dummyVBO;
 
-      util::ResourceHandle m_billboardShaderHandle;
+      sh::RenderShaderHandle m_billboardShaderHandle;
 
       std::list<xBar::BillboardContainer> m_renderBillboards;
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

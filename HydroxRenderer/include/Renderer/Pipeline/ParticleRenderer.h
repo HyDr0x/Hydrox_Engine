@@ -8,6 +8,8 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 namespace he
 {
   namespace util
@@ -46,7 +48,9 @@ namespace he
 
       void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      util::ResourceHandle m_particleShaderHandle;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+
+      sh::RenderShaderHandle m_particleShaderHandle;
 
       std::list<const xBar::ParticleEmitterContainer> m_particleEmitter;
 

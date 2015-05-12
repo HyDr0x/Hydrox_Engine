@@ -1,8 +1,9 @@
 #include "Renderer/Traverser/InsertGeometryTraverserReflectiveShadowPass.h"
 
 #include <DataBase/Mesh.h>
-#include <DataBase/ShaderContainer.h>
 #include <DataBase/ResourceManager.hpp>
+
+#include <Shader/ShaderContainer.h>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -27,23 +28,23 @@ namespace he
     {
     }
 
-    void InsertGeometryTraverserReflectiveShadowPass::insertGeometry(TreeNode *treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void InsertGeometryTraverserReflectiveShadowPass::insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_sharedRenderGroup = sharedRenderGroup;
       m_geometryContainer = geometryContainer;
       m_inserted = false;
+      m_uniColor = util::vec4f::identity();
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::REFLECTIVESHADOW, m_meshVertexDeclaration);
+      m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::REFLECTIVESHADOW, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
@@ -60,17 +61,17 @@ namespace he
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }
     }
 
-    bool InsertGeometryTraverserReflectiveShadowPass::preTraverse(RenderNode* treeNode)
+    bool InsertGeometryTraverserReflectiveShadowPass::preTraverse(RenderNode * treeNode)
     {
       m_inserted = false;
 
-      if(treeNode->getNextSibling() == nullptr)
+      if(!treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
         m_stopTraversal = m_inserted = true;
@@ -79,19 +80,19 @@ namespace he
       return false;
     }
 
-    void InsertGeometryTraverserReflectiveShadowPass::createNewChildNode(VertexDeclarationNode* parent)
+    void InsertGeometryTraverserReflectiveShadowPass::createNewChildNode(VertexDeclarationNode * parent)
     {
-      RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_sharedRenderGroup));
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
-    void InsertGeometryTraverserReflectiveShadowPass::createNewSibling(RenderNode* sibling)
+    void InsertGeometryTraverserReflectiveShadowPass::createNewSibling(RenderNode * sibling)
     {
-      RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_sharedRenderGroup));
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
   }

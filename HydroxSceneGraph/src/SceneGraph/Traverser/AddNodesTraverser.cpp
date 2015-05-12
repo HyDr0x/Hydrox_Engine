@@ -11,7 +11,7 @@
 namespace he
 {
   namespace sg
-  {    AddNodesTraverser::AddNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager, std::vector<float> lodRanges, util::vec3f camPos) :
+  {    AddNodesTraverser::AddNodesTraverser(TreeNodeAllocator& allocator, util::SharedPointer<util::EventManager> eventManager, std::vector<float> lodRanges, util::vec3f camPos) :
       Traverser(allocator), m_eventManager(eventManager), m_lodRanges(lodRanges), m_camPos(camPos)
     {
     }
@@ -22,8 +22,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnAddAnimatedTransformNode)->execute(treeNode);
-
+      m_eventManager->raiseSignal<void(*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnAddAnimatedTransformNode)->execute(treeNode);
       return true;
     }
 
@@ -33,7 +32,7 @@ namespace he
 
     bool AddNodesTraverser::preTraverse(LODNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(LODNode &treeNode)>(util::EventManager::OnAddLODNode)->execute(treeNode);
+      m_eventManager->raiseSignal<void(*)(LODNode &treeNode)>(util::EventManager::OnAddLODNode)->execute(treeNode);
 
       return treeNode.getLOD(m_camPos, m_lodRanges);
     }

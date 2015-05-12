@@ -34,7 +34,7 @@ namespace he
     {
     public:
 
-      RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode);
+      RenderScene(util::SharedPointer<util::EventManager> eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode);
       ~RenderScene();
 
       virtual NodeIndex addParentNode(NodeIndex destinationNodeIndex, const TreeNode& sourceNode) override;
@@ -55,7 +55,7 @@ namespace he
 
       SceneCacheManager m_sceneCacheManager;
 
-      util::EventManager& m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
     };
   }
 }

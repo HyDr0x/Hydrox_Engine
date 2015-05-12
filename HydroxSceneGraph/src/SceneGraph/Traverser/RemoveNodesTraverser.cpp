@@ -11,7 +11,7 @@
 namespace he
 {
   namespace sg
-  {    RemoveNodesTraverser::RemoveNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager) : Traverser(allocator), m_eventManager(eventManager)
+  {    RemoveNodesTraverser::RemoveNodesTraverser(TreeNodeAllocator& allocator, util::SharedPointer<util::EventManager> eventManager) : Traverser(allocator), m_eventManager(eventManager)
     {
     }
 
@@ -21,7 +21,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(AnimatedTransformNode& treeNode)
     {
-      m_eventManager.raiseSignal<void (*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnRemoveAnimatedTransformNode)->execute(treeNode);
+      m_eventManager->raiseSignal<void (*)(AnimatedTransformNode &treeNode)>(util::EventManager::OnRemoveAnimatedTransformNode)->execute(treeNode);
 
       return true;
     }
@@ -32,7 +32,7 @@ namespace he
 
     bool RemoveNodesTraverser::preTraverse(LODNode& treeNode)
     {
-      m_eventManager.raiseSignal<void(*)(LODNode &treeNode)>(util::EventManager::OnRemoveLODNode)->execute(treeNode);
+      m_eventManager->raiseSignal<void(*)(LODNode &treeNode)>(util::EventManager::OnRemoveLODNode)->execute(treeNode);
 
       return true;
     }

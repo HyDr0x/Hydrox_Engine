@@ -1,5 +1,7 @@
 #include "Renderer/Traverser/RenderReflectiveShadowGeometryTraverser.h"
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -24,7 +26,7 @@ namespace he
     void RenderReflectiveShadowGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
       m_textureManager = singletonManager->getService<db::TextureManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_options = singletonManager->getService<RenderOptions>();
     }
@@ -34,38 +36,38 @@ namespace he
       m_viewProjectionIndex = viewProjectionIndex;
     }
 
-    bool RenderReflectiveShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RenderReflectiveShadowGeometryTraverser::preTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->setVertexArray();
 
       return true;
     }
 
-    void RenderReflectiveShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RenderReflectiveShadowGeometryTraverser::postTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->unsetVertexArray();
     }
 
-    bool RenderReflectiveShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RenderReflectiveShadowGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useShader();
+      shader.useShader();
 
-      db::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
+      sh::RenderShader::setUniform(2, GL_INT, &m_viewProjectionIndex);
+      sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
 
       return true;
     }
 
-    void RenderReflectiveShadowGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RenderReflectiveShadowGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
-    bool RenderReflectiveShadowGeometryTraverser::preTraverse(TextureNode* treeNode)
+    bool RenderReflectiveShadowGeometryTraverser::preTraverse(TextureNode * treeNode)
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
@@ -85,7 +87,7 @@ namespace he
       return true;
     }
 
-    void RenderReflectiveShadowGeometryTraverser::postTraverse(TextureNode* treeNode)
+    void RenderReflectiveShadowGeometryTraverser::postTraverse(TextureNode * treeNode)
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
@@ -103,14 +105,14 @@ namespace he
       }
     }
 
-    bool RenderReflectiveShadowGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderReflectiveShadowGeometryTraverser::preTraverse(RenderNode * treeNode)
     {
       treeNode->getRenderGroup()->rasterizeReflectiveShadowGeometry();
 
       return true;
     }
 
-    void RenderReflectiveShadowGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderReflectiveShadowGeometryTraverser::postTraverse(RenderNode * treeNode)
     {
     }
   }

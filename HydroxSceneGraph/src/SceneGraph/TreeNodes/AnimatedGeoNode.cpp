@@ -130,7 +130,6 @@ namespace he
       {
         m_eventManager->raiseSignal<void(*)(util::SharedPointer<const xBar::IGeometryContainer> geometry)>(util::EventManager::OnRemoveGeometryNode)->execute(util::SharedPointer<const xBar::IGeometryContainer>(new xBar::SkinnedGeometryContainer(&m_boneTransformMatrices, &m_inverseBindPoseMatrices, util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::SKINNEDNODE), &m_trfMatrix, m_materialHandle, m_meshHandle)));
       }
-
       m_renderable = renderable;
     }
 

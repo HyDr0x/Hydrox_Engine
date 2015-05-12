@@ -1,5 +1,7 @@
 #include "Loader/ILDevilLoader.h"
 
+#include <iostream>
+
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <DataBase/Texture2D.h>
@@ -42,7 +44,7 @@ namespace he
       GLenum format;
       GLenum type;
       GLuint channelNumber;
-      GLuint bitsPerPixel;
+      GLuint bitsPerComponent;
 
       ilEnable(IL_ORIGIN_SET);
       ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
@@ -61,7 +63,7 @@ namespace he
         }
         else
         {
-          getImageInformations(width, height, internalFormat, format, type, channelNumber, bitsPerPixel);
+          getImageInformations(width, height, internalFormat, format, type, channelNumber, bitsPerComponent);
 
           //success = ilConvertImage(format, type);
           //if(!success)
@@ -69,7 +71,7 @@ namespace he
           //  printf("ERROR, couldn't convert file %s/n", filename);
           //}
         
-          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerPixel, ilGetData(), true));
+          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerComponent, ilGetData(), true));
         }
       }
       ilBindImage(0);
@@ -84,14 +86,17 @@ namespace he
       return m_textureManager->addObject(db::Texture2D(1, 1, GL_TEXTURE_2D, GL_FLOAT, GL_RGB8, GL_RGB, 3, 24, &textureData[0], true));
     }
 
-    void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerPixel)
+    void ILDevilLoader::getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerComponent)
     {
       width = ilGetInteger(IL_IMAGE_WIDTH);
       height = ilGetInteger(IL_IMAGE_HEIGHT);
-      bitsPerPixel = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
+      GLuint bitsPerPixel = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
 
       switch(ilGetInteger(IL_IMAGE_FORMAT))
       {
+      case IL_LUMINANCE:
+        format = GL_LUMINANCE;
+        break;
       case IL_RGB:
         format = GL_RGB;
         break;
@@ -110,6 +115,29 @@ namespace he
 
       switch(format)
       {
+      case GL_LUMINANCE:
+        channelNumber = 1;
+        switch(bitsPerPixel)
+        {
+        case 4:
+          internalFormat = GL_LUMINANCE4;
+          break;
+        case 12:
+          internalFormat = GL_LUMINANCE12;
+          break;
+        case 16:
+          internalFormat = GL_LUMINANCE16;
+          break;
+        case 32:
+          internalFormat = GL_LUMINANCE32F_ARB;
+          break;
+        case 8:
+        default:
+          internalFormat = GL_LUMINANCE8;
+          break;
+        }
+        
+        break;
       case GL_RGB:
       case GL_BGR:
         channelNumber = 3;
@@ -166,10 +194,15 @@ namespace he
       case IL_INT:
         type = GL_INT;
         break;
+      case IL_DOUBLE:
+        type = GL_DOUBLE;
+        break;
       case IL_FLOAT:
       default:
         type = GL_FLOAT;
       }
+
+      bitsPerComponent = bitsPerPixel / channelNumber;
     }
   }
 }

@@ -29,6 +29,15 @@ namespace he
 
       unsigned int getID() const;
 
+      class Less
+      {
+      public:
+        inline bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
+        {
+          return o1.getID() < o2.getID();
+        }
+      };
+
     private:
 
       void swap(ResourceHandle& other);

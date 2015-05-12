@@ -7,6 +7,8 @@
 
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Saver/DLLExport.h"
 
 namespace he
@@ -22,7 +24,7 @@ namespace he
     {
     public:
 
-      static void save(std::string path, std::string filename, util::ResourceHandle renderShaderHandle, util::SingletonManager *singletonManager);
+      static void save(std::string path, std::string filename, sh::RenderShaderHandle renderShaderHandle, util::SingletonManager *singletonManager);
     };
   }
 }

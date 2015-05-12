@@ -7,7 +7,8 @@
 #include <DataBase/Mesh.h>
 #include <DataBase/Material.h>
 #include <DataBase/Texture2D.h>
-#include <DataBase/RenderShader.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include <SceneGraph/Scene/TreeNodeAllocator.h>
 

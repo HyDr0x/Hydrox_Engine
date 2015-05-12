@@ -1,8 +1,9 @@
 #include "Renderer/Traverser/InsertGeometryTraverserIndexPass.h"
 
 #include <DataBase/Mesh.h>
-#include <DataBase/ShaderContainer.h>
 #include <DataBase/ResourceManager.hpp>
+
+#include <Shader/ShaderContainer.h>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -27,16 +28,16 @@ namespace he
     {
     }
 
-    void InsertGeometryTraverserIndexPass::insertGeometry(TreeNode *treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void InsertGeometryTraverserIndexPass::insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_sharedRenderGroup = sharedRenderGroup;
       m_geometryContainer = geometryContainer;
       m_inserted = false;
+      m_uniColor = util::vec4f::identity();
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
@@ -46,28 +47,28 @@ namespace he
       switch(mesh->getPrimitiveType())
       {
       case GL_POINTS:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::POINTINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::POINTINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       case GL_LINES:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::LINEINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::LINEINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       case GL_TRIANGLES:
       default:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::TRIANGLEINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::TRIANGLEINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       }
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }
     }
 
-    bool InsertGeometryTraverserIndexPass::preTraverse(RenderNode* treeNode)
+    bool InsertGeometryTraverserIndexPass::preTraverse(RenderNode * treeNode)
     {
-      if(!m_stopTraversal && treeNode->getNextSibling() == nullptr)
+      if(!m_stopTraversal && !treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
       }
@@ -75,23 +76,23 @@ namespace he
       return false;
     }
 
-    void InsertGeometryTraverserIndexPass::createNewChildNode(VertexDeclarationNode* parent)
+    void InsertGeometryTraverserIndexPass::createNewChildNode(VertexDeclarationNode * parent)
     {
       m_stopTraversal = true;
 
-      RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_sharedRenderGroup));
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
-    void InsertGeometryTraverserIndexPass::createNewSibling(RenderNode* sibling)
+    void InsertGeometryTraverserIndexPass::createNewSibling(RenderNode * sibling)
     {
       m_stopTraversal = true;
 
-      RenderNode *treeNode = new RenderNode(m_sharedRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_sharedRenderGroup));
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
   }

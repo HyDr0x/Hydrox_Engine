@@ -1,17 +1,19 @@
 #include "Renderer/Pipeline/GeometryRenderer.h"
 
-#include <XBar/IGeometryContainer.h>
+#include <Shader/ShaderContainer.h>
 
-#include <DataBase/ShaderContainer.h>
+#include <XBar/IGeometryContainer.h>
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
 
+#include "Renderer/Traverser/InsertGeometryTraverserDebug.h"
 #include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
 #include "Renderer/Traverser/InsertGeometryTraverserIndexPass.h"
 #include "Renderer/Traverser/InsertGeometryTraverserShadowPass.h"
 #include "Renderer/Traverser/InsertGeometryTraverserReflectiveShadowPass.h"
 #include "Renderer/Traverser/InsertGeometryTraverserIndirectLightingPass.h"
 
+#include "Renderer/Traverser/RemoveGeometryTraverserDebug.h"
 #include "Renderer/Traverser/RemoveGeometryTraverserRenderPass.h"
 #include "Renderer/Traverser/RemoveGeometryTraverserIndexPass.h"
 #include "Renderer/Traverser/RemoveGeometryTraverserShadowPass.h"
@@ -34,20 +36,16 @@ namespace he
     GeometryRenderer::GeometryRenderer() :
       m_globalCacheNumber(0)
     {
-      m_renderRootNode = new GroupNode();
-      m_renderIndexRootNode = new GroupNode();
-      m_renderShadowRootNode = new GroupNode();
-      m_renderReflectiveShadowRootNode = new GroupNode();
-      m_renderIndirectLightRootNode = new GroupNode();
+      m_renderRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
+      m_renderDebugRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
+      m_renderIndexRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
+      m_renderShadowRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
+      m_renderReflectiveShadowRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
+      m_renderIndirectLightRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
     }
 
     GeometryRenderer::~GeometryRenderer()
     {
-      delete m_renderRootNode;
-      delete m_renderIndexRootNode;
-      delete m_renderShadowRootNode;
-      delete m_renderReflectiveShadowRootNode;
-      delete m_renderIndirectLightRootNode;
     }
 
     void GeometryRenderer::initialize(util::SingletonManager *singletonManager, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
@@ -63,7 +61,7 @@ namespace he
       glCullFace(GL_BACK);
       glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-      m_container = m_singletonManager->getService<db::ShaderContainer>();
+      m_container = m_singletonManager->getService<sh::ShaderContainer>();
 
       std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURETYPENUM);
       samplerObjects[db::Material::DIFFUSETEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
@@ -72,6 +70,7 @@ namespace he
       samplerObjects[db::Material::DISPLACEMENTTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
 
       m_renderGeometryTraverser.initialize(m_singletonManager, samplerObjects);
+      m_renderGeometryTraverserDebug.initialize(m_singletonManager, samplerObjects);
       m_renderIndexGeometryTraverser.initialize(m_singletonManager);
       m_renderShadowGeometryTraverser.initialize(m_singletonManager);
       m_renderReflectiveShadowGeometryTraverser.initialize(m_singletonManager);
@@ -82,53 +81,67 @@ namespace he
 
     void GeometryRenderer::addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      m_globalCacheNumber += m_singletonManager->getService<db::ModelManager>()->getObject(geometry->getMeshHandle())->getCacheCount();
-
-      InsertGeometryTraverserRenderPass insertTraverser;
-      insertTraverser.insertGeometry(m_renderRootNode, geometry, m_singletonManager);
-
-      util::SharedPointer<IRenderGroup> createdRenderGroup = insertTraverser.getCreatedRenderNode();
-
-      if(createdRenderGroup)
+      if(!m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle())->getDebug())
       {
-        InsertGeometryTraverserIndexPass insertIndexTraverser;
-        insertIndexTraverser.insertGeometry(m_renderIndexRootNode, createdRenderGroup, geometry, m_singletonManager);
+        InsertGeometryTraverserRenderPass insertTraverser;
+        insertTraverser.insertGeometry(m_renderRootNode, geometry, m_singletonManager);
 
-        InsertGeometryTraverserShadowPass insertShadowTraverser;
-        insertShadowTraverser.insertGeometry(m_renderShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
+        util::SharedPointer<IRenderGroup> createdRenderGroup = insertTraverser.getCreatedRenderNode();
 
-        InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser;
-        insertReflectiveShadowTraverser.insertGeometry(m_renderReflectiveShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
+        if(createdRenderGroup)
+        {
+          InsertGeometryTraverserIndexPass insertIndexTraverser;
+          insertIndexTraverser.insertGeometry(m_renderIndexRootNode, createdRenderGroup, geometry, m_singletonManager);
 
-        InsertGeometryTraverserIndirectLightingPass insertGeometryTraverserIndirectLightingPass;
-        insertGeometryTraverserIndirectLightingPass.insertGeometry(m_renderIndirectLightRootNode, createdRenderGroup, geometry, m_singletonManager);
+          InsertGeometryTraverserShadowPass insertShadowTraverser;
+          insertShadowTraverser.insertGeometry(m_renderShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
+
+          InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser;
+          insertReflectiveShadowTraverser.insertGeometry(m_renderReflectiveShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
+
+          InsertGeometryTraverserIndirectLightingPass insertGeometryTraverserIndirectLightingPass;
+          insertGeometryTraverserIndirectLightingPass.insertGeometry(m_renderIndirectLightRootNode, createdRenderGroup, geometry, m_singletonManager);
+        }
+      }
+      else
+      {
+        InsertGeometryTraverserDebug insertDebugTraverser;
+        insertDebugTraverser.insertGeometry(m_renderDebugRootNode, geometry, m_singletonManager);
       }
     }
 
     void GeometryRenderer::removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      m_globalCacheNumber -= m_singletonManager->getService<db::ModelManager>()->getObject(geometry->getMeshHandle())->getCacheCount();
+      if(!m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle())->getDebug())
+      {
+        RemoveGeometryTraverserRenderPass removeTraverser;
+        removeTraverser.removeGeometry(m_renderRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserRenderPass removeTraverser;
-      removeTraverser.removeGeometry(m_renderRootNode, geometry, m_singletonManager);
+        RemoveGeometryTraverserIndexPass removeIndexTraverser;
+        removeIndexTraverser.removeGeometry(m_renderIndexRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserIndexPass removeIndexTraverser;
-      removeIndexTraverser.removeGeometry(m_renderIndexRootNode, geometry, m_singletonManager);
+        RemoveGeometryTraverserShadowPass removeShadowTraverser;
+        removeShadowTraverser.removeGeometry(m_renderShadowRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserShadowPass removeShadowTraverser;
-      removeShadowTraverser.removeGeometry(m_renderShadowRootNode, geometry, m_singletonManager);
+        RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser;
+        removeReflectiveShadowTraverser.removeGeometry(m_renderReflectiveShadowRootNode, geometry, m_singletonManager);
 
-      RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser;
-      removeReflectiveShadowTraverser.removeGeometry(m_renderReflectiveShadowRootNode, geometry, m_singletonManager);
-
-      RemoveGeometryTraverserIndirectLightingPass removeGeometryTraverserIndirectLightingPass;
-      removeGeometryTraverserIndirectLightingPass.removeGeometry(m_renderIndirectLightRootNode, geometry, m_singletonManager);
+        RemoveGeometryTraverserIndirectLightingPass removeGeometryTraverserIndirectLightingPass;
+        removeGeometryTraverserIndirectLightingPass.removeGeometry(m_renderIndirectLightRootNode, geometry, m_singletonManager);
+      }
+      else
+      {
+        RemoveGeometryTraverserDebug removeDebugTraverser;
+        removeDebugTraverser.removeGeometry(m_renderDebugRootNode, geometry, m_singletonManager);
+      }
     }
 
     void GeometryRenderer::updateBuffer()
     {
       UpdateTraverser updateTraverser;
       updateTraverser.doTraverse(m_renderRootNode);
+
+      m_globalCacheNumber = updateTraverser.getGlobalCacheNumber();
 
       m_bufferResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
       m_renderIndirectLightingGeometryTraverser.setGlobalBufferResolution(m_bufferResolution);
@@ -137,26 +150,26 @@ namespace he
 
     void GeometryRenderer::frustumCulling(int cameraIndex, RenderPass pass)
     {
-      db::ComputeShader *frustumCullingShader = m_singletonManager->getService<db::ComputeShaderManager>()->getObject(m_container->getComputeShader(m_singletonManager, db::ShaderContainer::FRUSTUMCULLING));
-      frustumCullingShader->useShader();
+      const sh::ComputeShader& frustumCullingShader = m_container->getComputeShader(sh::ShaderContainer::FRUSTUMCULLING);
+      frustumCullingShader.useShader();
 
-      db::ComputeShader::setUniform(1, GL_INT, &cameraIndex);
+      sh::ComputeShader::setUniform(1, GL_INT, &cameraIndex);
       FrustumCullingTraverser frustumCullingTraverser;
       
       switch(pass)
       {
         case SHADOWPASS:
-          frustumCullingTraverser.doTraverse(m_renderShadowRootNode);
+          frustumCullingTraverser.doTraverse(m_renderShadowRootNode.dynamic_pointer_cast<const TreeNode>());
           break;
         case REFLECTIVESHADOWPASS:
-          frustumCullingTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+          frustumCullingTraverser.doTraverse(m_renderReflectiveShadowRootNode.dynamic_pointer_cast<const TreeNode>());
           break;
         case VIEWPASS:
-          frustumCullingTraverser.doTraverse(m_renderRootNode);
+          frustumCullingTraverser.doTraverse(m_renderRootNode.dynamic_pointer_cast<const TreeNode>());
           break;
       }
 
-      frustumCullingShader->useNoShader();
+      frustumCullingShader.useNoShader();
     }
 
     void GeometryRenderer::generateShadowMap(int cameraIndex)
@@ -184,8 +197,16 @@ namespace he
     }
 
     void GeometryRenderer::rasterizeGeometry()
-    {  
+    {
       m_renderGeometryTraverser.doTraverse(m_renderRootNode);
+    }
+
+    void GeometryRenderer::rasterizeDebugGeometry()
+    {
+      UpdateTraverser updateTraverser;
+      updateTraverser.doTraverse(m_renderDebugRootNode);
+
+      m_renderGeometryTraverserDebug.doTraverse(m_renderDebugRootNode);
     }
 
     unsigned int GeometryRenderer::getGlobalCacheNumber() const

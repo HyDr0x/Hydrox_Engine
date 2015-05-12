@@ -7,6 +7,7 @@
 
 #include "Utilities/Math/Math.hpp"
 #include "Utilities/Math/Polygon.h"
+#include "Utilities/Math/Triangle.h"
 
 #include "Utilities/DLLExport.h"
 
@@ -19,7 +20,7 @@ namespace he
       vec3f position;
       float diffuseStrength;
       vec4f normal;//normalized normal [xyz], after the writing to the globalCacheBuffer normal.z becomes specularStrength and normal.w becomes specularExponent 
-      vec4f area;//only x is used, the rest is padding
+      vec4f area;//area which the cache represents | only x is used, the rest is padding
     };
 
     typedef util::vec4f cacheIndexType;
@@ -28,31 +29,20 @@ namespace he
     {
     public:
 
-      struct PolygonData
-      {
-        PolygonData(std::vector<vec3f> polygonPoints) : polygon(polygonPoints)
-        {}
-
-        PolygonData(const Polygon& otherPolygon) : polygon(otherPolygon)
-        {}
-
-        Polygon polygon;
-        vec3f triangleVertices[3];//the triangle from which the polygon was created
-      };
-
-      struct RawCache
-      {
-        vec3f position;//position of the cache
-        vec3f normal;//normalized normal
-        float area;//area which the cache represents
-        vec3f triangleVertices[3];//the triangle in which the cache lies
-      };
-
       void initialize(float errorRate, float maxDistance, float maxAngle, vec3f bbMin, vec3f bbMax);
 
       //OCTREE GENERATION SHOULD BE REPLACED BY UNIFIED TREE MODEL!!!
       void generateCaches(std::vector<Cache>& outCaches, std::vector<vec2ui>& outTriangleCacheIndices, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
       
+      void generateCachesArea(const std::vector<vec3f>& triangles, vec3f bbMin, vec3f bbMax, std::vector<Cache>& outCaches, const std::vector<Triangle>& cacheTriangles);
+      void generateCacheArea(const std::vector<vec3f>& triangles, vec3f bbMin, vec3f bbMax, std::vector<Cache>& caches, unsigned int cacheIndex, const Triangle& pickedTriangle);
+
+      static vec3f findCacheTriangle(const std::vector<vec3f>& triangles, const Cache& cache, Triangle& cacheTriangle);//returns the nearest triangle of the cache and the nearest point o nthe triangle
+
+      static void createTriangleCacheIndices(const std::vector<vec3f>& triangles, std::vector<Triangle>& cacheTriangles, std::vector<Cache>& caches, std::vector<vec2ui>& triangleCacheIndices);
+
+      static void convertIndexedToNonIndexedTriangles(const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices, std::vector<vec3f>& outTriangles);
+
     private:
 
       inline vec2f binToCylinder(vec2ui bin, unsigned int thetaQ, unsigned int phiQ)
@@ -78,17 +68,17 @@ namespace he
 
       void recursiveGenerateCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
       void createCaches(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
-      Polygon calculatePolygon(std::vector<vec3f> inPoints);//first vector contains the three points of the triangle to make all the rays
       void generateCachesPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin);
       void shiftCentroid(unsigned int voxelIndex);
       void reduceCaches();
-      void sortCachesPerTriangle(const std::vector<vec3f>& positions);
       
+      static const int m_bitShiftNumber = 31;
+
       std::vector<std::vector<vec3f>> m_triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
-      std::vector<std::list<PolygonData>> m_polygons;//saves all polygons which lying in the voxel
-      std::map<unsigned int, std::list<RawCache>> m_linearizedAreaCaches;//saves all caches with their area
-      std::vector<RawCache> m_reducedCaches;
-      std::vector<RawCache> m_caches;
+      std::vector<std::list<std::pair<Polygon, Triangle>>> m_polygons;//saves all polygons which lying in the voxel and their original triangle from where they came
+      std::map<unsigned int, std::list<std::pair<Cache, Triangle>>> m_linearizedAreaCaches;//saves all caches with their area
+      std::vector<Cache> m_caches;
+      std::vector<Triangle> m_cacheTriangles;
       std::vector<vec2ui> m_triangleCacheIndices;
 
       std::vector<vec3f> m_boxPoints;//create for each plane 3 points in the right orientation for the sutherland hodgman algorithm

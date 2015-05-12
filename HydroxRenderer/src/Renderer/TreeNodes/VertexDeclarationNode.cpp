@@ -2,7 +2,7 @@
 
 #include "Renderer/Traverser/Traverser.h"
 #include "Renderer/Traverser/ConstTraverser.h"
-#include <DataBase/RenderShader.h>
+#include <Shader/RenderShader.h>
 #include <DataBase/Mesh.h>
 
 namespace he
@@ -39,7 +39,7 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    void VertexDeclarationNode::initialize(util::Flags<VertexElements> shaderVertexDeclaration,
+    void VertexDeclarationNode::initialize(sh::ShaderSlotFlags shaderVertexDeclaration,
                                            util::Flags<VertexElements> meshVertexDeclaration)
     {
       m_shaderVertexDeclaration = shaderVertexDeclaration;
@@ -53,8 +53,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_POSITION).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::POSITION, 0);
+          glVertexAttribFormat(sh::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::POSITION, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_POSITION);
@@ -64,8 +64,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_TEXTURE0).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
+          glVertexAttribFormat(sh::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::TEXTURE0, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE0);
@@ -75,8 +75,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_TEXTURE1).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::TEXTURE1, 2, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::TEXTURE1, 0);
+          glVertexAttribFormat(sh::RenderShader::TEXTURE1, 2, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::TEXTURE1, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE1);
@@ -86,8 +86,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_TEXTURE2).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::TEXTURE2, 2, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::TEXTURE2, 0);
+          glVertexAttribFormat(sh::RenderShader::TEXTURE2, 2, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::TEXTURE2, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE2);
@@ -97,8 +97,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_TEXTURE3).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::TEXTURE3, 2, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::TEXTURE3, 0);
+          glVertexAttribFormat(sh::RenderShader::TEXTURE3, 2, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::TEXTURE3, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_TEXTURE3);
@@ -108,8 +108,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_NORMAL).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::NORMAL, 0);
+          glVertexAttribFormat(sh::RenderShader::NORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::NORMAL, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_NORMAL);
@@ -119,8 +119,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_BINORMAL).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::BINORMAL, 0);
+          glVertexAttribFormat(sh::RenderShader::BINORMAL, 3, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::BINORMAL, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BINORMAL);
@@ -130,8 +130,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_BONE_WEIGHTS).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::BONEWEIGHTS, 0);
+          glVertexAttribFormat(sh::RenderShader::BONEWEIGHTS, 4, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::BONEWEIGHTS, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BONE_WEIGHTS);
@@ -141,8 +141,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_BONE_INDICES).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::BONEINDICES, 0);
+          glVertexAttribFormat(sh::RenderShader::BONEINDICES, 4, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::BONEINDICES, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_BONE_INDICES);
@@ -152,8 +152,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_COLOR).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::COLOR, 0);
+          glVertexAttribFormat(sh::RenderShader::COLOR, 4, GL_FLOAT, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::COLOR, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_COLOR);
@@ -163,8 +163,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_CACHEINDICES0).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::CACHEINDICES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::CACHEINDICES0, 0);
+          glVertexAttribFormat(sh::RenderShader::CACHEINDICES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::CACHEINDICES0, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDICES0);
@@ -174,8 +174,8 @@ namespace he
       {
         if(m_shaderVertexDeclaration.toInt() & util::Flags<VertexElements>::convertToFlag(db::Mesh::MODEL_CACHEINDICES1).toInt())
         {
-          glVertexAttribFormat(db::RenderShader::CACHEINDICES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-          glVertexAttribBinding(db::RenderShader::CACHEINDICES1, 0);
+          glVertexAttribFormat(sh::RenderShader::CACHEINDICES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
+          glVertexAttribBinding(sh::RenderShader::CACHEINDICES1, 0);
         }
 
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDICES1);

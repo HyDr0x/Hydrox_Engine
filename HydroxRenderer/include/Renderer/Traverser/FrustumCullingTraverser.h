@@ -21,7 +21,7 @@ namespace he
       FrustumCullingTraverser();
       virtual ~FrustumCullingTraverser();
 
-      virtual bool preTraverse(const RenderNode* treeNode) override;
+      virtual bool preTraverse(const RenderNode *treeNode) override;
     };
   }
 }

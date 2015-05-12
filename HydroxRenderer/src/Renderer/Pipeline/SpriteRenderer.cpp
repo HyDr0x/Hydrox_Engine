@@ -4,10 +4,8 @@
 #include <Utilities/Signals/EventManager.h>
 
 #include <DataBase/Sprite.h>
-#include <DataBase/RenderShader.h>
 #include <DataBase/Texture2D.h>
 #include <DataBase/Texture3D.h>
-#include <DataBase/ShaderContainer.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
 
@@ -29,12 +27,12 @@ namespace he
 
     void SpriteRenderer::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
-      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
+      m_spriteShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPRITE, sh::ShaderSlotFlags(8192));
 
-      m_spriteShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::SPRITE, util::Flags<VertexElements>(8192));
+      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_maxLayer = singletonManager->getService<RenderOptions>()->max2DLayer;
 
@@ -44,13 +42,13 @@ namespace he
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
       glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
-      glVertexAttribPointer(db::RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
+      glVertexAttribPointer(sh::RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void SpriteRenderer::render() const
     {
-      glEnableVertexAttribArray(db::RenderShader::SPECIAL0);
+      glEnableVertexAttribArray(sh::RenderShader::SPECIAL0);
 
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
 
@@ -58,9 +56,9 @@ namespace he
 
       const db::Sprite *renderSprite;
       db::Texture2D *renderTexture;
-      db::RenderShader *spriteShader = m_renderShaderManager->getObject(m_spriteShaderHandle);
+      const sh::RenderShader& spriteShader = m_renderShaderContainer->getRenderShader(m_spriteShaderHandle);
 
-      spriteShader->useShader();
+      spriteShader.useShader();
 
       for(unsigned int i = 0; i < m_opaqueSprites.size(); i++)
       {
@@ -76,9 +74,9 @@ namespace he
             util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
             util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
             float z = renderSprite->getLayer() / (float)m_maxLayer;
-            db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-            db::RenderShader::setUniform(2, GL_FLOAT, &z);
+            sh::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            sh::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            sh::RenderShader::setUniform(2, GL_FLOAT, &z);
 
             glDrawArrays(GL_POINTS, 0, 1);
           }
@@ -106,9 +104,9 @@ namespace he
             util::Matrix<float, 3> worldMatrix = renderSprite->getTransformationMatrix();
             util::Matrix<float, 3> textureWorldMatrix = renderSprite->getTexTransformationMatrix();
             float z = renderSprite->getLayer() / (float)m_maxLayer;
-            db::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
-            db::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
-            db::RenderShader::setUniform(2, GL_FLOAT, &z);
+            sh::RenderShader::setUniform(0, GL_FLOAT_MAT3, &worldMatrix[0][0]);
+            sh::RenderShader::setUniform(1, GL_FLOAT_MAT3, &textureWorldMatrix[0][0]);
+            sh::RenderShader::setUniform(2, GL_FLOAT, &z);
 
             glDrawArrays(GL_POINTS, 0, 1);
           }
@@ -117,11 +115,13 @@ namespace he
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-      glDisableVertexAttribArray(db::RenderShader::SPECIAL0);
+      glDisableVertexAttribArray(sh::RenderShader::SPECIAL0);
 
       glDisable(GL_BLEND);
 
       glDepthMask(GL_TRUE);
+
+      spriteShader.useNoShader();
     }
 
     void SpriteRenderer::addRenderComponent(const db::Sprite* sprite)

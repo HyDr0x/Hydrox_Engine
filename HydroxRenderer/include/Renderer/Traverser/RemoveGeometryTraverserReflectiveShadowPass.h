@@ -5,10 +5,14 @@
 
 namespace he
 {
-  namespace xBar  {    class IGeometryContainer;  }
+  namespace xBar
+  {
+    class IGeometryContainer;
+  }
 
   namespace renderer
-  {    class RemoveGeometryTraverserReflectiveShadowPass : public RemoveGeometryTraverser
+  {
+    class RemoveGeometryTraverserReflectiveShadowPass : public RemoveGeometryTraverser
     {
     public:
 
@@ -16,10 +20,10 @@ namespace he
 
       virtual ~RemoveGeometryTraverserReflectiveShadowPass();
 
-      virtual void removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
+      virtual void removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
+      virtual void postTraverse(RenderNode * treeNode);
 
     private:
 

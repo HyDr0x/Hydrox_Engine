@@ -20,9 +20,10 @@ namespace he
       m_observer = other.m_observer;
     }
 
-    Subject& operator=(const Subject& other)
+    Subject& operator=(Subject other)
     {
-      m_observer = other.m_observer;
+      using namespace std;
+      swap(other);
 
       return *this;
     }
@@ -50,6 +51,11 @@ namespace he
     }
 
   protected:
+
+    void swap(Subject& other)
+    {
+      std::swap(m_observer, other.m_observer);
+    }
 
     std::list<Observer<ParamT>*> m_observer;
   };

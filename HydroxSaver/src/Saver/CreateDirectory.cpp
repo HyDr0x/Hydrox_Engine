@@ -5,7 +5,9 @@
 
 #ifdef _WIN32
 
+#ifndef _WINDOWS_
 #include <Windows.h>
+#endif
 
 bool createDirectory(std::string pathName)
 {

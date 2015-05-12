@@ -15,7 +15,7 @@ namespace he
 {
   namespace sg
   {
-    RenderScene::RenderScene(util::EventManager& eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) : 
+    RenderScene::RenderScene(util::SharedPointer<util::EventManager> eventManger, const util::vec3f& cameraPosition, const TreeNodeAllocator& allocator, NodeIndex rootNode) :
       Scene(allocator, rootNode), m_eventManager(eventManger), m_sceneCacheManager(eventManger)
     {
       TransformTraverser transformTraverser(m_allocator);

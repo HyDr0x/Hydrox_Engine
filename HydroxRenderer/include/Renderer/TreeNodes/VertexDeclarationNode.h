@@ -10,6 +10,8 @@
 
 #include <DataBase/Mesh.h>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/GroupNode.h"
 
 namespace he
@@ -29,7 +31,7 @@ namespace he
       bool preTraverse(ConstTraverser* traverser) const;
       void postTraverse(ConstTraverser* traverser) const;
 
-      void initialize(util::Flags<VertexElements> shaderVertexDeclaration,
+      void initialize(sh::ShaderSlotFlags shaderVertexDeclaration,
         util::Flags<VertexElements> meshVertexDeclaration);
 
       void setVertexArray() const;
@@ -40,7 +42,7 @@ namespace he
     private:
 
       GLuint m_vaoIndex;
-      util::Flags<VertexElements> m_shaderVertexDeclaration;
+      sh::ShaderSlotFlags m_shaderVertexDeclaration;
       util::Flags<VertexElements> m_meshVertexDeclaration;
     };
   }

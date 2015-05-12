@@ -8,6 +8,8 @@
 #include <DataBase/Texture2D.h>
 #include <DataBase/Texture3D.h>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
 #include "Renderer/Buffer/UBO.h"
@@ -22,12 +24,6 @@ namespace he
 
   namespace renderer
   {
-    struct IndirectLight
-    {
-      util::vec4f position;
-      util::vec4f luminousFlux;
-    };
-
     class RenderOptions;
 
     class IndirectLightRenderer
@@ -54,6 +50,15 @@ namespace he
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
+      util::SharedPointer<db::Texture2D> getIndirectPositionMapDiffuse();
+      util::SharedPointer<db::Texture2D> getIndirectLuminousFluxMapDiffuse();
+      util::SharedPointer<db::Texture2D> getIndirectPositionMapSpecular();
+      util::SharedPointer<db::Texture2D> getIndirectLuminousFluxMapSpecular();
+      util::SharedPointer<db::Texture2D> getZBuffer();
+
+      util::SharedPointer<db::Texture2D> getGlobalCachePositionMap();
+      util::SharedPointer<db::Texture2D> getGlobalCacheNormalMap();
+
     private:
       
       IndirectLightRenderer(const IndirectLightRenderer&);
@@ -64,6 +69,10 @@ namespace he
       util::SharedPointer<RenderOptions> m_options;
 
       util::SingletonManager *m_singletonManager;
+
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+
+      sh::RenderShaderHandle m_indirectLightShaderHandle;
 
       unsigned int m_bufferResolution;//to a power of two up rounded texture resolution
 
@@ -87,8 +96,6 @@ namespace he
       Renderquad m_indirectLightProxyLightCreationRenderQuad;
 
       util::SharedPointer<db::Texture2D> m_indirectLightMap;
-
-      util::ResourceHandle m_indirectLightShaderHandle;
 
       GLsync m_gBufferSync;
 

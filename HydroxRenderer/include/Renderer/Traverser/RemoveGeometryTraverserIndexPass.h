@@ -6,7 +6,8 @@
 namespace he
 {
   namespace renderer
-  {    class RemoveGeometryTraverserIndexPass : public RemoveGeometryTraverser
+  {
+    class RemoveGeometryTraverserIndexPass : public RemoveGeometryTraverser
     {
     public:
 
@@ -14,10 +15,10 @@ namespace he
 
       virtual ~RemoveGeometryTraverserIndexPass();
 
-      virtual void removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
+      virtual void removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
+      virtual void postTraverse(RenderNode * treeNode);
 
     private:
 

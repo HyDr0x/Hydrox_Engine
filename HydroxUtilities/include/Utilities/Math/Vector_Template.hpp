@@ -11,6 +11,17 @@ namespace he
       public:
 
       Vector()  {m_vertexcounter++;}
+
+      Vector(Type val)
+      {
+        for(unsigned int i = 0; i < VECTOR_NUM_ARGS; i++)
+        {
+          m_x[i] = val;
+        }
+
+        m_vertexcounter++;
+      }
+
       Vector(VECTOR_PARAMS)
       {
         VECTOR_INIT

@@ -15,7 +15,7 @@ namespace he
       m_rtMatrix(util::Matrix<float, 3>::identity()),
       m_tlMatrix(util::Matrix<float, 3>::identity()),
       m_scMatrix(util::Matrix<float, 3>::identity()),
-      m_renderable(true),
+      m_renderable(false),
       m_transparency(false)
     {
       m_eventManager = eventManager;

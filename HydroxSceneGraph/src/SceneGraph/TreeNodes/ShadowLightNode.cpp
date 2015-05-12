@@ -17,7 +17,7 @@ namespace he
       TreeNode(nodeName, parent, nextSibling),
       m_lightType(lightType),
       m_eventManager(eventManager),
-      m_directionalWidth(10.0f),
+      m_directionalNearSize(10.0f, 10.0f),
       m_renderable(false),
       m_reflectiveShadow(false)
     {
@@ -31,7 +31,9 @@ namespace he
       m_eventManager = sourceNode.m_eventManager;
       m_lightType = sourceNode.m_lightType;
       m_renderable = sourceNode.m_renderable;
+      m_reflectiveShadow = sourceNode.m_reflectiveShadow;
       m_lightData = sourceNode.m_lightData;
+      m_directionalNearSize = sourceNode.m_directionalNearSize;
       m_near = sourceNode.m_near;
       m_far = sourceNode.m_far;
       m_projectionMatrix = sourceNode.m_projectionMatrix;
@@ -114,6 +116,7 @@ namespace he
         m_lightData.projectionParameter[0] = m_near;
         m_lightData.projectionParameter[1] = m_far;
         m_lightData.projectionParameter[2] = 2.0f * width;
+        m_lightData.projectionParameter[3] = 2.0f * width;
         m_projectionMatrix = util::math::createPerspective(-width, width, -width, width, m_near, m_far);
         break;
       case POINTLIGHT:
@@ -121,15 +124,17 @@ namespace he
       case DIRECTIONALLIGHT:
         m_lightData.projectionParameter[0] = m_near;
         m_lightData.projectionParameter[1] = m_far;
-        m_lightData.projectionParameter[2] = 2.0f * m_directionalWidth;
-        m_projectionMatrix = util::math::createOrthographic(-m_directionalWidth, m_directionalWidth, -m_directionalWidth, m_directionalWidth, m_near, m_far);
+        m_lightData.projectionParameter[2] = 2.0f * m_directionalNearSize[0];
+        m_lightData.projectionParameter[3] = 2.0f * m_directionalNearSize[1];
+        m_projectionMatrix = util::math::createOrthographic(-m_directionalNearSize[0], m_directionalNearSize[0], -m_directionalNearSize[1], m_directionalNearSize[1], m_near, m_far);
         break;
       }
     }
 
-    void ShadowLightNode::setDirectionalLightWidth(float width)
+    void ShadowLightNode::setDirectionalLightNearSize(util::vec2f directionalNearSize)
     {
-      m_directionalWidth = width;
+      m_directionalNearSize = directionalNearSize;
+      setShadowProjection(m_near, m_far);
     }
 
     util::Matrix<float, 4> ShadowLightNode::getShadowProjectionMatrix() const

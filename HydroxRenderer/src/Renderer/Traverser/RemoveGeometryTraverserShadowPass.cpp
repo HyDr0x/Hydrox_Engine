@@ -23,21 +23,22 @@ namespace he
     {
     }
 
-    void RemoveGeometryTraverserShadowPass::removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void RemoveGeometryTraverserShadowPass::removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_geometryContainer = geometryContainer;
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+
+      m_uniColor = util::vec4f::identity();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::SHADOW, m_meshVertexDeclaration);
+      m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::SHADOW, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
@@ -54,22 +55,21 @@ namespace he
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }
     }
 
-    bool RemoveGeometryTraverserShadowPass::preTraverse(RenderNode* treeNode)
+    bool RemoveGeometryTraverserShadowPass::preTraverse(RenderNode * treeNode)
     {
       return false;
     }
 
-    void RemoveGeometryTraverserShadowPass::postTraverse(RenderNode* treeNode)
+    void RemoveGeometryTraverserShadowPass::postTraverse(RenderNode * treeNode)
     {
       if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
       {
-        deleteNode(treeNode);
         m_stopTraversal = true;
       }
     }

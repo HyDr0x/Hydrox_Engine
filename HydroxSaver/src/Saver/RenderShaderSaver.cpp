@@ -6,15 +6,14 @@
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
 #include <DataBase/ResourceManager.hpp>
-#include <DataBase/RenderShader.h>
 
 namespace he
 {
   namespace saver
   {
-    void RenderShaderSaver::save(std::string path, std::string filename, util::ResourceHandle renderShaderHandle, util::SingletonManager *singletonManager)
+    void RenderShaderSaver::save(std::string path, std::string filename, sh::RenderShaderHandle renderShaderHandle, util::SingletonManager *singletonManager)
     {
-      db::RenderShader *shader = singletonManager->getService<db::RenderShaderManager>()->getObject(renderShaderHandle);
+      const sh::RenderShader& shader = singletonManager->getService<sh::ShaderContainer>()->getRenderShader(renderShaderHandle);
 
       std::vector<std::string> shaderType(5);
       shaderType[0] = ".vert";
@@ -23,7 +22,7 @@ namespace he
       shaderType[4] = ".tctrl"; 
       shaderType[2] = ".teval";
 
-      std::vector<std::string> shaderSources = shader->getShaderSources();
+      std::vector<std::string> shaderSources = shader.getShaderSources();
 
       std::stringstream stream;
       for(unsigned int i = 0; i < shaderSources.size(); i++)

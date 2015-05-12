@@ -8,6 +8,8 @@
 #include <DataBase/Texture2D.h>
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Pipeline/Renderquad.h"
 
@@ -44,14 +46,15 @@ namespace he
       FinalCompositing(const FinalCompositing&);
       FinalCompositing& operator=(const FinalCompositing&);
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+
+      sh::RenderShaderHandle m_composeShaderHandle;
+      sh::RenderShaderHandle m_debugOutputShaderHandle;
 
       util::SharedPointer<RenderOptions> m_options;
 
       util::SharedPointer<db::Texture2D> m_combinedImage;
 
-      util::ResourceHandle m_offscreenBufferShaderHandle;
-      util::ResourceHandle m_combineShaderHandle;
       Renderquad m_fullscreenRenderQuad;
     };
   }

@@ -14,7 +14,7 @@ namespace he
     MaterialDecorator::MaterialDecorator(IRenderGroup *renderNode, util::SingletonManager *singletonManager) :
       ARenderNodeDecorator(renderNode), 
       m_materialCount(0),
-      m_materialNumberChanged(false)
+      m_updateMaterialData(false)
     {
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_options = singletonManager->getService<RenderOptions>();
@@ -33,7 +33,7 @@ namespace he
       {
         if(m_materialCount < m_options->maxMaterials && m_renderNode->insertGeometry(geometryContainer))
         {
-          m_materialNumberChanged = true;
+          m_updateMaterialData = true;
 
           m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber = 1;
 
@@ -60,7 +60,7 @@ namespace he
       bool deleted = m_renderNode->removeGeometry(geometryContainer);
       if(deleted)
       {
-        for(std::map<util::ResourceHandle, MaterialIndexData, Less>::iterator it = m_materialHandles.begin(); it != m_materialHandles.end(); it++)
+        for(std::map<util::ResourceHandle, MaterialIndexData, util::ResourceHandle::Less>::iterator it = m_materialHandles.begin(); it != m_materialHandles.end(); it++)
         {
           if(geometryContainer->getMaterialHandle() == it->first)
           {
@@ -68,7 +68,7 @@ namespace he
             
             if(m_materialHandles[geometryContainer->getMaterialHandle()].instanceNumber == 0)
             {
-              m_materialNumberChanged = true;
+              m_updateMaterialData = true;
               m_materialHandles.erase(geometryContainer->getMaterialHandle());
 
               m_materialCount--;
@@ -116,12 +116,23 @@ namespace he
 
     void MaterialDecorator::updateBuffer()
     {
-      if(m_materialNumberChanged)
+      for(std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less>::iterator materialIterator = m_materialHashes.begin(); materialIterator != m_materialHashes.end(); materialIterator++)
+      {
+        db::Material *material = m_materialManager->getObject(materialIterator->first);
+
+        if(material->getHash() != materialIterator->second)
+        {
+          m_updateMaterialData = true;//we need to update the mesh data
+          break;
+        }
+      }
+
+      if(m_updateMaterialData)
       {
         resizeMaterialBuffer();
         resizeMaterialIndexBuffer();
 
-        m_materialNumberChanged = false;
+        m_updateMaterialData = false;
       }
       else if(hasInstanceNumberChanged())
       {
@@ -136,12 +147,12 @@ namespace he
       unsigned int instanceNumber = getInstanceNumber();
 
       unsigned int index = 0;
-      for (std::map<util::ResourceHandle, MaterialIndexData, Less>::iterator instanceIterator = m_materialHandles.begin(); instanceIterator != m_materialHandles.end(); instanceIterator++, index++)
+      for(std::map<util::ResourceHandle, MaterialIndexData, util::ResourceHandle::Less>::iterator materialIterator = m_materialHandles.begin(); materialIterator != m_materialHandles.end(); materialIterator++, index++)
       {
-        db::Material *material = m_materialManager->getObject(instanceIterator->first);
+        db::Material *material = m_materialManager->getObject(materialIterator->first);
         m_materialBuffer.setData(index * sizeof(db::Material::MaterialData), sizeof(db::Material::MaterialData), &material->getMaterialData());
 
-        instanceIterator->second.bufferIndex = index;
+        materialIterator->second.bufferIndex = index;
       }
 
       m_materialBuffer.uploadData();

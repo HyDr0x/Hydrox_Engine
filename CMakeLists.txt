@@ -20,6 +20,10 @@ set(HYDROX_SG_INCLUDE ${HYDROX_DIR}/HydroxSceneGraph/include)
 set(HYDROX_SG_LIB_DBG ${HYDROX_DIR}/HydroxSceneGraph/lib/Debug/Hydrox_SceneGraph)
 set(HYDROX_SG_LIB_REL ${HYDROX_DIR}/HydroxSceneGraph/lib/Release/Hydrox_SceneGraph)
 
+set(HYDROX_SH_INCLUDE ${HYDROX_DIR}/HydroxShader/include)
+set(HYDROX_SH_LIB_DBG ${HYDROX_DIR}/HydroxShader/lib/Debug/Hydrox_Shader)
+set(HYDROX_SH_LIB_REL ${HYDROX_DIR}/HydroxShader/lib/Release/Hydrox_Shader)
+
 set(HYDROX_RE_INCLUDE ${HYDROX_DIR}/HydroxRenderer/include)
 set(HYDROX_RE_LIB_DBG ${HYDROX_DIR}/HydroxRenderer/lib/Debug/Hydrox_Renderer)
 set(HYDROX_RE_LIB_REL ${HYDROX_DIR}/HydroxRenderer/lib/Release/Hydrox_Renderer)
@@ -34,6 +38,9 @@ set(HYDROX_SAVER_LIB_REL ${HYDROX_DIR}/HydroxSaver/lib/Release/Hydrox_Saver)
 
 add_subdirectory(HydroxUtilities) 
 
+add_subdirectory(HydroxShader) 
+add_dependencies(Hydrox_Shader Hydrox_Utilities) 
+
 add_subdirectory(HydroxDataBase) 
 add_dependencies(Hydrox_DataBase Hydrox_Utilities) 
 
@@ -41,16 +48,16 @@ add_subdirectory(HydroxXBar)
 add_dependencies(Hydrox_XBar Hydrox_Utilities Hydrox_DataBase) 
 
 add_subdirectory(HydroxRenderer) 
-add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar Hydrox_DataBase) 
+add_dependencies(Hydrox_Renderer Hydrox_Utilities Hydrox_XBar Hydrox_DataBase Hydrox_Shader) 
 
 add_subdirectory(HydroxSceneGraph) 
 add_dependencies(Hydrox_SceneGraph Hydrox_Utilities Hydrox_XBar Hydrox_DataBase) 
 
 add_subdirectory(HydroxLoader) 
-add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 
+add_dependencies(Hydrox_Loader Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase Hydrox_Shader) 
 
 add_subdirectory(HydroxSaver) 
-add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 
+add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase Hydrox_Shader) 
 
 add_subdirectory(Sandbox) 
-add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase) 
+add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase Hydrox_Shader) 

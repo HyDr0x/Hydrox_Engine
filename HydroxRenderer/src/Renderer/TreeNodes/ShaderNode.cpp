@@ -35,17 +35,17 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    void ShaderNode::initialize(util::ResourceHandle shaderHandle)
+    void ShaderNode::initialize(sh::RenderShaderHandle shaderHandle)
     {
       m_shaderHandle = shaderHandle;
     }
 
-    bool ShaderNode::isShader(util::ResourceHandle shaderHandle) const
+    bool ShaderNode::isShader(sh::RenderShaderHandle shaderHandle) const
     {
       return m_shaderHandle == shaderHandle;
     }
 
-    util::ResourceHandle ShaderNode::getShaderHandle() const
+    sh::RenderShaderHandle ShaderNode::getShaderHandle() const
     {
       return m_shaderHandle;
     }

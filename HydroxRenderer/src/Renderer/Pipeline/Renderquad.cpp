@@ -4,7 +4,7 @@
 
 #include <Utilities/Math/Math.hpp>
 
-#include <DataBase/RenderShader.h>
+#include <Shader/ShaderContainer.h>
 #include <DataBase/Texture2D.h>
 
 namespace he
@@ -16,7 +16,7 @@ namespace he
       glGenBuffers(1, &m_vboindex);
       glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
       glBufferData(GL_ARRAY_BUFFER, sizeof(float), nullptr, GL_STATIC_DRAW);
-      glVertexAttribPointer(db::RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
+      glVertexAttribPointer(sh::RenderShader::SPECIAL0, 1, GL_FLOAT, GL_FALSE, sizeof(float), NULL);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -278,13 +278,13 @@ namespace he
 
     void Renderquad::render() const
     {    
-      glEnableVertexAttribArray(db::RenderShader::SPECIAL0);
+      glEnableVertexAttribArray(sh::RenderShader::SPECIAL0);
       glBindBuffer(GL_ARRAY_BUFFER, m_vboindex);
 
       glDrawArrays(GL_POINTS, 0, 1);
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glDisableVertexAttribArray(db::RenderShader::SPECIAL0);
+      glDisableVertexAttribArray(sh::RenderShader::SPECIAL0);
     }
 
     void Renderquad::clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors, bool clearDepth) const

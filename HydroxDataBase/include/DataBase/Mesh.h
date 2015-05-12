@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 
 #include <Utilities/Math/Math.hpp>
+#include <Utilities/Math/Triangle.h>
 #include <Utilities/Miscellaneous/Flags.hpp>
 #include <Utilities/Miscellaneous/CacheGenerator.h>
 #include <Utilities/Miscellaneous/ResourceHandle.h>
@@ -81,6 +82,8 @@ namespace he
       util::Flags<VertexDeclarationElements> getVertexDeclarationFlags() const;
       GLuint getPrimitiveType() const;
 
+      const AABB& getBoundingVolume() const;
+
       util::vec3f getBBMin() const;
       util::vec3f getBBMax() const;
 
@@ -95,9 +98,16 @@ namespace he
       GLuint getCacheCount() const;
 
       const std::vector<util::Cache>& getCaches() const;
+      void setCaches(const std::vector<util::vec3f>& points, const std::vector<util::vec3f>& pointNormals, const std::vector<util::Triangle>& pointTriangles);
+      void addCache(const util::vec3f& point, const util::vec3f& pointNormal, const util::Triangle& triangle);
+
       const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
 
       static unsigned int vertexDeclarationSize(unsigned int index);
+
+    protected:
+
+      virtual void updateHash();
 
     private:
 

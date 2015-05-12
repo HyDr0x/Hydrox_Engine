@@ -14,16 +14,16 @@ namespace he
       InsertGeometryTraverserRenderPass();
       virtual ~InsertGeometryTraverserRenderPass();
 
-      virtual void insertGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
+      virtual void insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
-      virtual bool preTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
 
       util::SharedPointer<IRenderGroup> getCreatedRenderNode() const;
 
     protected:
 
-      virtual void createNewChildNode(VertexDeclarationNode* parent);
-      virtual void createNewSibling(RenderNode* sibling);
+      virtual void createNewChildNode(VertexDeclarationNode * parent);
+      virtual void createNewSibling(RenderNode * sibling);
 
       util::SingletonManager *m_singletonManager;
 

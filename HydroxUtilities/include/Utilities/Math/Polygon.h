@@ -47,10 +47,11 @@ namespace he
 
       float getArea() const;
 
+      float calculateConcaveArea() const;
+
     private:
 
       void calculateAttributes();
-      void calculateArea();
 
       std::vector<vec3f> m_points;//the points which define the polygon
       std::vector<Polygon> m_insidePolygons;//the polygons which define holes the polygon

@@ -1,5 +1,7 @@
 #include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -23,7 +25,7 @@ namespace he
 
     void RenderShadowGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_options = singletonManager->getService<RenderOptions>();
     }
@@ -33,42 +35,42 @@ namespace he
       m_viewProjectionIndex = viewProjectionIndex;
     }
 
-    bool RenderShadowGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RenderShadowGeometryTraverser::preTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->setVertexArray();
 
       return true;
     }
 
-    void RenderShadowGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RenderShadowGeometryTraverser::postTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->unsetVertexArray();
     }
 
-    bool RenderShadowGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RenderShadowGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useShader();
+      shader.useShader();
 
       return true;
     }
 
-    void RenderShadowGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RenderShadowGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
-    bool RenderShadowGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderShadowGeometryTraverser::preTraverse(RenderNode * treeNode)
     {
       treeNode->getRenderGroup()->rasterizeShadowGeometry();
 
       return true;
     }
 
-    void RenderShadowGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderShadowGeometryTraverser::postTraverse(RenderNode * treeNode)
     {
     }
   }

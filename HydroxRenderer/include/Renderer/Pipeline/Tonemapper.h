@@ -10,6 +10,8 @@
 #include <DataBase/Texture2D.h>
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Pipeline/Renderquad.h"
 
@@ -49,7 +51,10 @@ namespace he
       util::vec2f m_logLuminanceRange, m_luminanceRange;
       util::vec2i m_logLuminanceRangeNew;
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+
+      sh::RenderShaderHandle m_histogramShaderHandle;
+      sh::RenderShaderHandle m_tonemappingShaderHandle;
 
       util::SharedPointer<RenderOptions> m_options;
 
@@ -62,9 +67,6 @@ namespace he
       GPUBuffer m_maxLuminanceBuffer;
 
       Renderquad m_histogramRenderQuad;
-
-      util::ResourceHandle m_histogramShaderHandle;
-      util::ResourceHandle m_tonemappingShaderHandle;
     };
   }
 }

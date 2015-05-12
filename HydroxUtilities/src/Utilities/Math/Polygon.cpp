@@ -37,15 +37,14 @@ namespace he
 
     float Polygon::calculatePointPolygonDistance(vec3f point, vec3f& nearestPoint)
     {
-      vec3f polygonNormal = math::cross(m_points[1] - m_points[0], m_points[2] - m_points[0]);
       vec3f pointPlanePos;
 
       Plane plane(m_points[0], m_points[1], m_points[2]);
-      plane.collisionLine(point, polygonNormal, pointPlanePos);
+      plane.collisionLine(point, m_normal, pointPlanePos);
 
       if(0.0f <= pointPlanePos[1] && pointPlanePos[1] <= 1.0f && 0.0f <= pointPlanePos[2] && pointPlanePos[2] <= 1.0f && pointPlanePos[1] + pointPlanePos[2] <= 1.0f)
       {
-        vec3f direction = pointPlanePos[0] * polygonNormal;
+        vec3f direction = pointPlanePos[0] * m_normal;
         nearestPoint = point + direction;
         return direction.length();//point lies, projected on the triangle plane, in the triangle
       }
@@ -160,10 +159,9 @@ namespace he
     std::vector<vec3f> Polygon::getRotatedPolygonPoints(util::vec3f planeNormal) const
     {
       //calculate the angle between the polygon and the z-axis to rotate the polygon so that its perpenidcular to the z plane
-      vec3f rotationAxis = math::cross(planeNormal, m_normal);
+      vec3f rotationAxis = math::cross(planeNormal, m_normal).normalize();
       float zAxisAngle = acosf(math::clamp(vec3f::dot(planeNormal, m_normal), -1.0f, 1.0f));
       Quaternion<float> rotQuat = math::createRotAxisQuaternion<float>(zAxisAngle, rotationAxis);
-      Matrix<float, 4> rotMatrix = rotQuat.toMatrix();
 
       std::vector<vec3f> rotatedPoints(m_points.size());
       for(unsigned int i = 0; i < m_points.size(); i++)//rotate the points parallel to the xy plane
@@ -213,10 +211,12 @@ namespace he
       std::vector<vec3f> triangleCentroids;
       vec3f normal = vec3f::identity();
 
-      for(unsigned int i = 2; i < m_points.size(); i++)//triangulation through fan triangulation, only for convex polygons
+      m_area = 0.0f;
+      for(unsigned int i = 2; i < m_points.size(); i++)//triangulation through fan triangulation, only for convex polygons!
       {
         Triangle triangle(pivotPoint, secondPoint, m_points[i]);
-        triangleAreas.push_back(triangle.getArea());
+        m_area += triangle.getArea();
+        triangleAreas.push_back(m_area);
 
         triangleCentroids.push_back((pivotPoint + secondPoint + m_points[i]) / 3.0f);
         normal += triangle.getNormal();
@@ -225,9 +225,7 @@ namespace he
 
       m_normal = normal.normalize();
 
-      calculateArea();
-
-      for(unsigned int i = 0; i < triangleCentroids.size(); i++)//centroid calculation fails for concave polygons!!!
+      for(unsigned int i = 0; i < triangleCentroids.size(); i++)//centroid calculation only for convex polygons!
       {
         m_centroid[0] += triangleCentroids[i][0] * triangleAreas[i];
         m_centroid[1] += triangleCentroids[i][1] * triangleAreas[i];
@@ -239,21 +237,25 @@ namespace he
       m_centroid[2] /= m_area;
     }
 
-    void Polygon::calculateArea()
+    float Polygon::calculateConcaveArea() const
     {
+      float area = 0.0f;
+
       std::vector<vec3f> rotatedPoints = getRotatedPolygonPoints(vec3f(0, 0, 1));
 
       for(unsigned int i = 0; i < rotatedPoints.size(); i++)//calculate the area with the gauss area formula
       {
         unsigned int index = (i + 1) % rotatedPoints.size();
-        m_area += (rotatedPoints[i][1] + rotatedPoints[index][1]) * (rotatedPoints[i][0] - rotatedPoints[index][0]);
+        area += (rotatedPoints[i][1] + rotatedPoints[index][1]) * (rotatedPoints[i][0] - rotatedPoints[index][0]);
       }
-      m_area *= 0.5f;
+      area *= 0.5f;
 
       for(unsigned int i = 0; i < m_insidePolygons.size(); i++)//add the negative areas of the inside polygons
       {
-        m_area += m_insidePolygons[i].getArea();
+        area += m_insidePolygons[i].getArea();
       }
+
+      return area;
 
       //vec3f e0 = m_points[1] - m_points[0];
       //vec3f e1 = m_points[2] - m_points[0];

@@ -16,7 +16,7 @@ namespace he
     {
     public:
 
-      RemoveNodesTraverser(TreeNodeAllocator& allocator, util::EventManager& eventManager);
+      RemoveNodesTraverser(TreeNodeAllocator& allocator, util::SharedPointer<util::EventManager> eventManager);
       virtual ~RemoveNodesTraverser();
 
       virtual bool preTraverse(AnimatedTransformNode& treeNode);
@@ -45,7 +45,7 @@ namespace he
 
     protected:
 
-      util::EventManager& m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
     };
   }
 }

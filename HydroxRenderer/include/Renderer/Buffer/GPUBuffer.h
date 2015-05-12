@@ -22,6 +22,8 @@ namespace he
       void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;
 
+      GLuint getBufferSize() const;
+
       void setData(GLuint offset, GLuint size, const GLvoid *data);
       void getData(GLuint offset, GLuint size, GLvoid *data) const;
 

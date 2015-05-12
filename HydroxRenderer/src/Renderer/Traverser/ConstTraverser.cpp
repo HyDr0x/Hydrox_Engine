@@ -16,27 +16,27 @@ namespace he
     {
     }
 
-    void ConstTraverser::doTraverse(const TreeNode *treeNode)
+    void ConstTraverser::doTraverse(util::SharedPointer<const TreeNode> treeNode)
     {
       if(treeNode->preTraverse(this))
       {
-        doTraverseDown(treeNode->getFirstChild());
+        doTraverseDown(treeNode->getFirstChild().dynamic_pointer_cast<const TreeNode>());
       }
       treeNode->postTraverse(this);
     }
 
-    void ConstTraverser::doTraverseDown(const TreeNode* treeNode)
+    void ConstTraverser::doTraverseDown(util::SharedPointer<const TreeNode> treeNode)
     {
-      while(treeNode != nullptr)
+      while(treeNode)
       {
         if(treeNode->preTraverse(this))
         {
-          doTraverseDown(treeNode->getFirstChild());
+          doTraverseDown(treeNode->getFirstChild().dynamic_pointer_cast<const TreeNode>());
         }
 
-        TreeNode *node = treeNode->getNextSibling();
+        util::SharedPointer<TreeNode> node = treeNode->getNextSibling();
         treeNode->postTraverse(this);
-        treeNode = node;
+        treeNode = node.dynamic_pointer_cast<const TreeNode>();
 
         if(m_stopTraversal)
         {
@@ -45,58 +45,58 @@ namespace he
       }
     }
 
-    bool ConstTraverser::preTraverse(const TreeNode* treeNode)
+    bool ConstTraverser::preTraverse(const TreeNode *treeNode)
     {
       return true;
     }
 
-    void ConstTraverser::postTraverse(const TreeNode* treeNode)
+    void ConstTraverser::postTraverse(const TreeNode *treeNode)
     {
     }
 
-    bool ConstTraverser::preTraverse(const GroupNode* treeNode)
-    {
-      return true;
-    }
-
-    void ConstTraverser::postTraverse(const GroupNode* treeNode)
-    {
-    }
-
-    bool ConstTraverser::preTraverse(const VertexDeclarationNode* treeNode)
+    bool ConstTraverser::preTraverse(const GroupNode * treeNode)
     {
       return true;
     }
 
-    void ConstTraverser::postTraverse(const VertexDeclarationNode* treeNode)
+    void ConstTraverser::postTraverse(const GroupNode * treeNode)
     {
     }
 
-
-    bool ConstTraverser::preTraverse(const ShaderNode* treeNode)
-    {
-      return true;
-    }
-
-    void ConstTraverser::postTraverse(const ShaderNode* treeNode)
-    {
-    }
-
-    bool ConstTraverser::preTraverse(const TextureNode* treeNode)
+    bool ConstTraverser::preTraverse(const VertexDeclarationNode * treeNode)
     {
       return true;
     }
 
-    void ConstTraverser::postTraverse(const TextureNode* treeNode)
+    void ConstTraverser::postTraverse(const VertexDeclarationNode * treeNode)
     {
     }
 
-    bool ConstTraverser::preTraverse(const RenderNode* treeNode)
+
+    bool ConstTraverser::preTraverse(const ShaderNode * treeNode)
     {
       return true;
     }
 
-    void ConstTraverser::postTraverse(const RenderNode* treeNode)
+    void ConstTraverser::postTraverse(const ShaderNode * treeNode)
+    {
+    }
+
+    bool ConstTraverser::preTraverse(const TextureNode * treeNode)
+    {
+      return true;
+    }
+
+    void ConstTraverser::postTraverse(const TextureNode * treeNode)
+    {
+    }
+
+    bool ConstTraverser::preTraverse(const RenderNode * treeNode)
+    {
+      return true;
+    }
+
+    void ConstTraverser::postTraverse(const RenderNode * treeNode)
     {
     }
   }

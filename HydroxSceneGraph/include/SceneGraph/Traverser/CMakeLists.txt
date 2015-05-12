@@ -13,5 +13,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/RemoveNodesTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TransformTraverser.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Traverser.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TrianglePickingTraverser.h 
 	PARENT_SCOPE 
 )

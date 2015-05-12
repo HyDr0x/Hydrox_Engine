@@ -24,26 +24,27 @@ namespace he
     {
     }
 
-    void RemoveGeometryTraverser::removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void RemoveGeometryTraverser::removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_geometryContainer = geometryContainer;
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+
+      m_uniColor = util::vec4f::identity();
     }
 
-    void RemoveGeometryTraverser::doTraverseDown(TreeNode* treeNode)
+    void RemoveGeometryTraverser::doTraverseDown(util::SharedPointer<TreeNode> treeNode)
     {
-      while(treeNode != nullptr)
+      while(treeNode)
       {
         if(treeNode->preTraverse(this))
         {
           doTraverseDown(treeNode->getFirstChild());
         }
 
-        TreeNode *node = treeNode->getNextSibling();
+        util::SharedPointer<TreeNode> node = treeNode->getNextSibling();
         treeNode->postTraverse(this);
         treeNode = node;
 
@@ -61,9 +62,9 @@ namespace he
 
     void RemoveGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
     {
-      if(treeNode->getFirstChild() == nullptr)
+      if(!treeNode->getFirstChild())
       {
-        deleteNode(treeNode);
+        treeNode->setFirstChild(util::SharedPointer<TreeNode>());
       }
     }
 
@@ -74,62 +75,60 @@ namespace he
 
     void RemoveGeometryTraverser::postTraverse(ShaderNode* treeNode)
     {
-      if(treeNode->getFirstChild() == nullptr)
+      if(!treeNode->getFirstChild())
       {
-        deleteNode(treeNode);
+        treeNode->setFirstChild(util::SharedPointer<TreeNode>());
       }
     }
 
     bool RemoveGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      return treeNode->isTexture(m_textureHandles);
+      return treeNode->isTexture(m_textureHandles, m_uniColor);
     }
 
     void RemoveGeometryTraverser::postTraverse(TextureNode* treeNode)
     {
-      if(treeNode->getFirstChild() == nullptr)
+      if(!treeNode->getFirstChild())
       {
-        deleteNode(treeNode);
+        treeNode->setFirstChild(util::SharedPointer<TreeNode>());
       }
     }
 
-    void RemoveGeometryTraverser::deleteNode(TreeNode *treeNode)
-    {
-      TreeNode *currentRenderNode = treeNode->getParent();
+    //void RemoveGeometryTraverser::deleteNode(TreeNode *treeNode)
+    //{
+    //  TreeNode *currentRenderNode = treeNode;
 
-      if(currentRenderNode != nullptr)
-      {
-        currentRenderNode = currentRenderNode->getFirstChild();
-        TreeNode *oldRenderNode = currentRenderNode;
+    //  if(currentRenderNode != nullptr)
+    //  {
+    //    currentRenderNode = currentRenderNode->getFirstChild();
+    //    util::SharedPointer<TreeNode> oldRenderNode = currentRenderNode;
 
-        while(currentRenderNode != nullptr)
-        {
-          if(currentRenderNode == treeNode)
-          {
-            if(oldRenderNode != currentRenderNode)
-            {
-              oldRenderNode->setNextSibling(currentRenderNode->getNextSibling());
-            }
-            else
-            {
-              currentRenderNode->getParent()->setFirstChild(currentRenderNode->getNextSibling());
-            }
+    //    while(currentRenderNode != nullptr)
+    //    {
+    //      if(currentRenderNode == treeNode)
+    //      {
+    //        if(oldRenderNode != currentRenderNode)
+    //        {
+    //          oldRenderNode->setNextSibling(currentRenderNode->getNextSibling());
+    //        }
+    //        else
+    //        {
+    //          currentRenderNode->getParent()->setFirstChild(currentRenderNode->getNextSibling());
+    //        }
 
-            delete treeNode;
-            treeNode = nullptr;
+    //        treeNode = util::SharedPointer<TreeNode>();
 
-            return;
-          }
+    //        return;
+    //      }
 
-          oldRenderNode = currentRenderNode;
-          currentRenderNode = currentRenderNode->getNextSibling();
-        }
-      }
-      else
-      {
-        delete treeNode;
-        treeNode = nullptr;
-      }
-    }
+    //      oldRenderNode = currentRenderNode;
+    //      currentRenderNode = currentRenderNode->getNextSibling();
+    //    }
+    //  }
+    //  else
+    //  {
+    //    treeNode = util::SharedPointer<TreeNode>();
+    //  }
+    //}
   }
 }

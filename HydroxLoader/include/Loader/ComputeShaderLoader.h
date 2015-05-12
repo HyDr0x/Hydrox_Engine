@@ -1,8 +1,6 @@
 #ifndef COMPUTESHADERLOADER_H_
 #define COMPUTESHADERLOADER_H_
 
-#include <DataBase/ResourceManager.hpp>
-
 #include "Loader/ShaderLoader.h"
 
 namespace he
@@ -13,12 +11,14 @@ namespace he
     {
     public:
 
-      ComputeShaderLoader(util::SingletonManager *singletonManager);
+      ComputeShaderLoader();
       ~ComputeShaderLoader();
 
-      util::ResourceHandle loadResource(std::string shaderName, std::string filename);
+      sh::ComputeShader loadResource(std::string shaderName, std::string filename);
 
-      void loadIndexfile(std::string path, std::string shaderIndexFilename);
+      void loadShadersInIndexfile(std::string path, std::string shaderIndexFilename);
+
+      virtual void checkIfShaderChanged();
     };
   }
 }

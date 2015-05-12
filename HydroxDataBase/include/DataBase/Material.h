@@ -8,6 +8,7 @@
 #include "DataBase/DLLExport.h"
 
 #include "DataBase/ManagedResource.h"
+
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 
 #include <Utilities/Math/Math.hpp>
@@ -51,7 +52,7 @@ namespace he
 
       Material();
       Material(const Material& other);
-      Material(MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureIndices, std::vector<uint64_t> hashes, bool transparency);
+      Material(const MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureHandles, std::vector< std::vector<uint64_t> > textureHashes, bool transparency, bool debug = false, util::vec4f uniColor = util::vec4f(0, 0, 0, 0));
       ~Material();
 
       Material& operator=(Material other);
@@ -61,7 +62,7 @@ namespace he
       void setTextureNumber(TextureType texType, unsigned int texNum);
       unsigned int getTextureNumber(TextureType texType) const;
 
-      void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle);
+      void setTextureHandle(TextureType texType, unsigned int slot, util::ResourceHandle textureHandle, uint64_t textureHash);
       util::ResourceHandle getTextureHandle(TextureType texType, unsigned int slot) const;
       std::vector< std::vector<util::ResourceHandle> > getTextureHandles() const;
       bool equalTextureHandles(const std::vector<std::vector<util::ResourceHandle>>& textureHandles) const;
@@ -71,13 +72,25 @@ namespace he
 
       bool getTransparency() const;
 
+      bool getDebug() const;
+
+      util::vec4f getUniColor() const;
+      void setUniColor(util::vec4f uniColor);
+
+    protected:
+
+      virtual void updateHash();
+
     private:
 
       void swap(Material& other);
 
+      std::vector< std::vector<uint64_t> > m_textureHashes;
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
       MaterialData m_materialData;
 
+      util::vec4f m_uniColor;
+      bool m_debug;
       bool m_transparency;
     };
   }

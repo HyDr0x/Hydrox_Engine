@@ -1,7 +1,7 @@
 #ifndef MATH_HPP_
 #define MATH_HPP_
 
-#include <math.h>
+#include <cmath>
 
 #include "Matrix.hpp"
 #include "Quaternion.hpp"
@@ -16,6 +16,11 @@ namespace he
       static const float PI_HALF = PI / 2.0f;
       static const float PI_QUARTER = PI_HALF / 2.0f;
 
+      template<typename Type> inline int sign(Type a)
+      {
+        return (Type(0) < a) - (a < Type(0));
+      }
+
       template<typename Type> inline Type clamp(Type a, Type intervalStart, Type intervalEnd)
       {
         Type tmpA = a < intervalStart ? intervalStart : a;
@@ -26,6 +31,11 @@ namespace he
       inline bool floatSafeEqual(float a, float b)
       {
         return fabs(a - b) <= (0.00001f * std::max<float>(1.0f, std::max<float>(fabs(a), fabs(b))));
+      }
+
+      inline bool floatSafeGreater(float a, float b)
+      {
+        return (a - b) > (0.00001f * std::max<float>(1.0f, std::max<float>(fabs(a), fabs(b))));
       }
 
       inline float round(float val)
@@ -43,9 +53,34 @@ namespace he
         return angle / PI * 180.0f;
       }
 
+      inline vec3f polarToCartesian(vec3f coordinate)
+      {
+        return coordinate[2] * vec3f(sinf(coordinate[0]) * cosf(coordinate[1]), cosf(coordinate[0]), sinf(coordinate[0]) * sinf(coordinate[1]));
+      }
+
       inline float cartesianToPolar(float x, float y)
       {
         return atan2f(y, x);
+      }
+
+      inline util::vec3f reflect(util::vec3f a, util::vec3f b)
+      {
+        return a - 2.0f * util::vec3f::dot(a, b) * b;
+      }
+
+      template<typename Type> inline Vector<Type, 4> minV(const Vector<Type, 4>& a, const Vector<Type, 4>& b)
+      {
+        return Vector<Type, 4>(std::min(a[0], b[0]), std::min(a[1], b[1]), std::min(a[2], b[2]), std::min(a[3], b[3]));
+      }
+
+      template<typename Type> inline Vector<Type, 3> minV(const Vector<Type, 3>& a, const Vector<Type, 3>& b)
+      {
+        return Vector<Type, 3>(std::min(a[0], b[0]), std::min(a[1], b[1]), std::min(a[2], b[2]));
+      }
+
+      template<typename Type> inline Vector<Type, 2> minV(const Vector<Type, 2>& a, const Vector<Type, 2>& b)
+      {
+        return Vector<Type, 2>(std::min(a[0], b[0]), std::min(a[1], b[1]));
       }
 
       template<typename Type> inline Vector<Type, 4> sqrt(const Vector<Type, 4>& v1)

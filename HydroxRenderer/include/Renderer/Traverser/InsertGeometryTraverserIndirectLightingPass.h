@@ -14,14 +14,14 @@ namespace he
       InsertGeometryTraverserIndirectLightingPass();
       virtual ~InsertGeometryTraverserIndirectLightingPass();
 
-      virtual void insertGeometry(TreeNode *treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
+      virtual void insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<IRenderGroup> sharedRenderGroup, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
-      virtual bool preTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
 
     protected:
 
-      virtual void createNewChildNode(VertexDeclarationNode* parent);
-      virtual void createNewSibling(RenderNode* sibling);
+      virtual void createNewChildNode(VertexDeclarationNode * parent);
+      virtual void createNewSibling(RenderNode * sibling);
 
       util::SingletonManager *m_singletonManager;
 

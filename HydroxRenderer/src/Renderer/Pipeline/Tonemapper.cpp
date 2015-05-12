@@ -2,9 +2,6 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/RenderShader.h>
-#include <DataBase/ShaderContainer.h>
-
 #include "Renderer/Pipeline/RenderOptions.h"
 
 namespace he
@@ -24,11 +21,11 @@ namespace he
     {
       m_logLuminanceRange = util::vec2f(0, 0);
       m_options = singletonManager->getService<RenderOptions>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      util::SharedPointer<db::ShaderContainer> renderShader = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      util::SharedPointer<sh::ShaderContainer> renderShader = singletonManager->getService<sh::ShaderContainer>();
 
-      m_histogramShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::HISTOGRAM, util::Flags<VertexElements>(1));
-      m_tonemappingShaderHandle = renderShader->getRenderShader(singletonManager, db::ShaderContainer::TONEMAPPING, util::Flags<VertexElements>(8192));
+      m_histogramShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::HISTOGRAM, sh::ShaderSlotFlags(1));
+      m_tonemappingShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::TONEMAPPING, sh::ShaderSlotFlags(8192));
 
       createHistogramVertices();
 
@@ -59,8 +56,8 @@ namespace he
       glGenVertexArrays(1, &m_histogramVAO);
 
       glBindVertexArray(m_histogramVAO);
-      glVertexAttribFormat(db::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribBinding(db::RenderShader::POSITION, 0);
+      glVertexAttribFormat(sh::RenderShader::POSITION, 2, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribBinding(sh::RenderShader::POSITION, 0);
       glBindVertexArray(0);
     }
 
@@ -74,10 +71,10 @@ namespace he
       glBlendFunc(GL_ONE, GL_ONE);
       glViewport(0, 0, m_histogramBins, 1);
       m_histogramRenderQuad.setWriteFrameBuffer();
-      db::RenderShader *shader = m_renderShaderManager->getObject(m_histogramShaderHandle);
-      shader->useShader();
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_histogramShaderHandle);
+      shader.useShader();
       glBindVertexArray(m_histogramVAO);
-      glEnableVertexAttribArray(db::RenderShader::POSITION);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
       m_histogramVertices.bindVertexbuffer(0, 0, sizeof(util::vec2f));
 
       combinedTexture->setTexture(0, 0);
@@ -87,9 +84,9 @@ namespace he
       combinedTexture->unsetTexture(0);
 
       m_histogramVertices.unbindVertexBuffer(0);
-      glDisableVertexAttribArray(db::RenderShader::POSITION);
+      glDisableVertexAttribArray(sh::RenderShader::POSITION);
       glBindVertexArray(0);
-      shader->useNoShader();
+      shader.useNoShader();
       m_histogramRenderQuad.unsetWriteFrameBuffer();
       glViewport(0, 0, m_options->width, m_options->height);
       glDisable(GL_BLEND);
@@ -155,12 +152,12 @@ namespace he
 
       m_timer.start();
 
-      db::RenderShader *toneMappingShader = m_renderShaderManager->getObject(m_tonemappingShaderHandle);
-      toneMappingShader->useShader();
+      const sh::RenderShader& toneMappingShader = m_renderShaderContainer->getRenderShader(m_tonemappingShaderHandle);
+      toneMappingShader.useShader();
 
       //float s = 0.00390625f * m_luminanceRange[1] / (1.0f * m_luminanceRange[0] + 0.0001f);
-      db::RenderShader::setUniform(2, GL_FLOAT, &m_options->s);
-      db::RenderShader::setUniform(3, GL_FLOAT_VEC2, &m_luminanceRange[0]);
+      sh::RenderShader::setUniform(2, GL_FLOAT, &m_options->s);
+      sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &m_luminanceRange[0]);
 
       combinedTexture->setTexture(0, 0);
 
@@ -168,7 +165,7 @@ namespace he
 
       combinedTexture->unsetTexture(0);
 
-      toneMappingShader->useNoShader();
+      toneMappingShader.useNoShader();
     }
   }
 }

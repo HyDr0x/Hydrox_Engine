@@ -21,11 +21,15 @@ namespace he
 
       virtual void free() = 0;
 
-      const uint64_t getHash() const;
+      const uint64_t getHash();
 
     protected:
 
+      virtual void updateHash() = 0;
+
       uint64_t m_hash;
+
+      bool m_dirtyHash;//hash value needs to be updated
     };
   }
 }

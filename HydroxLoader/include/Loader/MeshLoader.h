@@ -19,6 +19,8 @@ namespace he
 
       util::ResourceHandle getDefaultResource() const;
 
+      void printFileInformations() const;
+
     private:
 
       struct MeshMetaData
@@ -34,6 +36,9 @@ namespace he
         GLuint vboSize;
         GLuint cacheSize;
       };
+
+      std::string m_fileName;
+      MeshMetaData m_meshData;
 
       float m_errorRate;
       float m_maxDistance;

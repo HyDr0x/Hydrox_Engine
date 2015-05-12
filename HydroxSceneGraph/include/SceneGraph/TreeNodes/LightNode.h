@@ -46,6 +46,8 @@ namespace he
 
       void applyTransformation(util::vec3f position, util::Quaternion<float> rotation);
 
+      void setDirectionalLightNearSize(util::vec2f directionalNearSize);
+
       void setLightType(LightType lightType);
       LightType getLightType() const;
 

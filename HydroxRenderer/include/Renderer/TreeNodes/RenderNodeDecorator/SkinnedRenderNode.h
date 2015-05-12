@@ -9,6 +9,8 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 #include "Renderer/Buffer/UBO.h"
 

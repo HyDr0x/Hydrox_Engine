@@ -1,0 +1,9 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/ComputeShader.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderShader.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Shader.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShaderContainer.cpp 
+	PARENT_SCOPE 
+)

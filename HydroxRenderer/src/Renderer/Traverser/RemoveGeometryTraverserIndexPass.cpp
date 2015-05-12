@@ -23,14 +23,15 @@ namespace he
     {
     }
 
-    void RemoveGeometryTraverserIndexPass::removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void RemoveGeometryTraverserIndexPass::removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_geometryContainer = geometryContainer;
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+
+      m_uniColor = util::vec4f::identity();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
@@ -40,14 +41,14 @@ namespace he
       switch(mesh->getPrimitiveType())
       {
       case GL_POINTS:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::POINTINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::POINTINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       case GL_LINES:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::LINEINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::LINEINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       case GL_TRIANGLES:
       default:
-        m_shaderHandle = m_renderShaderContainer->getRenderShader(singletonManager, db::ShaderContainer::TRIANGLEINDEX, m_meshVertexDeclaration);
+        m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::TRIANGLEINDEX, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
         break;
       }
 
@@ -66,22 +67,21 @@ namespace he
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }
     }
 
-    bool RemoveGeometryTraverserIndexPass::preTraverse(RenderNode* treeNode)
+    bool RemoveGeometryTraverserIndexPass::preTraverse(RenderNode * treeNode)
     {
       return false;
     }
 
-    void RemoveGeometryTraverserIndexPass::postTraverse(RenderNode* treeNode)
+    void RemoveGeometryTraverserIndexPass::postTraverse(RenderNode * treeNode)
     {
       if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
       {
-        deleteNode(treeNode);
         m_stopTraversal = true;
       }
     }

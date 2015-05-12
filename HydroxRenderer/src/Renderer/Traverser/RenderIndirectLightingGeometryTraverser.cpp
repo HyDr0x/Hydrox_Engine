@@ -1,5 +1,7 @@
 #include "Renderer/Traverser/RenderIndirectLightingGeometryTraverser.h"
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -26,7 +28,7 @@ namespace he
       m_normalMap = normalMap;
       m_materialMap = materialMap;
 
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
     void RenderIndirectLightingGeometryTraverser::setGlobalBufferResolution(unsigned int globalBufferResolution)
@@ -34,32 +36,32 @@ namespace he
       m_globalBufferResolution = globalBufferResolution;
     }
 
-    bool RenderIndirectLightingGeometryTraverser::preTraverse(GroupNode* treeNode)
+    bool RenderIndirectLightingGeometryTraverser::preTraverse(GroupNode * treeNode)
     {
       m_globalCacheOffset = 0;//reset global cache offset counter
 
       return true;
     }
 
-    bool RenderIndirectLightingGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RenderIndirectLightingGeometryTraverser::preTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->setVertexArray();
 
       return true;
     }
 
-    void RenderIndirectLightingGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RenderIndirectLightingGeometryTraverser::postTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->unsetVertexArray();
     }
 
-    bool RenderIndirectLightingGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RenderIndirectLightingGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useShader();
+      shader.useShader();
 
-      db::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_globalBufferResolution);
+      sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_globalBufferResolution);
 
       m_normalMap->setTexture(0, 0);
       m_materialMap->setTexture(1, 1);
@@ -67,19 +69,19 @@ namespace he
       return true;
     }
 
-    void RenderIndirectLightingGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RenderIndirectLightingGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       m_materialMap->unsetTexture(1);
       m_normalMap->unsetTexture(0);
 
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
-    bool RenderIndirectLightingGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderIndirectLightingGeometryTraverser::preTraverse(RenderNode * treeNode)
     {
-      db::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_globalCacheOffset);
+      sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_globalCacheOffset);
 
       treeNode->getRenderGroup()->rasterizeIndirectLightingGeometry();
 
@@ -88,7 +90,7 @@ namespace he
       return true;
     }
 
-    void RenderIndirectLightingGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderIndirectLightingGeometryTraverser::postTraverse(RenderNode * treeNode)
     {
     }
   }

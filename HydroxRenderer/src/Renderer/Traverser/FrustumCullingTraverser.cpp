@@ -19,7 +19,7 @@ namespace he
     {
     }
 
-    bool FrustumCullingTraverser::preTraverse(const RenderNode* treeNode)
+    bool FrustumCullingTraverser::preTraverse(const RenderNode *treeNode)
     {
       treeNode->getRenderGroup()->frustumCulling();
 

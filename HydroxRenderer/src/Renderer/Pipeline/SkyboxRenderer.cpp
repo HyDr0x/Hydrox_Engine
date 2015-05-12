@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <Utilities/PrimitiveGenerator/CubeGenerator.h>
-#include <DataBase/ShaderContainer.h>
 
 namespace he
 {
@@ -20,17 +19,17 @@ namespace he
 
     void SkyboxRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxTextureHandles[6])
     {
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_textureArrayManager = singletonManager->getService<db::TextureArrayManager>();
 
-      m_skyboxShaderHandle = singletonManager->getService<db::ShaderContainer>()->getRenderShader(singletonManager, db::ShaderContainer::SKYBOX, util::Flags<VertexElements>(3));
+      m_skyboxShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::SKYBOX, sh::ShaderSlotFlags(3));
 
-      db::Texture2D *texture;
-      texture = m_textureManager->getObject(skyboxTextureHandles[0]);
-      unsigned int size = texture->getTextureSize();
+      db::Texture2D *texture = m_textureManager->getObject(skyboxTextureHandles[0]);
+      
+      unsigned int size = texture->getResolution()[0] * texture->getResolution()[1] * (texture->getBitsPerComponent() / 8) * 4;
 
-      std::vector<unsigned char> data(size * 6);
+      std::vector<GLubyte> data(6 * size);
 
       for (unsigned int i = 0; i < 6; i++)
       {
@@ -38,7 +37,7 @@ namespace he
         texture->getTextureData(&data[i * size]);
       }
 
-      m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), texture->getChannelNumber(), texture->getBitsPerPixel(), &data[0]));
+      m_arrayTextureHandle = m_textureArrayManager->addObject(db::Texture3D(texture->getResolution()[0], texture->getResolution()[1], 6, GL_TEXTURE_2D_ARRAY, texture->getType(), texture->getInternalFormat(), texture->getFormat(), texture->getChannelNumber(), texture->getBitsPerComponent(), &data[0]));
 
       std::vector<util::vec3f> positions;
 
@@ -82,14 +81,14 @@ namespace he
       glGenVertexArrays(1, &m_skyBoxVAO);
       glBindVertexArray(m_skyBoxVAO);
 
-      glVertexAttribFormat(db::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
-      glVertexAttribFormat(db::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec3f));
+      glVertexAttribFormat(sh::RenderShader::POSITION, 3, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribFormat(sh::RenderShader::TEXTURE0, 2, GL_FLOAT, GL_FALSE, sizeof(util::vec3f));
 
-      glVertexAttribBinding(db::RenderShader::POSITION, 0);
-      glVertexAttribBinding(db::RenderShader::TEXTURE0, 0);
+      glVertexAttribBinding(sh::RenderShader::POSITION, 0);
+      glVertexAttribBinding(sh::RenderShader::TEXTURE0, 0);
 
-      glEnableVertexAttribArray(db::RenderShader::POSITION);
-      glEnableVertexAttribArray(db::RenderShader::TEXTURE0);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
+      glEnableVertexAttribArray(sh::RenderShader::TEXTURE0);
 
       glBindVertexArray(0);
     }
@@ -101,9 +100,9 @@ namespace he
       glBindVertexArray(m_skyBoxVAO);
 
       db::Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
-      db::RenderShader *skyboxShader = m_renderShaderManager->getObject(m_skyboxShaderHandle);
+      const sh::RenderShader& skyboxShader = m_renderShaderContainer->getRenderShader(m_skyboxShaderHandle);
 
-      skyboxShader->useShader();
+      skyboxShader.useShader();
       renderTexture->setTexture(0, 0);
 
       m_geometryData.bindVertexbuffer(0, 0, sizeof(util::vec3f) + sizeof(util::vec2f));
@@ -113,7 +112,7 @@ namespace he
       m_geometryData.unbindVertexBuffer(0);
 
       renderTexture->unsetTexture(0);
-      skyboxShader->useNoShader();
+      skyboxShader.useNoShader();
       
       glBindVertexArray(0);
 

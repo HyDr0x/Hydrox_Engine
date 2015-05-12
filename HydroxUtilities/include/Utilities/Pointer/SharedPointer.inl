@@ -80,6 +80,8 @@ namespace he
     template<typename T> void SharedPointer<T>::reset()
     {
       ownDelete();
+      m_ptr = nullptr;
+      m_referenceNumber = nullptr;
     }
 
     template<typename T> template<typename F> void SharedPointer<T>::reset(F *ptr)
@@ -117,10 +119,7 @@ namespace he
     {
       if(m_referenceNumber != nullptr && --(*m_referenceNumber) == 0)
       {
-        delete m_ptr;
-        delete m_referenceNumber;
-        m_ptr = nullptr;
-        m_referenceNumber = nullptr;
+        release();
       }
     }
 
@@ -210,6 +209,8 @@ namespace he
     template<typename T> void SharedPointer<T[]>::reset()
     {
       ownDelete();
+      m_ptr = nullptr;
+      m_referenceNumber = nullptr;
     }
 
     template<typename T> template<typename F> void SharedPointer<T[]>::reset(F *ptr)
@@ -247,10 +248,7 @@ namespace he
     {
       if(m_referenceNumber != nullptr && --(*m_referenceNumber) == 0)
       {
-        delete[] m_ptr;
-        delete m_referenceNumber;
-        m_ptr = nullptr;
-        m_referenceNumber = nullptr;
+        release();
       }
     }
 

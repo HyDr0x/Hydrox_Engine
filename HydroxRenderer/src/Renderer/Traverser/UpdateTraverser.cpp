@@ -11,7 +11,7 @@ namespace he
 {
   namespace renderer
   {
-    UpdateTraverser::UpdateTraverser()
+    UpdateTraverser::UpdateTraverser() : m_globalCacheNumber(0)
     {
     }
 
@@ -19,11 +19,18 @@ namespace he
     {
     }
 
-    bool UpdateTraverser::preTraverse(RenderNode* treeNode)
+    bool UpdateTraverser::preTraverse(RenderNode * treeNode)
     {
       treeNode->getRenderGroup()->updateBuffer();
 
+      m_globalCacheNumber += treeNode->getRenderGroup()->getCacheNumber();
+
       return true;
+    }
+
+    unsigned int UpdateTraverser::getGlobalCacheNumber() const
+    {
+      return m_globalCacheNumber;
     }
   }
 }

@@ -1,5 +1,7 @@
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/TreeNodes/TreeNode.h"
 
 #include "Renderer/TreeNodes/VertexDeclarationNode.h"
@@ -26,45 +28,45 @@ namespace he
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_samplerObjects = samplerObjects;
     }
 
-    bool RenderGeometryTraverser::preTraverse(GroupNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(GroupNode * treeNode)
     {
       return true;
     }
 
-    bool RenderGeometryTraverser::preTraverse(VertexDeclarationNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->setVertexArray();
 
       return true;
     }
 
-    void RenderGeometryTraverser::postTraverse(VertexDeclarationNode* treeNode)
+    void RenderGeometryTraverser::postTraverse(VertexDeclarationNode * treeNode)
     {
       treeNode->unsetVertexArray();
     }
 
-    bool RenderGeometryTraverser::preTraverse(ShaderNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useShader();
+      shader.useShader();
 
       return true;
     }
 
-    void RenderGeometryTraverser::postTraverse(ShaderNode* treeNode)
+    void RenderGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      db::RenderShader *shader = m_renderShaderManager->getObject(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
 
-      shader->useNoShader();
+      shader.useNoShader();
     }
 
-    bool RenderGeometryTraverser::preTraverse(TextureNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(TextureNode * treeNode)
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
@@ -85,7 +87,7 @@ namespace he
       return true;
     }
 
-    void RenderGeometryTraverser::postTraverse(TextureNode* treeNode)
+    void RenderGeometryTraverser::postTraverse(TextureNode * treeNode)
     {
       const std::vector< std::vector<util::ResourceHandle> >& textureHandles = treeNode->getTextureHandles();
 
@@ -104,14 +106,14 @@ namespace he
       }
     }
 
-    bool RenderGeometryTraverser::preTraverse(RenderNode* treeNode)
+    bool RenderGeometryTraverser::preTraverse(RenderNode * treeNode)
     {
       treeNode->getRenderGroup()->rasterizeGeometry();
 
       return true;
     }
 
-    void RenderGeometryTraverser::postTraverse(RenderNode* treeNode)
+    void RenderGeometryTraverser::postTraverse(RenderNode * treeNode)
     {
     }
   }

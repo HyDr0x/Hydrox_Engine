@@ -22,6 +22,8 @@ namespace he
       void resizeBuffer(GLuint size);
       bool isEnoughSpace(GLuint size) const;
 
+      GLuint getBufferSize() const;
+
       void setMemoryFence();
       void syncWithFence() const;
 

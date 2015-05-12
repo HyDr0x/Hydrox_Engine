@@ -31,7 +31,7 @@ namespace he
       {
         return *this;
       }
-
+      using namespace std;
       swap(other);
 
       return *this;
@@ -44,6 +44,7 @@ namespace he
 
     void ResourceHandle::swap(ResourceHandle& other)
     {
+      Subject::swap(other);
       std::swap(m_id, other.m_id);
       std::swap(m_referenceCounter, other.m_referenceCounter);
     }

@@ -4,89 +4,89 @@
 #include <ostream>
 #include <istream>
 
-#define VECTOR_NUM_ARGS 1
-#define VECTOR_IDENTITY 0
-#define VECTOR_INIT m_x[0] = x0;
-#define VECTOR_INIT_VEC m_x[0] = v.m_x[0];
-#define VECTOR_PARAMS Type x0
-#define VECTOR_ARGS m_x[0]
-#define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];
-#define VECTOR_PLUS_OP        m_x[0] + v.m_x[0]
-#define VECTOR_MINUS_OP       m_x[0] - v.m_x[0]
-#define VECTOR_MULTIPLY_OP    m_x[0] * v.m_x[0]
-#define VECTOR_DIVIDE_OP      m_x[0] / v.m_x[0]
-#define VECTOR_PLUS_OP_SCALAR     m_x[0] + s
-#define VECTOR_MINUS_OP_SCALAR    m_x[0] - s
-#define VECTOR_MULTIPLY_OP_SCALAR m_x[0] * s
-#define VECTOR_DIVIDE_OP_SCALAR   m_x[0] / s
-#define VECTOR_PLUS_OP_SCALAR_LEFT     s + v[0]
-#define VECTOR_MINUS_OP_SCALAR_LEFT    s - v[0]
-#define VECTOR_MULTIPLY_OP_SCALAR_LEFT s * v[0]
-#define VECTOR_DIVIDE_OP_SCALAR_LEFT   s / v[0]
-#define VECTOR_EQ_PLUS_OP     m_x[0] += v.m_x[0];
-#define VECTOR_EQ_MINUS_OP    m_x[0] -= v.m_x[0];
-#define VECTOR_EQ_MULTIPLY_OP m_x[0] *= v.m_x[0];
-#define VECTOR_EQ_DIVIDE_OP   m_x[0] /= v.m_x[0];
-#define VECTOR_EQ_PLUS_OP_SCALAR     m_x[0] += s;
-#define VECTOR_EQ_MINUS_OP_SCALAR    m_x[0] -= s;
-#define VECTOR_EQ_MULTIPLY_OP_SCALAR m_x[0] *= s;
-#define VECTOR_EQ_DIVIDE_OP_SCALAR   m_x[0] /= s;
-#define VECTOR_COMP_EQ    m_x[0] == v.m_x[0];
-#define VECTOR_COMP_UQ    m_x[0] != v.m_x[0];
-#define VECTOR_COMP_GR    m_x[0] >  v.m_x[0];
-#define VECTOR_COMP_LS    m_x[0] <  v.m_x[0];
-#define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0];
-#define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0];
-#define VECTOR_BINOP_EQ   m_x[0] & v.m_x[0]
-#define VECTOR_BINOP_OR   m_x[0] | v.m_x[0]
-#define VECTOR_BINOP_XOR  m_x[0] ^ v.m_x[0]
-#define VECTOR_BINOP_EQ_EQ  m_x[0] &= v.m_x[0];
-#define VECTOR_BINOP_EQ_OR  m_x[0] |= v.m_x[0];
-#define VECTOR_BINOP_EQ_XOR m_x[0] ^= v.m_x[0];
-#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]);
-
-#include "Utilities/Math/Vector_Template.hpp"
-
-#undef VECTOR_CAST
-#undef VECTOR_BINOP_EQ_XOR
-#undef VECTOR_BINOP_EQ_OR
-#undef VECTOR_BINOP_EQ_EQ
-#undef VECTOR_BINOP_XOR
-#undef VECTOR_BINOP_OR
-#undef VECTOR_BINOP_EQ
-#undef VECTOR_COMP_EQ_LS
-#undef VECTOR_COMP_EQ_GR
-#undef VECTOR_COMP_LS
-#undef VECTOR_COMP_GR
-#undef VECTOR_COMP_UQ
-#undef VECTOR_COMP_EQ
-#undef VECTOR_EQ_DIVIDE_OP_SCALAR
-#undef VECTOR_EQ_MULTIPLY_OP_SCALAR
-#undef VECTOR_EQ_MINUS_OP_SCALAR
-#undef VECTOR_EQ_PLUS_OP_SCALAR
-#undef VECTOR_EQ_DIVIDE_OP
-#undef VECTOR_EQ_MULTIPLY_OP
-#undef VECTOR_EQ_MINUS_OP
-#undef VECTOR_EQ_PLUS_OP
-#undef VECTOR_DIVIDE_OP_SCALAR_LEFT
-#undef VECTOR_MULTIPLY_OP_SCALAR_LEFT
-#undef VECTOR_MINUS_OP_SCALAR_LEFT
-#undef VECTOR_PLUS_OP_SCALAR_LEFT
-#undef VECTOR_DIVIDE_OP_SCALAR
-#undef VECTOR_MULTIPLY_OP_SCALAR
-#undef VECTOR_MINUS_OP_SCALAR
-#undef VECTOR_PLUS_OP_SCALAR
-#undef VECTOR_DIVIDE_OP
-#undef VECTOR_MULTIPLY_OP
-#undef VECTOR_MINUS_OP
-#undef VECTOR_PLUS_OP
-#undef VECTOR_ASSIGNEMENT_OP
-#undef VECTOR_ARGS
-#undef VECTOR_PARAMS
-#undef VECTOR_INIT_VEC
-#undef VECTOR_INIT
-#undef VECTOR_IDENTITY
-#undef VECTOR_NUM_ARGS
+//#define VECTOR_NUM_ARGS 1
+//#define VECTOR_IDENTITY 0
+//#define VECTOR_INIT m_x[0] = x0;
+//#define VECTOR_INIT_VEC m_x[0] = v.m_x[0];
+//#define VECTOR_PARAMS Type x0
+//#define VECTOR_ARGS m_x[0]
+//#define VECTOR_ASSIGNEMENT_OP m_x[0] = v.m_x[0];
+//#define VECTOR_PLUS_OP        m_x[0] + v.m_x[0]
+//#define VECTOR_MINUS_OP       m_x[0] - v.m_x[0]
+//#define VECTOR_MULTIPLY_OP    m_x[0] * v.m_x[0]
+//#define VECTOR_DIVIDE_OP      m_x[0] / v.m_x[0]
+//#define VECTOR_PLUS_OP_SCALAR     m_x[0] + s
+//#define VECTOR_MINUS_OP_SCALAR    m_x[0] - s
+//#define VECTOR_MULTIPLY_OP_SCALAR m_x[0] * s
+//#define VECTOR_DIVIDE_OP_SCALAR   m_x[0] / s
+//#define VECTOR_PLUS_OP_SCALAR_LEFT     s + v[0]
+//#define VECTOR_MINUS_OP_SCALAR_LEFT    s - v[0]
+//#define VECTOR_MULTIPLY_OP_SCALAR_LEFT s * v[0]
+//#define VECTOR_DIVIDE_OP_SCALAR_LEFT   s / v[0]
+//#define VECTOR_EQ_PLUS_OP     m_x[0] += v.m_x[0];
+//#define VECTOR_EQ_MINUS_OP    m_x[0] -= v.m_x[0];
+//#define VECTOR_EQ_MULTIPLY_OP m_x[0] *= v.m_x[0];
+//#define VECTOR_EQ_DIVIDE_OP   m_x[0] /= v.m_x[0];
+//#define VECTOR_EQ_PLUS_OP_SCALAR     m_x[0] += s;
+//#define VECTOR_EQ_MINUS_OP_SCALAR    m_x[0] -= s;
+//#define VECTOR_EQ_MULTIPLY_OP_SCALAR m_x[0] *= s;
+//#define VECTOR_EQ_DIVIDE_OP_SCALAR   m_x[0] /= s;
+//#define VECTOR_COMP_EQ    m_x[0] == v.m_x[0];
+//#define VECTOR_COMP_UQ    m_x[0] != v.m_x[0];
+//#define VECTOR_COMP_GR    m_x[0] >  v.m_x[0];
+//#define VECTOR_COMP_LS    m_x[0] <  v.m_x[0];
+//#define VECTOR_COMP_EQ_GR m_x[0] >= v.m_x[0];
+//#define VECTOR_COMP_EQ_LS m_x[0] <= v.m_x[0];
+//#define VECTOR_BINOP_EQ   m_x[0] & v.m_x[0]
+//#define VECTOR_BINOP_OR   m_x[0] | v.m_x[0]
+//#define VECTOR_BINOP_XOR  m_x[0] ^ v.m_x[0]
+//#define VECTOR_BINOP_EQ_EQ  m_x[0] &= v.m_x[0];
+//#define VECTOR_BINOP_EQ_OR  m_x[0] |= v.m_x[0];
+//#define VECTOR_BINOP_EQ_XOR m_x[0] ^= v.m_x[0];
+//#define VECTOR_CAST m_x[0] = static_cast<Type>(v[0]);
+//
+//#include "Utilities/Math/Vector_Template.hpp"
+//
+//#undef VECTOR_CAST
+//#undef VECTOR_BINOP_EQ_XOR
+//#undef VECTOR_BINOP_EQ_OR
+//#undef VECTOR_BINOP_EQ_EQ
+//#undef VECTOR_BINOP_XOR
+//#undef VECTOR_BINOP_OR
+//#undef VECTOR_BINOP_EQ
+//#undef VECTOR_COMP_EQ_LS
+//#undef VECTOR_COMP_EQ_GR
+//#undef VECTOR_COMP_LS
+//#undef VECTOR_COMP_GR
+//#undef VECTOR_COMP_UQ
+//#undef VECTOR_COMP_EQ
+//#undef VECTOR_EQ_DIVIDE_OP_SCALAR
+//#undef VECTOR_EQ_MULTIPLY_OP_SCALAR
+//#undef VECTOR_EQ_MINUS_OP_SCALAR
+//#undef VECTOR_EQ_PLUS_OP_SCALAR
+//#undef VECTOR_EQ_DIVIDE_OP
+//#undef VECTOR_EQ_MULTIPLY_OP
+//#undef VECTOR_EQ_MINUS_OP
+//#undef VECTOR_EQ_PLUS_OP
+//#undef VECTOR_DIVIDE_OP_SCALAR_LEFT
+//#undef VECTOR_MULTIPLY_OP_SCALAR_LEFT
+//#undef VECTOR_MINUS_OP_SCALAR_LEFT
+//#undef VECTOR_PLUS_OP_SCALAR_LEFT
+//#undef VECTOR_DIVIDE_OP_SCALAR
+//#undef VECTOR_MULTIPLY_OP_SCALAR
+//#undef VECTOR_MINUS_OP_SCALAR
+//#undef VECTOR_PLUS_OP_SCALAR
+//#undef VECTOR_DIVIDE_OP
+//#undef VECTOR_MULTIPLY_OP
+//#undef VECTOR_MINUS_OP
+//#undef VECTOR_PLUS_OP
+//#undef VECTOR_ASSIGNEMENT_OP
+//#undef VECTOR_ARGS
+//#undef VECTOR_PARAMS
+//#undef VECTOR_INIT_VEC
+//#undef VECTOR_INIT
+//#undef VECTOR_IDENTITY
+//#undef VECTOR_NUM_ARGS
 
 
 #define VECTOR_NUM_ARGS 2

@@ -23,6 +23,8 @@ namespace he
       util::vec3f getBBMax() const;
       util::vec3f getBBMin() const;
 
+      bool collisionLine(util::vec3f point, util::vec3f direction) const;
+
     private:
 
       util::vec3f m_bbMax;

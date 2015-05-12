@@ -14,6 +14,7 @@
 #include "Renderer/Buffer/GPUBuffer.h"
 
 #include "Renderer/Traverser/RenderGeometryTraverser.h"
+#include "Renderer/Traverser/RenderGeometryTraverserDebug.h"
 #include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
 #include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
 #include "Renderer/Traverser/RenderReflectiveShadowGeometryTraverser.h"
@@ -27,7 +28,7 @@ namespace he
     class IGeometryContainer;
   }
 
-  namespace db
+  namespace sh
   {
     class ShaderContainer;
   }
@@ -68,6 +69,8 @@ namespace he
 
       void rasterizeGeometry();
 
+      void rasterizeDebugGeometry();
+
       void addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
       void removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
@@ -83,23 +86,28 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      util::SharedPointer<db::ShaderContainer> m_container;
+      util::SharedPointer<sh::ShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
       unsigned int m_bufferResolution;
 
+      std::vector<util::ResourceHandle> m_updateMeshHandles;
+      std::vector<util::ResourceHandle> m_updateMaterialHandles;
+
       FrustumCullingTraverser m_frustumCullingTraverser;
       RenderGeometryTraverser m_renderGeometryTraverser;
+      RenderGeometryTraverserDebug m_renderGeometryTraverserDebug;
       RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
       RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
       RenderReflectiveShadowGeometryTraverser m_renderReflectiveShadowGeometryTraverser;
       RenderIndirectLightingGeometryTraverser m_renderIndirectLightingGeometryTraverser;
 
-      GroupNode *m_renderRootNode;
-      GroupNode *m_renderIndexRootNode;
-      GroupNode *m_renderShadowRootNode;
-      GroupNode *m_renderReflectiveShadowRootNode;
-      GroupNode *m_renderIndirectLightRootNode;
+      util::SharedPointer<TreeNode> m_renderRootNode;
+      util::SharedPointer<TreeNode> m_renderDebugRootNode;
+      util::SharedPointer<TreeNode> m_renderIndexRootNode;
+      util::SharedPointer<TreeNode> m_renderShadowRootNode;
+      util::SharedPointer<TreeNode> m_renderReflectiveShadowRootNode;
+      util::SharedPointer<TreeNode> m_renderIndirectLightRootNode;
     };
   }
 }

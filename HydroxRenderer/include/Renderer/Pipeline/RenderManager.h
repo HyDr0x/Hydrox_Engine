@@ -68,6 +68,10 @@ namespace he
       void enableSkybox(util::ResourceHandle skyboxTextureHandles[6]);
       void disableSkybox();
 
+      void showVirtualAreaLights(bool showVirtualAreaLights);
+
+      void showCaches(bool showCaches);
+
       void initialize(util::SingletonManager *singletonManager);
 
       void setViewPort(GLuint width, GLuint height, GLfloat zNear, GLfloat zFar);
@@ -95,6 +99,12 @@ namespace he
       RenderManager(const RenderManager&);
       RenderManager& operator=(const RenderManager&);
 
+      void renderVirtualAreaLights();
+      void removeVirtualAreaLights();
+
+      void renderCaches();
+      void removeCaches();
+
       util::SingletonManager *m_singletonManager;
 
       UBO m_cameraParameterUBO;
@@ -121,9 +131,15 @@ namespace he
       bool m_skyboxRendering;
       bool m_wireframe;
 
-      util::Matrix<float, 4> m_trfMatrix;
-      util::ResourceHandle m_debugMeshHandle;
-      util::ResourceHandle m_debugMaterialHandle;
+      bool m_showVirtualAreaLights;
+      std::vector<util::SharedPointer<util::Matrix<float, 4>>> m_trfProxyLightMatrices;
+      util::ResourceHandle m_debugSphereMaterialHandle;
+      util::ResourceHandle m_debugProxyLightMeshHandle;
+      
+      bool m_showCaches;
+      std::vector<util::SharedPointer<util::Matrix<float, 4>>> m_trfCacheMatrices;
+      util::ResourceHandle m_debugDiscMaterialHandle;
+      util::ResourceHandle m_debugCacheMeshHandle;
     };
   }
 }

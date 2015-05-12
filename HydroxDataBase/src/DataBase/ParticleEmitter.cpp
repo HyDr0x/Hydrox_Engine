@@ -8,5 +8,10 @@ namespace he
     {
 
     }
+
+    void ParticleEmitter::updateHash()
+    {
+
+    }
   }
 }

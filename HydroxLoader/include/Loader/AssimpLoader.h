@@ -102,7 +102,6 @@ namespace he
       util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::MaterialManager> m_materialManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
 
       util::ResourceHandle m_defaultMaterial;
 

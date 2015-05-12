@@ -1,8 +1,9 @@
 #include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
 
 #include <DataBase/Mesh.h>
-#include <DataBase/ShaderContainer.h>
 #include <DataBase/ResourceManager.hpp>
+
+#include <Shader/ShaderContainer.h>
 
 #include <XBar/IGeometryContainer.h>
 
@@ -27,16 +28,16 @@ namespace he
     {
     }
 
-    void InsertGeometryTraverserRenderPass::insertGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void InsertGeometryTraverserRenderPass::insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_geometryContainer = geometryContainer;
       m_inserted = false;
+      m_uniColor = util::vec4f::identity();
 
       m_singletonManager = singletonManager;
       m_modelManager = m_singletonManager->getService<db::ModelManager>();
       m_materialManager = m_singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = m_singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = m_singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = m_singletonManager->getService<sh::ShaderContainer>();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
@@ -55,9 +56,7 @@ namespace he
         m_nodeType |= util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::NONINDEXEDNODE);
       }
 
-      m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
-
-      m_shaderHandle = m_renderShaderContainer->getRenderShader(m_singletonManager, db::ShaderContainer::GBUFFER, m_meshVertexDeclaration);
+      m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::GBUFFER, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
@@ -74,17 +73,17 @@ namespace he
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderManager->getObject(m_shaderHandle)->getVertexDeclaration();
+        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }
     }
 
-    bool InsertGeometryTraverserRenderPass::preTraverse(RenderNode* treeNode)
+    bool InsertGeometryTraverserRenderPass::preTraverse(RenderNode * treeNode)
     {
       m_stopTraversal = m_inserted = treeNode->getRenderGroup()->insertGeometry(m_geometryContainer);
 
-      if(!m_inserted && treeNode->getNextSibling() == nullptr)
+      if(!m_inserted && !treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
       }
@@ -97,21 +96,21 @@ namespace he
       return m_createdRenderGroup;
     }
 
-    void InsertGeometryTraverserRenderPass::createNewChildNode(VertexDeclarationNode* parent)
+    void InsertGeometryTraverserRenderPass::createNewChildNode(VertexDeclarationNode * parent)
     {
       m_createdRenderGroup = RenderNodeFactory::createRenderNode(m_nodeType, m_primitiveType, m_vertexStride, m_singletonManager);
-      RenderNode *treeNode = new RenderNode(m_createdRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_createdRenderGroup));
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
-    void InsertGeometryTraverserRenderPass::createNewSibling(RenderNode* sibling)
+    void InsertGeometryTraverserRenderPass::createNewSibling(RenderNode * sibling)
     {
       m_createdRenderGroup = RenderNodeFactory::createRenderNode(m_nodeType, m_primitiveType, m_vertexStride, m_singletonManager);
-      RenderNode *treeNode = new RenderNode(m_createdRenderGroup);
+      util::SharedPointer<RenderNode> treeNode = util::SharedPointer<RenderNode>(new RenderNode(m_createdRenderGroup));
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
   }

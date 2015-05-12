@@ -8,6 +8,8 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 namespace he
 {
   namespace util
@@ -46,16 +48,16 @@ namespace he
 
       void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      GLuint m_dummyVBO;
+      sh::RenderShaderHandle m_spriteShaderHandle;
 
-      util::ResourceHandle m_spriteShaderHandle;
+      GLuint m_dummyVBO;
 
       unsigned char m_maxLayer;
 
       std::vector<std::list<const db::Sprite*>> m_opaqueSprites;
       std::vector<std::list<const db::Sprite*>> m_transparentSprites;
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

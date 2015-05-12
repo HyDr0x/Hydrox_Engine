@@ -1,13 +1,9 @@
 #include "Renderer/Pipeline/ParticleRenderer.h"
 
-#include <DataBase/ShaderContainer.h>
-
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
 
 #include <XBar/ParticleEmitterContainer.h>
-
-#include <DataBase/RenderShader.h>
 
 namespace he
 {
@@ -26,9 +22,11 @@ namespace he
     {
       m_particleEmitterManager = singletonManager->getService<db::ParticleEmitterManager>();
 
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      //m_particleShaderHandle = singletonManager->getService<db::ShaderContainer>()->particleShaderHandle;
+      //m_particleShaderHandle = singletonManager->getService<sh::ShaderContainer>()->getRenderShaderHandle(sh::ShaderContainer::PARTICLESHADER, sh::ShaderSlotFlags(8192));
     }
 
     void ParticleRenderer::render() const

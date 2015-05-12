@@ -17,10 +17,16 @@ namespace he
     public:
 
       SingletonManager(){}
+      ~SingletonManager(){}
 
       template<class T> void addService(SharedPointer<T> service)
       {
         m_serviceMap[std::string(typeid(service).name())] = service.dynamic_pointer_cast<SingletonBehaviour>();
+      }
+
+      template<class T> void deleteService()
+      {
+        m_serviceMap.erase(std::string(typeid(SharedPointer<T>).name()));
       }
 
       template<class T> SharedPointer<T> getService()

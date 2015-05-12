@@ -25,14 +25,17 @@ namespace he
       bool preTraverse(ConstTraverser* traverser) const;
       void postTraverse(ConstTraverser* traverser) const;
 
-      void initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles);
+      void initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles, util::vec4f uniColor);
 
-      bool isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles) const;
+      bool isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles, util::vec4f uniColor) const;
 
       const std::vector< std::vector<util::ResourceHandle> >& getTextureHandles() const;
 
+      util::vec4f getUniColor() const;
+
     private:
 
+      util::vec4f m_uniColor;
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
     };
   }

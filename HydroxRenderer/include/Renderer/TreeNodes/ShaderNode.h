@@ -4,7 +4,8 @@
 #include <vector>
 
 #include <Utilities/Math/Math.hpp>
-#include <Utilities/Miscellaneous/ResourceHandle.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include "Renderer/TreeNodes/GroupNode.h"
 
@@ -25,15 +26,15 @@ namespace he
       bool preTraverse(ConstTraverser* traverser) const;
       void postTraverse(ConstTraverser* traverser) const;
 
-      void initialize(util::ResourceHandle shaderHandle);
+      void initialize(sh::RenderShaderHandle shaderHandle);
 
-      bool isShader(util::ResourceHandle shaderHandle) const;
+      bool isShader(sh::RenderShaderHandle shaderHandle) const;
 
-      util::ResourceHandle getShaderHandle() const;
+      sh::RenderShaderHandle getShaderHandle() const;
 
     private:
 
-      util::ResourceHandle m_shaderHandle;
+      sh::RenderShaderHandle m_shaderHandle;
     };
   }
 }

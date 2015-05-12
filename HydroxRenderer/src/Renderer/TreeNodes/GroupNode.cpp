@@ -9,14 +9,13 @@ namespace he
 {
   namespace renderer
   {
-    GroupNode::GroupNode(GroupNode* parent, TreeNode* nextSibling, TreeNode* firstChild) : TreeNode(parent, nextSibling),
+    GroupNode::GroupNode(GroupNode * parent, util::SharedPointer<TreeNode> nextSibling, util::SharedPointer<TreeNode> firstChild) : TreeNode(parent, nextSibling),
                                                                                            m_firstChild(firstChild)
     {
     }
 
     GroupNode::~GroupNode()
     {
-      m_firstChild = nullptr;
     }
 
     bool GroupNode::preTraverse(Traverser* traverser)
@@ -39,12 +38,12 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    TreeNode* GroupNode::getFirstChild() const
+    util::SharedPointer<TreeNode> GroupNode::getFirstChild() const
     {
       return m_firstChild;
     }
 
-    void GroupNode::setFirstChild(TreeNode* firstChild)
+    void GroupNode::setFirstChild(util::SharedPointer<TreeNode> firstChild)
     {
       m_firstChild = firstChild;
     }

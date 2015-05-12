@@ -32,7 +32,6 @@ namespace he
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
 
       MaterialLoader materialLoader(m_singletonManager);
       m_defaultMaterial = materialLoader.getDefaultResource();
@@ -44,7 +43,6 @@ namespace he
       m_modelManager = other.m_modelManager;
       m_materialManager = other.m_materialManager;
       m_textureManager = other.m_textureManager;
-      m_renderShaderManager = other.m_renderShaderManager;
       m_defaultMaterial = other.m_defaultMaterial;
     }
 
@@ -57,7 +55,6 @@ namespace he
       m_modelManager = other.m_modelManager;
       m_materialManager = other.m_materialManager;
       m_textureManager = other.m_textureManager;
-      m_renderShaderManager = other.m_renderShaderManager;
       m_defaultMaterial = other.m_defaultMaterial;
 
       return *this;
@@ -97,11 +94,12 @@ namespace he
 
     sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped)
     {
-      std::cout << "Assimp Loads Scene" << std::endl;
+      std::clog << "Assimp Loads Scene" << std::endl;
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
-
+      
       unsigned int deleteAssimpOptions = ~(aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
+      //unsigned int deleteAssimpOptions = ~(aiProcess_GenUVCoords);
       const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality & deleteAssimpOptions);
 
       if(!assimpScene)
@@ -120,23 +118,23 @@ namespace he
         m_fileInformation.faceNumber = 0;
         m_fileInformation.vertexNumber = 0;
 
-        std::cout << "Mesh Conversion" << std::endl;
-        loadMeshesFromAssimp(assimpScene, yAxisFlipped);
-
-        std::cout << "Materials Conversion" << std::endl;
+        std::clog << "Materials Conversion" << std::endl;
         loadMaterialsFromAssimp(path, assimpScene);
 
-        std::cout << "Skeleton Conversion" << std::endl;
+        std::clog << "Mesh Conversion" << std::endl;
+        loadMeshesFromAssimp(assimpScene, yAxisFlipped);
+
+        std::clog << "Skeleton Conversion" << std::endl;
         loadAnimatedSkeleton(assimpScene);
 
-        std::cout << "SceneGraph Conversion" << std::endl;
+        std::clog << "SceneGraph Conversion" << std::endl;
         sg::NodeIndex rootNode = loadSceneGraphFromAssimp(filename, assimpScene);
 
         attachBonesToSkinnedMesh();
 
         scene = new sg::Scene(m_allocator, rootNode);
 
-        std::cout << "Finished!" << std::endl;
+        std::clog << "Finished!" << std::endl;
 
         m_animationTracks.clear();
         m_inverseBindPoseTable.clear();
@@ -159,10 +157,12 @@ namespace he
 
       util::ResourceHandle materialHandle;
 
-      std::cout << "Total Mesh Number: " << scene->mNumMeshes << std::endl;
+      std::clog << "Total Mesh Number: " << scene->mNumMeshes << std::endl;
 
       for(unsigned int i = 0; i != scene->mNumMeshes; i++)
       {
+        std::clog << "(" << i + 1 << "/" << scene->mNumMeshes << ")" << std::endl;
+
         m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
 
         m_fileInformation.cacheNumber += m_modelManager->getObject(m_meshes[i])->getCacheCount();
@@ -170,8 +170,6 @@ namespace he
         m_fileInformation.vertexNumber += m_modelManager->getObject(m_meshes[i])->getVertexCount();
 
         m_materialIndex[i] = scene->mMeshes[i]->mMaterialIndex;
-
-        std::cout << "(" << i + 1 << "/" << scene->mNumMeshes << ")" << std::endl;
       }
     }
 
@@ -564,43 +562,44 @@ namespace he
 
       for(unsigned int i = 0; i < m_materials.size(); i++)
       {
-        std::vector<uint64_t> hashes;
+        std::vector<std::vector<uint64_t>> hashes(db::Material::TEXTURETYPENUM);
 
         textures[db::Material::DIFFUSETEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DIFFUSE));
-        textures[db::Material::NORMALTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_NORMALS));
+        unsigned int normalMapIdentifier = scene->mMaterials[i]->GetTextureCount(aiTextureType_NORMALS) > 0 ? aiTextureType_NORMALS : scene->mMaterials[i]->GetTextureCount(aiTextureType_HEIGHT) > 0 ? aiTextureType_HEIGHT : 0;
+        textures[db::Material::NORMALTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType(normalMapIdentifier)));
         textures[db::Material::DISPLACEMENTTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
         textures[db::Material::SPECULARTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
 
         for(unsigned int k = 0; k != textures[db::Material::DIFFUSETEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
-          textures[db::Material::DIFFUSETEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          textures[db::Material::DIFFUSETEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
           db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::DIFFUSETEX][k]);
-          hashes.push_back(texture->getHash());
+          hashes[db::Material::DIFFUSETEX].push_back(texture->getHash());
         }
 
         for(unsigned int k = 0; k != textures[db::Material::NORMALTEX].size(); k++)
         {
-          scene->mMaterials[i]->GetTexture(aiTextureType_NORMALS, 0, &texPath);
-          textures[db::Material::NORMALTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          scene->mMaterials[i]->GetTexture(aiTextureType(normalMapIdentifier), 0, &texPath);
+          textures[db::Material::NORMALTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
           db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::NORMALTEX][k]);
-          hashes.push_back(texture->getHash());
+          hashes[db::Material::NORMALTEX].push_back(texture->getHash());
         }
 
         for(unsigned int k = 0; k != textures[db::Material::DISPLACEMENTTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
-          textures[db::Material::DISPLACEMENTTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          textures[db::Material::DISPLACEMENTTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
           db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::DISPLACEMENTTEX][k]);
-          hashes.push_back(texture->getHash());
+          hashes[db::Material::DISPLACEMENTTEX].push_back(texture->getHash());
         }
 
         for(unsigned int k = 0; k != textures[db::Material::SPECULARTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
-          textures[db::Material::SPECULARTEX][k] = texLoader.loadResource(path + std::string(texPath.data));
+          textures[db::Material::SPECULARTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
           db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::SPECULARTEX][k]);
-          hashes.push_back(texture->getHash());
+          hashes[db::Material::SPECULARTEX].push_back(texture->getHash());
         }
 
         db::Material::MaterialData matData;
@@ -615,16 +614,16 @@ namespace he
 
     void AssimpLoader::printStatusInformations()
     {
-      std::cout << std::endl;
-      std::cout << "File Informations:" << std::endl;
-      std::cout << "Filename: " << m_fileInformation.filename << std::endl;
-      std::cout << "Mesh Number: " << m_fileInformation.meshNumber << std::endl;
-      std::cout << "Material Number: " << m_fileInformation.materialNumber << std::endl;
-      std::cout << "Animation Number: " << m_fileInformation.animationNumber << std::endl;
-      std::cout << "Face Number: " << m_fileInformation.faceNumber << std::endl;
-      std::cout << "Vertex Number: " << m_fileInformation.vertexNumber << std::endl;
-      std::cout << "Cache Number: " << m_fileInformation.cacheNumber << std::endl;
-      std::cout << std::endl;
+      std::clog << std::endl;
+      std::clog << "File Informations:" << std::endl;
+      std::clog << "Filename: " << m_fileInformation.filename << std::endl;
+      std::clog << "Mesh Number: " << m_fileInformation.meshNumber << std::endl;
+      std::clog << "Material Number: " << m_fileInformation.materialNumber << std::endl;
+      std::clog << "Animation Number: " << m_fileInformation.animationNumber << std::endl;
+      std::clog << "Face Number: " << m_fileInformation.faceNumber << std::endl;
+      std::clog << "Vertex Number: " << m_fileInformation.vertexNumber << std::endl;
+      std::clog << "Cache Number: " << m_fileInformation.cacheNumber << std::endl;
+      std::clog << std::endl;
     }
   }
 }

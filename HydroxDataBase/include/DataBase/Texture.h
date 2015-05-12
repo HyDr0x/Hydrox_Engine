@@ -1,54 +1,53 @@
-#ifndef TEXTURE2D_H_
-#define TEXTURE2D_H_
+#ifndef TEXTURE_H_
+#define TEXTURE_H_
 
 #include <list>
 
 #include <GL/glew.h>
 
-#include "Renderer/DLLExport.h"
-
+#include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Math/Math.hpp>
 
-#include "Renderer/Resources/ManagedResource.h"
-#include <Utilities/Miscellaneous/ResourceHandle.h>
+#include "DataBase/ManagedResource.h"
+
+#include "DataBase/DLLExport.h"
 
 namespace he
 {
-	namespace renderer
+	namespace db
 	{
-    class GRAPHICAPI Texture2D : public ManagedResource
+    class GRAPHICAPI Texture : public ManagedResource
     {
     public:
 
-      Texture2D() {}
-      Texture2D(const Texture2D&);
+      Texture() : m_texIndex(0) {}
+      Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping = true);
 
-	    Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, void* data = NULL, bool mipmapping = true);
-      Texture2D& operator=(const Texture2D& o);
-	    ~Texture2D();
+      virtual ~Texture();
 
       void free();
 
-	    void setTexture(GLint location, GLuint slot);
-	    void unsetTexture();
+      void clearTexture(const void *data);
 
-      void activateMipMapping(bool mipmapping);
+      void setTexture(GLint location, GLuint slot) const;
+      void unsetTexture(GLuint slot) const;
 
-	    void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter);
+      void generateMipMapps();
 
-	    util::Vector<unsigned int, 2> getResolution();
-	    GLenum getTarget();
-      GLenum getInternalFormat();
-      GLenum getFormat();
-      GLenum getType();
+      GLuint getIndex() const;
+      GLenum getTarget() const;
+      GLenum getInternalFormat() const;
+      GLenum getFormat() const;
+      GLenum getType() const;
+      GLuint getChannelNumber() const;
+      GLuint getBitsPerComponent() const;
 
-      unsigned int getTextureSize();
+      virtual unsigned int getTextureSize() const = 0;
 
-      void getTextureData(GLvoid* data);
+      void getTextureData(GLvoid* data) const;
+      void getTextureData(GLenum format, GLenum type, GLvoid* data) const;
 
-	    friend class Renderquad;
-
-    private:
+    protected:
 
 	    GLsizei m_width, m_height;
 	    GLuint m_texIndex;
@@ -56,7 +55,9 @@ namespace he
       GLenum m_internalFormat;
       GLenum m_format;
       GLenum m_type;
-	    GLuint m_slot;
+      GLuint m_channelNumber;
+      GLuint m_bitsPerComponent;
+      bool m_mipmapping;
     };
 	}
 }

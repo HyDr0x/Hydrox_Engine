@@ -7,27 +7,9 @@ namespace he
 {
   namespace db
   {
-    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerPixel, void* data, bool mipmapping) : m_target(target),
-      m_width(width),
-      m_height(height),
-      m_type(type),
-      m_internalFormat(internalFormat),
-      m_format(format),
-      m_channelNumber(channelNumber),
-      m_bitsPerPixel(bitsPerPixel),
-      m_mipmapping(mipmapping)
+    Texture2D::Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) :
+      Texture(width, height, target, type, internalFormat, format, channelNumber, bitsPerComponent, data, mipmapping)
     {
-      if(data != nullptr)
-      {
-        unsigned int bytesPerPixel = bitsPerPixel / 8;
-        unsigned int length = m_width * m_height * bytesPerPixel;
-        m_hash = MurmurHash64A(data, length, 0);
-      }
-      else
-      {
-        m_hash = 0;
-      }
-
       glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -48,20 +30,42 @@ namespace he
     {
       if(other.m_texIndex != 0)
       {
-        m_hash = other.m_hash;
         m_width = other.m_width;
         m_height = other.m_height;
         m_target = other.m_target;
         m_internalFormat = other.m_internalFormat;
         m_format = other.m_format;
         m_type = other.m_type;
-        m_bitsPerPixel = other.m_bitsPerPixel;
+        m_bitsPerComponent = other.m_bitsPerComponent;
         m_channelNumber = other.m_channelNumber;
         m_mipmapping = other.m_mipmapping;
 
-        std::vector<GLubyte> data(m_width * m_height * (m_bitsPerPixel / 8.0f));
+        unsigned int bytesPerComponent = (m_bitsPerComponent / 8.0f);
+
+        GLint byteRowAlignement;
+        glGetIntegerv(GL_PACK_ALIGNMENT, &byteRowAlignement);
+        GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
+        GLsizei paddedWidth = dataWidth + ((byteRowAlignement - (dataWidth % byteRowAlignement)) % byteRowAlignement);
+        std::vector<GLubyte> data(paddedWidth * m_height);
 
         other.getTextureData(&data[0]);
+
+        std::vector<GLubyte> textureData(m_width * m_height * bytesPerComponent * m_channelNumber);
+
+        if(m_channelNumber == 4)
+        {
+          textureData = data;
+        }
+        else
+        {
+          for(unsigned int i = 0; i < data.size(); i++)
+          {
+            if(i % paddedWidth < m_width * bytesPerComponent * m_channelNumber)
+            {
+              textureData[i] = data[i];
+            }
+          }
+        }
 
         glGenTextures(1, &m_texIndex);
         glBindTexture(m_target, m_texIndex);
@@ -70,7 +74,7 @@ namespace he
         glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, &data[0]);
+        glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, &textureData[0]);
 
         if(m_mipmapping)
         {
@@ -86,7 +90,6 @@ namespace he
 
     Texture2D::~Texture2D()
     {
-      glDeleteTextures(1, &m_texIndex);
     }
 
     Texture2D& Texture2D::operator=(Texture2D other)//copy swap idiom
@@ -106,21 +109,9 @@ namespace he
       std::swap(m_internalFormat, other.m_internalFormat);
       std::swap(m_format, other.m_format);
       std::swap(m_type, other.m_type);
-      std::swap(m_bitsPerPixel, other.m_bitsPerPixel);
+      std::swap(m_bitsPerComponent, other.m_bitsPerComponent);
       std::swap(m_channelNumber, other.m_channelNumber);
       std::swap(m_mipmapping, other.m_mipmapping);
-    }
-
-    void Texture2D::free()
-    {
-      glDeleteTextures(1, &m_texIndex);
-    }
-
-    void Texture2D::clearTexture(const void *data) const
-    {
-      glBindTexture(m_target, m_texIndex);
-      glClearTexImage(m_texIndex, 0, m_format, m_type, data);
-      glBindTexture(m_target, 0);
     }
 
     void Texture2D::bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format)
@@ -131,29 +122,6 @@ namespace he
     void Texture2D::unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format)
     {
       glBindImageTexture(unit, 0, level, GL_FALSE, 0, access, format);
-    }
-
-    void Texture2D::setTexture(GLint location, GLuint slot) const
-    {
-      assert(slot < 31 && "ERROR, texture slot too high/n");
-
-      glActiveTexture(GL_TEXTURE0 + slot);
-      glBindTexture(m_target, m_texIndex);
-      glUniform1i(location, slot);
-    }
-
-    void Texture2D::unsetTexture(GLuint slot) const
-    {
-      glActiveTexture(GL_TEXTURE0 + slot);
-      glBindTexture(m_target, 0);
-    }
-
-    void Texture2D::generateMipMapps()
-    {
-      m_mipmapping = true;
-      glBindTexture(m_target, m_texIndex);
-        glGenerateMipmap(m_target);
-      glBindTexture(m_target, 0);
     }
 
     void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter) const
@@ -176,53 +144,33 @@ namespace he
       return util::vec2ui(m_width, m_height);
     }
 
-    GLuint Texture2D::getIndex() const
-    {
-      return m_texIndex;
-    }
-
-    GLenum Texture2D::getTarget() const
-    {
-      return m_target;
-    }
-
-    GLenum Texture2D::getInternalFormat() const
-    {
-      return m_internalFormat;
-    }
-
-    GLenum Texture2D::getFormat() const
-    {
-      return m_format;
-    }
-
-    GLenum Texture2D::getType() const
-    {
-      return m_type;
-    }
-
-    GLuint Texture2D::getChannelNumber() const
-    {
-      return m_channelNumber;
-    }
-
-    GLuint Texture2D::getBitsPerPixel() const
-    {
-      return m_bitsPerPixel;
-    }
-
     unsigned int Texture2D::getTextureSize() const
     {
-      unsigned int bytesPerPixel= m_bitsPerPixel / 8;
-
-      return m_width * m_height * bytesPerPixel;
+      return m_width * m_height * (m_bitsPerComponent / 8) * m_channelNumber;
     }
 
-    void Texture2D::getTextureData(GLvoid* data) const
+    void Texture2D::updateHash()
     {
-      glBindTexture(m_target, m_texIndex);
-      glGetTexImage(m_target, 0, m_format, m_type, data);
-      glBindTexture(m_target, 0);
+      if(m_width * m_height > 0)
+      {
+        GLint byteRowAlignement;
+        glGetIntegerv(GL_PACK_ALIGNMENT, &byteRowAlignement);
+
+        unsigned int bytesPerComponent = m_bitsPerComponent / 8;
+        GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
+        GLsizei paddedWidth = dataWidth + ((byteRowAlignement - (dataWidth % byteRowAlignement)) % byteRowAlignement);
+        std::vector<GLubyte> data(dataWidth * m_height);
+
+        glBindTexture(m_target, m_texIndex);
+        glGetTexImage(m_target, 0, m_format, m_type, &data[0]);
+        glBindTexture(m_target, 0);
+
+        m_hash = MurmurHash64A(&data[0], data.size(), 0);
+      }
+      else
+      {
+        m_hash = 0;
+      }
     }
   }
 }

@@ -2,6 +2,10 @@
 
 #include "Utilities/Timer/TimerCPUWin.h"
 
+#ifndef _WINDOWS_
+#include <windows.h>
+#endif
+
 namespace he
 {
   namespace util
@@ -28,8 +32,8 @@ namespace he
         QueryPerformanceCounter(&newTime);
         m_cpuTime = time(double(newTime.QuadPart - m_cpuTime) / m_cpuFrequency); 
 
-        std::cout << m_timerName << std::endl;
-        std::cout << "CPU Time: " << m_cpuTime << " m" << MICROSIGN << std::endl;
+        std::clog << m_timerName << std::endl;
+        std::clog << "CPU Time: " << m_cpuTime << " m" << MICROSIGN << std::endl;
       }
     }
 

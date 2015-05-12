@@ -32,7 +32,7 @@ namespace he
     {
     public:
 
-      SceneCacheManager(util::EventManager& eventManager);
+      SceneCacheManager(util::SharedPointer<util::EventManager> eventManager);
       ~SceneCacheManager();
 
       void setLODRanges(const std::vector<float>& lodRanges);
@@ -65,7 +65,7 @@ namespace he
       void updateTransformNodes(TreeNodeAllocator& allocator);
       void updateLODNodes(TreeNodeAllocator& allocator, const util::vec3f& cameraPosition);
 
-      util::EventManager& m_eventManager;
+      util::SharedPointer<util::EventManager> m_eventManager;
 
       std::vector<float> m_lodRanges;
 

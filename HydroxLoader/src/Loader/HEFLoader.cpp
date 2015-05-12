@@ -1,6 +1,7 @@
 #include "Loader/HEFLoader.h"
 
 #include <fstream>
+#include <iostream>
 
 #include <Utilities/Signals/EventManager.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
@@ -25,7 +26,6 @@
 #include <DataBase/Mesh.h>
 
 #include "Loader/ILDevilLoader.h"
-#include "Loader/RenderShaderLoader.h"
 #include "Loader/MaterialLoader.h"
 #include "Loader/MeshLoader.h"
 
@@ -76,11 +76,15 @@ namespace he
       fileStream >> meshMapSize;
       std::getline(fileStream, std::string());
       
+      if(meshMapSize) std::clog << "Load Meshes" << std::endl;
       for(unsigned int i = 0; i < meshMapSize; i++)
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = meshLoader.loadResource(path + resourceFilename + ".mesh");
         m_resourceMap["Meshes"][resourceFilename] = handle;
+
+        //meshLoader.printFileInformations();
+        std::clog << i << "/" << meshMapSize << std::endl;
       }
 
       MaterialLoader materialLoader(singletonManager);
@@ -89,11 +93,14 @@ namespace he
       fileStream >> materialMapSize;
       std::getline(fileStream, std::string());
       
+      if(materialMapSize) std::clog << "Load Materials" << std::endl;
       for(unsigned int i = 0; i < materialMapSize; i++)
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = materialLoader.loadResource(path + resourceFilename + ".material");
         m_resourceMap["Materials"][resourceFilename] = handle;
+
+        std::clog << i << "/" << materialMapSize << std::endl;
       }
 
       ILDevilLoader ilDevilLoader(singletonManager);
@@ -102,11 +109,14 @@ namespace he
       fileStream >> billboardTextureMapSize;
       std::getline(fileStream, std::string());
       
+      if(billboardTextureMapSize) std::clog << "Load BillboardTextures" << std::endl;
       for(unsigned int i = 0; i < billboardTextureMapSize; i++)
       {
         std::getline(fileStream, resourceFilename);
         util::ResourceHandle handle = ilDevilLoader.loadResource(path + resourceFilename + ".png");
         m_resourceMap["Textures"][resourceFilename] = handle;
+
+        std::clog << i << "/" << billboardTextureMapSize << std::endl;
       }
 
       read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());

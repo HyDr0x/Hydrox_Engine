@@ -110,12 +110,10 @@ namespace he
                m_triangleCacheIndices(triangleCacheIndices),
                m_indexData(indices)
     {
-      m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
     }
 
     Mesh::Mesh(const Mesh& other)
     {
-      m_hash = other.m_hash;
       m_boundingVolume = other.m_boundingVolume;
       m_primitiveType = other.m_primitiveType;
       m_primitiveCount = other.m_primitiveCount;
@@ -234,8 +232,6 @@ namespace he
       getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
       getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
 
-      util::CacheIndicesGenerator cacheIndicesGenerator;
-
       if(!m_indexData.empty())
       {
         generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions, m_indexData);
@@ -245,6 +241,7 @@ namespace he
         generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions);
       }
 
+      util::CacheIndicesGenerator cacheIndicesGenerator;
       cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
 
       copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
@@ -263,7 +260,7 @@ namespace he
 
       for(unsigned int i = offset; i < numberOfElements; i++)
       {
-        std::copy(&m_geometryData[i * m_vertexStride + localStride], &m_geometryData[i * m_vertexStride + localStride + VERTEXDECLARATIONSIZE[vertexDeclaration]], &data[VERTEXDECLARATIONSIZE[vertexDeclaration] * i]);
+        std::copy(m_geometryData.begin() + (i * m_vertexStride + localStride), m_geometryData.begin() + (i * m_vertexStride + localStride + VERTEXDECLARATIONSIZE[vertexDeclaration]), &data[VERTEXDECLARATIONSIZE[vertexDeclaration] * i]);
       }
     }
 
@@ -279,10 +276,10 @@ namespace he
 
       for(unsigned int i = offset; i < numberOfElements; i++)
       {
-        std::copy(&data[i * VERTEXDECLARATIONSIZE[vertexDeclaration]], &data[(i + 1) * VERTEXDECLARATIONSIZE[vertexDeclaration]], &m_geometryData[localStride + m_vertexStride * i]);
+        std::copy(&data[i * VERTEXDECLARATIONSIZE[vertexDeclaration]], &data[(i + 1) * VERTEXDECLARATIONSIZE[vertexDeclaration]], m_geometryData.begin() + (localStride + m_vertexStride * i));
       }
 
-      m_hash = MurmurHash64A(&m_geometryData[0], m_vertexCount * m_vertexStride, 0);
+      m_dirtyHash = true;
     }
 
     VertexElementFlags Mesh::getVertexDeclarationFlags() const
@@ -293,6 +290,11 @@ namespace he
     GLuint Mesh::getPrimitiveType() const
     {
       return m_primitiveType;
+    }
+
+    const AABB& Mesh::getBoundingVolume() const
+    {
+      return m_boundingVolume;
     }
 
     util::vec3f Mesh::getBBMin() const
@@ -350,9 +352,122 @@ namespace he
       return m_cacheData;
     }
 
+    void Mesh::setCaches(const std::vector<util::vec3f>& points, const std::vector<util::vec3f>& pointNormals, const std::vector<util::Triangle>& pointTriangles)
+    {
+      std::vector<util::vec3f> positions(m_vertexCount);
+      std::vector<util::vec3f> normals(m_vertexCount);
+      std::vector<he::util::cacheIndexType> cacheIndizes0;
+      std::vector<he::util::cacheIndexType> cacheIndizes1;
+
+      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+      getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
+
+      std::vector<util::vec3f> triangles;
+      if(!m_indexData.empty())
+      {
+        util::CacheGenerator::convertIndexedToNonIndexedTriangles(positions, m_indexData, triangles);
+      }
+      else
+      {
+        triangles = positions;
+      }
+
+      util::CacheGenerator cacheGenerator;
+      cacheGenerator.generateCachesArea(triangles, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax(), m_cacheData, pointTriangles);
+
+      std::vector<util::Triangle> cacheTriangles;
+      for(unsigned int i = 0; i < m_cacheData.size(); i++)//collect the triangles where the caches are lying on
+      {
+        util::Triangle newCacheTriangle;
+        util::CacheGenerator::findCacheTriangle(triangles, m_cacheData[i], newCacheTriangle);
+        cacheTriangles.push_back(newCacheTriangle);
+      }
+
+      m_triangleCacheIndices.clear();
+      util::CacheGenerator::createTriangleCacheIndices(triangles, cacheTriangles, m_cacheData, m_triangleCacheIndices);
+
+      util::CacheIndicesGenerator cacheIndicesGenerator;
+      cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
+
+      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
+      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
+
+      m_dirtyHash = true;
+    }
+
+    void Mesh::addCache(const util::vec3f& point, const util::vec3f& pointNormal, const util::Triangle& triangle)
+    {
+      std::vector<util::vec3f> positions(m_vertexCount);
+      std::vector<util::vec3f> normals(m_vertexCount);
+      std::vector<he::util::cacheIndexType> cacheIndizes0;
+      std::vector<he::util::cacheIndexType> cacheIndizes1;
+
+      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+      getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
+
+      util::Cache cache;
+      cache.position = point;
+      cache.normal = pointNormal;
+      m_cacheData.push_back(cache);
+
+      std::vector<util::vec3f> triangles;
+      if(!m_indexData.empty())
+      {
+        util::CacheGenerator::convertIndexedToNonIndexedTriangles(positions, m_indexData, triangles);
+      }
+      else
+      {
+        triangles = positions;
+      }
+
+      util::CacheGenerator cacheGenerator;
+      cacheGenerator.generateCacheArea(triangles, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax(), m_cacheData, m_cacheData.size() - 1, triangle);
+
+      std::vector<util::Triangle> cacheTriangles;
+      for(unsigned int i = 0; i < m_cacheData.size(); i++)
+      {
+        for(unsigned int j = 0; j < m_triangleCacheIndices.size(); j++)
+        {
+          if(m_triangleCacheIndices[j][0] <= i && i < m_triangleCacheIndices[j][1])
+          {
+            cacheTriangles.push_back(util::Triangle(triangles[3 * j], triangles[3 * j + 1], triangles[3 * j + 2]));
+            break;
+          }
+        }
+      }
+
+      cacheTriangles.push_back(triangle);
+
+      m_triangleCacheIndices.clear();
+      util::CacheGenerator::createTriangleCacheIndices(triangles, cacheTriangles, m_cacheData, m_triangleCacheIndices);
+
+      util::CacheIndicesGenerator cacheIndicesGenerator;
+      cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
+
+      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
+      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
+
+      m_dirtyHash = true;
+    }
+
     const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
     {
       return m_triangleCacheIndices;
+    }
+
+    void Mesh::updateHash()
+    {
+      std::vector<GLubyte> hashData(m_vertexCount * m_vertexStride + sizeof(util::Cache) * m_cacheData.size());
+
+      std::copy(m_geometryData.begin(), m_geometryData.begin() + m_geometryData.size(), &hashData[0]);
+
+      if(!m_cacheData.empty())
+      {
+        GLubyte *cachePointer = reinterpret_cast<GLubyte*>(&m_cacheData[0]);
+        std::copy(cachePointer, &cachePointer[m_cacheData.size() * sizeof(util::Cache)], &hashData[m_vertexCount * m_vertexStride]);
+      }
+      
+      m_hash = MurmurHash64A(&hashData[0], hashData.size(), 0);
     }
   }
 }

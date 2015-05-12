@@ -8,9 +8,10 @@
 
 #include <DataBase/ResourceManager.hpp>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Buffer/GPUBuffer.h"
 
-#include <DataBase/RenderShader.h>
 #include <DataBase/Texture2D.h>
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
@@ -38,13 +39,14 @@ namespace he
       SkyboxRenderer(const SkyboxRenderer&);
       SkyboxRenderer& operator=(const SkyboxRenderer&);
 
-      util::ResourceHandle m_skyboxShaderHandle;
+      sh::RenderShaderHandle m_skyboxShaderHandle;
+
       util::ResourceHandle m_arrayTextureHandle;
 
       GLuint m_skyBoxVAO;
       GPUBuffer m_geometryData;
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
       util::SharedPointer<db::TextureArrayManager> m_textureArrayManager;
     };

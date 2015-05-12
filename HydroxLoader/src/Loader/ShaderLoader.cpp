@@ -5,18 +5,25 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/Shader.h>
+#include <Shader/Shader.h>
 
 namespace he
 {
   namespace loader
   {
-    ShaderLoader::ShaderLoader(util::SingletonManager *singletonManager) : m_singletonManager(singletonManager)
+    ShaderLoader::ShaderLoader()
     {
     }
 
     ShaderLoader::~ShaderLoader()
     {
+    }
+
+    void ShaderLoader::initialize(util::SingletonManager *singletonManager, std::string shaderDirectory)
+    {
+      m_singletonManager = singletonManager;
+
+      m_shaderFileChecker.initialize(shaderDirectory);
     }
 
     void ShaderLoader::setDynamicDefines(std::vector<std::pair<std::string, std::string>>& dynamicDefines)

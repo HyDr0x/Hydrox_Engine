@@ -4,6 +4,11 @@
 #include <string>
 #include <vector>
 
+#include <Shader/ShaderContainer.h>
+
+#include <Utilities/Miscellaneous/Filecheck.h>
+#include <Utilities/Miscellaneous/SingletonBehaviour.hpp>
+
 #include "Loader/DLLExport.h"
 
 namespace he
@@ -15,20 +20,26 @@ namespace he
 
   namespace loader
   {
-    class GRAPHICAPI ShaderLoader
+    class GRAPHICAPI ShaderLoader : public util::SingletonBehaviour
     {
     public:
 
-      ShaderLoader(util::SingletonManager *singletonManager);
+      ShaderLoader();
       virtual ~ShaderLoader();
 
+      void initialize(util::SingletonManager *singletonManager, std::string shaderDirectory);
+
       void setDynamicDefines(std::vector<std::pair<std::string, std::string>>& dynamicDefines);
+
+      virtual void checkIfShaderChanged() = 0;
 
     protected:
 
       std::string loadShaderSource(std::string filename);
       
       util::SingletonManager *m_singletonManager;
+
+      util::Filecheck m_shaderFileChecker;
 
     private:
 

@@ -2,6 +2,7 @@
 
 #include <map>
 #include <fstream>
+#include <iostream>
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Miscellaneous/ResourceHandle.h>

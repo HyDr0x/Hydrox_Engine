@@ -192,7 +192,7 @@ namespace he
       CopyTraverser traverser(subTree.getTreeNodeAllocator(), m_allocator, namePrefix);
       traverser.doTraverse(subTree.getTreeNodeAllocator()[subTree.getRootNode()]);
       NodeIndex newNode = traverser.getCopiedRootNode();
-
+      
       if(m_rootNode != ~0)
       {
         NodeIndex oldFirstChild = m_allocator[parentNodeIndex].getFirstChild();
@@ -205,7 +205,7 @@ namespace he
       {
         m_rootNode = newNode;
       }
-
+      
       return newNode;
     }
 

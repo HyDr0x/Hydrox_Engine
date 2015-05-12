@@ -9,7 +9,7 @@
 
 namespace he
 {
-  namespace db
+  namespace sh
   {
     class Shader;
   }
@@ -23,7 +23,7 @@ namespace he
       UBO();
       ~UBO();
 
-      void createBuffer(db::Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
+      void createBuffer(sh::Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
       void createBuffer(const GLuint bufferSize, GLenum usage);//std140 layout
 
       template<class T> void setData(const GLuint index, T *data, const GLuint count = 1)//shared layout

@@ -11,7 +11,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderNode::RenderNode(util::SharedPointer<IRenderGroup> renderGroup, GroupNode* parent, TreeNode* nextSibling) : 
+    RenderNode::RenderNode(util::SharedPointer<IRenderGroup> renderGroup, GroupNode * parent, util::SharedPointer<TreeNode> nextSibling) : 
       TreeNode(parent, nextSibling),
       m_renderGroup(renderGroup)
     {

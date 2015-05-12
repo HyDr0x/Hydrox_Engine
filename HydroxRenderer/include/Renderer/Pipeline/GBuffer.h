@@ -37,6 +37,9 @@ namespace he
       void setGBuffer() const;
       void unsetGBuffer() const;
 
+      void setDebugGBuffer() const;
+      void unsetDebugGBuffer() const;
+
       void setClearColor(util::vec4f clearColor);
 
       util::SharedPointer<db::Texture2D> getDepthTexture() const;
@@ -59,6 +62,7 @@ namespace he
       util::SharedPointer<db::Texture2D> m_materialTexture;
 
       Renderquad m_fullscreenRenderQuad;
+      Renderquad m_debugRenderquad;
 
       util::vec4f m_clearColor;
     };

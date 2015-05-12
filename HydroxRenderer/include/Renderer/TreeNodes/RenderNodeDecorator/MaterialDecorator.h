@@ -49,11 +49,12 @@ namespace he
       UBO m_materialBuffer;
       GPUImmutableBuffer m_materialIndexBuffer;
 
-      bool m_materialNumberChanged;
+      bool m_updateMaterialData;
 
       unsigned int m_materialCount;
 
-      std::map<util::ResourceHandle, MaterialIndexData, Less> m_materialHandles;
+      std::map<util::ResourceHandle, MaterialIndexData, util::ResourceHandle::Less> m_materialHandles;
+      std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less> m_materialHashes;//original materialHandle with the actual hash value and data and the old hash value with the data uploaded to the gpu
     };
   }
 }

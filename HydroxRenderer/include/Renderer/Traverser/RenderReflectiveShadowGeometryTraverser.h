@@ -11,6 +11,11 @@
 
 namespace he
 {
+  namespace sh
+  {
+    class ShaderContainer;
+  }
+
   namespace renderer
   {
     class RenderReflectiveShadowGeometryTraverser : public Traverser
@@ -24,21 +29,21 @@ namespace he
 
       void setViewProjectionIndex(int viewProjectionIndex);
 
-      virtual bool preTraverse(VertexDeclarationNode* treeNode);
-      virtual void postTraverse(VertexDeclarationNode* treeNode);
+      virtual bool preTraverse(VertexDeclarationNode * treeNode);
+      virtual void postTraverse(VertexDeclarationNode * treeNode);
 
-      virtual bool preTraverse(ShaderNode* treeNode);
-      virtual void postTraverse(ShaderNode* treeNode);
+      virtual bool preTraverse(ShaderNode * treeNode);
+      virtual void postTraverse(ShaderNode * treeNode);
 
-      virtual bool preTraverse(TextureNode* treeNode);
-      virtual void postTraverse(TextureNode* treeNode);
+      virtual bool preTraverse(TextureNode * treeNode);
+      virtual void postTraverse(TextureNode * treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode);
-      virtual void postTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
+      virtual void postTraverse(RenderNode * treeNode);
 
     private:
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
 
       util::SharedPointer<RenderOptions> m_options;

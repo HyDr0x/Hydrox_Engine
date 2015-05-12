@@ -7,7 +7,8 @@
 
 #include <DataBase/Material.h>
 #include <DataBase/Texture2D.h>
-#include <DataBase/RenderShader.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include "Saver/RenderShaderSaver.h"
 #include "Saver/ILDevilSaver.h"
@@ -24,13 +25,16 @@ namespace he
       materialFileKeywords[AMBIENTSTRENGTH] = "Ambient Strength";
       materialFileKeywords[SPECULAREXPONENT] = "Specular Exponent";
 
+      materialFileKeywords[TRANSPARENCY] = "Transparency";
+      materialFileKeywords[RENDERDEBUG] = "Debug";
+      materialFileKeywords[UNICOLOR] = "Unicolor";
+
       materialFileKeywords[DIFFUSETEXTURE] = "Diffuse Map";
       materialFileKeywords[NORMALMAP] = "Normal Map";
       materialFileKeywords[SPECULARMAP] = "Specular Map";
       materialFileKeywords[DISPLACEMENTMAP] = "Displacement Map";
 
       util::SharedPointer<db::TextureManager> textureManager = singletonManager->getService<db::TextureManager>();
-      util::SharedPointer<db::RenderShaderManager> renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
       util::SharedPointer<db::MaterialManager> materialManager = singletonManager->getService<db::MaterialManager>();
 
       db::Material *material = materialManager->getObject(materialHandle);
@@ -50,6 +54,15 @@ namespace he
       fileStream << std::endl;
       fileStream << materialFileKeywords[SPECULAREXPONENT] << std::endl;
       fileStream << material->getMaterialData().specularExponent << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[TRANSPARENCY] << std::endl;
+      fileStream << material->getTransparency() << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[RENDERDEBUG] << std::endl;
+      fileStream << material->getDebug() << std::endl;
+      fileStream << std::endl;
+      fileStream << materialFileKeywords[UNICOLOR] << std::endl;
+      fileStream << material->getUniColor() << std::endl;
       fileStream << std::endl;
 
       /////////////////////////TEXTURES/////////////////////////

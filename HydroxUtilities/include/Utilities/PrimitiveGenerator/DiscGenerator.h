@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "Utilities/DLLExport.h"
-
 #include "Utilities/Math/Math.hpp"
+
+#include "Utilities/DLLExport.h"
 
 namespace he
 {
@@ -14,7 +14,7 @@ namespace he
     class GRAPHICAPI DiscGenerator
     {
     public:
-
+      //direction becomes the disc normal
       static void generateDisc(float radius, vec3f direction, std::vector<vec3f>& position, unsigned int vertexNumber);
       static void generateDisc(float radius, vec3f direction, std::vector<vec3f>& position, std::vector<vec3f>& normal, unsigned int vertexNumber);
       static void generateDisc(float radius, vec3f direction, std::vector<vec3f>& position, std::vector<unsigned int>& index, unsigned int vertexNumber);

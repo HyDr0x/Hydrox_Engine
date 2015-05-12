@@ -12,7 +12,7 @@ namespace he
     {
     public:
 
-      RenderNode(util::SharedPointer<IRenderGroup> renderGroup, GroupNode* parent = nullptr, TreeNode* nextSibling = nullptr);
+      RenderNode(util::SharedPointer<IRenderGroup> renderGroup, GroupNode * parent = nullptr, util::SharedPointer<TreeNode> nextSibling = util::SharedPointer<TreeNode>());
       virtual ~RenderNode();
 
       virtual bool preTraverse(Traverser* traverser);

@@ -41,6 +41,11 @@ namespace he
       return size < m_currentBufferSize;
     }
 
+    GLuint GPUBuffer::getBufferSize() const
+    {
+      return m_currentBufferSize;
+    }
+
     void GPUBuffer::setData(GLuint offset, GLuint size, const GLvoid *data)
     {
       if(offset + size > m_currentBufferSize)//is the old buffer big enough for the new data?

@@ -77,8 +77,8 @@ namespace he
     void StaticRenderNode::frustumCulling() const
     {
       unsigned int instanceNumber = m_instances.size();
-      db::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
-      db::ComputeShader::dispatchComputeShader(256, 1, 1);
+      sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &instanceNumber);
+      sh::ComputeShader::dispatchComputeShader(256, 1, 1);
     }
 
     void StaticRenderNode::rasterizeShadowGeometry() const

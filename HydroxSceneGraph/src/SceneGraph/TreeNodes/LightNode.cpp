@@ -22,6 +22,7 @@ namespace he
       m_renderable(false)
     {
       m_index.nodeType = LIGHTNODE;
+      m_lightData.projectionParameter = util::vec4f(0.0f, 0.0f, 10.0f, 10.0f);
     }
 
     LightNode::LightNode(const LightNode& sourceNode) : TreeNode(sourceNode)
@@ -117,6 +118,12 @@ namespace he
       if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
     }
 
+    void LightNode::setDirectionalLightNearSize(util::vec2f directionalNearSize)
+    {
+      m_lightData.projectionParameter[2] = directionalNearSize[0];
+      m_lightData.projectionParameter[3] = directionalNearSize[1];
+    }
+
     void LightNode::setLightType(LightType lightType)
     {
       m_lightType = lightType;
@@ -210,6 +217,8 @@ namespace he
       stream >> m_lightData.linearAttenuation;
       stream >> m_lightData.quadricAttenuation;
 
+      stream >> m_lightData.projectionParameter;
+
       unsigned int type;
       stream >> type;
       m_lightType = (LightType)type;
@@ -231,6 +240,8 @@ namespace he
       stream << m_lightData.constAttenuation << std::endl;
       stream << m_lightData.linearAttenuation << std::endl;
       stream << m_lightData.quadricAttenuation << std::endl;
+
+      stream << m_lightData.projectionParameter << std::endl;
 
       stream << (unsigned int)m_lightType << std::endl;
     }

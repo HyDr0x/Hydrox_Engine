@@ -25,20 +25,20 @@ namespace he
     {
     }
 
-    void InsertGeometryTraverser::insertGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
+    void InsertGeometryTraverser::insertGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager)
     {
       m_geometryContainer = geometryContainer;
       m_inserted = false;
+      m_uniColor = util::vec4f::identity();
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderManager = singletonManager->getService<db::RenderShaderManager>();
-      m_renderShaderContainer = singletonManager->getService<db::ShaderContainer>();
+      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
-    bool InsertGeometryTraverser::preTraverse(GroupNode* treeNode)
+    bool InsertGeometryTraverser::preTraverse(GroupNode * treeNode)
     {
-      if(treeNode->getFirstChild() == nullptr)
+      if(!treeNode->getFirstChild())
       {
         createNewChildNode(treeNode);
       }
@@ -52,12 +52,12 @@ namespace he
 
       if(m_inserted)
       {
-        if(treeNode->getFirstChild() == nullptr)
+        if(!treeNode->getFirstChild())
         {
           createNewChildNode(treeNode);
         }
       }
-      else if(treeNode->getNextSibling() == nullptr)
+      else if(!treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
       }
@@ -71,12 +71,12 @@ namespace he
 
       if(m_inserted)
       {
-        if(treeNode->getFirstChild() == nullptr)
+        if(!treeNode->getFirstChild())
         {
           createNewChildNode(treeNode);
         }
       }
-      else if(treeNode->getNextSibling() == nullptr)
+      else if(!treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
       }
@@ -86,16 +86,16 @@ namespace he
 
     bool InsertGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      m_inserted = treeNode->isTexture(m_textureHandles);
+      m_inserted = treeNode->isTexture(m_textureHandles, m_uniColor);
 
       if(m_inserted)
       {
-        if(treeNode->getFirstChild() == nullptr)
+        if(!treeNode->getFirstChild())
         {
           createNewChildNode(treeNode);
         }
       }
-      else if(treeNode->getNextSibling() == nullptr)
+      else if(!treeNode->getNextSibling())
       {
         createNewSibling(treeNode);
       }
@@ -103,57 +103,57 @@ namespace he
       return m_inserted;
     }
 
-    void InsertGeometryTraverser::createNewChildNode(GroupNode* parent)
+    void InsertGeometryTraverser::createNewChildNode(GroupNode * parent)
     {
-      ShaderNode *treeNode = new ShaderNode();
+      util::SharedPointer<ShaderNode> treeNode = util::SharedPointer<ShaderNode>(new ShaderNode());
       treeNode->initialize(m_shaderHandle);
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
     void InsertGeometryTraverser::createNewChildNode(TextureNode* parent)
     {
-      VertexDeclarationNode *treeNode = new VertexDeclarationNode();
+      util::SharedPointer<VertexDeclarationNode> treeNode = util::SharedPointer<VertexDeclarationNode>(new VertexDeclarationNode());
       treeNode->initialize(m_shaderVertexDeclaration, m_meshVertexDeclaration);
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
     void InsertGeometryTraverser::createNewChildNode(ShaderNode* parent)
     {
-      TextureNode *treeNode = new TextureNode();
-      treeNode->initialize(m_textureHandles);
+      util::SharedPointer<TextureNode> treeNode = util::SharedPointer<TextureNode>(new TextureNode());
+      treeNode->initialize(m_textureHandles, m_uniColor);
 
-      parent->setFirstChild(treeNode);
+      parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
     }
 
     void InsertGeometryTraverser::createNewSibling(TextureNode* sibling)
     {
-      TextureNode *treeNode = new TextureNode();
-      treeNode->initialize(m_textureHandles);
+      util::SharedPointer<TextureNode> treeNode = util::SharedPointer<TextureNode>(new TextureNode());
+      treeNode->initialize(m_textureHandles, m_uniColor);
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
 
     void InsertGeometryTraverser::createNewSibling(ShaderNode* sibling)
     {
-      ShaderNode *treeNode = new ShaderNode();
+      util::SharedPointer<ShaderNode> treeNode = util::SharedPointer<ShaderNode>(new ShaderNode());
       treeNode->initialize(m_shaderHandle);
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
 
     void InsertGeometryTraverser::createNewSibling(VertexDeclarationNode* sibling)
     {
-      VertexDeclarationNode *treeNode = new VertexDeclarationNode();
+      util::SharedPointer<VertexDeclarationNode> treeNode = util::SharedPointer<VertexDeclarationNode>(new VertexDeclarationNode());
       treeNode->initialize(m_shaderVertexDeclaration, m_meshVertexDeclaration);
 
-      sibling->setNextSibling(treeNode);
+      sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());
     }
   }

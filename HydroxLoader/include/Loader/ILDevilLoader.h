@@ -30,7 +30,7 @@ namespace he
 
     private:
 
-      void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerPixel);
+      void getImageInformations(GLsizei& width, GLsizei& height, GLenum& internalFormat, GLenum& format, GLenum& type, GLuint& channelNumber, GLuint& bitsPerComponent);
 
       util::SharedPointer<db::TextureManager> m_textureManager;
 

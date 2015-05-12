@@ -107,7 +107,7 @@ namespace he
       return false;
     }
 
-    bool Plane::collisionCenteredBox(vec3f boxCenter, vec3f boxHalfSize) const
+    bool Plane::collisionCenteredBox(vec3f boxCenter, vec3f boxHalfSize, float epsilon) const
     {
       vec3f centeredPos = m_pos - boxCenter;
 
@@ -127,15 +127,15 @@ namespace he
         }
       }
 
-      if(vec3f::dot(m_normal, vmin) > 0.0f) return false;
-      if(vec3f::dot(m_normal, vmax) >= 0.0f) return true;
+      if(vec3f::dot(m_normal, vmin) > epsilon) return false;
+      if(vec3f::dot(m_normal, vmax) >= -epsilon) return true;
 
       return false;
     }
 
     bool Plane::isPointBehind(vec3f v, float epsilon) const
     {
-      return vec3f::dot(m_normal, v - m_pos) < epsilon;
+      return vec3f::dot(m_normal, (v - m_pos)) < epsilon;
     }
 
     vec3f Plane::getPosition() const

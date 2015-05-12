@@ -6,6 +6,9 @@
 #include <GL/glew.h>
 
 #include <DataBase/Texture2D.h>
+#include <DataBase/Texture3D.h>
+
+#include <Shader/ShaderContainer.h>
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
 #include "Renderer/Pipeline/Renderquad.h"
@@ -81,7 +84,9 @@ namespace he
 
       util::SingletonManager *m_singletonManager;
 
-      
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+
+      sh::RenderShaderHandle m_directLightShaderHandle;
 
       std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
@@ -103,10 +108,8 @@ namespace he
       Renderquad m_renderLightMapQuad;
       util::SharedPointer<db::Texture2D> m_lightTexture;
 
-      util::ResourceHandle m_directLightShaderHandle;
-
       GLint m_maxShadowMapsPerTextureArray;
-      GLint m_maxColorAttachments;
+      GLint m_maxColorAttachments;//WHAT IS THIS?!?
 
       bool m_lightNumberChanged;
       bool m_shadowLightNumberChanged;

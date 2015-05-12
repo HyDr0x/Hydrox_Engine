@@ -21,7 +21,13 @@ namespace he
       UpdateTraverser();
       virtual ~UpdateTraverser();
 
-      virtual bool preTraverse(RenderNode* treeNode);
+      virtual bool preTraverse(RenderNode * treeNode);
+
+      unsigned int getGlobalCacheNumber() const;
+
+    private:
+
+      unsigned int m_globalCacheNumber;
     };
   }
 }

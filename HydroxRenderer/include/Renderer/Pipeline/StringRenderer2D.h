@@ -6,15 +6,15 @@
 
 #include <GL/glew.h>
 
-#include <DataBase/ResourceManager.hpp>
-
-#include "Renderer/Buffer/GPUBuffer.h"
-
-#include <DataBase/RenderShader.h>
-#include <DataBase/Texture2D.h>
-
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 #include <Utilities/Signals/EventManager.h>
+
+#include <DataBase/ResourceManager.hpp>
+#include <DataBase/Texture2D.h>
+
+#include <Shader/ShaderContainer.h>
+
+#include "Renderer/Buffer/GPUBuffer.h"
 
 namespace he
 {
@@ -45,7 +45,7 @@ namespace he
 
       void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      util::ResourceHandle m_stringShaderHandle;
+      sh::RenderShaderHandle m_stringShaderHandle;
 
       GLuint m_stringVAO;
 
@@ -54,7 +54,7 @@ namespace he
       std::list<const StringTexture2D*> m_opaqueStrings;
       std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

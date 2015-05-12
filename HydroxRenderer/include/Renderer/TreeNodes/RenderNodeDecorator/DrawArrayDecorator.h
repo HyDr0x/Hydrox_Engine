@@ -79,14 +79,13 @@ namespace he
 
       GLuint m_vertexStride;
 
-      bool m_meshNumberChanged;
+      bool m_updateMeshData;
 
-      unsigned int m_vboSize;
-      unsigned int m_triangleNumber;
       unsigned int m_cacheNumber;
       unsigned int m_perInstanceCacheNumber;
 
-      std::map<util::ResourceHandle, ArrayGeometry, Less> m_meshes;
+      std::map<util::ResourceHandle, ArrayGeometry, util::ResourceHandle::Less> m_meshes;
+      std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less> m_meshHashes;//original meshHandle with the actual hash value and data and the old hash value with the data uploaded to the gpu
     };
   }
 }

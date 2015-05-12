@@ -44,17 +44,6 @@ namespace he
       virtual void updateBuffer() = 0;
 
       virtual unsigned int getCacheNumber() const = 0;
-
-    protected:
-
-      class Less
-      {
-      public:
-        inline bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
-        {
-          return o1.getID() < o2.getID();
-        }
-      };
     };
   }
 }

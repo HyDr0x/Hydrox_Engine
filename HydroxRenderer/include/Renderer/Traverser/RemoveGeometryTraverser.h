@@ -6,7 +6,8 @@
 #include <Utilities/Miscellaneous/ResourceHandle.h>
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/ShaderContainer.h>
+#include <Shader/ShaderContainer.h>
+
 #include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Traverser/Traverser.h"
@@ -27,36 +28,34 @@ namespace he
       RemoveGeometryTraverser();
       virtual ~RemoveGeometryTraverser();
 
-      virtual void removeGeometry(TreeNode *treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
+      virtual void removeGeometry(util::SharedPointer<TreeNode>treeNode, util::SharedPointer<const xBar::IGeometryContainer> geometryContainer, util::SingletonManager *singletonManager);
 
-      virtual bool preTraverse(VertexDeclarationNode* treeNode);
-      virtual void postTraverse(VertexDeclarationNode* treeNode);
+      virtual bool preTraverse(VertexDeclarationNode * treeNode);
+      virtual void postTraverse(VertexDeclarationNode * treeNode);
 
-      virtual bool preTraverse(ShaderNode* treeNode);
-      virtual void postTraverse(ShaderNode* treeNode);
+      virtual bool preTraverse(ShaderNode * treeNode);
+      virtual void postTraverse(ShaderNode * treeNode);
 
-      virtual bool preTraverse(TextureNode* treeNode);
-      virtual void postTraverse(TextureNode* treeNode);
+      virtual bool preTraverse(TextureNode * treeNode);
+      virtual void postTraverse(TextureNode * treeNode);
 
-      virtual bool preTraverse(RenderNode* treeNode) = 0;
+      virtual bool preTraverse(RenderNode * treeNode) = 0;
 
     protected:
 
-      void doTraverseDown(TreeNode* treeNode);
-
-      void deleteNode(TreeNode *treeNode);
+      void doTraverseDown(util::SharedPointer<TreeNode> treeNode);
 
       util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::MaterialManager> m_materialManager;
-      util::SharedPointer<db::RenderShaderManager> m_renderShaderManager;
-      util::SharedPointer<db::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
 
       util::SharedPointer<const xBar::IGeometryContainer> m_geometryContainer;
 
-      util::Flags<VertexElements> m_shaderVertexDeclaration;
+      sh::ShaderSlotFlags m_shaderVertexDeclaration;
       util::Flags<VertexElements> m_meshVertexDeclaration;
-      util::ResourceHandle m_shaderHandle;
+      sh::RenderShaderHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
+      util::vec4f m_uniColor;
     };
   }
 }
