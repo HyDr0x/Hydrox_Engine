@@ -31,8 +31,6 @@ namespace he
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
-
-      m_uniColor = util::vec4f::identity();
     }
 
     void RemoveGeometryTraverser::doTraverseDown(util::SharedPointer<TreeNode> treeNode)
@@ -83,7 +81,7 @@ namespace he
 
     bool RemoveGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      return treeNode->isTexture(m_textureHandles, m_uniColor);
+      return treeNode->isTexture(m_textureHandles);
     }
 
     void RemoveGeometryTraverser::postTraverse(TextureNode* treeNode)

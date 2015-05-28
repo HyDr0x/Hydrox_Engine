@@ -8,13 +8,14 @@ namespace he
 {
   namespace renderer
   {
-    Tonemapper::Tonemapper() : m_histogramBins(16)
+    Tonemapper::Tonemapper() : m_histogramBins(16), m_pingPong(0)
     {
     }
 
     Tonemapper::~Tonemapper()
     {
       glDeleteVertexArrays(1, &m_histogramVAO);
+      glDeleteBuffers(2, m_pboIndex);
     }
 
     void Tonemapper::initialize(util::SingletonManager *singletonManager)
@@ -49,9 +50,16 @@ namespace he
 
       m_histogramVertices.createBuffer(GL_ARRAY_BUFFER, m_options->width * m_options->height * sizeof(util::vec2f), m_options->width * m_options->height * sizeof(util::vec2f), GL_STATIC_DRAW, &vertices[0]);
 
-      m_histogram = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+      m_histogram[0] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+      m_histogram[1] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_histogramBins, 1, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
 
-      m_histogramRenderQuad.setRenderTargets(1, m_histogram);
+      glGenBuffers(2, m_pboIndex);
+
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pboIndex[0]);
+      glBufferData(GL_PIXEL_PACK_BUFFER, m_histogramBins * sizeof(GLfloat), nullptr, GL_STREAM_READ);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pboIndex[1]);
+      glBufferData(GL_PIXEL_PACK_BUFFER, m_histogramBins * sizeof(GLfloat), nullptr, GL_STREAM_READ);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
       glGenVertexArrays(1, &m_histogramVAO);
 
@@ -63,16 +71,18 @@ namespace he
 
     void Tonemapper::createHistogram(util::SharedPointer<db::Texture2D> combinedTexture)
     {
+      m_histogramRenderQuad.setRenderTargets(1, m_histogram[m_pingPong]);
       m_histogramRenderQuad.clearTargets(0, util::vec4f(0, 0, 0, 0));
 
-      //glPointSize(1.0f);
       glDepthMask(GL_FALSE);
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
       glViewport(0, 0, m_histogramBins, 1);
+
       m_histogramRenderQuad.setWriteFrameBuffer();
       const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_histogramShaderHandle);
       shader.useShader();
+
       glBindVertexArray(m_histogramVAO);
       glEnableVertexAttribArray(sh::RenderShader::POSITION);
       m_histogramVertices.bindVertexbuffer(0, 0, sizeof(util::vec2f));
@@ -86,15 +96,30 @@ namespace he
       m_histogramVertices.unbindVertexBuffer(0);
       glDisableVertexAttribArray(sh::RenderShader::POSITION);
       glBindVertexArray(0);
+
       shader.useNoShader();
       m_histogramRenderQuad.unsetWriteFrameBuffer();
+
       glViewport(0, 0, m_options->width, m_options->height);
       glDisable(GL_BLEND);
       glDepthMask(GL_TRUE);
 
-      std::vector<GLfloat> histogram(m_histogramBins);
+      m_histogramRenderQuad.setReadFrameBuffer(GL_COLOR_ATTACHMENT0);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pboIndex[m_pingPong]);
 
-      m_histogram->getTextureData(&histogram[0]);
+      glReadPixels(0, 0, m_histogramBins, 1, GL_RED, GL_FLOAT, nullptr);
+
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, m_pboIndex[(m_pingPong + 1) % 2]);
+      m_histogramRenderQuad.unsetReadFrameBuffer();
+
+      std::vector<GLfloat> histogram(m_histogramBins);
+      GLfloat *data = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+      std::copy(data, data + m_histogramBins, &histogram[0]);
+      glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+      m_pingPong = 1 - m_pingPong;
 
       unsigned int pixelNumber = 0, maxPixelNumber = 0;
 

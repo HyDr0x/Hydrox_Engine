@@ -36,7 +36,7 @@ namespace he
 
       if(vertexShaderSource.empty())
       {
-        std::cerr << "ERROR, couldn't open file: " << vertexFilename << std::endl;
+        std::clog << "ERROR, couldn't open file: " << vertexFilename << std::endl;
         assert(false);
       }
 
@@ -120,7 +120,7 @@ namespace he
       {
         file.close();
 
-        //std::cerr << "Warning, couldn't open shader source file: " << filename << std::endl;
+        std::clog << "Warning, couldn't open render shader config file: " << path + shaderIndexFilename << std::endl;
       }
     }
 

@@ -1,5 +1,7 @@
 #include "Utilities/PrimitiveGenerator/CubeGenerator.h"
 
+#include "Utilities/PrimitiveGenerator/PlaneGenerator.h"
+
 #include <vector>
 #include <string>
 
@@ -7,26 +9,199 @@ namespace he
 {
   namespace util
   {
-    void CubeGenerator::generateCube(std::vector<vec3f>& position)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, unsigned int levelOfDetail)
     {
-      generateNonIndexedPositions(position);
+      if(levelOfDetail == UINT_MAX)
+      {
+        generateNonIndexedPositions(position);
+      }
+      else
+      {
+        std::vector<vec3f> planePositions, transformedPositions;
+
+        PlaneGenerator::generatePlane(planePositions, levelOfDetail);
+
+        transformedPositions.resize(planePositions.size());
+
+        Quaternion<float> rotQuats[6];
+        rotQuats[0] = math::createRotXQuaternion(math::PI_HALF);
+        rotQuats[1] = math::createRotXQuaternion(-math::PI_HALF);
+        rotQuats[2] = math::createRotZQuaternion(math::PI_HALF);
+        rotQuats[3] = math::createRotZQuaternion(-math::PI_HALF);
+        rotQuats[4] = math::createRotXQuaternion(math::PI);
+        rotQuats[5] = Quaternion<float>::identity();
+
+        vec3f translate[6];
+        translate[0] = vec3f(0.0f, 0.0f, -0.5f);
+        translate[1] = vec3f(0.0f, 0.0f, 0.5f);
+        translate[2] = vec3f(0.5f, 0.0f, 0.0f);
+        translate[3] = vec3f(-0.5f, 0.0f, 0.0f);
+        translate[4] = vec3f(0.0f, -0.5f, 0.0f);
+        translate[5] = vec3f(0.0f, 0.5f, 0.0f);
+
+        for(unsigned int i = 0; i < 6; i++)
+        {
+          for(unsigned int j = 0; j < planePositions.size(); j++)
+          {
+            transformedPositions[j] = translate[i] + rotQuats[i].apply(planePositions[j]);
+          }
+
+          position.insert(position.begin() + transformedPositions.size() * i, transformedPositions.begin(), transformedPositions.end());
+        }
+      }
     }
 
-    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal, unsigned int levelOfDetail)
     {
-      generateNonIndexedPositions(position);
-      generateNonIndexedNormals(normal, position);
+      if(levelOfDetail == UINT_MAX)
+      {
+        generateNonIndexedPositions(position);
+        generateNonIndexedNormals(normal, position);
+      }
+      else
+      {
+        std::vector<vec3f> planePositions, transformedPositions;
+        std::vector<vec3f> planeNormals, transformedNormals;
+
+        PlaneGenerator::generatePlane(planePositions, planeNormals, levelOfDetail);
+
+        transformedPositions.resize(planePositions.size());
+        transformedNormals.resize(planeNormals.size());
+
+        Quaternion<float> rotQuats[6];
+        rotQuats[0] = math::createRotXQuaternion(math::PI_HALF);
+        rotQuats[1] = math::createRotXQuaternion(-math::PI_HALF);
+        rotQuats[2] = math::createRotZQuaternion(math::PI_HALF);
+        rotQuats[3] = math::createRotZQuaternion(-math::PI_HALF);
+        rotQuats[4] = math::createRotXQuaternion(math::PI);
+        rotQuats[5] = Quaternion<float>::identity();
+
+        vec3f translate[6];
+        translate[0] = vec3f(0.0f, 0.0f, -0.5f);
+        translate[1] = vec3f(0.0f, 0.0f, 0.5f);
+        translate[2] = vec3f(0.5f, 0.0f, 0.0f);
+        translate[3] = vec3f(-0.5f, 0.0f, 0.0f);
+        translate[4] = vec3f(0.0f, -0.5f, 0.0f);
+        translate[5] = vec3f(0.0f, 0.5f, 0.0f);
+
+        for(unsigned int i = 0; i < 6; i++)
+        {
+          for(unsigned int j = 0; j < planePositions.size(); j++)
+          {
+            transformedPositions[j] = translate[i] + rotQuats[i].apply(planePositions[j]);
+            transformedNormals[j] = rotQuats[i].apply(planeNormals[j]);
+          }
+          position.insert(position.begin() + transformedPositions.size() * i, transformedPositions.begin(), transformedPositions.end());
+          normal.insert(normal.begin() + transformedNormals.size() * i, transformedNormals.begin(), transformedNormals.end());
+        }
+      }
     }
 
-    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail)
     {
       generateIndexedPositions(position, index);
+
+      if(levelOfDetail == UINT_MAX)
+      {
+        generateIndexedPositions(position, index);
+      }
+      else
+      {
+        std::vector<vec3f> planePositions, transformedPositions;
+        std::vector<unsigned int> indices, offsettedIndices;
+
+        PlaneGenerator::generatePlane(planePositions, indices, levelOfDetail);
+
+        transformedPositions.resize(planePositions.size());
+        offsettedIndices.resize(indices.size());
+
+        Quaternion<float> rotQuats[6];
+        rotQuats[0] = math::createRotXQuaternion(math::PI_HALF);
+        rotQuats[1] = math::createRotXQuaternion(-math::PI_HALF);
+        rotQuats[2] = math::createRotZQuaternion(math::PI_HALF);
+        rotQuats[3] = math::createRotZQuaternion(-math::PI_HALF);
+        rotQuats[4] = math::createRotXQuaternion(math::PI);
+        rotQuats[5] = Quaternion<float>::identity();
+
+        vec3f translate[6];
+        translate[0] = vec3f(0.0f, 0.0f, -0.5f);
+        translate[1] = vec3f(0.0f, 0.0f, 0.5f);
+        translate[2] = vec3f(0.5f, 0.0f, 0.0f);
+        translate[3] = vec3f(-0.5f, 0.0f, 0.0f);
+        translate[4] = vec3f(0.0f, -0.5f, 0.0f);
+        translate[5] = vec3f(0.0f, 0.5f, 0.0f);
+
+        for(unsigned int i = 0; i < 6; i++)
+        {
+          for(unsigned int j = 0; j < planePositions.size(); j++)
+          {
+            transformedPositions[j] = translate[i] + rotQuats[i].apply(planePositions[j]);
+          }
+
+          for(unsigned int j = 0; j < indices.size(); j++)
+          {
+            offsettedIndices[j] = indices[j] + planePositions.size() * i;
+          }
+
+          position.insert(position.begin() + transformedPositions.size() * i, transformedPositions.begin(), transformedPositions.end());
+          index.insert(index.begin() + offsettedIndices.size() * i, offsettedIndices.begin(), offsettedIndices.end());
+        }
+      }
     }
 
-    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal)
+    void CubeGenerator::generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal, unsigned int levelOfDetail)
     {
-      generateIndexedPositions(position, index);
-      generateIndexedNormals(normal, position);
+      if(levelOfDetail == UINT_MAX)
+      {
+        generateIndexedPositions(position, index);
+        generateIndexedNormals(normal, position);
+      }
+      else
+      {
+        std::vector<vec3f> planePositions, transformedPositions;
+        std::vector<vec3f> planeNormals, transformedNormals;
+        std::vector<unsigned int> indices, offsettedIndices;
+
+        PlaneGenerator::generatePlane(planePositions, indices, planeNormals, levelOfDetail);
+
+        transformedPositions.resize(planePositions.size());
+        transformedNormals.resize(planeNormals.size());
+        offsettedIndices.resize(indices.size());
+
+        Quaternion<float> rotQuats[6];
+        rotQuats[0] = math::createRotXQuaternion(math::PI_HALF);
+        rotQuats[1] = math::createRotXQuaternion(-math::PI_HALF);
+        rotQuats[2] = math::createRotZQuaternion(math::PI_HALF);
+        rotQuats[3] = math::createRotZQuaternion(-math::PI_HALF);
+        rotQuats[4] = math::createRotXQuaternion(math::PI);
+        rotQuats[5] = Quaternion<float>::identity();
+
+        vec3f translate[6];
+        translate[0] = vec3f(0.0f, 0.0f, -0.5f);
+        translate[1] = vec3f(0.0f, 0.0f, 0.5f);
+        translate[2] = vec3f(0.5f, 0.0f, 0.0f);
+        translate[3] = vec3f(-0.5f, 0.0f, 0.0f);
+        translate[4] = vec3f(0.0f, -0.5f, 0.0f);
+        translate[5] = vec3f(0.0f, 0.5f, 0.0f);
+
+        for(unsigned int i = 0; i < 6; i++)
+        {
+          for(unsigned int j = 0; j < planePositions.size(); j++)
+          {
+            transformedPositions[j] = translate[i] + rotQuats[i].apply(planePositions[j]);
+            transformedNormals[j] = rotQuats[i].apply(planeNormals[j]);
+          }
+
+          for(unsigned int j = 0; j < indices.size(); j++)
+          {
+            offsettedIndices[j] = indices[j] + planePositions.size() * i;
+          }
+
+          position.insert(position.begin() + transformedPositions.size() * i, transformedPositions.begin(), transformedPositions.end());
+          normal.insert(normal.begin() + transformedNormals.size() * i, transformedNormals.begin(), transformedNormals.end());
+          index.insert(index.begin() + offsettedIndices.size() * i, offsettedIndices.begin(), offsettedIndices.end());
+        }
+      }
     }
 
     void CubeGenerator::generateIndexedPositions(std::vector<vec3f>& position, std::vector<unsigned int>& index)

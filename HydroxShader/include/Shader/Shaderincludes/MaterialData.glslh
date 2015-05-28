@@ -1,9 +1,10 @@
 struct MaterialData
 {
-	float diffuseStrength;
-	float specularStrength;//metall materials have their own color as specular reflection
+	float diffuseRho;
+	float specularRho;//metall materials have their own color as specular reflection
 	float ambientStrength;
-	float specularExponent;
+	float roughness;
+	vec4 color;
 };
 
 layout(std140, binding = 1) uniform materialBuffer

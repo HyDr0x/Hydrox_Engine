@@ -32,7 +32,7 @@ namespace he
       m_lightType = sourceNode.m_lightType;
       m_renderable = sourceNode.m_renderable;
       m_reflectiveShadow = sourceNode.m_reflectiveShadow;
-      m_lightData = sourceNode.m_lightData;
+      m_lightData.light = sourceNode.m_lightData.light;
       m_directionalNearSize = sourceNode.m_directionalNearSize;
       m_near = sourceNode.m_near;
       m_far = sourceNode.m_far;
@@ -67,7 +67,7 @@ namespace he
     {
       ShadowLightNode *newNode = new ShadowLightNode(m_near, m_far, m_lightType, m_eventManager, m_nodeName);
 
-      newNode->m_lightData = m_lightData;
+      newNode->m_lightData.light = m_lightData.light;
 
       return newNode;
     }
@@ -112,20 +112,20 @@ namespace he
       switch(m_lightType)
       {
       case SPOTLIGHT:
-        width = tanf(acosf(m_lightData.direction[3]) * 0.5f) * 2.25f * m_near;
-        m_lightData.projectionParameter[0] = m_near;
-        m_lightData.projectionParameter[1] = m_far;
-        m_lightData.projectionParameter[2] = 2.0f * width;
-        m_lightData.projectionParameter[3] = 2.0f * width;
+        width = tanf(acosf(m_lightData.light.direction[3]) * 0.5f) * 2.25f * m_near;
+        m_lightData.light.projectionParameter[0] = m_near;
+        m_lightData.light.projectionParameter[1] = m_far;
+        m_lightData.light.projectionParameter[2] = 2.0f * width;
+        m_lightData.light.projectionParameter[3] = 2.0f * width;
         m_projectionMatrix = util::math::createPerspective(-width, width, -width, width, m_near, m_far);
         break;
       case POINTLIGHT:
         break;
       case DIRECTIONALLIGHT:
-        m_lightData.projectionParameter[0] = m_near;
-        m_lightData.projectionParameter[1] = m_far;
-        m_lightData.projectionParameter[2] = 2.0f * m_directionalNearSize[0];
-        m_lightData.projectionParameter[3] = 2.0f * m_directionalNearSize[1];
+        m_lightData.light.projectionParameter[0] = m_near;
+        m_lightData.light.projectionParameter[1] = m_far;
+        m_lightData.light.projectionParameter[2] = 2.0f * m_directionalNearSize[0];
+        m_lightData.light.projectionParameter[3] = 2.0f * m_directionalNearSize[1];
         m_projectionMatrix = util::math::createOrthographic(-m_directionalNearSize[0], m_directionalNearSize[0], -m_directionalNearSize[1], m_directionalNearSize[1], m_near, m_far);
         break;
       }
@@ -201,10 +201,10 @@ namespace he
 
     void ShadowLightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
-      if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
-      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis() * -1.0f;//negate it, zaxis inverted in view space and shader need the negated lightDir anyways
+      if(m_lightType != DIRECTIONALLIGHT) m_lightData.light.position = position;
+      if(m_lightType != POINTLIGHT) m_lightData.light.direction = rotation.getRotationAxis() * -1.0f;//negate it, zaxis inverted in view space and shader need the negated lightDir anyways
 
-      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.direction, util::vec3f(0.0f, 1.0f, 0.0f));
+      m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.light.direction, util::vec3f(0.0f, 1.0f, 0.0f));
     }
 
     LightType ShadowLightNode::getLightType() const
@@ -214,87 +214,87 @@ namespace he
 
     void ShadowLightNode::setColor(util::vec3f color)
     {
-      m_lightData.color = color;
+      m_lightData.light.color = color;
     }
 
     util::vec3f ShadowLightNode::getColor() const
     {
-      return m_lightData.color;
+      return m_lightData.light.color;
     }
 
     void ShadowLightNode::setLuminousFlux(float intensity)
     {
-      m_lightData.luminousFlux = intensity;
+      m_lightData.light.luminousFlux = intensity;
     }
 
     float ShadowLightNode::getLuminousFlux() const
     {
-      return m_lightData.luminousFlux;
+      return m_lightData.light.luminousFlux;
     }
 
     void ShadowLightNode::setSpotLightExponent(float spotLightExponent)
     {
-      m_lightData.position[3] = spotLightExponent;
+      m_lightData.light.position[3] = spotLightExponent;
     }
 
     float ShadowLightNode::getSpotLightExponent() const
     {
-      return m_lightData.position[3];
+      return m_lightData.light.position[3];
     }
 
     void ShadowLightNode::setSpotLightCutoff(float spotLightCutoff)
     {
-      m_lightData.direction[3] = spotLightCutoff;
+      m_lightData.light.direction[3] = spotLightCutoff;
       setShadowProjection(m_near, m_far);
     }
 
     float ShadowLightNode::getSpotLightCutoff() const
     {
-      return m_lightData.direction[3];
+      return m_lightData.light.direction[3];
     }
 
     void ShadowLightNode::setConstAttenuation(float constAttenuation)
     {
-      m_lightData.constAttenuation = constAttenuation;
+      m_lightData.light.constAttenuation = constAttenuation;
     }
 
     float ShadowLightNode::getConstAttenuation() const
     {
-      return m_lightData.constAttenuation;
+      return m_lightData.light.constAttenuation;
     }
 
     void ShadowLightNode::setLinearAttenuation(float linearAttenuation)
     {
-      m_lightData.linearAttenuation = linearAttenuation;
+      m_lightData.light.linearAttenuation = linearAttenuation;
     }
 
     float ShadowLightNode::getLinearAttenuation() const
     {
-      return m_lightData.linearAttenuation;
+      return m_lightData.light.linearAttenuation;
     }
 
     void ShadowLightNode::setQuadricAttenuation(float quadricAttenuation)
     {
-      m_lightData.quadricAttenuation = quadricAttenuation;
+      m_lightData.light.quadricAttenuation = quadricAttenuation;
     }
 
     float ShadowLightNode::getQuadricAttenuation() const
     {
-      return m_lightData.quadricAttenuation;
+      return m_lightData.light.quadricAttenuation;
     }
 
     void ShadowLightNode::read(std::istream& stream, util::SharedPointer<util::EventManager> eventManager, std::map<std::string, std::map<std::string, util::ResourceHandle>> resourceHandles)
     {
       TreeNode::read(stream, eventManager, resourceHandles);
 
-      stream >> m_lightData.position;
-      stream >> m_lightData.direction;
-      stream >> m_lightData.color;
-      stream >> m_lightData.luminousFlux;
+      stream >> m_lightData.light.position;
+      stream >> m_lightData.light.direction;
+      stream >> m_lightData.light.color;
+      stream >> m_lightData.light.luminousFlux;
 
-      stream >> m_lightData.constAttenuation;
-      stream >> m_lightData.linearAttenuation;
-      stream >> m_lightData.quadricAttenuation;
+      stream >> m_lightData.light.constAttenuation;
+      stream >> m_lightData.light.linearAttenuation;
+      stream >> m_lightData.light.quadricAttenuation;
 
       unsigned int type;
       stream >> type;
@@ -318,14 +318,14 @@ namespace he
     {
       TreeNode::write(stream, resourceHandles);
 
-      stream << m_lightData.position << std::endl;
-      stream << m_lightData.direction << std::endl;
-      stream << m_lightData.color << std::endl;
-      stream << m_lightData.luminousFlux << std::endl;
+      stream << m_lightData.light.position << std::endl;
+      stream << m_lightData.light.direction << std::endl;
+      stream << m_lightData.light.color << std::endl;
+      stream << m_lightData.light.luminousFlux << std::endl;
 
-      stream << m_lightData.constAttenuation << std::endl;
-      stream << m_lightData.linearAttenuation << std::endl;
-      stream << m_lightData.quadricAttenuation << std::endl;
+      stream << m_lightData.light.constAttenuation << std::endl;
+      stream << m_lightData.light.linearAttenuation << std::endl;
+      stream << m_lightData.light.quadricAttenuation << std::endl;
 
       stream << (unsigned int)m_lightType << std::endl;
 

@@ -40,7 +40,7 @@ namespace he
         m_channelNumber = other.m_channelNumber;
         m_mipmapping = other.m_mipmapping;
 
-        unsigned int bytesPerComponent = (m_bitsPerComponent / 8.0f);
+        /*unsigned int bytesPerComponent = (m_bitsPerComponent / 8.0f);
 
         GLint byteRowAlignement;
         glGetIntegerv(GL_PACK_ALIGNMENT, &byteRowAlignement);
@@ -80,11 +80,32 @@ namespace he
         {
           glGenerateMipmap(m_target);
         }
+        glBindTexture(m_target, 0);*/
+
+        glGenTextures(1, &m_texIndex);
+        glBindTexture(m_target, m_texIndex);
+
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glTexImage2D(m_target, 0, m_internalFormat, m_width, m_height, 0, m_format, m_type, nullptr);
+
         glBindTexture(m_target, 0);
+
+        glCopyImageSubData(other.m_texIndex, other.m_target, 0, 0, 0, 0, m_texIndex, m_target, 0, 0, 0, 0, other.m_width, other.m_height, 1);
+
+        if(m_mipmapping)
+        {
+          glBindTexture(m_target, m_texIndex);
+          glGenerateMipmap(m_target);
+          glBindTexture(m_target, 0);
+        }
       }
       else
       {
-        m_texIndex = other.m_texIndex;
+        m_texIndex = 0;
       }
     }
 
@@ -149,6 +170,22 @@ namespace he
       return m_width * m_height * (m_bitsPerComponent / 8) * m_channelNumber;
     }
 
+    void Texture2D::setTextureData(GLuint offsetX, GLuint offsetY, GLuint width, GLuint height, GLvoid* data)
+    {
+      GLint byteRowAlignement;
+      glGetIntegerv(GL_UNPACK_ALIGNMENT, &byteRowAlignement);
+      unsigned int bytesPerComponent = m_bitsPerComponent / 8;
+      GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
+
+
+      GLint rowStride = m_width - width;
+      //glPixelStorei(GL_UNPACK_ROW_LENGTH, rowStride);
+      glBindTexture(m_target, m_texIndex);
+      glTexSubImage2D(m_target, 0, offsetX, offsetY, width, height, m_format, m_type, data);
+      glBindTexture(m_target, 0);
+      //glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    }
+
     void Texture2D::updateHash()
     {
       if(m_width * m_height > 0)
@@ -159,7 +196,7 @@ namespace he
         unsigned int bytesPerComponent = m_bitsPerComponent / 8;
         GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
         GLsizei paddedWidth = dataWidth + ((byteRowAlignement - (dataWidth % byteRowAlignement)) % byteRowAlignement);
-        std::vector<GLubyte> data(dataWidth * m_height);
+        std::vector<GLubyte> data(paddedWidth * m_height);
 
         glBindTexture(m_target, m_texIndex);
         glGetTexImage(m_target, 0, m_format, m_type, &data[0]);

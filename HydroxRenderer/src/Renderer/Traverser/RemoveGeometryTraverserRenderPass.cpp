@@ -31,8 +31,6 @@ namespace he
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_uniColor = util::vec4f::identity();
-
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
@@ -68,8 +66,7 @@ namespace he
 
     void RemoveGeometryTraverserRenderPass::postTraverse(RenderNode * treeNode)
     {
-      treeNode->getRenderGroup()->removeGeometry(m_geometryContainer);
-      if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
+      if(treeNode->getRenderGroup()->removeGeometry(m_geometryContainer))
       {
         m_stopTraversal = true;
       }

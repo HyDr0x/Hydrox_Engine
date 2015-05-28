@@ -15,10 +15,10 @@ namespace he
     {
     public:
 
-      static void generateCube(std::vector<vec3f>& position);
-      static void generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal);
-      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index);
-      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal);
+      static void generateCube(std::vector<vec3f>& position, unsigned int levelOfDetail);
+      static void generateCube(std::vector<vec3f>& position, std::vector<vec3f>& normal, unsigned int levelOfDetail);
+      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail);
+      static void generateCube(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal, unsigned int levelOfDetail);
 
     private:
 

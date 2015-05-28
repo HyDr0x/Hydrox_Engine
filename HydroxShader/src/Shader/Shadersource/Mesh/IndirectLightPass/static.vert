@@ -108,12 +108,12 @@ void main()
 			
 			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
-			float dir = max(1.0f - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0001f);
+			float dir = max(1.0f - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0);
 			
-			float wd = EPSILON + dir * sqrt(max(dot(cacheNormal, normal), 0));
+			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0.0));
 			
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
-			float wg = EPSILON + dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0));
+			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0.0));
 			
 			IndirectLightData indirectLightD;
 			indirectLightD.position = imageLoad(indirectLightPositionDBuffer, coord);

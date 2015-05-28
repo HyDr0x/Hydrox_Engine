@@ -104,7 +104,7 @@ namespace he
 
       if(!assimpScene)
       {
-        std::cerr << importer.GetErrorString() << std::endl;
+        std::clog << importer.GetErrorString() << std::endl;
 
         scene = loadDefaultSceneGraph();
       }
@@ -239,13 +239,13 @@ namespace he
         {
           if(mesh->mFaces[j].mNumIndices != indicesPerFace)
           {
-            std::cerr << "Invalid number of indices per face!" << std::endl;
-            std::cerr << "Expected number: " << indicesPerFace << std::endl;
-            std::cerr << "Actual number: " << mesh->mFaces[j].mNumIndices << std::endl;
+            std::clog << "Invalid number of indices per face!" << std::endl;
+            std::clog << "Expected number: " << indicesPerFace << std::endl;
+            std::clog << "Actual number: " << mesh->mFaces[j].mNumIndices << std::endl;
 
             if(mesh->mFaces[j].mNumIndices > 3)
             {
-              std::cerr << "No quads or polygons allowed!" << std::endl;
+              std::clog << "No quads or polygons allowed!" << std::endl;
             }
           }
 
@@ -536,7 +536,7 @@ namespace he
       std::vector<util::vec3f> positions;
       std::vector<util::vec3f> normals;
       std::vector<db::Mesh::indexType> indices;
-      util::CubeGenerator::generateCube(positions, indices, normals);
+      util::CubeGenerator::generateCube(positions, indices, normals, UINT_MAX);
 
       std::vector<VertexElements> vertexElements;
       vertexElements.push_back(db::Mesh::MODEL_POSITION);

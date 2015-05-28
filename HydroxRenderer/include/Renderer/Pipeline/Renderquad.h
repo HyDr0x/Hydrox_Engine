@@ -22,6 +22,9 @@ namespace he
       Renderquad();
       ~Renderquad();
 
+      virtual void setReadFrameBuffer(GLenum buffer) const;
+      virtual void unsetReadFrameBuffer() const;
+
       virtual void setWriteFrameBuffer(std::vector<unsigned int> indices = std::vector<unsigned int>()) const;
       virtual void unsetWriteFrameBuffer() const;
 

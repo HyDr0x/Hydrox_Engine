@@ -95,6 +95,7 @@ namespace he
             break;
           case UNICOLOR:
             file >> uniColor;
+            materialData.color = uniColor;
             break;
           case DIFFUSETEXTURE:
             for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
@@ -148,8 +149,26 @@ namespace he
 
         std::vector<std::vector<util::ResourceHandle>> textureHandles(db::Material::TEXTURETYPENUM);
 
-        for(unsigned int i = 0; i < textureFilenames.size(); i++)
+        for(unsigned int i = 0; i < db::Material::TEXTURETYPENUM; i++)
         {
+          if(i == db::Material::DIFFUSETEX)
+          {
+            textureLoader.setSRGB(true);
+          }
+          else
+          {
+            textureLoader.setSRGB(false);
+          }
+
+          if(i == db::Material::DIFFUSETEX || i == db::Material::NORMALTEX)
+          {
+            textureLoader.setMipMapping(true);
+          }
+          else
+          {
+            textureLoader.setMipMapping(false);
+          }
+
           for(unsigned int j = 0; j < textureFilenames[i].size(); j++)
           {
             if(textureFilenames[i][j] != std::string())
@@ -161,13 +180,13 @@ namespace he
           }
         }
 
-        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, hashes, transparency, debugMaterial, uniColor));
+        materialHandle = m_materialManager->addObject(db::Material(materialData, textureHandles, hashes, transparency, debugMaterial));
       }
       else//wrong filename or file does not exist
       {
         file.close();
 
-        std::cerr << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
+        std::clog << "Error: couldn't open material source file " << filename[0] << "." << std::endl;
 
         return getDefaultResource();
       }
@@ -180,7 +199,7 @@ namespace he
     util::ResourceHandle MaterialLoader::getDefaultResource() const
     {
       std::vector<std::vector<uint64_t>> hashes(db::Material::TEXTURETYPENUM);
-      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), hashes, false, true));
+      return m_materialManager->addObject(db::Material(db::Material::MaterialData(1.0f, 1.0f, 1.0f, 1.0f, util::vec4f::identity()), std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), hashes, false, true));
     }
   }
 }

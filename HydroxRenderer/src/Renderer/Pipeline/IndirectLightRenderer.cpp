@@ -1,6 +1,7 @@
 #include "Renderer/Pipeline/IndirectLightRenderer.h"
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
+#include <Utilities/Miscellaneous/RandomSequenceGenerator.h>
 #include <Utilities/Timer/Timer.h>
 
 #include <DataBase/ResourceManager.hpp>
@@ -13,7 +14,7 @@ namespace he
 {
   namespace renderer
   {
-    IndirectLightRenderer::IndirectLightRenderer() : m_cacheNumber(0)
+    IndirectLightRenderer::IndirectLightRenderer() : m_cacheNumber(0), m_gBufferSync(0)
     {
     }
 
@@ -42,19 +43,15 @@ namespace he
 
     void IndirectLightRenderer::createSamplingPattern()
     {
-      const float rMax = 1.0f;
+      std::vector<util::vec4f> samplingPattern;
+      std::vector<float> debugSamplingPattern;
 
-      std::vector<util::vec4f> samplingPattern(m_options->giLightSampleNumber);
+      unsigned int imageSize = 513;
 
-      for(unsigned int i = 0; i < samplingPattern.size(); i++)
-      {
-        float s0 = rand() / float(RAND_MAX);
-        float s1 = rand() / float(RAND_MAX);
+      //util::RandomSequenceGenerator::generateDiscSequence(m_options->giLightSampleNumber, 0.5f, 2.0f, imageSize, samplingPattern, debugSamplingPattern);
+      util::RandomSequenceGenerator::generateHaltonSequence(m_options->giLightSampleNumber, util::vec2ui(2, 3), 0.5f, imageSize, samplingPattern, debugSamplingPattern);
 
-        samplingPattern[i] = util::vec4f(rMax * s0 * sinf(2.0f * util::math::PI * s1), rMax * s0 * cosf(2.0f * util::math::PI * s1), (1.0f / float(m_options->giLightSampleNumber)), 0.0f);
-        //samplingPattern[i] *= s0 * s0;
-        //samplingPattern[i] = samplingPattern[i].normalize();
-      }
+      m_samplingDebugTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(imageSize, imageSize, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16, &debugSamplingPattern[0]));
 
       m_samplingPatternBuffer.createBuffer(sizeof(samplingPattern[0]) * samplingPattern.size(), GL_STATIC_DRAW);
       m_samplingPatternBuffer.setData(0, sizeof(samplingPattern[0]) * samplingPattern.size(), &samplingPattern[0]);
@@ -323,6 +320,11 @@ namespace he
     util::SharedPointer<db::Texture2D> IndirectLightRenderer::getGlobalCacheNormalMap()
     {
       return m_globalCacheNormalBuffer;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectLightRenderer::getSamplingDebugMap()
+    {
+      return m_samplingDebugTexture;
     }
   }
 }

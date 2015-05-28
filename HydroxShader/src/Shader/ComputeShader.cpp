@@ -78,7 +78,7 @@ namespace he
         GLchar *errorLog = new GLchar[length];
         glGetProgramInfoLog(m_program, length, nullptr, errorLog);
 
-        std::cerr << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
+        std::clog << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
 
         delete[] errorLog;
         glDeleteProgram(m_program);

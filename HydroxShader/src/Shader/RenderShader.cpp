@@ -99,7 +99,7 @@ namespace he
     
         if(strcmp(var, varyings[i]))
         {
-          std::cerr <<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
+          std::clog <<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
         }
       }
     }
@@ -162,7 +162,7 @@ namespace he
         GLchar *errorLog = new GLchar[length];
         glGetProgramInfoLog(m_program, length, nullptr, errorLog);
 
-        std::cerr << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
+        std::clog << "Error linking shader program " << shaderName <<  " because of:/n "<< errorLog << std::endl;
 
         delete[] errorLog;
         glDeleteProgram(m_program);

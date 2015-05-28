@@ -24,6 +24,10 @@ namespace he
 
       void setTarget(GLenum target);
 
+      void setSRGB(bool srgb);
+
+      void setMipMapping(bool mipmapping);
+
       util::ResourceHandle loadResource(std::string filename);
 
       util::ResourceHandle getDefaultResource() const;
@@ -35,6 +39,9 @@ namespace he
       util::SharedPointer<db::TextureManager> m_textureManager;
 
       GLenum m_target;
+
+      bool m_srgb;
+      bool m_mipmapping;
     };
   }
 }

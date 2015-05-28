@@ -55,7 +55,7 @@ void main()
 	
 	for(uint i = 0; i < lightNumber; i++)
 	{
-		luminousFlux += vec4(light[i].color.rgb, 1.0f) * (material.z + calculateLightIntensity(light[i], pos, normal, material));
+		luminousFlux += vec4(light[i].color.rgb, 1.0f) * (material.z + calculateLuminance(light[i], pos, normal, material));
 	}
 	
 	for(uint i = 0; i < shadowLightNumber; i++)
@@ -68,17 +68,12 @@ void main()
 		
 		if(shadowPos.z <= shadowZ + 0.001 && (shadowTexCoords.x >= 0.0f && shadowTexCoords.x <= 1.0f && shadowTexCoords.y >= 0.0f && shadowTexCoords.y <= 1.0f))
 		{
-			luminousFlux += vec4(shadowLight[i].light.color.rgb, 1.0f) * calculateLightIntensity(shadowLight[i].light, pos, normal, material);
-		}
-		/*
-		if(shadowPos.z <= shadowZ + 0.001 || (shadowTexCoords.x < 0.0f || shadowTexCoords.x > 1.0f || shadowTexCoords.y < 0.0f || shadowTexCoords.y > 1.0f))
-		{
-			luminousFlux += vec4(shadowLight[i].light.color.rgb, 1.0f) * (material.z + calculateLightIntensity(shadowLight[i].light, pos, normal, material));
+			luminousFlux += vec4(shadowLight[i].light.color.rgb, 1.0f) * (material.z + calculateLuminance(shadowLight[i].light, pos, normal, material));
 		}
 		else
 		{
 			luminousFlux += vec4(shadowLight[i].light.color.rgb, 1.0f) * material.z;
-		}*/
+		}
 	}
 	
 	for(uint i = 0; i < reflectiveShadowLightNumber; i++)
@@ -90,7 +85,7 @@ void main()
 		
 		if(length(shadowPos - pos) < 0.1 && (shadowTexCoords.x >= 0.0f && shadowTexCoords.x <= 1.0f && shadowTexCoords.y >= 0.0f && shadowTexCoords.y <= 1.0f))
 		{
-			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * calculateLightIntensity(reflectiveShadowLight[i].light, pos, normal, material);
+			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0f) * calculateLuminance(reflectiveShadowLight[i].light, pos, normal, material);
 		}
 	}
 }

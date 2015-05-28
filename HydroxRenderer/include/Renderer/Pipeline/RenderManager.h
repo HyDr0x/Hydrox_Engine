@@ -68,6 +68,8 @@ namespace he
       void enableSkybox(util::ResourceHandle skyboxTextureHandles[6]);
       void disableSkybox();
 
+      void showDebugTexture(unsigned int debugTexture);
+
       void showVirtualAreaLights(bool showVirtualAreaLights);
 
       void showCaches(bool showCaches);
@@ -130,6 +132,8 @@ namespace he
 
       bool m_skyboxRendering;
       bool m_wireframe;
+
+      unsigned int m_debugTexture;
 
       bool m_showVirtualAreaLights;
       std::vector<util::SharedPointer<util::Matrix<float, 4>>> m_trfProxyLightMatrices;

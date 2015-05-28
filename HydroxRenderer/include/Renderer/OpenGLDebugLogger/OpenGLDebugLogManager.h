@@ -2,6 +2,7 @@
 #define DEBUGLOGMANAGER_H_
 
 #include <string>
+#include <fstream>
 
 #include <GL/glew.h>
 
@@ -68,6 +69,8 @@ namespace he
       GLint getCapabilities(OpenGLCaps capability) const;
 
     private:
+
+      std::ofstream m_logstream;
 
       bool m_syncedOutput;
 

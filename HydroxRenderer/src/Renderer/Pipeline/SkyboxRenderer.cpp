@@ -41,7 +41,7 @@ namespace he
 
       std::vector<util::vec3f> positions;
 
-      util::CubeGenerator::generateCube(positions);
+      util::CubeGenerator::generateCube(positions, UINT_MAX);
 
       std::vector<float> geometryData(positions.size() * 5);
       for (unsigned int i = 0; i < 12; i++)

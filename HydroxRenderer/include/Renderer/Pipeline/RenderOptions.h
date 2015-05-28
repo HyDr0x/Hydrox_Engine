@@ -41,6 +41,8 @@ namespace he
       unsigned int usedHistogramBins;//tonemapping
       float logLuminancePerMS;//tonemapping
       float s;//tonemapping
+
+      bool globalIllumination;
     };
   }
 }

@@ -36,6 +36,16 @@ namespace he
       m_target = target;
     }
 
+    void ILDevilLoader::setSRGB(bool srgb)
+    {
+      m_srgb = srgb;
+    }
+
+    void ILDevilLoader::setMipMapping(bool mipmapping)
+    {
+      m_mipmapping = mipmapping;
+    }
+
     util::ResourceHandle ILDevilLoader::loadResource(std::string filename)
     {
       util::ResourceHandle tmpTextureID;
@@ -57,7 +67,7 @@ namespace he
 
         if(!success)
         {
-          std::cerr << "ERROR, couldn't open file: " << filename << std::endl;
+          std::clog << "ERROR, couldn't open file: " << filename << std::endl;
 
           return getDefaultResource();
         }
@@ -71,7 +81,7 @@ namespace he
           //  printf("ERROR, couldn't convert file %s/n", filename);
           //}
         
-          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerComponent, ilGetData(), true));
+          tmpTextureID = m_textureManager->addObject(db::Texture2D(width, height, m_target, type, internalFormat, format, channelNumber, bitsPerComponent, ilGetData(), m_mipmapping));
         }
       }
       ilBindImage(0);
@@ -145,14 +155,21 @@ namespace he
         switch(bitsPerPixel)
         {
         case 48:
-          internalFormat = GL_RGB16;
+          internalFormat = GL_RGB16F;
           break;
         case 96:
           internalFormat = GL_RGB32F;
           break;
         case 24:
         default:
-          internalFormat = GL_RGB8;
+          if(m_srgb)
+          {
+            internalFormat = GL_SRGB8;
+          }
+          else
+          {
+            internalFormat = GL_RGB8;
+          }
         }
         break;
       case GL_RGBA:
@@ -162,14 +179,21 @@ namespace he
         switch(bitsPerPixel)
         {
         case 64:
-          internalFormat = GL_RGBA16;
+          internalFormat = GL_RGBA16F;
           break;
         case 128:
           internalFormat = GL_RGBA32F;
           break;
         case 32:
         default:
-          internalFormat = GL_RGBA8;
+          if(m_srgb)
+          {
+            internalFormat = GL_SRGB8_ALPHA8;
+          }
+          else
+          {
+            internalFormat = GL_RGBA8;
+          }
         }
         break;
       }

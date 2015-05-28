@@ -67,7 +67,7 @@ namespace he
       {
         file.close();
 
-        std::cerr << "Error: couldn't open mesh source file " << filename << "." << std::endl;
+        std::clog << "Error: couldn't open mesh source file " << filename << "." << std::endl;
 
         return getDefaultResource();
       }
@@ -82,7 +82,7 @@ namespace he
       std::vector<util::vec3f> positions;
       std::vector<util::vec3f> normals;
       std::vector<db::Mesh::indexType> indices;
-      util::CubeGenerator::generateCube(positions, indices, normals);
+      util::CubeGenerator::generateCube(positions, indices, normals, UINT_MAX);
 
       std::vector<VertexElements> vertexElements;
       vertexElements.push_back(db::Mesh::MODEL_POSITION);

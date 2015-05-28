@@ -66,7 +66,6 @@ namespace he
       util::Flags<VertexElements> m_meshVertexDeclaration;
       sh::RenderShaderHandle m_shaderHandle;
       std::vector<std::vector<util::ResourceHandle>> m_textureHandles;
-      util::vec4f m_uniColor;
 
       bool m_inserted;
     };

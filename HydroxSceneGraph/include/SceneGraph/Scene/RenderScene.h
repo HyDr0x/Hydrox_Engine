@@ -20,7 +20,6 @@ namespace he
   namespace sg
   {
     class SceneCacheManager;
-
     class TreeNode;
     class GroupNode;
     class LODNode;

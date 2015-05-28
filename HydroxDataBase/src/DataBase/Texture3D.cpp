@@ -43,47 +43,70 @@ namespace he
         m_channelNumber = other.m_channelNumber;
         m_mipmapping = other.m_mipmapping;
 
-        unsigned int bytesPerComponent = (m_bitsPerComponent / 8.0f);
+        //unsigned int bytesPerComponent = (m_bitsPerComponent / 8.0f);
 
-        GLint byteRowAlignement;
-        glGetIntegerv(GL_PACK_ALIGNMENT, &byteRowAlignement);
-        GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
-        GLsizei paddedWidth = dataWidth + ((byteRowAlignement - (dataWidth % byteRowAlignement)) % byteRowAlignement);
-        std::vector<GLubyte> data(paddedWidth * m_height * m_depth);
+        //GLint byteRowAlignement;
+        //glGetIntegerv(GL_PACK_ALIGNMENT, &byteRowAlignement);
+        //GLsizei dataWidth = m_width * bytesPerComponent * m_channelNumber;
+        //GLsizei paddedWidth = dataWidth + ((byteRowAlignement - (dataWidth % byteRowAlignement)) % byteRowAlignement);
+        //std::vector<GLubyte> data(paddedWidth * m_height * m_depth);
 
-        other.getTextureData(&data[0]);
+        //other.getTextureData(&data[0]);
 
-        std::vector<GLubyte> textureData(m_width * m_height * m_depth * bytesPerComponent * m_channelNumber);
+        //std::vector<GLubyte> textureData(m_width * m_height * m_depth * bytesPerComponent * m_channelNumber);
 
-        if(m_channelNumber == 4)
-        {
-          textureData = data;
-        }
-        else
-        {
-          for(unsigned int i = 0; i < data.size(); i++)
-          {
-            if(i % paddedWidth < m_width * bytesPerComponent * m_channelNumber)
-            {
-              textureData[i] = data[i];
-            }
-          }
-        }
+        //if(m_channelNumber == 4)
+        //{
+        //  textureData = data;
+        //}
+        //else
+        //{
+        //  for(unsigned int i = 0; i < data.size(); i++)
+        //  {
+        //    if(i % paddedWidth < m_width * bytesPerComponent * m_channelNumber)
+        //    {
+        //      textureData[i] = data[i];
+        //    }
+        //  }
+        //}
+
+        //glGenTextures(1, &m_texIndex);
+        //glBindTexture(m_target, m_texIndex);
+        //glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        //glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        //glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+        //glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        //glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, &textureData[0]);
+
+        //if(m_mipmapping)
+        //{
+        //  glGenerateMipmap(m_target);
+        //}
+        //glBindTexture(m_target, 0);
 
         glGenTextures(1, &m_texIndex);
         glBindTexture(m_target, m_texIndex);
+
         glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
         glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-        glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, &textureData[0]);
+        glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, nullptr);
+
+        glBindTexture(m_target, 0);
+
+        glCopyImageSubData(other.m_texIndex, other.m_target, 0, 0, 0, 0, m_texIndex, m_target, 0, 0, 0, 0, other.m_width, other.m_height, other.m_depth);
 
         if(m_mipmapping)
         {
+          glBindTexture(m_target, m_texIndex);
           glGenerateMipmap(m_target);
+          glBindTexture(m_target, 0);
         }
-        glBindTexture(m_target, 0);
       }
       else
       {

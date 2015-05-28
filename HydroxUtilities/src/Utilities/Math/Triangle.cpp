@@ -116,43 +116,66 @@ namespace he
     {
       vec3f e0 = m_v[1] - m_v[0];
       vec3f e1 = m_v[2] - m_v[0];
+      vec3f s = point - m_v[0];
 
-      /* LGS Cramersche Regel*/
-      float r = m_v[0][0] - point[0];
-      float s = m_v[0][1] - point[1];
-      float t = m_v[0][2] - point[2];
-      Matrix<float, 3> a(e0, e1, direction);
+      vec3f sxe0 = util::math::cross(s, e0);
+      vec3f dxe1 = util::math::cross(direction, e1);
 
-      float det = 1.0f / a.detMat();
-      a[0][0] = r;
-      a[0][1] = s;
-      a[0][2] = t;
-      float u = a.detMat();
+      float a = util::vec3f::dot(dxe1, e0);
 
-      a[0][0] = e0[0];
-      a[0][1] = e0[1];
-      a[0][2] = e0[2];
-      a[1][0] = r;
-      a[1][1] = s;
-      a[1][2] = t;
-      float v = a.detMat();
+      if(std::abs(a) < 0.0f)
+      {
+        output = util::vec3f::identity();
+        return false;
+      }
 
-      a[1][0] = e1[0];
-      a[1][1] = e1[1];
-      a[1][2] = e1[2];
-      a[2][0] = r;
-      a[2][1] = s;
-      a[2][2] = t;
-      float w = a.detMat();
+      output = (1.0f / a) * util::vec3f(util::vec3f::dot(sxe0, e1), util::vec3f::dot(dxe1, s), util::vec3f::dot(sxe0, direction));
 
-      r = u * det;
-      s = v * det;
-      t = w * det;
-
-      output = vec3f(t, r, s);
-
-      return ((s + r) >= -1.0f && (s + r) <= 0.0f && s <= 0.0f && r <= 0.0f && s >= -1.0f && r >= -1.0f) && (t > 0.00001f /*|| Skalar(m_n,*cv)+Skalar(m_n,(*cv)+(*rv))<0*/);
+      return (0.0f <= output[2] && output[2] <= 1.0f && 0.0f <= output[1] && output[1] <= 1.0f && (output[2] + output[1]) <= 1.0f) && output[0] > 0.0f;
     }
+
+    //bool Triangle::collisionLine(vec3f point, vec3f direction, vec3f& output) const
+    //{
+    //  vec3f e0 = m_v[1] - m_v[0];
+    //  vec3f e1 = m_v[2] - m_v[0];
+
+    //  /* LGS Cramersche Regel*/
+    //  float r = m_v[0][0] - point[0];
+    //  float s = m_v[0][1] - point[1];
+    //  float t = m_v[0][2] - point[2];
+    //  Matrix<float, 3> a(e0, e1, direction);
+
+    //  float det = 1.0f / a.detMat();
+    //  a[0][0] = r;
+    //  a[0][1] = s;
+    //  a[0][2] = t;
+    //  float u = a.detMat();
+
+    //  a[0][0] = e0[0];
+    //  a[0][1] = e0[1];
+    //  a[0][2] = e0[2];
+    //  a[1][0] = r;
+    //  a[1][1] = s;
+    //  a[1][2] = t;
+    //  float v = a.detMat();
+
+    //  a[1][0] = e1[0];
+    //  a[1][1] = e1[1];
+    //  a[1][2] = e1[2];
+    //  a[2][0] = r;
+    //  a[2][1] = s;
+    //  a[2][2] = t;
+    //  float w = a.detMat();
+
+    //  r = u * det;
+    //  s = v * det;
+    //  t = w * det;
+
+    //  output = vec3f(t, r, s);
+
+    //  //return (-1.0f <= (s + r) && (s + r) <= 0.0f && -1.0f <= s && s <= 0.0f && -1.0f <= r && r <= 0.0f) && t > 0.0f;
+    //  return (0.0f <= s && s <= 1.0f && 0.0f <= r && r <= 1.0f && (s + r) <= 1.0f) && t > 0.0f;
+    //}
 
     static bool testAABBEdgeWithTriangle(vec3f v0, vec3f v1, vec3f v2, float boxHalfSize, vec3f e)
     {

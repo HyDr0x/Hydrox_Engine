@@ -36,6 +36,8 @@ namespace he
 
       virtual unsigned int getTextureSize() const;
 
+      void setTextureData(GLuint offsetX, GLuint offsetY, GLuint width, GLuint height, GLvoid* data);
+
     protected:
 
       virtual void updateHash();

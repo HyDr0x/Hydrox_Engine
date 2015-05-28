@@ -80,10 +80,10 @@ void main()
 			
 			mat4 modelMatrix = trfMatrix[vsout_instanceIndex[0]];
 			
-			imageStore(globalCachePositionBuffer, coord, vec4((modelMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, 1));
+			imageStore(globalCachePositionBuffer, coord, vec4((modelMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseRho));
 			
 			vec3 normal = normalize(mat3(modelMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
-			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularStrength, cacheMaterial.specularExponent));
+			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularRho, cacheMaterial.roughness));
 			
 			//extract matrix scale for area, expect uniform scale!
 			float scale = sqrt(modelMatrix[0][0] * modelMatrix[0][0] + modelMatrix[0][1] * modelMatrix[0][1] + modelMatrix[0][2] * modelMatrix[0][2]);

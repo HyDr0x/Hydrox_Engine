@@ -18,6 +18,19 @@ namespace he
       generateNonIndexedNormals(position, normal);
     }
 
+    void PlaneGenerator::generatePlane(std::vector<vec3f>& position, std::vector<vec2f>& texture, unsigned int levelOfDetail)
+    {
+      generateNonIndexedPositions(position, levelOfDetail);
+      generateTextures(position, texture);
+    }
+
+    void PlaneGenerator::generatePlane(std::vector<vec3f>& position, std::vector<vec3f>& normal, std::vector<vec2f>& texture, unsigned int levelOfDetail)
+    {
+      generateNonIndexedPositions(position, levelOfDetail);
+      generateNonIndexedNormals(position, normal);
+      generateTextures(position, texture);
+    }
+
     void PlaneGenerator::generatePlane(std::vector<vec3f>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail)
     {
       generateIndexedPositions(position, index, levelOfDetail);
@@ -29,6 +42,19 @@ namespace he
       generateIndexedNormals(position, index, normal);
     }
     
+    void PlaneGenerator::generatePlane(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec2f>& texture, unsigned int levelOfDetail)
+    {
+      generateIndexedPositions(position, index, levelOfDetail);
+      generateTextures(position, texture);
+    }
+
+    void PlaneGenerator::generatePlane(std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal, std::vector<vec2f>& texture, unsigned int levelOfDetail)
+    {
+      generateIndexedPositions(position, index, levelOfDetail);
+      generateIndexedNormals(position, index, normal);
+      generateTextures(position, texture);
+    }
+
     void PlaneGenerator::generateIndexedPositions(std::vector<vec3f>& position, std::vector<unsigned int>& index, unsigned int levelOfDetail)
     {
       unsigned int quadNumber = levelOfDetail + 1;
@@ -92,7 +118,7 @@ namespace he
       }
     }
       
-    void PlaneGenerator::generateIndexedNormals(const std::vector<vec3f>& position, std::vector<unsigned int>& index, std::vector<vec3f>& normal)
+    void PlaneGenerator::generateIndexedNormals(const std::vector<vec3f>& position, const std::vector<unsigned int>& index, std::vector<vec3f>& normal)
     {
       vec3f a = position[index[1]] - position[index[0]];
       vec3f b = position[index[2]] - position[index[0]];
@@ -120,12 +146,13 @@ namespace he
       }
     }
 
-    void PlaneGenerator::generateIndexedTextures(std::vector<vec3f>& texture)
+    void PlaneGenerator::generateTextures(const std::vector<vec3f>& position, std::vector<vec2f>& texture)
     {
-    }
-
-    void PlaneGenerator::generateNonIndexedTextures(std::vector<vec3f>& texture)
-    {
+      texture.resize(position.size());
+      for(unsigned int i = 0; i < position.size(); i++)
+      {
+        texture[i] = vec2f(position[i][0], position[i][2]);
+      }
     }
   }
 }

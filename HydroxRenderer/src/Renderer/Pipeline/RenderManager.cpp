@@ -19,7 +19,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderManager::RenderManager() : m_skyboxRendering(false), m_wireframe(false), m_showVirtualAreaLights(false), m_showCaches(false)
+    RenderManager::RenderManager() : m_skyboxRendering(false), m_wireframe(false), m_showVirtualAreaLights(false), m_showCaches(false), m_debugTexture(0)
     {
     }
 
@@ -80,6 +80,11 @@ namespace he
       m_skyboxRendering = false;
     }
 
+    void RenderManager::showDebugTexture(unsigned int debugTexture)
+    {
+      m_debugTexture = debugTexture;
+    }
+
     void RenderManager::showVirtualAreaLights(bool showVirtualAreaLights)
     {
       if(m_showVirtualAreaLights && !showVirtualAreaLights)
@@ -125,8 +130,8 @@ namespace he
       vertexDeclarationElements.push_back(db::Mesh::MODEL_POSITION);
       vertexDeclarationElements.push_back(db::Mesh::MODEL_NORMAL);
 
-      db::Material::MaterialData materialData(0.5f, 0.5f, 0.0f, 1.0f);
-      db::Material debugSphereMaterial(materialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true, util::vec4f(0, 0, 1, 1));
+      db::Material::MaterialData sphereMaterialData(0.5f, 0.5f, 0.0f, 1.0f, util::vec4f(0.0f, 0.0f, 1.0f, 1.0f));
+      db::Material debugSphereMaterial(sphereMaterialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true);
       m_debugSphereMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(debugSphereMaterial);
 
       util::SphereGenerator::generateSphere(0.05f, positions, indices, normals, 5);
@@ -140,7 +145,8 @@ namespace he
       indices.clear();
       normals.clear();
 
-      db::Material debugDiscMaterial(materialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true, util::vec4f(1, 0, 1, 1));
+      db::Material::MaterialData discMaterialData(0.5f, 0.5f, 0.0f, 1.0f, util::vec4f(1.0f, 0.0f, 1.0f, 1.0f));
+      db::Material debugDiscMaterial(discMaterialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true);
       m_debugDiscMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(debugDiscMaterial);
 
       util::DiscGenerator::generateDisc(0.1f, util::vec3f(0, 1, 0), positions, indices, normals, 20);
@@ -163,18 +169,17 @@ namespace he
     void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition)
     {
       util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
-      util::vec4f eyeVec = util::vec4f(viewMatrix[3][0], viewMatrix[3][1], viewMatrix[3][2], 1.0f);
 
       m_cameraParameterUBO.setData(0, sizeof(util::Matrix<float, 4>), &viewMatrix[0][0]);
       m_cameraParameterUBO.setData(1 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &projectionMatrix[0][0]);
       m_cameraParameterUBO.setData(2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix[0][0]);
       m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix.invert()[0][0]);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &eyeVec[0]);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &cameraPosition[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
-      bool globalIllumination = m_geometryRasterizer.getGlobalCacheNumber() > 0;
-
+      bool globalIllumination = m_lightRenderer.getReflectiveShadowLightNumber() > 0 && m_geometryRasterizer.getGlobalCacheNumber() > 0 && m_options->globalIllumination;
+      
       {//everything in here should be packed in an render pass interface and the blocks like gbuffer etc. in a technique interface which gets passed to a render pass 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -248,7 +253,6 @@ namespace he
             m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
             m_lightRenderer.getReflectiveShadowLights());
 
-
           m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
           m_geometryRasterizer.generateIndirectLightMap();
           m_indirectLightRenderer.unsetCacheAndProxyLights();
@@ -289,10 +293,49 @@ namespace he
         m_geometryRasterizer.rasterizeDebugGeometry();
         m_gBuffer.unsetDebugGBuffer();
       }
-
-      //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-      //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
-
+      
+      switch(m_debugTexture)
+      {
+      case 1:
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+        break;
+      case 2:
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
+        break;
+      case 3:
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getMaterialTexture());
+        break;
+      case 4:
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getDepthTexture());
+        break;
+      case 5:
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
+        break;
+      case 6:
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0));
+        break;
+      case 7:
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0));
+        break;
+      case 8:
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+        break;
+      case 9:
+        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+        break;
+      case 10:
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+        break;
+      case 11:
+        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getSamplingDebugMap());
+        break;
+      case 0:
+      default:
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+        m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+      }
+      
       //m_gBuffer.getColorTexture()
       //m_gBuffer.getNormalTexture()
       //m_gBuffer.getMaterialTexture()
@@ -304,7 +347,7 @@ namespace he
       //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
       //m_indirectLightRenderer.getIndirectLightMap()
       //m_finalCompositing.getCombinedTexture()
-      m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      //m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
 
       m_spriteRenderer.render();
       m_stringRenderer.render();
@@ -390,7 +433,7 @@ namespace he
 
         if(m_geometryRasterizer.getGlobalCacheNumber() < m_trfProxyLightMatrices.size())
         {
-          unsigned int oldSize = m_trfCacheMatrices.size() - diff;
+          unsigned int oldSize = m_trfProxyLightMatrices.size() - diff;
           for(unsigned int i = 0; i < diff; i++)
           {
             util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[oldSize + i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle));
@@ -503,7 +546,6 @@ namespace he
 
       unsigned int cacheResolution = cachePositionTexture->getResolution()[0];
 
-      
       std::vector<util::vec4f> cachePositions(cacheResolution * cacheResolution);
       std::vector<util::vec4f> cacheNormals(cacheResolution * cacheResolution);
       std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);

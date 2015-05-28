@@ -38,8 +38,6 @@ namespace he
 
       m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::RENDERDEBUG, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
-      m_uniColor = material->getUniColor();
-
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)
@@ -68,8 +66,7 @@ namespace he
 
     void RemoveGeometryTraverserDebug::postTraverse(RenderNode * treeNode)
     {
-      treeNode->getRenderGroup()->removeGeometry(m_geometryContainer);
-      if(treeNode->getRenderGroup()->getInstanceNumber() == 0)
+      if(treeNode->getRenderGroup()->removeGeometry(m_geometryContainer))
       {
         m_stopTraversal = true;
       }

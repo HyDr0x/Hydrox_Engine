@@ -54,7 +54,7 @@ namespace he
       unsigned int m_materialCount;
 
       std::map<util::ResourceHandle, MaterialIndexData, util::ResourceHandle::Less> m_materialHandles;
-      std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less> m_materialHashes;//original materialHandle with the actual hash value and data and the old hash value with the data uploaded to the gpu
+      std::map<util::ResourceHandle, uint64_t, util::ResourceHandle::Less> m_materialHashes;//original materialHandle with the actual hash value and data and the old hash value which stands for the old data uploaded to the gpu
     };
   }
 }

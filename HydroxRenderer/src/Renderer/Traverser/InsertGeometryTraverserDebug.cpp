@@ -57,8 +57,6 @@ namespace he
 
       m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::RENDERDEBUG, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
-      m_uniColor = material->getUniColor();
-
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)

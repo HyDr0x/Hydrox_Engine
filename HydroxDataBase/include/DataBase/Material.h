@@ -32,15 +32,16 @@ namespace he
 
       struct MaterialData
       {
-        MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f)
+        MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), color(util::vec4f::identity())
         {
         }
 
-        MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent) :
+        MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, util::vec4f in_color) :
           diffuseStrength(in_diffuseStrength),
           specularStrength(in_specularStrength),
           ambientStrength(in_ambientStrength),
-          specularExponent(in_specularExponent)
+          specularExponent(in_specularExponent),
+          color(in_color)
         {
         }
 
@@ -48,11 +49,12 @@ namespace he
         float specularStrength;//metall materials have their own color as specular reflection
         float ambientStrength;
         float specularExponent;
+        util::vec4f color;
       };
 
       Material();
       Material(const Material& other);
-      Material(const MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureHandles, std::vector< std::vector<uint64_t> > textureHashes, bool transparency, bool debug = false, util::vec4f uniColor = util::vec4f(0, 0, 0, 0));
+      Material(const MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureHandles, std::vector< std::vector<uint64_t> > textureHashes, bool transparency, bool debug = false);
       ~Material();
 
       Material& operator=(Material other);
@@ -74,9 +76,6 @@ namespace he
 
       bool getDebug() const;
 
-      util::vec4f getUniColor() const;
-      void setUniColor(util::vec4f uniColor);
-
     protected:
 
       virtual void updateHash();
@@ -89,7 +88,6 @@ namespace he
       std::vector< std::vector<util::ResourceHandle> > m_textureHandles;
       MaterialData m_materialData;
 
-      util::vec4f m_uniColor;
       bool m_debug;
       bool m_transparency;
     };

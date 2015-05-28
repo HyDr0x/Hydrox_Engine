@@ -44,18 +44,19 @@ namespace he
 
       util::Matrix<float, 4> viewProj;
 
-      util::vec4f position;//w component = spotLightExponent
-      util::vec4f direction;//w component = spotLightCutoff
+      Light light;
+      //util::vec4f position;//w component = spotLightExponent
+      //util::vec4f direction;//w component = spotLightCutoff
 
-      util::vec4f color;//w component = unused
+      //util::vec4f color;//w component = unused
 
-      util::vec4f projectionParameter;//x = near, y = far, z = nearWidth, w = nearHeight
+      //util::vec4f projectionParameter;//x = near, y = far, z = nearWidth, w = nearHeight
 
-      float luminousFlux;
+      //float luminousFlux;
 
-      float constAttenuation;
-      float linearAttenuation;
-      float quadricAttenuation;
+      //float constAttenuation;
+      //float linearAttenuation;
+      //float quadricAttenuation;
     };
   }
 }

@@ -33,7 +33,6 @@ namespace he
       m_sharedRenderGroup = sharedRenderGroup;
       m_geometryContainer = geometryContainer;
       m_inserted = false;
-      m_uniColor = util::vec4f::identity();
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();

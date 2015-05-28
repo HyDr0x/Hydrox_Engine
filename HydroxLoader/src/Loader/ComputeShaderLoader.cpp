@@ -27,7 +27,7 @@ namespace he
 
       if(computeShaderSource == std::string())
       {
-        std::cerr << "ERROR, couldn't open file: " << filename << std::endl;
+        std::clog << "ERROR, couldn't open file: " << filename << std::endl;
         assert(false);
       }
 
@@ -81,7 +81,7 @@ namespace he
       {
         file.close();
 
-        //std::cerr << "Warning, couldn't open shader source file: " << filename << std::endl;
+        //std::clog << "Warning, couldn't open shader source file: " << filename << std::endl;
       }
     }
 

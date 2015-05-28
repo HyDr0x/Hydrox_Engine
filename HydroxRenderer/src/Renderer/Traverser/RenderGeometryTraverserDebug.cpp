@@ -84,12 +84,6 @@ namespace he
         slotOffset += static_cast<GLuint>(textureHandles[i].size());
       }
 
-      util::vec4f uniColor = treeNode->getUniColor();
-      if(slotOffset == 0 && uniColor != util::vec4f::identity())
-      {
-        sh::RenderShader::setUniform(0, GL_FLOAT_VEC3, &uniColor[0]);
-      }
-
       return true;
     }
 

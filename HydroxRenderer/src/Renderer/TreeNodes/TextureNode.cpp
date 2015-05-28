@@ -37,13 +37,12 @@ namespace he
       traverser->postTraverse(this);
     }
 
-    void TextureNode::initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles, util::vec4f uniColor)
+    void TextureNode::initialize(std::vector< std::vector<util::ResourceHandle> >& textureHandles)
     {
-      m_uniColor = uniColor;
       m_textureHandles = textureHandles;
     }
 
-    bool TextureNode::isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles, util::vec4f uniColor) const
+    bool TextureNode::isTexture(std::vector< std::vector<util::ResourceHandle> >& textureHandles) const
     {
       for(unsigned int i = 0; i < m_textureHandles.size(); i++)
       {
@@ -61,17 +60,12 @@ namespace he
         }
       }
 
-      return m_uniColor == uniColor;
+      return true;
     }
 
     const std::vector< std::vector<util::ResourceHandle> >& TextureNode::getTextureHandles() const
     {
       return m_textureHandles;
-    }
-
-    util::vec4f TextureNode::getUniColor() const
-    {
-      return m_uniColor;
     }
   }
 }

@@ -30,6 +30,17 @@ namespace he
       }
     }
 
+    void Renderquad::setReadFrameBuffer(GLenum buffer) const
+    {
+      glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fboIndex);
+      glReadBuffer(buffer);
+    }
+
+    void Renderquad::unsetReadFrameBuffer() const
+    {
+      glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    }
+
     void Renderquad::setWriteFrameBuffer(std::vector<unsigned int> indices) const
     {
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboIndex);
@@ -251,26 +262,26 @@ namespace he
       case GL_FRAMEBUFFER_COMPLETE:
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        std::cerr << "Error, framebuffer incomplete attachment." << std::endl;
+        std::clog << "Error, framebuffer incomplete attachment." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        std::cerr << "Error, framebuffer missing attachment." << std::endl;
+        std::clog << "Error, framebuffer missing attachment." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-        std::cerr << "Error, framebuffer incomplete draw buffer." << std::endl;
+        std::clog << "Error, framebuffer incomplete draw buffer." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-        std::cerr << "Error, framebuffer incomplete read buffer." << std::endl;
+        std::clog << "Error, framebuffer incomplete read buffer." << std::endl;
         break;
       case GL_FRAMEBUFFER_UNSUPPORTED:
-        std::cerr << "Error, framebuffer unsupported." << std::endl;
+        std::clog << "Error, framebuffer unsupported." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-        std::cerr << "Error, framebuffer incomplete multisample." << std::endl;
+        std::clog << "Error, framebuffer incomplete multisample." << std::endl;
         break;
       case GL_FRAMEBUFFER_UNDEFINED:
       default:
-        std::cerr << "Unknown error, framebuffer corrupted." << std::endl;
+        std::clog << "Unknown error, framebuffer corrupted." << std::endl;
         break;
       }
       glBindFramebuffer(GL_FRAMEBUFFER, 0);

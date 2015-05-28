@@ -10,9 +10,7 @@ namespace he
   namespace sg
   {
     class TreeNodeAllocator;
-
     class GroupNode;
-
     class LODNode;
     class AnimatedTransformNode;
     class TransformNode;

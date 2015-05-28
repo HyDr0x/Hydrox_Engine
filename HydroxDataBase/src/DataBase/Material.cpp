@@ -8,10 +8,9 @@ namespace he
     {
     }
 
-    Material::Material(const MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureHandles, std::vector< std::vector<uint64_t> > textureHashes, bool transparency, bool debug, util::vec4f uniColor) :
+    Material::Material(const MaterialData& materialData, const std::vector< std::vector<util::ResourceHandle> >& textureHandles, std::vector< std::vector<uint64_t> > textureHashes, bool transparency, bool debug) :
       m_transparency(transparency),
       m_debug(debug),
-      m_uniColor(uniColor),
       m_textureHashes(textureHashes),
       m_textureHandles(textureHandles),
       m_materialData(materialData)
@@ -24,7 +23,6 @@ namespace he
 
       m_transparency = other.m_transparency;
       m_debug = other.m_debug;
-      m_uniColor = other.m_uniColor;
 
       m_textureHashes = other.m_textureHashes;
       m_textureHandles = other.m_textureHandles;
@@ -49,7 +47,6 @@ namespace he
       std::swap(m_materialData, other.m_materialData);
       std::swap(m_transparency, other.m_transparency);
       std::swap(m_debug, other.m_debug);
-      std::swap(m_uniColor, other.m_uniColor);
       std::swap(m_textureHashes, other.m_textureHashes);
       std::swap(m_textureHandles, other.m_textureHandles);
     }
@@ -140,21 +137,9 @@ namespace he
       return m_debug;
     }
 
-    util::vec4f Material::getUniColor() const
-    {
-      return m_uniColor;
-    }
-
-    void Material::setUniColor(util::vec4f uniColor)
-    {
-      m_uniColor = uniColor;
-
-      m_dirtyHash = true;
-    }
-
     void Material::updateHash()
     {
-      unsigned int length = sizeof(MaterialData) + sizeof(m_transparency) + sizeof(m_debug) + sizeof(m_uniColor);
+      unsigned int length = sizeof(MaterialData) + sizeof(m_transparency) + sizeof(m_debug);
 
       for(unsigned int i = 0; i < TEXTURETYPENUM; i++)
       {
@@ -165,9 +150,8 @@ namespace he
       std::copy(&m_materialData, &m_materialData + 1, (MaterialData*)&data[0]);
       std::copy(&m_transparency, &m_transparency + 1, (bool*)(&data[0] + sizeof(MaterialData)));
       std::copy(&m_debug, &m_debug + 1, (bool*)(&data[0] + sizeof(MaterialData) + sizeof(bool)));
-      std::copy(&m_uniColor, &m_uniColor + 1, (util::vec4f*)(&data[0] + sizeof(MaterialData) + sizeof(bool) + sizeof(bool)));
 
-      unsigned int offset = sizeof(MaterialData) + sizeof(bool) + sizeof(bool) + sizeof(util::vec4f);
+      unsigned int offset = sizeof(MaterialData) + sizeof(bool) + sizeof(bool);
       for(unsigned int i = 0; i < TEXTURETYPENUM; i++)
       {
         if(!m_textureHashes[i].empty())

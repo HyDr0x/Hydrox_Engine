@@ -62,7 +62,7 @@ namespace he
       fileStream << material->getDebug() << std::endl;
       fileStream << std::endl;
       fileStream << materialFileKeywords[UNICOLOR] << std::endl;
-      fileStream << material->getUniColor() << std::endl;
+      fileStream << material->getMaterialData().color << std::endl;
       fileStream << std::endl;
 
       /////////////////////////TEXTURES/////////////////////////

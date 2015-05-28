@@ -58,7 +58,7 @@ namespace he
 
         sutherlandHodgman(Plane(boxPoints[3 * i], boxPoints[3 * i + 1], boxPoints[3 * i + 2]), inPolygon, epsilon, outPolygon);
 
-        if(outPolygon.getPointNumber() < 3)//polygon only touched the voxel
+        if(outPolygon.getPointNumber() < 3 || math::floatSafeEqual(outPolygon.getArea(), 0.0f))//polygon only touched the voxel
         {
           break;
         }

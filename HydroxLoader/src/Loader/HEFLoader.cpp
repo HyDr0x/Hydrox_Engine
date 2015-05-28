@@ -119,6 +119,7 @@ namespace he
         std::clog << i << "/" << billboardTextureMapSize << std::endl;
       }
 
+      std::clog << "Load Scene Nodes" << std::endl;
       read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());
 
       unsigned int nodeType;

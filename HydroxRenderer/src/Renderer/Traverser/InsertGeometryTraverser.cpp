@@ -29,7 +29,6 @@ namespace he
     {
       m_geometryContainer = geometryContainer;
       m_inserted = false;
-      m_uniColor = util::vec4f::identity();
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
@@ -86,7 +85,7 @@ namespace he
 
     bool InsertGeometryTraverser::preTraverse(TextureNode* treeNode)
     {
-      m_inserted = treeNode->isTexture(m_textureHandles, m_uniColor);
+      m_inserted = treeNode->isTexture(m_textureHandles);
 
       if(m_inserted)
       {
@@ -124,7 +123,7 @@ namespace he
     void InsertGeometryTraverser::createNewChildNode(ShaderNode* parent)
     {
       util::SharedPointer<TextureNode> treeNode = util::SharedPointer<TextureNode>(new TextureNode());
-      treeNode->initialize(m_textureHandles, m_uniColor);
+      treeNode->initialize(m_textureHandles);
 
       parent->setFirstChild(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(parent);
@@ -133,7 +132,7 @@ namespace he
     void InsertGeometryTraverser::createNewSibling(TextureNode* sibling)
     {
       util::SharedPointer<TextureNode> treeNode = util::SharedPointer<TextureNode>(new TextureNode());
-      treeNode->initialize(m_textureHandles, m_uniColor);
+      treeNode->initialize(m_textureHandles);
 
       sibling->setNextSibling(treeNode.dynamic_pointer_cast<TreeNode>());
       treeNode->setParent(sibling->getParent());

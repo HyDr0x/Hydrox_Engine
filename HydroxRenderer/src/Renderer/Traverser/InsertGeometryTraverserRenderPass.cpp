@@ -32,7 +32,6 @@ namespace he
     {
       m_geometryContainer = geometryContainer;
       m_inserted = false;
-      m_uniColor = util::vec4f::identity();
 
       m_singletonManager = singletonManager;
       m_modelManager = m_singletonManager->getService<db::ModelManager>();

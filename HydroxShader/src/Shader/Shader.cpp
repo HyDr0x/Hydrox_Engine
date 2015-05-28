@@ -181,7 +181,7 @@ namespace he
           shaderTypeEnding = ".uknw";
         }
 
-        std::cerr << "Error compiling " << shaderName << shaderTypeEnding << " because of " << errorLog << std::endl;
+        std::clog << "Error compiling " << shaderName << shaderTypeEnding << " because of " << errorLog << std::endl;
 
         delete[] errorLog;
 

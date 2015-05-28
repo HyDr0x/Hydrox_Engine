@@ -183,7 +183,6 @@ namespace he
 
         if(mesh->getHash() != meshIterator->second)
         {
-          meshIterator->second = mesh->getHash();
           m_updateMeshData = true;//we need to update the mesh data
           break;
         }
@@ -249,6 +248,8 @@ namespace he
         vertexOffset += mesh->getVertexCount();
         triangleOffset += mesh->getPrimitiveCount();
         cacheOffset += mesh->getCacheCount();
+
+        m_meshHashes[meshIterator->first] = mesh->getHash();
 
         //update bbox data
         m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 0) * sizeof(util::vec4f), sizeof(util::vec3f), &mesh->getBBMin()[0]);

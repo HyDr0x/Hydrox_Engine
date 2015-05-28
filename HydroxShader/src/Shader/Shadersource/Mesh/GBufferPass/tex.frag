@@ -16,13 +16,13 @@ flat in uint vsout_instanceIndex;
 
 void main()
 {
-	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, 0);
+	fsout_normal = vec4(normalize(vsout_normal) * 0.5f + 0.5f, 0);
 	fsout_color = vec4(texture(texSampler, vsout_texCoord).rgb, 1.0f);
 	
 	MaterialData thisMaterial = material[materialIndex[vsout_instanceIndex]];
 	
-	fsout_material = vec4(thisMaterial.diffuseStrength, 
-												thisMaterial.specularStrength, 
+	fsout_material = vec4(thisMaterial.diffuseRho, 
+												thisMaterial.specularRho, 
 												thisMaterial.ambientStrength, 
-												thisMaterial.specularExponent);
+												thisMaterial.roughness);
 }

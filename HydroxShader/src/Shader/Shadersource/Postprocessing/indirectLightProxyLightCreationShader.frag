@@ -56,22 +56,22 @@ vec3 project(in vec3 t, in vec3 b, in vec3 c, in vec3 p)
 	return c + t * shareT + b * shareB;
 }
 
-float calculateProjectedProxyLightArea(in vec3 cachePos, in vec3 cacheNormal, in vec3 lightPos, in float r)
+float calculateProjectedProxyLightArea(in vec3 cachePos, in vec3 cacheNormal, in vec3 lightDir, in float r)
 {
-	vec3 lightDir = lightPos - cachePos;
 	float cosAngle = max(dot(cacheNormal, normalize(lightDir)), 0.0);
 	
-	return (r * r * cosAngle) / (r * r + dot(lightDir, lightDir));
+	return max((r * r * cosAngle) / (r * r + dot(lightDir, lightDir)), 0.0);
 }
 
-float calculateProjectedCacheArea(in vec3 cachePos0, in vec3 cacheNormal0, in vec3 cachePos1, in vec3 cacheNormal1, in float cacheArea)
+float calculateProjectedCacheArea(in vec3 cacheDir, in vec3 cacheNormal0, in vec3 cacheNormal1, in float cacheArea)
 {
-	vec3 cacheDir = cachePos1 - cachePos0;
+	float quadCacheDistance = dot(cacheDir, cacheDir);
+	cacheDir = normalize(cacheDir);
 	
-	float cosAngle0 = max(dot(cacheNormal0, normalize(cacheDir)), 0.0);
-	float cosAngle1 = abs(dot(cacheNormal1, normalize(cacheDir)));
+	float cosAngle0 = max(dot(cacheNormal0, cacheDir), 0.0);
+	float cosAngle1 = abs(dot(cacheNormal1, cacheDir));
 	
-	return max((cacheArea * cosAngle0 * cosAngle1) / (cacheArea + PI * dot(cacheDir, cacheDir)), 0.0);
+	return max((cacheArea * cosAngle0 * cosAngle1) / (cacheArea + PI * quadCacheDistance), 0.0);
 }
 
 float overlappingArea(in vec3 p0, in float length0, in vec3 p1, in float length1, in vec3 t, in vec3 b, inout vec2 areaHeuristicMin, inout vec2 areaHeuristicMax)
@@ -108,15 +108,15 @@ void calculateVisibility(in CacheData cache, in vec3 Xpd, in vec3 Xpg, in vec3 X
 	float Rd = max(Sd.x, max(Sd.y, Sd.z));
 	float Rg = max(Sg.x, max(Sg.y, Sg.z));
 	
-	float Fpd = max(calculateProjectedProxyLightArea(cache.position.xyz, cache.normal.xyz, Xpd, Rd), 0.0);
-	float Fpg = max(calculateProjectedProxyLightArea(cache.position.xyz, cache.normal.xyz, Xpg, Rg), 0.0);
+	float Fpd = calculateProjectedProxyLightArea(cache.position.xyz, cache.normal.xyz, Xpd - cache.position.xyz, Rd);
+	float Fpg = calculateProjectedProxyLightArea(cache.position.xyz, cache.normal.xyz, Xpg - cache.position.xyz, Rg);
 	
 	float diffuseSquareSideLength = sqrt(Fpd) * 0.5;
 	float specularSquareSideLength = sqrt(Fpg) * 0.5;
 
 	vec2 areaHeuristicMinD = vec2(INT32_MAX), areaHeuristicMaxD = vec2(-INT32_MAX);
 	vec2 areaHeuristicMinG = vec2(INT32_MAX), areaHeuristicMaxG = vec2(-INT32_MAX);
-	
+
 	for(uint y = 0; y < cacheBufferResolution; y++)
 	{
 		if(y * cacheBufferResolution >= cacheNumber)
@@ -139,15 +139,15 @@ void calculateVisibility(in CacheData cache, in vec3 Xpd, in vec3 Xpg, in vec3 X
 				vec3 cacheNormal = normalize(decodeNormal(texelFetch(globalCacheNormalBuffer, texCoord, 0).xy));
 				float cacheArea = texelFetch(globalCacheAreaBuffer, texCoord, 0).r;
 				
-				float cacheAABBSideLength = 0.5 * sqrt(calculateProjectedCacheArea(cache.position.xyz, cache.normal.xyz, cachePos, cacheNormal, cacheArea));
+				float cacheAABBSideLength = 0.5 * sqrt(calculateProjectedCacheArea(cachePos - cache.position.xyz, cache.normal.xyz, cacheNormal, cacheArea));
 				
 				vec3 cacheProjPos = project(tangent, binormal, cache.position.xyz, cachePos);
 				
 				float aD = overlappingArea(XpdProj, diffuseSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinD, areaHeuristicMaxD);
-				areaD += max(0.0, aD / Rd * min(Rd, dot(cachePos - Xpd, normalize(cache.position.xyz - Xpd))));
+				areaD += max(0.0, (aD / Rd) * min(Rd, dot(cachePos - Xpd, normalize(cache.position.xyz - Xpd))));
 				
 				float aG = overlappingArea(XpgProj, specularSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinG, areaHeuristicMaxG);
-				areaG += max(0.0, aG / Rg * min(Rg, dot(cachePos - Xpg, normalize(cache.position.xyz - Xpg))));
+				areaG += max(0.0, (aG / Rg) * min(Rg, dot(cachePos - Xpg, normalize(cache.position.xyz - Xpg))));
 			}
 		}
 	}
@@ -160,14 +160,14 @@ void calculateVisibility(in CacheData cache, in vec3 Xpd, in vec3 Xpg, in vec3 X
 	
 	vec2 diffD = areaHeuristicMaxD - areaHeuristicMinD;
 	float proxyLightAreaD = diffD.x * diffD.y;
-	//areaD = min(areaD, proxyLightAreaD);
+	areaD = min(areaD, proxyLightAreaD);
 	
 	vec2 diffG = areaHeuristicMaxG - areaHeuristicMinG;
 	float proxyLightAreaG = diffG.x * diffG.y;
-	//areaG = min(areaG, proxyLightAreaG);
+	areaG = min(areaG, proxyLightAreaG);
 	
-	visibilityD = Fpd - EPSILON > 0.0 ? max(1.0 - areaD / Fpd, 0.0) : 0.0;
-	visibilityG = Fpg - EPSILON > 0.0 ? max(1.0 - areaG / Fpg, 0.0) : 0.0;
+	visibilityD = Fpd >= 0.0 ? max(1.0 - areaD / Fpd, 0.0) : 0.0;
+	visibilityG = Fpg >= 0.0 ? max(1.0 - areaG / Fpg, 0.0) : 0.0;
 }
 
 void main()
@@ -182,14 +182,11 @@ void main()
 	
 	float Wgesd = 0.0;
 	float Wgesg = 0.0;
-	
+
 	CacheData cache;
 	cache.position = texture(globalCachePositionBuffer, gsout_texCoord);
 	vec4 cacheNormalMaterialData = texture(globalCacheNormalBuffer, gsout_texCoord);
 	cache.normal.xyz = normalize(decodeNormal(cacheNormalMaterialData.xy));
-	
-	cache.position.w = 1.0;
-	//cacheNormalMaterialData.zw = vec2(1.0, 32.0);
 	
 	float frd = cache.position.w / PI;
 	float frg = cacheNormalMaterialData.z * (cacheNormalMaterialData.w + 2.0) / (2.0 * PI);
@@ -200,7 +197,19 @@ void main()
 	{
 		vec4 projPosition = reflectiveShadowLight[i].lightViewProj * vec4(cache.position.xyz, 1.0);
 		projPosition /= projPosition.w;
-		projPosition.xy = clamp(projPosition.xy * 0.5 + 0.5, 0.0, 1.0);
+		projPosition.xy = projPosition.xy * 0.5 + 0.5;
+		
+		//projPosition = clamp(projPosition, 0.0, 1.0);
+		
+		/*
+		if(!(0.0 < projPosition.x && projPosition.x < 1.0 && 0.0 < projPosition.y && projPosition.y < 1.0))
+		{
+			projPosition.xy = vec2(0.5, 0.5);
+		}*/
+		
+		//projPosition.xy = vec2(0.5, 0.5);
+		
+		float validLightSamples = 0.0;
 		
 		for(uint j = 0; j < SAMPLERNUMBER; j++)
 		{
@@ -209,26 +218,56 @@ void main()
 			texCoords.y = projPosition.y + samples[j].y;
 			texCoords.z = float(i) / float(reflectiveShadowMapNumber);
 			
-			vec4 lightPos = texture(indirectLightPosSampler, texCoords, 0);
+			/*
+			vec2 orientation;
+			orientation.x = texCoords.x <= 1.0 ? texCoords.x : 1.0 - (texCoords.x - float(int(texCoords.x)));
+			orientation.x = texCoords.x >= 0.0 ? texCoords.x : -(texCoords.x - float(int(texCoords.x)));
 			
-			if(lightPos.w == 0.0) continue;//cancels indirect lightsources which aren't initialized, because there is no geometry behind
+			orientation.y = texCoords.y <= 1.0 ? texCoords.y : 1.0 - (texCoords.y - float(int(texCoords.y)));
+			orientation.y = texCoords.y >= 0.0 ? texCoords.y : -(texCoords.y - float(int(texCoords.y)));
+			
+			vec2 diff = texCoords.xy - vec2(0.5);
+			float t;
+			if(abs(texCoords.x) > abs(texCoords.y))
+			{			
+				t = (texCoords.x - orientation.x) / diff.x;
+			}
+			else
+			{
+				t = (texCoords.y - orientation.y) / diff.y;
+			}
+			
+			texCoords.xy -= t * diff;
+			*/
+
+			//texCoords.xy = clamp(texCoords.xy, 0.0, 1.0);
+			
+			vec4 lightPos = texture(indirectLightPosSampler, texCoords, 0);
+			vec4 luminousFluxSample = texture(indirectLightLuminousFluxSampler, texCoords, 0);
+			
+			if(lightPos.w == 0.0 || luminousFluxSample.w <= 0.0) //cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+			{
+				continue;
+			}
+
+			validLightSamples++;
+			
+			vec3 luminousFlux = luminousFluxSample.xyz;
 			
 			vec4 lightNormalArea = texture(indirectLightNormalSampler, texCoords, 0);
 			
 			vec3 lightNormal = normalize(lightNormalArea.xyz * 2.0 - 1.0);
 			float lightArea = lightNormalArea.w;
 			
-			vec3 luminousFlux = texture(indirectLightLuminousFluxSampler, texCoords, 0).rgb;
-			
 			vec3 lightDir = lightPos.xyz - cache.position.xyz;
 			float quadDistance = dot(lightDir, lightDir);
 			lightDir = normalize(lightDir);
 			
-			float reflAngle = max(pow(dot(reflect(-lightDir, cache.normal.xyz), camDir), cacheNormalMaterialData.w), 0.00001);
+			float reflAngle = pow(max(dot(reflect(-lightDir, cache.normal.xyz), camDir), 0.0), cacheNormalMaterialData.w);
 			//vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
 			//float reflAngle = max(pow(dot(halfVector, cache.normal.xyz), cacheNormalMaterialData.w), 0.00001);
 			
-			float F = max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)) * dot(cache.normal.xyz, lightDir), 0) / (lightArea + PI * quadDistance);
+			float F = max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0) / (lightArea + PI * quadDistance);
 			
 			float Wd = F;
 			float Wg = reflAngle * F;
@@ -245,6 +284,9 @@ void main()
 			Wgesd += Wd;
 			Wgesg += Wg;
 		}
+		
+		Lod *= (float(SAMPLERNUMBER) / validLightSamples);
+		Log *= (float(SAMPLERNUMBER) / validLightSamples);
 	}
 	
 	Xpd = Wgesd > 0 ? Xpd / Wgesd : vec3(0);
@@ -253,23 +295,25 @@ void main()
 	Xpdq = Wgesd > 0 ? Xpdq / Wgesd : vec3(0);
 	Xpgq = Wgesg > 0 ? Xpgq / Wgesg : vec3(0);
 		
-	float visibilityD, visibilityG;
+	//Xpd -= cache.normal.xyz * 0.1;
+		
+	float visibilityD = 1, visibilityG = 1;
 	calculateVisibility(cache, Xpd, Xpg, Xpdq, Xpgq, visibilityD, visibilityG);
 	
 	vec3 lightDirD = Xpd - cache.position.xyz;
-	float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.1);
+	float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.0001);
 
 	indirectLightPositionD = vec4(Xpd, length(lightDirD));
-	indirectLightLuminousFluxD = visibilityD * vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0);
+	indirectLightLuminousFluxD = visibilityD * vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0.0);
 	
 	vec3 lightDirG = Xpg - cache.position.xyz;
 	float lightQuadDistance = dot(lightDirG, lightDirG);
 	lightDirG = normalize(lightDirG);
-	float reflAngleG = max(pow(dot(reflect(-lightDirG, cache.normal.xyz), camDir), cacheNormalMaterialData.w), 0.1);
+	float reflAngleG = pow(max(dot(reflect(-lightDirG, cache.normal.xyz), camDir), 0.0001), cacheNormalMaterialData.w);
 	//vec3 halfVector = (lightDirG + camDir) / length(lightDirG + camDir);
-	//float reflAngleG = max(pow(dot(halfVector, cache.normal.xyz), cacheNormalMaterialData.w), 0.1);
-	float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.1);
+	//float reflAngleG = max(pow(dot(halfVector, cache.normal.xyz), cacheNormalMaterialData.w), 0.0001);
+	float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
 	
 	indirectLightPositionG = vec4(Xpg, sqrt(lightQuadDistance));
-	indirectLightLuminousFluxG = visibilityG * vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0);
+	indirectLightLuminousFluxG = visibilityG * vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0);
 }

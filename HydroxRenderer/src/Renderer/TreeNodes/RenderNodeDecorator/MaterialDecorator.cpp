@@ -122,7 +122,7 @@ namespace he
 
         if(material->getHash() != materialIterator->second)
         {
-          m_updateMaterialData = true;//we need to update the mesh data
+          m_updateMaterialData = true;//we need to update the material data
           break;
         }
       }
@@ -152,6 +152,8 @@ namespace he
         db::Material *material = m_materialManager->getObject(materialIterator->first);
         m_materialBuffer.setData(index * sizeof(db::Material::MaterialData), sizeof(db::Material::MaterialData), &material->getMaterialData());
 
+        m_materialHashes[materialIterator->first] = material->getHash();//update the hash value
+
         materialIterator->second.bufferIndex = index;
       }
 
@@ -170,7 +172,7 @@ namespace he
       {
         const xBar::IGeometryContainer& instance = incInstanceIterator();
         
-        m_materialIndexBuffer.setData(sizeof(GLuint)* index, sizeof(GLuint), &m_materialHandles[instance.getMeshHandle()].bufferIndex);
+        m_materialIndexBuffer.setData(sizeof(GLuint)* index, sizeof(GLuint), &m_materialHandles[instance.getMaterialHandle()].bufferIndex);
         index++;
       }
 

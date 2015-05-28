@@ -11,13 +11,14 @@ flat in uint vsout_instanceIndex;
 
 void main()
 {
-	fsout_normal = vec4(vsout_normal * 0.5f + 0.5f, 0);
-	fsout_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	fsout_normal = vec4(normalize(vsout_normal) * 0.5f + 0.5f, 0);
 	
 	MaterialData thisMaterial = material[materialIndex[vsout_instanceIndex]];
 	
-	fsout_material = vec4(thisMaterial.diffuseStrength, 
-												thisMaterial.specularStrength, 
+	fsout_color = thisMaterial.color;
+
+	fsout_material = vec4(thisMaterial.diffuseRho, 
+												thisMaterial.specularRho, 
 												thisMaterial.ambientStrength, 
-												thisMaterial.specularExponent);
+												thisMaterial.roughness);
 }

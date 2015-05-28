@@ -155,7 +155,7 @@ namespace he
 
         Polygon polygon = cutPolygonBox(trianglePoints, m_boxPoints, m_epsilon);//calculate area of the part of the triangle which lies in the voxel an return the centroid of that polygon
 
-        if(polygon.getPointNumber() < 3)//triangle only touched the voxel
+        if(polygon.getPointNumber() < 3 || math::floatSafeEqual(polygon.getArea(), 0.0f))//triangle only touched the voxel
         {
           continue;
         }

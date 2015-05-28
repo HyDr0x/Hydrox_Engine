@@ -19,6 +19,9 @@ namespace he
 
     void OpenGLDebugLogManager::gatherSystemInformation()
     {
+      //m_logstream = std::ofstream("logfile.txt");
+      //std::clog.rdbuf(m_logstream.rdbuf());
+
       m_vendorName = (const char*)glGetString(GL_VENDOR);
       m_graphicCardName = (const char*)glGetString(GL_RENDERER);
       m_shadingVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);

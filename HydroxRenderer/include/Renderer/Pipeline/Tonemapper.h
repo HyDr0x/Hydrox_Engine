@@ -60,7 +60,9 @@ namespace he
 
       const unsigned int m_histogramBins;
 
-      util::SharedPointer<db::Texture2D> m_histogram;
+      unsigned int m_pingPong;
+      util::SharedPointer<db::Texture2D> m_histogram[2];
+      GLuint m_pboIndex[2];
 
       GLuint m_histogramVAO;
       GPUBuffer m_histogramVertices;

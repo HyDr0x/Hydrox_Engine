@@ -17,12 +17,12 @@ namespace he
       ~RenderShaderLoader();
 
       sh::RenderShader loadResource(sh::ShaderSlotFlags vertexDecaration,
-                                        std::string filename,
-                                        std::string vertexFilename, 
-                                        std::string fragmentFilename = std::string(),
-                                        std::string geometryFilename = std::string(),
-                                        std::string tessControlFilename = std::string(),
-                                        std::string tessEvalFilename = std::string());
+                                    std::string filename,
+                                    std::string vertexFilename, 
+                                    std::string fragmentFilename = std::string(),
+                                    std::string geometryFilename = std::string(),
+                                    std::string tessControlFilename = std::string(),
+                                    std::string tessEvalFilename = std::string());
 
       void loadShadersInIndexfile(std::string path, std::string shaderIndexFilename);
 

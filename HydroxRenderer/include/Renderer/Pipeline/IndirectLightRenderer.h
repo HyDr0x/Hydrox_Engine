@@ -59,6 +59,8 @@ namespace he
       util::SharedPointer<db::Texture2D> getGlobalCachePositionMap();
       util::SharedPointer<db::Texture2D> getGlobalCacheNormalMap();
 
+      util::SharedPointer<db::Texture2D> getSamplingDebugMap();
+
     private:
       
       IndirectLightRenderer(const IndirectLightRenderer&);
@@ -77,6 +79,8 @@ namespace he
       unsigned int m_bufferResolution;//to a power of two up rounded texture resolution
 
       UBO m_samplingPatternBuffer;
+
+      util::SharedPointer<db::Texture2D> m_samplingDebugTexture;
 
       util::SharedPointer<db::Texture2D> m_depthBuffer;
 

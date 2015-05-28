@@ -64,7 +64,7 @@ namespace he
           {
             float weight = util::vec3f::dot(normals[i], caches[j].normal) / (length * length + 0.0001f);//more weight is better
 
-            if(weight > cacheIndices.back()[1])
+            if(weight > cacheIndices.back()[1] && util::vec3f::dot(normals[i], caches[j].normal) > 0.0f)
             {
               sortCacheIndices(cacheIndices, util::vec2f(float(j), weight));
             }

@@ -8,6 +8,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/Flags.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RandomSequenceGenerator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Singleton.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SingletonBehaviour.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SingletonManager.hpp 

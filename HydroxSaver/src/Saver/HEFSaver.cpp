@@ -48,7 +48,7 @@ namespace he
       {
         if(!createDirectory(path))
         {
-          std::cerr << "Error, couldn't create directory: " << path << std::endl;
+          std::clog << "Error, couldn't create directory: " << path << std::endl;
           return;
         }
         else

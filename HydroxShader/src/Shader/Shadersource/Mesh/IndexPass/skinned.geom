@@ -81,10 +81,10 @@ void main()
 			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
 			ivec2 coord = ivec2(mod(index, bufferResolution), index / bufferResolution);
 			
-			imageStore(globalCachePositionBuffer, coord, vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseStrength));
+			imageStore(globalCachePositionBuffer, coord, vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseRho));
 			
 			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
-			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularStrength, cacheMaterial.specularExponent));
+			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularRho, cacheMaterial.roughness));
 		
 			//extract matrix scale for area, expect uniform scale!
 			float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
