@@ -48,7 +48,7 @@ namespace he
 
       void registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager);
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       sh::RenderShaderHandle m_particleShaderHandle;
 

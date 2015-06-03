@@ -28,7 +28,7 @@ namespace he
       m_normalMap = normalMap;
       m_materialMap = materialMap;
 
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
     void RenderIndirectLightingGeometryTraverser::setGlobalBufferResolution(unsigned int globalBufferResolution)
@@ -57,7 +57,7 @@ namespace he
 
     bool RenderIndirectLightingGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useShader();
 
@@ -71,7 +71,7 @@ namespace he
 
     void RenderIndirectLightingGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       m_materialMap->unsetTexture(1);
       m_normalMap->unsetTexture(0);

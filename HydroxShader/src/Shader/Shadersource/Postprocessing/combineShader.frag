@@ -1,7 +1,5 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/HSVRGB.glslh"
-
 layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D lightSampler;
 layout(location = 2) uniform sampler2D indirectLightSampler;
@@ -21,7 +19,7 @@ void main()
 	
 	//color = (indirectLight + light) * albedo;
 	
-	color = vec4(RGBtoHSV(((indirectLight.rgb + light.rgb) * albedo.rgb * albedo.a + (1.0 - albedo.a) * albedo.rgb).rgb), 1.0f);
+	color = vec4(((indirectLight.rgb + light.rgb) * albedo.rgb * albedo.a + (1.0 - albedo.a) * albedo.rgb).rgb, 1.0f);
 	
 	/*vec3 normalColor = ((indirectLight + light) * albedo).rgb;
 	float Y = dot(vec3(0.299f, 0.587f, 0.114f), normalColor);

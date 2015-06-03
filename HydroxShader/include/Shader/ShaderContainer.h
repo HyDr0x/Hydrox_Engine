@@ -33,7 +33,6 @@ namespace he
         COMBINE,
         DIRECTLIGHT,
         DOWNSAMPLING,
-        INDIRECTLIGHTPROXYLIGHTCREATION,
         OFFSCREENBUFFER,
         TONEMAPPING,
         HISTOGRAM,
@@ -47,6 +46,7 @@ namespace he
       enum ComputePass
       {
         FRUSTUMCULLING,
+        INDIRECTLIGHTPROXYLIGHTCREATION,
         COMPUTESHADERNUMBER
       };
 
@@ -105,17 +105,12 @@ namespace he
       void addComputeShader(unsigned int shaderIndex, const ComputeShader& shader);
 
       void replaceRenderShader(ThisRenderShaderHandle handle, const RenderShader& shader);
-
-      unsigned int getRenderShaderPass(std::string completeFilename);
-      unsigned int getComputeShaderIndex(std::string completeFilename);
+      void replaceComputeShader(unsigned int shaderIndex, const ComputeShader& shader);
 
     private:
 
       std::vector<std::vector<RenderShader>> m_renderPassShader;
       std::vector<ComputeShader> m_computeShader;
-
-      std::map<std::string, unsigned int> m_renderShaderPass;
-      std::map<std::string, unsigned int> m_computeShaderIndex;
     };
 
     typedef ShaderContainer::ThisRenderShaderHandle RenderShaderHandle;

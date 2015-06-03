@@ -78,15 +78,11 @@ namespace he
     {
       unsigned int instanceNumber = getInstanceNumber();
 
-      m_matrixBuffer.setMemoryFence();
-      m_bboxMatrixBuffer.setMemoryFence();
-
       fillBuffer();
 
       m_renderNode->updateBuffer();
 
-      m_bboxMatrixBuffer.syncWithFence();
-      m_matrixBuffer.syncWithFence();
+      GPUImmutableBuffer::syncWithWrittenData();
     }
 
     void SkinnedGeometryDecorator::fillBuffer()

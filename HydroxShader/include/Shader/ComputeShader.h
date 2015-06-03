@@ -16,7 +16,7 @@ namespace he
     public:
 
       ComputeShader();
-      ComputeShader(std::string shaderName, std::string computeShaderSource);
+      ComputeShader(const std::string& shaderName, const std::vector<std::string>& shaderSourceNames, const std::vector<std::string>& computeShaderSource);
       ComputeShader(const ComputeShader& other);
 
       ~ComputeShader();
@@ -26,13 +26,9 @@ namespace he
       static void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ);
       static void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset);
 
-      std::string getShaderSource() const;
-
     private:
 
       bool createProgram(std::string shaderName, GLuint computeShader);
-
-      std::string m_shaderSource;
     };
   }
 }

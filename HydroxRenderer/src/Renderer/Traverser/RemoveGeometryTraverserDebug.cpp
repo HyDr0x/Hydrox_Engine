@@ -29,14 +29,14 @@ namespace he
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       db::Mesh *mesh = m_modelManager->getObject(geometryContainer->getMeshHandle());
       db::Material *material = m_materialManager->getObject(geometryContainer->getMaterialHandle());
 
       m_meshVertexDeclaration = mesh->getVertexDeclarationFlags();
 
-      m_shaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::RENDERDEBUG, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
+      m_shaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::RENDERDEBUG, sh::ShaderSlotFlags(m_meshVertexDeclaration.toInt()));
 
       m_textureHandles.resize(db::Material::TEXTURETYPENUM);
 
@@ -53,7 +53,7 @@ namespace he
 
       if(m_shaderHandle)
       {
-        m_shaderVertexDeclaration = m_renderShaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
+        m_shaderVertexDeclaration = m_shaderContainer->getRenderShader(m_shaderHandle).getVertexDeclaration();
 
         doTraverse(treeNode);
       }

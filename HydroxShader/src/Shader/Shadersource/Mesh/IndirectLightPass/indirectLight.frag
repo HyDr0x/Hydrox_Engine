@@ -38,7 +38,7 @@ void main()
 	float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
 	
 	//luminousFlux = vec4(normal, 1);
-	//luminousFlux = vec4(frd);
+	//luminousFlux = vec4(vsout_phiPD, 1);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI), 1.0);
 	//luminousFlux = vec4((frd * vsout_phiPD) / (4.0 * PI * lengthD), 1.0);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI * lengthG), 1.0);

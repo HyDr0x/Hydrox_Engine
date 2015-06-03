@@ -77,6 +77,8 @@ namespace he
 
       unsigned int getGlobalCacheNumber() const;
 
+      unsigned int getProxyLightTextureResolution() const;
+
     private:
 
       GeometryRenderer(const GeometryRenderer&);
@@ -89,7 +91,7 @@ namespace he
       util::SharedPointer<sh::ShaderContainer> m_container;
 
       unsigned int m_globalCacheNumber;
-      unsigned int m_bufferResolution;
+      unsigned int m_proxyLightTextureResolution;
 
       std::vector<util::ResourceHandle> m_updateMeshHandles;
       std::vector<util::ResourceHandle> m_updateMaterialHandles;

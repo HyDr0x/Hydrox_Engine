@@ -48,7 +48,7 @@ namespace he
       util::SharedPointer<db::MaterialManager> m_materialManager;
       util::SharedPointer<db::TextureManager> m_textureManager;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       std::vector<util::SharedPointer<SamplerObject>> m_samplerObjects;
     };

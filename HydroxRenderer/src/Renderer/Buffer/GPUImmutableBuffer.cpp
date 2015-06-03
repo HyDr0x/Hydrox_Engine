@@ -51,16 +51,21 @@ namespace he
       return m_currentBufferSize;
     }
 
-    void GPUImmutableBuffer::setMemoryFence()
+    void GPUImmutableBuffer::setReadFence()
     {
-      glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
+      glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);//make sure the memory is coherently visible
       glDeleteSync(m_memoryFence);
-      m_memoryFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+      m_memoryFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);//make sure that the write has happened and the barrier was reached
     }
 
-    void GPUImmutableBuffer::syncWithFence() const
+    void GPUImmutableBuffer::syncWithReadFence() const
     {
       glClientWaitSync(m_memoryFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000);
+    } 
+
+    void GPUImmutableBuffer::syncWithWrittenData()
+    {
+      glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
     }
     
     void GPUImmutableBuffer::setData(GLuint offset, GLuint size, const GLvoid *data)

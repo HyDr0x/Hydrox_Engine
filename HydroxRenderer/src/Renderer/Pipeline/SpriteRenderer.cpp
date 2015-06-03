@@ -27,10 +27,10 @@ namespace he
 
     void SpriteRenderer::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
-      m_spriteShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPRITE, sh::ShaderSlotFlags(8192));
+      m_spriteShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPRITE, sh::ShaderSlotFlags(8192));
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
@@ -56,7 +56,7 @@ namespace he
 
       const db::Sprite *renderSprite;
       db::Texture2D *renderTexture;
-      const sh::RenderShader& spriteShader = m_renderShaderContainer->getRenderShader(m_spriteShaderHandle);
+      const sh::RenderShader& spriteShader = m_shaderContainer->getRenderShader(m_spriteShaderHandle);
 
       spriteShader.useShader();
 

@@ -47,7 +47,7 @@ namespace he
 
       util::SharedPointer<db::ModelManager> m_modelManager;
       util::SharedPointer<db::MaterialManager> m_materialManager;
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       util::SharedPointer<const xBar::IGeometryContainer> m_geometryContainer;
 

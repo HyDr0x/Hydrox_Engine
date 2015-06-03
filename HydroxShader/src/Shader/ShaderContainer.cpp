@@ -63,14 +63,9 @@ namespace he
       m_renderPassShader[handle.renderPass][handle.shaderIndex] = shader;
     }
 
-    unsigned int ShaderContainer::getRenderShaderPass(std::string completeFilename)
+    void ShaderContainer::replaceComputeShader(unsigned int shaderIndex, const ComputeShader& shader)
     {
-      return m_renderShaderPass[completeFilename];
-    }
-
-    unsigned int ShaderContainer::getComputeShaderIndex(std::string completeFilename)
-    {
-      return m_computeShaderIndex[completeFilename];
+      m_computeShader[shaderIndex] = shader;
     }
   }
 }

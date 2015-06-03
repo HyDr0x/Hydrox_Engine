@@ -46,7 +46,7 @@ namespace he
       FinalCompositing(const FinalCompositing&);
       FinalCompositing& operator=(const FinalCompositing&);
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       sh::RenderShaderHandle m_composeShaderHandle;
       sh::RenderShaderHandle m_debugOutputShaderHandle;

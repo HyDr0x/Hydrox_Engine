@@ -28,7 +28,7 @@ namespace he
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_samplerObjects = samplerObjects;
     }
@@ -52,7 +52,7 @@ namespace he
 
     bool RenderGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useShader();
 
@@ -61,7 +61,7 @@ namespace he
 
     void RenderGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useNoShader();
     }

@@ -47,7 +47,7 @@ namespace he
 
       std::list<xBar::BillboardContainer> m_renderBillboards;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

@@ -8,7 +8,7 @@ namespace he
 {
   namespace renderer
   {
-    TBO::TBO() : m_textureSlot(0)
+    TBO::TBO()
     {
       glGenBuffers(1, &m_bufferIndex);
       glGenTextures(1, &m_textureIndex);
@@ -86,37 +86,46 @@ namespace he
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
-    void TBO::bindTextureBuffer(GLenum slot)
+    void TBO::bindTexture(GLenum slot) const
     {
-      m_textureSlot = slot;
-      glActiveTexture(GL_TEXTURE0 + m_textureSlot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_textureTarget, m_textureIndex);
     }
 
-    void TBO::unBindTextureBuffer() const
+    void TBO::unbindTexture(GLenum slot) const
     {
-      glActiveTexture(GL_TEXTURE0 + m_textureSlot);
+      glActiveTexture(GL_TEXTURE0 + slot);
       glBindTexture(m_textureTarget, 0);
     }
 
-    void TBO::bindBuffer() const
+    void TBO::bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const
     {
-      glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
+      glBindImageTexture(unit, m_textureIndex, level, GL_FALSE, 0, access, format);
     }
 
-    void TBO::unbindBuffer() const
+    void TBO::unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const
     {
-      glBindBuffer(GL_TEXTURE_BUFFER, 0);
+      glBindImageTexture(unit, 0, level, GL_FALSE, 0, access, format);
     }
 
-    void TBO::bindBuffer(GLuint bufferBindingPoint) const
+    void TBO::bindBuffer(GLenum target) const
     {
-      glBindBufferBase(GL_TEXTURE_BUFFER, bufferBindingPoint, m_bufferIndex);
+      glBindBuffer(target, m_bufferIndex);
     }
 
-    void TBO::unbindBuffer(GLuint bufferBindingPoint) const
+    void TBO::unbindBuffer(GLenum target) const
     {
-      glBindBufferBase(GL_TEXTURE_BUFFER, bufferBindingPoint, 0);
+      glBindBuffer(target, 0);
+    }
+
+    void TBO::bindBuffer(GLenum target, GLuint bufferBindingPoint) const
+    {
+      glBindBufferBase(target, bufferBindingPoint, m_bufferIndex);
+    }
+
+    void TBO::unbindBuffer(GLenum target, GLuint bufferBindingPoint) const
+    {
+      glBindBufferBase(target, bufferBindingPoint, 0);
     }
   }
 }

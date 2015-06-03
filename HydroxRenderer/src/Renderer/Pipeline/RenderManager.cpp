@@ -187,7 +187,7 @@ namespace he
         m_lightRenderer.clear();
         
         m_geometryRasterizer.updateBuffer();
-        m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
+        m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
         m_lightRenderer.updateBuffer();
         
         if(m_wireframe)
@@ -245,24 +245,11 @@ namespace he
         
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
         
-        if(globalIllumination)
-        {
-          m_indirectLightRenderer.calculateIndirectLight(
-            m_lightRenderer.getReflectiveShadowPosMaps(),
-            m_lightRenderer.getReflectiveShadowNormalMaps(),
-            m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
-            m_lightRenderer.getReflectiveShadowLights());
-
-          m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
-          m_geometryRasterizer.generateIndirectLightMap();
-          m_indirectLightRenderer.unsetCacheAndProxyLights();
-        }
-
         m_gBuffer.setGBuffer();
 
         m_billboardRenderer.render();
 
-        if(m_skyboxRendering)     
+        if(m_skyboxRendering)
         {
           if(m_cullModeNotBack)
           {
@@ -278,6 +265,19 @@ namespace he
         }
 
         m_gBuffer.unsetGBuffer();
+
+        if(globalIllumination)
+        {
+          m_indirectLightRenderer.calculateIndirectLight(
+            m_lightRenderer.getReflectiveShadowPosMaps(),
+            m_lightRenderer.getReflectiveShadowNormalMaps(),
+            m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
+            m_lightRenderer.getReflectiveShadowLights());
+
+          m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
+          m_geometryRasterizer.generateIndirectLightMap();
+          m_indirectLightRenderer.unsetCacheAndProxyLights();
+        }
 
         if(m_showVirtualAreaLights && globalIllumination)
         {
@@ -324,31 +324,18 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
         break;
       case 10:
-        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getSamplingDebugMap());
         break;
       case 11:
-        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getSamplingDebugMap());
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+        m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
         break;
       case 0:
       default:
         m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
       }
       
-      //m_gBuffer.getColorTexture()
-      //m_gBuffer.getNormalTexture()
-      //m_gBuffer.getMaterialTexture()
-      //m_gBuffer.getDepthTexture()
-      //m_lightRenderer.getLightTexture()
-      //m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0)
-      //m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0)
-      //m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0)
-      //m_lightRenderer.getShadowMaps()->convertToTexture2D(0)
-      //m_indirectLightRenderer.getIndirectLightMap()
-      //m_finalCompositing.getCombinedTexture()
-      //m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
-
       m_spriteRenderer.render();
       m_stringRenderer.render();
       
@@ -456,26 +443,22 @@ namespace he
         }
       }
 
-      util::SharedPointer<db::Texture2D> lightPositionTexture = m_indirectLightRenderer.getIndirectPositionMapDiffuse();
-      util::SharedPointer<db::Texture2D> lightLuminousFluxTexture = m_indirectLightRenderer.getIndirectLuminousFluxMapDiffuse();
-      util::SharedPointer<db::Texture2D> zBufferTexture = m_indirectLightRenderer.getZBuffer();
-
-      unsigned int cacheResolution = lightPositionTexture->getResolution()[0];
-
-      std::vector<util::vec4f> lightPositions(cacheResolution * cacheResolution);
-      std::vector<util::vec4f> lightLuminousFlux(cacheResolution * cacheResolution);
+      unsigned int cacheResolution = m_geometryRasterizer.getProxyLightTextureResolution();
+      
+      std::vector<util::vec4f> lightPositions(2 * cacheResolution * cacheResolution);
+      std::vector<util::vec4f> lightLuminousFlux(2 * cacheResolution * cacheResolution);
       std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
       
-      lightPositionTexture->getTextureData(&lightPositions[0]);
-      lightLuminousFluxTexture->getTextureData(&lightLuminousFlux[0]);
-      zBufferTexture->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
+      m_indirectLightRenderer.getIndirectPositionMap()->getTextureData(&lightPositions[0]);
+      m_indirectLightRenderer.getIndirectLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
+      m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
 
       unsigned int validLightCounter = 0;
-      for(unsigned int i = 0; i < lightPositions.size(); i++)
+      for(unsigned int i = 0; i < cacheResolution * cacheResolution; i++)
       {
         if(zBuffer[i][0])
         {
-          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[i][0], lightPositions[i][1], lightPositions[i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
+          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[2 * i][0], lightPositions[2 * i][1], lightPositions[2 * i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
           validLightCounter++;
         }
       }
@@ -540,19 +523,16 @@ namespace he
         }
       }
       
-      util::SharedPointer<db::Texture2D> cachePositionTexture = m_indirectLightRenderer.getGlobalCachePositionMap();
-      util::SharedPointer<db::Texture2D> cacheNormalTexture = m_indirectLightRenderer.getGlobalCacheNormalMap();
-      util::SharedPointer<db::Texture2D> zBufferTexture = m_indirectLightRenderer.getZBuffer();
+      unsigned int cacheNumber = m_geometryRasterizer.getGlobalCacheNumber();
+      unsigned int cacheTextureResolution = m_geometryRasterizer.getProxyLightTextureResolution();
 
-      unsigned int cacheResolution = cachePositionTexture->getResolution()[0];
+      std::vector<util::vec4f> cachePositions(cacheNumber);
+      std::vector<util::vec4f> cacheNormals(cacheNumber);
+      std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheTextureResolution * cacheTextureResolution);
 
-      std::vector<util::vec4f> cachePositions(cacheResolution * cacheResolution);
-      std::vector<util::vec4f> cacheNormals(cacheResolution * cacheResolution);
-      std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
-
-      cachePositionTexture->getTextureData(&cachePositions[0]);
-      cacheNormalTexture->getTextureData(&cacheNormals[0]);
-      zBufferTexture->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
+      m_indirectLightRenderer.getGlobalCachePositionMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cachePositions[0]);
+      m_indirectLightRenderer.getGlobalCacheNormalMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cacheNormals[0]);
+      m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
       
       unsigned int validLightCounter = 0;
       for(unsigned int i = 0; i < cachePositions.size(); i++)

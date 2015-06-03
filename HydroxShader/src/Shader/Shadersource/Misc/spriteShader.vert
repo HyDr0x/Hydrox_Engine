@@ -2,7 +2,7 @@
 
 #include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
 
-layout(location = SPECIAL1) flat in float in_placeHolder;
+layout(location = SPECIAL1) in float in_placeHolder;
 
 void main()
 {

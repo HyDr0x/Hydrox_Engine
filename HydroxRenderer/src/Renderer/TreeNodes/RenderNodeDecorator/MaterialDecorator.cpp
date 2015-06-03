@@ -137,6 +137,8 @@ namespace he
       else if(hasInstanceNumberChanged())
       {
         resizeMaterialIndexBuffer();
+
+        GPUImmutableBuffer::syncWithWrittenData();
       }
 
       m_renderNode->updateBuffer();
@@ -164,8 +166,6 @@ namespace he
     {
       unsigned int instanceNumber = getInstanceNumber();
 
-      m_materialIndexBuffer.setMemoryFence();
-
       unsigned int index = 0;
       resetInstanceIterator();
       while (!isEndInstanceIterator())
@@ -175,8 +175,6 @@ namespace he
         m_materialIndexBuffer.setData(sizeof(GLuint)* index, sizeof(GLuint), &m_materialHandles[instance.getMaterialHandle()].bufferIndex);
         index++;
       }
-
-      m_materialIndexBuffer.syncWithFence();
     }
   }
 }

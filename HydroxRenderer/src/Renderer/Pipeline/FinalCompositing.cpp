@@ -19,10 +19,10 @@ namespace he
     void FinalCompositing::initialize(util::SingletonManager *singletonManager)
     {
       m_options = singletonManager->getService<RenderOptions>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_composeShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(8192));
-      m_debugOutputShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(8192));
+      m_composeShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(8192));
+      m_debugOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(8192));
 
       m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
@@ -33,7 +33,7 @@ namespace he
       util::SharedPointer<db::Texture2D> directlightTexture,
       util::SharedPointer<db::Texture2D> indirectlightTexture) const
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_composeShaderHandle);
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_composeShaderHandle);
 
       shader.useShader();
       m_fullscreenRenderQuad.setWriteFrameBuffer();
@@ -52,7 +52,7 @@ namespace he
 
     void FinalCompositing::renderDebugOutput(util::SharedPointer<db::Texture2D> texture) const
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_debugOutputShaderHandle);
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_debugOutputShaderHandle);
 
       shader.useShader();
       texture->setTexture(0, 0);
@@ -81,7 +81,7 @@ namespace he
       util::vec2i normalizeTexCoord(newWidth, newHeight);
       util::vec2f textureOffset(1.0f / (2.0f * newWidth), 1.0f / (2.0f * newHeight));
 
-      sh::RenderShader *shader = m_renderShaderContainer->getObject(m_histogramShaderHandle);
+      sh::RenderShader *shader = m_shaderContainer->getObject(m_histogramShaderHandle);
       shader->useShader();
       sh::RenderShader::setUniform(2, GL_FLOAT_VEC2, &filterImageSize[0]);
 
@@ -171,7 +171,7 @@ namespace he
 
       glViewport(0, 0, m_options->width, m_options->height);
       
-      sh::RenderShader *toneMappingShader = m_renderShaderContainer->getObject(m_tonemappingShaderHandle);
+      sh::RenderShader *toneMappingShader = m_shaderContainer->getObject(m_tonemappingShaderHandle);
       toneMappingShader->useShader();
 
       float s = 2.5f;

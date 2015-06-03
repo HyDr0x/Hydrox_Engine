@@ -24,8 +24,10 @@ namespace he
 
       GLuint getBufferSize() const;
 
-      void setMemoryFence();
-      void syncWithFence() const;
+      void setReadFence();
+      void syncWithReadFence() const;
+
+      static void syncWithWrittenData();
 
       void setData(GLuint offset, GLuint size, const GLvoid *data);
       void getData(GLuint offset, GLuint size, GLvoid *data) const;

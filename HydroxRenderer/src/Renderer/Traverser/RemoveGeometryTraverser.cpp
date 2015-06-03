@@ -30,7 +30,7 @@ namespace he
 
       m_modelManager = singletonManager->getService<db::ModelManager>();
       m_materialManager = singletonManager->getService<db::MaterialManager>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
     void RemoveGeometryTraverser::doTraverseDown(util::SharedPointer<TreeNode> treeNode)

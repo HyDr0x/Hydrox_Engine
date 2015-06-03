@@ -75,8 +75,6 @@ namespace he
     {
       unsigned int instanceNumber = getInstanceNumber();
 
-      m_matrixBuffer.setMemoryFence();
-
       unsigned int instanceIndex = 0;
       resetInstanceIterator();
       while (!isEndInstanceIterator())
@@ -89,7 +87,7 @@ namespace he
 
       m_renderNode->updateBuffer();
 
-      m_matrixBuffer.syncWithFence();
+      GPUImmutableBuffer::syncWithWrittenData();
     }
   }
 }

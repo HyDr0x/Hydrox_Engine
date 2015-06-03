@@ -54,7 +54,7 @@ namespace he
       std::list<const StringTexture2D*> m_opaqueStrings;
       std::vector<std::list<const StringTexture2D*>> m_transparentStrings;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

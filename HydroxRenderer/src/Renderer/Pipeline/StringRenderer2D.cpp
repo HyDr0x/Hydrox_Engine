@@ -22,10 +22,10 @@ namespace he
 
     void StringRenderer2D::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
-      m_stringShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::STRING2D, sh::ShaderSlotFlags(3));
+      m_stringShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::STRING2D, sh::ShaderSlotFlags(3));
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
@@ -58,7 +58,7 @@ namespace he
 
       const StringTexture2D *renderString;
       db::Texture2D *renderTexture;
-      const sh::RenderShader& stringShader = m_renderShaderContainer->getRenderShader(m_stringShaderHandle);
+      const sh::RenderShader& stringShader = m_shaderContainer->getRenderShader(m_stringShaderHandle);
 
       stringShader.useShader();
 

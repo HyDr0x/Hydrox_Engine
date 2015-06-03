@@ -26,7 +26,7 @@ namespace he
     void RenderReflectiveShadowGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
       m_textureManager = singletonManager->getService<db::TextureManager>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_options = singletonManager->getService<RenderOptions>();
     }
@@ -50,7 +50,7 @@ namespace he
 
     bool RenderReflectiveShadowGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useShader();
 
@@ -62,7 +62,7 @@ namespace he
 
     void RenderReflectiveShadowGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useNoShader();
     }

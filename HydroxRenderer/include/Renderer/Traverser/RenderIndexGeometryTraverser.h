@@ -39,7 +39,7 @@ namespace he
 
     private:
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       unsigned int m_globalCacheOffset;
       unsigned int m_globalBufferResolution;

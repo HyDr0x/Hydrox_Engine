@@ -35,9 +35,9 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
       m_singletonManager = singletonManager;
 
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_directLightShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::DIRECTLIGHT, sh::ShaderSlotFlags(8192));
+      m_directLightShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DIRECTLIGHT, sh::ShaderSlotFlags(8192));
 
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
 
@@ -181,6 +181,11 @@ namespace he
     {
       m_reflectiveShadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
       m_renderReflectiveShadowMapsQuad.unsetWriteFrameBuffer();
+    }
+
+    void LightRenderer::generateImperfectShadowMap(const TBO& globalCachePositionBuffer)
+    {
+      globalCachePositionBuffer.bindBuffer(0);
     }
 
     void LightRenderer::addLight(const xBar::LightContainer& light)

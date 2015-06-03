@@ -17,12 +17,8 @@ namespace he
       ~RenderShaderLoader();
 
       sh::RenderShader loadResource(sh::ShaderSlotFlags vertexDecaration,
-                                    std::string filename,
-                                    std::string vertexFilename, 
-                                    std::string fragmentFilename = std::string(),
-                                    std::string geometryFilename = std::string(),
-                                    std::string tessControlFilename = std::string(),
-                                    std::string tessEvalFilename = std::string());
+                                    const std::string& filename,
+                                    const std::vector<std::string>& shaderFilenames);
 
       void loadShadersInIndexfile(std::string path, std::string shaderIndexFilename);
 
@@ -30,7 +26,6 @@ namespace he
 
     private:
 
-      std::map<sh::RenderShaderHandle, std::vector<std::string>, sh::RenderShaderHandle::Less> m_shaderStageFilenames;
       std::map<std::string, std::vector<sh::RenderShaderHandle>> m_renderShaderMap;
     };
   }

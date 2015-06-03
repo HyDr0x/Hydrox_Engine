@@ -25,7 +25,7 @@ namespace he
 
     void RenderIndexGeometryTraverser::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
     }
 
     void RenderIndexGeometryTraverser::setGlobalBufferResolution(unsigned int globalBufferResolution)
@@ -54,7 +54,7 @@ namespace he
 
     bool RenderIndexGeometryTraverser::preTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useShader();
 
@@ -65,7 +65,7 @@ namespace he
 
     void RenderIndexGeometryTraverser::postTraverse(ShaderNode * treeNode)
     {
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(treeNode->getShaderHandle());
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(treeNode->getShaderHandle());
 
       shader.useNoShader();
     }

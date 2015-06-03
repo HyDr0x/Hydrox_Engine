@@ -46,7 +46,7 @@ namespace he
       GLuint m_skyBoxVAO;
       GPUBuffer m_geometryData;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
       util::SharedPointer<db::TextureArrayManager> m_textureArrayManager;
     };

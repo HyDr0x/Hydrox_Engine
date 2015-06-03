@@ -143,9 +143,9 @@ namespace he
 
       m_globalCacheNumber = updateTraverser.getGlobalCacheNumber();
 
-      m_bufferResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
-      m_renderIndirectLightingGeometryTraverser.setGlobalBufferResolution(m_bufferResolution);
-      m_renderIndexGeometryTraverser.setGlobalBufferResolution(m_bufferResolution);
+      m_proxyLightTextureResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
+      m_renderIndirectLightingGeometryTraverser.setGlobalBufferResolution(m_proxyLightTextureResolution);
+      m_renderIndexGeometryTraverser.setGlobalBufferResolution(m_proxyLightTextureResolution);
     }
 
     void GeometryRenderer::frustumCulling(int cameraIndex, RenderPass pass)
@@ -212,6 +212,11 @@ namespace he
     unsigned int GeometryRenderer::getGlobalCacheNumber() const
     {
       return m_globalCacheNumber;
+    }
+
+    unsigned int GeometryRenderer::getProxyLightTextureResolution() const
+    {
+      return m_proxyLightTextureResolution;
     }
 
     void GeometryRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)

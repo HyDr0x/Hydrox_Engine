@@ -17,12 +17,12 @@ namespace he
 
     void BillboardRenderer::initialize(util::SingletonManager *singletonManager)
     {
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_billboardShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::BILLBOARD, sh::ShaderSlotFlags(8192));
+      m_billboardShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::BILLBOARD, sh::ShaderSlotFlags(8192));
 
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
@@ -42,7 +42,7 @@ namespace he
 
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);
  
-      const sh::RenderShader& billboardShader = m_renderShaderContainer->getRenderShader(m_billboardShaderHandle);
+      const sh::RenderShader& billboardShader = m_shaderContainer->getRenderShader(m_billboardShaderHandle);
       billboardShader.useShader();
 
       for(std::list<xBar::BillboardContainer>::const_iterator billboarditerator = m_renderBillboards.begin(); billboarditerator != m_renderBillboards.end(); billboarditerator++)

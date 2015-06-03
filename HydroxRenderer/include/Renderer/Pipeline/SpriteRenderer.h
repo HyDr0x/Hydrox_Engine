@@ -57,7 +57,7 @@ namespace he
       std::vector<std::list<const db::Sprite*>> m_opaqueSprites;
       std::vector<std::list<const db::Sprite*>> m_transparentSprites;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
       util::SharedPointer<db::TextureManager> m_textureManager;
     };
   }

@@ -13,9 +13,9 @@ layout(triangle_strip, max_vertices = 3) out;
 
 #define INT32_MAX 2147483647
 
-layout(rgba32f, binding = 0) writeonly uniform image2D globalCachePositionBuffer;
-layout(rgba32f, binding = 1) writeonly uniform image2D globalCacheNormalBuffer;
-layout(r16f, binding = 2) writeonly uniform image2D globalCacheAreaBuffer;
+layout(rgba32f, binding = 0) writeonly uniform imageBuffer globalCachePositionBuffer;
+layout(rgba32f, binding = 1) writeonly uniform imageBuffer globalCacheNormalBuffer;
+layout(r16f, binding = 2) writeonly uniform imageBuffer globalCacheAreaBuffer;
 
 layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
@@ -79,17 +79,16 @@ void main()
 			skinningMatrix = barycentric.x * vsout_skinningMatrix[0] + barycentric.y * vsout_skinningMatrix[1] + barycentric.z * vsout_skinningMatrix[2];
 			
 			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
-			ivec2 coord = ivec2(mod(index, bufferResolution), index / bufferResolution);
-			
-			imageStore(globalCachePositionBuffer, coord, vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseRho));
+
+			imageStore(globalCachePositionBuffer, int(index), vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseRho));
 			
 			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
-			imageStore(globalCacheNormalBuffer, coord, vec4(encodeNormal(normal), cacheMaterial.specularRho, cacheMaterial.roughness));
+			imageStore(globalCacheNormalBuffer, int(index), vec4(encodeNormal(normal), cacheMaterial.specularRho, cacheMaterial.roughness));
 		
 			//extract matrix scale for area, expect uniform scale!
 			float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
 		
-			imageStore(globalCacheAreaBuffer, coord, scale * scale * caches[cacheIndexOffsetTMP + i].area);
+			imageStore(globalCacheAreaBuffer, int(index), scale * scale * caches[cacheIndexOffsetTMP + i].area);
 		}
 	}
 	

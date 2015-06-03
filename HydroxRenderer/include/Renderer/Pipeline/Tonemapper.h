@@ -51,7 +51,7 @@ namespace he
       util::vec2f m_logLuminanceRange, m_luminanceRange;
       util::vec2i m_logLuminanceRangeNew;
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       sh::RenderShaderHandle m_histogramShaderHandle;
       sh::RenderShaderHandle m_tonemappingShaderHandle;

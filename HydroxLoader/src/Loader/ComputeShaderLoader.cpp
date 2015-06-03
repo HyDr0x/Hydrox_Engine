@@ -19,19 +19,20 @@ namespace he
     {
     }
 
-    sh::ComputeShader ComputeShaderLoader::loadResource(std::string shaderName, std::string filename)
+    sh::ComputeShader ComputeShaderLoader::loadResource(const std::string& shaderName, const std::vector<std::string>& filename)
     {
-      std::string computeShaderSource = loadShaderSource(filename);
+      std::vector<std::string> computeShaderSource(1);
+      computeShaderSource[0] = loadShaderSource(filename[0]);
 
       util::ResourceHandle shaderHandle;
 
-      if(computeShaderSource == std::string())
+      if(computeShaderSource[0].empty())
       {
-        std::clog << "ERROR, couldn't open file: " << filename << std::endl;
+        std::clog << "ERROR, couldn't open file: " << shaderName << std::endl;
         assert(false);
       }
 
-      return sh::ComputeShader(shaderName, computeShaderSource);
+      return sh::ComputeShader(shaderName, filename, computeShaderSource);
     }
 
     void ComputeShaderLoader::loadShadersInIndexfile(std::string path, std::string shaderIndexFilename)
@@ -64,14 +65,16 @@ namespace he
           {
             shaderIndex = atoi(line.substr(pos + 7).c_str());
 
-            std::vector<std::string> shaderFileNames(2);
+            std::string shaderName;
+            std::getline(file, shaderName, '\n');
+
+            std::vector<std::string> shaderFileNames(1);
             std::getline(file, shaderFileNames[0], '\n');
-            std::getline(file, shaderFileNames[1], '\n');
-            shaderFileNames[1] = path + shaderFileNames[1];
+            shaderFileNames[0] = path + shaderFileNames[0];
 
-            container->addComputeShader(shaderIndex, loadResource(shaderFileNames[0], shaderFileNames[1]));
+            container->addComputeShader(shaderIndex, loadResource(shaderName, shaderFileNames));
 
-            continue;
+            m_computeShaderMap[shaderFileNames[0]] = shaderIndex;
           }
         }
 
@@ -81,7 +84,7 @@ namespace he
       {
         file.close();
 
-        //std::clog << "Warning, couldn't open shader source file: " << filename << std::endl;
+        std::clog << "Warning, couldn't open shader source file: " << path + shaderIndexFilename << std::endl;
       }
     }
 
@@ -89,7 +92,12 @@ namespace he
     {
       if(m_shaderFileChecker.isFileChanged())
       {
-        m_shaderFileChecker.getChangedFilepath();
+        util::SharedPointer<sh::ShaderContainer> container = m_singletonManager->getService<sh::ShaderContainer>();
+        const sh::ComputeShader& shader = container->getComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()]);
+
+        container->replaceComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
+
+        m_shaderFileChecker.resetFilecheckerStatus();
       }
     }
   }

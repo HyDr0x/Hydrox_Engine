@@ -44,7 +44,7 @@ namespace he
 
     private:
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       util::SharedPointer<db::Texture2D> m_normalMap;
       util::SharedPointer<db::Texture2D> m_materialMap;

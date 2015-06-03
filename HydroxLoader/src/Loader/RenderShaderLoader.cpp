@@ -19,28 +19,23 @@ namespace he
 
     sh::RenderShader RenderShaderLoader::loadResource(
       sh::ShaderSlotFlags vertexDecaration,
-      std::string filename,
-      std::string vertexFilename,
-      std::string fragmentFilename,
-      std::string geometryFilename,
-      std::string tessControlFilename,
-      std::string tessEvalFilename)
+      const std::string& filename,
+      const std::vector<std::string>& shaderFilenames)
     {
-      std::string vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource;
+      std::vector<std::string> shaderSources(5);
 
-      vertexShaderSource = loadShaderSource(vertexFilename);
-      fragmentShaderSource = loadShaderSource(fragmentFilename);
-      geometryShaderSource = loadShaderSource(geometryFilename);
-      tesselationCTRLShaderSource = loadShaderSource(tessControlFilename);
-      tesselationEVALShaderSource = loadShaderSource(tessEvalFilename);
-
-      if(vertexShaderSource.empty())
+      for(unsigned int i = 0; i < shaderSources.size(); i++)
       {
-        std::clog << "ERROR, couldn't open file: " << vertexFilename << std::endl;
+        shaderSources[i] = loadShaderSource(shaderFilenames[i]);
+      }
+
+      if(shaderSources[0].empty())
+      {
+        std::clog << "ERROR, couldn't open file: " << filename << std::endl;
         assert(false);
       }
 
-      return sh::RenderShader(vertexDecaration, filename, vertexShaderSource, fragmentShaderSource, geometryShaderSource, tesselationCTRLShaderSource, tesselationEVALShaderSource);
+      return sh::RenderShader(vertexDecaration, filename, shaderFilenames, shaderSources);
     }
 
     void RenderShaderLoader::loadShadersInIndexfile(std::string path, std::string shaderIndexFilename)
@@ -82,7 +77,10 @@ namespace he
           {
             vertexDeclaration = atoi(line.substr(pos + vertexDeclarationKeyword.size() + 1).c_str());
 
-            std::vector<std::string> shaderFileNames(6);
+            std::string shaderName;
+            std::getline(file, shaderName, '\n');
+
+            std::vector<std::string> shaderFileNames(5);
             for(unsigned int i = 0; i < shaderFileNames.size(); i++)
             {
               std::getline(file, shaderFileNames[i], '\n');
@@ -96,14 +94,10 @@ namespace he
               }
             }
 
-            sh::RenderShaderHandle shaderHandle = container->addRenderShader(renderPass, loadResource(sh::ShaderSlotFlags(vertexDeclaration), shaderFileNames[0], shaderFileNames[1], shaderFileNames[2], shaderFileNames[3], shaderFileNames[4], shaderFileNames[5]));
-
-            m_shaderStageFilenames[shaderHandle].resize(6);
+            sh::RenderShaderHandle shaderHandle = container->addRenderShader(renderPass, loadResource(sh::ShaderSlotFlags(vertexDeclaration), shaderName, shaderFileNames));
 
             for(unsigned int i = 0; i < shaderFileNames.size(); i++)
             {
-              m_shaderStageFilenames[shaderHandle][i] = shaderFileNames[i];
-
               if(!shaderFileNames[i].empty())
               {
                 m_renderShaderMap[shaderFileNames[i]].push_back(shaderHandle);
@@ -136,12 +130,8 @@ namespace he
         {
           const sh::RenderShader& shader = container->getRenderShader(editedShaderHandles[i]);
           container->replaceRenderShader(editedShaderHandles[i], loadResource(shader.getVertexDeclaration(), 
-            m_shaderStageFilenames[editedShaderHandles[i]][0], 
-            m_shaderStageFilenames[editedShaderHandles[i]][1],
-            m_shaderStageFilenames[editedShaderHandles[i]][2],
-            m_shaderStageFilenames[editedShaderHandles[i]][3],
-            m_shaderStageFilenames[editedShaderHandles[i]][4],
-            m_shaderStageFilenames[editedShaderHandles[i]][5]));
+            shader.getShaderName(),
+            shader.getShaderSourceNames()));
         }
 
         m_shaderFileChecker.resetFilecheckerStatus();

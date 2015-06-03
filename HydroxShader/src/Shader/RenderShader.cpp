@@ -5,16 +5,14 @@ namespace he
   namespace sh
   {
     RenderShader::RenderShader()
-    {
-    }
+    {}
 
     RenderShader::RenderShader(ShaderSlotFlags vertexDecaration,
                                const std::string& shaderName,
-                               const std::string& vertexShaderSource, 
-                               const std::string& fragmentShaderSource, 
-                               const std::string& geometryShaderSource, 
-                               const std::string& tesselationCTRLShaderSource, 
-                               const std::string& tesselationEVALShaderSource) : m_vertexDecaration(vertexDecaration)
+                               const std::vector<std::string>& shaderSourceNames,
+                               const std::vector<std::string>& shaderSources) :
+                               Shader(shaderName, shaderSourceNames, shaderSources),
+                               m_vertexDecaration(vertexDecaration)
     {
       GLuint vertexShader;
       GLuint tesselationControlShader;
@@ -22,23 +20,17 @@ namespace he
       GLuint geometryShader; 
       GLuint fragmentShader;
       
-      vertexShader = createShader(GL_VERTEX_SHADER, shaderName, vertexShaderSource);
-      tesselationControlShader = createShader(GL_TESS_CONTROL_SHADER, shaderName, tesselationCTRLShaderSource);
-      tesselationEvaluationShader = createShader(GL_TESS_EVALUATION_SHADER, shaderName, tesselationEVALShaderSource);
-      geometryShader = createShader(GL_GEOMETRY_SHADER, shaderName, geometryShaderSource);
-      fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, fragmentShaderSource);
+      vertexShader = createShader(GL_VERTEX_SHADER, shaderName, m_shaderSources[0]);
+      tesselationControlShader = createShader(GL_TESS_CONTROL_SHADER, shaderName, m_shaderSources[3]);
+      tesselationEvaluationShader = createShader(GL_TESS_EVALUATION_SHADER, shaderName, m_shaderSources[4]);
+      geometryShader = createShader(GL_GEOMETRY_SHADER, shaderName, m_shaderSources[2]);
+      fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, m_shaderSources[1]);
 
-      m_shaderSources.push_back(vertexShaderSource);
-      m_shaderSources.push_back(fragmentShaderSource);
-      m_shaderSources.push_back(geometryShaderSource);
-      m_shaderSources.push_back(tesselationCTRLShaderSource);
-      m_shaderSources.push_back(tesselationEVALShaderSource);
-
-      m_shaderHashes.push_back(MurmurHash64A(vertexShaderSource.c_str(), vertexShaderSource.size(), 0));
-      m_shaderHashes.push_back(MurmurHash64A(fragmentShaderSource.c_str(), fragmentShaderSource.size(), 0));
-      m_shaderHashes.push_back(MurmurHash64A(geometryShaderSource.c_str(), geometryShaderSource.size(), 0));
-      m_shaderHashes.push_back(MurmurHash64A(tesselationCTRLShaderSource.c_str(), tesselationCTRLShaderSource.size(), 0));
-      m_shaderHashes.push_back(MurmurHash64A(tesselationEVALShaderSource.c_str(), tesselationEVALShaderSource.size(), 0));
+      for(unsigned int i = 0; i < 5; i++)
+      {
+        m_shaderSources.push_back(m_shaderSources[i]);
+        m_shaderHashes.push_back(MurmurHash64A(m_shaderSources[i].c_str(), m_shaderSources[i].size(), 0));
+      }
       
       createProgram(shaderName, vertexShader, tesselationControlShader, tesselationEvaluationShader, geometryShader, fragmentShader);
     }
@@ -46,6 +38,8 @@ namespace he
     RenderShader::RenderShader(const RenderShader& other)
     {
       m_program = other.m_program;
+      m_shaderName = other.m_shaderName;
+      m_shaderSourceNames = other.m_shaderSourceNames;
       m_shaderSources = other.m_shaderSources;
       m_vertexDecaration = other.m_vertexDecaration;
       m_shaderHashes = other.m_shaderHashes;
@@ -58,6 +52,8 @@ namespace he
     RenderShader& RenderShader::operator=(const RenderShader& other)
     {
       m_program = other.m_program;
+      m_shaderName = other.m_shaderName;
+      m_shaderSourceNames = other.m_shaderSourceNames;
       m_shaderSources = other.m_shaderSources;
       m_vertexDecaration = other.m_vertexDecaration;
       m_shaderHashes = other.m_shaderHashes;
@@ -102,11 +98,6 @@ namespace he
           std::clog <<"Error, the TransformFeedback varying " << varyings[i] << "of type " << type << " and with size " << size << " is erroneous." << std::endl;
         }
       }
-    }
-
-    std::vector<std::string> RenderShader::getShaderSources() const
-    {
-      return m_shaderSources;
     }
 
     ShaderSlotFlags RenderShader::getVertexDeclaration() const

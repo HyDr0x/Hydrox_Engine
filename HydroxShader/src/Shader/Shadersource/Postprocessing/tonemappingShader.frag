@@ -13,7 +13,7 @@ in vec2 gsout_texCoord;
 
 void main()
 {
-	vec3 hsv = texture(hsvColorSampler, gsout_texCoord).rgb;
+	vec3 hsv = RGBtoHSV(texture(hsvColorSampler, gsout_texCoord).rgb);
 	hsv.b = max(hsv.b - luminanceRange.x, 0);
 	
 	hsv.b = s * hsv.b / (s * hsv.b - hsv.b + luminanceRange.y);

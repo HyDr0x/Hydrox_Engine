@@ -26,14 +26,17 @@ namespace he
 
       void clearBuffer(GLenum format, GLenum type, const GLvoid *data) const;
 
-      void bindTextureBuffer(GLenum slot);
-      void unBindTextureBuffer() const;
+      void bindTexture(GLenum slot) const;
+      void unbindTexture(GLenum slot) const;
 
-      void bindBuffer() const;
-      void unbindBuffer() const;
+      void bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const;
+      void unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const;
 
-      void bindBuffer(GLuint bufferBindingPoint) const;
-      void unbindBuffer(GLuint bufferBindingPoint) const;
+      void bindBuffer(GLenum target) const;
+      void unbindBuffer(GLenum target) const;
+
+      void bindBuffer(GLenum target, GLuint bufferBindingPoint) const;
+      void unbindBuffer(GLenum target, GLuint bufferBindingPoint) const;
 
     private:
 
@@ -42,8 +45,6 @@ namespace he
 
       GLuint m_bufferIndex;
       GLuint m_textureIndex;
-
-      GLenum m_textureSlot;
 
       GLuint m_bufferBlockSize;
       GLuint m_currentBufferSize;

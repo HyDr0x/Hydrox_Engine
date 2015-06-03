@@ -19,11 +19,11 @@ namespace he
 
     void SkyboxRenderer::initialize(util::SingletonManager *singletonManager, util::ResourceHandle skyboxTextureHandles[6])
     {
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
       m_textureArrayManager = singletonManager->getService<db::TextureArrayManager>();
 
-      m_skyboxShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::SKYBOX, sh::ShaderSlotFlags(3));
+      m_skyboxShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SKYBOX, sh::ShaderSlotFlags(3));
 
       db::Texture2D *texture = m_textureManager->getObject(skyboxTextureHandles[0]);
       
@@ -100,7 +100,7 @@ namespace he
       glBindVertexArray(m_skyBoxVAO);
 
       db::Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);
-      const sh::RenderShader& skyboxShader = m_renderShaderContainer->getRenderShader(m_skyboxShaderHandle);
+      const sh::RenderShader& skyboxShader = m_shaderContainer->getRenderShader(m_skyboxShaderHandle);
 
       skyboxShader.useShader();
       renderTexture->setTexture(0, 0);

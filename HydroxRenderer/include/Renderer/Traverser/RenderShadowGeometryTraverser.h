@@ -38,7 +38,7 @@ namespace he
 
     private:
 
-      util::SharedPointer<sh::ShaderContainer> m_renderShaderContainer;
+      util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       util::SharedPointer<RenderOptions> m_options;
 

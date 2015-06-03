@@ -22,7 +22,7 @@ namespace he
     {
       m_particleEmitterManager = singletonManager->getService<db::ParticleEmitterManager>();
 
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 

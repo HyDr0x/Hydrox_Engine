@@ -1,13 +1,20 @@
 #include "Shader/Shader.h"
 
+#include <string>
+
 namespace he
 {
   namespace sh
   {
-    Shader::Shader()
-    {
-      m_program = 0;
-    }
+    Shader::Shader() : m_program(0)
+    {}
+
+    Shader::Shader(const std::string& shaderName, const std::vector<std::string>& shaderSourceNames, const std::vector<std::string>& shaderSources) :
+      m_shaderName(shaderName), 
+      m_shaderSourceNames(shaderSourceNames), 
+      m_shaderSources(shaderSources),
+      m_program(0)
+    {}
 
     Shader::~Shader()
     {
@@ -117,6 +124,21 @@ namespace he
     void Shader::useNoShader() const
     {
       glUseProgram(0);
+    }
+
+    std::string Shader::getShaderName() const
+    {
+      return m_shaderName;
+    }
+
+    std::vector<std::string> Shader::getShaderSourceNames() const
+    {
+      return m_shaderSourceNames;
+    }
+
+    std::vector<std::string> Shader::getShaderSources() const
+    {
+      return m_shaderSources;
     }
 
     GLuint Shader::createShader(GLenum shaderType, std::string shaderName, std::string shaderSource) const

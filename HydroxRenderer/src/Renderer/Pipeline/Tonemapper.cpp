@@ -22,11 +22,11 @@ namespace he
     {
       m_logLuminanceRange = util::vec2f(0, 0);
       m_options = singletonManager->getService<RenderOptions>();
-      m_renderShaderContainer = singletonManager->getService<sh::ShaderContainer>();
+      m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       util::SharedPointer<sh::ShaderContainer> renderShader = singletonManager->getService<sh::ShaderContainer>();
 
-      m_histogramShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::HISTOGRAM, sh::ShaderSlotFlags(1));
-      m_tonemappingShaderHandle = m_renderShaderContainer->getRenderShaderHandle(sh::ShaderContainer::TONEMAPPING, sh::ShaderSlotFlags(8192));
+      m_histogramShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::HISTOGRAM, sh::ShaderSlotFlags(1));
+      m_tonemappingShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::TONEMAPPING, sh::ShaderSlotFlags(8192));
 
       createHistogramVertices();
 
@@ -80,7 +80,7 @@ namespace he
       glViewport(0, 0, m_histogramBins, 1);
 
       m_histogramRenderQuad.setWriteFrameBuffer();
-      const sh::RenderShader& shader = m_renderShaderContainer->getRenderShader(m_histogramShaderHandle);
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_histogramShaderHandle);
       shader.useShader();
 
       glBindVertexArray(m_histogramVAO);
@@ -177,7 +177,7 @@ namespace he
 
       m_timer.start();
 
-      const sh::RenderShader& toneMappingShader = m_renderShaderContainer->getRenderShader(m_tonemappingShaderHandle);
+      const sh::RenderShader& toneMappingShader = m_shaderContainer->getRenderShader(m_tonemappingShaderHandle);
       toneMappingShader.useShader();
 
       //float s = 0.00390625f * m_luminanceRange[1] / (1.0f * m_luminanceRange[0] + 0.0001f);

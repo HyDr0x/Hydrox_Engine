@@ -14,11 +14,15 @@ namespace he
       ComputeShaderLoader();
       ~ComputeShaderLoader();
 
-      sh::ComputeShader loadResource(std::string shaderName, std::string filename);
+      sh::ComputeShader loadResource(const std::string& shaderName, const std::vector<std::string>& filename);
 
       void loadShadersInIndexfile(std::string path, std::string shaderIndexFilename);
 
       virtual void checkIfShaderChanged();
+
+    private:
+
+      std::map<std::string, unsigned int> m_computeShaderMap;
     };
   }
 }

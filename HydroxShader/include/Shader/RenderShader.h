@@ -40,11 +40,8 @@ namespace he
       RenderShader();
       RenderShader(util::Flags<ShaderSlots> vertexDecaration,
                    const std::string& shaderName,
-                   const std::string& vertexShaderSource, 
-                   const std::string& fragmentShaderSource = std::string(), 
-                   const std::string& geometryShaderSource = std::string(), 
-                   const std::string& tesselationCTRLShaderSource = std::string(), 
-                   const std::string& tesselationEVALShaderSource = std::string());
+                   const std::vector<std::string>& shaderSourceNames,
+                   const std::vector<std::string>& shaderSources);
 
       RenderShader(const RenderShader& other);
 
@@ -56,8 +53,6 @@ namespace he
 
       void enableTransformFeedback(int count, const GLchar** varyings, GLenum buffertype) const;
 
-      std::vector<std::string> getShaderSources() const;
-
       util::Flags<ShaderSlots> getVertexDeclaration() const;
 
     private:
@@ -67,8 +62,6 @@ namespace he
                                                  GLuint tesselationEvaluationShader, 
                                                  GLuint geometryShader, 
                                                  GLuint fragmentShader);
-
-      std::vector<std::string> m_shaderSources;
       
       util::Flags<ShaderSlots> m_vertexDecaration;
     };

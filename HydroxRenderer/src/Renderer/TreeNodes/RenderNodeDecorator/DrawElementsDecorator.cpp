@@ -101,7 +101,7 @@ namespace he
 
     void DrawElementsDecorator::rasterizeShadowGeometry() const
     {
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+      //glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
@@ -116,7 +116,7 @@ namespace he
 
     void DrawElementsDecorator::rasterizeReflectiveShadowGeometry() const
     {
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+      //glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
@@ -131,7 +131,7 @@ namespace he
 
     void DrawElementsDecorator::rasterizeIndexGeometry() const
     {
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+      //glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
@@ -158,7 +158,7 @@ namespace he
 
     void DrawElementsDecorator::rasterizeIndirectLightingGeometry() const
     {
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+      //glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
@@ -175,7 +175,7 @@ namespace he
 
     void DrawElementsDecorator::rasterizeGeometry() const
     {
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+      //glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
 
       m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
       m_meshVertexBuffer.bindVertexbuffer(0, 0, m_vertexStride);
@@ -205,22 +205,14 @@ namespace he
       {
         updatePerMeshBuffer();
 
-        m_meshVertexBuffer.syncWithFence();
-        m_meshIndexBuffer.syncWithFence();
-        m_bboxesBuffer.syncWithFence();
-        m_triangleIndexOffsetBuffer.syncWithFence();
-        m_cacheOffsetBuffer.syncWithFence();
-        m_triangleBuffer.syncWithFence();
-        m_cacheBuffer.syncWithFence();
+        GPUImmutableBuffer::syncWithWrittenData();
       }
 
       if(hasInstanceNumberChanged() || m_updateMeshData)
       {
         updatePerInstanceBuffer();
 
-        m_commandBuffer.syncWithFence();
-        m_meshInstanceBufferIndex.syncWithFence();
-        m_cacheInstanceOffsetBuffer.syncWithFence();
+        GPUImmutableBuffer::syncWithWrittenData();
       }
 
       m_updateMeshData = false;
@@ -235,14 +227,6 @@ namespace he
 
     void DrawElementsDecorator::updatePerMeshBuffer()
     {
-      m_meshVertexBuffer.setMemoryFence();
-      m_meshIndexBuffer.setMemoryFence();
-      m_bboxesBuffer.setMemoryFence();
-      m_triangleIndexOffsetBuffer.setMemoryFence();
-      m_cacheOffsetBuffer.setMemoryFence();
-      m_triangleBuffer.setMemoryFence();
-      m_cacheBuffer.setMemoryFence();
-
       unsigned int bufferIndex = 0;
       unsigned int vertexOffset = 0;
       unsigned int indexOffset = 0;
@@ -281,10 +265,6 @@ namespace he
     void DrawElementsDecorator::updatePerInstanceBuffer()
     {
       unsigned int instanceCount = getInstanceNumber();
-
-      m_cacheInstanceOffsetBuffer.setMemoryFence();
-      m_meshInstanceBufferIndex.setMemoryFence();
-      m_commandBuffer.setMemoryFence();
 
       unsigned int perInstanceCacheOffsetCounter = 0;
       unsigned int instanceCounter = 0;
