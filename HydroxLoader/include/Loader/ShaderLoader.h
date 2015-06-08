@@ -37,7 +37,7 @@ namespace he
 
       std::string loadShaderSource(std::string filename);
       
-      util::SingletonManager *m_singletonManager;
+      util::SharedPointer<sh::ShaderContainer> m_container;
 
       util::Filecheck m_shaderFileChecker;
 

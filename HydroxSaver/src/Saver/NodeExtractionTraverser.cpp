@@ -27,7 +27,7 @@ namespace he
   namespace saver
   {
     NodeExtractionTraverser::NodeExtractionTraverser(const sg::TreeNodeAllocator& allocator, std::string fileName,
-      std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceMap) :
+      std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceMap) :
       ConstTraverser(allocator), m_fileName(fileName), m_resourceMap(resourceMap)
     {
     }

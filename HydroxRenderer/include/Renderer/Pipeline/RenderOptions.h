@@ -23,9 +23,9 @@ namespace he
       unsigned char max2DLayer;//const number of layer for 2D sprites
 
       //RenderNodes - const
-      unsigned int maxMaterials;//max number of materials in a material node
-      unsigned int maxGeometry;//max number of meshes per render node
-      unsigned int maxBones;//maximum number of bones per skinned mesh
+      unsigned int maxMaterialNumber;//max number of materials in a material node
+      unsigned int maxInstanceNumber;//max number of instances per render node
+      unsigned int maxBoneNumber;//maximum number of bones per skinned mesh
 
       //RenderBuffer Block Sizes - const
       unsigned int vboBlockSize;

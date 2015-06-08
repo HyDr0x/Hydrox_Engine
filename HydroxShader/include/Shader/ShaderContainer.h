@@ -20,7 +20,7 @@ namespace he
     {
     public:
 
-      enum RenderPass
+      enum Renderpass
       {
         RENDERDEBUG,
         GBUFFER,
@@ -43,7 +43,7 @@ namespace he
         PASSNUMBER
       };
 
-      enum ComputePass
+      enum Computepass
       {
         FRUSTUMCULLING,
         INDIRECTLIGHTPROXYLIGHTCREATION,
@@ -52,15 +52,15 @@ namespace he
 
       struct ThisRenderShaderHandle
       {
-        ThisRenderShaderHandle() : renderPass(RenderPass(UINT32_MAX)), shaderIndex(UINT32_MAX)
+        ThisRenderShaderHandle() : renderPass(Renderpass(UINT32_MAX)), shaderIndex(UINT32_MAX)
         {}
 
-        ThisRenderShaderHandle(RenderPass pass, unsigned int index) : renderPass(pass), shaderIndex(index)
+        ThisRenderShaderHandle(Renderpass pass, unsigned int index) : renderPass(pass), shaderIndex(index)
         {}
 
         operator bool()
         {
-          return renderPass != RenderPass(UINT32_MAX) && shaderIndex != UINT32_MAX;
+          return renderPass != Renderpass(UINT32_MAX) && shaderIndex != UINT32_MAX;
         }
 
         bool operator==(const ThisRenderShaderHandle& other) const
@@ -89,7 +89,7 @@ namespace he
           }
         };
 
-        RenderPass renderPass;
+        Renderpass renderPass;
         unsigned int shaderIndex;
       };
 
@@ -97,6 +97,7 @@ namespace he
       virtual ~ShaderContainer();
 
       ThisRenderShaderHandle getRenderShaderHandle(unsigned int pass, ShaderSlotFlags meshVertexDeclaration) const;
+      std::vector<ThisRenderShaderHandle> getRenderShaderHandles(unsigned int pass) const;
 
       const RenderShader& getRenderShader(ThisRenderShaderHandle handle) const;
       const ComputeShader& getComputeShader(unsigned int shaderIndex) const;

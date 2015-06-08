@@ -99,7 +99,7 @@ namespace he
     {
       if(m_showCaches && !showCaches)
       {
-        removeCaches();
+        removeRenderCaches();
       }
 
       m_showCaches = showCaches;
@@ -180,6 +180,16 @@ namespace he
 
       bool globalIllumination = m_lightRenderer.getReflectiveShadowLightNumber() > 0 && m_geometryRasterizer.getGlobalCacheNumber() > 0 && m_options->globalIllumination;
       
+      if(m_showVirtualAreaLights && globalIllumination)
+      {
+        insertVirtualAreaLights();
+      }
+
+      if(m_showCaches && globalIllumination)
+      {
+        insertRenderCaches();
+      }
+
       {//everything in here should be packed in an render pass interface and the blocks like gbuffer etc. in a technique interface which gets passed to a render pass 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -277,16 +287,16 @@ namespace he
           m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
           m_geometryRasterizer.generateIndirectLightMap();
           m_indirectLightRenderer.unsetCacheAndProxyLights();
-        }
 
-        if(m_showVirtualAreaLights && globalIllumination)
-        {
-          renderVirtualAreaLights();
-        }
+          if(m_showVirtualAreaLights)
+          {
+            updateVirtualAreaLights();
+          }
 
-        if(m_showCaches && globalIllumination)
-        {
-          renderCaches();
+          if(m_showCaches)
+          {
+            updateRenderCaches();
+          }
         }
 
         m_gBuffer.setDebugGBuffer();
@@ -412,7 +422,7 @@ namespace he
       m_particleRenderer.removeRenderComponent(particleEmitter);
     }
 
-    void RenderManager::renderVirtualAreaLights()
+    void RenderManager::insertVirtualAreaLights()
     {
       if(m_geometryRasterizer.getGlobalCacheNumber() != m_trfProxyLightMatrices.size())
       {
@@ -420,10 +430,10 @@ namespace he
 
         if(m_geometryRasterizer.getGlobalCacheNumber() < m_trfProxyLightMatrices.size())
         {
-          unsigned int oldSize = m_trfProxyLightMatrices.size() - diff;
+          unsigned int newSize = m_trfProxyLightMatrices.size() - diff;
           for(unsigned int i = 0; i < diff; i++)
           {
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[oldSize + i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle));
+            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[newSize + i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle));
             removeRenderComponent(geomContainer);
           }
 
@@ -442,13 +452,26 @@ namespace he
           }
         }
       }
+    }
 
+    void RenderManager::removeVirtualAreaLights()
+    {
+      for(unsigned int i = 0; i < m_trfProxyLightMatrices.size(); i++)
+      {
+        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle)));
+      }
+
+      m_trfProxyLightMatrices.clear();
+    }
+
+    void RenderManager::updateVirtualAreaLights()
+    {
       unsigned int cacheResolution = m_geometryRasterizer.getProxyLightTextureResolution();
-      
+
       std::vector<util::vec4f> lightPositions(2 * cacheResolution * cacheResolution);
       std::vector<util::vec4f> lightLuminousFlux(2 * cacheResolution * cacheResolution);
       std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
-      
+
       m_indirectLightRenderer.getIndirectPositionMap()->getTextureData(&lightPositions[0]);
       m_indirectLightRenderer.getIndirectLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
       m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
@@ -469,16 +492,6 @@ namespace he
       }
     }
 
-    void RenderManager::removeVirtualAreaLights()
-    {
-      for(unsigned int i = 0; i < m_trfProxyLightMatrices.size(); i++)
-      {
-        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle)));
-      }
-
-      m_trfProxyLightMatrices.clear();
-    }
-
     util::vec2f encodeNormal2(util::vec3f normal)
     {
       return normal[2] < 1.0f - 0.00001 ? (normal[2] * 0.5f + 0.5f) * (util::vec2f(normal[0], normal[1])).normalize() : util::vec2f(1.0f, 0.0f);
@@ -492,7 +505,7 @@ namespace he
       return util::vec3f(tmpErg[0], tmpErg[1], z);
     }
 
-    void RenderManager::renderCaches()
+    void RenderManager::insertRenderCaches()
     {
       if(m_geometryRasterizer.getGlobalCacheNumber() != m_trfCacheMatrices.size())
       {
@@ -500,10 +513,10 @@ namespace he
 
         if(m_geometryRasterizer.getGlobalCacheNumber() < m_trfCacheMatrices.size())
         {
-          unsigned int oldSize = m_trfCacheMatrices.size() - diff;
+          unsigned int newSize = m_trfCacheMatrices.size() - diff;
           for(unsigned int i = 0; i < diff; i++)
           {
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[oldSize + i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle));
+            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[newSize + i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle));
             removeRenderComponent(geomContainer);
           }
 
@@ -522,7 +535,20 @@ namespace he
           }
         }
       }
-      
+    }
+
+    void RenderManager::removeRenderCaches()
+    {
+      for(unsigned int i = 0; i < m_trfCacheMatrices.size(); i++)
+      {
+        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle)));
+      }
+
+      m_trfCacheMatrices.clear();
+    }
+
+    void RenderManager::updateRenderCaches()
+    {
       unsigned int cacheNumber = m_geometryRasterizer.getGlobalCacheNumber();
       unsigned int cacheTextureResolution = m_geometryRasterizer.getProxyLightTextureResolution();
 
@@ -533,7 +559,7 @@ namespace he
       m_indirectLightRenderer.getGlobalCachePositionMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cachePositions[0]);
       m_indirectLightRenderer.getGlobalCacheNormalMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cacheNormals[0]);
       m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
-      
+
       unsigned int validLightCounter = 0;
       for(unsigned int i = 0; i < cachePositions.size(); i++)
       {
@@ -554,16 +580,6 @@ namespace he
       {
         *m_trfCacheMatrices[i] = util::Matrix<float, 4>::identity();
       }
-    }
-
-    void RenderManager::removeCaches()
-    {
-      for(unsigned int i = 0; i < m_trfCacheMatrices.size(); i++)
-      {
-        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle)));
-      }
-
-      m_trfCacheMatrices.clear();
     }
   }
 }

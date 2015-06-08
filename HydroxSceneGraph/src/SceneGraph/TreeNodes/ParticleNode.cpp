@@ -12,7 +12,8 @@
 namespace he
 {
   namespace sg
-  {    ParticleNode::ParticleNode(util::SharedPointer<util::EventManager> eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
+  {
+    ParticleNode::ParticleNode(util::SharedPointer<util::EventManager> eventManager, const std::string& nodeName, NodeIndex parent, NodeIndex nextSibling) :
       TreeNode(nodeName, parent, nextSibling),
       m_eventManager(eventManager)
     {
@@ -127,7 +128,7 @@ namespace he
       m_eventManager = eventManager;
     }
 
-    void ParticleNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void ParticleNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       TreeNode::write(stream, resourceHandles);
 

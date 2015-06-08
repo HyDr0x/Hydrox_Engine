@@ -139,7 +139,7 @@ namespace he
       m_transformedPosition = m_position;
     }
 
-    void LODNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void LODNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       GroupNode::write(stream, resourceHandles);
 

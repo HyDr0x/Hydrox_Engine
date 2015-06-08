@@ -101,11 +101,13 @@ namespace he
       RenderManager(const RenderManager&);
       RenderManager& operator=(const RenderManager&);
 
-      void renderVirtualAreaLights();
+      void insertVirtualAreaLights();
       void removeVirtualAreaLights();
+      void updateVirtualAreaLights();
 
-      void renderCaches();
-      void removeCaches();
+      void insertRenderCaches();
+      void removeRenderCaches();
+      void updateRenderCaches();
 
       util::SingletonManager *m_singletonManager;
 

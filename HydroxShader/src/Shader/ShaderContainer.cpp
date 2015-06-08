@@ -8,8 +8,8 @@ namespace he
   {
     ShaderContainer::ShaderContainer()
     {
-      m_renderPassShader.resize(PASSNUMBER);
       m_computeShader.resize(COMPUTESHADERNUMBER);
+      m_renderPassShader.resize(PASSNUMBER);
     }
 
     ShaderContainer::~ShaderContainer()
@@ -34,7 +34,19 @@ namespace he
         }
       }
 
-      return ThisRenderShaderHandle(RenderPass(pass), resultID);
+      return ThisRenderShaderHandle(Renderpass(pass), resultID);
+    }
+
+    std::vector<ShaderContainer::ThisRenderShaderHandle> ShaderContainer::getRenderShaderHandles(unsigned int pass) const
+    {
+      std::vector<ThisRenderShaderHandle> renderShaderHandles(m_renderPassShader[pass].size());
+
+      for(unsigned int i = 0; i < m_renderPassShader[pass].size(); i++)
+      {
+        renderShaderHandles[i] = ThisRenderShaderHandle(Renderpass(pass), i);
+      }
+
+      return renderShaderHandles;
     }
 
     const RenderShader& ShaderContainer::getRenderShader(ThisRenderShaderHandle handle) const
@@ -50,7 +62,7 @@ namespace he
     sh::ShaderContainer::ThisRenderShaderHandle ShaderContainer::addRenderShader(unsigned int pass, const RenderShader& shader)
     {
       m_renderPassShader[pass].push_back(shader);
-      return ThisRenderShaderHandle(RenderPass(pass), m_renderPassShader[pass].size() - 1);
+      return ThisRenderShaderHandle(Renderpass(pass), m_renderPassShader[pass].size() - 1);
     }
 
     void ShaderContainer::addComputeShader(unsigned int shaderIndex, const ComputeShader& shader)

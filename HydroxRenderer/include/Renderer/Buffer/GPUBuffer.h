@@ -6,6 +6,8 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Pointer/UniquePointer.h>
+
 namespace he
 {
   namespace renderer
@@ -15,7 +17,10 @@ namespace he
     public:
 
       GPUBuffer();
+      GPUBuffer(GPUBuffer& other);
       ~GPUBuffer();
+
+      const GPUBuffer& operator=(GPUBuffer other);
 
       void createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const GLvoid *data = nullptr);
 
@@ -40,10 +45,7 @@ namespace he
 
     private:
 
-      GPUBuffer(const GPUBuffer&);
-      GPUBuffer& operator=(const GPUBuffer&);
-
-      GLuint m_bufferIndex;
+      util::UniquePointer<GLuint> m_bufferIndex;
       
       GLuint m_bufferBlockSize;
       GLuint m_currentBufferSize;

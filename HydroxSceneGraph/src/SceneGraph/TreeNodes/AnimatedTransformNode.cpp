@@ -393,7 +393,7 @@ namespace he
       m_currentRotationKey = 0;
     }
 
-    void AnimatedTransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void AnimatedTransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       TransformNode::write(stream, resourceHandles);
 

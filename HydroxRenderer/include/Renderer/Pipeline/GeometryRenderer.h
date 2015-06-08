@@ -11,15 +11,15 @@
 
 #include <DataBase/ResourceManager.hpp>
 
-#include "Renderer/Buffer/GPUBuffer.h"
+#include "Renderer/Renderpass/FrustumCullingRenderpass.h"
+#include "Renderer/Renderpass/GeometryRenderpass.h"
+#include "Renderer/Renderpass/DebugGeometryRenderpass.h"
+#include "Renderer/Renderpass/IndexGeometryRenderpass.h"
+#include "Renderer/Renderpass/IndirectLightGeometryRenderpass.h"
+#include "Renderer/Renderpass/ReflectiveShadowMapGeometryRenderpass.h"
+#include "Renderer/Renderpass/ShadowMapGeometryRenderpass.h"
 
-#include "Renderer/Traverser/RenderGeometryTraverser.h"
-#include "Renderer/Traverser/RenderGeometryTraverserDebug.h"
-#include "Renderer/Traverser/RenderIndexGeometryTraverser.h"
-#include "Renderer/Traverser/RenderShadowGeometryTraverser.h"
-#include "Renderer/Traverser/RenderReflectiveShadowGeometryTraverser.h"
-#include "Renderer/Traverser/RenderIndirectLightingGeometryTraverser.h"
-#include "Renderer/Traverser/FrustumCullingTraverser.h"
+#include "Renderer/Renderdata/IRenderContainer.h"
 
 namespace he
 {
@@ -38,7 +38,7 @@ namespace he
     class GroupNode;
     class IRenderNode;
 
-    enum RenderPass
+    enum Renderpass
     {
       SHADOWPASS,
       REFLECTIVESHADOWPASS,
@@ -57,7 +57,7 @@ namespace he
 
       void updateBuffer();
 
-      void frustumCulling(int cameraIndex, RenderPass pass);
+      void frustumCulling(int cameraIndex, Renderpass pass);
 
       void generateShadowMap(int cameraIndex);
 
@@ -96,20 +96,16 @@ namespace he
       std::vector<util::ResourceHandle> m_updateMeshHandles;
       std::vector<util::ResourceHandle> m_updateMaterialHandles;
 
-      FrustumCullingTraverser m_frustumCullingTraverser;
-      RenderGeometryTraverser m_renderGeometryTraverser;
-      RenderGeometryTraverserDebug m_renderGeometryTraverserDebug;
-      RenderIndexGeometryTraverser m_renderIndexGeometryTraverser;
-      RenderShadowGeometryTraverser m_renderShadowGeometryTraverser;
-      RenderReflectiveShadowGeometryTraverser m_renderReflectiveShadowGeometryTraverser;
-      RenderIndirectLightingGeometryTraverser m_renderIndirectLightingGeometryTraverser;
+      FrustumCullingRenderpass m_frustumCullingRenderpass;
+      GeometryRenderpass m_geometryRenderpass;
+      DebugGeometryRenderpass m_debugRenderpass;
+      IndexGeometryRenderpass m_indexRenderpass;
+      IndirectLightGeometryRenderpass m_indirectLightingRenderpass;
+      ReflectiveShadowMapGeometryRenderpass m_reflectiveShadowMapRenderpass;
+      ShadowMapGeometryRenderpass m_shadowMapRenderpass;
 
-      util::SharedPointer<TreeNode> m_renderRootNode;
-      util::SharedPointer<TreeNode> m_renderDebugRootNode;
-      util::SharedPointer<TreeNode> m_renderIndexRootNode;
-      util::SharedPointer<TreeNode> m_renderShadowRootNode;
-      util::SharedPointer<TreeNode> m_renderReflectiveShadowRootNode;
-      util::SharedPointer<TreeNode> m_renderIndirectLightRootNode;
+      std::vector<util::SharedPointer<IRenderContainer>> m_renderContainer;
+      std::vector<util::SharedPointer<IRenderContainer>> m_debugRenderContainer;
     };
   }
 }

@@ -58,7 +58,7 @@ namespace he
       }
       
       fileStream << m_resourceMap["Meshes"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Meshes"].begin(); it != m_resourceMap["Meshes"].end(); it++)
+      for(std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>::iterator it = m_resourceMap["Meshes"].begin(); it != m_resourceMap["Meshes"].end(); it++)
       {
         fileStream << it->second << std::endl;
         
@@ -68,7 +68,7 @@ namespace he
       fileStream << std::endl;
 
       fileStream << m_resourceMap["Materials"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Materials"].begin(); it != m_resourceMap["Materials"].end(); it++)
+      for(std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>::iterator it = m_resourceMap["Materials"].begin(); it != m_resourceMap["Materials"].end(); it++)
       {
         fileStream << it->second << std::endl;
 
@@ -78,7 +78,7 @@ namespace he
       fileStream << std::endl;
 
       fileStream << m_resourceMap["Textures"].size() << std::endl;
-      for(std::map<util::ResourceHandle, std::string, util::Less>::iterator it = m_resourceMap["Textures"].begin(); it != m_resourceMap["Textures"].end(); it++)
+      for(std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>::iterator it = m_resourceMap["Textures"].begin(); it != m_resourceMap["Textures"].end(); it++)
       {
         fileStream << it->second << std::endl;
 

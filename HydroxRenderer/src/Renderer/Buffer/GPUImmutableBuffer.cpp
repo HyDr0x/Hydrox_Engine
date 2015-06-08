@@ -9,13 +9,49 @@ namespace he
   {
     GPUImmutableBuffer::GPUImmutableBuffer()
     {
-      m_immutableBufferIndex = 0;
-      m_memoryFence = 0;
+      m_immutableBufferIndex = util::UniquePointer<GLuint>(new GLuint(0));
+      m_memoryFence = util::UniquePointer<GLsync>(new GLsync(nullptr));
+    }
+
+    GPUImmutableBuffer::GPUImmutableBuffer(GPUImmutableBuffer& other)
+    {
+      m_immutableBufferIndex = std::move(other.m_immutableBufferIndex);
+      m_memoryFence = std::move(other.m_memoryFence);
+
+      m_bufferPointer = other.m_bufferPointer;
+      m_bufferBlockSize = other.m_bufferBlockSize;
+      m_currentBufferSize = other.m_currentBufferSize;
+
+      m_flags = other.m_flags;
+      m_target = other.m_target;
     }
 
     GPUImmutableBuffer::~GPUImmutableBuffer()
     {
-      glDeleteBuffers(1, &m_immutableBufferIndex);
+      if(m_immutableBufferIndex)
+      {
+        glDeleteBuffers(1, m_immutableBufferIndex.get());
+      }
+
+      if(m_memoryFence)
+      {
+        glDeleteSync(*m_memoryFence);
+      }
+    }
+
+    const GPUImmutableBuffer& GPUImmutableBuffer::operator=(GPUImmutableBuffer other)
+    {
+      m_immutableBufferIndex = std::move(other.m_immutableBufferIndex);
+      m_memoryFence = std::move(other.m_memoryFence);
+
+      std::swap(m_bufferPointer, other.m_bufferPointer);
+      std::swap(m_bufferBlockSize, other.m_bufferBlockSize);
+      std::swap(m_currentBufferSize, other.m_currentBufferSize);
+
+      std::swap(m_flags, other.m_flags);
+      std::swap(m_target, other.m_target);
+
+      return *this;
     }
 
     void GPUImmutableBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum flags, const GLvoid *data)
@@ -32,10 +68,10 @@ namespace he
     {
       m_currentBufferSize = ceil(size / float(m_bufferBlockSize)) * m_bufferBlockSize;
 
-      glDeleteBuffers(1, &m_immutableBufferIndex);//necessary because of immutable storage
-      glGenBuffers(1, &m_immutableBufferIndex);
+      glDeleteBuffers(1, m_immutableBufferIndex.get());//necessary because of immutable storage
+      glGenBuffers(1, m_immutableBufferIndex.get());
 
-      glBindBuffer(m_target, m_immutableBufferIndex);
+      glBindBuffer(m_target, *m_immutableBufferIndex);
       glBufferStorage(m_target, m_currentBufferSize, nullptr, m_flags);
       m_bufferPointer = glMapBufferRange(m_target, 0, m_currentBufferSize, m_flags);
       glBindBuffer(m_target, 0);
@@ -54,13 +90,13 @@ namespace he
     void GPUImmutableBuffer::setReadFence()
     {
       glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);//make sure the memory is coherently visible
-      glDeleteSync(m_memoryFence);
-      m_memoryFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);//make sure that the write has happened and the barrier was reached
+      glDeleteSync(*m_memoryFence);
+      *m_memoryFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);//make sure that the write has happened and the barrier was reached
     }
 
     void GPUImmutableBuffer::syncWithReadFence() const
     {
-      glClientWaitSync(m_memoryFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000);
+      glClientWaitSync(*m_memoryFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000);
     } 
 
     void GPUImmutableBuffer::syncWithWrittenData()
@@ -96,14 +132,14 @@ namespace he
 
     void GPUImmutableBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const void *data) const
     {
-      glBindBuffer(m_target, m_immutableBufferIndex);
+      glBindBuffer(m_target, *m_immutableBufferIndex);
       glClearBufferData(m_target, internalFormat, format, type, data);
       glBindBuffer(m_target, 0);
     }
 
     void GPUImmutableBuffer::bindBuffer(GLenum target) const
     {
-      glBindBuffer(target, m_immutableBufferIndex);
+      glBindBuffer(target, *m_immutableBufferIndex);
     }
 
     void GPUImmutableBuffer::unbindBuffer(GLenum target) const
@@ -113,7 +149,7 @@ namespace he
 
     void GPUImmutableBuffer::bindBuffer(GLenum target, GLuint bufferBindingPoint) const
     {
-      glBindBufferBase(target, bufferBindingPoint, m_immutableBufferIndex);
+      glBindBufferBase(target, bufferBindingPoint, *m_immutableBufferIndex);
     }
 
     void GPUImmutableBuffer::unbindBuffer(GLenum target, GLuint bufferBindingPoint) const
@@ -123,7 +159,7 @@ namespace he
 
     void GPUImmutableBuffer::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const
     {
-      glBindVertexBuffer(bufferBindingPoint, m_immutableBufferIndex, offset, stride);
+      glBindVertexBuffer(bufferBindingPoint, *m_immutableBufferIndex, offset, stride);
     }
 
     void GPUImmutableBuffer::unbindVertexBuffer(GLuint bufferBindingPoint) const

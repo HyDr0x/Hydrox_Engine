@@ -26,9 +26,8 @@ namespace he
       geometryShader = createShader(GL_GEOMETRY_SHADER, shaderName, m_shaderSources[2]);
       fragmentShader = createShader(GL_FRAGMENT_SHADER, shaderName, m_shaderSources[1]);
 
-      for(unsigned int i = 0; i < 5; i++)
+      for(unsigned int i = 0; i < m_shaderSources.size(); i++)
       {
-        m_shaderSources.push_back(m_shaderSources[i]);
         m_shaderHashes.push_back(MurmurHash64A(m_shaderSources[i].c_str(), m_shaderSources[i].size(), 0));
       }
       

@@ -16,13 +16,15 @@ layout(location = POSITION) in vec3 in_Pos;
 layout(location = BONEWEIGHTS) in vec4 in_boneWeights;
 layout(location = BONEINDICES) in vec4 in_boneIndices;
 
+flat out uint vsout_instanceIndex;
+
 void main()
 {
-	uint instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
+	vsout_instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 
 	mat4 skinningMatrix = mat4(0.0f);
 
-	uint globalInstanceID = MAXBONES * instanceIndex;
+	uint globalInstanceID = MAXBONES * vsout_instanceIndex;
 	
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.x)] * in_boneWeights.x);
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.y)] * in_boneWeights.y);

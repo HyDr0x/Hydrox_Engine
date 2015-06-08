@@ -37,7 +37,7 @@ namespace he
       void writeToFile(std::string path, std::string filename, const sg::Scene& scene, util::SingletonManager *singletonManager);
       void write(std::ostream& stream, const sg::TreeNodeAllocator& allocator, util::SingletonManager *singletonManager);
 
-      std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>> m_resourceMap;//first string: resource kind e.g. mesh, billboard etc. | resource handle: for unique mapping | second string: filename
+      std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>> m_resourceMap;//first string: resource kind e.g. mesh, billboard etc. | resource handle: for unique mapping | second string: filename
     };
   }
 }

@@ -45,11 +45,9 @@ namespace he
         return;
       }
 
-      util::SharedPointer<sh::ShaderContainer> container = m_singletonManager->getService<sh::ShaderContainer>();
-
       std::ifstream file(path + shaderIndexFilename);
       std::string line;
-      std::string renderPassKeyword("RenderPass"), vertexDeclarationKeyword("VertexDeclaration");
+      std::string renderPassKeyword("Renderpass"), vertexDeclarationKeyword("VertexDeclaration");
       unsigned int renderPass = UINT32_MAX;
       unsigned int vertexDeclaration = UINT32_MAX;
 
@@ -94,7 +92,7 @@ namespace he
               }
             }
 
-            sh::RenderShaderHandle shaderHandle = container->addRenderShader(renderPass, loadResource(sh::ShaderSlotFlags(vertexDeclaration), shaderName, shaderFileNames));
+            sh::RenderShaderHandle shaderHandle = m_container->addRenderShader(renderPass, loadResource(sh::ShaderSlotFlags(vertexDeclaration), shaderName, shaderFileNames));
 
             for(unsigned int i = 0; i < shaderFileNames.size(); i++)
             {
@@ -122,14 +120,12 @@ namespace he
     {
       if(m_shaderFileChecker.isFileChanged())
       {
-        util::SharedPointer<sh::ShaderContainer> container = m_singletonManager->getService<sh::ShaderContainer>();
-
         std::vector<sh::RenderShaderHandle> editedShaderHandles = m_renderShaderMap[m_shaderFileChecker.getChangedFilepath()];
 
         for(unsigned int i = 0; i < editedShaderHandles.size(); i++)
         {
-          const sh::RenderShader& shader = container->getRenderShader(editedShaderHandles[i]);
-          container->replaceRenderShader(editedShaderHandles[i], loadResource(shader.getVertexDeclaration(), 
+          const sh::RenderShader& shader = m_container->getRenderShader(editedShaderHandles[i]);
+          m_container->replaceRenderShader(editedShaderHandles[i], loadResource(shader.getVertexDeclaration(),
             shader.getShaderName(),
             shader.getShaderSourceNames()));
         }

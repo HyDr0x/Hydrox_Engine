@@ -13,7 +13,8 @@ namespace he
     }
 
     template<typename T> SharedPointer<T>::SharedPointer(T *obj) : m_ptr(obj), m_referenceNumber(new unsigned int(1))
-    {}
+    {
+    }
 
     template<typename T> SharedPointer<T>::SharedPointer(const SharedPointer<T>& other) : m_referenceNumber(other.m_referenceNumber), m_ptr(other.m_ptr)
     {

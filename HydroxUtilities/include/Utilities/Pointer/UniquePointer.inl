@@ -10,12 +10,34 @@ namespace he
     }
 
     template<typename T> UniquePointer<T>::UniquePointer(T* obj) : m_ptr(obj)
-    {}
+    {
+    }
+
+    template<typename T> UniquePointer<T>::UniquePointer(UniquePointer<T>&& other)
+    {
+      if(this != &other)
+      {
+        m_ptr = other.m_ptr;
+        other.m_ptr = nullptr;
+      }
+    }
 
     template<typename T> UniquePointer<T>::~UniquePointer()
     {
       delete m_ptr;
       m_ptr = nullptr;
+    }
+
+    template<typename T> UniquePointer<T>& UniquePointer<T>::operator=(UniquePointer<T>&& other)
+    {
+      if(this != &other)
+      {
+        delete m_ptr;
+        m_ptr = other.m_ptr;
+        other.m_ptr = nullptr;
+      }
+
+      return *this;
     }
 
     template<typename T> void UniquePointer<T>::release()
@@ -72,13 +94,28 @@ namespace he
       m_ptr = nullptr;
     }
 
-    template<typename T> UniquePointer<T[]>::UniquePointer(T[] obj) : m_ptr(obj)
+    template<typename T> UniquePointer<T[]>::UniquePointer(T obj[]) : m_ptr(obj)
     {}
+
+    template<typename T> UniquePointer<T[]>::UniquePointer(UniquePointer<T[]>& other)
+    {
+      m_ptr = other.m_ptr;
+      other.m_ptr = nullptr;
+    }
 
     template<typename T> UniquePointer<T[]>::~UniquePointer()
     {
       delete[] m_ptr;
       m_ptr = nullptr;
+    }
+
+    template<typename T> UniquePointer<T[]>& UniquePointer<T[]>::operator=(UniquePointer<T[]>& other)
+    {
+      delete[] m_ptr;
+      m_ptr = other.m_ptr;
+      other.m_ptr = nullptr;
+
+      return *this;
     }
 
     template<typename T> void UniquePointer<T[]>::release()
@@ -93,7 +130,7 @@ namespace he
       m_ptr = nullptr;
     }
 
-    template<typename T> template<typename F> void UniquePointer<T[]>::reset(F *ptr)
+    template<typename T> template<typename F> void UniquePointer<T[]>::reset(F ptr[])
     {
       UniquePointer<T[]> other = static_cast<T*>(ptr);
       swap(other);
@@ -117,12 +154,6 @@ namespace he
     template<typename T> T* UniquePointer<T[]>::get() const
     {
       return m_ptr;
-    }
-
-    template<typename T> void UniquePointer<T[]>::ownDelete()
-    {
-      delete[] m_ptr;
-      m_ptr = nullptr;
     }
 
     template<typename T> void UniquePointer<T[]>::swap(UniquePointer<T[]>& other)

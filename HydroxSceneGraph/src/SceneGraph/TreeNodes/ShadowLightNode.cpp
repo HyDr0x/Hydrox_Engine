@@ -314,7 +314,7 @@ namespace he
       m_renderable = false;
     }
 
-    void ShadowLightNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void ShadowLightNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       TreeNode::write(stream, resourceHandles);
 

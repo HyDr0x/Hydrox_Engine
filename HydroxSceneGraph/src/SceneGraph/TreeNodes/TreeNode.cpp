@@ -96,7 +96,7 @@ namespace he
       m_nextSibling = NodeIndex(nodeIndex, (NodeType)nodeType);
     }
 
-    void TreeNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void TreeNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       stream << (unsigned int)m_index.nodeType << std::endl;
       stream << m_index.index << std::endl;

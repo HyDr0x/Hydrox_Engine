@@ -1,0 +1,19 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IDrawRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IInstanceRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IMaterialRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IMatrixRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IRenderContainer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/MaterialRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderContainer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderDataFactory.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedInstancesRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedMatrixRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticInstancesRenderData.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticMatrixRenderData.h 
+	PARENT_SCOPE 
+)

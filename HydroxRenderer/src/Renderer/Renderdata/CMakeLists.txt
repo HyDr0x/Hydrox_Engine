@@ -1,0 +1,13 @@
+set(
+	SOURCE 
+	${SOURCE} 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawArrayRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DrawElementsRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/MaterialRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderDataFactory.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedInstancesRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/SkinnedMatrixRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticInstancesRenderData.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/StaticMatrixRenderData.cpp 
+	PARENT_SCOPE 
+)

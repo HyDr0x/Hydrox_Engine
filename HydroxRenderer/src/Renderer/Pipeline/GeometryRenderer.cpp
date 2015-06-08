@@ -1,33 +1,13 @@
 #include "Renderer/Pipeline/GeometryRenderer.h"
 
+#include <Utilities/Timer/Timer.h>
+
 #include <Shader/ShaderContainer.h>
 
 #include <XBar/IGeometryContainer.h>
 
-#include "Renderer/TreeNodes/VertexDeclarationNode.h"
-
-#include "Renderer/Traverser/InsertGeometryTraverserDebug.h"
-#include "Renderer/Traverser/InsertGeometryTraverserRenderPass.h"
-#include "Renderer/Traverser/InsertGeometryTraverserIndexPass.h"
-#include "Renderer/Traverser/InsertGeometryTraverserShadowPass.h"
-#include "Renderer/Traverser/InsertGeometryTraverserReflectiveShadowPass.h"
-#include "Renderer/Traverser/InsertGeometryTraverserIndirectLightingPass.h"
-
-#include "Renderer/Traverser/RemoveGeometryTraverserDebug.h"
-#include "Renderer/Traverser/RemoveGeometryTraverserRenderPass.h"
-#include "Renderer/Traverser/RemoveGeometryTraverserIndexPass.h"
-#include "Renderer/Traverser/RemoveGeometryTraverserShadowPass.h"
-#include "Renderer/Traverser/RemoveGeometryTraverserReflectiveShadowPass.h"
-#include "Renderer/Traverser/RemoveGeometryTraverserIndirectLightingPass.h"
-
-#include "Renderer/Traverser/UpdateTraverser.h"
-
-#include "Renderer/TreeNodes/GroupNode.h"
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
-
+#include "Renderer/Renderdata/RenderDataFactory.h"
 #include "Renderer/Pipeline/RenderOptions.h"
-
-#include <Utilities/Timer/Timer.h>
 
 namespace he
 {
@@ -36,12 +16,6 @@ namespace he
     GeometryRenderer::GeometryRenderer() :
       m_globalCacheNumber(0)
     {
-      m_renderRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
-      m_renderDebugRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
-      m_renderIndexRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
-      m_renderShadowRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
-      m_renderReflectiveShadowRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
-      m_renderIndirectLightRootNode = util::SharedPointer<GroupNode>(new GroupNode).dynamic_pointer_cast<TreeNode>();
     }
 
     GeometryRenderer::~GeometryRenderer()
@@ -69,44 +43,57 @@ namespace he
       samplerObjects[db::Material::SPECULARTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
       samplerObjects[db::Material::DISPLACEMENTTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST));
 
-      m_renderGeometryTraverser.initialize(m_singletonManager, samplerObjects);
-      m_renderGeometryTraverserDebug.initialize(m_singletonManager, samplerObjects);
-      m_renderIndexGeometryTraverser.initialize(m_singletonManager);
-      m_renderShadowGeometryTraverser.initialize(m_singletonManager);
-      m_renderReflectiveShadowGeometryTraverser.initialize(m_singletonManager);
-      m_renderIndirectLightingGeometryTraverser.initialize(m_singletonManager, normalMap, materialMap);
+      m_frustumCullingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::FRUSTUMCULLING);
+      m_geometryRenderpass.initialize(m_singletonManager, sh::ShaderContainer::GBUFFER, samplerObjects);
+      m_debugRenderpass.initialize(m_singletonManager, sh::ShaderContainer::RENDERDEBUG, samplerObjects);
+      m_indexRenderpass.initialize(m_singletonManager, sh::ShaderContainer::TRIANGLEINDEX);
+      m_indirectLightingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTINTERPOLATION, normalMap, materialMap);
+      m_reflectiveShadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::REFLECTIVESHADOW, samplerObjects);
+      m_shadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::SHADOW);
 
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
     }
 
     void GeometryRenderer::addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      if(!m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle())->getDebug())
+      db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle());
+
+      if(!material->getDebug())
       {
-        InsertGeometryTraverserRenderPass insertTraverser;
-        insertTraverser.insertGeometry(m_renderRootNode, geometry, m_singletonManager);
-
-        util::SharedPointer<IRenderGroup> createdRenderGroup = insertTraverser.getCreatedRenderNode();
-
-        if(createdRenderGroup)
+        for(unsigned int i = 0; i < m_renderContainer.size(); i++)
         {
-          InsertGeometryTraverserIndexPass insertIndexTraverser;
-          insertIndexTraverser.insertGeometry(m_renderIndexRootNode, createdRenderGroup, geometry, m_singletonManager);
-
-          InsertGeometryTraverserShadowPass insertShadowTraverser;
-          insertShadowTraverser.insertGeometry(m_renderShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
-
-          InsertGeometryTraverserReflectiveShadowPass insertReflectiveShadowTraverser;
-          insertReflectiveShadowTraverser.insertGeometry(m_renderReflectiveShadowRootNode, createdRenderGroup, geometry, m_singletonManager);
-
-          InsertGeometryTraverserIndirectLightingPass insertGeometryTraverserIndirectLightingPass;
-          insertGeometryTraverserIndirectLightingPass.insertGeometry(m_renderIndirectLightRootNode, createdRenderGroup, geometry, m_singletonManager);
+          if(m_renderContainer[i]->insertGeometry(geometry))
+          {
+            return;
+          }
         }
+
+        m_renderContainer.push_back(RenderDataFactory::createRenderDataContainer(geometry, m_singletonManager));
+
+        m_renderContainer.back()->insertGeometry(geometry);
+
+        m_frustumCullingRenderpass.insertGeometry(m_renderContainer.back());
+        m_geometryRenderpass.insertGeometry(m_renderContainer.back());
+        m_indexRenderpass.insertGeometry(m_renderContainer.back());
+        m_indirectLightingRenderpass.insertGeometry(m_renderContainer.back());
+        m_reflectiveShadowMapRenderpass.insertGeometry(m_renderContainer.back());
+        m_shadowMapRenderpass.insertGeometry(m_renderContainer.back());
       }
       else
       {
-        InsertGeometryTraverserDebug insertDebugTraverser;
-        insertDebugTraverser.insertGeometry(m_renderDebugRootNode, geometry, m_singletonManager);
+        for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
+        {
+          if(m_debugRenderContainer[i]->insertGeometry(geometry))
+          {
+            return;
+          }
+        }
+
+        m_debugRenderContainer.push_back(RenderDataFactory::createRenderDataContainer(geometry, m_singletonManager));
+
+        m_debugRenderContainer.back()->insertGeometry(geometry);
+
+        m_debugRenderpass.insertGeometry(m_debugRenderContainer.back());
       }
     }
 
@@ -114,99 +101,102 @@ namespace he
     {
       if(!m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle())->getDebug())
       {
-        RemoveGeometryTraverserRenderPass removeTraverser;
-        removeTraverser.removeGeometry(m_renderRootNode, geometry, m_singletonManager);
+        for(unsigned int i = 0; i < m_renderContainer.size(); i++)
+        {
+          if(m_renderContainer[i]->removeGeometry(geometry))
+          {
+            if(m_renderContainer[i]->isEmpty())
+            {
+              m_frustumCullingRenderpass.removeGeometry(m_renderContainer[i]);
+              m_geometryRenderpass.removeGeometry(m_renderContainer[i]);
+              m_debugRenderpass.removeGeometry(m_renderContainer[i]);
+              m_indexRenderpass.removeGeometry(m_renderContainer[i]);
+              m_indirectLightingRenderpass.removeGeometry(m_renderContainer[i]);
+              m_reflectiveShadowMapRenderpass.removeGeometry(m_renderContainer[i]);
+              m_shadowMapRenderpass.removeGeometry(m_renderContainer[i]);
 
-        RemoveGeometryTraverserIndexPass removeIndexTraverser;
-        removeIndexTraverser.removeGeometry(m_renderIndexRootNode, geometry, m_singletonManager);
+              m_renderContainer.erase(m_renderContainer.begin() + i);
 
-        RemoveGeometryTraverserShadowPass removeShadowTraverser;
-        removeShadowTraverser.removeGeometry(m_renderShadowRootNode, geometry, m_singletonManager);
-
-        RemoveGeometryTraverserReflectiveShadowPass removeReflectiveShadowTraverser;
-        removeReflectiveShadowTraverser.removeGeometry(m_renderReflectiveShadowRootNode, geometry, m_singletonManager);
-
-        RemoveGeometryTraverserIndirectLightingPass removeGeometryTraverserIndirectLightingPass;
-        removeGeometryTraverserIndirectLightingPass.removeGeometry(m_renderIndirectLightRootNode, geometry, m_singletonManager);
+              return;
+            }
+          }
+        }
       }
       else
       {
-        RemoveGeometryTraverserDebug removeDebugTraverser;
-        removeDebugTraverser.removeGeometry(m_renderDebugRootNode, geometry, m_singletonManager);
+        for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
+        {
+          if(m_debugRenderContainer[i]->removeGeometry(geometry))
+          {
+            if(m_debugRenderContainer[i]->isEmpty())
+            {
+              m_debugRenderpass.removeGeometry(m_debugRenderContainer[i]);
+
+              m_debugRenderContainer.erase(m_debugRenderContainer.begin() + i);
+            }
+
+            return;
+          }
+        }
       }
     }
 
     void GeometryRenderer::updateBuffer()
     {
-      UpdateTraverser updateTraverser;
-      updateTraverser.doTraverse(m_renderRootNode);
+      m_globalCacheNumber = 0;
 
-      m_globalCacheNumber = updateTraverser.getGlobalCacheNumber();
-
-      m_proxyLightTextureResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
-      m_renderIndirectLightingGeometryTraverser.setGlobalBufferResolution(m_proxyLightTextureResolution);
-      m_renderIndexGeometryTraverser.setGlobalBufferResolution(m_proxyLightTextureResolution);
-    }
-
-    void GeometryRenderer::frustumCulling(int cameraIndex, RenderPass pass)
-    {
-      const sh::ComputeShader& frustumCullingShader = m_container->getComputeShader(sh::ShaderContainer::FRUSTUMCULLING);
-      frustumCullingShader.useShader();
-
-      sh::ComputeShader::setUniform(1, GL_INT, &cameraIndex);
-      FrustumCullingTraverser frustumCullingTraverser;
-      
-      switch(pass)
+      for(unsigned int i = 0; i < m_renderContainer.size(); i++)
       {
-        case SHADOWPASS:
-          frustumCullingTraverser.doTraverse(m_renderShadowRootNode.dynamic_pointer_cast<const TreeNode>());
-          break;
-        case REFLECTIVESHADOWPASS:
-          frustumCullingTraverser.doTraverse(m_renderReflectiveShadowRootNode.dynamic_pointer_cast<const TreeNode>());
-          break;
-        case VIEWPASS:
-          frustumCullingTraverser.doTraverse(m_renderRootNode.dynamic_pointer_cast<const TreeNode>());
-          break;
+        m_renderContainer[i]->update();
+        m_globalCacheNumber += m_renderContainer[i]->getCacheNumber();
       }
 
-      frustumCullingShader.useNoShader();
+      for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
+      {
+        m_debugRenderContainer[i]->update();
+      }
+
+      m_proxyLightTextureResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
+    }
+
+    void GeometryRenderer::frustumCulling(int cameraIndex, Renderpass pass)
+    {
+      m_frustumCullingRenderpass.setViewIndex(cameraIndex);
+      m_frustumCullingRenderpass.doComputepass();
     }
 
     void GeometryRenderer::generateShadowMap(int cameraIndex)
     {
-      m_renderShadowGeometryTraverser.setViewProjectionIndex(cameraIndex);
-      m_renderShadowGeometryTraverser.doTraverse(m_renderShadowRootNode);
+      m_shadowMapRenderpass.setLightIndex(cameraIndex);
+      m_shadowMapRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::generateReflectiveShadowMap(int cameraIndex)
     {
-      //CPUTIMER("cpuCompute", 0)
-      //GPUTIMER("gpuCompute", 1)
-      m_renderReflectiveShadowGeometryTraverser.setViewProjectionIndex(cameraIndex);
-      m_renderReflectiveShadowGeometryTraverser.doTraverse(m_renderReflectiveShadowRootNode);
+      m_reflectiveShadowMapRenderpass.setLightIndex(cameraIndex);
+      m_reflectiveShadowMapRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::generateIndirectLightMap()
     {
-      m_renderIndirectLightingGeometryTraverser.doTraverse(m_renderIndirectLightRootNode);
+      m_indirectLightingRenderpass.setProxyLightTextureResolution(m_proxyLightTextureResolution);
+      m_indirectLightingRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::rasterizeIndexGeometry()
     {
-      m_renderIndexGeometryTraverser.doTraverse(m_renderIndexRootNode);
+      m_indexRenderpass.setProxyLightTextureResolution(m_proxyLightTextureResolution);
+      m_indexRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::rasterizeGeometry()
     {
-      m_renderGeometryTraverser.doTraverse(m_renderRootNode);
+      m_geometryRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::rasterizeDebugGeometry()
     {
-      UpdateTraverser updateTraverser;
-      updateTraverser.doTraverse(m_renderDebugRootNode);
-
-      m_renderGeometryTraverserDebug.doTraverse(m_renderDebugRootNode);
+      m_debugRenderpass.drawRenderpass();
     }
 
     unsigned int GeometryRenderer::getGlobalCacheNumber() const

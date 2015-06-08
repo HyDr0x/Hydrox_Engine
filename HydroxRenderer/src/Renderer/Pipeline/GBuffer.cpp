@@ -2,19 +2,9 @@
 
 #include <Utilities/Miscellaneous/SingletonManager.hpp>
 
-#include <DataBase/ResourceManager.hpp>
 #include <DataBase/Texture2D.h>
 
 #include "Renderer/Pipeline/RenderOptions.h"
-
-#include "Renderer/Traverser/RemoveGeometryTraverser.h"
-#include "Renderer/Traverser/RenderGeometryTraverser.h"
-#include "Renderer/Traverser/FrustumCullingTraverser.h"
-
-#include "Renderer/TreeNodes/GroupNode.h"
-#include "Renderer/TreeNodes/VertexDeclarationNode.h"
-
-#include "Renderer/TreeNodes/RenderNodeDecorator/IRenderGroup.h"
 
 namespace he
 {

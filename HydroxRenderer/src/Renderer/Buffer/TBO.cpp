@@ -10,14 +10,47 @@ namespace he
   {
     TBO::TBO()
     {
-      glGenBuffers(1, &m_bufferIndex);
-      glGenTextures(1, &m_textureIndex);
+      m_bufferIndex = util::UniquePointer<GLuint>(new GLuint(0));
+      m_textureIndex = util::UniquePointer<GLuint>(new GLuint(0));
+      glGenBuffers(1, m_bufferIndex.get());
+      glGenTextures(1, m_textureIndex.get());
+    }
+
+    TBO::TBO(TBO& other)
+    {
+      m_bufferIndex = std::move(other.m_bufferIndex);
+      m_textureIndex = std::move(other.m_textureIndex);
+
+      m_bufferBlockSize = other.m_bufferBlockSize;
+      m_currentBufferSize = other.m_currentBufferSize;
+
+      m_usage = other.m_usage;
+      m_textureTarget = other.m_textureTarget;
+      m_internalFormat = other.m_internalFormat;
     }
 
     TBO::~TBO()
     {
-      glDeleteBuffers(1, &m_bufferIndex);
-      glDeleteTextures(1, &m_textureIndex);
+      if(m_bufferIndex)
+      {
+        glDeleteBuffers(1, m_bufferIndex.get());
+        glDeleteTextures(1, m_textureIndex.get());
+      }
+    }
+
+    const TBO& TBO::operator=(TBO other)
+    {
+      m_bufferIndex = std::move(other.m_bufferIndex);
+      m_textureIndex = std::move(other.m_textureIndex);
+
+      std::swap(m_bufferBlockSize, other.m_bufferBlockSize);
+      std::swap(m_currentBufferSize, other.m_currentBufferSize);
+
+      std::swap(m_usage, other.m_usage);
+      std::swap(m_textureTarget, other.m_textureTarget);
+      std::swap(m_internalFormat, other.m_internalFormat);
+
+      return *this;
     }
 
     void TBO::createBuffer(GLenum textureTarget, GLuint bufferBlockSize, GLuint size, GLenum usage, GLenum internalFormat, const GLvoid *data)
@@ -35,12 +68,12 @@ namespace he
     {
       m_currentBufferSize = ceil(size / float(m_bufferBlockSize)) * m_bufferBlockSize;
 
-      glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
+      glBindBuffer(GL_TEXTURE_BUFFER, *m_bufferIndex);
       glBufferData(GL_TEXTURE_BUFFER, m_currentBufferSize, nullptr, m_usage);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
-      glBindTexture(m_textureTarget, m_textureIndex);
-      glTexBuffer(m_textureTarget, m_internalFormat, m_bufferIndex);//link the created buffer object with the texture
+      glBindTexture(m_textureTarget, *m_textureIndex);
+      glTexBuffer(m_textureTarget, m_internalFormat, *m_bufferIndex);//link the created buffer object with the texture
       glBindTexture(m_textureTarget, 0);
     }
 
@@ -67,21 +100,21 @@ namespace he
         }
       }
 
-      glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
+      glBindBuffer(GL_TEXTURE_BUFFER, *m_bufferIndex);
       glBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
     void TBO::getData(GLuint offset, GLuint size, GLvoid *data) const
     {
-      glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
+      glBindBuffer(GL_TEXTURE_BUFFER, *m_bufferIndex);
       glGetBufferSubData(GL_TEXTURE_BUFFER, offset, size, data);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
     void TBO::clearBuffer(GLenum format, GLenum type, const GLvoid *data) const
     {
-      glBindBuffer(GL_TEXTURE_BUFFER, m_bufferIndex);
+      glBindBuffer(GL_TEXTURE_BUFFER, *m_bufferIndex);
       glClearBufferData(GL_TEXTURE_BUFFER, m_internalFormat, format, type, data);
       glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
@@ -89,7 +122,7 @@ namespace he
     void TBO::bindTexture(GLenum slot) const
     {
       glActiveTexture(GL_TEXTURE0 + slot);
-      glBindTexture(m_textureTarget, m_textureIndex);
+      glBindTexture(m_textureTarget, *m_textureIndex);
     }
 
     void TBO::unbindTexture(GLenum slot) const
@@ -100,7 +133,7 @@ namespace he
 
     void TBO::bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const
     {
-      glBindImageTexture(unit, m_textureIndex, level, GL_FALSE, 0, access, format);
+      glBindImageTexture(unit, *m_textureIndex, level, GL_FALSE, 0, access, format);
     }
 
     void TBO::unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format) const
@@ -110,7 +143,7 @@ namespace he
 
     void TBO::bindBuffer(GLenum target) const
     {
-      glBindBuffer(target, m_bufferIndex);
+      glBindBuffer(target, *m_bufferIndex);
     }
 
     void TBO::unbindBuffer(GLenum target) const
@@ -120,7 +153,7 @@ namespace he
 
     void TBO::bindBuffer(GLenum target, GLuint bufferBindingPoint) const
     {
-      glBindBufferBase(target, bufferBindingPoint, m_bufferIndex);
+      glBindBufferBase(target, bufferBindingPoint, *m_bufferIndex);
     }
 
     void TBO::unbindBuffer(GLenum target, GLuint bufferBindingPoint) const

@@ -9,12 +9,40 @@ namespace he
   {
     GPUBuffer::GPUBuffer()
     {
-      glGenBuffers(1, &m_bufferIndex);
+      m_bufferIndex = util::UniquePointer<GLuint>(new GLuint(0));
+      glGenBuffers(1, m_bufferIndex.get());
+    }
+
+    GPUBuffer::GPUBuffer(GPUBuffer& other)
+    {
+      m_bufferIndex = std::move(other.m_bufferIndex);
+
+      m_bufferBlockSize = other.m_bufferBlockSize;
+      m_currentBufferSize = other.m_currentBufferSize;
+
+      m_usage = other.m_usage;
+      m_target = other.m_target;
     }
 
     GPUBuffer::~GPUBuffer()
     {
-      glDeleteBuffers(1, &m_bufferIndex);
+      if(m_bufferIndex)
+      {
+        glDeleteBuffers(1, m_bufferIndex.get());
+      }
+    }
+
+    const GPUBuffer& GPUBuffer::operator=(GPUBuffer other)
+    {
+      m_bufferIndex = std::move(other.m_bufferIndex);
+
+      std::swap(m_bufferBlockSize, other.m_bufferBlockSize);
+      std::swap(m_currentBufferSize, other.m_currentBufferSize);
+
+      std::swap(m_usage, other.m_usage);
+      std::swap(m_target, other.m_target);
+
+      return *this;
     }
 
     void GPUBuffer::createBuffer(GLenum target, GLuint bufferBlockSize, GLuint size, GLenum usage, const GLvoid *data)
@@ -31,7 +59,7 @@ namespace he
     {
       m_currentBufferSize = ceil(size / float(m_bufferBlockSize)) * m_bufferBlockSize;
 
-      glBindBuffer(m_target, m_bufferIndex);
+      glBindBuffer(m_target, *m_bufferIndex);
       glBufferData(m_target, m_currentBufferSize, nullptr, m_usage);
       glBindBuffer(m_target, 0);
     }
@@ -64,28 +92,28 @@ namespace he
         }
       }
 
-      glBindBuffer(m_target, m_bufferIndex);
+      glBindBuffer(m_target, *m_bufferIndex);
       glBufferSubData(m_target, offset, size, data);//fill the buffer with the new data
       glBindBuffer(m_target, 0);
     }
 
     void GPUBuffer::getData(GLuint offset, GLuint size, GLvoid *data) const
     {
-      glBindBuffer(m_target, m_bufferIndex);
+      glBindBuffer(m_target, *m_bufferIndex);
       glGetBufferSubData(m_target, offset, size, data);
       glBindBuffer(m_target, 0);
     }
 
     void GPUBuffer::clearBuffer(GLenum format, GLenum internalFormat, GLenum type, const GLvoid *data) const
     {
-      glBindBuffer(m_target, m_bufferIndex);
+      glBindBuffer(m_target, *m_bufferIndex);
       glClearBufferData(m_target, internalFormat, format, type, data);
       glBindBuffer(m_target, 0);
     }
 
     void GPUBuffer::bindBuffer(GLenum target) const
     {
-      glBindBuffer(target, m_bufferIndex);
+      glBindBuffer(target, *m_bufferIndex);
     }
 
     void GPUBuffer::unbindBuffer(GLenum target) const
@@ -95,7 +123,7 @@ namespace he
 
     void GPUBuffer::bindBuffer(GLenum target, GLuint bufferBindingPoint) const
     {
-      glBindBufferBase(target, bufferBindingPoint, m_bufferIndex);
+      glBindBufferBase(target, bufferBindingPoint, *m_bufferIndex);
     }
 
     void GPUBuffer::unbindBuffer(GLenum target, GLuint bufferBindingPoint) const
@@ -105,7 +133,7 @@ namespace he
 
     void GPUBuffer::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const
     {
-      glBindVertexBuffer(bufferBindingPoint, m_bufferIndex, offset, stride);
+      glBindVertexBuffer(bufferBindingPoint, *m_bufferIndex, offset, stride);
     }
 
     void GPUBuffer::unbindVertexBuffer(GLuint bufferBindingPoint) const

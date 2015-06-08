@@ -3,6 +3,8 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Pointer/UniquePointer.h>
+
 #include "Renderer/DLLExport.h"
 
 namespace he
@@ -14,7 +16,10 @@ namespace he
     public:
 
       TBO();
+      TBO(TBO& other);
       ~TBO();
+
+      const TBO& operator=(TBO other);
 
       void createBuffer(GLenum textureTarget, GLuint bufferBlockSize, GLuint size, GLenum usage, GLenum internalFormat, const GLvoid *data = nullptr);
 
@@ -40,11 +45,8 @@ namespace he
 
     private:
 
-      TBO(const TBO&);
-      TBO& operator=(const TBO&);
-
-      GLuint m_bufferIndex;
-      GLuint m_textureIndex;
+      util::UniquePointer<GLuint> m_bufferIndex;
+      util::UniquePointer<GLuint> m_textureIndex;
 
       GLuint m_bufferBlockSize;
       GLuint m_currentBufferSize;

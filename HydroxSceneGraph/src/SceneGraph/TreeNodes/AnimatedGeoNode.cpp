@@ -178,7 +178,7 @@ namespace he
       m_boneTransformMatrices.resize(m_inverseBindPoseMatrices.size());
     }
 
-    void AnimatedGeoNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void AnimatedGeoNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       GeoNode::write(stream, resourceHandles);
 

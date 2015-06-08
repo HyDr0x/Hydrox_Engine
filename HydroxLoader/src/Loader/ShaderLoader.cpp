@@ -21,7 +21,7 @@ namespace he
 
     void ShaderLoader::initialize(util::SingletonManager *singletonManager, std::string shaderDirectory)
     {
-      m_singletonManager = singletonManager;
+      m_container = singletonManager->getService<sh::ShaderContainer>();
 
       m_shaderFileChecker.initialize(shaderDirectory);
     }

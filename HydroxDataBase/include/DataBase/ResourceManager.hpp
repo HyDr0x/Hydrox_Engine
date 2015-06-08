@@ -71,7 +71,7 @@ namespace he
           unsigned int id = *m_list.begin();
           m_list.pop_front();
 
-          util::ResourceHandle handle(id);
+          util::ResourceHandle handle(id, hash);
           handle.add(this);
 
           m_objectsCache[handle.getID()] = object;
@@ -83,7 +83,7 @@ namespace he
         {
           unsigned int id = m_objectHash[hash];
 
-          util::ResourceHandle handle(id);
+          util::ResourceHandle handle(id, hash);
           handle.add(this);
 
           return handle;
@@ -92,7 +92,6 @@ namespace he
 
       void update(util::ResourceHandle& param) override
       {
-        uint64_t hash = m_objectsCache[param.getID()].getHash();
         m_objectHash.erase(m_objectsCache[param.getID()].getHash());
         m_objectsCache[param.getID()].free();
 

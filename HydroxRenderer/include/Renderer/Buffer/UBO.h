@@ -5,6 +5,8 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Pointer/UniquePointer.h>
+
 #include "Renderer/DLLExport.h"
 
 namespace he
@@ -21,7 +23,10 @@ namespace he
     public:
 
       UBO();
+      UBO(UBO& other);
       ~UBO();
+
+      const UBO& operator=(UBO other);
 
       void createBuffer(sh::Shader *shader, const GLuint bufferSize, const GLuint uniformCount, GLenum usage, const char **uniformNames);//shared layout
       void createBuffer(const GLuint bufferSize, GLenum usage);//std140 layout
@@ -51,7 +56,7 @@ namespace he
         }
       }
 
-      void setData(GLuint offset, GLuint size, const void *data) const;//standard layout
+      void setData(GLuint offset, GLuint size, const void *data);//standard layout
       void getData(GLuint offset, GLuint size, void *data) const;
 
       void uploadData() const;
@@ -61,16 +66,13 @@ namespace he
 
     private:
 
-      UBO(const UBO&);
-      UBO& operator=(const UBO&);
-
       std::vector<GLuint> m_uniformIndices; 
       std::vector<GLint> m_uniformOffsets;
       std::vector<GLint> m_arrayStrides; 
       std::vector<GLint> m_matrixStrides;
 
-      GLubyte *m_bufferData;
-      GLuint m_bufferIndex;
+      util::UniquePointer<GLubyte[]> m_bufferData;
+      util::UniquePointer<GLuint> m_bufferIndex;
       GLuint m_bufferSize;
       GLuint m_bufferDataOffset;
 

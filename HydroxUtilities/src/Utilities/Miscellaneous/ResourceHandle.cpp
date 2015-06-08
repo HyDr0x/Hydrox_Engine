@@ -8,7 +8,7 @@ namespace he
     {
     }
 
-    ResourceHandle::ResourceHandle(unsigned int id) : m_id(id), m_referenceCounter(new unsigned int(1))
+    ResourceHandle::ResourceHandle(unsigned int id, uint64_t hash) : m_id(id), m_referenceCounter(new unsigned int(1))
     {
     }
 
@@ -56,7 +56,7 @@ namespace he
 
     bool ResourceHandle::operator!=(const ResourceHandle& other) const
     {
-      return m_id != other.m_id || m_referenceCounter != other.m_referenceCounter;
+      return !operator==(other);
     }
 
     void ResourceHandle::free()

@@ -42,8 +42,6 @@ namespace he
         return;
       }
 
-      util::SharedPointer<sh::ShaderContainer> container = m_singletonManager->getService<sh::ShaderContainer>();
-
       std::ifstream file(path + shaderIndexFilename);
       std::string line;
       unsigned int shaderIndex = UINT32_MAX;
@@ -72,7 +70,7 @@ namespace he
             std::getline(file, shaderFileNames[0], '\n');
             shaderFileNames[0] = path + shaderFileNames[0];
 
-            container->addComputeShader(shaderIndex, loadResource(shaderName, shaderFileNames));
+            m_container->addComputeShader(shaderIndex, loadResource(shaderName, shaderFileNames));
 
             m_computeShaderMap[shaderFileNames[0]] = shaderIndex;
           }
@@ -92,10 +90,9 @@ namespace he
     {
       if(m_shaderFileChecker.isFileChanged())
       {
-        util::SharedPointer<sh::ShaderContainer> container = m_singletonManager->getService<sh::ShaderContainer>();
-        const sh::ComputeShader& shader = container->getComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()]);
+        const sh::ComputeShader& shader = m_container->getComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()]);
 
-        container->replaceComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
+        m_container->replaceComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
 
         m_shaderFileChecker.resetFilecheckerStatus();
       }

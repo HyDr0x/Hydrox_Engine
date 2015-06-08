@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Utilities/Math/Math.hpp"#
+#include "Utilities/Math/Math.hpp"
 
 #include "Utilities/DLLExport.h"
 

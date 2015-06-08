@@ -12,10 +12,10 @@ layout(std430, binding = 0) buffer transformMatrixBuffer
 
 layout(location = POSITION) in vec3 in_Pos;
 
-out vec3 vsout_normal;
 flat out uint vsout_instanceIndex;
 
 void main()
 {
-	gl_Position = (viewProjectionMatrix * (trfMatrix[gl_InstanceID + gl_BaseInstanceARB] * vec4(in_Pos, 1)));
+	vsout_instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
+	gl_Position = (viewProjectionMatrix * (trfMatrix[vsout_instanceIndex] * vec4(in_Pos, 1)));
 }

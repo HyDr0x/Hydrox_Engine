@@ -4,6 +4,7 @@
 #include "Utilities/DLLExport.h"
 
 #include "Utilities/Observer/Subject.hpp"
+#include "Utilities/Miscellaneous/MurMurHash3.h"
 
 namespace he
 {
@@ -14,7 +15,7 @@ namespace he
     public:
 
       ResourceHandle();
-      ResourceHandle(unsigned int id);
+      ResourceHandle(unsigned int id, uint64_t hash);
       ResourceHandle(const ResourceHandle& other);
       ~ResourceHandle();
 
@@ -44,15 +45,6 @@ namespace he
 
       unsigned int m_id;
       unsigned int *m_referenceCounter;
-    };
-
-    class Less
-    {
-    public:
-      inline bool operator()(const util::ResourceHandle& o1, const util::ResourceHandle& o2) const
-      {
-        return o1.getID() < o2.getID();
-      }
     };
   }
 }

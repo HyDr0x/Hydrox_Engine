@@ -27,9 +27,9 @@ typedef unsigned __int64 uint64_t;
 
 template<typename T> unsigned int convertToRawData(const T& data, unsigned char *chunk, unsigned int offset)
 {
-  std::copy((unsigned char*)&data, (unsigned char*)&data + sizeof(data), &chunk[0] + offset);
+  std::copy((unsigned char*)&data, (unsigned char*)&data + sizeof(T), &chunk[offset]);
 
-  return offset + sizeof(data);
+  return offset + sizeof(T);
 }
 
 //-----------------------------------------------------------------------------

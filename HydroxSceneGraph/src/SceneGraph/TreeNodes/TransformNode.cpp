@@ -401,7 +401,7 @@ namespace he
       stream >> m_scale;
     }
 
-    void TransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::Less>>& resourceHandles) const
+    void TransformNode::write(std::ostream& stream, const std::map<std::string, std::map<util::ResourceHandle, std::string, util::ResourceHandle::Less>>& resourceHandles) const
     {
       GroupNode::write(stream, resourceHandles);
 

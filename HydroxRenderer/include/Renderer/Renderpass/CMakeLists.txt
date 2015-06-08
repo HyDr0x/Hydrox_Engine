@@ -1,0 +1,17 @@
+set(
+	HEADER 
+	${HEADER} 
+	${CMAKE_CURRENT_SOURCE_DIR}/AComputepass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ARenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DebugGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndexGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ReflectiveShadowMapGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShaderNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/ShadowMapGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/TextureNode.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/VertexDeclarationNode.h 
+	PARENT_SCOPE 
+)

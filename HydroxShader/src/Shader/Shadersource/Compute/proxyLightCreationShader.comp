@@ -60,7 +60,7 @@ float calculateProjectedCacheArea(in vec3 cacheDir, in vec3 cacheNormal0, in vec
 	cacheDir = normalize(cacheDir);
 	
 	float cosAngle0 = max(dot(cacheNormal0, cacheDir), 0.0);
-	float cosAngle1 = abs(dot(cacheNormal1, cacheDir));
+	float cosAngle1 = max(dot(cacheNormal1, cacheDir), 0.0);
 	
 	return max((cacheArea * cosAngle0 * cosAngle1) / (cacheArea + PI * quadCacheDistance), 0.0);
 }
@@ -112,19 +112,23 @@ void calculateVisibility(in uint cacheIndex, in CacheData cache, in vec3 Xpd, in
 	{		
 		if(index != cacheIndex)
 		{
-			vec3 cachePos = imageLoad(globalCachePositionBuffer, index).xyz;
 			vec3 cacheNormal = normalize(decodeNormal(imageLoad(globalCacheNormalBuffer, index).xy));
-			float cacheArea = imageLoad(globalCacheAreaBuffer, index).r;
+			vec3 cachePos = imageLoad(globalCachePositionBuffer, index).xyz;
 			
-			float cacheAABBSideLength = 0.5 * sqrt(calculateProjectedCacheArea(cachePos - cache.position.xyz, cache.normal.xyz, cacheNormal, cacheArea));
-			
-			vec3 cacheProjPos = project(tangent, binormal, cache.position.xyz, cachePos);
-			
-			float aD = overlappingArea(XpdProj, diffuseSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinD, areaHeuristicMaxD);
-			areaD += max(0.0, (aD / Rd) * min(Rd, dot(cachePos - Xpd, normalize(cache.position.xyz - Xpd))));
-			
-			float aG = overlappingArea(XpgProj, specularSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinG, areaHeuristicMaxG);
-			areaG += max(0.0, (aG / Rg) * min(Rg, dot(cachePos - Xpg, normalize(cache.position.xyz - Xpg))));
+			if(dot(normalize(cachePos - cache.position.xyz), cache.normal.xyz) > 0.01)
+			{
+				float cacheArea = imageLoad(globalCacheAreaBuffer, index).r;
+				
+				float cacheAABBSideLength = 0.5 * sqrt(calculateProjectedCacheArea(cachePos - cache.position.xyz, cache.normal.xyz, cacheNormal, cacheArea));
+				
+				vec3 cacheProjPos = project(tangent, binormal, cache.position.xyz, cachePos);
+				
+				float aD = overlappingArea(XpdProj, diffuseSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinD, areaHeuristicMaxD);
+				areaD += max(0.0, (aD / Rd) * min(Rd, dot(cachePos - Xpd, normalize(cache.position.xyz - Xpd))));
+				
+				float aG = overlappingArea(XpgProj, specularSquareSideLength, cacheProjPos, cacheAABBSideLength, tangent, binormal, areaHeuristicMinG, areaHeuristicMaxG);
+				areaG += max(0.0, (aG / Rg) * min(Rg, dot(cachePos - Xpg, normalize(cache.position.xyz - Xpg))));
+			}
 		}
 	}
 	
@@ -258,6 +262,7 @@ void main()
 
 		imageStore(proxyLightPositionBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4(Xpd, length(lightDirD)));
 		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y), visibilityD * vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0.0));
+		//imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4(vec3(visibilityD), 0.0));
 
 		vec3 lightDirG = Xpg - cache.position.xyz;
 		float lightQuadDistance = dot(lightDirG, lightDirG);
