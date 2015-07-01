@@ -72,7 +72,7 @@ namespace he
       {
         file.close();
 
-        //std::clog << "Warning, couldn't open shader source file: " << filename << std::endl;
+        std::clog << "Warning, couldn't open shader source file: " << filename << std::endl;
       }
 
       return shaderSource;

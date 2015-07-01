@@ -34,7 +34,5 @@ void main()
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.z)] * in_boneWeights.z);
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.w)] * in_boneWeights.w);
 	
-	mat4 MVP = shadowLight[lightIndex].lightViewProj * skinningMatrix;
-	
-	gl_Position = MVP * vec4(in_Pos, 1.0f);
+	gl_Position = shadowLight[lightIndex].lightViewProj * (skinningMatrix * vec4(in_Pos, 1.0f));
 }

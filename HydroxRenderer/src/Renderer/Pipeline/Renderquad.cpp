@@ -49,14 +49,12 @@ namespace he
       {
         unsigned int size = 0;
 
-        if(!m_writeTextures3D.empty())
+        for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
         {
-          for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
-          {
-            size += m_writeTextures3D[i]->getResolution()[2];
-          }
+          size += m_writeTextures3D[i]->getResolution()[2];
         }
-        else
+
+        if(!m_writeTextures.empty())
         {
           size = m_writeTextures.size();
         }
@@ -87,6 +85,7 @@ namespace he
     void Renderquad::unsetWriteFrameBuffer() const
     {
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+      glDrawBuffer(GL_BACK);//restore draw buffer
 
       //GLenum windowBuff[] = { GL_BACK_LEFT };//switching to back buffer (LEFT/RIGHT --> for stereoscopic rendering, default is LEFT)
       //glDrawBuffers(1, windowBuff);
@@ -223,27 +222,22 @@ namespace he
 
       glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
 
-      if(!m_writeTextures3D.empty())
+      unsigned int indexOffset = 0;
+      for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
       {
-        unsigned int indexOffset = 0;
-        for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
+        if(m_writeTextures3D[i])
         {
-          if(m_writeTextures3D[i])
+          for(unsigned int j = 0; j < m_writeTextures3D[i]->getResolution()[2]; j++)
           {
-            for(unsigned int j = 0; j < m_writeTextures3D[i]->getResolution()[2]; j++)
-            {
-              m_writeTextures3D[i]->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + indexOffset + j, j);
-            }
-            indexOffset += m_writeTextures3D[i]->getResolution()[2];
+            m_writeTextures3D[i]->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + indexOffset + j, j);
           }
+          indexOffset += m_writeTextures3D[i]->getResolution()[2];
         }
       }
-      else
+
+      for(unsigned int i = 0; i < m_writeTextures.size(); i++)
       {
-        for(unsigned int i = 0; i < m_writeTextures.size(); i++)
-        {
-          m_writeTextures[i]->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + i);
-        }
+        m_writeTextures[i]->bindToFramebuffer(GL_COLOR_ATTACHMENT0 + i);
       }
 
       if(m_depthTexture)
@@ -255,6 +249,7 @@ namespace he
         m_depthTexture3D->bindToFramebuffer(GL_DEPTH_ATTACHMENT, layer);
       }
 
+#ifndef NDEBUG
       GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
       switch(fboStatus)
@@ -262,28 +257,71 @@ namespace he
       case GL_FRAMEBUFFER_COMPLETE:
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        std::clog << "Error, framebuffer incomplete attachment." << std::endl;
+        std::cerr << "Error, framebuffer incomplete attachment." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        std::clog << "Error, framebuffer missing attachment." << std::endl;
+        std::cerr << "Error, framebuffer missing attachment." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-        std::clog << "Error, framebuffer incomplete draw buffer." << std::endl;
+        std::cerr << "Error, framebuffer incomplete draw buffer." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-        std::clog << "Error, framebuffer incomplete read buffer." << std::endl;
+        std::cerr << "Error, framebuffer incomplete read buffer." << std::endl;
         break;
       case GL_FRAMEBUFFER_UNSUPPORTED:
-        std::clog << "Error, framebuffer unsupported." << std::endl;
+        std::cerr << "Error, framebuffer unsupported." << std::endl;
         break;
       case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-        std::clog << "Error, framebuffer incomplete multisample." << std::endl;
+        std::cerr << "Error, framebuffer incomplete multisample." << std::endl;
         break;
       case GL_FRAMEBUFFER_UNDEFINED:
       default:
-        std::clog << "Unknown error, framebuffer corrupted." << std::endl;
+        std::cerr << "Unknown error, framebuffer corrupted." << std::endl;
         break;
       }
+#endif
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void Renderquad::setDepthLayer(unsigned int layer)
+    {
+      assert(m_depthTexture3D);
+
+      glBindFramebuffer(GL_FRAMEBUFFER, m_fboIndex);
+
+      m_depthTexture3D->bindToFramebuffer(GL_DEPTH_ATTACHMENT, layer);
+
+#ifndef NDEBUG
+      GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+      switch(fboStatus)
+      {
+      case GL_FRAMEBUFFER_COMPLETE:
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        std::cerr << "Error, framebuffer incomplete attachment." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+        std::cerr << "Error, framebuffer missing attachment." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        std::cerr << "Error, framebuffer incomplete draw buffer." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+        std::cerr << "Error, framebuffer incomplete read buffer." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_UNSUPPORTED:
+        std::cerr << "Error, framebuffer unsupported." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+        std::cerr << "Error, framebuffer incomplete multisample." << std::endl;
+        break;
+      case GL_FRAMEBUFFER_UNDEFINED:
+      default:
+        std::cerr << "Unknown error, framebuffer corrupted." << std::endl;
+        break;
+      }
+#endif
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
@@ -326,12 +364,20 @@ namespace he
       unsetWriteFrameBuffer();
     }
 
-    void Renderquad::clearTargets(GLfloat clearDepthValue, util::vec4f clearColor, std::vector<unsigned int> indices) const
+    void Renderquad::clearTargets(GLfloat clearDepthValue, util::vec4f clearColor, std::vector<unsigned int> indices, bool clearDepth) const
     {
       setWriteFrameBuffer(indices);
 
       glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      if(clearDepth)
+      {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      }
+      else
+      {
+        glClear(GL_COLOR_BUFFER_BIT);
+      }
 
       unsetWriteFrameBuffer();
     }

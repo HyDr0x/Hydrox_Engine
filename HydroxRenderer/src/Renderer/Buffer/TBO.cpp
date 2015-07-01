@@ -160,5 +160,15 @@ namespace he
     {
       glBindBufferBase(target, bufferBindingPoint, 0);
     }
+
+    void TBO::bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const
+    {
+      glBindVertexBuffer(bufferBindingPoint, *m_bufferIndex, offset, stride);
+    }
+
+    void TBO::unbindVertexBuffer(GLuint bufferBindingPoint) const
+    {
+      glBindVertexBuffer(bufferBindingPoint, 0, 0, 0);
+    }
   }
 }

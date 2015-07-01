@@ -21,7 +21,5 @@ layout(location = POSITION) in vec3 in_Pos;
 
 void main()
 {																	
-	mat4 MVP = shadowLight[lightIndex].lightViewProj * trfMatrix[uint(gl_InstanceID + gl_BaseInstanceARB)];
-
-	gl_Position = MVP * vec4(in_Pos, 1);
+	gl_Position = shadowLight[lightIndex].lightViewProj * (trfMatrix[uint(gl_InstanceID + gl_BaseInstanceARB)] * vec4(in_Pos, 1));
 }

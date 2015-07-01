@@ -1,0 +1,74 @@
+#version 440 core
+
+#define INTERLEAVEDBLOCKSIZE
+
+#define BLOCKNUMBER 32
+#define WORKGROUPSIZE (INTERLEAVEDBLOCKSIZE * BLOCKNUMBER)
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepth;
+layout(rgba16f, binding = 0) readonly uniform image2D gBufferNormal;
+
+layout(r16f, binding = 1) readonly uniform image2D shadowMap0;
+layout(r16f, binding = 2) writeonly uniform image2D shadowMap1;
+
+layout(location = 1) uniform uvec2 frameBufferResolution;
+layout(location = 2) uniform ivec2 samplingDirection;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared float depth[WORKGROUPSIZE];
+shared vec3 normal[WORKGROUPSIZE];
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+	uint workGroupID = gl_LocalInvocationID.x;
+	uint interleavedBlockID = (workGroupID / INTERLEAVEDBLOCKSIZE) * INTERLEAVEDBLOCKSIZE;
+	uint blockOffset = workGroupID - interleavedBlockID;
+	
+	uint rowOffset = uint(INTERLEAVEDBLOCKSIZE * fract(frameBufferResolution.x / INTERLEAVEDBLOCKSIZE));
+	uint newXResolution = frameBufferResolution.x + rowOffset;
+	
+	uint invocationNumber = WORKGROUPSIZE * gl_NumWorkGroups.x;
+	uint pixelNumber = 1024 * 768;//newXResolution * frameBufferResolution.y;
+	
+	for(uint i = idx; i < pixelNumber; i += invocationNumber)
+	{
+		ivec2 texCoord = ivec2(mod(i, newXResolution), i / newXResolution);
+		texCoord = ivec2(samplingDirection.x * texCoord.x + samplingDirection.y * texCoord.y, samplingDirection.x * texCoord.y + samplingDirection.y * texCoord.x);
+		
+		if(texCoord.x < (samplingDirection.x * frameBufferResolution.x + samplingDirection.y * frameBufferResolution.y))
+		{
+			float rawZ = texelFetch(gBufferDepth, texCoord, 0).r * 2.0 - 1.0;
+			rawZ = -(-projectionMatrix[3][2] / (rawZ + projectionMatrix[2][2]));
+			depth[workGroupID] = (rawZ - near) / (far - near);
+			normal[workGroupID] = imageLoad(gBufferNormal, texCoord).xyz * 2.0 - 1.0;
+		}
+		else
+		{
+			normal[workGroupID] = vec3(0, 0, 0);
+		}
+		
+		memoryBarrierShared();//not necessarily essential
+		barrier();
+
+		float newVisibility = 0.0;
+		float usedPixels = 0.0;
+		
+		for(uint j = 0; j < INTERLEAVEDBLOCKSIZE; j++)
+		{
+			if(abs((depth[interleavedBlockID + j] - depth[workGroupID])) < 0.0001 && dot(normal[interleavedBlockID + j], normal[workGroupID]) > 0.9)
+			{
+				ivec2 blockTexCoord = texCoord + samplingDirection * int(-blockOffset + j);
+				newVisibility += imageLoad(shadowMap0, blockTexCoord).r;
+				usedPixels++;
+			}
+		}
+		
+		newVisibility /= usedPixels;
+		
+		imageStore(shadowMap1, texCoord, vec4(newVisibility, 0.0, 0.0, 0.0));
+	}
+}

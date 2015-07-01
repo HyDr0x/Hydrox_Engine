@@ -42,6 +42,7 @@ namespace he
 
       ShadowLight();
 
+      util::Matrix<float, 4> view;//VAL-accumulated view matrix for point sample backprojection
       util::Matrix<float, 4> viewProj;
 
       Light light;

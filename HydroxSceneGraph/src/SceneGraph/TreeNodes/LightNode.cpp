@@ -22,6 +22,7 @@ namespace he
       m_renderable(false)
     {
       m_index.nodeType = LIGHTNODE;
+      m_lightData.constAttenuation = 1.0f;
       m_lightData.projectionParameter = util::vec4f(0.0f, 0.0f, 10.0f, 10.0f);
     }
 

@@ -59,7 +59,7 @@ void main()
 {
 	uint idx = gl_GlobalInvocationID.x;
 
-	uint bboxesPerThread = max(AABBNumber / (WORKGROUPSIZE * gl_NumWorkGroups.x), 1);
+	uint bboxesPerThread = max(uint(ceil(AABBNumber / (WORKGROUPSIZE * gl_NumWorkGroups.x))), 1);
 	uint bboxOffset = idx * bboxesPerThread;
 	
 	if(bboxOffset >= AABBNumber)

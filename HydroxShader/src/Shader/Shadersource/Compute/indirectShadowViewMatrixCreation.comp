@@ -1,0 +1,74 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define WORKGROUPSIZE 1
+
+#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
+
+layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
+layout(location = 1) uniform sampler2DArray indirectLightNormalSampler;
+
+layout(std140, binding = 1) uniform samplingPattern
+{
+	vec4 samples[SAMPLENUMBER];
+};
+
+layout(std430, binding = 1) buffer reflectiveShadowLightBuffer
+{
+	ShadowLightData reflectiveShadowLight[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+	uint globalThreadNumber = gl_NumWorkGroups.x * WORKGROUPSIZE;
+
+	vec3 camPos = vec3(0);
+	vec3 camDirection = vec3(0);
+	
+	uint validSamples = 0;
+	
+	for(uint j = 0; j < SAMPLENUMBER; j++)
+	{
+		vec3 texCoords;
+		texCoords.x = 0.5 + samples[j].x;
+		texCoords.y = 0.5 + samples[j].y;
+		texCoords.z = float(idx) / float(gl_NumWorkGroups.x);
+	
+		vec4 lightPos = texture(indirectLightPosSampler, texCoords, 0);
+		vec3 lightNormal = texture(indirectLightNormalSampler, texCoords, 0).xyz * 2.0 - 1.0;
+		
+		if(lightPos.w == 0.0)//cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+		{
+			continue;
+		}
+		
+		validSamples++;
+		
+		camPos += lightPos.xyz;
+		camDirection += lightNormal;
+	}
+	
+	camPos.xyz /= validSamples;
+	vec3 z = -reflectiveShadowLight[idx].light.direction.xyz;//normalize(camDirection.xyz / validSamples);
+	
+	vec3 upVector = vec3(0, 1, 0);
+	if(upVector == z)
+	{
+		upVector += vec3(0.00001);
+	}
+	
+	vec3 x = normalize(cross(upVector, z));
+	vec3 y = normalize(cross(z, x));
+	
+	mat4 viewMatrix = mat4(vec4(x, 0.0),
+									vec4(y, 0.0),
+									vec4(z, 0.0),
+									vec4(0.0));
+									
+	viewMatrix[3] = viewMatrix[0] * -camPos.x + viewMatrix[1] * -camPos.y + viewMatrix[2] * -camPos.z + viewMatrix[3];
+	
+	reflectiveShadowLight[idx].lightView = viewMatrix;
+}

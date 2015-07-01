@@ -23,6 +23,7 @@ namespace he
     {
       setShadowProjection(near, far);
 
+      m_lightData.light.constAttenuation = 1.0f;
       m_index.nodeType = SHADOWLIGHTNODE;
     }
 

@@ -62,7 +62,7 @@ namespace he
       void uploadData() const;
 
       void bindBuffer(GLuint bufferBindingPoint) const;
-      void unBindBuffer(GLuint bufferBindingPoint) const;
+      void unbindBuffer(GLuint bufferBindingPoint) const;
 
     private:
 

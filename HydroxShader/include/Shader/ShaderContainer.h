@@ -22,24 +22,26 @@ namespace he
 
       enum Renderpass
       {
-        RENDERDEBUG,
-        GBUFFER,
-        POINTINDEX,
-        LINEINDEX,
-        TRIANGLEINDEX,
-        REFLECTIVESHADOW,
-        SHADOW,
-        INDIRECTLIGHTINTERPOLATION,
-        COMBINE,
-        DIRECTLIGHT,
-        DOWNSAMPLING,
-        OFFSCREENBUFFER,
-        TONEMAPPING,
-        HISTOGRAM,
-        BILLBOARD,
-        SKYBOX,
-        SPRITE,
-        STRING2D,
+        RENDERDEBUG = 0,
+        GBUFFER = 1,
+        INDIRECTSHADOWMAPCREATION = 2,
+        VISIBILITYMAPCREATION = 3,
+        TRIANGLEINDEX = 4,
+        REFLECTIVESHADOW = 5,
+        SHADOW = 6,
+        INDIRECTLIGHTINTERPOLATION = 7,
+        COMBINE = 8,
+        DIRECTLIGHT = 9,
+        DOWNSAMPLING = 10,
+        OFFSCREENBUFFER = 11,
+        TONEMAPPING = 12,
+        HISTOGRAM = 13,
+        BILLBOARD = 14,
+        SKYBOX = 15,
+        SPRITE = 16,
+        STRING2D = 17,
+        PUSHSHADER = 18,
+        INDIRECTSHADOWMAPBACKPROJECTION = 19,
         PASSNUMBER
       };
 
@@ -47,6 +49,9 @@ namespace he
       {
         FRUSTUMCULLING,
         INDIRECTLIGHTPROXYLIGHTCREATION,
+        INDIRECTSHADOWMAPBLUR,
+        PULL,
+        INDIRECTSHADOWVIEWMATRIXCREATION,
         COMPUTESHADERNUMBER
       };
 
@@ -115,6 +120,7 @@ namespace he
     };
 
     typedef ShaderContainer::ThisRenderShaderHandle RenderShaderHandle;
+    typedef unsigned int ComputeShaderHandle;
   }
 }
 

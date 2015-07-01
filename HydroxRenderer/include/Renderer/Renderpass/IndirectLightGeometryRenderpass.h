@@ -33,6 +33,7 @@ namespace he
         util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
 
       void setProxyLightTextureResolution(GLuint proxyLightTextureResolution);
+      void setIndirectShadowMap(util::SharedPointer<db::Texture2D> indirectShadowMap);
 
       virtual void drawRenderpass() const override;
 
@@ -42,6 +43,7 @@ namespace he
 
       util::SharedPointer<db::Texture2D> m_normalMap;
       util::SharedPointer<db::Texture2D> m_materialMap;
+      util::SharedPointer<db::Texture2D> m_indirectShadowMap;
     };
   }
 }

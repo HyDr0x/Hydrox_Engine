@@ -26,12 +26,6 @@ namespace he
 
       util::ResourceHandle shaderHandle;
 
-      if(computeShaderSource[0].empty())
-      {
-        std::clog << "ERROR, couldn't open file: " << shaderName << std::endl;
-        assert(false);
-      }
-
       return sh::ComputeShader(shaderName, filename, computeShaderSource);
     }
 

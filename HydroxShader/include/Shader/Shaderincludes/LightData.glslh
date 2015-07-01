@@ -16,6 +16,7 @@ struct LightData
 
 struct ShadowLightData
 {
+	mat4 lightView;//VAL-accumulated view matrix for point sample backprojection
 	mat4 lightViewProj;
 
 	LightData light;

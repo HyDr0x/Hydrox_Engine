@@ -284,7 +284,7 @@ void main()
 	//Xpd -= cache.normal.xyz * 0.1;
 		
 	float visibilityD = 1, visibilityG = 1;
-	//calculateVisibility(cache, Xpd, Xpg, Xpdq, Xpgq, visibilityD, visibilityG);
+	calculateVisibility(cache, Xpd, Xpg, Xpdq, Xpgq, visibilityD, visibilityG);
 	
 	vec3 lightDirD = Xpd - cache.position.xyz;
 	float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.0001);

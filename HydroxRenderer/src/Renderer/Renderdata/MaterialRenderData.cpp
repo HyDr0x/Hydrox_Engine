@@ -5,8 +5,6 @@
 
 #include <DataBase/Material.h>
 
-#include "Renderer/Traverser/Traverser.h"
-
 namespace he
 {
   namespace renderer
@@ -74,7 +72,7 @@ namespace he
 
     void MaterialRenderData::unbindMaterialBuffer() const
     {
-      m_materialBuffer.unBindBuffer(1);
+      m_materialBuffer.unbindBuffer(1);
       m_materialIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 

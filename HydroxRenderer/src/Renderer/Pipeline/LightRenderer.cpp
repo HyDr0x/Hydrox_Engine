@@ -33,24 +33,23 @@ namespace he
     void LightRenderer::initialize(util::SingletonManager *singletonManager)
     {
       m_options = singletonManager->getService<RenderOptions>();
-      m_singletonManager = singletonManager;
-
+      
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_directLightShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DIRECTLIGHT, sh::ShaderSlotFlags(8192));
 
-      registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
+      
+      registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
       m_lightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(db::Light) * m_options->lightNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_shadowedLightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(db::ShadowLight) * m_options->lightNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_reflectiveShadowedLightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(db::ShadowLight) * m_options->lightNumber, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
-      util::SharedPointer<OpenGLDebugLogManager> oglDebugLogManager = m_singletonManager->getService<OpenGLDebugLogManager>();
+      util::SharedPointer<OpenGLDebugLogManager> oglDebugLogManager = singletonManager->getService<OpenGLDebugLogManager>();
       m_maxShadowMapsPerTextureArray = oglDebugLogManager->getCapabilities(OpenGLDebugLogManager::MAX_ARRAY_TEXTURE_LAYERS);
       m_maxColorAttachments = oglDebugLogManager->getCapabilities(OpenGLDebugLogManager::MAX_COLOR_ATTACHMENTS);
 
       m_lightTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
-      m_shadowDepthMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->shadowMapWidth, m_options->shadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
       m_reflectiveShadowDepthMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
 
       m_renderLightMapQuad.setRenderTargets(1, m_lightTexture);
@@ -67,9 +66,9 @@ namespace he
       {
         m_shadowLightNumberChanged = false;
 
-        m_shadowMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapWidth, m_shadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+        m_shadowMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->shadowMapWidth, m_options->shadowMapWidth, m_shadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
 
-        m_renderShadowMapsQuad.setRenderTargets3D(m_shadowDepthMap, 1, m_shadowMaps);
+        m_renderShadowMapsQuad.setRenderTargets3D(m_shadowMaps, 0, 0);
       }
 
       if(m_reflectiveShadowLightNumberChanged)
@@ -79,15 +78,6 @@ namespace he
         m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
         m_shadowNormalMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
         m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
-
-        /*m_shadowPosMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);
-        m_shadowNormalMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);
-        m_shadowLuminousFluxMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR, GL_LINEAR);*/
-
-        //m_shadowPosMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
-        //m_shadowNormalMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
-        //m_shadowLuminousFluxMaps->setTexParameters(GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_MIRRORED_REPEAT, GL_NEAREST, GL_NEAREST);
-
         m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_reflectiveShadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalMaps, m_shadowLuminousFluxMaps);
       }
 
@@ -112,7 +102,7 @@ namespace he
 
     void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
     {
-      const sh::RenderShader& shader = m_singletonManager->getService<sh::ShaderContainer>()->getRenderShader(m_directLightShaderHandle);
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_directLightShaderHandle);
 
       shader.useShader();
 
@@ -155,7 +145,8 @@ namespace he
     void LightRenderer::setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex)
     {
       m_renderShadowMapsQuad.clearTargets(1.0f, util::vec4f::identity(), std::vector<unsigned int>(1, shadowMapIndex));
-      m_renderShadowMapsQuad.setWriteFrameBuffer(std::vector<unsigned int>(1, shadowMapIndex));
+      m_renderShadowMapsQuad.setDepthLayer(shadowMapIndex);
+      m_renderShadowMapsQuad.setWriteFrameBuffer();
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
     }
 
@@ -181,11 +172,6 @@ namespace he
     {
       m_reflectiveShadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, bindingPoint);
       m_renderReflectiveShadowMapsQuad.unsetWriteFrameBuffer();
-    }
-
-    void LightRenderer::generateImperfectShadowMap(const TBO& globalCachePositionBuffer)
-    {
-      globalCachePositionBuffer.bindBuffer(0);
     }
 
     void LightRenderer::addLight(const xBar::LightContainer& light)

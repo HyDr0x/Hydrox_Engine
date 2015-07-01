@@ -16,8 +16,7 @@ namespace he
       RenderShaderLoader();
       ~RenderShaderLoader();
 
-      sh::RenderShader loadResource(sh::ShaderSlotFlags vertexDecaration,
-                                    const std::string& filename,
+      sh::RenderShader loadResource(const std::string& filename,
                                     const std::vector<std::string>& shaderFilenames);
 
       void loadShadersInIndexfile(std::string path, std::string shaderIndexFilename);
@@ -25,6 +24,8 @@ namespace he
       virtual void checkIfShaderChanged();
 
     private:
+
+      sh::ShaderSlotFlags readVertexDeclaration(const std::string& vertexShaderSource);
 
       std::map<std::string, std::vector<sh::RenderShaderHandle>> m_renderShaderMap;
     };

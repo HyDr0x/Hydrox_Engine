@@ -43,6 +43,9 @@ namespace he
       void bindBuffer(GLenum target, GLuint bufferBindingPoint) const;
       void unbindBuffer(GLenum target, GLuint bufferBindingPoint) const;
 
+      void bindVertexbuffer(GLuint bufferBindingPoint, GLuint offset, GLuint stride) const;
+      void unbindVertexBuffer(GLuint bufferBindingPoint) const;
+
     private:
 
       util::UniquePointer<GLuint> m_bufferIndex;

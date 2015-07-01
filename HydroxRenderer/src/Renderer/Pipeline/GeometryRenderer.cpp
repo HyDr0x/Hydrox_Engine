@@ -50,6 +50,7 @@ namespace he
       m_indirectLightingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTINTERPOLATION, normalMap, materialMap);
       m_reflectiveShadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::REFLECTIVESHADOW, samplerObjects);
       m_shadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::SHADOW);
+      m_indirectBackprojetionRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTSHADOWMAPBACKPROJECTION);
 
       registerRenderComponentSlots(m_singletonManager->getService<util::EventManager>());
     }
@@ -78,6 +79,7 @@ namespace he
         m_indirectLightingRenderpass.insertGeometry(m_renderContainer.back());
         m_reflectiveShadowMapRenderpass.insertGeometry(m_renderContainer.back());
         m_shadowMapRenderpass.insertGeometry(m_renderContainer.back());
+        m_indirectBackprojetionRenderpass.insertGeometry(m_renderContainer.back());
       }
       else
       {
@@ -114,6 +116,7 @@ namespace he
               m_indirectLightingRenderpass.removeGeometry(m_renderContainer[i]);
               m_reflectiveShadowMapRenderpass.removeGeometry(m_renderContainer[i]);
               m_shadowMapRenderpass.removeGeometry(m_renderContainer[i]);
+              m_indirectBackprojetionRenderpass.removeGeometry(m_renderContainer[i]);
 
               m_renderContainer.erase(m_renderContainer.begin() + i);
 
@@ -165,22 +168,35 @@ namespace he
       m_frustumCullingRenderpass.doComputepass();
     }
 
-    void GeometryRenderer::generateShadowMap(int cameraIndex)
+    void GeometryRenderer::generateShadowMap(unsigned int lightIndex)
     {
-      m_shadowMapRenderpass.setLightIndex(cameraIndex);
+      m_shadowMapRenderpass.setLightIndex(lightIndex);
       m_shadowMapRenderpass.drawRenderpass();
     }
 
-    void GeometryRenderer::generateReflectiveShadowMap(int cameraIndex)
+    void GeometryRenderer::generateParaboloidShadowMap(unsigned int lightIndex)
     {
-      m_reflectiveShadowMapRenderpass.setLightIndex(cameraIndex);
+      m_paraboloidShadowMappingpass.setLightIndex(lightIndex);
+      m_paraboloidShadowMappingpass.drawRenderpass();
+    }
+
+    void GeometryRenderer::generateReflectiveShadowMap(unsigned int lightIndex)
+    {
+      m_reflectiveShadowMapRenderpass.setLightIndex(lightIndex);
       m_reflectiveShadowMapRenderpass.drawRenderpass();
     }
 
-    void GeometryRenderer::generateIndirectLightMap()
+    void GeometryRenderer::generateIndirectLightMap(util::SharedPointer<db::Texture2D> indirectShadowMap)
     {
       m_indirectLightingRenderpass.setProxyLightTextureResolution(m_proxyLightTextureResolution);
+      m_indirectLightingRenderpass.setIndirectShadowMap(indirectShadowMap);
       m_indirectLightingRenderpass.drawRenderpass();
+    }
+
+    void GeometryRenderer::generateIndirectBackprojectionMap(unsigned int lightIndex)
+    {
+      m_indirectBackprojetionRenderpass.setLightIndex(lightIndex);
+      m_indirectBackprojetionRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::rasterizeIndexGeometry()

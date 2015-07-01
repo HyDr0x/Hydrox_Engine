@@ -17,8 +17,11 @@ namespace he
       unsigned int height;//vertical resolution
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
+      unsigned int indirectShadowMapWidth;//resolution if the indirect shadow map
       unsigned int giLightSampleNumber;//number of sampled lights for global illumination
       unsigned int lightNumber;//max number of supported lights
+      unsigned int pushPullPyramideSize;//number of textures for the pushpull pyramide
+      unsigned int adaptiveSampleNumber;//number of aditional samples used for filling the ISM's
 
       unsigned char max2DLayer;//const number of layer for 2D sprites
 

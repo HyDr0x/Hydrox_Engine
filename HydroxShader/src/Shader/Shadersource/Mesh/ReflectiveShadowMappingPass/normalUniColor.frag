@@ -2,7 +2,7 @@
 
 layout(early_fragment_tests) in;
 
-#define SAMPLERNUMBER
+#define SAMPLENUMBER
 
 #include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
 #include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
@@ -36,12 +36,12 @@ void main()
 	if(lightPos.x != DIRECTIONAL_LIGHT_POSITION)//spotlight
 	{
 		lightAngle = max(dot(normalize(-reflectiveShadowLight[lightIndex].light.direction.xyz), normalize(vsout_pos.xyz - lightPos.xyz)), 0.0);
-		area = (gl_FragCoord.z * gl_FragCoord.z * projPar.z * projPar.w) / (projPar.x * projPar.x * SAMPLERNUMBER * SAMPLERNUMBER);
+		area = (gl_FragCoord.z * gl_FragCoord.z * projPar.z * projPar.w) / (projPar.x * projPar.x * SAMPLENUMBER * SAMPLENUMBER);
 	}
 	else//directional light
 	{
 		lightAngle = 1.0;
-		area = (projPar.z * projPar.w) / SAMPLERNUMBER;
+		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
 	vec3 normal = normalize(vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f));
@@ -49,6 +49,6 @@ void main()
 	
 	fsout_pos3D = vec4(vsout_pos.xyz, 1.0f);
 
-	vec3 luminousFlux = ((1.0 / float(SAMPLERNUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * material[materialIndex[vsout_instanceIndex]].color).xyz;
+	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * material[materialIndex[vsout_instanceIndex]].color).xyz;
 	fsout_luminousFlux = vec4(luminousFlux, step(reflectiveShadowLight[lightIndex].light.direction.w, lightAngle));
 }

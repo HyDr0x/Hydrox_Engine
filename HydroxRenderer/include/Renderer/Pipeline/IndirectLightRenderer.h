@@ -57,8 +57,10 @@ namespace he
 
       const TBO& getGlobalCachePositionMap();
       const TBO& getGlobalCacheNormalMap();
+      const TBO& getGlobalCacheAreaMap();
 
       util::SharedPointer<db::Texture2D> getSamplingDebugMap();
+      const UBO& getSamplingBuffer();
 
     private:
       

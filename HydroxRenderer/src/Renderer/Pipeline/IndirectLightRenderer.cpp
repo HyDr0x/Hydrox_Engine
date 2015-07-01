@@ -147,7 +147,7 @@ namespace he
         reflectiveShadowNormalMaps->unsetTexture(1);
         reflectiveShadowPosMaps->unsetTexture(0);
 
-        m_samplingPatternBuffer.unBindBuffer(1);
+        m_samplingPatternBuffer.unbindBuffer(1);
 
         computeShader.useNoShader();
 
@@ -209,10 +209,14 @@ namespace he
 
       m_indirectLightPositionBuffer->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
       m_indirectLightLuminousFluxBuffer->bindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
+
+      m_samplingPatternBuffer.bindBuffer(1);
     }
 
     void IndirectLightRenderer::unsetCacheAndProxyLights() const
     {
+      m_samplingPatternBuffer.unbindBuffer(1);
+
       m_indirectLightLuminousFluxBuffer->unbindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
       m_indirectLightPositionBuffer->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
 
@@ -294,9 +298,19 @@ namespace he
       return m_globalCacheNormalBuffer;
     }
 
+    const TBO& IndirectLightRenderer::getGlobalCacheAreaMap()
+    {
+      return m_globalCacheAreaBuffer;
+    }
+
     util::SharedPointer<db::Texture2D> IndirectLightRenderer::getSamplingDebugMap()
     {
       return m_samplingDebugTexture;
+    }
+
+    const UBO& IndirectLightRenderer::getSamplingBuffer()
+    {
+      return m_samplingPatternBuffer;
     }
   }
 }

@@ -31,6 +31,11 @@ namespace he
       m_proxyLightTextureResolution = proxyLightTextureResolution;
     }
 
+    void IndirectLightGeometryRenderpass::setIndirectShadowMap(util::SharedPointer<db::Texture2D> indirectShadowMap)
+    {
+      m_indirectShadowMap = indirectShadowMap;
+    }
+
     void IndirectLightGeometryRenderpass::drawRenderpass() const
     {
       GLuint globalCacheNumber = 0;
@@ -40,14 +45,15 @@ namespace he
         const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_shaderNodes[i].getShaderHandle());
         shader.useShader();
 
-        sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
+        sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
 
         m_normalMap->setTexture(0, 0);
         m_materialMap->setTexture(1, 1);
+        m_indirectShadowMap->setTexture(2, 2);
 
         for(unsigned int j = 0; j < m_renderContainer[i].size(); j++)//all arrays have the same size! Vertexdeclaration-, Texture Nodes and Render Container are coupled together
         {
-          sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &globalCacheNumber);
+          sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &globalCacheNumber);
 
           m_vertexDeclarationNodes[i][j].setVertexArray();
 
@@ -63,6 +69,10 @@ namespace he
 
           globalCacheNumber += m_renderContainer[i][j]->getCacheNumber();
         }
+
+        m_indirectShadowMap->unsetTexture(2);
+        m_materialMap->unsetTexture(1);
+        m_normalMap->unsetTexture(0);
 
         shader.useNoShader();
       }

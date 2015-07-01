@@ -1,7 +1,7 @@
 #version 440 core
 
 #define AREAARRAYSIZE 25
-#define SAMPLERNUMBER
+#define SAMPLENUMBER
 #define PI 3.14159265359
 #define EPSILON 0.00001
 #define INT32_MAX 2147483647
@@ -13,9 +13,9 @@
 #include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
 
-layout(binding = 1) uniform samplingPattern
+layout(std140, binding = 1) uniform samplingPattern
 {
-	vec4 samples[SAMPLERNUMBER];
+	vec4 samples[SAMPLENUMBER];
 };
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
@@ -194,7 +194,7 @@ void main()
 		{
 			float validLightSamples = 0.0;
 			
-			for(uint j = 0; j < SAMPLERNUMBER; j++)
+			for(uint j = 0; j < SAMPLENUMBER; j++)
 			{
 				vec3 texCoords;
 				texCoords.x = 0.5 + samples[j].x;
@@ -226,7 +226,7 @@ void main()
 				//vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
 				//float reflAngle = max(pow(dot(halfVector, cache.normal.xyz), cacheNormalMaterialData.w), 0.00001);
 				
-				float F = max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0) / (lightArea + PI * quadDistance);
+				float F = (max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0)) / (lightArea + PI * quadDistance);
 				
 				float Wd = F;
 				float Wg = reflAngle * F;
@@ -244,8 +244,8 @@ void main()
 				Wgesg += Wg;
 			}
 			
-			Lod *= (float(SAMPLERNUMBER) / validLightSamples);
-			Log *= (float(SAMPLERNUMBER) / validLightSamples);
+			Lod *= (float(SAMPLENUMBER) / validLightSamples);
+			Log *= (float(SAMPLENUMBER) / validLightSamples);
 		}
 		
 		Xpd = Wgesd > 0 ? Xpd / Wgesd : vec3(0);
@@ -255,7 +255,7 @@ void main()
 		Xpgq = Wgesg > 0 ? Xpgq / Wgesg : vec3(0);
 			
 		float visibilityD = 1, visibilityG = 1;
-		calculateVisibility(cacheIndex, cache, Xpd, Xpg, Xpdq, Xpgq, visibilityD, visibilityG);
+		//calculateVisibility(cacheIndex, cache, Xpd, Xpg, Xpdq, Xpgq, visibilityD, visibilityG);
 		
 		vec3 lightDirD = Xpd - cache.position.xyz;
 		float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.0001);

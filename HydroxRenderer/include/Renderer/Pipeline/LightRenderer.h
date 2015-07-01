@@ -11,6 +11,7 @@
 #include <Shader/ShaderContainer.h>
 
 #include "Renderer/Buffer/GPUImmutableBuffer.h"
+#include "Renderer/Buffer/UBO.h"
 #include "Renderer/Buffer/TBO.h"
 #include "Renderer/Pipeline/Renderquad.h"
 
@@ -50,8 +51,6 @@ namespace he
       void setReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
       void unsetReflectiveShadowMap(unsigned int bindingPoint);
 
-      void generateImperfectShadowMap(const TBO& globalCachePositionBuffer);
-
       void addLight(const xBar::LightContainer& light);
       void removeLight(const xBar::LightContainer& light);
 
@@ -85,17 +84,14 @@ namespace he
 
       util::SharedPointer<RenderOptions> m_options;
 
-      util::SingletonManager *m_singletonManager;
-
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       sh::RenderShaderHandle m_directLightShaderHandle;
-
+      
       std::list<const xBar::LightContainer> m_lights;
       GPUImmutableBuffer m_lightBuffer;
 
       std::list<const xBar::ShadowLightContainer> m_shadowLights;
-      util::SharedPointer<db::Texture2D> m_shadowDepthMap;
       util::SharedPointer<db::Texture3D> m_shadowMaps;
       GPUImmutableBuffer m_shadowedLightBuffer;
       Renderquad m_renderShadowMapsQuad;

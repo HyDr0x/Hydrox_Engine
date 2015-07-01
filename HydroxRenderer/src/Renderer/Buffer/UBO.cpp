@@ -113,7 +113,7 @@ namespace he
       glBindBufferBase(GL_UNIFORM_BUFFER, bufferBindingPoint, *m_bufferIndex);
     }
 
-    void UBO::unBindBuffer(GLuint bufferBindingPoint) const
+    void UBO::unbindBuffer(GLuint bufferBindingPoint) const
     {
       glBindBufferBase(GL_UNIFORM_BUFFER, bufferBindingPoint, 0);
     }

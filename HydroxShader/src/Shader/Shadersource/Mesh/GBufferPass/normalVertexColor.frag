@@ -1,5 +1,7 @@
 #version 440 core
 
+layout(early_fragment_tests) in;
+
 #include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
 
 layout(location = 0) out vec4 fsout_color;

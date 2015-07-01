@@ -4,8 +4,6 @@
 
 #include <XBar/SkinnedGeometryContainer.h>
 
-#include "Renderer/Traverser/Traverser.h"
-
 namespace he
 {
   namespace renderer

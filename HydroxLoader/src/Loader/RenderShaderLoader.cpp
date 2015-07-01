@@ -18,7 +18,6 @@ namespace he
     }
 
     sh::RenderShader RenderShaderLoader::loadResource(
-      sh::ShaderSlotFlags vertexDecaration,
       const std::string& filename,
       const std::vector<std::string>& shaderFilenames)
     {
@@ -29,13 +28,7 @@ namespace he
         shaderSources[i] = loadShaderSource(shaderFilenames[i]);
       }
 
-      if(shaderSources[0].empty())
-      {
-        std::clog << "ERROR, couldn't open file: " << filename << std::endl;
-        assert(false);
-      }
-
-      return sh::RenderShader(vertexDecaration, filename, shaderFilenames, shaderSources);
+      return sh::RenderShader(readVertexDeclaration(shaderSources[0]), filename, shaderFilenames, shaderSources);
     }
 
     void RenderShaderLoader::loadShadersInIndexfile(std::string path, std::string shaderIndexFilename)
@@ -47,9 +40,8 @@ namespace he
 
       std::ifstream file(path + shaderIndexFilename);
       std::string line;
-      std::string renderPassKeyword("Renderpass"), vertexDeclarationKeyword("VertexDeclaration");
+      std::string renderPassKeyword("Renderpass"), newShaderKeyword("Shader");
       unsigned int renderPass = UINT32_MAX;
-      unsigned int vertexDeclaration = UINT32_MAX;
 
       if(file.is_open())
       {
@@ -70,11 +62,9 @@ namespace he
             continue;
           }
 
-          pos = line.find(vertexDeclarationKeyword);
+          pos = line.find(newShaderKeyword);
           if(pos != std::string::npos && renderPass < UINT32_MAX)
           {
-            vertexDeclaration = atoi(line.substr(pos + vertexDeclarationKeyword.size() + 1).c_str());
-
             std::string shaderName;
             std::getline(file, shaderName, '\n');
 
@@ -92,7 +82,7 @@ namespace he
               }
             }
 
-            sh::RenderShaderHandle shaderHandle = m_container->addRenderShader(renderPass, loadResource(sh::ShaderSlotFlags(vertexDeclaration), shaderName, shaderFileNames));
+            sh::RenderShaderHandle shaderHandle = m_container->addRenderShader(renderPass, loadResource(shaderName, shaderFileNames));
 
             for(unsigned int i = 0; i < shaderFileNames.size(); i++)
             {
@@ -125,13 +115,40 @@ namespace he
         for(unsigned int i = 0; i < editedShaderHandles.size(); i++)
         {
           const sh::RenderShader& shader = m_container->getRenderShader(editedShaderHandles[i]);
-          m_container->replaceRenderShader(editedShaderHandles[i], loadResource(shader.getVertexDeclaration(),
-            shader.getShaderName(),
-            shader.getShaderSourceNames()));
+          m_container->replaceRenderShader(editedShaderHandles[i], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
         }
 
         m_shaderFileChecker.resetFilecheckerStatus();
       }
+    }
+
+    sh::ShaderSlotFlags RenderShaderLoader::readVertexDeclaration(const std::string& vertexShaderSource)
+    {
+      std::string searchString("layout(location = ");
+      size_t stringPosNumberBegin = 0, stringPosNumberEnd = 0;
+      sh::ShaderSlotFlags vertexDeclarationFlags;
+      
+      do
+      {
+        stringPosNumberBegin = vertexShaderSource.find(searchString, stringPosNumberEnd);
+
+        if(stringPosNumberBegin != std::string::npos)
+        {
+          stringPosNumberBegin += searchString.size();
+          stringPosNumberEnd = vertexShaderSource.find(')', stringPosNumberBegin);
+
+          size_t stringPosWhitespace = vertexShaderSource.find_first_not_of(' ', stringPosNumberEnd + 1);//look if it is a vertex declaration location and not a uniform or anything else
+
+          if(vertexShaderSource.substr(stringPosWhitespace, 2) == "in")
+          {
+            unsigned long vertexDeclaration = std::strtoul(vertexShaderSource.substr(stringPosNumberBegin, stringPosNumberEnd - stringPosNumberBegin).c_str(), nullptr, 0);
+            vertexDeclarationFlags |= sh::ShaderSlotFlags::convertToFlag(vertexDeclaration);
+          }
+        }
+        
+      } while(stringPosNumberBegin != std::string::npos);
+
+      return vertexDeclarationFlags;
     }
   }
 }

@@ -118,6 +118,7 @@ namespace he
       m_stringRenderer.initialize(m_singletonManager);
       m_lightRenderer.initialize(m_singletonManager);
       m_indirectLightRenderer.initialize(m_singletonManager);
+      m_indirectShadowsCreation.initialize(singletonManager);
       m_particleRenderer.initialize(m_singletonManager);
       m_finalCompositing.initialize(m_singletonManager);
       m_tonemapper.initialize(m_singletonManager);
@@ -199,6 +200,7 @@ namespace he
         m_geometryRasterizer.updateBuffer();
         m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
         m_lightRenderer.updateBuffer();
+        m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
         
         if(m_wireframe)
         {
@@ -210,18 +212,7 @@ namespace he
         m_gBuffer.setGBuffer();
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
-        
-        if(globalIllumination)//create global cache map and z buffer
-        {
-          glDepthMask(GL_FALSE);
-          glDepthFunc(GL_LEQUAL);
-          m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
-          m_geometryRasterizer.rasterizeIndexGeometry();
-          m_indirectLightRenderer.unsetBuffer();
-          glDepthFunc(GL_LESS);
-          glDepthMask(GL_TRUE);
-        }
-        
+                
         {
           glEnable(GL_POLYGON_OFFSET_FILL);
           glPolygonOffset(1.1f, 4.0f);
@@ -278,14 +269,62 @@ namespace he
 
         if(globalIllumination)
         {
+          glDepthMask(GL_FALSE);
+          glDepthFunc(GL_LEQUAL);
+          m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
+          m_geometryRasterizer.rasterizeIndexGeometry();//create global cache map and z buffer
+          m_indirectLightRenderer.unsetBuffer();
+          glDepthFunc(GL_LESS);
+          glDepthMask(GL_TRUE);
+
+          {
+            m_lightRenderer.getReflectiveShadowLights().bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+
+            m_indirectLightRenderer.getSamplingBuffer().bindBuffer(1);
+
+            m_indirectShadowsCreation.viewMatrixCreation(m_lightRenderer.getReflectiveShadowPosMaps(), m_lightRenderer.getReflectiveShadowNormalMaps());
+
+            m_indirectLightRenderer.getSamplingBuffer().unbindBuffer(1);
+
+            for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
+            {
+              m_indirectShadowsCreation.setBackprojectionMap();
+              m_geometryRasterizer.generateIndirectBackprojectionMap(i);
+              m_indirectShadowsCreation.unsetBackprojectionMap();
+            }
+
+            m_lightRenderer.getReflectiveShadowLights().unbindBuffer(GL_SHADER_STORAGE_BUFFER);
+          }
+
+          m_indirectShadowsCreation.generateImperfectShadowMap(
+            m_lightRenderer.getReflectiveShadowPosMaps(), 
+            m_lightRenderer.getReflectiveShadowNormalMaps(), 
+            m_indirectLightRenderer.getGlobalCachePositionMap(), 
+            m_indirectLightRenderer.getGlobalCacheAreaMap(),
+            m_indirectLightRenderer.getSamplingBuffer(), 
+            m_lightRenderer.getReflectiveShadowLights(),
+            m_geometryRasterizer.getGlobalCacheNumber());//generates the imperfect shadow maps
+
+          m_indirectShadowsCreation.generateIndirectLightsShadowMap(
+            m_gBuffer.getDepthTexture(),
+            m_gBuffer.getNormalTexture(),
+            m_lightRenderer.getReflectiveShadowPosMaps(),
+            m_lightRenderer.getReflectiveShadowNormalMaps(),
+            m_indirectLightRenderer.getSamplingBuffer());//does pull push, blurring and visibility calculation of the indirect light sources
+
           m_indirectLightRenderer.calculateIndirectLight(
             m_lightRenderer.getReflectiveShadowPosMaps(),
             m_lightRenderer.getReflectiveShadowNormalMaps(),
             m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
-            m_lightRenderer.getReflectiveShadowLights());
+            m_lightRenderer.getReflectiveShadowLights());// calculates the indirect light of the caches
+
+          //m_lightRenderer.getReflectiveShadowPosMaps()->bindImageTexture(4, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+          //m_lightRenderer.getReflectiveShadowNormalMaps()->bindImageTexture(5, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+          //m_lightRenderer.getReflectiveShadowNormalMaps()->unbindImageTexture(5, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+          //m_lightRenderer.getReflectiveShadowPosMaps()->unbindImageTexture(4, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
           m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
-          m_geometryRasterizer.generateIndirectLightMap();
+          m_geometryRasterizer.generateIndirectLightMap(m_indirectShadowsCreation.getIndirectShadowMap());//generates the indirect light for every pixel on screen with the cache data
           m_indirectLightRenderer.unsetCacheAndProxyLights();
 
           if(m_showVirtualAreaLights)
@@ -334,9 +373,21 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
         break;
       case 10:
-        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getSamplingDebugMap());
+        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
         break;
       case 11:
+        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPsuhPullShadowMap()[0]->convertToTexture2D(0));
+        break;
+      case 12:
+        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPsuhPullShadowMap()[1]->convertToTexture2D(0));
+        break;
+      case 13:
+        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionMaps()->convertToTexture2D(0));
+        break;
+      case 14:
+        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectLightsShadowMaps()->convertToTexture2D(0));
+        break;
+      case 15:
         m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
         m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
         break;
@@ -349,7 +400,7 @@ namespace he
       m_spriteRenderer.render();
       m_stringRenderer.render();
       
-      m_cameraParameterUBO.unBindBuffer(0);
+      m_cameraParameterUBO.unbindBuffer(0);
     }
 
     void RenderManager::addRenderComponent(const db::Sprite *sprite)

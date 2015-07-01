@@ -7,7 +7,9 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingRenderpass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderpass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndexGeometryRenderpass.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndirectBackprojectionRenderpass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightGeometryRenderpass.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ParaboloidShadowMapGeometryRenderpass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ReflectiveShadowMapGeometryRenderpass.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderNode.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShadowMapGeometryRenderpass.cpp 

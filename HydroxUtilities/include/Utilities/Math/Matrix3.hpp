@@ -19,7 +19,6 @@ namespace he
         m_m[2] = m.m_m[2];
       }
 
-
       Matrix(const Vector<Type, 3>& v0, const Vector<Type, 3>& v1, const Vector<Type, 3>& v2)
       {
         m_m[0][0]=v0[0]; m_m[1][0]=v1[0]; m_m[2][0]=v2[0];

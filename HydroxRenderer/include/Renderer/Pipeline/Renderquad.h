@@ -36,11 +36,13 @@ namespace he
       void setRenderTargets3D(util::SharedPointer<db::Texture3D> depthTexture3D, unsigned int layer, int count, ...);
       void setRenderTargets3D(int count, ...);
 
+      void setDepthLayer(unsigned int layer);
+
       virtual void render() const;
 
       void clearTargets(GLfloat clearDepthValue, std::vector<util::vec4f>& clearColors, bool clearDepth) const;
       void clearTargets(GLfloat clearDepthValue, std::vector<util::vec4ui>& clearColors, bool clearDepth) const;
-      void clearTargets(GLfloat clearDepthValue, util::vec4f clearColor, std::vector<unsigned int> indices = std::vector<unsigned int>()) const;
+      void clearTargets(GLfloat clearDepthValue, util::vec4f clearColor, std::vector<unsigned int> indices = std::vector<unsigned int>(), bool clearDepth = true) const;
 
     private:
 

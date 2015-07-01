@@ -2,8 +2,6 @@
 
 #include <XBar/StaticGeometryContainer.h>
 
-#include "Renderer/Traverser/Traverser.h"
-
 namespace he
 {
   namespace renderer

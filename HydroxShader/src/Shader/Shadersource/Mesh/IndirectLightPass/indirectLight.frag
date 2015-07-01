@@ -1,14 +1,14 @@
 #version 440 core
 
-#define INT32_MAX 2147483647
-#define PI 3.14159265359f
+layout(early_fragment_tests) in;
+
+#define PI 3.14159265359
 
 #include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2D normalSampler;
 layout(location = 1) uniform sampler2D materialSampler;
+layout(location = 2) uniform sampler2D indirectShadowMapSampler;
 
 out vec4 luminousFlux;
 
@@ -36,11 +36,11 @@ void main()
 	float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));//length(lightDirG)
 	lightDirG = normalize(lightDirG);
 	float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
-	
+
 	//luminousFlux = vec4(normal, 1);
 	//luminousFlux = vec4(vsout_phiPD, 1);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI), 1.0);
 	//luminousFlux = vec4((frd * vsout_phiPD) / (4.0 * PI * lengthD), 1.0);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI * lengthG), 1.0);
-	luminousFlux = vec4(max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0)), 1.0);
+	luminousFlux = texture(indirectShadowMapSampler, texCoord).r * vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
 }

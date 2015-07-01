@@ -27,9 +27,9 @@ layout(std430, binding = 1) buffer instanceCacheOffsetBuffer
 	uint perInstanceCacheOffset[];
 };
 
-layout(location = 2) uniform uint bufferResolution;
+layout(location = 3) uniform uint reflectiveShadowMapResolution;
 
-layout(location = 3) uniform uint globalCacheOffset;
+layout(location = 4) uniform uint globalCacheOffset;
 
 layout(location = POSITION) in vec3 in_pos;
 layout(location = NORMAL) in vec3 in_normal;
@@ -97,7 +97,7 @@ void main()
 	{
 		if(cacheIndices[i] < INT32_MAX)
 		{
-			ivec2 coord = ivec2(mod(cacheIndices[i], bufferResolution), cacheIndices[i] / bufferResolution);
+			ivec2 coord = ivec2(mod(cacheIndices[i], reflectiveShadowMapResolution), cacheIndices[i] / reflectiveShadowMapResolution);
 			CacheData cache;
 			cache.position = imageLoad(globalCachePositionBuffer, int(cacheIndices[i]));
 			cache.normal = imageLoad(globalCacheNormalBuffer, int(cacheIndices[i]));

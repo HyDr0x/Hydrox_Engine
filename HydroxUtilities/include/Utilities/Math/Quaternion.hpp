@@ -47,9 +47,12 @@ namespace he
           );
       }
 
-      inline void setRotationAxis(vec3f axis) const
+      inline void setRotationAxis(TYPE angle, Vector<TYPE, 3> axis) const
       {
-        m_coord[0] = 0.0f;
+        angle *= 0.5f;
+        axis *= sinf(angle);
+
+        m_coord[0] = cosf(angle);
         m_coord[1] = axis[0];
         m_coord[2] = axis[1];
         m_coord[3] = axis[2];
@@ -210,8 +213,8 @@ namespace he
         TYPE a33 = m_coord[3] * m_coord[3];
 
         return Vector<TYPE, 3>(v[0] * (a00 + a11 - a22 - a33) + 2.0f * (a12 * v[1] + a13 * v[2] + a02 * v[2] - a03 * v[1]),
-                            v[1] * (a00 - a11 + a22 - a33) + 2.0f * (a12 * v[0] + a23 * v[2] + a03 * v[0] - a01 * v[2]),
-                            v[2] * (a00 - a11 - a22 + a33) + 2.0f * (a13 * v[0] + a23 * v[1] - a02 * v[0] + a01 * v[1]));
+                               v[1] * (a00 - a11 + a22 - a33) + 2.0f * (a12 * v[0] + a23 * v[2] + a03 * v[0] - a01 * v[2]),
+                               v[2] * (a00 - a11 - a22 + a33) + 2.0f * (a13 * v[0] + a23 * v[1] - a02 * v[0] + a01 * v[1]));
       }*/
 
       inline Vector<TYPE, 3> apply(const Vector<TYPE, 3>& v) const

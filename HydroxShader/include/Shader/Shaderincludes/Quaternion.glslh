@@ -1,0 +1,17 @@
+vec4 createQuaternion(in float angle, in vec3 axis)
+{
+	vec4 q;
+	q.w = angle * 0.5f;
+	q.xyz = axis * sin(q.w);
+	q.w = cos(q.w);
+	
+	return q;
+}
+
+vec3 applyQuaternion(in vec3 v, in vec4 q)
+{
+	vec3 transformedPosition = 2.0 * cross(v, q.xyz);
+	transformedPosition = v + transformedPosition * q.w + cross(transformedPosition, q.xyz);
+	
+	return transformedPosition;
+}
