@@ -23,6 +23,8 @@ namespace he
 
       static void generateHaltonSequence(unsigned int sampleNumber, util::vec2ui base, float offset, unsigned int debugTextureSize, std::vector<util::vec4f>& outSamplingPattern, std::vector<float>& outDebugSamplingPattern);
 
+      static float halton(unsigned int index, unsigned int base);
+
     private:
 
     };

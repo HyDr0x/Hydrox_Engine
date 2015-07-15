@@ -21,7 +21,7 @@ namespace he
     public:
 
       Texture() : m_texIndex(0) {}
-      Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping = true);
+      Texture(GLuint width, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping = true);
 
       virtual ~Texture();
 
@@ -49,7 +49,7 @@ namespace he
 
     protected:
 
-	    GLsizei m_width, m_height;
+	    GLsizei m_width;
 	    GLuint m_texIndex;
 	    GLenum m_target;
       GLenum m_internalFormat;

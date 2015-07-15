@@ -39,7 +39,7 @@ namespace he
       }
     }
 
-    float halton(unsigned int index, unsigned int base)
+    float RandomSequenceGenerator::halton(unsigned int index, unsigned int base)
     {
       unsigned int j = index;
       float f = 1.0f;

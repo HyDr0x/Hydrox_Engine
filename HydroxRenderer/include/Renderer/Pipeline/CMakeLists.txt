@@ -2,6 +2,7 @@ set(
 	HEADER 
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/DelaunayTriangulation.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/FinalCompositing.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.h 

@@ -1,5 +1,5 @@
-#ifndef TEXTURE2D_H_
-#define TEXTURE2D_H_
+#ifndef TEXTURE1D_H_
+#define TEXTURE1D_H_
 
 #include <GL/glew.h>
 
@@ -13,19 +13,19 @@ namespace he
 {
   namespace db
   {
-    class GRAPHICAPI Texture2D : public Texture
+    class GRAPHICAPI Texture1D : public Texture
     {
     public:
 
-      Texture2D() {}
-      Texture2D(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data = nullptr, bool mipmapping = false);
-      Texture2D(const Texture2D& other);
+      Texture1D() {}
+      Texture1D(GLuint width, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data = nullptr, bool mipmapping = false);
+      Texture1D(const Texture1D& other);
 
-      ~Texture2D();
+      ~Texture1D();
 
-      Texture2D& operator=(Texture2D other);
+      Texture1D& operator=(Texture1D other);
 
-      void copyTextureData(const Texture2D& texture);
+      void copyTextureData(const Texture1D& texture);
 
       void bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
       void unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
@@ -34,11 +34,11 @@ namespace he
 
       void bindToFramebuffer(GLenum attachment);
 
-      util::vec2ui getResolution() const;
+      unsigned int getResolution() const;
 
       virtual unsigned int getTextureSize() const;
 
-      void setTextureData(GLuint offsetX, GLuint offsetY, GLuint width, GLuint height, GLvoid* data);
+      void setTextureData(GLuint offsetX, GLuint width, GLvoid* data);
 
     protected:
 
@@ -46,9 +46,7 @@ namespace he
 
     private:
 
-      void swap(Texture2D& other);
-
-      GLsizei m_height;
+      void swap(Texture1D& other);
 
     };
   }

@@ -116,7 +116,7 @@ namespace he
     void LightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.position = position;
-      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.getRotationAxis();
+      if(m_lightType != POINTLIGHT) m_lightData.direction = rotation.apply(util::vec3f(1, 0, 0));
     }
 
     void LightNode::setDirectionalLightNearSize(util::vec2f directionalNearSize)

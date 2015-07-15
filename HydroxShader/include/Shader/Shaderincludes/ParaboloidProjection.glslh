@@ -1,0 +1,52 @@
+#include "Quaternion.glslh"
+
+#define PARABOLOIDNEAR
+#define PARABOLOIDFAR
+#define PI 3.14159265359f
+
+void paraboloidViewProjection(in vec3 lightPos, in vec3 lightNormal, in vec3 pos, in float near, in float far, out vec3 projPos, out float clipDepth)
+{
+	projPos = pos - lightPos;
+
+	if(abs(lightNormal.z) < 0.99)
+	{
+		float lightRotationAngle = acos(lightNormal.z);
+		vec3 rotationAxis = normalize(vec3(lightNormal.y, -lightNormal.x, 0.0));//normalize(cross(lightNormal, vec3(0, 0, 1)));
+		
+		vec4 q = createQuaternion(lightRotationAngle, rotationAxis);
+		projPos = applyQuaternion(projPos, q);
+	}
+	else if(lightNormal.z > 0.99)
+	{
+		float lightRotationAngle = PI;
+		vec3 rotationAxis = normalize(vec3(0, 1, 0));//normalize(cross(lightNormal, vec3(0, 0, 1)));
+		
+		vec4 q = createQuaternion(lightRotationAngle, rotationAxis);
+		projPos = applyQuaternion(projPos, q);
+	}
+	
+	projPos.z *= -1.0;
+	
+	float cacheLightDistance = length(projPos);
+	projPos /= cacheLightDistance;//create the normal of the point at the paraboloid to get the texture coordinates
+	clipDepth = projPos.z;
+	projPos.z += 1.0;//add the reflection vector(0, 0, 1)
+	projPos.xy /= projPos.z;//divide through the new z value to get the normal
+	
+	projPos.z = ((cacheLightDistance - near) / (far - near)) * 2.0 - 1.0;
+}
+
+void paraboloidProjection(in vec3 pos, in float near, in float far, out vec3 projPos, out float clipDepth)
+{
+	pos.z *= -1.0;
+	
+	float cacheLightDistance = length(pos);
+	pos /= cacheLightDistance;//create the normal of the point at the paraboloid to get the texture coordinates
+	clipDepth = pos.z;
+	pos.z += 1.0;//add the reflection vector(0, 0, 1)
+	pos.xy /= pos.z;//divide through the new z value to get the normal
+	
+	pos.z = ((cacheLightDistance - near) / (far - near)) * 2.0 - 1.0;
+	
+	projPos = pos;
+}

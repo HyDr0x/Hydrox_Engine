@@ -1,0 +1,39 @@
+#version 440 core
+
+#define WORKGROUPSIZE 1
+
+struct DrawArraysInstancedBaseInstance
+{
+	uint count;
+	uint instanceCount;
+	uint baseVertex;
+	uint baseInstance;
+};
+
+coherent layout(r16ui, binding = 0) uniform uimage1D sampleNumberOffsetBuffer;
+
+layout(std430, binding = 1) buffer commandBuffer
+{
+	DrawArraysInstancedBaseInstance command;
+};
+
+layout(location = 0) uniform uint resolution;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint rowSampleNumber = 0;
+
+	for(int i = 0; i < resolution; i++)
+	{
+		uint siteSampleNumber = imageLoad(sampleNumberOffsetBuffer, i).r;
+
+		imageStore(sampleNumberOffsetBuffer, i, uvec4(rowSampleNumber));
+		
+		rowSampleNumber += siteSampleNumber;
+	}
+	
+	command.count = rowSampleNumber;
+	//command.instanceCount = 1;
+}

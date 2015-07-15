@@ -5,7 +5,7 @@
 #define INTERLEAVEDBLOCKSIZE
 
 #include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Quaternion.glslh"
+#include "../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 layout(location = 0) uniform sampler2D depthSampler;
 layout(location = 1) uniform sampler2DArray indirectShadowMapSampler;
@@ -54,36 +54,21 @@ void main()
 			}
 			
 			vec3 lightNormal = imageLoad(indirectLightNormals, indirectLightTexCoord).xyz * 2.0 - 1.0;
-			
-			vec3 transformedPosition = pos3D.xyz - lightPos.xyz;
 
-			float lightRotationAngle = acos(lightNormal.z);
-			vec3 rotationAxis = normalize(vec3(lightNormal.y, -lightNormal.x, 0.0));//normalize(cross(lightNormal.xyz, vec3(0, 0, 1)));
-			
-			vec4 q = createQuaternion(lightRotationAngle, rotationAxis);
-			transformedPosition = applyQuaternion(transformedPosition, q);
-
-			float distance = length(transformedPosition);
-			
-			transformedPosition.z *= -1.0;
-			transformedPosition /= distance;//create the normal of the point at the paraboloid to get the texture coordinates
-			transformedPosition.z += 1.0;//add the reflection vector(0, 0, 1)
-			transformedPosition.xy /= transformedPosition.z;//divide through the new z value to get the normal
+			float clipDepth;
+			vec3 transformedPosition;
+			paraboloidViewProjection(lightPos.xyz, lightNormal, pos3D.xyz, PARABOLOIDNEAR, PARABOLOIDFAR, transformedPosition, clipDepth);
 			
 			transformedPosition.xy = (transformedPosition.xy * 0.5 + 0.5) / float(SAMPLENUMBERROOT);
+			transformedPosition.z = transformedPosition.z * 0.5 + 0.5 - 0.01;
 			
 			transformedPosition.x += mod(i, SAMPLENUMBERROOT) / float(SAMPLENUMBERROOT);
 			transformedPosition.y += (i / SAMPLENUMBERROOT) / float(SAMPLENUMBERROOT);
-			
+
 			float depth = texture(indirectShadowMapSampler, vec3(transformedPosition.xy, j)).r;
-/*
-			float f = 100.0, n = 0.1;
-			distance = -distance;
-			distance = (distance * ((-f - n) / (f - n)) - (2.0 * f * n) / (f - n)) / (-distance) - 0.0019;*/
-			distance = (distance - 0.1) / (100.0 - 0.1) - 0.015;
-			
+
 			//visibleIndirectLightNumber = depth;
-			visibleIndirectLightNumber += clamp(ceil(depth - distance), 0, 1);
+			visibleIndirectLightNumber += clamp(ceil(depth - transformedPosition.z), 0, 1);
 		}
 	}
 	

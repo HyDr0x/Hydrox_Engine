@@ -1,0 +1,86 @@
+#version 440 core
+
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+
+#define WORKGROUPSIZE 128
+#define PI 3.14159265359
+//circleArea = pi * r^2 = pi * 0.5 * 0.5
+#define AREAMAX (0.25 * PI)
+
+layout(r32ui, binding = 0) readonly uniform uimage2D indexBuffer;
+
+layout(r16ui, binding = 1) readonly uniform uimage1D sampleNumberOffsetBuffer;
+
+layout(rgba32f, binding = 2) readonly uniform image2D backprojectionPositionBuffer;
+layout(rgba32f, binding = 3) readonly uniform image2D backprojectionNormalBuffer;
+
+layout(rgba32f, binding = 4) writeonly uniform imageBuffer adaptiveSamplingPositionBuffer;
+layout(rgba32f, binding = 5) writeonly uniform imageBuffer adaptiveSamplingNormalBuffer;
+
+layout(rg16f, binding = 6) readonly uniform imageBuffer noiseBuffer;
+
+layout(location = 0) uniform samplerBuffer siteBuffer;
+
+layout(location = 1) uniform uint resolution;
+
+layout(location = 2) uniform uint maxSampleNumber;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	if(idx >= resolution)
+	{
+		return;
+	}
+	
+	uint rowSampleNumber = imageLoad(sampleNumberOffsetBuffer, int(idx)).r;
+	
+	for(int x = 0; x < resolution; x++)
+	{
+		ivec2 texCoord = ivec2(x, idx);
+		
+		if(texCoord.x + 1 >= resolution || texCoord.y + 1 >= resolution) continue;
+		
+		int indices[4];
+		
+		indices[0] = int(imageLoad(indexBuffer, ivec2(texCoord.x, texCoord.y)).r - 1);
+		indices[1] = int(imageLoad(indexBuffer, ivec2(texCoord.x + 1, texCoord.y)).r - 1);
+		indices[2] = int(imageLoad(indexBuffer, ivec2(texCoord.x + 1, texCoord.y + 1)).r - 1);
+		indices[3] = int(imageLoad(indexBuffer, ivec2(texCoord.x, texCoord.y + 1)).r - 1);
+
+		for(uint i = 0; i < 2; i++)//only need two tries!
+		{
+			uint index1 = uint(mod(i + 1, 4));
+			uint index2 = uint(mod(i + 2, 4));
+			if(indices[i] != indices[index1] && indices[i] != indices[index2] && indices[index1] != indices[index2])
+			{
+				vec2 p0 = texelFetch(siteBuffer, indices[i]).xy;
+				vec2 p1 = texelFetch(siteBuffer, indices[index1]).xy;
+				vec2 p2 = texelFetch(siteBuffer, indices[index2]).xy;
+				
+				if(length(vec2(0.5) - p0) < 0.5 && length(vec2(0.5) - p1) < 0.5 && length(vec2(0.5) - p2) < 0.5)
+				{
+					vec3 e0 = vec3(p1 - p0, 0);
+					vec3 e1 = vec3(p2 - p0, 0);
+					vec3 e2 = vec3(p2 - p1, 0);
+					float triangleArea = 0.5 * length(cross(e0, e1));
+					uint sampleNumber = uint(maxSampleNumber * triangleArea / AREAMAX);
+					
+					for(uint j = 0; j < sampleNumber; j++)//spawn as many sample points as needed to fill the gap in the triangle!
+					{
+						vec2 randomValues = imageLoad(noiseBuffer, int(rowSampleNumber)).xy;
+						//vec2 randomValues = vec2(10,10);
+						ivec2 samplingTexCoord = ivec2(resolution * (p0 + randomValues.x * e0.xy + randomValues.y * e2.xy));
+						imageStore(adaptiveSamplingPositionBuffer, int(rowSampleNumber), imageLoad(backprojectionPositionBuffer, samplingTexCoord));
+						imageStore(adaptiveSamplingNormalBuffer, int(rowSampleNumber), vec4(encodeNormal(imageLoad(backprojectionNormalBuffer, samplingTexCoord).xyz), 0, 0));
+						
+						rowSampleNumber++;
+					}
+				}
+			}
+		}
+	}
+}

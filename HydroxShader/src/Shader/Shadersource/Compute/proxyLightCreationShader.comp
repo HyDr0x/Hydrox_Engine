@@ -262,7 +262,6 @@ void main()
 
 		imageStore(proxyLightPositionBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4(Xpd, length(lightDirD)));
 		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y), visibilityD * vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0.0));
-		//imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4(vec3(visibilityD), 0.0));
 
 		vec3 lightDirG = Xpg - cache.position.xyz;
 		float lightQuadDistance = dot(lightDirG, lightDirG);
@@ -273,6 +272,6 @@ void main()
 		float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
 		
 		imageStore(proxyLightPositionBuffer, ivec2(2 * texCoord.x + 1, texCoord.y), vec4(Xpg, sqrt(lightQuadDistance)));
-		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x + 1, texCoord.y), visibilityG * vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0));
+		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x + 1, texCoord.y), 0 * vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0));
 	}
 }

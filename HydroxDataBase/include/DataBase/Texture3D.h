@@ -27,6 +27,8 @@ namespace he
 
       Texture3D& operator=(Texture3D other);
 
+      void copyTextureData(const Texture3D& texture);
+
       void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
       void unbindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
 
@@ -48,6 +50,7 @@ namespace he
 
       void swap(Texture3D& other);
 
+      GLsizei m_height;
       GLsizei m_depth;
     };
   }

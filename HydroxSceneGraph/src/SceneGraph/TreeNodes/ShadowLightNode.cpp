@@ -203,7 +203,7 @@ namespace he
     void ShadowLightNode::applyTransformation(util::vec3f position, util::Quaternion<float> rotation)
     {
       if(m_lightType != DIRECTIONALLIGHT) m_lightData.light.position = position;
-      if(m_lightType != POINTLIGHT) m_lightData.light.direction = rotation.getRotationAxis() * -1.0f;//negate it, zaxis inverted in view space and shader need the negated lightDir anyways
+      if(m_lightType != POINTLIGHT) m_lightData.light.direction = rotation.apply(util::vec3f(1, 0, 0));//negate it, zaxis inverted in view space and shader need the negated lightDir anyways
 
       m_lightData.viewProj = m_projectionMatrix * util::math::createLookAt(position, m_lightData.light.direction, util::vec3f(0.0f, 1.0f, 0.0f));
     }

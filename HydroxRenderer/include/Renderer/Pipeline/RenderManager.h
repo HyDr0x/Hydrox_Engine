@@ -15,6 +15,7 @@
 #include "Renderer/Pipeline/LightRenderer.h"
 #include "Renderer/Pipeline/IndirectLightRenderer.h"
 #include "Renderer/Pipeline/IndirectShadowsCreation.h"
+#include "Renderer/Pipeline/DelaunayTriangulation.h"
 #include "Renderer/Pipeline/ParticleRenderer.h"
 #include "Renderer/Pipeline/GeometryRenderer.h"
 #include "Renderer/Pipeline/BillboardRenderer.h"
@@ -120,6 +121,7 @@ namespace he
       LightRenderer m_lightRenderer;
       IndirectLightRenderer m_indirectLightRenderer;
       IndirectShadowsCreation m_indirectShadowsCreation;
+      DelaunayTriangulation m_delaunayTriangulation;
       ParticleRenderer m_particleRenderer;
       GeometryRenderer m_geometryRasterizer;
       BillboardRenderer m_billboardRenderer;

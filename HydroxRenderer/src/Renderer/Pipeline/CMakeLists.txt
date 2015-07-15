@@ -2,6 +2,7 @@ set(
 	SOURCE 
 	${SOURCE} 
 	${CMAKE_CURRENT_SOURCE_DIR}/BillboardRenderer.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/DelaunayTriangulation.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/FinalCompositing.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.cpp 

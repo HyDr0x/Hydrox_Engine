@@ -367,6 +367,16 @@ namespace he
     typedef Vector<unsigned short, 3> vec3us;
     typedef Vector<unsigned short, 4> vec4us;
 
+    typedef Vector<char, 1> vec1b;
+    typedef Vector<char, 2> vec2b;
+    typedef Vector<char, 3> vec3b;
+    typedef Vector<char, 4> vec4b;
+
+    typedef Vector<unsigned char, 1> vec1ub;
+    typedef Vector<unsigned char, 2> vec2ub;
+    typedef Vector<unsigned char, 3> vec3ub;
+    typedef Vector<unsigned char, 4> vec4ub;
+
     typedef Vector<float, 1> vec1f;
     typedef Vector<float, 2> vec2f;
     typedef Vector<float, 3> vec3f;

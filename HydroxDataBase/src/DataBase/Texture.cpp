@@ -7,10 +7,9 @@ namespace he
 {
   namespace db
 	{
-    Texture::Texture(GLuint width, GLuint height, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) : 
+    Texture::Texture(GLuint width, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) : 
       m_target(target),
       m_width(width),
-      m_height(height),
       m_type(type),
       m_internalFormat(internalFormat),
       m_format(format),

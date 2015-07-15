@@ -52,20 +52,21 @@ void main()
 	}
 	
 	camPos.xyz /= validSamples;
+	
 	vec3 z = -reflectiveShadowLight[idx].light.direction.xyz;//normalize(camDirection.xyz / validSamples);
 	
 	vec3 upVector = vec3(0, 1, 0);
 	if(upVector == z)
 	{
-		upVector += vec3(0.00001);
+		upVector += vec3(0.0001);
 	}
 	
 	vec3 x = normalize(cross(upVector, z));
 	vec3 y = normalize(cross(z, x));
-	
-	mat4 viewMatrix = mat4(vec4(x, 0.0),
-									vec4(y, 0.0),
-									vec4(z, 0.0),
+
+	mat4 viewMatrix = mat4(x.x, y.x, z.x, 0.0,
+									x.y, y.y, z.y, 0.0,
+									x.z, y.z, z.z, 0.0,
 									vec4(0.0));
 									
 	viewMatrix[3] = viewMatrix[0] * -camPos.x + viewMatrix[1] * -camPos.y + viewMatrix[2] * -camPos.z + viewMatrix[3];

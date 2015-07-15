@@ -8,7 +8,8 @@ namespace he
   namespace db
   {
     Texture3D::Texture3D(GLuint width, GLuint height, GLuint depth, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) :
-      Texture(width, height, target, type, internalFormat, format, channelNumber, bitsPerComponent, data, mipmapping),
+      Texture(width, target, type, internalFormat, format, channelNumber, bitsPerComponent, data, mipmapping),
+      m_height(height),
       m_depth(depth)
     {
       glGenTextures(1, &m_texIndex);
@@ -139,6 +140,30 @@ namespace he
       std::swap(m_bitsPerComponent, other.m_bitsPerComponent);
       std::swap(m_channelNumber, other.m_channelNumber);
       std::swap(m_mipmapping, other.m_mipmapping);
+    }
+
+    void Texture3D::copyTextureData(const Texture3D& texture)
+    {
+      glBindTexture(m_target, m_texIndex);
+
+      glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+      glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+      glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, nullptr);
+
+      glBindTexture(m_target, 0);
+
+      glCopyImageSubData(texture.m_texIndex, texture.m_target, 0, 0, 0, 0, m_texIndex, m_target, 0, 0, 0, 0, texture.m_width, texture.m_height, texture.m_depth);
+
+      if(m_mipmapping)
+      {
+        glBindTexture(m_target, m_texIndex);
+        glGenerateMipmap(m_target);
+        glBindTexture(m_target, 0);
+      }
     }
 
     void Texture3D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)

@@ -9,6 +9,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleEmitter.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Sprite.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Texture.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/Texture1D.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Texture2D.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Texture3D.cpp 
 	PARENT_SCOPE 
