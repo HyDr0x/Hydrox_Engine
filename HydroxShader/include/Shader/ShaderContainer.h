@@ -46,6 +46,7 @@ namespace he
         PARABOLOIDCACHETOSITEPROJECTION = 21,
         SHOWVORONOIDIAGRAM = 22,
         PULLSHADER = 23,
+        SEPARATEDBLUR = 24,
         PASSNUMBER
       };
 

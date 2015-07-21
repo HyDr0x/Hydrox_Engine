@@ -92,14 +92,23 @@ namespace he
       return m_animationTimeUnit;
     }
 
-    sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped)
+    sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped, bool generateTangentSpace, bool generateUVSpace)
     {
       std::clog << "Assimp Loads Scene" << std::endl;
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
       
-      unsigned int deleteAssimpOptions = ~(aiProcess_GenUVCoords | aiProcess_CalcTangentSpace);
-      //unsigned int deleteAssimpOptions = ~(aiProcess_GenUVCoords);
+      unsigned int deleteAssimpOptions = ~0;
+      if(!generateTangentSpace)
+      {
+        deleteAssimpOptions &= ~aiProcess_CalcTangentSpace;
+      }
+
+      if(!generateUVSpace)
+      {
+        deleteAssimpOptions &= ~aiProcess_GenUVCoords;
+      }
+
       const aiScene *assimpScene = importer.ReadFile(path + filename, aiProcessPreset_TargetRealtime_MaxQuality & deleteAssimpOptions);
 
       if(!assimpScene)

@@ -39,6 +39,7 @@ namespace he
       m_indirectShadowMapCreationShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::VISIBILITYMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
       m_pullShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::PULLSHADER, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
       m_pushShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::PUSHSHADER, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      m_blurShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SEPARATEDBLUR, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
       m_viewMatrixCreationHandle = sh::ShaderContainer::INDIRECTSHADOWVIEWMATRIXCREATION;
 
       m_indirectShadowMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(0.5f * m_options->width, 0.5f * m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
@@ -158,10 +159,13 @@ namespace he
 
       generateShadowMap(gBufferDepthMap, indirectLightPositions, indirectLightNormals, samplingPatternBuffer);
 
-      blurShadowMap(gBufferDepthMap, gBufferNormalMap);
+      bilateralInterleavedBlurShadowMap(gBufferDepthMap, gBufferNormalMap);
+
+      bilateralBlurShadowMap(gBufferDepthMap, gBufferNormalMap);
     }
 
-    void IndirectShadowsCreation::generateShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap,
+    void IndirectShadowsCreation::generateShadowMap(
+      util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture3D> indirectLightPositions,
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       const UBO& samplingPatternBuffer)
@@ -201,7 +205,7 @@ namespace he
       glViewport(0, 0, m_options->width, m_options->height);
     }
 
-    void IndirectShadowsCreation::blurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    void IndirectShadowsCreation::bilateralInterleavedBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
     {
       const sh::ComputeShader& indirectShadowMapBlurShader = m_shaderContainer->getComputeShader(sh::ShaderContainer::INDIRECTSHADOWMAPBLUR);
       indirectShadowMapBlurShader.useShader();
@@ -328,6 +332,88 @@ namespace he
       }
 
       push.useNoShader();
+
+      glViewport(0, 0, m_options->width, m_options->height);
+    }
+
+    void IndirectShadowsCreation::bilateralBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    {
+      //unsigned int kernelSize = 5;
+
+      //glViewport(0, 0, 0.5f * m_options->width, 0.5f * m_options->height);
+
+      //const sh::RenderShader& blurShader = m_shaderContainer->getRenderShader(m_blurShaderHandle);
+      //blurShader.useShader();
+
+      //m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap1);
+      //m_indirectShadowMapQuad.setWriteFrameBuffer();
+
+      //m_indirectShadowMap0->setTexture(0, 0);
+      //gBufferDepthMap->setTexture(1, 1);
+      //gBufferNormalMap->setTexture(2, 2);
+
+      //util::vec2f imageSize = util::vec2f(0.5f * m_options->width, 0.5f * m_options->height);
+      //sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &imageSize[0]);
+
+      //sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &kernelSize);
+
+      //m_indirectShadowMapQuad.render();
+
+      //gBufferNormalMap->unsetTexture(2);
+      //gBufferDepthMap->unsetTexture(1);
+      //m_indirectShadowMap0->unsetTexture(0);
+
+      //m_indirectShadowMapQuad.unsetWriteFrameBuffer();
+
+      //blurShader.useNoShader();
+
+      //glViewport(0, 0, m_options->width, m_options->height);
+
+      util::vec2f samplingDirection;
+      unsigned int kernelSize = 5;
+
+      glViewport(0, 0, 0.5f * m_options->width, 0.5f * m_options->height);
+
+      const sh::RenderShader& blurShader = m_shaderContainer->getRenderShader(m_blurShaderHandle);
+      blurShader.useShader();
+
+      gBufferDepthMap->setTexture(1, 1);
+      gBufferNormalMap->setTexture(2, 2);
+
+      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap1);
+      m_indirectShadowMapQuad.setWriteFrameBuffer();
+
+      m_indirectShadowMap0->setTexture(0, 0);
+
+      samplingDirection = util::vec2f(1.0f / (0.5f * m_options->width), 0.0f);
+      sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &samplingDirection[0]);
+
+      sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &kernelSize);
+
+      m_indirectShadowMapQuad.render();
+
+      m_indirectShadowMapQuad.unsetWriteFrameBuffer();
+
+      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap0);
+      m_indirectShadowMapQuad.setWriteFrameBuffer();
+
+      m_indirectShadowMap1->setTexture(0, 0);
+
+      samplingDirection = util::vec2f(0.0f, 1.0f / (0.5f * m_options->height));
+      sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &samplingDirection[0]);
+
+      sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &kernelSize);
+
+      m_indirectShadowMapQuad.render();
+
+      m_indirectShadowMap1->unsetTexture(0);
+
+      m_indirectShadowMapQuad.unsetWriteFrameBuffer();
+
+      gBufferNormalMap->unsetTexture(2);
+      gBufferDepthMap->unsetTexture(1);
+
+      blurShader.useNoShader();
 
       glViewport(0, 0, m_options->width, m_options->height);
     }

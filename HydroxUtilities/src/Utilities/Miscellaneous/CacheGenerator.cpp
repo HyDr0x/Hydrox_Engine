@@ -624,6 +624,7 @@ namespace he
 
       if(voronoiLoop.start())
       {
+        unsigned int cellCounter = 0;
         do
         {
           voro::voronoicell vc;
@@ -631,6 +632,10 @@ namespace he
           container.compute_cell(vc, voronoiLoop);
 
           calculateCacheArea(outCaches[voronoiLoop.pid()], cacheTriangles[voronoiLoop.pid()], vc, diagonal, triangles, epsilon, bitShiftNumber);
+
+          cellCounter++;
+
+          std::clog << cellCounter << " / " << outCaches.size() << " Voronoi Cells computed!" << std::endl;
 
         } while(voronoiLoop.inc());
       }
@@ -791,7 +796,7 @@ namespace he
       m_polygons.clear();
       m_linearizedAreaCaches.clear();
 
-      generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
+      //generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
 
       outCaches = m_caches;
 

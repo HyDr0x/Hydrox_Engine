@@ -110,6 +110,7 @@ namespace he
       assert(count > 0 || depthTexture);
 
       m_depthTexture = depthTexture;
+      m_depthTexture3D = util::SharedPointer<db::Texture3D>();
 
       va_list texList;
       va_start(texList, count);
@@ -127,6 +128,7 @@ namespace he
     {
       assert(count > 0 || depthTexture3D);
 
+      m_depthTexture = util::SharedPointer<db::Texture2D>();
       m_depthTexture3D = depthTexture3D;
 
       va_list texList;
@@ -149,6 +151,7 @@ namespace he
       va_start(texList, count);
 
       m_depthTexture = util::SharedPointer<db::Texture2D>();
+      m_depthTexture3D = util::SharedPointer<db::Texture3D>();
 
       m_writeTextures.resize(count);
       for(unsigned int i = 0; i < m_writeTextures.size(); i++)
@@ -167,6 +170,7 @@ namespace he
       va_start(texList, count);
 
       m_depthTexture = depthTexture;
+      m_depthTexture3D = util::SharedPointer<db::Texture3D>();
 
       m_writeTextures3D.resize(count);
       for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)
@@ -184,6 +188,7 @@ namespace he
       va_list texList;
       va_start(texList, count);
 
+      m_depthTexture = util::SharedPointer<db::Texture2D>();
       m_depthTexture3D = depthTexture3D;
 
       m_writeTextures3D.resize(count);
@@ -203,6 +208,7 @@ namespace he
       va_start(texList, count);
 
       m_depthTexture = util::SharedPointer<db::Texture2D>();
+      m_depthTexture3D = util::SharedPointer<db::Texture3D>();
 
       m_writeTextures3D.resize(count);
       for(unsigned int i = 0; i < m_writeTextures3D.size(); i++)

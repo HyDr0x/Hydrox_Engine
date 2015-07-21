@@ -71,7 +71,7 @@ namespace he
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
       AnimationTimeUnit getAnimationTimeUnit() const;
 
-      sg::Scene* load(std::string path, std::string filename, bool yAxisFlipped = true);
+      sg::Scene* load(std::string path, std::string filename, bool yAxisFlipped = true, bool generateTangentSpace = false, bool generateUVSpace = false);
 
       sg::Scene* loadDefaultSceneGraph();
 

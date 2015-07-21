@@ -80,14 +80,17 @@ namespace he
                              util::SharedPointer<db::Texture3D> indirectLightNormals,
                              const UBO& samplingPatternBuffer);
 
-      void blurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
+      void bilateralInterleavedBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
 
       void pullPush();
+
+      void bilateralBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
 
       sh::RenderShaderHandle m_indirectShadowMapsShaderHandle;
       sh::RenderShaderHandle m_indirectShadowMapCreationShaderHandle;
       sh::RenderShaderHandle m_pullShaderHandle;
       sh::RenderShaderHandle m_pushShaderHandle;
+      sh::RenderShaderHandle m_blurShaderHandle;
       sh::ComputeShaderHandle m_viewMatrixCreationHandle;
 
       util::SharedPointer<RenderOptions> m_options;

@@ -387,7 +387,7 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
         break;
       case 11:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPsuhPullShadowMap()[4]->convertToTexture2D(0));
+
         break;
       case 12:
         m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionNormalMaps()->convertToTexture2D(0));
