@@ -70,9 +70,8 @@ namespace he
 
       util::SharedPointer<db::Texture3D> getShadowMaps() const;
 
-      util::SharedPointer<db::Texture3D> getReflectiveShadowPosMaps() const;
-      util::SharedPointer<db::Texture3D> getReflectiveShadowNormalMaps() const;
-      util::SharedPointer<db::Texture3D> getReflectiveShadowLuminousFluxMaps() const;
+      std::vector<util::SharedPointer<db::Texture2D>> getReflectiveShadowPosLuminousFluxMaps() const;
+      std::vector<util::SharedPointer<db::Texture2D>> getReflectiveShadowNormalAreaMaps() const;
       const GPUImmutableBuffer& getReflectiveShadowLights() const;
 
     private:
@@ -98,9 +97,8 @@ namespace he
 
       std::list<const xBar::ShadowLightContainer> m_reflectiveShadowLights;
       util::SharedPointer<db::Texture2D> m_reflectiveShadowDepthMap;
-      util::SharedPointer<db::Texture3D> m_shadowPosMaps;
-      util::SharedPointer<db::Texture3D> m_shadowNormalMaps;
-      util::SharedPointer<db::Texture3D> m_shadowLuminousFluxMaps;
+      std::vector<util::SharedPointer<db::Texture2D>> m_shadowPosLuminousFluxMaps;
+      std::vector<util::SharedPointer<db::Texture2D>> m_shadowNormalAreaMaps;
       GPUImmutableBuffer m_reflectiveShadowedLightBuffer;
       Renderquad m_renderReflectiveShadowMapsQuad;
 

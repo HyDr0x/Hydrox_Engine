@@ -211,7 +211,6 @@ namespace he
       std::vector<vec3f> triangleCentroids;
       vec3f normal = vec3f::identity();
 
-      m_area = 0.0f;
       for(unsigned int i = 2; i < m_points.size(); i++)//triangulation through fan triangulation, only for convex polygons!
       {
         Triangle triangle(pivotPoint, secondPoint, m_points[i]);

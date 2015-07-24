@@ -38,10 +38,9 @@ namespace he
 
       void updateBuffer(unsigned int cacheNumber, unsigned int proxyLightTextureResolution);
       void calculateIndirectLight(
-        util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
-        util::SharedPointer<db::Texture3D> reflectiveShadowNormalMaps,
-        util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps,
-        const GPUImmutableBuffer& reflectiveShadowLightBuffer) const;
+        std::vector<util::SharedPointer<db::Texture2D>> reflectiveShadowPosLuminousFluxMaps,
+        std::vector<util::SharedPointer<db::Texture2D>> reflectiveShadowNormalAreaMaps,
+        const GPUImmutableBuffer& reflectiveShadowLightBuffer);
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
       void unsetBuffer() const;
@@ -51,8 +50,10 @@ namespace he
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
-      util::SharedPointer<db::Texture2D> getIndirectPositionMap();
-      util::SharedPointer<db::Texture2D> getIndirectLuminousFluxMap();
+      util::SharedPointer<db::Texture2D> getIndirectDiffusePositionMap();
+      util::SharedPointer<db::Texture2D> getIndirectDiffuseLuminousFluxMap();
+      util::SharedPointer<db::Texture2D> getIndirectSpecularPositionMap();
+      util::SharedPointer<db::Texture2D> getIndirectSpecularLuminousFluxMap();
       util::SharedPointer<db::Texture2D> getZBuffer();
 
       const TBO& getGlobalCachePositionMap();
@@ -60,7 +61,7 @@ namespace he
       const TBO& getGlobalCacheAreaMap();
 
       util::SharedPointer<db::Texture2D> getSamplingDebugMap();
-      const UBO& getSamplingBuffer();
+      const GPUBuffer& getSamplingBuffer();
 
     private:
       
@@ -77,7 +78,8 @@ namespace he
 
       unsigned int m_proxyLightTextureResolution;//to a power of two up rounded texture resolution
 
-      UBO m_samplingPatternBuffer;
+      GPUBuffer m_proxyLightCommandBuffer;
+      GPUBuffer m_samplingPatternBuffer;
 
       util::SharedPointer<db::Texture2D> m_samplingDebugTexture;
 
@@ -87,9 +89,12 @@ namespace he
       TBO m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
       TBO m_globalCacheAreaBuffer;//saves all caches area
 
-      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer;//the position of the indirect diffuse proxy light for the interpolation
-      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer;//the luminous flux of the indirect diffuse proxy light for the soft shadows
-      
+      sh::RenderShaderHandle m_proxyWeightCreationShaderHandle;
+      unsigned int m_ping, m_pong;
+      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer[4];//the position of the indirect diffuse proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer[4];//the luminous flux of the indirect diffuse proxy light for the soft shadows
+      Renderquad m_indirectProxyLightRenderQuad;
+
       util::SharedPointer<db::Texture2D> m_zBuffer;//ubytes 0 = cache is not being used, 1 = cache is being used
 
       Renderquad m_indirectLightIndicesRenderQuad;

@@ -4,8 +4,8 @@
 #include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
 #include "../../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
-#define SAMPLENUMBER
-#define SAMPLENUMBERROOT
+#define SHADOWSAMPLENUMBER
+#define SHADOWSAMPLENUMBERROOT
 #define ADAPTIVESAMPLENUMBER
 
 layout(points) in;
@@ -14,9 +14,9 @@ layout(triangle_strip, max_vertices = 4) out;
 layout(rgba32f, binding = 0) readonly uniform image2D indirectLightPositions;
 layout(rgba32f, binding = 1) readonly uniform image2D indirectLightNormals;
 
-layout(std140, binding = 1) uniform SampleBuffer
+layout(std430, binding = 1) buffer samplingPattern
 {
-	vec4 samples[SAMPLENUMBER];
+	vec4 samples[];
 };
 
 layout(location = 0) uniform uint reflectiveShadowMapResolution;
@@ -45,7 +45,7 @@ void main()
 	points[2] = vsout_pos3D[0] + size * x + size * z;
 	points[3] = vsout_pos3D[0] + size * x - size * z;
 	
-	vec2 texOffset = vec2(mod(float(vsout_instanceID[0]), SAMPLENUMBERROOT) * 2.0 / float(SAMPLENUMBERROOT), (float(vsout_instanceID[0]) / SAMPLENUMBERROOT) * 2.0 / float(SAMPLENUMBERROOT));
+	vec2 texOffset = vec2(mod(float(vsout_instanceID[0]), SHADOWSAMPLENUMBERROOT) * 2.0 / float(SHADOWSAMPLENUMBERROOT), (float(vsout_instanceID[0]) / SHADOWSAMPLENUMBERROOT) * 2.0 / float(SHADOWSAMPLENUMBERROOT));
 
 	vec3 positions[4];
 	float clipDepths[4];
@@ -60,11 +60,11 @@ void main()
 			 1.0 < transformedCachePosition.y || transformedCachePosition.y < -1.0 ||
 			 1.0 < transformedCachePosition.z || transformedCachePosition.z < -1.0) return;
 		
-		transformedCachePosition.xy = (transformedCachePosition.xy - float(SAMPLENUMBERROOT) + 1.0) / float(SAMPLENUMBERROOT);
+		transformedCachePosition.xy = (transformedCachePosition.xy - float(SHADOWSAMPLENUMBERROOT) + 1.0) / float(SHADOWSAMPLENUMBERROOT);
 
 		//transformedCachePosition.xy += texOffset;
-		transformedCachePosition.x += mod(float(vsout_instanceID[0]), SAMPLENUMBERROOT) * 2.0 / float(SAMPLENUMBERROOT);
-		transformedCachePosition.y += (float(vsout_instanceID[0]) / SAMPLENUMBERROOT) * 2.0 / float(SAMPLENUMBERROOT) - (mod(float(vsout_instanceID[0]), SAMPLENUMBERROOT) * 2) / SAMPLENUMBER;
+		transformedCachePosition.x += mod(float(vsout_instanceID[0]), SHADOWSAMPLENUMBERROOT) * 2.0 / float(SHADOWSAMPLENUMBERROOT);
+		transformedCachePosition.y += (float(vsout_instanceID[0]) / SHADOWSAMPLENUMBERROOT) * 2.0 / float(SHADOWSAMPLENUMBERROOT) - (mod(float(vsout_instanceID[0]), SHADOWSAMPLENUMBERROOT) * 2) / SHADOWSAMPLENUMBER;
 
 		positions[i] = transformedCachePosition;
 	}

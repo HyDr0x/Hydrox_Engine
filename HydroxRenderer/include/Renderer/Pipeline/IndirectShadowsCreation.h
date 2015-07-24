@@ -39,32 +39,31 @@ namespace he
       void updateBuffer(unsigned int cacheNumber);
 
       void generateImperfectShadowMap(
-        util::SharedPointer<db::Texture3D> shadowPosMaps, 
-        util::SharedPointer<db::Texture3D> shadowNormalMaps, 
+        std::vector<util::SharedPointer<db::Texture2D>> shadowPosMaps, 
+        std::vector<util::SharedPointer<db::Texture2D>> shadowNormalMaps,
         const TBO& globalCachePositionBuffer, 
         const TBO& globalCacheNormalBuffer,
         const TBO& adaptiveSamplingPositionBuffer,
         const TBO& adaptiveSamplingNormalBuffer,
-        const UBO& samplingPatternBuffer,
+        const GPUBuffer& samplingPatternBuffer,
         const GPUBuffer& commandBuffer,
         unsigned int cacheNumber);
 
       void generateIndirectLightsShadowMap(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
-        util::SharedPointer<db::Texture3D> indirectLightPositions,
-        util::SharedPointer<db::Texture3D> indirectLightNormals,
-        const UBO& samplingPatternBuffer);
+        std::vector<util::SharedPointer<db::Texture2D>> indirectLightPositions,
+        std::vector<util::SharedPointer<db::Texture2D>> indirectLightNormals,
+        const GPUBuffer& samplingPatternBuffer);
 
-      void viewMatrixCreation(util::SharedPointer<db::Texture3D> shadowPosMaps,
-        util::SharedPointer<db::Texture3D> shadowNormalMaps);
+      void viewMatrixCreation(std::vector<util::SharedPointer<db::Texture2D>> shadowPosMaps, std::vector<util::SharedPointer<db::Texture2D>> shadowNormalMaps);
 
       void setBackprojectionMap(unsigned int lightIndex);
       void unsetBackprojectionMap();
 
       util::SharedPointer<db::Texture3D> getIndirectLightsShadowMaps() const;
       util::SharedPointer<db::Texture2D> getIndirectShadowMap() const;
-      std::vector<util::SharedPointer<db::Texture3D>> getIndirectPsuhPullShadowMap() const;
+      std::vector<util::SharedPointer<db::Texture3D>> getIndirectPushPullShadowMap() const;
 
       util::SharedPointer<db::Texture3D> getBackprojectionDepthMaps() const;
       util::SharedPointer<db::Texture3D> getBackprojectionPositionMaps() const;
@@ -76,9 +75,9 @@ namespace he
       IndirectShadowsCreation& operator=(const IndirectShadowsCreation&);
 
       void generateShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap,
-                             util::SharedPointer<db::Texture3D> indirectLightPositions,
-                             util::SharedPointer<db::Texture3D> indirectLightNormals,
-                             const UBO& samplingPatternBuffer);
+                             std::vector<util::SharedPointer<db::Texture2D>> indirectLightPositions,
+                             std::vector<util::SharedPointer<db::Texture2D>> indirectLightNormals,
+                             const GPUBuffer& samplingPatternBuffer);
 
       void bilateralInterleavedBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
 
@@ -105,8 +104,8 @@ namespace he
       std::vector<util::SharedPointer<db::Texture3D>> m_indirectLightPushPullShadowMaps;
       Renderquad m_indirectLightShadowMapsQuad;
  
-      util::SharedPointer<db::Texture2D> m_indirectShadowMap0;
-      util::SharedPointer<db::Texture2D> m_indirectShadowMap1;
+      unsigned int m_ping, m_pong;
+      util::SharedPointer<db::Texture2D> m_indirectShadowMap[2];
       Renderquad m_indirectShadowMapQuad;
 
       util::SharedPointer<db::Texture3D> m_geometryBackprojectionDepthMap;

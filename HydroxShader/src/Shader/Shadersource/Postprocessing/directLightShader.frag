@@ -8,11 +8,11 @@ layout(location = 1) uniform sampler2D normalSampler;
 layout(location = 2) uniform sampler2D materialSampler;
 
 layout(location = 3) uniform sampler2DArray shadowMapsSampler;
-layout(location = 4) uniform sampler2DArray shadowPosMapsSampler;
+layout(location = 7) uniform sampler2D shadowPosMapsSampler[28];
 
-layout(location = 5) uniform uint lightNumber;
-layout(location = 6) uniform uint shadowLightNumber;
-layout(location = 7) uniform uint reflectiveShadowLightNumber;
+layout(location = 4) uniform uint lightNumber;
+layout(location = 5) uniform uint shadowLightNumber;
+layout(location = 6) uniform uint reflectiveShadowLightNumber;
 
 layout(std430, binding = 0) buffer lightBuffer
 {
@@ -80,8 +80,11 @@ void main()
 	{
 		vec4 projShadowPos = reflectiveShadowLight[i].lightViewProj * vec4(pos, 1.0);
 		projShadowPos /= projShadowPos.w;
-		vec3 shadowTexCoords = vec3(projShadowPos.xy * 0.5 + 0.5, i);
-		vec3 shadowPos = texture(shadowPosMapsSampler, shadowTexCoords).xyz;
+		//vec3 shadowTexCoords = vec3(projShadowPos.xy * 0.5 + 0.5, i);
+		//vec3 shadowPos = texture(shadowPosMapsSampler, shadowTexCoords).xyz;
+		
+		vec2 shadowTexCoords = vec2(projShadowPos.xy * 0.5 + 0.5);
+		vec3 shadowPos = texture(shadowPosMapsSampler[i], shadowTexCoords).xyz;
 		
 		if(length(shadowPos - pos) < 0.1 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
 		{

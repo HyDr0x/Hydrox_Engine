@@ -15,7 +15,7 @@ layout(std430, binding = 4) buffer shadowLightBuffer
 	ShadowLightData shadowLight[];
 };
 
-layout(location = 1) uniform uint lightIndex;
+layout(location = 2) uniform int lightIndex;
 
 out float vsout_clipDepth;
 

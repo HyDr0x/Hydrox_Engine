@@ -17,14 +17,19 @@ namespace he
       unsigned int height;//vertical resolution
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
-      unsigned int indirectShadowMapWidth;//resolution if the indirect shadow map
       unsigned int giLightSampleNumber;//number of sampled lights for global illumination
+      unsigned int giShadowLightSampleDivisor;//the divisor of the giLightSampleNumber variable: e.g. 4096 indirect light samples with shadowDivisor of 4 equals only 1024 indirect shadow light samples
+      unsigned int kCache;//number of VAL's which are getting processed per invocation
       unsigned int lightNumber;//max number of supported lights
+
+      unsigned int indirectShadowMapWidth;//resolution if the indirect shadow map
       unsigned int pushPullPyramideSize;//number of textures for the pushpull pyramide
       unsigned int backProjectionWidth;//size of the viewport for the backprojection, responsible for sample-hole detection and adaptive resampling of those regions to get a less erroneous ISM
       unsigned int adaptiveSampleNumber;//the maximum number of adaptive caches for hole-filling
       float paraboloidNearClipping;//near clipping plane for paraboloid projection
       float paraboloidFarClipping;//farclipping plane for paraboloid projection
+
+      unsigned int specularCacheNumber;//maximum number of specular caches
 
       unsigned char max2DLayer;//const number of layer for 2D sprites
 
@@ -48,7 +53,8 @@ namespace he
       float logLuminancePerMS;//tonemapping
       float s;//tonemapping
 
-      bool globalIllumination;
+      bool globalIllumination;//enables/disables global illumination
+      bool indirectShadows;//enables/disables indirect shadows
     };
   }
 }

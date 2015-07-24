@@ -56,7 +56,7 @@ namespace he
       DrawArraysIndirectCommand command;
       command.baseInstance = 0;
       command.baseVertex = 0;
-      command.instanceCount = m_options->giLightSampleNumber;
+      command.instanceCount = m_options->giLightSampleNumber / m_options->giShadowLightSampleDivisor;
       m_sampleCommandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand), sizeof(DrawArraysIndirectCommand), GL_STATIC_DRAW, &command);
 
       m_sampleNumberOffset = util::SharedPointer<db::Texture1D>(new db::Texture1D(m_options->backProjectionWidth, GL_TEXTURE_1D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));

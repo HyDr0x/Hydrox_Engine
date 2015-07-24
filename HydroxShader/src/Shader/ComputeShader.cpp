@@ -47,11 +47,9 @@ namespace he
       glDispatchCompute(workGroupNumberX, workGroupNumberY, workGroupNumberZ);
     }
 
-    void ComputeShader::dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset)
+    void ComputeShader::dispatchComputeShaderIndirect(GLintptr offset)
     {
-      glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, dispatchBuffer);
       glDispatchComputeIndirect(offset);
-      glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
     }
 
     bool ComputeShader::createProgram(std::string shaderName, GLuint computeShader)

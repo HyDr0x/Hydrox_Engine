@@ -14,8 +14,10 @@
 layout(rgba32f, binding = 0) readonly uniform imageBuffer globalCachePositionBuffer;
 layout(rgba32f, binding = 1) readonly uniform imageBuffer globalCacheNormalBuffer;
 
-layout(rgba32f, binding = 2) readonly uniform image2D indirectLightPositionBuffer;
-layout(rgba32f, binding = 3) readonly uniform image2D indirectLightLuminousFluxBuffer;
+layout(rgba32f, binding = 2) readonly uniform image2D diffuseIndirectLightPositionBuffer;
+layout(rgba32f, binding = 3) readonly uniform image2D specularIndirectLightPositionBuffer;
+layout(rgba32f, binding = 4) readonly uniform image2D diffuseIndirectLightLuminousFluxBuffer;
+layout(rgba32f, binding = 5) readonly uniform image2D specularIndirectLightLuminousFluxBuffer;
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
 {
@@ -104,7 +106,7 @@ void main()
 			
 			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
-			float dir = max(1.0f - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0);
+			float dir = max(1.0 - length(vsout_pos3D - cache.position.xyz) / dmax, 0.0);
 			
 			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0.0));
 			
@@ -112,12 +114,12 @@ void main()
 			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0.0));
 			
 			IndirectLightData indirectLightD;
-			indirectLightD.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x, coord.y));
-			indirectLightD.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x, coord.y));
+			indirectLightD.position = imageLoad(diffuseIndirectLightPositionBuffer, coord);
+			indirectLightD.luminousFlux = imageLoad(diffuseIndirectLightLuminousFluxBuffer, coord);
 			
 			IndirectLightData indirectLightG;
-			indirectLightG.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x + 1, coord.y));
-			indirectLightG.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x + 1, coord.y));
+			indirectLightG.position = imageLoad(specularIndirectLightPositionBuffer, coord);
+			indirectLightG.luminousFlux = imageLoad(specularIndirectLightLuminousFluxBuffer, coord);
 			
 			cacheProxyMinDistanceD += wd * indirectLightD.position.w;
 			cacheProxyMinDistanceG += wg * indirectLightG.position.w;

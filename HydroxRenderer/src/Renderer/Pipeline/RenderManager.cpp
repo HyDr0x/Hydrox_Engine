@@ -181,16 +181,6 @@ namespace he
       m_cameraParameterUBO.bindBuffer(0);
 
       bool globalIllumination = m_lightRenderer.getReflectiveShadowLightNumber() > 0 && m_geometryRasterizer.getGlobalCacheNumber() > 0 && m_options->globalIllumination;
-      
-      if(m_showVirtualAreaLights && globalIllumination)
-      {
-        insertVirtualAreaLights();
-      }
-
-      if(m_showCaches && globalIllumination)
-      {
-        insertRenderCaches();
-      }
 
       {//everything in here should be packed in an render pass interface and the blocks like gbuffer etc. in a technique interface which gets passed to a render pass 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -199,11 +189,25 @@ namespace he
         m_lightRenderer.clear();
         
         m_geometryRasterizer.updateBuffer();
-        m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
         m_lightRenderer.updateBuffer();
-        m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
-        m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
-        
+
+        if(globalIllumination)
+        {
+          if(m_showVirtualAreaLights)
+          {
+            insertVirtualAreaLights();
+          }
+
+          if(m_showCaches)
+          {
+            insertRenderCaches();
+          }
+
+          m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
+          m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
+          m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
+        }
+
         if(m_wireframe)
         {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -278,15 +282,16 @@ namespace he
           m_indirectLightRenderer.unsetBuffer();
           glDepthFunc(GL_LESS);
           glDepthMask(GL_TRUE);
-
+          
+          if(m_options->indirectShadows)
           {
             m_lightRenderer.getReflectiveShadowLights().bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
 
-            m_indirectLightRenderer.getSamplingBuffer().bindBuffer(1);
+            m_indirectLightRenderer.getSamplingBuffer().bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
-            m_indirectShadowsCreation.viewMatrixCreation(m_lightRenderer.getReflectiveShadowPosMaps(), m_lightRenderer.getReflectiveShadowNormalMaps());
+            m_indirectShadowsCreation.viewMatrixCreation(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(), m_lightRenderer.getReflectiveShadowNormalAreaMaps());
 
-            m_indirectLightRenderer.getSamplingBuffer().unbindBuffer(1);
+            m_indirectLightRenderer.getSamplingBuffer().unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
             for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
             {
@@ -296,43 +301,37 @@ namespace he
             }
 
             m_lightRenderer.getReflectiveShadowLights().unbindBuffer(GL_SHADER_STORAGE_BUFFER);
+
+            m_delaunayTriangulation.calculateDelaunayTriangulation(
+              m_indirectShadowsCreation.getBackprojectionDepthMaps(),
+              m_indirectShadowsCreation.getBackprojectionPositionMaps(),
+              m_indirectShadowsCreation.getBackprojectionNormalMaps(),
+              m_indirectLightRenderer.getGlobalCachePositionMap(),
+              m_lightRenderer.getReflectiveShadowLights());
+
+            m_indirectShadowsCreation.generateImperfectShadowMap(
+              m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+              m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
+              m_indirectLightRenderer.getGlobalCachePositionMap(),
+              m_indirectLightRenderer.getGlobalCacheNormalMap(),
+              m_delaunayTriangulation.getAdaptiveSamplePositionBuffer(),
+              m_delaunayTriangulation.getAdaptiveSampleNormalBuffer(),
+              m_indirectLightRenderer.getSamplingBuffer(),
+              m_delaunayTriangulation.getCommandBuffer(),
+              m_geometryRasterizer.getGlobalCacheNumber());//generates the imperfect shadow maps
+
+            m_indirectShadowsCreation.generateIndirectLightsShadowMap(
+              m_gBuffer.getDepthTexture(),
+              m_gBuffer.getNormalTexture(),
+              m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+              m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
+              m_indirectLightRenderer.getSamplingBuffer());//does pull push, blurring and visibility calculation of the indirect light sources
           }
 
-          m_delaunayTriangulation.calculateDelaunayTriangulation(
-            m_indirectShadowsCreation.getBackprojectionDepthMaps(),
-            m_indirectShadowsCreation.getBackprojectionPositionMaps(),
-            m_indirectShadowsCreation.getBackprojectionNormalMaps(),
-            m_indirectLightRenderer.getGlobalCachePositionMap(),
-            m_lightRenderer.getReflectiveShadowLights());
-
-          m_indirectShadowsCreation.generateImperfectShadowMap(
-            m_lightRenderer.getReflectiveShadowPosMaps(), 
-            m_lightRenderer.getReflectiveShadowNormalMaps(), 
-            m_indirectLightRenderer.getGlobalCachePositionMap(), 
-            m_indirectLightRenderer.getGlobalCacheNormalMap(),
-            m_delaunayTriangulation.getAdaptiveSamplePositionBuffer(),
-            m_delaunayTriangulation.getAdaptiveSampleNormalBuffer(),
-            m_indirectLightRenderer.getSamplingBuffer(),
-            m_delaunayTriangulation.getCommandBuffer(),
-            m_geometryRasterizer.getGlobalCacheNumber());//generates the imperfect shadow maps
-          
-          m_indirectShadowsCreation.generateIndirectLightsShadowMap(
-            m_gBuffer.getDepthTexture(),
-            m_gBuffer.getNormalTexture(),
-            m_lightRenderer.getReflectiveShadowPosMaps(),
-            m_lightRenderer.getReflectiveShadowNormalMaps(),
-            m_indirectLightRenderer.getSamplingBuffer());//does pull push, blurring and visibility calculation of the indirect light sources
-          
           m_indirectLightRenderer.calculateIndirectLight(
-            m_lightRenderer.getReflectiveShadowPosMaps(),
-            m_lightRenderer.getReflectiveShadowNormalMaps(),
-            m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
+            m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+            m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
             m_lightRenderer.getReflectiveShadowLights());// calculates the indirect light of the caches
-
-          //m_lightRenderer.getReflectiveShadowPosMaps()->bindImageTexture(4, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-          //m_lightRenderer.getReflectiveShadowNormalMaps()->bindImageTexture(5, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-          //m_lightRenderer.getReflectiveShadowNormalMaps()->unbindImageTexture(5, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-          //m_lightRenderer.getReflectiveShadowPosMaps()->unbindImageTexture(4, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
           m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
           m_geometryRasterizer.generateIndirectLightMap(m_indirectShadowsCreation.getIndirectShadowMap());//generates the indirect light for every pixel on screen with the cache data
@@ -372,13 +371,13 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
         break;
       case 6:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps()[0]);
         break;
       case 7:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalAreaMaps()[0]);
         break;
       case 8:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+
         break;
       case 9:
         m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
@@ -534,12 +533,12 @@ namespace he
     {
       unsigned int cacheResolution = m_geometryRasterizer.getProxyLightTextureResolution();
 
-      std::vector<util::vec4f> lightPositions(2 * cacheResolution * cacheResolution);
-      std::vector<util::vec4f> lightLuminousFlux(2 * cacheResolution * cacheResolution);
+      std::vector<util::vec4f> lightPositions(cacheResolution * cacheResolution);
+      std::vector<util::vec4f> lightLuminousFlux(cacheResolution * cacheResolution);
       std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
 
-      m_indirectLightRenderer.getIndirectPositionMap()->getTextureData(&lightPositions[0]);
-      m_indirectLightRenderer.getIndirectLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
+      m_indirectLightRenderer.getIndirectDiffusePositionMap()->getTextureData(&lightPositions[0]);
+      m_indirectLightRenderer.getIndirectDiffuseLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
       m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
 
       unsigned int validLightCounter = 0;
@@ -547,7 +546,7 @@ namespace he
       {
         if(zBuffer[i][0])
         {
-          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[2 * i][0], lightPositions[2 * i][1], lightPositions[2 * i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
+          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[i][0], lightPositions[i][1], lightPositions[i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
           validLightCounter++;
         }
       }

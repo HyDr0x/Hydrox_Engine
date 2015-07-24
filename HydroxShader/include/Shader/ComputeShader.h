@@ -24,7 +24,7 @@ namespace he
       ComputeShader& operator=(const ComputeShader& other);
 
       static void dispatchComputeShader(GLuint workGroupNumberX, GLuint workGroupNumberY, GLuint workGroupNumberZ);
-      static void dispatchComputeShaderIndirect(GLuint dispatchBuffer, GLuint offset);
+      static void dispatchComputeShaderIndirect(GLintptr offset);
 
     private:
 

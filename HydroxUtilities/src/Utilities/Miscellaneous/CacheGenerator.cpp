@@ -485,25 +485,16 @@ namespace he
       Plane plane(cacheTriangle[0], cacheTriangle[1], cacheTriangle[2]);
 
       std::vector<Polygon> polygons;
-
+      
       for(unsigned int i = 0; i < triangles.size(); i += 3)
       {
         std::vector<vec3f> trianglePoints(3);
-        trianglePoints[0] = plane.projectPointOn(triangles[i]);
-        trianglePoints[1] = plane.projectPointOn(triangles[i + 1]);
-        trianglePoints[2] = plane.projectPointOn(triangles[i + 2]);
+        trianglePoints[0] = triangles[i];
+        trianglePoints[1] = triangles[i + 1];
+        trianglePoints[2] = triangles[i + 2];
 
         Polygon polygon0(trianglePoints);
         Polygon polygon1;
-
-        if(polygon0.getArea() < 0.0f)
-        {
-          polygon0.invertWindingOrder();//winding order can be changed through plane projection
-        }
-        else if(polygon0.getArea() == 0.0f)//if it degenerates to a line, stop
-        {
-          continue;
-        }
 
         for(unsigned int j = 0; j < faceVertices.size(); j += faceVertices[j] + 1)
         {
@@ -522,6 +513,20 @@ namespace he
           {
             break;
           }
+        }
+
+        if(polygon0.getArea() < 0.0f)
+        {
+          polygon0.invertWindingOrder();//winding order can be changed through plane projection
+        }
+        else if(polygon0.getArea() == 0.0f)//if it degenerates to a line, stop
+        {
+          continue;
+        }
+
+        for(unsigned int i = 0; i < polygon0.getPointNumber(); i ++)
+        {
+          polygon0.setPoint(i, plane.projectPointOn(polygon0[i]));
         }
 
         if(polygon0.getPointNumber() > 2 && polygon0.getArea() > 0.0f)//take only triangles or more with an area
@@ -796,7 +801,7 @@ namespace he
       m_polygons.clear();
       m_linearizedAreaCaches.clear();
 
-      //generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
+      generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
 
       outCaches = m_caches;
 

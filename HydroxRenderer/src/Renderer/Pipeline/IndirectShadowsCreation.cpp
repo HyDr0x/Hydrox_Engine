@@ -14,6 +14,9 @@ namespace he
   {
     IndirectShadowsCreation::IndirectShadowsCreation() : m_reflectiveShadowMapNumber(0)
     {
+      m_ping = 0;
+      m_pong = 1 - m_ping;
+
       glGenVertexArrays(1, &m_pointVAO);
     }
 
@@ -42,8 +45,8 @@ namespace he
       m_blurShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SEPARATEDBLUR, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
       m_viewMatrixCreationHandle = sh::ShaderContainer::INDIRECTSHADOWVIEWMATRIXCREATION;
 
-      m_indirectShadowMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(0.5f * m_options->width, 0.5f * m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
-      m_indirectShadowMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(0.5f * m_options->width, 0.5f * m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
+      m_indirectShadowMap[0] = util::SharedPointer<db::Texture2D>(new db::Texture2D(0.5f * m_options->width, 0.5f * m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
+      m_indirectShadowMap[1] = util::SharedPointer<db::Texture2D>(new db::Texture2D(0.5f * m_options->width, 0.5f * m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
     }
 
     void IndirectShadowsCreation::updateBuffer(unsigned int reflectiveShadowMapNumber)
@@ -72,13 +75,13 @@ namespace he
     }
 
     void IndirectShadowsCreation::generateImperfectShadowMap(
-      util::SharedPointer<db::Texture3D> shadowPosMaps, 
-      util::SharedPointer<db::Texture3D> shadowNormalMaps, 
+      std::vector<util::SharedPointer<db::Texture2D>> shadowPosMaps,
+      std::vector<util::SharedPointer<db::Texture2D>> shadowNormalMaps,
       const TBO& globalCachePositionBuffer,
       const TBO& globalCacheNormalBuffer,
       const TBO& adaptiveSamplingPositionBuffer,
       const TBO& adaptiveSamplingNormalBuffer,
-      const UBO& samplingPatternBuffer,
+      const GPUBuffer& samplingPatternBuffer,
       const GPUBuffer& commandBuffer,
       unsigned int cacheNumber)
     {
@@ -96,7 +99,7 @@ namespace he
       glEnableVertexAttribArray(sh::RenderShader::POSITION);
       glEnableVertexAttribArray(sh::RenderShader::NORMAL);
 
-      samplingPatternBuffer.bindBuffer(1);
+      samplingPatternBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
 
       glPointSize(6.0f);
 
@@ -108,13 +111,13 @@ namespace he
         m_indirectLightShadowMapsQuad.clearTargets(1.0f, he::util::vec4f::identity());
         m_indirectLightShadowMapsQuad.setWriteFrameBuffer();
 
-        shadowPosMaps->bindImageTexture(0, 0, GL_FALSE, i, GL_READ_ONLY, GL_RGBA32F);
-        shadowNormalMaps->bindImageTexture(1, 0, GL_FALSE, i, GL_READ_ONLY, GL_RGBA32F);
+        shadowPosMaps[i]->bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
+        shadowNormalMaps[i]->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
 
         globalCachePositionBuffer.bindVertexbuffer(0, 0, sizeof(util::vec4f));
         globalCacheNormalBuffer.bindVertexbuffer(1, 0, sizeof(util::vec4f));
 
-        glDrawArraysInstanced(GL_POINTS, 0, cacheNumber, m_options->giLightSampleNumber);
+        glDrawArraysInstanced(GL_POINTS, 0, cacheNumber, m_options->giLightSampleNumber / m_options->giShadowLightSampleDivisor);
 
         globalCacheNormalBuffer.unbindVertexBuffer(1);
         globalCachePositionBuffer.unbindVertexBuffer(0);
@@ -129,15 +132,15 @@ namespace he
         adaptiveSamplingNormalBuffer.unbindVertexBuffer(1);
         adaptiveSamplingPositionBuffer.unbindVertexBuffer(0);
 
-        shadowNormalMaps->unbindImageTexture(1, 0, GL_FALSE, i, GL_READ_ONLY, GL_RGBA32F);
-        shadowPosMaps->unbindImageTexture(0, 0, GL_FALSE, i, GL_READ_ONLY, GL_RGBA32F);
+        shadowNormalMaps[i]->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+        shadowPosMaps[i]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
 
         m_indirectLightShadowMapsQuad.unsetWriteFrameBuffer();
       }
 
       glPointSize(1.0f);
 
-      samplingPatternBuffer.unbindBuffer(1);
+      samplingPatternBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       
       glDisableVertexAttribArray(sh::RenderShader::NORMAL);
       glDisableVertexAttribArray(sh::RenderShader::POSITION);
@@ -151,9 +154,9 @@ namespace he
     void IndirectShadowsCreation::generateIndirectLightsShadowMap(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
-      util::SharedPointer<db::Texture3D> indirectLightPositions,
-      util::SharedPointer<db::Texture3D> indirectLightNormals,
-      const UBO& samplingPatternBuffer)
+      std::vector<util::SharedPointer<db::Texture2D>> indirectLightPositions,
+      std::vector<util::SharedPointer<db::Texture2D>> indirectLightNormals,
+      const GPUBuffer& samplingPatternBuffer)
     {
       pullPush();
 
@@ -166,9 +169,9 @@ namespace he
 
     void IndirectShadowsCreation::generateShadowMap(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
-      util::SharedPointer<db::Texture3D> indirectLightPositions,
-      util::SharedPointer<db::Texture3D> indirectLightNormals,
-      const UBO& samplingPatternBuffer)
+      std::vector<util::SharedPointer<db::Texture2D>> indirectLightPositions,
+      std::vector<util::SharedPointer<db::Texture2D>> indirectLightNormals,
+      const GPUBuffer& samplingPatternBuffer)
     {
       glViewport(0, 0, 0.5f * m_options->width, 0.5f * m_options->height);
 
@@ -176,30 +179,41 @@ namespace he
       indirectShadowMapCreationShader.useShader();
 
       sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
-      sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &m_reflectiveShadowMapNumber);
-
-      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap0);
-      m_indirectShadowMapQuad.setWriteFrameBuffer();
-
-      indirectLightPositions->bindImageTexture(0, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
-      indirectLightNormals->bindImageTexture(1, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
 
       gBufferDepthMap->setTexture(0, 0);
       m_indirectLightShadowMaps->setTexture(1, 1);
 
-      samplingPatternBuffer.bindBuffer(1);
+      samplingPatternBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
 
-      m_indirectShadowMapQuad.render();
+      for(unsigned int i = 0; i < indirectLightPositions.size(); i++)
+      {
+        m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap[m_ping]);
+        m_indirectShadowMapQuad.setWriteFrameBuffer();
 
-      samplingPatternBuffer.unbindBuffer(1);
+        sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &i);
+
+        indirectLightPositions[i]->bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
+        indirectLightNormals[i]->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+
+        m_indirectShadowMapQuad.render();
+
+        indirectLightNormals[i]->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+        indirectLightPositions[i]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
+
+        m_indirectShadowMapQuad.unsetWriteFrameBuffer();
+
+        if(i + 1 < indirectLightPositions.size())
+        {
+          m_ping = m_pong;
+          m_pong = 1 - m_pong;
+        }
+      }
+
+      samplingPatternBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
 
       m_indirectLightShadowMaps->unsetTexture(1);
       gBufferDepthMap->unsetTexture(0);
 
-      indirectLightNormals->unbindImageTexture(1, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
-      indirectLightPositions->unbindImageTexture(0, 0, GL_TRUE, 0, GL_READ_ONLY, GL_RGBA32F);
-
-      m_indirectShadowMapQuad.unsetWriteFrameBuffer();
       indirectShadowMapCreationShader.useNoShader();
 
       glViewport(0, 0, m_options->width, m_options->height);
@@ -221,14 +235,17 @@ namespace he
         util::vec2i samplingDirection(1, 0);
         sh::ComputeShader::setUniform(2, GL_INT_VEC2, &samplingDirection[0]);
 
-        m_indirectShadowMap0->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
-        m_indirectShadowMap1->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
+        m_indirectShadowMap[m_ping]->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
+        m_indirectShadowMap[m_pong]->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
 
         sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-        m_indirectShadowMap1->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
-        m_indirectShadowMap0->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
+        m_indirectShadowMap[m_pong]->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
+        m_indirectShadowMap[m_ping]->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
       }
+
+      m_ping = m_pong;
+      m_pong = 1 - m_pong;
 
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -239,13 +256,13 @@ namespace he
         util::vec2i samplingDirection(0, 1);
         sh::ComputeShader::setUniform(2, GL_INT_VEC2, &samplingDirection[0]);
 
-        m_indirectShadowMap1->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
-        m_indirectShadowMap0->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
+        m_indirectShadowMap[m_ping]->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
+        m_indirectShadowMap[m_pong]->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
 
         sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-        m_indirectShadowMap0->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
-        m_indirectShadowMap1->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
+        m_indirectShadowMap[m_pong]->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16F);
+        m_indirectShadowMap[m_ping]->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16F);
       }
 
       gBufferNormalMap->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA16F);
@@ -380,10 +397,10 @@ namespace he
       gBufferDepthMap->setTexture(1, 1);
       gBufferNormalMap->setTexture(2, 2);
 
-      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap1);
+      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap[m_ping]);
       m_indirectShadowMapQuad.setWriteFrameBuffer();
 
-      m_indirectShadowMap0->setTexture(0, 0);
+      m_indirectShadowMap[m_pong]->setTexture(0, 0);
 
       samplingDirection = util::vec2f(1.0f / (0.5f * m_options->width), 0.0f);
       sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &samplingDirection[0]);
@@ -394,10 +411,10 @@ namespace he
 
       m_indirectShadowMapQuad.unsetWriteFrameBuffer();
 
-      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap0);
+      m_indirectShadowMapQuad.setRenderTargets(1, m_indirectShadowMap[m_pong]);
       m_indirectShadowMapQuad.setWriteFrameBuffer();
 
-      m_indirectShadowMap1->setTexture(0, 0);
+      m_indirectShadowMap[m_ping]->setTexture(0, 0);
 
       samplingDirection = util::vec2f(0.0f, 1.0f / (0.5f * m_options->height));
       sh::RenderShader::setUniform(3, GL_FLOAT_VEC2, &samplingDirection[0]);
@@ -406,7 +423,7 @@ namespace he
 
       m_indirectShadowMapQuad.render();
 
-      m_indirectShadowMap1->unsetTexture(0);
+      m_indirectShadowMap[m_ping]->unsetTexture(0);
 
       m_indirectShadowMapQuad.unsetWriteFrameBuffer();
 
@@ -418,16 +435,18 @@ namespace he
       glViewport(0, 0, m_options->width, m_options->height);
     }
 
-    void IndirectShadowsCreation::viewMatrixCreation(util::SharedPointer<db::Texture3D> shadowPosMaps,
-                                                     util::SharedPointer<db::Texture3D> shadowNormalMaps)
+    void IndirectShadowsCreation::viewMatrixCreation(std::vector<util::SharedPointer<db::Texture2D>> shadowPosMaps, std::vector<util::SharedPointer<db::Texture2D>> shadowNormalMaps)
     {
       const sh::ComputeShader& viewMatrixCreationShader = m_shaderContainer->getComputeShader(m_viewMatrixCreationHandle);
       viewMatrixCreationShader.useShader();
 
-      shadowPosMaps->setTexture(0, 0);
-      shadowNormalMaps->setTexture(1, 1);
+      shadowPosMaps[0]->setTexture(0, 0);
+      shadowNormalMaps[0]->setTexture(1, 1);
 
       sh::ComputeShader::dispatchComputeShader(m_reflectiveShadowMapNumber, 1, 1);
+
+      shadowNormalMaps[0]->unsetTexture(1);
+      shadowPosMaps[0]->unsetTexture(0);
 
       viewMatrixCreationShader.useNoShader();
     }
@@ -453,10 +472,10 @@ namespace he
 
     util::SharedPointer<db::Texture2D> IndirectShadowsCreation::getIndirectShadowMap() const
     {
-      return m_indirectShadowMap0;
+      return m_indirectShadowMap[m_pong];
     }
 
-    std::vector<util::SharedPointer<db::Texture3D>> IndirectShadowsCreation::getIndirectPsuhPullShadowMap() const
+    std::vector<util::SharedPointer<db::Texture3D>> IndirectShadowsCreation::getIndirectPushPullShadowMap() const
     {
       return m_indirectLightPushPullShadowMaps;
     }

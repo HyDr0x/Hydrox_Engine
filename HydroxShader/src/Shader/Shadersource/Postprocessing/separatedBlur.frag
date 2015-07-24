@@ -25,7 +25,7 @@ void main()
 		float newDepth = texture(depthSampler, newTexCoord).r;
 		vec3 newNormal = texture(normalSampler, newTexCoord).rgb * 2.0 - 1.0;
 		
-		if(abs(origDepth - newDepth) < 0.0001 && dot(origNormal, newNormal) > 0.9)
+		if(abs(origDepth - newDepth) < 0.0005 && dot(origNormal, newNormal) > 0.75)
 		{
 			validSamples++;
 			shadowValue += max(texture(colorSampler, newTexCoord).r, 0.0);
@@ -33,6 +33,7 @@ void main()
 		newTexCoord += samplingDirection;
 	}
 	
+	//if(validSamples > 0)
 	shadowValue /= float(validSamples);
 	
   newShadowValue = shadowValue;
