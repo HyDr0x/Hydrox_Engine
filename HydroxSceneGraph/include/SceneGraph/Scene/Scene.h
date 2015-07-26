@@ -41,6 +41,7 @@ namespace he
 
       virtual NodeIndex addSubTree(const Scene& subTree, NodeIndex parentNodeIndex, const util::vec3f& cameraPosition, std::string namePrefix = std::string(""));
       virtual void removeSubTree(NodeIndex rootNodeIndex);
+      virtual Scene getSubTree(NodeIndex nodeIndex, std::string namePrefix = std::string(""));
 
       template<typename T> T& getNode(const std::string& nodeName)
       {

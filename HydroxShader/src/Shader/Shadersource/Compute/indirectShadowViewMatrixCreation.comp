@@ -53,8 +53,8 @@ void main()
 	
 	camPos.xyz /= validSamples;
 	
-	//vec3 z = -reflectiveShadowLight[idx].light.direction.xyz;
-	vec3 z = -normalize(camDirection.xyz / validSamples);
+	vec3 z = -reflectiveShadowLight[idx].light.direction.xyz;
+	//vec3 z = -normalize(camDirection.xyz / validSamples);
 	
 	vec3 upVector = vec3(0, 1, 0);
 	if(upVector == z)

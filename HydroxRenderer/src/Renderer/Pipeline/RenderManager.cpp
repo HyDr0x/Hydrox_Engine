@@ -187,9 +187,6 @@ namespace he
 
         m_gBuffer.clear();
         m_lightRenderer.clear();
-        
-        m_geometryRasterizer.updateBuffer();
-        m_lightRenderer.updateBuffer();
 
         if(globalIllumination)
         {
@@ -202,7 +199,13 @@ namespace he
           {
             insertRenderCaches();
           }
+        }
+        
+        m_geometryRasterizer.updateBuffer();
+        m_lightRenderer.updateBuffer();
 
+        if(globalIllumination)
+        {
           m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
           m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
           m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());

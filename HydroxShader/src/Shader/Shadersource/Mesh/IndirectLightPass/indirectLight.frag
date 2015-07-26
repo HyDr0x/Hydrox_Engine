@@ -29,11 +29,13 @@ void main()
 	vec3 camDir = normalize(eyePos.xyz - vsout_pos3D);
 
 	vec3 lightDirD = vsout_Xpd - vsout_pos3D;
-	float lengthD = max(dot(lightDirD, lightDirD), dot(cacheProxyMinDistanceD, cacheProxyMinDistanceD));//length(lightDirD)
+	//float lengthD = max(dot(lightDirD, lightDirD), dot(cacheProxyMinDistanceD, cacheProxyMinDistanceD));
+	float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
 	float frd = material.x * max(dot(normalize(lightDirD), normal), 0.001);
 	
 	vec3 lightDirG = vsout_Xpg - vsout_pos3D;
-	float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));//length(lightDirG)
+	float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));
+	//float lengthG = max(length(lightDirG), cacheProxyMinDistanceG);
 	lightDirG = normalize(lightDirG);
 	float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
 

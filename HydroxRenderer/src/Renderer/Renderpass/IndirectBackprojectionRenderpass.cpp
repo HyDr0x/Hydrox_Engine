@@ -16,6 +16,16 @@ namespace he
     {
     }
 
+    bool IndirectBackprojectionRenderpass::insertGeometry(util::SharedPointer<IRenderContainer> renderContainer)
+    {
+      if(renderContainer->getDrawData().getPrimitiveType() == GL_TRIANGLES)
+      {
+        return ARenderpass::insertGeometry(renderContainer);
+      }
+
+      return false;
+    }
+
     void IndirectBackprojectionRenderpass::setLightIndex(int lightIndex)
     {
       m_lightIndex = lightIndex;

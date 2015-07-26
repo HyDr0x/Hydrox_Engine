@@ -60,7 +60,7 @@ void main()
 		paraboloidViewProjection(lightPos.xyz, lightNormal, pos3D.xyz, PARABOLOIDNEAR, PARABOLOIDFAR, transformedPosition, clipDepth);
 		
 		transformedPosition.xy = (transformedPosition.xy * 0.5 + 0.5) / float(SHADOWSAMPLENUMBERROOT);
-		transformedPosition.z = transformedPosition.z * 0.5 + 0.5 - 0.01;
+		transformedPosition.z = transformedPosition.z * 0.5 + 0.5;
 		
 		transformedPosition.x += mod(i, SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
 		transformedPosition.y += (i / SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
@@ -68,7 +68,7 @@ void main()
 		float depth = texture(indirectShadowMapSampler, vec3(transformedPosition.xy, reflectiveShadowMapIndex)).r;
 
 		//visibleIndirectLightNumber = depth;
-		visibleIndirectLightNumber += clamp(ceil(depth - transformedPosition.z), 0, 1);
+		visibleIndirectLightNumber += clamp(ceil(depth - transformedPosition.z + 0.01), 0, 1);
 	}
 	
 	//fsout_visibility = visibleIndirectLightNumber;

@@ -39,25 +39,29 @@ namespace he
     bool ARenderpass::insertGeometry(util::SharedPointer<IRenderContainer> renderContainer)
     {
       sh::RenderShaderHandle shaderHandle = m_shaderContainer->getRenderShaderHandle(m_renderPass, sh::ShaderSlotFlags(renderContainer->getMeshVertexDeclaration().toInt()));
-      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(shaderHandle);
 
-      for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
+      if(shaderHandle.shaderIndex != ~0)
       {
-        if(m_shaderNodes[i].isShader(shaderHandle))
+        const sh::RenderShader& shader = m_shaderContainer->getRenderShader(shaderHandle);
+
+        for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
         {
-          VertexDeclarationNode vertexDeclarationNode;
-          vertexDeclarationNode.initialize(shader.getVertexDeclaration(), renderContainer->getMeshVertexDeclaration());
+          if(m_shaderNodes[i].isShader(shaderHandle))
+          {
+            VertexDeclarationNode vertexDeclarationNode;
+            vertexDeclarationNode.initialize(shader.getVertexDeclaration(), renderContainer->getMeshVertexDeclaration());
 
-          m_vertexDeclarationNodes[i].resize(m_vertexDeclarationNodes[i].size() + 1);//necessary because no const ctor possible, because of unique pointer
-          m_vertexDeclarationNodes[i][m_vertexDeclarationNodes[i].size() - 1] = vertexDeclarationNode;
+            m_vertexDeclarationNodes[i].resize(m_vertexDeclarationNodes[i].size() + 1);//necessary because no const ctor possible, because of unique pointer
+            m_vertexDeclarationNodes[i][m_vertexDeclarationNodes[i].size() - 1] = vertexDeclarationNode;
 
-          TextureNode textureNode;
-          textureNode.initialize(renderContainer->getTextureHandles());
-          m_textureNodes[i].push_back(textureNode);
+            TextureNode textureNode;
+            textureNode.initialize(renderContainer->getTextureHandles());
+            m_textureNodes[i].push_back(textureNode);
 
-          m_renderContainer[i].push_back(renderContainer);
+            m_renderContainer[i].push_back(renderContainer);
 
-          return true;
+            return true;
+          }
         }
       }
 

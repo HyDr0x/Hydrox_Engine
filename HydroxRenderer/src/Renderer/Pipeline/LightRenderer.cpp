@@ -75,12 +75,13 @@ namespace he
       {
         m_reflectiveShadowLightNumberChanged = false;
 
-        if(m_reflectiveShadowLights.size() > m_shadowPosLuminousFluxMaps.size())
+        while(m_reflectiveShadowLights.size() > m_shadowPosLuminousFluxMaps.size())
         {
           m_shadowPosLuminousFluxMaps.push_back(util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32)));
           m_shadowNormalAreaMaps.push_back(util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32)));
         }
-        else
+        
+        while(m_reflectiveShadowLights.size() < m_shadowPosLuminousFluxMaps.size())
         {
           m_shadowPosLuminousFluxMaps.pop_back();
           m_shadowNormalAreaMaps.pop_back();

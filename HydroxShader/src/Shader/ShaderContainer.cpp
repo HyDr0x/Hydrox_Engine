@@ -18,7 +18,7 @@ namespace he
 
     ShaderContainer::ThisRenderShaderHandle ShaderContainer::getRenderShaderHandle(unsigned int pass, ShaderSlotFlags meshVertexDeclaration) const
     {
-      unsigned int resultID;
+      unsigned int resultID = ~0;
       unsigned int maxBitNumber = 0;
 
       for(unsigned int i = 0; i < m_renderPassShader[pass].size(); i++)

@@ -1,13 +1,17 @@
 #ifndef RENDEROPTIONS_H_
 #define RENDEROPTIONS_H_
 
+#include <fstream>
+
 #include <Utilities/Miscellaneous/SingletonBehaviour.hpp>
+
+#include "Renderer/DLLExport.h"
 
 namespace he
 {
   namespace renderer
   {
-    class RenderOptions : public util::SingletonBehaviour
+    class GRAPHICAPI RenderOptions : public util::SingletonBehaviour
     {
     public:
 
@@ -55,6 +59,20 @@ namespace he
 
       bool globalIllumination;//enables/disables global illumination
       bool indirectShadows;//enables/disables indirect shadows
+
+      void loadConfigFile(std::string filename);
+
+    private:
+
+      void overreadComments(std::ifstream &parameterStream, std::string& line);
+
+      template<typename TYPE, typename F> void getParameter(std::ifstream &parameterStream, TYPE &parameter, F cast)
+      {
+        std::string line;
+        overreadComments(parameterStream, line);
+        size_t pos = line.find(' ') + 1;
+        parameter = cast(line.substr(pos).c_str());
+      }
     };
   }
 }

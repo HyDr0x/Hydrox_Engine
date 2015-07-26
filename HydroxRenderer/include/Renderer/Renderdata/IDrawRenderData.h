@@ -61,6 +61,11 @@ namespace he
 
       virtual VertexElementFlags getMeshVertexDeclaration() const = 0;
 
+      GLenum getPrimitiveType() const
+      {
+        return m_primitiveType;
+      }
+
     protected:
 
       util::SharedPointer<db::ModelManager> m_modelManager;

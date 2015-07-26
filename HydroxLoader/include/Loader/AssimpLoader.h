@@ -67,11 +67,12 @@ namespace he
       AssimpLoader& operator=(const AssimpLoader& other);
 
       void setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle);
+      void setCreateNormals(bool createNormals);
 
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
       AnimationTimeUnit getAnimationTimeUnit() const;
 
-      sg::Scene* load(std::string path, std::string filename, bool yAxisFlipped = true, bool generateTangentSpace = false, bool generateUVSpace = false);
+      sg::Scene* load(std::string path, std::string filename, bool yAxisFlipped = true, bool sRGB = false, bool generateTangentSpace = false, bool generateUVSpace = false);
 
       sg::Scene* loadDefaultSceneGraph();
 
@@ -122,6 +123,9 @@ namespace he
       float m_errorRate;
       float m_maxDistance;
       float m_maxAngle;
+
+      bool m_sRGB;
+      bool m_createNormals;
     };
   }
 }

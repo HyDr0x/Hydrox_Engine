@@ -153,7 +153,7 @@ namespace he
         {
           if(i == db::Material::DIFFUSETEX)
           {
-            textureLoader.setSRGB(true);
+            textureLoader.setSRGB(false);
           }
           else
           {

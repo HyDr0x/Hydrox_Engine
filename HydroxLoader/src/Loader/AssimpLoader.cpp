@@ -26,7 +26,8 @@ namespace he
   {
     AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : 
       m_singletonManager(singletonManager), 
-      m_animationTimeUnit(Seconds)
+      m_animationTimeUnit(Seconds),
+      m_createNormals(false)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -67,6 +68,11 @@ namespace he
       m_maxAngle = maxAngle;
     }
 
+    void AssimpLoader::setCreateNormals(bool createNormals)
+    {
+      m_createNormals = createNormals;
+    }
+
     void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
     {
       m_animationTimeUnit = animationTimeUnit;
@@ -92,8 +98,10 @@ namespace he
       return m_animationTimeUnit;
     }
 
-    sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped, bool generateTangentSpace, bool generateUVSpace)
+    sg::Scene* AssimpLoader::load(std::string path, std::string filename, bool yAxisFlipped, bool sRGB, bool generateTangentSpace, bool generateUVSpace)
     {
+      m_sRGB = sRGB;
+
       std::clog << "Assimp Loads Scene" << std::endl;
       sg::Scene *scene = nullptr;
       Assimp::Importer importer;
@@ -265,7 +273,7 @@ namespace he
         }
       }
 
-      db::Mesh newMesh(GL_TRIANGLES, mesh->mNumVertices, vertexElements, indices);
+      db::Mesh newMesh(primitiveType, mesh->mNumVertices, vertexElements, indices);
 
       if(mesh->HasPositions())
       {
@@ -382,7 +390,11 @@ namespace he
       }
 
       newMesh.generateBoundingVolume();
-      newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+
+      if(newMesh.getPrimitiveType() == GL_TRIANGLES)
+      {
+        newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+      }
 
       return m_modelManager->addObject(newMesh);
     }
@@ -567,7 +579,7 @@ namespace he
       m_materials.resize(scene->mNumMaterials);
       std::vector<std::vector<util::ResourceHandle>> textures(db::Material::TEXTURETYPENUM);
       ILDevilLoader texLoader(m_singletonManager);
-      aiString texPath;
+      aiString texPath;     
 
       for(unsigned int i = 0; i < m_materials.size(); i++)
       {
@@ -579,6 +591,9 @@ namespace he
         textures[db::Material::DISPLACEMENTTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
         textures[db::Material::SPECULARTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
 
+        texLoader.setSRGB(m_sRGB);
+        texLoader.setMipMapping(true);
+
         for(unsigned int k = 0; k != textures[db::Material::DIFFUSETEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
@@ -587,6 +602,8 @@ namespace he
           hashes[db::Material::DIFFUSETEX].push_back(texture->getHash());
         }
 
+        texLoader.setSRGB(false);
+
         for(unsigned int k = 0; k != textures[db::Material::NORMALTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType(normalMapIdentifier), 0, &texPath);
@@ -594,6 +611,8 @@ namespace he
           db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::NORMALTEX][k]);
           hashes[db::Material::NORMALTEX].push_back(texture->getHash());
         }
+
+        texLoader.setMipMapping(false);
 
         for(unsigned int k = 0; k != textures[db::Material::DISPLACEMENTTEX].size(); k++)
         {
@@ -616,6 +635,9 @@ namespace he
         matData.specularStrength = 0.5f;
         matData.ambientStrength = 0.1f;
         matData.specularExponent = 1.0f;
+
+        scene->mMaterials[i]->Get<float>(AI_MATKEY_COLOR_DIFFUSE, matData.color[0]);
+        matData.color[3] = 1.0f;
 
         m_materials[i] = m_materialManager->addObject(db::Material(matData, textures, hashes, false));
       }

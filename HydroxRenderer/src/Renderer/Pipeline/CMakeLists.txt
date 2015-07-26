@@ -12,6 +12,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/LightRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParticleRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RenderManager.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/RenderOptions.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Renderquad.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SamplerObject.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/SkyboxRenderer.cpp 

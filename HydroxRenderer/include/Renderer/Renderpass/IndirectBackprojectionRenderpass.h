@@ -29,6 +29,8 @@ namespace he
       IndirectBackprojectionRenderpass();
       virtual ~IndirectBackprojectionRenderpass();
 
+      virtual bool insertGeometry(util::SharedPointer<IRenderContainer> renderContainer) override;
+
       void setLightIndex(int lightIndex);
 
       virtual void drawRenderpass() const override;

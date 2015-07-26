@@ -132,55 +132,62 @@ namespace he
       NodeIndex siblingIndex = m_allocator[node].getNextSibling();
 
       NodeIndex parentIndex = m_allocator[node].getParent();
-      GroupNode& parent = (GroupNode&)m_allocator[parentIndex];
-
       NodeIndex firstChildIndex = m_allocator[node].getFirstChild();
 
-      if(firstChildIndex != ~0)
+      if(parentIndex == ~0)
       {
-        parent.setFirstChild(firstChildIndex);
-
-        TreeNode& firstChild = m_allocator[firstChildIndex];
-        TreeNode& oldChildSibling = firstChild;
-        while(firstChildIndex != ~0)
-        {
-          firstChild.setParent(parentIndex);
-
-          oldChildSibling = firstChild;
-          firstChildIndex = firstChild.getNextSibling();
-        }
-
-        oldChildSibling.setNextSibling(siblingIndex);
-      }
-
-      if(parent.getFirstChild() == node)
-      {
-        if(firstChildIndex != ~0)
-        {
-          parent.setFirstChild(firstChildIndex);
-        }
-        else
-        {
-          parent.setFirstChild(siblingIndex);
-        }
+        m_rootNode = firstChildIndex;//the root node cant have siblings!
       }
       else
       {
-        NodeIndex parentFirstChildIndex = parent.getFirstChild();
-        NodeIndex oldParentFirstChildindex = parentFirstChildIndex;
-        while(parentFirstChildIndex != node)
-        {
-          oldParentFirstChildindex = parentFirstChildIndex;
-          parentFirstChildIndex = m_allocator[parentFirstChildIndex].getNextSibling();
-        }
+        GroupNode& parent = (GroupNode&)m_allocator[parentIndex];
 
         if(firstChildIndex != ~0)
         {
-          m_allocator[oldParentFirstChildindex].setNextSibling(firstChildIndex);
+          parent.setFirstChild(firstChildIndex);
+
+          TreeNode& firstChild = m_allocator[firstChildIndex];
+          TreeNode& oldChildSibling = firstChild;
+          while(firstChildIndex != ~0)
+          {
+            firstChild.setParent(parentIndex);
+
+            oldChildSibling = firstChild;
+            firstChildIndex = firstChild.getNextSibling();
+          }
+
+          oldChildSibling.setNextSibling(siblingIndex);
+        }
+
+        if(parent.getFirstChild() == node)
+        {
+          if(firstChildIndex != ~0)
+          {
+            parent.setFirstChild(firstChildIndex);
+          }
+          else
+          {
+            parent.setFirstChild(siblingIndex);
+          }
         }
         else
         {
-          m_allocator[oldParentFirstChildindex].setNextSibling(siblingIndex);
+          NodeIndex parentFirstChildIndex = parent.getFirstChild();
+          NodeIndex oldParentFirstChildindex = parentFirstChildIndex;
+          while(parentFirstChildIndex != node)
+          {
+            oldParentFirstChildindex = parentFirstChildIndex;
+            parentFirstChildIndex = m_allocator[parentFirstChildIndex].getNextSibling();
+          }
+
+          if(firstChildIndex != ~0)
+          {
+            m_allocator[oldParentFirstChildindex].setNextSibling(firstChildIndex);
+          }
+          else
+          {
+            m_allocator[oldParentFirstChildindex].setNextSibling(siblingIndex);
+          }
         }
       }
 
@@ -242,6 +249,24 @@ namespace he
 
       DeleteTraverser traverser(m_allocator);
       traverser.doTraverse(m_allocator[rootNodeIndex]);
+    }
+
+    Scene Scene::getSubTree(NodeIndex nodeIndex, std::string namePrefix)
+    {
+      TreeNodeAllocator allocator;
+      sg::NodeIndex sceneRootNode = allocator.insert(sg::TransformNode(util::Matrix<float, 4>::identity(), std::string("rootNode")));
+      Scene subTree(allocator, sceneRootNode);
+
+      CopyTraverser traverser(m_allocator, subTree.getTreeNodeAllocator(), namePrefix);
+      traverser.doTraverse(m_allocator[nodeIndex]);
+      NodeIndex newNode = traverser.getCopiedRootNode();
+
+      ((GroupNode&)subTree.getTreeNodeAllocator()[sceneRootNode]).setFirstChild(newNode);
+      subTree.getTreeNodeAllocator()[newNode].setParent(sceneRootNode);
+
+      subTree.removeNode(sceneRootNode);
+
+      return subTree;
     }
 
     TreeNodeAllocator& Scene::getTreeNodeAllocator()
