@@ -59,7 +59,7 @@ void main()
 		
 		for(uint j = 0; j < INTERLEAVEDBLOCKSIZE; j++)
 		{
-			if(abs((depth[interleavedBlockID + j] - depth[workGroupID])) < 0.0001 && dot(normal[interleavedBlockID + j], normal[workGroupID]) > 0.9)
+			if(abs((depth[interleavedBlockID + j] - depth[workGroupID])) < 0.01 && dot(normal[interleavedBlockID + j], normal[workGroupID]) > 0.9)
 			{
 				ivec2 blockTexCoord = texCoord + samplingDirection * int(-blockOffset + j);
 				newVisibility += imageLoad(shadowMap0, blockTexCoord).r;

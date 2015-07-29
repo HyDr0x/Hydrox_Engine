@@ -38,8 +38,8 @@ namespace he
 
       void updateBuffer(unsigned int cacheNumber, unsigned int proxyLightTextureResolution);
       void calculateIndirectLight(
-        std::vector<util::SharedPointer<db::Texture2D>> reflectiveShadowPosLuminousFluxMaps,
-        std::vector<util::SharedPointer<db::Texture2D>> reflectiveShadowNormalAreaMaps,
+        util::SharedPointer<db::Texture3D> reflectiveShadowPosLuminousFluxMaps,
+        util::SharedPointer<db::Texture3D> reflectiveShadowNormalAreaMaps,
         const GPUImmutableBuffer& reflectiveShadowLightBuffer);
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
@@ -50,10 +50,8 @@ namespace he
 
       util::SharedPointer<db::Texture2D> getIndirectLightMap() const;
 
-      util::SharedPointer<db::Texture2D> getIndirectDiffusePositionMap();
-      util::SharedPointer<db::Texture2D> getIndirectDiffuseLuminousFluxMap();
-      util::SharedPointer<db::Texture2D> getIndirectSpecularPositionMap();
-      util::SharedPointer<db::Texture2D> getIndirectSpecularLuminousFluxMap();
+      util::SharedPointer<db::Texture2D> getIndirectPositionMap();
+      util::SharedPointer<db::Texture2D> getIndirectLuminousFluxMap();
       util::SharedPointer<db::Texture2D> getZBuffer();
 
       const TBO& getGlobalCachePositionMap();
@@ -89,11 +87,8 @@ namespace he
       TBO m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene
       TBO m_globalCacheAreaBuffer;//saves all caches area
 
-      sh::RenderShaderHandle m_proxyWeightCreationShaderHandle;
-      unsigned int m_ping, m_pong;
-      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer[4];//the position of the indirect diffuse proxy light for the interpolation
-      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer[4];//the luminous flux of the indirect diffuse proxy light for the soft shadows
-      Renderquad m_indirectProxyLightRenderQuad;
+      util::SharedPointer<db::Texture2D> m_indirectLightPositionBuffer;//the position of the indirect diffuse proxy light for the interpolation
+      util::SharedPointer<db::Texture2D> m_indirectLightLuminousFluxBuffer;//the luminous flux of the indirect diffuse proxy light for the soft shadows
 
       util::SharedPointer<db::Texture2D> m_zBuffer;//ubytes 0 = cache is not being used, 1 = cache is being used
 

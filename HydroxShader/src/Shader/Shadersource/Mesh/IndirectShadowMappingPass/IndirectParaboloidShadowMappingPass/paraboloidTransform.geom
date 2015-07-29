@@ -30,10 +30,10 @@ void main()
 		
 		paraboloidProjection(transformedPosition, PARABOLOIDNEAR, PARABOLOIDFAR, transformedPosition, clipDepth[i]);
 		
-		//if(length(transformedPosition.xy) > 1.0) isInterior = false;
+		//if(length(transformedPosition.xy) > 1.0) return;
 		if(1.0 < transformedPosition.x || transformedPosition.x < -1.0 || 
 			 1.0 < transformedPosition.y || transformedPosition.y < -1.0 ||
-			 1.0 < transformedPosition.z || transformedPosition.z < -1.0)
+			 1.0 < transformedPosition.z || transformedPosition.z < -0.85)
 		{
 			return;
 		}

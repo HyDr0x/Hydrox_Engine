@@ -30,6 +30,9 @@ namespace he
       void bindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
       void unbindImageTexture(GLuint unit, GLint level, GLenum access, GLenum format);
 
+      void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
+      void unbindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
+
       void setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter) const;
 
       void bindToFramebuffer(GLenum attachment);

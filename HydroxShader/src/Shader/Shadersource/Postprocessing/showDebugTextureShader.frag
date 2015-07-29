@@ -1,6 +1,7 @@
 #version 440 core
 
 #include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2D colorSampler;
 
@@ -22,4 +23,5 @@ void main()
 	*/
 	
   color = vec4(texture(colorSampler, gsout_texCoord));//simple texture output
+	//color = vec4(unpackLuminousFlux(texture(colorSampler, gsout_texCoord).a*30), 1);//simple texture output
 }

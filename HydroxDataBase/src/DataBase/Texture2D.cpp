@@ -169,6 +169,16 @@ namespace he
       glBindImageTexture(unit, 0, level, GL_FALSE, 0, access, format);
     }
 
+    void Texture2D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, m_texIndex, level, layered, layer, access, format);
+    }
+
+    void Texture2D::unbindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
+    {
+      glBindImageTexture(unit, 0, level, layered, layer, access, format);
+    }
+
     void Texture2D::setTexParameters(GLint edgeModeS, GLint edgeModeT, GLint magFilter, GLint minFilter) const
     {
       glBindTexture(m_target, m_texIndex);

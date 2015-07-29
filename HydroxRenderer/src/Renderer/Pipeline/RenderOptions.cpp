@@ -49,6 +49,9 @@ namespace he
       getParameter<float, double(*) (const char*)>(parameterStream, logLuminancePerMS, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, s, &atof);
 
+      getParameter<bool, int(*) (const char*)>(parameterStream, globalIllumination, &atoi);
+      getParameter<bool, int(*) (const char*)>(parameterStream, indirectShadows, &atoi);
+
       parameterStream.close();
     }
 

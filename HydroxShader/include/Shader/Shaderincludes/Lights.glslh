@@ -37,7 +37,8 @@ float calculateLuminance(LightData light, const vec3 worldPos, const vec3 normal
 	else//SPOTLIGHT
 	{
 		float spotLightAngle = max(dot(lightDir, normalize(light.direction.xyz)), 0.0f);
-		float spotAttenuation = step(light.direction.w, spotLightAngle) * clamp(pow(spotLightAngle, light.position.w), 0.0f, 1.0f);
+		//float spotAttenuation = step(light.direction.w, spotLightAngle) * clamp(pow(spotLightAngle, light.position.w), 0.0f, 1.0f);
+		float spotAttenuation = clamp((spotLightAngle - light.direction.w) * 1.0 / 0.05, 0.0, 1.0) * clamp(pow(spotLightAngle, light.position.w), 0.0f, 1.0f);
 		
 		attenuation *= spotAttenuation;
 	}

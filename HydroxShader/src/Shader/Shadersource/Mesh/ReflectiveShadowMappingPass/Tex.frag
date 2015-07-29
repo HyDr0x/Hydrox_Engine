@@ -44,7 +44,7 @@ void main()
 		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
-	vec3 luminousFlux =  ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
+	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
 	fsout_pos3DLuminousFlux = vec4(vsout_pos.xyz, packLuminousFlux(luminousFlux));
 	fsout_normalArea = vec4(vsout_normal * 0.5f + 0.5f, area);
 	

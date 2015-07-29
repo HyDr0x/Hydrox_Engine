@@ -1,0 +1,121 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+#define SAMPLENUMBER
+#define SHADOWSAMPLENUMBER
+#define SHADOWSAMPLENUMBERROOT
+#define INTERLEAVEDBLOCKSIZE
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
+
+layout(location = 0) uniform sampler2D depthSampler;
+layout(location = 1) uniform sampler2DArray indirectShadowMapSampler;
+
+layout(rgba32f, binding = 0) readonly uniform image2DArray indirectLightPositions;
+layout(rgba32f, binding = 1) readonly uniform image2DArray indirectLightNormals;
+
+layout(r16f, binding = 2) writeonly uniform image2D visibilityBuffer;
+layout(rgba32f, binding = 3) readonly uniform image1DArray valQuaternions;
+
+layout(std430, binding = 1) buffer samplingPattern
+{
+	vec4 samples[SAMPLENUMBER];
+};
+
+layout(location = 2) uniform uint reflectiveShadowMapResolution;
+layout(location = 3) uniform uint reflectiveShadowMapNumber;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec4 indirectLightPos[128];
+shared vec4 indirectLightNormal[128];
+
+void main()
+{
+	const float screenWidth = 0.5 * float(width);
+	const float screenHeight = 0.5 * float(height);
+	
+	uint idx = gl_GlobalInvocationID.x;
+
+	const uint pixelPerCache = max(uint(screenWidth * screenHeight) / (WORKGROUPSIZE * gl_NumWorkGroups.x), 1);
+	
+	for(uint k = 0; k < pixelPerCache; k++)
+	{
+		const uint index = idx * pixelPerCache + k;
+		if(index >= screenWidth * screenHeight) return;
+	
+		ivec2 fragCoord = ivec2(mod(index, uint(screenWidth)), index / uint(screenWidth));
+		vec2 texCoord = vec2(float(fragCoord.x) / screenWidth, float(fragCoord.y) / screenHeight);
+		
+		float z = texture(depthSampler, texCoord).r;
+		
+		vec4 pos3D = invViewProjectionMatrix * vec4(vec3(texCoord.xy, z) * 2.0 - 1.0, 1);
+		pos3D /= pos3D.w;
+		
+		float visibleIndirectLightNumber = 0.0;
+		
+		const uint interleavedSize = INTERLEAVEDBLOCKSIZE * INTERLEAVEDBLOCKSIZE;
+
+		ivec2 blockCoord = ivec2(mod(fragCoord.x, INTERLEAVEDBLOCKSIZE), mod(fragCoord.y, INTERLEAVEDBLOCKSIZE));
+		
+		const uint startIndex = blockCoord.x + blockCoord.y * INTERLEAVEDBLOCKSIZE;
+		
+		for(uint j = 0; j < reflectiveShadowMapNumber; j++)
+		{
+			for(uint i = startIndex; i < SHADOWSAMPLENUMBER; i += interleavedSize)
+			//for(uint i = 0; i < SHADOWSAMPLENUMBER; i++)
+			{
+				ivec3 indirectLightTexCoord = ivec3((samples[i].xy + vec2(0.5)) * reflectiveShadowMapResolution, j);
+				vec4 lightPos = imageLoad(indirectLightPositions, indirectLightTexCoord);
+				
+				if(lightPos.w == 0.0) //cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+				{
+					visibleIndirectLightNumber++;
+					continue;
+				}
+				
+				vec3 lightNormal = imageLoad(indirectLightNormals, indirectLightTexCoord).xyz * 2.0 - 1.0;
+				
+				/*
+				if(gl_LocalInvocationID.x == 0)
+				{
+					ivec3 indirectLightTexCoord = ivec3((samples[i].xy + vec2(0.5)) * reflectiveShadowMapResolution, j);
+					indirectLightPos[gl_WorkGroupID.x] = imageLoad(indirectLightPositions, indirectLightTexCoord);
+					indirectLightNormal[gl_WorkGroupID.x].xyz = imageLoad(indirectLightNormals, indirectLightTexCoord).xyz * 2.0 - 1.0;
+				}
+				memoryBarrierShared();
+				barrier();
+				
+				vec4 lightPos = indirectLightPos[gl_WorkGroupID.x];
+				vec3 lightNormal = indirectLightNormal[gl_WorkGroupID.x].xyz;
+				*/
+				
+				vec4 q = imageLoad(valQuaternions, ivec2(i, j));
+				
+				float clipDepth;
+				vec3 transformedPosition = pos3D.xyz - lightPos.xyz;
+				transformedPosition = applyQuaternion(transformedPosition, q);
+				
+				paraboloidProjection(transformedPosition, PARABOLOIDNEAR, PARABOLOIDFAR, transformedPosition, clipDepth);
+				
+				if(clipDepth > 0.01)
+				{
+					transformedPosition.xy = (transformedPosition.xy * 0.5 + 0.5) / float(SHADOWSAMPLENUMBERROOT);
+					transformedPosition.z = transformedPosition.z * 0.5 + 0.5;
+					
+					transformedPosition.x += mod(i, SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
+					transformedPosition.y += (i / SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
+
+					float depth = texture(indirectShadowMapSampler, vec3(transformedPosition.xy, j)).r;
+
+					//visibleIndirectLightNumber = depth;
+					visibleIndirectLightNumber += clamp(ceil(depth - transformedPosition.z + 0.01), 0, 1);
+				}
+			}
+		}
+		
+		imageStore(visibilityBuffer, fragCoord, vec4(visibleIndirectLightNumber / float(reflectiveShadowMapNumber * SHADOWSAMPLENUMBER / interleavedSize)));
+		//imageStore(visibilityBuffer, fragCoord, vec4(visibleIndirectLightNumber / float(reflectiveShadowMapNumber * SHADOWSAMPLENUMBER)));
+	}
+}

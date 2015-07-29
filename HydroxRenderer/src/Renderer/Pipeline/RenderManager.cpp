@@ -374,10 +374,10 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
         break;
       case 6:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps()[0]);
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps()->convertToTexture2D(0));
         break;
       case 7:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalAreaMaps()[0]);
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalAreaMaps()->convertToTexture2D(0));
         break;
       case 8:
 
@@ -536,12 +536,12 @@ namespace he
     {
       unsigned int cacheResolution = m_geometryRasterizer.getProxyLightTextureResolution();
 
-      std::vector<util::vec4f> lightPositions(cacheResolution * cacheResolution);
-      std::vector<util::vec4f> lightLuminousFlux(cacheResolution * cacheResolution);
+      std::vector<util::vec4f> lightPositions(2 * cacheResolution * cacheResolution);
+      std::vector<util::vec4f> lightLuminousFlux(2 * cacheResolution * cacheResolution);
       std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
 
-      m_indirectLightRenderer.getIndirectDiffusePositionMap()->getTextureData(&lightPositions[0]);
-      m_indirectLightRenderer.getIndirectDiffuseLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
+      m_indirectLightRenderer.getIndirectPositionMap()->getTextureData(&lightPositions[0]);
+      m_indirectLightRenderer.getIndirectLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
       m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
 
       unsigned int validLightCounter = 0;
@@ -549,7 +549,7 @@ namespace he
       {
         if(zBuffer[i][0])
         {
-          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[i][0], lightPositions[i][1], lightPositions[i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
+          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[2 * i][0], lightPositions[2 * i][1], lightPositions[2 * i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
           validLightCounter++;
         }
       }

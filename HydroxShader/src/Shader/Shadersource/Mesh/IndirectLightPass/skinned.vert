@@ -15,10 +15,8 @@
 layout(rgba32f, binding = 0) readonly uniform imageBuffer globalCachePositionBuffer;
 layout(rgba32f, binding = 1) readonly uniform imageBuffer globalCacheNormalBuffer;
 
-layout(rgba32f, binding = 2) readonly uniform image2D diffuseIndirectLightPositionBuffer;
-layout(rgba32f, binding = 3) readonly uniform image2D specularIndirectLightPositionBuffer;
-layout(rgba32f, binding = 4) readonly uniform image2D diffuseIndirectLightLuminousFluxBuffer;
-layout(rgba32f, binding = 5) readonly uniform image2D specularIndirectLightLuminousFluxBuffer;
+layout(rgba32f, binding = 2) readonly uniform image2D indirectLightPositionBuffer;
+layout(rgba32f, binding = 3) readonly uniform image2D indirectLightLuminousFluxBuffer;
 
 layout(std430, binding = 0) buffer boneMatrixBuffer
 {
@@ -125,12 +123,12 @@ void main()
 			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0.0));
 			
 			IndirectLightData indirectLightD;
-			indirectLightD.position = imageLoad(diffuseIndirectLightPositionBuffer, coord);
-			indirectLightD.luminousFlux = imageLoad(diffuseIndirectLightLuminousFluxBuffer, coord);
+			indirectLightD.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x, coord.y));
+			indirectLightD.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x, coord.y));
 			
 			IndirectLightData indirectLightG;
-			indirectLightG.position = imageLoad(specularIndirectLightPositionBuffer, coord);
-			indirectLightG.luminousFlux = imageLoad(specularIndirectLightLuminousFluxBuffer, coord);
+			indirectLightG.position = imageLoad(indirectLightPositionBuffer, ivec2(2 * coord.x + 1, coord.y));
+			indirectLightG.luminousFlux = imageLoad(indirectLightLuminousFluxBuffer, ivec2(2 * coord.x + 1, coord.y));
 			
 			cacheProxyMinDistanceD += wd * indirectLightD.position.w;
 			cacheProxyMinDistanceG += wg * indirectLightG.position.w;
