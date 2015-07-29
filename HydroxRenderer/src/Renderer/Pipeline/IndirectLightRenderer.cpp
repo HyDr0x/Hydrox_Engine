@@ -128,7 +128,7 @@ namespace he
 
         m_globalCachePositionBuffer.bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
         m_globalCacheNormalBuffer.bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_globalCacheAreaBuffer.bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+        m_globalCacheAreaBuffer.bindImageTexture(2, 0, GL_READ_ONLY, GL_R16F);
 
         m_indirectLightPositionBuffer->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA32F);
         m_indirectLightLuminousFluxBuffer->bindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -155,7 +155,7 @@ namespace he
         m_indirectLightLuminousFluxBuffer->unbindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA32F);
         m_indirectLightPositionBuffer->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-        m_globalCacheAreaBuffer.unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+        m_globalCacheAreaBuffer.unbindImageTexture(2, 0, GL_READ_ONLY, GL_R16F);
         m_globalCacheNormalBuffer.unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
         m_globalCachePositionBuffer.unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
 

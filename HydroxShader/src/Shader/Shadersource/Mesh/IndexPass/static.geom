@@ -87,7 +87,7 @@ void main()
 			//extract matrix scale for area, expect uniform scale!
 			float scale = sqrt(modelMatrix[0][0] * modelMatrix[0][0] + modelMatrix[0][1] * modelMatrix[0][1] + modelMatrix[0][2] * modelMatrix[0][2]);
 			
-			imageStore(globalCacheAreaBuffer, int(index), scale * scale * caches[cacheIndexOffsetTMP + i].area);
+			imageStore(globalCacheAreaBuffer, int(index), 10.0 * scale * scale * caches[cacheIndexOffsetTMP + i].area);
 		}
 	}
 	
