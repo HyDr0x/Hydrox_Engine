@@ -68,7 +68,8 @@ void main()
 		
 		if(shadowPos.z <= shadowZ + 0.001 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
 		{
-			luminousFlux += vec4(shadowLight[i].light.color.rgb, 1.0) * (material.z + calculateLuminance(shadowLight[i].light, pos, normal, material));
+			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
+			luminousFlux += borderAttenuation.x * borderAttenuation.y * vec4(shadowLight[i].light.color.rgb, 1.0) * (material.z + calculateLuminance(shadowLight[i].light, pos, normal, material));
 		}
 		else
 		{
@@ -85,7 +86,8 @@ void main()
 		
 		if(length(shadowPos - pos) < 0.1 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
 		{
-			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb, 1.0) * calculateLuminance(reflectiveShadowLight[i].light, pos, normal, material);
+			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
+			luminousFlux += borderAttenuation.x * borderAttenuation.y * vec4(reflectiveShadowLight[i].light.color.rgb, 1.0) * calculateLuminance(reflectiveShadowLight[i].light, pos, normal, material);
 		}
 	}
 }

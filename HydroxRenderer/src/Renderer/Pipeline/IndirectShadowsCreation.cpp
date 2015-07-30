@@ -60,6 +60,7 @@ namespace he
         m_VALQuaternions = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->giLightSampleNumber / m_options->giShadowLightSampleDivisor, m_reflectiveShadowMapNumber, GL_TEXTURE_1D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
 
         m_indirectLightPushPullShadowMaps.resize(m_options->pushPullPyramideSize);
+        m_indirectLightPushPullShadowMapsReference.resize(m_options->pushPullPyramideSize);
 
         for(unsigned int i = 0; i < m_options->pushPullPyramideSize; i++)
         {
@@ -67,6 +68,12 @@ namespace he
           m_indirectLightPushPullShadowMaps[i] = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->indirectShadowMapWidth / divisor, m_options->indirectShadowMapWidth / divisor, m_reflectiveShadowMapNumber, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
         }
         
+        for(unsigned int i = 0; i < m_options->pushPullPyramideSize; i++)
+        {
+          unsigned int divisor = std::pow(2, float(i));
+          m_indirectLightPushPullShadowMapsReference[i] = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->indirectShadowMapWidth / divisor, m_options->indirectShadowMapWidth / divisor, m_reflectiveShadowMapNumber, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
+        }
+
         m_indirectLightShadowMapsQuad.setRenderTargets3D(m_indirectLightShadowMaps, 0, 0);
 
         m_geometryBackprojectionDepthMap = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->backProjectionWidth, m_options->backProjectionWidth, m_reflectiveShadowMapNumber, GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, 1, 32));
@@ -309,14 +316,22 @@ namespace he
 
       pull.useNoShader();
 
+      m_indirectLightPushPullShadowMapsReference[0]->copyTextureData(*m_indirectLightShadowMaps);
+      for(unsigned int i = 1; i < m_options->pushPullPyramideSize; i++)
+      {
+        m_indirectLightPushPullShadowMapsReference[i]->copyTextureData(*m_indirectLightPushPullShadowMaps[i]);
+      }
+
       const sh::RenderShader& push = m_shaderContainer->getRenderShader(m_pushShaderHandle);
       push.useShader();
 
       for(unsigned int j = 0; j < m_reflectiveShadowMapNumber; j++)
       {
+        glViewport(0, 0, m_options->indirectShadowMapWidth, m_options->indirectShadowMapWidth);
+        m_indirectLightShadowMapsQuad.setRenderTargets3D(m_indirectLightShadowMaps, j, 0);
         for(int i = m_options->pushPullPyramideSize - 1; i >= 0; i--)
         {
-          float textureDivisor = 1.0f / std::pow(2.0f, i);
+          /*float textureDivisor = 1.0f / std::pow(2.0f, i);
           glViewport(0, 0, m_options->indirectShadowMapWidth * textureDivisor, m_options->indirectShadowMapWidth * textureDivisor);
           if(i > 0)
           {
@@ -325,14 +340,17 @@ namespace he
           else
           {
             m_indirectLightShadowMapsQuad.setRenderTargets3D(m_indirectLightShadowMaps, j, 0);
-          }
+          }*/
 
           m_indirectLightShadowMapsQuad.setWriteFrameBuffer();
 
-          sh::RenderShader::setUniform(1, GL_UNSIGNED_INT, &j);
+          sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &j);
+          sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &i);
 
           m_indirectLightPushPullShadowMaps[i]->setTexture(0, 0);
+          m_indirectLightPushPullShadowMapsReference[i]->setTexture(1, 1);
           m_indirectLightShadowMapsQuad.render();
+          m_indirectLightPushPullShadowMapsReference[i]->unsetTexture(1);
           m_indirectLightPushPullShadowMaps[i]->unsetTexture(0);
 
           m_indirectLightShadowMapsQuad.unsetWriteFrameBuffer();

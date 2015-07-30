@@ -5,6 +5,7 @@
 
 #include <GL/glew.h>
 
+#include <DataBase/Texture1D.h>
 #include <DataBase/Texture2D.h>
 #include <DataBase/Texture3D.h>
 
@@ -41,23 +42,26 @@ namespace he
       void generateReflectionCaches(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         const GPUBuffer& samplingPatternBuffer);
 
-      const GPUBuffer& getSpecularProxyLights() const;
-      const GPUBuffer& getSpecularCacheMap() const;
-      util::SharedPointer<db::Texture2D> getSpecularProxyIndexMap() const;
-      util::SharedPointer<db::Texture2D> getSpecularProxyOffsets() const;
+      util::SharedPointer<db::Texture2D> getSpecularLightMap() const;
 
     private:
       
       IndirectSpecularReflections(const IndirectSpecularReflections&);
       IndirectSpecularReflections& operator=(const IndirectSpecularReflections&);
 
-      void createProxyLightOffsetBuffer(util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions);
+
+      void createSpecularCachePositions(util::SharedPointer<db::Texture2D> gBufferDepthMap,
                                         util::SharedPointer<db::Texture2D> gBufferNormalMap,
+                                        util::SharedPointer<db::Texture2D> gBufferMaterialMap,
                                         util::SharedPointer<db::Texture3D> indirectLightPositions,
                                         const GPUBuffer& samplingPatternBuffer);
+
+      void createProxyLightOffsets();
 
       void createProxyLights(util::SharedPointer<db::Texture2D> gBufferDepthMap,
                              util::SharedPointer<db::Texture2D> gBufferNormalMap,
@@ -66,19 +70,23 @@ namespace he
 
       void createProxyLightIndices();
 
-      sh::RenderShaderHandle m_proxyLightOffsetShaderHandle;
-      sh::RenderShaderHandle m_proxyLightCreationShaderHandle;
+      sh::ComputeShaderHandle m_calculateAreaLightTube;
+      sh::ComputeShaderHandle m_specularCacheXCreation;
+      sh::ComputeShaderHandle m_specularCacheYCreation;
+      sh::ComputeShaderHandle m_specularCacheOffsetCreation;
+      sh::RenderShaderHandle m_specularCacheCreation;
+      sh::RenderShaderHandle m_specularLightMapCreation;
  
       util::SharedPointer<RenderOptions> m_options;
 
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       GLuint m_pointVAO;
-      GPUBuffer m_proxyLightBoundingBoxBuffer;
+      GPUBuffer m_proxyLightTubeBuffer;
       GPUBuffer m_proxyLightBuffer;
-      GPUBuffer m_cacheBuffer;
+      GPUBuffer m_cachePositions;
       util::SharedPointer<db::Texture2D> m_specularProxyLightOffsets;
-      util::SharedPointer<db::Texture2D> m_specularProxyIndices;
+      util::SharedPointer<db::Texture2D> m_specularLightMap;
       Renderquad m_specularProxyLightQuad;
 
       unsigned int m_reflectiveShadowMapNumber;

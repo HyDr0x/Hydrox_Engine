@@ -144,17 +144,17 @@ namespace he
 
     void Texture3D::copyTextureData(const Texture3D& texture)
     {
-      glBindTexture(m_target, m_texIndex);
+      //glBindTexture(m_target, m_texIndex);
 
-      glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
-      glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      //glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      //glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      //glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+      //glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      //glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-      glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, nullptr);
+      //glTexImage3D(m_target, 0, m_internalFormat, m_width, m_height, m_depth, 0, m_format, m_type, nullptr);
 
-      glBindTexture(m_target, 0);
+      //glBindTexture(m_target, 0);
 
       glCopyImageSubData(texture.m_texIndex, texture.m_target, 0, 0, 0, 0, m_texIndex, m_target, 0, 0, 0, 0, texture.m_width, texture.m_height, texture.m_depth);
 

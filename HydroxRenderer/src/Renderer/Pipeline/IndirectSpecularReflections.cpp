@@ -35,15 +35,20 @@ namespace he
 
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_proxyLightOffsetShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::INDIRECTSHADOWMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::POSITION) | sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::NORMAL));
-      m_proxyLightCreationShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::VISIBILITYMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      //m_calculateAreaLightTube = sh::ShaderContainer::;
+      //m_specularCacheXCreation = sh::ShaderContainer::;
+      //m_specularCacheYCreation = sh::ShaderContainer::;
+      //m_specularCacheOffsetCreation = sh::ShaderContainer::;
+      //m_specularCacheCreation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::VISIBILITYMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      //m_specularLightMapCreation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::VISIBILITYMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+
+      m_proxyLightTubeBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * sizeof(util::vec4f), 2 * sizeof(util::vec4f), GL_STREAM_COPY);
 
       m_specularProxyLightOffsets = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
-      m_specularProxyIndices = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
+      m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
-      m_proxyLightBoundingBoxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::vec3f), sizeof(util::vec3f), GL_STATIC_DRAW);
       m_proxyLightBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
-      m_cacheBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      m_cachePositions.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
     }
 
     void IndirectSpecularReflections::updateBuffer(unsigned int reflectiveShadowMapNumber)
@@ -57,20 +62,30 @@ namespace he
     void IndirectSpecularReflections::generateReflectionCaches(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture3D> indirectLightPositions,
       const GPUBuffer& samplingPatternBuffer)
     {
-      createProxyLightOffsetBuffer(gBufferDepthMap, gBufferNormalMap, indirectLightPositions, samplingPatternBuffer);
+      createTubeData(indirectLightPositions);
+
+      createSpecularCachePositions(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, indirectLightPositions, samplingPatternBuffer);
+
+      createProxyLightOffsets();
 
       createProxyLights(gBufferDepthMap, gBufferNormalMap, indirectLightPositions, samplingPatternBuffer);
 
       createProxyLightIndices();
-      
     }
 
-    void IndirectSpecularReflections::createProxyLightOffsetBuffer(
+    void IndirectSpecularReflections::createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions)
+    {
+
+    }
+
+    void IndirectSpecularReflections::createSpecularCachePositions(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture3D> indirectLightPositions,
       const GPUBuffer& samplingPatternBuffer)
     {
@@ -181,29 +196,19 @@ namespace he
       glViewport(0, 0, m_options->width, m_options->height);*/
     }
 
+    void IndirectSpecularReflections::createProxyLightOffsets()
+    {
+
+    }
+
     void IndirectSpecularReflections::createProxyLightIndices()
     {
 
     }
 
-    const GPUBuffer& IndirectSpecularReflections::getSpecularProxyLights() const
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getSpecularLightMap() const
     {
-      return m_proxyLightBuffer;
-    }
-
-    const GPUBuffer& IndirectSpecularReflections::getSpecularCacheMap() const
-    {
-      return m_cacheBuffer;
-    }
-
-    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getSpecularProxyIndexMap() const
-    {
-      return m_specularProxyIndices;
-    }
-
-    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getSpecularProxyOffsets() const
-    {
-      return m_specularProxyLightOffsets;
+      return m_specularLightMap;
     }
   }
 }
