@@ -118,6 +118,7 @@ namespace he
       m_stringRenderer.initialize(m_singletonManager);
       m_lightRenderer.initialize(m_singletonManager);
       m_indirectLightRenderer.initialize(m_singletonManager);
+      m_indirectSpecularRenderer.initialize(m_singletonManager);
       m_indirectShadowsCreation.initialize(m_singletonManager);
       m_delaunayTriangulation.initialize(m_singletonManager);
       m_particleRenderer.initialize(m_singletonManager);
@@ -209,6 +210,7 @@ namespace he
           m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
           m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
           m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber());
+          m_indirectSpecularRenderer.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
         }
 
         if(m_wireframe)
@@ -292,7 +294,7 @@ namespace he
 
             m_indirectLightRenderer.getSamplingBuffer().bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
-            m_indirectShadowsCreation.viewMatrixCreation(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(), m_lightRenderer.getReflectiveShadowNormalAreaMaps());
+            m_indirectShadowsCreation.viewMatrixCreation(m_lightRenderer.getReflectiveShadowPosMaps(), m_lightRenderer.getReflectiveShadowNormalAreaMaps());
 
             m_indirectLightRenderer.getSamplingBuffer().unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
@@ -313,7 +315,7 @@ namespace he
               m_lightRenderer.getReflectiveShadowLights());
 
             m_indirectShadowsCreation.generateImperfectShadowMap(
-              m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+              m_lightRenderer.getReflectiveShadowPosMaps(),
               m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
               m_indirectLightRenderer.getGlobalCachePositionMap(),
               m_indirectLightRenderer.getGlobalCacheNormalMap(),
@@ -326,14 +328,24 @@ namespace he
             m_indirectShadowsCreation.generateIndirectLightsShadowMap(
               m_gBuffer.getDepthTexture(),
               m_gBuffer.getNormalTexture(),
-              m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+              m_lightRenderer.getReflectiveShadowPosMaps(),
               m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
               m_indirectLightRenderer.getSamplingBuffer());//does pull push, blurring and visibility calculation of the indirect light sources
           }
 
-          m_indirectLightRenderer.calculateIndirectLight(
-            m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps(),
+          m_indirectSpecularRenderer.generateReflectionCaches(
+            m_gBuffer.getDepthTexture(),
+            m_gBuffer.getNormalTexture(),
+            m_gBuffer.getMaterialTexture(),
+            m_lightRenderer.getReflectiveShadowPosMaps(),
             m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
+            m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
+            m_indirectLightRenderer.getSamplingBuffer());
+
+          m_indirectLightRenderer.calculateIndirectLight(
+            m_lightRenderer.getReflectiveShadowPosMaps(),
+            m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
+            m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
             m_lightRenderer.getReflectiveShadowLights());// calculates the indirect light of the caches
 
           m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
@@ -356,6 +368,67 @@ namespace he
         m_gBuffer.unsetDebugGBuffer();
       }
       
+      //switch(m_debugTexture)
+      //{
+      //case 1:
+      //  m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+      //  break;
+      //case 2:
+      //  m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
+      //  break;
+      //case 3:
+      //  m_finalCompositing.renderDebugOutput(m_gBuffer.getMaterialTexture());
+      //  break;
+      //case 4:
+      //  m_finalCompositing.renderDebugOutput(m_gBuffer.getDepthTexture());
+      //  break;
+      //case 5:
+      //  m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
+      //  break;
+      //case 6:
+      //  m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosMaps()->convertToTexture2D(0));
+      //  break;
+      //case 7:
+      //  m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalAreaMaps()->convertToTexture2D(0));
+      //  break;
+      //case 8:
+      //  m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+      //  break;
+      //case 9:
+      //  m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
+      //  break;
+      //case 10:
+      //  m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
+      //  break;
+      //case 11:
+      //  m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
+      //  //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[2]->convertToTexture2D(0));
+      //  break;
+      //case 12:
+      //  m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionNormalMaps()->convertToTexture2D(0));
+      //  //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[1]->convertToTexture2D(0));
+      //  break;
+      //case 13:
+      //  m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionPositionMaps()->convertToTexture2D(0));
+      //  //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[0]->convertToTexture2D(0));
+      //  break;
+      //case 14:
+      //  m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectLightsShadowMaps()->convertToTexture2D(0));
+      //  break;
+      //case 15:
+      //  m_delaunayTriangulation.showVoronoiDiagram();
+      //  //m_finalCompositing.renderDebugOutput(m_delaunayTriangulation.getVoronoiDiagram());
+      //  break;
+      //case 16:
+      //  m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      //  m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
+      //  break;
+      //case 0:
+      //default:
+      //  m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+      //  m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+      //}
+
       switch(m_debugTexture)
       {
       case 1:
@@ -371,40 +444,15 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_gBuffer.getDepthTexture());
         break;
       case 5:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCachePositionsMap());
         break;
       case 6:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowPosLuminousFluxMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugIndexCounterMap());
         break;
       case 7:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowNormalAreaMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
         break;
       case 8:
-
-        break;
-      case 9:
-        m_finalCompositing.renderDebugOutput(m_indirectLightRenderer.getIndirectLightMap());
-        break;
-      case 10:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
-        break;
-      case 11:
-
-        break;
-      case 12:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionNormalMaps()->convertToTexture2D(0));
-        break;
-      case 13:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionPositionMaps()->convertToTexture2D(0));
-        break;
-      case 14:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectLightsShadowMaps()->convertToTexture2D(0));
-        break;
-      case 15:
-        m_delaunayTriangulation.showVoronoiDiagram();
-        //m_finalCompositing.renderDebugOutput(m_delaunayTriangulation.getVoronoiDiagram());
-        break;
-      case 16:
         m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
         m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
         break;

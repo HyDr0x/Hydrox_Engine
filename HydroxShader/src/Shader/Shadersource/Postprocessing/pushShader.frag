@@ -10,9 +10,9 @@ in vec2 gsout_texCoord;
 
 void main()
 {
-	float errorRate = 0.5 * pow(2.0, float(pyramidLevel));
-	float referenceDepth = texture(referenceDepthSampler, vec3(gsout_texCoord.xy, layer)).r;
-	float newDepth = texture(depthSampler, vec3(gsout_texCoord.xy, layer)).r;
+	float errorRate = 0.0 * pow(2.0, float(pyramidLevel));
+	float referenceDepth = texture(referenceDepthSampler, vec3(gsout_texCoord, layer)).r;
+	float newDepth = texture(depthSampler, vec3(gsout_texCoord, layer)).r;
 	
-	gl_FragDepth = abs(referenceDepth - newDepth) > errorRate ? newDepth : 1.0;
+	gl_FragDepth = abs(referenceDepth - newDepth) > errorRate && newDepth < 0.99 ? newDepth : referenceDepth;
 }

@@ -1,0 +1,159 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define PI 3.14159265359
+#define EPSILON 0.00001
+#define INT32_MAX 2147483647
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+
+layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
+layout(location = 1) uniform sampler2DArray indirectLightNormalAreaSampler;
+layout(location = 2) uniform sampler2DArray indirectLightLuminousFluxSampler;
+
+layout(location = 3) uniform uint reflectiveShadowMapNumber;
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsetSampler;
+
+layout(std430, binding = 0) buffer samplingPattern
+{
+	vec4 samples[SAMPLENUMBER];
+};
+
+layout(std430, binding = 1) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 2) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormalMaterial[];
+};
+
+layout(std430, binding = 3) buffer proxyLightPositionBuffer
+{
+	vec4 proxyLightPosition[];
+};
+
+layout(std430, binding = 4) buffer proxyLightLuminousFluxBuffer
+{
+	vec4 proxyLightLuminousFlux[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec4 indirectLightPos[WORKGROUPSIZE];
+shared vec4 indirectLightNormalArea[WORKGROUPSIZE];
+shared vec4 indirectLightLuminousFlux[WORKGROUPSIZE];
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	const uint cacheNumber = uint(imageLoad(cacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	const uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint cacheOffset = idx * cachesPerThread;
+	const uint cacheEnd = cacheOffset + cachesPerThread;
+	
+	for(uint i = cacheOffset; i < cacheEnd; i++)
+	{
+		vec3 Log = vec3(0.0), Xpg = vec3(0.0), camDir;
+		float Wgesg = 0.0, frg;
+		vec2 cacheMaterial;
+		CacheData cache;
+		
+		if(i < cacheNumber)
+		{
+			cache.position = specularCachePositions[i];
+			vec4 cacheNormalMaterial = specularCacheNormalMaterial[i];
+			
+			cache.normal.xyz = decodeNormal(cacheNormalMaterial.xy);
+			cacheMaterial = cacheNormalMaterial.zw;
+
+			frg = cacheMaterial.x * (cacheMaterial.y + 2.0) / (2.0 * PI);
+			
+			camDir = normalize(eyePos.xyz - cache.position.xyz);
+		}
+		
+		for(uint k = 0; k < reflectiveShadowMapNumber; k++)
+		{
+			float validLightSamples = 0.0;
+			const uint cacheLoops = uint(ceil(SAMPLENUMBER / WORKGROUPSIZE));
+			
+			for(uint j = 0; j < cacheLoops; j++)
+			{
+				uint sampleIndex = gl_LocalInvocationID.x + j * WORKGROUPSIZE;
+				
+				//if(sampleIndex < SAMPLENUMBER && i < cacheNumber)
+				{
+					vec3 texCoordsVAL;
+					texCoordsVAL.x = 0.5 + samples[sampleIndex].x;
+					texCoordsVAL.y = 0.5 + samples[sampleIndex].y;
+					texCoordsVAL.z = float(k) / float(reflectiveShadowMapNumber);
+					
+					indirectLightPos[gl_LocalInvocationID.x] = texture(indirectLightPosSampler, texCoordsVAL, 0);
+					indirectLightNormalArea[gl_LocalInvocationID.x] = texture(indirectLightNormalAreaSampler, texCoordsVAL, 0);
+					indirectLightLuminousFlux[gl_LocalInvocationID.x] = texture(indirectLightLuminousFluxSampler, texCoordsVAL, 0);
+				}
+			
+				memoryBarrierShared();
+				barrier();
+			
+				if(sampleIndex < SAMPLENUMBER && i < cacheNumber)
+				{
+					for(uint l = 0; l < WORKGROUPSIZE; l++)
+					{
+						vec4 lightPos = indirectLightPos[l];
+						vec4 lightNormalArea = indirectLightNormalArea[l];
+						vec3 luminousFlux = indirectLightLuminousFlux[l].rgb;
+						
+						if(lightPos.w == 0.0) //cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+						{
+							//continue;
+						}
+
+						validLightSamples++;
+
+						vec3 lightNormal = normalize(lightNormalArea.xyz * 2.0 - 1.0);
+						float lightArea = lightNormalArea.w;
+						
+						vec3 lightDir = lightPos.xyz - cache.position.xyz;
+						float quadDistance = dot(lightDir, lightDir);
+						lightDir = normalize(lightDir);
+						
+						float reflAngle = pow(max(dot(reflect(-lightDir, cache.normal.xyz), camDir), 0.0), cacheMaterial.y);
+						
+						float F = (max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0)) / (lightArea + PI * quadDistance);
+						
+						float Wg = reflAngle * F;
+						
+						Xpg += Wg * lightPos.xyz;
+
+						Log += luminousFlux * frg * reflAngle * F;
+						
+						Wgesg += Wg;
+					}
+				}
+			}
+
+			Log *= (float(SAMPLENUMBER) / validLightSamples);
+		}
+
+		if(i < cacheNumber)
+		{
+			Xpg = Wgesg > 0 ? Xpg / Wgesg : vec3(0);
+
+			vec3 lightDirG = Xpg - cache.position.xyz;
+			float lightQuadDistance = dot(lightDirG, lightDirG);
+			lightDirG = normalize(lightDirG);
+			float reflAngleG = pow(max(dot(reflect(-lightDirG, cache.normal.xyz), camDir), 0.0001), cacheMaterial.y);
+			float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
+			
+			proxyLightPosition[i] = vec4(Xpg, sqrt(lightQuadDistance));
+			proxyLightLuminousFlux[i] = vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0);
+		}
+	}
+}

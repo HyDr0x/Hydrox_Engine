@@ -38,6 +38,7 @@ namespace he
         util::SharedPointer<db::Texture2D> indirectlightTexture) const;
 
       void renderDebugOutput(util::SharedPointer<db::Texture2D> texture) const;
+      void renderIntegerDebugOutput(util::SharedPointer<db::Texture2D> texture) const;
 
       util::SharedPointer<db::Texture2D> getCombinedTexture() const;
 
@@ -50,6 +51,7 @@ namespace he
 
       sh::RenderShaderHandle m_composeShaderHandle;
       sh::RenderShaderHandle m_debugOutputShaderHandle;
+      sh::RenderShaderHandle m_debugIntegerOutputShaderHandle;
 
       util::SharedPointer<RenderOptions> m_options;
 

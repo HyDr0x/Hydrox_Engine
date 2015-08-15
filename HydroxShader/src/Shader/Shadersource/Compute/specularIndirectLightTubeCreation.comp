@@ -1,0 +1,93 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define WORKGROUPSIZE 128
+#define INT32_MAX 2147483647
+
+layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
+
+layout(std430, binding = 1) buffer samplingPattern
+{
+	vec4 samples[SAMPLENUMBER];
+};
+
+layout(std430, binding = 2) buffer tubeData
+{
+	vec4 tubeStartPosRadius[1];
+	vec4 tubeDirection[1];//not normalized, the vector length is the length of the tube
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec3 minAABBGroup[WORKGROUPSIZE];
+shared vec3 maxAABBGroup[WORKGROUPSIZE];
+
+void main()
+{
+	uint localIDX = gl_LocalInvocationID.x;
+
+	vec3 minAABB = vec3(INT32_MAX), maxAABB = vec3(-INT32_MAX);
+	
+	const uint samplesPerThread = SAMPLENUMBER / WORKGROUPSIZE;
+	const uint startIndex = localIDX * samplesPerThread;
+	const uint endIndex = startIndex + samplesPerThread;
+	
+	//for(uint j = startIndex; j < endIndex; j++)
+	for(uint j = startIndex; j < samplesPerThread; j++)//should be WRONG!!!
+	{
+		if(j >= SAMPLENUMBER)
+		{
+			break;
+		}
+		
+		vec3 texCoords;
+		texCoords.x = 0.5 + samples[j].x;
+		texCoords.y = 0.5 + samples[j].y;
+		texCoords.z = float(gl_WorkGroupID.x) / float(gl_NumWorkGroups.x);
+	
+		vec4 lightPos = texture(indirectLightPosSampler, texCoords);
+
+		if(lightPos.w == 0.0)//cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+		{
+			continue;
+		}
+		
+		minAABB = min(minAABB, lightPos.xyz);
+		maxAABB = max(maxAABB, lightPos.xyz);
+	}
+	
+	minAABBGroup[localIDX] = minAABB;
+	maxAABBGroup[localIDX] = maxAABB;
+	
+	memoryBarrierShared();
+	barrier();
+	
+	if(localIDX == 0)
+	{
+		for(uint i = 0; i < WORKGROUPSIZE; i++)
+		{
+			minAABB = min(minAABB, minAABBGroup[i]);
+			maxAABB = max(maxAABB, maxAABBGroup[i]);
+		}
+	
+		//find the two main axes
+		vec3 axes = maxAABB - minAABB;
+		
+		float maxLength = max(axes.x, max(axes.y, axes.z));
+		vec3 mainAxis = (vec3(1.0) + sign(axes - vec3(maxLength))) * axes;
+		//vec3 mainAxis = maxLength == axes.x ? vec3(axes.x, 0.0, 0.0) : maxLength == axes.y ? vec3(0.0, axes.y, 0.0) : vec3(0.0, 0.0, axes.z);
+		
+		vec3 secondAxisLengths = (vec3(1.0) - sign(mainAxis)) * axes;
+		float minorLength = max(secondAxisLengths.x, max(secondAxisLengths.y, secondAxisLengths.z));
+		vec3 minorAxis = (vec3(1.0) - abs(sign(axes - vec3(minorLength)))) * axes;
+		//vec3 minorAxis = minorLength == axes.x ? vec3(axes.x, 0.0, 0.0) : minorLength == axes.y ? vec3(0.0, axes.y, 0.0) : vec3(0.0, 0.0, axes.z);
+		
+		vec3 thirdAxis = axes - mainAxis - minorAxis;
+		
+		float radius = 0.5 * minorLength;
+		//tubeStartPosRadius[0] = vec4(maxAABB, 0);
+		
+		tubeStartPosRadius[gl_WorkGroupID.x] = vec4(minAABB + 0.5 * secondAxisLengths, radius);
+		tubeDirection[gl_WorkGroupID.x] = vec4(mainAxis, 0);
+	}
+}

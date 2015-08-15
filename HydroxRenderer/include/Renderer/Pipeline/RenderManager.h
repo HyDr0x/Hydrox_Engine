@@ -14,6 +14,7 @@
 #include "Renderer/Pipeline/GBuffer.h"
 #include "Renderer/Pipeline/LightRenderer.h"
 #include "Renderer/Pipeline/IndirectLightRenderer.h"
+#include "Renderer/Pipeline/IndirectSpecularReflections.h"
 #include "Renderer/Pipeline/IndirectShadowsCreation.h"
 #include "Renderer/Pipeline/DelaunayTriangulation.h"
 #include "Renderer/Pipeline/ParticleRenderer.h"
@@ -120,6 +121,7 @@ namespace he
       GBuffer m_gBuffer;
       LightRenderer m_lightRenderer;
       IndirectLightRenderer m_indirectLightRenderer;
+      IndirectSpecularReflections m_indirectSpecularRenderer;
       IndirectShadowsCreation m_indirectShadowsCreation;
       DelaunayTriangulation m_delaunayTriangulation;
       ParticleRenderer m_particleRenderer;

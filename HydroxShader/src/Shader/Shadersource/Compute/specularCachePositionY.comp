@@ -1,0 +1,70 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+
+layout(r32f, binding = 0) uniform readonly image2D readCacheSamplingDistanceBuffer;
+layout(r32f, binding = 1) uniform writeonly image2D writeCacheSamplingDistanceBuffer;
+layout(r32f, binding = 2) uniform writeonly image2D writeCacheOffsetBuffer;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+//shared vec3 lastCachePosition[WORKGROUPSIZE];
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	float oldDepth, newDepth;
+	
+	for(uint k = 0; k < 2; k++)
+	{
+		idx += k * gl_NumWorkGroups.x * WORKGROUPSIZE;
+		
+		vec3 oldPosition = vec3(0.0), newPosition;
+		float actualDistance = 0.0;
+		
+		const uint pixelPerThread = (width * height) / (gl_NumWorkGroups.x * WORKGROUPSIZE);
+		const uint startIndex = idx * pixelPerThread;
+		const uint endIndex = startIndex + pixelPerThread;
+		
+		ivec2 texCoords = ivec2(mod(idx, width), pixelPerThread * floor(idx / width));
+		
+		for(uint i = startIndex; i < endIndex; i++)
+		{
+			if(texCoords.x >= width || texCoords.y >= height)
+			{
+				return;
+			}
+			
+			vec2 texCoordsNormed = vec2(texCoords.x / float(width), texCoords.y / float(height));
+			newDepth = texture(gBufferDepthSampler, texCoordsNormed).r;
+			
+			newPosition = vec3(texCoordsNormed, newDepth) * 2.0 - 1.0;
+			vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
+			newPosition = tmpProjPos.xyz / tmpProjPos.w;
+			
+			float distance = length(newPosition - oldPosition);
+			
+			actualDistance -= distance;
+			
+			float samplingDistance = imageLoad(readCacheSamplingDistanceBuffer, texCoords).r;
+			
+			if((actualDistance <= 0.0 || abs(oldDepth - newDepth) > 0.01) && samplingDistance > 0.0)
+			{
+				//lastCachePosition[gl_LocalInvocationID.x] = newPosition;
+				actualDistance = samplingDistance;
+				imageStore(writeCacheSamplingDistanceBuffer, texCoords, vec4(samplingDistance));
+				imageStore(writeCacheOffsetBuffer, texCoords, vec4(1.0));
+			}
+			
+			oldDepth = newDepth;
+			oldPosition = newPosition;
+			
+			texCoords.y++;
+		}
+	}
+}

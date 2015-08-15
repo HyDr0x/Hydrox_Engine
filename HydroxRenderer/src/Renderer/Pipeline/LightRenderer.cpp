@@ -75,9 +75,10 @@ namespace he
       {
         m_reflectiveShadowLightNumberChanged = false;
 
-        m_shadowPosLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+        m_shadowPosMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
         m_shadowNormalAreaMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
-        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_reflectiveShadowDepthMap, 2, m_shadowPosLuminousFluxMaps, m_shadowNormalAreaMaps);
+        m_shadowLuminousFluxMaps = util::SharedPointer<db::Texture3D>(new db::Texture3D(m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth, m_reflectiveShadowLights.size(), GL_TEXTURE_2D_ARRAY, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+        m_renderReflectiveShadowMapsQuad.setRenderTargets3D(m_reflectiveShadowDepthMap, 3, m_shadowPosMaps, m_shadowNormalAreaMaps, m_shadowLuminousFluxMaps);
       }
 
       unsigned int lightIndex = 0;
@@ -123,11 +124,11 @@ namespace he
       normalMap->setTexture(1, 1);
       materialMap->setTexture(2, 2);
       if(m_shadowMaps) m_shadowMaps->setTexture(3, 3);
-      if(m_shadowPosLuminousFluxMaps) m_shadowPosLuminousFluxMaps->setTexture(4, 4);
+      if(m_shadowPosMaps) m_shadowPosMaps->setTexture(4, 4);
 
       m_renderLightMapQuad.render();
 
-      if(m_shadowPosLuminousFluxMaps) m_shadowPosLuminousFluxMaps->unsetTexture(4);
+      if(m_shadowPosMaps) m_shadowPosMaps->unsetTexture(4);
       if(m_shadowMaps) m_shadowMaps->unsetTexture(3);
       materialMap->unsetTexture(2);
       normalMap->unsetTexture(1);
@@ -157,6 +158,9 @@ namespace he
 
     void LightRenderer::setReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex)
     {
+      float clearValue = -1.0f;
+      m_shadowPosMaps->clearTexture(&clearValue);
+
       std::vector<unsigned int> texturendices(3);
       texturendices[0] = shadowMapIndex;
       texturendices[1] = shadowMapIndex + m_reflectiveShadowLights.size();
@@ -252,14 +256,19 @@ namespace he
       return m_shadowMaps;
     }
 
-    util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowPosLuminousFluxMaps() const
+    util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowPosMaps() const
     {
-      return m_shadowPosLuminousFluxMaps;
+      return m_shadowPosMaps;
     }
 
     util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowNormalAreaMaps() const
     {
       return m_shadowNormalAreaMaps;
+    }
+
+    util::SharedPointer<db::Texture3D> LightRenderer::getReflectiveShadowLuminousFluxMaps() const
+    {
+      return m_shadowLuminousFluxMaps;
     }
 
     const GPUImmutableBuffer& LightRenderer::getReflectiveShadowLights() const

@@ -91,8 +91,9 @@ namespace he
     }
 
     void IndirectLightRenderer::calculateIndirectLight(
-      util::SharedPointer<db::Texture3D> reflectiveShadowPosLuminousFluxMaps,
+      util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
       util::SharedPointer<db::Texture3D> reflectiveShadowNormalAreaMaps,
+      util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps,
       const GPUImmutableBuffer& reflectiveShadowLightBuffer)
     {
       //util::SharedPointer<db::Texture2D> visibilityMap;
@@ -133,22 +134,24 @@ namespace he
         m_indirectLightPositionBuffer->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA32F);
         m_indirectLightLuminousFluxBuffer->bindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-        reflectiveShadowPosLuminousFluxMaps->setTexture(0, 0);
+        reflectiveShadowPosMaps->setTexture(0, 0);
         reflectiveShadowNormalAreaMaps->setTexture(1, 1);
+        reflectiveShadowLuminousFluxMaps->setTexture(2, 2);
 
-        m_zBuffer->setTexture(2, 2);
+        m_zBuffer->setTexture(3, 3);
+        
+        unsigned int reflectiveShadowLightNumber = reflectiveShadowPosMaps->getResolution()[2];
+        sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
 
-        unsigned int reflectiveShadowLightNumber = reflectiveShadowPosLuminousFluxMaps->getResolution()[2];
-        sh::RenderShader::setUniform(3, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
+        sh::RenderShader::setUniform(5, GL_UNSIGNED_INT, &m_cacheNumber);
 
-        sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &m_cacheNumber);
-
-        sh::RenderShader::setUniform(5, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
+        sh::RenderShader::setUniform(6, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
 
         sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
+        reflectiveShadowLuminousFluxMaps->unsetTexture(2);
         reflectiveShadowNormalAreaMaps->unsetTexture(1);
-        reflectiveShadowPosLuminousFluxMaps->unsetTexture(0);
+        reflectiveShadowPosMaps->unsetTexture(0);
 
         m_zBuffer->unsetTexture(6);
 

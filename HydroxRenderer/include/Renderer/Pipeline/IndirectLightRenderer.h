@@ -38,8 +38,9 @@ namespace he
 
       void updateBuffer(unsigned int cacheNumber, unsigned int proxyLightTextureResolution);
       void calculateIndirectLight(
-        util::SharedPointer<db::Texture3D> reflectiveShadowPosLuminousFluxMaps,
+        util::SharedPointer<db::Texture3D> reflectiveShadowPosMaps,
         util::SharedPointer<db::Texture3D> reflectiveShadowNormalAreaMaps,
+        util::SharedPointer<db::Texture3D> reflectiveShadowLuminousFluxMaps,
         const GPUImmutableBuffer& reflectiveShadowLightBuffer);
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);

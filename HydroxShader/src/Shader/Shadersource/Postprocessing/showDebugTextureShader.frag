@@ -22,6 +22,7 @@ void main()
 	color = vec4(zn);//vec4(gsout_texCoord.x,gsout_texCoord.y, 0, 1);
 	*/
 	
-  color = vec4(texture(colorSampler, gsout_texCoord));//simple texture output
-	//color = vec4(unpackLuminousFlux(texture(colorSampler, gsout_texCoord).a*30), 1);//simple texture output
+	//color = vec4(decodeNormal(vec4(texture(colorSampler, gsout_texCoord)).xy), 1);//indirect light normal output
+	//color = vec4(unpackLuminousFlux(texture(colorSampler, gsout_texCoord).a*30), 1);//indirect light luminous flux output
+	color = 10.0 * vec4(texture(colorSampler, gsout_texCoord));//simple texture output
 }

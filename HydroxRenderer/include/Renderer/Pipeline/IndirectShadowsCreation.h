@@ -101,7 +101,7 @@ namespace he
       GLuint m_pointVAO;
       util::SharedPointer<db::Texture2D> m_VALQuaternions;
       util::SharedPointer<db::Texture3D> m_indirectLightShadowMaps;
-      std::vector<util::SharedPointer<db::Texture3D>> m_indirectLightPushPullShadowMapsReference;
+      util::SharedPointer<db::Texture3D> m_indirectLightShadowMapsReference;
       std::vector<util::SharedPointer<db::Texture3D>> m_indirectLightPushPullShadowMaps;
       Renderquad m_indirectLightShadowMapsQuad;
  

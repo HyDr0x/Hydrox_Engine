@@ -8,8 +8,9 @@ layout(early_fragment_tests) in;
 #include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
 #include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
 
-layout(location = 0) out vec4 fsout_pos3DLuminousFlux;
+layout(location = 0) out vec4 fsout_pos3D;
 layout(location = 1) out vec4 fsout_normalArea;
+layout(location = 2) out vec4 fsout_luminousFlux;
 
 layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D normalSampler;
@@ -49,8 +50,8 @@ void main()
 	fsout_normalArea = vec4(normal * 0.5f + 0.5f, area);
 	
 	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
-	fsout_pos3DLuminousFlux = vec4(vsout_pos.xyz, packLuminousFlux(luminousFlux));
-
+	fsout_pos3D = vec4(vsout_pos.xyz, 1.0);
+	fsout_luminousFlux = vec4(luminousFlux, 1.0);
 	
 	//fsout_luminousFlux = vec4(luminousFlux, step(reflectiveShadowLight[lightIndex].light.direction.w, lightAngle));
 }

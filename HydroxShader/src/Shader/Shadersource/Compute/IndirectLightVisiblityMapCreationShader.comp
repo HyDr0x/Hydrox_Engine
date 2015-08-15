@@ -28,8 +28,8 @@ layout(location = 3) uniform uint reflectiveShadowMapNumber;
 
 layout(local_size_x = WORKGROUPSIZE) in;
 
-shared vec4 indirectLightPos[128];
-shared vec4 indirectLightNormal[128];
+//shared vec4 indirectLightPos[WORKGROUPSIZE];
+//shared vec4 indirectLightNormal[WORKGROUPSIZE];
 
 void main()
 {

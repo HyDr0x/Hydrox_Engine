@@ -25,6 +25,7 @@ namespace he
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, pushPullPyramideSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, backProjectionWidth, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, adaptiveSampleNumber, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, specularCacheNumber, &atoi);
 
       getParameter<float, double(*) (const char*)>(parameterStream, paraboloidNearClipping, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, paraboloidFarClipping, &atof);

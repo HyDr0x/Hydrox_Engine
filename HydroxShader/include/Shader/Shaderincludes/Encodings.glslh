@@ -24,3 +24,26 @@ vec3 unpackLuminousFlux(in float val)
 	
 	return result / 1023.0;
 }
+/*
+he::util::vec2f packLuminousFluxHigh(he::util::vec3f val)
+{
+  unsigned int tmp0 = unsigned int(val[0] * 2097151.0f + 0.5f);//upper bitmask: 4292870144 | lower bitmask: 2097151
+  unsigned int tmp1 = unsigned int(val[1] * 2097151.0f + 0.5f);
+  unsigned int tmp2 = unsigned int(val[2] * 2097151.0f + 0.5f);
+  
+  he::util::vec2f result;
+  result[0] = tmp0 | (tmp1 << 21);
+  result[1] = tmp1 >> 11 | tmp2 << 10;
+  return result;
+}
+
+he::util::vec3f unpackLuminousFluxHigh(he::util::vec2f val)
+{
+  he::util::vec2ui newVal = he::util::math::vector_cast<unsigned int>(val);
+  he::util::vec3f result;
+  result[0] = newVal[0] & 2097151;
+  result[1] = ((newVal[1] & 2047) << 11) | ((newVal[0] & 4292870144) >> 21);
+  result[2] = newVal[1] >> 10;
+
+  return result / 2097151.0f;
+}*/

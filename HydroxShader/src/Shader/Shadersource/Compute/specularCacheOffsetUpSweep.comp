@@ -1,0 +1,65 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r32f, binding = 0) uniform image2D cacheOffsetBuffer;
+
+layout(location = 0) uniform uint stride;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared float groupOffsets[WORKGROUPSIZE];
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+	uint localIDX = gl_LocalInvocationID.x;
+
+	const uint globalThreadNumber = gl_NumWorkGroups.x * WORKGROUPSIZE;
+	const uint pixelPerThread = max(((width * height) / (2 * stride)) / globalThreadNumber, 1);
+	
+	for(uint i = 0; i < pixelPerThread; i++)
+	{
+		uint index = (2 * stride) * (idx + 1) - 1 + 2 * stride * i * globalThreadNumber;
+		
+		float a = 0.0;
+		float b = 0.0;
+		
+		if(index < width * height)
+		{
+			a = imageLoad(cacheOffsetBuffer, ivec2(mod(index, width), index / width)).r;
+			
+			if(index - stride < width * height)//its < because of uint buffer overflow
+			{
+				b = imageLoad(cacheOffsetBuffer, ivec2(mod((index - stride), width), (index - stride) / width)).r;
+			}
+		}
+
+		groupOffsets[localIDX] = a + b;
+		
+		for(uint j = 1; j < WORKGROUPSIZE; j *= 2)//start with j = 1 because the threads start at every second pixel and are loading the offsets tight
+		{
+			float activeThread = mod(localIDX + 1, j * 2);
+			float newOffset = 0.0;
+			
+			memoryBarrierShared();
+			barrier();
+			
+			if(activeThread == 0.0)
+			{
+				newOffset = groupOffsets[localIDX - j];
+			}
+
+			barrier();
+			
+			groupOffsets[localIDX] += newOffset;
+		}
+		
+		if(index < width * height)
+		{
+			imageStore(cacheOffsetBuffer, ivec2(mod(index, width), index / width), vec4(groupOffsets[localIDX]));
+		}
+	}
+}

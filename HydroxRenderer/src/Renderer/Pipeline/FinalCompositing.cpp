@@ -23,6 +23,7 @@ namespace he
 
       m_composeShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(8192));
       m_debugOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(8192));
+      m_debugIntegerOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DEBUGINTEGERTEXTURE, sh::ShaderSlotFlags(8192));
 
       m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
@@ -53,6 +54,19 @@ namespace he
     void FinalCompositing::renderDebugOutput(util::SharedPointer<db::Texture2D> texture) const
     {
       const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_debugOutputShaderHandle);
+
+      shader.useShader();
+      texture->setTexture(0, 0);
+
+      m_fullscreenRenderQuad.render();
+
+      texture->unsetTexture(0);
+      shader.useNoShader();
+    }
+
+    void FinalCompositing::renderIntegerDebugOutput(util::SharedPointer<db::Texture2D> texture) const
+    {
+      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_debugIntegerOutputShaderHandle);
 
       shader.useShader();
       texture->setTexture(0, 0);
