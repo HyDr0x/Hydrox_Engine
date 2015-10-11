@@ -39,7 +39,7 @@ void main()
 					ivec2 siteCoords = ivec2(texelFetch(siteBuffer, int(siteIndex)).xy * resolution);
 					
 					float distance = length(siteCoords - ivec2(gl_FragCoord.xy));
-					if(distance <= minDistance)
+					if(distance < minDistance)
 					{
 						minDistance = distance;
 						pixelIndex = siteIndex;//rewrite the pixels index

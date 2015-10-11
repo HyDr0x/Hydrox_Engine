@@ -1,0 +1,69 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define WORKGROUPSIZE 128
+#define INT32_MAX 2147483647
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsets;
+
+layout(std430, binding = 0) buffer specularCachePositionRadiusBuffer
+{
+	vec4 specularCachePositionRadius[];
+};
+
+layout(std430, binding = 1) buffer CacheBoundingBoxBuffer
+{
+	vec4 cacheBBox[];
+};
+
+layout(location = 0) uniform uint borderCacheNumber;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	vec3 minAABB = vec3(INT32_MAX), maxAABB = vec3(-INT32_MAX);
+	
+	const uint cacheNumber = uint(imageLoad(cacheOffsets, ivec2(width - 1, height - 1)).r);
+	
+	const uint cachesPerThread = uint(ceil(cacheNumber / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint startIndex = borderCacheNumber + idx * cachesPerThread;
+	const uint endIndex = startIndex + cachesPerThread;
+	
+	
+	const vec3 x = vec3(viewMatrix[0].x, viewMatrix[1].x, viewMatrix[2].x);
+	const vec3 y = vec3(viewMatrix[0].y, viewMatrix[1].y, viewMatrix[2].y);
+	const vec3 z = vec3(viewMatrix[0].z, viewMatrix[1].z, viewMatrix[2].z);
+	const vec3 diagonalXY = normalize(x + y);
+	const vec3 diagonalZ = normalize(z);
+	
+	for(uint j = startIndex; j < endIndex; j++)
+	{
+		if(j < cacheNumber + borderCacheNumber)
+		{	
+			vec4 cachePos = specularCachePositionRadius[j];
+			vec4 minBoxXY = viewProjectionMatrix * vec4(cachePos.xyz - cachePos.w * diagonalXY, 1.0);
+			vec4 maxBoxXY = viewProjectionMatrix * vec4(cachePos.xyz + cachePos.w * diagonalXY, 1.0);
+			vec4 minBoxZ = viewMatrix * vec4(cachePos.xyz + cachePos.w * diagonalZ, 1.0);
+			vec4 maxBoxZ = viewMatrix * vec4(cachePos.xyz - cachePos.w * diagonalZ, 1.0);
+			
+			minBoxZ.z = min(minBoxZ.z, -2.0 * near);
+			maxBoxZ.z = max(maxBoxZ.z, -far);
+			
+			minBoxZ = projectionMatrix * minBoxZ;
+			maxBoxZ = projectionMatrix * maxBoxZ;
+			
+			minBoxXY /= minBoxXY.w;
+			maxBoxXY /= maxBoxXY.w;
+			minBoxZ /= minBoxZ.w;
+			maxBoxZ /= maxBoxZ.w;
+
+			cacheBBox[2 * j] = vec4(minBoxXY.xy, minBoxZ.z, 1.0);
+			cacheBBox[2 * j + 1] = vec4(maxBoxXY.xy, maxBoxZ.z, 1.0);
+		}
+	}
+}

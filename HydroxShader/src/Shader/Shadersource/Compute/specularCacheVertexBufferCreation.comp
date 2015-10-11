@@ -1,0 +1,94 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+
+layout(location = 2) uniform uint borderVertexNumber;
+
+layout(r32f, binding = 0) readonly uniform image2D vertexOffsetSampler;
+layout(rgba32f, binding = 1) readonly uniform image2D vertexPosSampler;
+layout(rgba32f, binding = 2) readonly uniform image2D vertexNormalSampler;
+layout(r16ui, binding = 3) writeonly uniform uimage2D voronoiIndexSampler;
+
+layout(std430, binding = 0) buffer projectedVertexPositionBuffer
+{
+	ivec2 projectedVertexPositions[];
+};
+
+layout(std430, binding = 1) buffer vertexPositionBuffer
+{
+	vec4 vertexPositions[];
+};
+
+layout(std430, binding = 2) buffer vertexNormalBuffer
+{
+	vec4 vertexNormals[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	const uint threadNumber = WORKGROUPSIZE * gl_NumWorkGroups.x;
+	const uint pixelPerThread = uint(float(width * height + threadNumber - 1) / float(threadNumber));
+	const uint pixelOffset = idx * pixelPerThread;
+	const uint pixelEnd = pixelOffset + pixelPerThread;
+	
+	for(uint i = pixelOffset; i < pixelEnd; i++)
+	{
+		if(i >= width * height)
+		{
+			return;
+		}
+	
+		ivec2 texCoord = ivec2(mod(i, width), i / width);
+		vec2 texCoordNormalized = vec2(texCoord.x / float(width), texCoord.y / float(height));
+		
+		if(texCoord.x == 0 || texCoord.y == 0 || texCoord.x == width - 1 || texCoord.y == height - 1)
+		{
+			int heightOffset = ((int(height) - 1 + texCoord.y) / int(height)) * (1 - texCoord.y / (int(height) - 1)) * (2 * int(width) - 1);//increase if 0 < y && y != 767
+			int heightOffset2 = (texCoord.x / (int(width) - 1)) * (heightOffset / (2 * int(width) - 1)) * (int(height) - 2 - (int(width) - 1));
+
+			int widthOffset = (texCoord.y / (int(height) - 1)) * (int(width) - (int(height) - 1));
+			int index = texCoord.x + texCoord.y + heightOffset + heightOffset2 + widthOffset;
+			imageStore(voronoiIndexSampler, texCoord, uvec4(index));
+			
+			vec2 texOffset = vec2(0.0);//dont know why this offset is neccessary, maybe standard pixel offset?
+			if(texCoord.x == width - 1 || texCoord.y == height - 1)
+			{
+				texOffset = vec2(1.0 / float(width), 1.0 / float(height));
+			}
+			
+			vec4 borderPosTrf = invViewProjectionMatrix * (vec4(texCoordNormalized + texOffset, near, 1.0) * 2.0 - 1.0);
+			borderPosTrf /= borderPosTrf.w;
+			
+			vertexPositions[index] = borderPosTrf;
+			vertexNormals[index] = vec4(0.0);
+			projectedVertexPositions[index] = texCoord;
+		}
+
+		vec4 vertexNormal = imageLoad(vertexNormalSampler, texCoord);
+		if(vertexNormal != vec4(0.0))
+		{
+			uint vertexOffset = borderVertexNumber + uint(imageLoad(vertexOffsetSampler, texCoord).r) - 1;
+
+			vec4 projCoord = imageLoad(vertexPosSampler, texCoord);
+			vertexPositions[vertexOffset] = projCoord;
+			
+			projCoord = viewProjectionMatrix * vec4(projCoord.xyz, 1.0);
+			projCoord /= projCoord.w;
+			ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
+			
+			projectedVertexPositions[vertexOffset] = projTexCoord;
+			vertexNormals[vertexOffset] = vertexNormal;
+			
+			imageStore(voronoiIndexSampler, projTexCoord, uvec4(vertexOffset));
+		}
+	}
+}

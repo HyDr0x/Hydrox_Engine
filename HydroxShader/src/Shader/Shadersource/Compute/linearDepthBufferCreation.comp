@@ -1,0 +1,37 @@
+#version 440 core
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+#define WORKGROUPSIZE 128
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+
+layout(r32f, binding = 0) uniform writeonly image2D linearDepthBuffer;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	const uint threadNumber = WORKGROUPSIZE * gl_NumWorkGroups.x;
+	const uint pixelPerThread = uint(float(width * height + threadNumber - 1) / float(threadNumber));
+	const uint pixelOffset = idx * pixelPerThread;
+	const uint pixelEnd = pixelOffset + pixelPerThread;
+	
+	for(uint i = pixelOffset; i < pixelEnd; i++)
+	{
+		ivec2 texCoord = ivec2(mod(i, width), i / width);
+		
+		float depth = texelFetch(gBufferDepthSampler, texCoord, 0).r;
+		imageStore(linearDepthBuffer, texCoord, vec4(2.0 * near * far / (far + near - depth * (far - near))));
+		/*
+		vec2 normalizedTexCoords = vec2(texCoord) / vec2(width, height);
+		vec4 tmpPoint = invViewProjectionMatrix * (vec4(normalizedTexCoords, depth, 1.0) * 2.0 - 1.0);
+		tmpPoint /= tmpPoint.w;
+		
+		tmpPoint = viewProjectionMatrix * tmpPoint;
+		
+		imageStore(linearDepthBuffer, texCoord, vec4(tmpPoint.z));*/
+	}
+}

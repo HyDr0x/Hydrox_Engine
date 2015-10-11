@@ -1,0 +1,102 @@
+#version 440 core
+
+#define WORKGROUPSIZE 256
+#define INT32_MAX 2147483647
+#define MAXRESOLUTION 1024
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r16ui, binding = 0) uniform uimage2D voronoiDiagramImage;
+
+layout(location = 0) uniform uint borderVertexNumber;
+
+layout(std430, binding = 0) buffer projectedVertexPositionBuffer
+{
+	ivec2 projectedVertexPositions[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared uint groupNewIndex[MAXRESOLUTION / 2];
+
+void main()
+{
+	//there is one diagonal pixel line for each of the four corners.
+	//every workgroup gets one diagonal
+	//the threads which finds an inner voronoi index will report this and all other threads
+	//are going to replace their pixel indices with the closest index to their position, 
+	//so broken triangulated corners are avoided
+	
+	const uint localId = gl_LocalInvocationIndex;
+
+	const uint pixelPerThread = uint(((MAXRESOLUTION + 1) / 2 + WORKGROUPSIZE - 1) / WORKGROUPSIZE);
+	const uint startIndex = localId * pixelPerThread;
+
+	uint directionIndex = gl_WorkGroupID.x;
+	
+	ivec2 direction = ivec2(1, -1);
+	ivec2 startPosition = ivec2(1, height - 2);
+	
+	if(directionIndex == 0)
+	{
+		direction = ivec2(1, 1);
+		startPosition = ivec2(1, 1);
+	}
+	else if(directionIndex == 1)
+	{
+		direction = ivec2(-1, 1);
+		startPosition = ivec2(width - 2, 1);
+	}
+	else if(directionIndex == 2)
+	{
+		direction = ivec2(-1, -1);
+		startPosition = ivec2(width - 2, height - 2);
+	}
+	
+	ivec2 texCoords = startPosition + direction * int(startIndex);
+	
+	for(uint i = 0; i < pixelPerThread; i++)
+	{
+		uint index = imageLoad(voronoiDiagramImage, texCoords).r;
+
+		groupNewIndex[pixelPerThread * localId + i] = INT32_MAX;
+		if(index >= borderVertexNumber)
+		{
+			groupNewIndex[pixelPerThread * localId + i] = index;
+		}
+		
+		texCoords += direction;
+	}
+	
+	memoryBarrierShared();
+	barrier();
+	
+	texCoords = startPosition + direction * int(startIndex);
+	
+	for(uint i = 0; i < pixelPerThread; i++)
+	{
+		uint index = imageLoad(voronoiDiagramImage, texCoords).r;
+		float minWeight = INT32_MAX;
+		uint newIndex;
+		
+		if(index < borderVertexNumber)
+		{
+			for(uint j = 0; j < (MAXRESOLUTION / 2); j++)
+			{
+				if(groupNewIndex[j] < INT32_MAX)
+				{
+					float weight = distance(texCoords, projectedVertexPositions[groupNewIndex[j]]);
+					if(weight < minWeight)
+					{
+						minWeight = weight;
+						newIndex = groupNewIndex[j];
+					}
+				}
+			}
+			
+			imageStore(voronoiDiagramImage, texCoords, uvec4(newIndex));
+		}
+		
+		texCoords += direction;
+	}
+}

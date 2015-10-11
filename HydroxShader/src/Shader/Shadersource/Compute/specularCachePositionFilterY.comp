@@ -1,0 +1,142 @@
+#version 440 core
+
+#define WORKGROUPSIZE 16
+#define PI 3.14159265359
+#define PI_HALF (0.5 * PI)
+#define LIGHTTUBEBINDINGPOINT 1
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+layout(location = 2) uniform sampler2D gBufferMaterialSampler;
+
+layout(location = 3) uniform sampler2D cacheInnerSamplingDistanceSampler;
+
+layout(location = 4) uniform uint reflectiveShadowMapNumber;
+layout(location = 5) uniform ivec2 stepSize;
+layout(location = 6) uniform uint cacheBlockDimensions;
+layout(location = 7) uniform uint vertexBlockDimensions;
+
+layout(r32f, binding = 0) writeonly uniform image2D edgeCacheOffsetBuffer;
+layout(rgba32f, binding = 1) writeonly uniform image2D edgeCachePositionSampler;
+layout(rgba32f, binding = 2) writeonly uniform image2D edgeCacheNormalSampler;
+layout(r32ui, binding = 3) uniform uimage2D cacheAtomicIndexSampler;
+
+layout(r32f, binding = 4) writeonly uniform image2D edgeVertexOffsetBuffer;
+layout(rgba32f, binding = 5) writeonly uniform image2D edgeVertexPositionSampler;
+layout(rgba32f, binding = 6) writeonly uniform image2D edgeVertexNormalSampler;
+layout(r32ui, binding = 7) uniform uimage2D vertexAtomicIndexSampler;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	vec3 oldPosition = vec3(0.0), newPosition;
+	vec3 normal;
+	float sampleDistance = 0.0;
+	vec2 material;
+	float depth;
+	
+	const uint pixelPerThread = uint(ceil(width / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / height)));
+	const uint startIndex = idx * pixelPerThread;
+	const uint endIndex = startIndex + pixelPerThread;
+
+	ivec2 texCoords = stepSize * ivec2(pixelPerThread * floor(idx / height), pixelPerThread * floor(idx / width)) + (ivec2(1) - stepSize) * ivec2(mod(idx, width), mod(idx, height));
+
+	for(uint i = startIndex; i < endIndex; i++)
+	{
+		if(texCoords.y >= height && stepSize.y > 0)
+		{
+			texCoords.y = 0;
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+		}
+		
+		if(texCoords.y < 0 && stepSize.y < 0)
+		{
+			texCoords.y = int(height - 1);
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+		}
+	
+		if(texCoords.x >= width || texCoords.y >= height)
+		{
+			return;
+		}
+
+		depth = texelFetch(gBufferDepthSampler, texCoords, 0).r;
+		
+		if(depth >= 0.99999)
+		{
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+			texCoords += stepSize;
+			continue;
+		}
+		
+		newPosition = vec3(texCoords / vec2(width, height), depth) * 2.0 - 1.0;
+		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
+		newPosition = tmpProjPos.xyz / tmpProjPos.w;
+		
+		material = texelFetch(gBufferMaterialSampler, texCoords, 0).ga;
+		
+		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
+		
+		sampleDistance -= length(newPosition - oldPosition);
+		
+		if(sampleDistance <= 0.0)
+		{
+			float maxSolidAngle = specularCacheSolidAngle(0.95, material.g);
+			float collisionSolidAngle = specularCacheSolidAngle(0.1, material.g);
+			
+			vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), normal));
+			
+			float cacheIndirectLightDistance;
+			
+			for(uint j = 0; j < reflectiveShadowMapNumber; j++)
+			{
+				if(indirectLightTubeCollision(newPosition, reflectRay, collisionSolidAngle, j, cacheIndirectLightDistance))
+				{
+					if(texelFetch(cacheInnerSamplingDistanceSampler, texCoords, 0).x > 0.0001)
+					{
+						float newSampleDistance = samplingDistance(cacheIndirectLightDistance, maxSolidAngle);
+						
+						/*
+						It could be that an edge-cache or an edge-vertex gets overwritten by an inner cache or vertex.
+						But that only means, that the doubled vertex wont get triangulated or the doubled cache will 
+						be two times indiced by any vertex who would index the cache only one time otherwise.
+						*/
+				
+						ivec2 atomicCacheTexCoord = texCoords / int(cacheBlockDimensions);
+						int cacheBlockCounter = int(imageAtomicAdd(cacheAtomicIndexSampler, atomicCacheTexCoord, 1));
+						ivec2 cacheTexCoord = atomicCacheTexCoord * int(cacheBlockDimensions) + ivec2(mod(cacheBlockCounter, int(cacheBlockDimensions)), cacheBlockCounter / int(cacheBlockDimensions));
+						
+						imageStore(edgeCachePositionSampler, cacheTexCoord, vec4(newPosition, material.r));
+						imageStore(edgeCacheNormalSampler, cacheTexCoord, vec4(normal, material.g));
+						imageStore(edgeCacheOffsetBuffer, cacheTexCoord, vec4(1.0));
+						
+						ivec2 atomicVertexTexCoord = texCoords / int(vertexBlockDimensions);
+						int vertexBlockCounter = int(imageAtomicAdd(vertexAtomicIndexSampler, atomicVertexTexCoord, 1));
+						ivec2 vertexTexCoord = atomicVertexTexCoord * int(vertexBlockDimensions) + ivec2(mod(vertexBlockCounter, int(vertexBlockDimensions)), vertexBlockCounter / int(vertexBlockDimensions));
+						
+						imageStore(edgeVertexPositionSampler, vertexTexCoord, vec4(newPosition, material.r));
+						imageStore(edgeVertexNormalSampler, vertexTexCoord, vec4(normal, material.g));
+						imageStore(edgeVertexOffsetBuffer, vertexTexCoord, vec4(1.0));
+							
+						sampleDistance = newSampleDistance;
+					
+						break;
+						break;
+					}
+				}
+			}
+		}
+
+		oldPosition = newPosition;
+		texCoords += stepSize;
+	}
+}

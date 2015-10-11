@@ -1,0 +1,83 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+#define NODENUMBER 4681
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(std430, binding = 0) buffer bvhPositionRadiusBuffer
+{
+	vec4 bvhPosRadius[NODENUMBER];
+};
+
+layout(std430, binding = 1) buffer bvhFirstChildIDBuffer
+{
+	uint bvhFirstChild[NODENUMBER];
+};
+
+layout(std430, binding = 2) buffer bvhNextSiblingIDBuffer
+{
+	uint bvhNextSibling[NODENUMBER];
+};
+
+layout(std430, binding = 3) buffer bvhParentIDBuffer
+{
+	uint bvhParent[NODENUMBER];
+};
+
+layout(std430, binding = 4) buffer bvhChildNumberBuffer
+{
+	uint bvhChildNumber[NODENUMBER];
+};
+
+layout(std430, binding = 5) buffer BoundingBoxBuffer
+{
+	vec4 minBBox;
+	vec4 diagonal;
+};
+
+layout(location = 0) uniform uint hierarchyDeep;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	const uint nodesPerThread = uint(ceil(float(NODENUMBER) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint nodeOffset = idx * nodesPerThread;
+	const uint nodeEnd = nodeOffset + nodesPerThread;
+	
+	float diameter = length(diagonal);
+	
+	for(uint i = nodeOffset; i < nodeEnd; i++)
+	{
+		if(i < NODENUMBER)
+		{
+			int deep = 0;
+			uint actualLevelID[5] = uint[](~0, ~0, ~0, ~0, ~0);
+			uint actualID = i;
+			
+			while(deep <= hierarchyDeep && actualID != ~0)
+			{
+				actualLevelID[deep] = actualID;
+				actualID = bvhParent[actualID];
+				deep++;
+			}
+			
+			vec3 pos = minBBox.xyz;
+			float scale = 1.0;
+			while(deep >= 0)
+			{
+				scale *= 0.5;
+				
+				uint childDigit = bvhChildNumber[actualLevelID[deep]];
+				pos += scale * vec3((int((childDigit & 1) > 0) * -2.0 + 1.0) * diagonal.x, (int((childDigit & 2) > 0) * -2.0 + 1.0) * diagonal.y, (int((childDigit & 4) > 0) * -2.0 + 1.0) * diagonal.z);
+
+				deep--;
+			}
+			
+			bvhPosRadius[i] = vec4(pos, scale * diameter);
+		}
+	}
+}

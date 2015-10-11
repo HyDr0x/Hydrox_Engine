@@ -3,6 +3,7 @@
 layout(early_fragment_tests) in;
 
 #include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
+#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) out vec4 fsout_color;
 layout(location = 1) out vec4 fsout_normal;

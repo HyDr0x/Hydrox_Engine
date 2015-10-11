@@ -135,15 +135,16 @@ namespace he
 
       inline Matrix<float, 4> createPerspective(float left, float right, float bottom, float top, float cnear, float cfar)
       {
-        //return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left), 0.0f,
-        //                         0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
-        //                         0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
-        //                         0.0f,                           0.0f,                            -1.0f,                           0.0f);
+        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            (right + left) / (right - left),   0.0f,
+                                 0.0f,                           (2.0f * cnear) / (top - bottom), (top + bottom) / (top - bottom),   0.0f,
+                                 0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
+                                 0.0f,                           0.0f,                            -1.0f,                             0.0f);
 
-        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                           0.0f,                             0.0f,
-                                 0.0f,                          (2.0f * cnear) / (top - bottom), 0.0f,                             0.0f,
-                                 0.0f,                           0.0f,                         -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
-                                 0.0f,                           0.0f,                          -1.0f,                             0.0f);
+        /*
+        return Matrix<float, 4>((2.0f * cnear) / (right - left), 0.0f,                            0.0f,                              0.0f,
+                                 0.0f,                           (2.0f * cnear) / (top - bottom), 0.0f,                              0.0f,
+                                 0.0f,                           0.0f,                            -(cfar + cnear) / (cfar - cnear), -(2.0f * cfar * cnear) / (cfar - cnear),
+                                 0.0f,                           0.0f,                            -1.0f,                             0.0f);*/
       }
 
       inline Matrix<float, 4> createPerspective(float fov, float aspectRatio, float cnear, float cfar)
@@ -188,7 +189,7 @@ namespace he
         Matrix<float, 4> rotMat(x[0], x[1], x[2], 0.0f,
                                 y[0], y[1], y[2], 0.0f,
                                 z[0], z[1], z[2], 0.0f,
-                                0.0f, 0.0f, 0.0f, 1.0f);
+                                0.0f, 0.0f, 0.0f, 1.0f);//row major order matrix
 
         rotMat[3] = rotMat[0] * -camPos[0] + rotMat[1] * -camPos[1] + rotMat[2] * -camPos[2] + rotMat[3];
 

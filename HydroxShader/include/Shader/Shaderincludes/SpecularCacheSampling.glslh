@@ -1,0 +1,45 @@
+#define PI 3.14159265359
+#define PI_HALF (0.5 * PI)
+
+layout(std430, binding = 1) buffer tubeData
+{
+	vec4 tubeStartPosRadius[1];
+	vec4 tubeDirection[1];//not normalized, the vector length is the length of the tube
+};
+
+float specularCacheSolidAngle(float n)
+{
+	return PI_HALF - asin(pow(0.5, 1.0 / n));
+}
+
+bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAngle, in uint tubeIndex, out float distance)
+{
+	float dotRDir = dot(r, tubeDirection[tubeIndex].xyz);
+	
+	vec3 trfTubeStartPos = tubeStartPosRadius[tubeIndex].xyz - cachePos;
+	
+	float t = (dot(r, trfTubeStartPos) * dotRDir - dot(trfTubeStartPos, tubeDirection[tubeIndex].xyz)) / (dot(tubeDirection[tubeIndex].xyz, tubeDirection[tubeIndex].xyz) - dotRDir * dotRDir);
+	
+	vec3 tubePos = trfTubeStartPos + clamp(t, 0.0, 1.0) * tubeDirection[tubeIndex].xyz;
+	
+	float lineDistance = length(tubePos);
+
+	vec3 centerToRay = dot(tubePos, r) * r - tubePos;
+	vec3 closestPoint = (tubePos + centerToRay * clamp(tubeStartPosRadius[tubeIndex].w / length(centerToRay), 0.0, 1.0));
+	
+	float tubeDistance = max(length(closestPoint), 0.001);
+
+	//if we are inside the tube, we use the distance to the center
+	distance = lineDistance < tubeStartPosRadius[tubeIndex].w ? length(tubePos + 0.5 * tubeDirection[tubeIndex].xyz) : tubeDistance;
+	//distance = lineDistance;
+	//distance = tubeDistance;
+	//distance = length(cachePos - vec3(0, 5, -5));
+	
+	return true;//dot(normalize(closestPoint / tubeDistance), r) > cos(maxSolidAngle) && distance > 0.1;
+}
+
+float samplingDistance(float lightDistance, float maxSolidAngle)
+{
+	//return /*0.1325 */ 2.0 * lightDistance * tan(maxSolidAngle - 0.0001);//offset to handle PI_HALF
+	return min(2.0 * lightDistance * tan(maxSolidAngle - 0.0001), 1.0);//offset to handle PI_HALF
+}

@@ -1,0 +1,207 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+#define INT32_MAX 2147483647
+#define INT16_MAX 32768
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthMap;
+layout(location = 1) uniform sampler2D gBufferNormalMap;
+
+layout(r16ui, binding = 0) writeonly uniform uimage2D cacheIndexMap0;
+layout(r16ui, binding = 1) writeonly uniform uimage2D cacheIndexMap1;
+layout(r16ui, binding = 2) writeonly uniform uimage2D cacheIndexMap2;
+layout(r16ui, binding = 3) writeonly uniform uimage2D cacheIndexMap3;
+
+layout(r32f, binding = 4) readonly uniform image2D cacheOffsets;
+
+layout(std430, binding = 0) buffer bvhPositionRadiusBuffer
+{
+	vec4 bvhPosRadius[4681];
+};
+
+layout(std430, binding = 1) buffer bvhFirstChildIDBuffer
+{
+	uint bvhFirstChild[4681];
+};
+
+layout(std430, binding = 2) buffer bvhNextSiblingIDBuffer
+{
+	uint bvhNextSibling[4681];
+};
+
+layout(std430, binding = 3) buffer cacheNextSiblingIDBuffer
+{
+	uint cacheNextSibling[];
+};
+
+layout(std430, binding = 4) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 5) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormalMaterials[];
+};
+
+layout(location = 2) uniform uint hierarchyDeep;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec3 cachePositions[WORKGROUPSIZE];
+shared vec3 cacheNormals[WORKGROUPSIZE];
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	const uint pixelNumber = width * height;
+	const uint pixelPerThread = uint(ceil(float(pixelNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint pixelOffset = idx * pixelPerThread;
+	const uint pixelEnd = pixelOffset + pixelPerThread;
+	
+	const uint cacheNumber = uint(imageLoad(cacheOffsets, ivec2(width - 1, height - 1)).r);
+	
+	for(uint i = pixelOffset; i < pixelEnd; i++)
+	{
+		if(i < pixelNumber)
+		{
+			ivec2 texCoord = ivec2(mod(i, width), i / width);
+		
+			float depth = texelFetch(gBufferDepthMap, texCoord, 0).r;
+			vec3 position3D = vec3(texCoord.x / float(width), texCoord.y / float(height), depth) * 2.0 - 1.0;
+			vec4 tmpProjPos = invViewProjectionMatrix * vec4(position3D, 1.0);
+			position3D = tmpProjPos.xyz / tmpProjPos.w;
+		
+			vec3 normal = normalize(texelFetch(gBufferNormalMap, texCoord, 0).xyz * 2.0 - 1.0);
+		
+			uint indices[4] = uint[](INT16_MAX + 256, INT16_MAX + 256, INT16_MAX + 256, INT16_MAX + 256);
+			float weights[4] = float[](INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX);
+						
+			uint minimumIndex = 0;
+			
+			/*
+			uint cacheLoopEnd = WORKGROUPSIZE * uint(ceil(cacheNumber / float(WORKGROUPSIZE)));
+			for(uint j = 0; j < cacheLoopEnd; j += WORKGROUPSIZE)
+			{
+				if(j + gl_LocalInvocationID.x < cacheNumber)
+				{
+					cachePositions[gl_LocalInvocationID.x] = specularCachePositions[j + gl_LocalInvocationID.x].xyz;
+					cacheNormals[gl_LocalInvocationID.x] = normalize(decodeNormal(specularCacheNormalMaterials[j + gl_LocalInvocationID.x].xy));
+				}
+				
+				memoryBarrierShared();
+				barrier();
+				
+				for(uint l = 0; l < WORKGROUPSIZE; l++)
+				{
+					if(j + l < cacheNumber)
+					{
+						float cachePosDistance = distance(cachePositions[l], position3D);
+						float weight = max(cachePosDistance * cachePosDistance, 0.0) / max(dot(normal, cacheNormals[l]), 0.0001);
+
+						if(weight < weights[minimumIndex])
+						{
+							indices[minimumIndex] = j + l;
+							weights[minimumIndex] = weight;
+							
+							minimumIndex = 0;
+							for(int k = 1; k < 4; k++)
+							{
+								int compareVal = int(sign(ceil(weights[k] - weights[minimumIndex])));
+								minimumIndex = ((compareVal + 1) / 2) * k + (((compareVal * - 1) + 1) / 2) * minimumIndex;
+								
+								//if(weights[minimumIndex] < weights[k])
+								{
+									//minimumIndex = uint(mod(k + j + l, 4));
+								}
+							}
+						}
+					}
+				}
+			}
+
+			imageStore(cacheIndexMap0, texCoord, uvec4(indices[0] + 1));
+			imageStore(cacheIndexMap1, texCoord, uvec4(indices[1] + 1));
+			imageStore(cacheIndexMap2, texCoord, uvec4(indices[2] + 1));
+			imageStore(cacheIndexMap3, texCoord, uvec4(indices[3] + 1));*/
+			
+			
+			int deep = 0;
+			uint parentID[5] = uint[](~0, ~0, ~0, ~0, ~0);
+			uint actualID[5] = uint[](~0, ~0, ~0, ~0, ~0);
+			
+			parentID[deep] = 0;
+
+			uint counter = 0;
+			while(deep >= 0 && counter < 25000)
+			{
+				if(deep < hierarchyDeep)
+				{
+					if(actualID[deep] == ~0)
+					{
+						actualID[deep] = bvhFirstChild[parentID[deep]];
+					}
+					else
+					{
+						actualID[deep] = bvhNextSibling[actualID[deep]];
+					}
+
+					if(actualID[deep] != ~0)
+					{
+						vec4 posRad = bvhPosRadius[actualID[deep]];
+						//if(1.0 / distance(posRad.xyz + posRad.w * normalize(position3D - posRad.xyz), position3D) < 1)
+						if(distance(posRad.xyz, position3D) < posRad.w)
+						{
+							deep++;
+							parentID[deep] = actualID[deep - 1];
+						}
+					}
+					else
+					{
+						deep--;
+					}
+				}
+				else
+				{counter++;
+					//indices[minimumIndex] = 10;
+					//weights[minimumIndex] = 100;
+					uint cacheID = bvhFirstChild[parentID[deep]];
+					
+					while(cacheID != ~0)
+					{
+						float weight = distance(specularCachePositions[cacheID].xyz, position3D) / dot(normal, decodeNormal(specularCacheNormalMaterials[cacheID].xy));
+						
+						if(weight < weights[minimumIndex])
+						{
+							indices[minimumIndex] = cacheID;
+							weights[minimumIndex] = weight;
+							
+							minimumIndex = 0;
+							for(uint j = 1; j < 4; j++)
+							{
+								//minimumIndex = weights[minimumIndex] < weights[j] ? j;
+								if(weights[minimumIndex] < weights[j])
+								{
+									minimumIndex = j;
+								}
+							}
+						}
+						
+						cacheID = cacheNextSibling[cacheID];
+					}
+					
+					deep--;
+				}
+			}
+			
+			imageStore(cacheIndexMap0, texCoord, uvec4(indices[0] + 1));
+			imageStore(cacheIndexMap1, texCoord, uvec4(indices[1] + 1));
+			imageStore(cacheIndexMap2, texCoord, uvec4(indices[2] + 1));
+			imageStore(cacheIndexMap3, texCoord, uvec4(indices[3] + 1));
+		}
+	}
+}

@@ -37,7 +37,7 @@ namespace he
       void generateCachesArea(const std::vector<vec3f>& triangles, vec3f bbMin, vec3f bbMax, std::vector<Cache>& outCaches, const std::vector<Triangle>& cacheTriangles);
       void generateCacheArea(const std::vector<vec3f>& triangles, vec3f bbMin, vec3f bbMax, std::vector<Cache>& caches, unsigned int cacheIndex, const Triangle& pickedTriangle);
 
-      static vec3f findCacheTriangle(const std::vector<vec3f>& triangles, const Cache& cache, Triangle& cacheTriangle);//returns the nearest triangle of the cache and the nearest point o nthe triangle
+      static vec3f findCacheTriangle(const std::vector<vec3f>& triangles, const Cache& cache, Triangle& cacheTriangle);//returns the nearest triangle of the cache and the nearest point on the triangle
 
       static void createTriangleCacheIndices(const std::vector<vec3f>& triangles, std::vector<Triangle>& cacheTriangles, std::vector<Cache>& caches, std::vector<vec2ui>& triangleCacheIndices);
 

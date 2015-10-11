@@ -1,0 +1,70 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define WORKGROUPSIZE 256
+#define INT32_MAX 2147483647
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsets;
+
+layout(std430, binding = 0) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 1) buffer BoundingBoxBuffer
+{
+	vec4 minBBox;
+	vec4 diagonal;
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec3 minAABBGroup[WORKGROUPSIZE];
+shared vec3 maxAABBGroup[WORKGROUPSIZE];
+
+void main()
+{
+	uint localIDX = gl_LocalInvocationID.x;
+
+	vec3 minAABB = vec3(INT32_MAX), maxAABB = vec3(-INT32_MAX);
+	
+	const uint cacheNumber = uint(imageLoad(cacheOffsets, ivec2(width - 1, height - 1)).r);
+	
+	const uint cachesPerThread = uint(ceil(cacheNumber / float(WORKGROUPSIZE)));
+	const uint startIndex = localIDX * cachesPerThread;
+	const uint endIndex = startIndex + cachesPerThread;
+	
+	for(uint j = startIndex; j < endIndex; j++)
+	{
+		if(j < cacheNumber)
+		{	
+			vec3 cachePos = specularCachePositions[j].xyz;
+			
+			minAABB = min(minAABB, cachePos);
+			maxAABB = max(maxAABB, cachePos);
+		}
+	}
+	
+	minAABBGroup[localIDX] = minAABB;
+	maxAABBGroup[localIDX] = maxAABB;
+	
+	memoryBarrierShared();
+	barrier();
+	
+	if(localIDX == 0)
+	{
+		for(uint i = 0; i < WORKGROUPSIZE; i++)
+		{
+			minAABB = min(minAABB, minAABBGroup[i]);
+			maxAABB = max(maxAABB, maxAABBGroup[i]);
+		}
+	
+		//find the main axis
+		vec3 cuboidDiagonal = maxAABB - minAABB;
+		vec3 cubeDiagonal = vec3(max(cuboidDiagonal.x, max(cuboidDiagonal.y, cuboidDiagonal.z)));
+		diagonal = vec4(cubeDiagonal, 0.0);
+		minBBox = vec4((minAABB + 0.5 * cuboidDiagonal) - 0.5 * cubeDiagonal.xyz, 0.0);
+	}
+}

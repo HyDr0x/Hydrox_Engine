@@ -16,7 +16,7 @@ void main()
 {
 	vec3 normal = decodeNormal(vsout_normalMat[0].xy);
 
-	vec3 x = normalize(cross(normal, normal + vec3(0, 0.1, 0)));
+	vec3 x = normalize(cross(normal, normal + vec3(0, 1.0, 0)));
 	vec3 z = normalize(cross(normal, x));
 	
 	vec3 points[4];

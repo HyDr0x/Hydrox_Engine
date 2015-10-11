@@ -9,6 +9,8 @@
 #include <Utilities/Pointer/SharedPointer.h>
 #include <Utilities/Signals/EventManager.h>
 
+#include <Shader/ShaderContainer.h>
+
 #include "Renderer/Pipeline/Renderquad.h"
 
 namespace he
@@ -40,9 +42,12 @@ namespace he
       void setDebugGBuffer() const;
       void unsetDebugGBuffer() const;
 
+      void calculateLinearDepthBuffer() const;
+
       void setClearColor(util::vec4f clearColor);
 
       util::SharedPointer<db::Texture2D> getDepthTexture() const;
+      util::SharedPointer<db::Texture2D> getLinearDepthTexture() const;
       util::SharedPointer<db::Texture2D> getColorTexture() const;
       util::SharedPointer<db::Texture2D> getNormalTexture() const;
       util::SharedPointer<db::Texture2D> getMaterialTexture() const;
@@ -57,9 +62,12 @@ namespace he
       util::SingletonManager *m_singletonManager;
 
       util::SharedPointer<db::Texture2D> m_depthTexture;
+      util::SharedPointer<db::Texture2D> m_linearDepthTexture;
       util::SharedPointer<db::Texture2D> m_colorTexture;
       util::SharedPointer<db::Texture2D> m_normalTexture;
       util::SharedPointer<db::Texture2D> m_materialTexture;
+
+      sh::ComputeShaderHandle m_linearDepthBufferCreation;
 
       Renderquad m_fullscreenRenderQuad;
       Renderquad m_debugRenderquad;

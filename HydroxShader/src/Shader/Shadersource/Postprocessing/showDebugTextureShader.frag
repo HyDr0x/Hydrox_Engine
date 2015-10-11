@@ -24,5 +24,5 @@ void main()
 	
 	//color = vec4(decodeNormal(vec4(texture(colorSampler, gsout_texCoord)).xy), 1);//indirect light normal output
 	//color = vec4(unpackLuminousFlux(texture(colorSampler, gsout_texCoord).a*30), 1);//indirect light luminous flux output
-	color = 10.0 * vec4(texture(colorSampler, gsout_texCoord));//simple texture output
+	color = 30.0 * vec4(texture(colorSampler, gsout_texCoord));//simple texture output
 }

@@ -1,0 +1,107 @@
+#version 440 core
+
+#define WORKGROUPSIZE 16
+#define PI 3.14159265359
+#define PI_HALF (0.5 * PI)
+#define LIGHTTUBEBINDINGPOINT 1
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+layout(location = 2) uniform sampler2D gBufferMaterialSampler;
+
+layout(location = 3) uniform uint reflectiveShadowMapNumber;
+layout(location = 4) uniform ivec2 stepSize;
+
+layout(r16f, binding = 0) uniform writeonly image2D cacheInnerSamplingDistanceBuffer;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	vec3 oldPosition = vec3(0.0), newPosition;
+	vec3 normal;
+	float sampleDistance = 0.0;
+	float roughness;
+	float depth;
+	
+	const uint pixelPerThread = uint(ceil(width / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / height)));
+	const uint startIndex = idx * pixelPerThread;
+	const uint endIndex = startIndex + pixelPerThread;
+
+	ivec2 texCoords = stepSize * ivec2(pixelPerThread * floor(idx / height), pixelPerThread * floor(idx / width)) + (ivec2(1) - stepSize) * ivec2(mod(idx, width), mod(idx, height));
+
+	for(uint i = startIndex; i < endIndex; i++)
+	{
+		if(texCoords.y >= height && stepSize.y > 0)
+		{
+			texCoords.y = 0;
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+		}
+		
+		if(texCoords.y < 0 && stepSize.y < 0)
+		{
+			texCoords.y = int(height - 1);
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+		}
+	
+		if(texCoords.x >= width || texCoords.y >= height)
+		{
+			return;
+		}
+
+		depth = texelFetch(gBufferDepthSampler, texCoords, 0).r;
+		
+		if(depth >= 0.99999)
+		{
+			sampleDistance = 0.0;
+			oldPosition = vec3(0.0);
+			texCoords += stepSize;
+			continue;
+		}
+		
+		newPosition = vec3(texCoords / vec2(width, height), depth) * 2.0 - 1.0;
+		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
+		newPosition = tmpProjPos.xyz / tmpProjPos.w;
+		
+		roughness = texelFetch(gBufferMaterialSampler, texCoords, 0).w;
+		
+		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
+		
+		sampleDistance -= length(newPosition - oldPosition);
+		
+		if(sampleDistance <= 0.0 && texCoords != ivec2(0,0))
+		{
+			float maxSolidAngle = specularCacheSolidAngle(0.95, roughness);
+			float collisionSolidAngle = specularCacheSolidAngle(0.1, roughness);
+			
+			vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), normal));
+			
+			float cacheIndirectLightDistance;
+			
+			for(uint j = 0; j < reflectiveShadowMapNumber; j++)
+			{
+				if(indirectLightTubeCollision(newPosition, reflectRay, collisionSolidAngle, j, cacheIndirectLightDistance))
+				{
+					float newSampleDistance = samplingDistance(cacheIndirectLightDistance, maxSolidAngle);
+					
+					imageStore(cacheInnerSamplingDistanceBuffer, texCoords, vec4(newSampleDistance));
+
+					sampleDistance = newSampleDistance;
+					
+					break;
+				}
+			}
+		}
+
+		oldPosition = newPosition;
+
+		texCoords += stepSize;
+	}
+}

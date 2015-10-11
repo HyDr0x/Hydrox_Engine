@@ -15,10 +15,8 @@ layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;
 layout(location = 2) uniform sampler2D gBufferMaterialSampler;
 
-layout(r16ui, binding = 0) readonly uniform uimage2D cacheIndexMap0;
-layout(r16ui, binding = 1) readonly uniform uimage2D cacheIndexMap1;
-layout(r16ui, binding = 2) readonly uniform uimage2D cacheIndexMap2;
-layout(r16ui, binding = 3) readonly uniform uimage2D cacheIndexMap3;
+layout(rgba16ui, binding = 0) readonly uniform uimage2D cacheIndexMap0;
+layout(rgba16ui, binding = 1) readonly uniform uimage2D cacheIndexMap1;
 
 layout(std430, binding = 0) buffer specularCachePositionBuffer
 {
@@ -48,12 +46,19 @@ void main()
 {
 	ivec2 texCoord = ivec2(gl_FragCoord.x, gl_FragCoord.y);
 	
-	uint cacheIndex[4];
-	cacheIndex[0] = imageLoad(cacheIndexMap0, texCoord).r - 1;
-	cacheIndex[1] = imageLoad(cacheIndexMap1, texCoord).r - 1;
-	cacheIndex[2] = imageLoad(cacheIndexMap2, texCoord).r - 1;
-	cacheIndex[3] = imageLoad(cacheIndexMap3, texCoord).r - 1;
+	uvec4 tmpIndices = imageLoad(cacheIndexMap0, texCoord);
+	uint cacheIndex[8];
+	cacheIndex[0] = tmpIndices.r;
+	cacheIndex[1] = tmpIndices.g;
+	cacheIndex[2] = tmpIndices.b;
+	cacheIndex[3] = tmpIndices.a;
 
+	tmpIndices = imageLoad(cacheIndexMap1, texCoord);
+	cacheIndex[4] = tmpIndices.r;
+	cacheIndex[5] = tmpIndices.g;
+	cacheIndex[6] = tmpIndices.b;
+	cacheIndex[7] = tmpIndices.a;
+	
 	vec4 pos3D = vec4(gsout_texCoord, texture(gBufferDepthSampler, gsout_texCoord).r, 1.0);
 	pos3D.xyz = pos3D.xyz * 2.0 - 1.0;
 	pos3D = invViewProjectionMatrix * pos3D;
@@ -66,7 +71,7 @@ void main()
 	vec3 reflectCamDir = reflect(-camDir, normal);
 	
 	float dmax = 0.0;
-	for(uint i = 0; i < 4; i++)
+	for(uint i = 0; i < 8; i++)
 	{
 		if(cacheIndex[i] < INT16_MAX)
 		{
@@ -80,7 +85,7 @@ void main()
 	vec3 Xpg = vec3(0.0f), phiPG = vec3(0.0f);
 	float wGesG = 0.0f, cacheProxyMinDistanceG = 0.0f;
 	
-	for(uint i = 0; i < 4; i++)
+	for(uint i = 0; i < 8; i++)
 	{
 		if(cacheIndex[i] < INT16_MAX)
 		{
@@ -90,10 +95,9 @@ void main()
 			vec4 cacheNormalMaterial = specularCacheNormalMaterial[cacheIndex[i]];
 			cache.normal.xyz = normalize(decodeNormal(cacheNormalMaterial.xy));
 			
-			float dir = max(1.0 - length(pos3D.xyz - cache.position.xyz) / dmax, 0.0);
-			
-			vec3 camCacheDir = normalize(cache.position.xyz - eyePos.xyz);
-			float wg = dir * sqrt(max(dot(reflect(camCacheDir, cache.normal.xyz), reflectCamDir), 0.0));
+			float dist = max(length(pos3D.xyz - cache.position.xyz), 0.0001);
+
+			float wg = dmax / dist;
 			
 			IndirectLightData indirectLightG;
 			indirectLightG.position = proxyLightPosition[cacheIndex[i]];
@@ -125,7 +129,7 @@ void main()
 	//luminousFlux = vec4(vec3(frg), 1);
 	//luminousFlux = vec4(0.05 * vec3(lengthG), 1);
 	//luminousFlux = vec4(Xpg, 1);
-	//luminousFlux = vec4(0.1 * phiPG, 1);
-	luminousFlux = 1.0 * vec4(max((frg * phiPG) / (4.0 * PI * lengthG), vec3(0)), 1.0);
+	//luminousFlux = vec4(0.001 * phiPG, 1);
+	luminousFlux = vec4(max((frg * phiPG) / (4.0 * PI * lengthG), vec3(0)), 1.0);
 	//luminousFlux = texture(indirectShadowMapSampler, texCoord).r * vec4(max((frg * phiPG) / (4 * PI * lengthG), vec3(0)), 1.0);
 }

@@ -21,11 +21,9 @@ void main()
 {
 	ivec2 texCoords = ivec2(gl_FragCoord.xy);
 
-	vec2 texCoordsNormalized = vec2(texCoords.x / float(width), texCoords.y / float(height));
-
-	vec3 normal = normalize(texture(gBufferNormalMap, texCoordsNormalized).xyz * 2.0 - 1.0);
+	vec3 normal = normalize(texelFetch(gBufferNormalMap, texCoords, 0).xyz * 2.0 - 1.0);
 	
-	float linZGBuff = (2.0 * near * far / (far + near - texture(gBufferDepthMap, texCoordsNormalized).r * (far - near))) / far;
+	float linZGBuff = (2.0 * near * far / (far + near - texelFetch(gBufferDepthMap, texCoords, 0).r * (far - near))) / far;
 	float linZFrameBuff = (2.0 * near * far / (far + near - gl_FragCoord.z * (far - near))) / far;
 	
 	if(imageLoad(cacheIndexAtomicCounter, texCoords).r < 3 && abs(linZGBuff - linZFrameBuff) < 0.01 && dot(normal, normalize(gsout_normal)) > 0.9)
@@ -33,6 +31,9 @@ void main()
 		uint vertexID = gsout_vertexID + 1;
 
 		uint index = imageAtomicAdd(cacheIndexAtomicCounter, texCoords, 1);
+		
+		//uint index = imageLoad(cacheIndexAtomicCounter, texCoords).r;
+		//imageStore(cacheIndexAtomicCounter, texCoords, uvec4(index + 1));
 		
 		if(index == 0)
 		{
@@ -52,5 +53,5 @@ void main()
 		}
 	}
 
-	color = vec4(1, 0, 0, 1);
+	//color = vec4(1, 0, 0, 1);
 }

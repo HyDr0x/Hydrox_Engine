@@ -1,0 +1,109 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsets;
+
+layout(std430, binding = 0) buffer bvhPositionRadiusBuffer
+{
+	vec4 bvhPosRadius[4681];
+};
+
+layout(std430, binding = 1) buffer bvhFirstChildIDBuffer
+{
+	uint bvhFirstChild[4681];
+};
+
+layout(std430, binding = 2) buffer bvhNextSiblingIDBuffer
+{
+	uint bvhNextSibling[4681];
+};
+
+layout(std430, binding = 3) buffer cacheNextSiblingIDBuffer
+{
+	uint cacheNextSibling[];
+};
+
+layout(std430, binding = 4) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 5) buffer sphereNextCacheIDBuffer
+{
+	uint sphereNextCacheID[4681];
+};
+
+layout(location = 0) uniform uint hierarchyDeep;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	const uint cacheNumber = uint(imageLoad(cacheOffsets, ivec2(width - 1, height - 1)).r);
+	
+	const uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint cacheOffset = idx * cachesPerThread;
+	const uint cacheEnd = cacheOffset + cachesPerThread;
+	
+	for(uint i = cacheOffset; i < cacheEnd; i++)
+	{
+		if(i < cacheNumber)
+		{
+			int deep = 0;
+			uint parentID[5] = uint[](~0, ~0, ~0, ~0, ~0);
+			uint actualID[5] = uint[](~0, ~0, ~0, ~0, ~0);
+			
+			parentID[deep] = 0;
+
+			while(deep >= 0)
+			{
+				if(deep < hierarchyDeep)
+				{
+					if(actualID[deep] == ~0)
+					{
+						actualID[deep] = bvhFirstChild[parentID[deep]];
+					}
+					else
+					{
+						actualID[deep] = bvhNextSibling[actualID[deep]];
+					}
+
+					if(actualID[deep] != ~0)
+					{
+						vec4 posRad = bvhPosRadius[actualID[deep]];
+						if(distance(posRad.xyz, specularCachePositions[i].xyz) < posRad.w)
+						{
+							deep++;
+							parentID[deep] = actualID[deep - 1];
+						}
+					}
+					else
+					{
+						deep--;
+					}
+				}
+				else
+				{
+					uint sphereID = atomicExchange(sphereNextCacheID[parentID[deep]], i);
+					if(sphereID == ~0)
+					{
+						bvhFirstChild[parentID[deep]] = i;
+						break;
+					}
+					else
+					{
+						cacheNextSibling[sphereID] = i;
+						break;
+					}
+					
+					deep--;
+				}
+			}
+		}
+	}
+}

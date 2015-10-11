@@ -11,6 +11,7 @@
 #include "Renderer/DLLExport.h"
 
 #include <DataBase/ResourceManager.hpp>
+#include "Renderer/Pipeline/CameraManager.h"
 #include "Renderer/Pipeline/GBuffer.h"
 #include "Renderer/Pipeline/LightRenderer.h"
 #include "Renderer/Pipeline/IndirectLightRenderer.h"
@@ -79,9 +80,9 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void setViewPort(GLuint width, GLuint height, GLfloat zNear, GLfloat zFar);
+      void setViewPort();
 
-      void render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition);
+      void render();
 
       void addRenderComponent(const db::Sprite* sprite);
       void addRenderComponent(const StringTexture2D* string);
@@ -117,6 +118,7 @@ namespace he
       UBO m_cameraParameterUBO;
 
       util::SharedPointer<RenderOptions> m_options;
+      util::SharedPointer<CameraManager> m_cameraManager;
 
       GBuffer m_gBuffer;
       LightRenderer m_lightRenderer;

@@ -1,6 +1,10 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+/*
+All matrices are stored in column major order.
+*/
+
 #include "Vector.h"
 
 namespace he

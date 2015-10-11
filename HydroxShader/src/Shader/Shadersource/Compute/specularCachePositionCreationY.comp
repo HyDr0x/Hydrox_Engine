@@ -1,0 +1,74 @@
+#version 440 core
+
+#define WORKGROUPSIZE 16
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(rg16f, binding = 0) uniform readonly image2D cachePosXImage;
+layout(rg16f, binding = 1) uniform readonly image2D cachePosYImage;
+layout(r16f, binding = 4) uniform writeonly image2D cachePosIntermediateMap;
+layout(r16f, binding = 5) uniform writeonly image2D intermediateRegionCounterMap;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	
+	vec2 sampleDistanceRegionNumberY[3];
+
+	const uint pixelPerThread = uint(ceil(height / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / width)));
+	const uint startIndex = idx * pixelPerThread;
+	const uint endIndex = startIndex + pixelPerThread;
+	
+	const uint startOffset = uint(ceil(height / float(pixelPerThread))) * pixelPerThread;
+	
+	ivec2 texCoords = ivec2(mod(idx, width), startOffset - pixelPerThread * floor(idx / width) - 1);
+
+	uint regionCounter = 0;
+	
+	for(uint i = startIndex; i < endIndex; i++)
+	{
+		if(texCoords.y < 0 || texCoords.x >= width)
+		{
+			return;
+		}
+		
+		if(texCoords.y >= height)
+		{
+			continue;
+		}
+		
+		sampleDistanceRegionNumberY[0] = imageLoad(cachePosYImage, texCoords).xy;
+		sampleDistanceRegionNumberY[1] = imageLoad(cachePosYImage, texCoords - ivec2(1, 0)).xy;
+		sampleDistanceRegionNumberY[2] = imageLoad(cachePosYImage, texCoords + ivec2(1, 0)).xy;
+
+		if(sampleDistanceRegionNumberY[0].y > 0.0 && sampleDistanceRegionNumberY[1].y > 0.0 && sampleDistanceRegionNumberY[2].y > 0.0)//because of start offset to match the thread starting of the filter kernels
+		{
+			vec2 xVal = vec2(0.0);
+			ivec2 xyCoord = ivec2(texCoords.x, texCoords.y - int(sampleDistanceRegionNumberY[0].y * 0.5));
+						
+			do
+			{
+				xVal = imageLoad(cachePosXImage, xyCoord).xy;
+				xyCoord.x++;
+			}while(xVal.y < 1.0 && xyCoord.x < width);
+			
+			xyCoord.x--;
+						
+			xyCoord.x -= int(xVal.y * 0.5);
+			
+			imageStore(cachePosIntermediateMap, xyCoord, vec4(1.0));
+			imageStore(intermediateRegionCounterMap, xyCoord, vec4(regionCounter + int(max(sampleDistanceRegionNumberY[0].y * 0.5, 1))));
+			
+			regionCounter = max(int(sampleDistanceRegionNumberY[0].y * 0.5), 1);
+			texCoords.y -= max(int(sampleDistanceRegionNumberY[0].y), 1);
+			i += int(max(sampleDistanceRegionNumberY[0].y - 1, 1));
+		}
+		else
+		{
+			regionCounter++;
+			texCoords.y--;
+		}		
+	}
+}

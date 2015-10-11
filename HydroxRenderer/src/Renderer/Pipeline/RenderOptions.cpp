@@ -11,8 +11,21 @@ namespace he
       std::ifstream parameterStream;
       parameterStream.open(filename, std::ios::in);
 
+      getParameter<std::string>(parameterStream, vfxPath);
+      getParameter<std::string>(parameterStream, texturePath);
+      getParameter<std::string>(parameterStream, modelPath);
+      getParameter<std::string>(parameterStream, scenePath);
+
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, width, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, height, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, colorBitDepth, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, depthBitDepth, &atoi);
+
+      getParameter<float, double(*) (const char*)>(parameterStream, fov, &atof);
+      getParameter<float, double(*) (const char*)>(parameterStream, nearPlane, &atof);
+      getParameter<float, double(*) (const char*)>(parameterStream, farPlane, &atof);
+
+      getParameter<float, double(*) (const char*)>(parameterStream, letterSize, &atof);
 
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, lightNumber, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, shadowMapWidth, &atoi);

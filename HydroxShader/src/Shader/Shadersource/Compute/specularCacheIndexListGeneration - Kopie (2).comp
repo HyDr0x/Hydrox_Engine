@@ -1,0 +1,161 @@
+#version 440 core
+
+#define WORKGROUPSIZE 64
+#define TILESIZE 16
+#define INT32_MAX 2147483647
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsetImage;
+layout(rgba32f, binding = 1) readonly uniform image2D cachePositionImage;
+layout(rgba32f, binding = 2) readonly uniform image2D cacheNormalImage;
+layout(r32ui, binding = 3) readonly uniform uimage2D cacheNumberPerTile;
+
+layout(r32f, binding = 4) readonly uniform image2D vertexOffsetImage;
+layout(rgba32f, binding = 5) readonly uniform image2D vertexPositionImage;
+layout(rgba32f, binding = 6) readonly uniform image2D vertexNormalImage;
+layout(r32ui, binding = 7) readonly uniform uimage2D vertexNumberPerTile;
+
+layout(std430, binding = 0) buffer vertexPositionBuffer
+{
+	vec4 vertexPositions[];
+};
+
+layout(std430, binding = 1) buffer vertexNormalBuffer
+{
+	vec4 vertexNormals[];
+};
+
+layout(std430, binding = 2) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 3) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormals[];
+};
+
+layout(std430, binding = 4) buffer specularCacheIndices0Buffer
+{
+	vec4 specularCacheIndices0[];
+};
+
+layout(std430, binding = 5) buffer specularCacheIndices1Buffer
+{
+	vec4 specularCacheIndices1[];
+};
+
+layout(location = 0) uniform uint borderVertexNumber;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec3 cachePositions[WORKGROUPSIZE];
+shared vec3 cacheNormals[WORKGROUPSIZE];
+
+void main()
+{
+	const uint cacheNumber = uint(imageLoad(cacheOffsetImage, ivec2(width - 1, height - 1)).r);
+
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localIDx = gl_LocalInvocationIndex;
+
+	const uvec2 tileNumber = (uvec2(width, height) + uvec2(TILESIZE - 1)) / TILESIZE;
+	const uint tilesPerGroup = (tileNumber.x * tileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint tileStartIndex = gl_WorkGroupID.x * tilesPerGroup;
+	const uint tileEndIndex = tileStartIndex + tilesPerGroup;
+
+	for(uint i = tileStartIndex; i < tileEndIndex; i++)
+	{
+		ivec2 blockCoord = ivec2(mod(i, tileNumber.x), i / tileNumber.x);
+		
+		const uint vertexNumber = imageLoad(vertexNumberPerTile, blockCoord).r;
+		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint vertexStartIndex = verticesPerThread * localIDx;
+		const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
+		
+		for(uint j = vertexStartIndex; j < vertexEndIndex; j++)
+		{
+			ivec2 texCoord = blockCoord * TILESIZE + ivec2(mod(j, TILESIZE), j / TILESIZE);
+			
+			vec3 vertexPosition = imageLoad(vertexPositionImage, texCoord).xyz;
+			vec3 vertexNormal = normalize(imageLoad(vertexNormalImage, texCoord).xyz);
+			
+			uint indices[8] = uint[](INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX);
+			float weights[8] = float[](INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX);
+			/*
+			for(uint m = 0; m < 8; m++)
+			{
+				indices[m] = m;
+			}
+			*/
+			
+			vec4 projPos = viewProjectionMatrix * vec4(vertexPosition, 1.0);
+			projPos /= projPos.w;
+			vec2 projVertexPos = vec2(projPos.xy * 0.5 + 0.5) * vec2(width, height);
+			
+			uint maximumIndex = 0;
+			
+			uint cacheLoopEnd = WORKGROUPSIZE * uint((cacheNumber + WORKGROUPSIZE - 1) / float(WORKGROUPSIZE));
+			for(uint m = 0; m < cacheLoopEnd; m += WORKGROUPSIZE)
+			{
+				if(m + localIDx < cacheNumber)
+				{
+					cachePositions[localIDx] = specularCachePositions[m + localIDx].xyz;
+					cacheNormals[localIDx] = normalize(specularCacheNormals[m + localIDx].xyz);
+				}
+				
+				memoryBarrierShared();
+				barrier();
+				
+				if(texCoord.x < width && texCoord.y < height && j < vertexNumber)
+				{
+					for(uint l = 0; l < WORKGROUPSIZE; l++)
+					{
+						if(m + l < cacheNumber && (m + l < 1878 || m + l > 2104))
+						{
+							vec4 tmpProjPos = viewProjectionMatrix * vec4(cachePositions[l], 1.0);
+							tmpProjPos /= tmpProjPos.w;
+							vec2 projCachePos = vec2(tmpProjPos.xy * 0.5 + 0.5) * vec2(width, height);
+						
+							//if(distance(projCachePos, projVertexPos) < 16.0)
+							{
+								vec3 cachePosDistance = cachePositions[l] - vertexPosition;
+								float angle = dot(vertexNormal, cacheNormals[l]);
+								float weight = max(length(cachePosDistance), 0.0) / max(pow(angle, 1.0), 0.00001);
+
+								if(weight < weights[maximumIndex])
+								{
+									indices[maximumIndex] = m + l;
+									weights[maximumIndex] = weight;
+									
+									maximumIndex = 7;
+									for(int k = 0; k < 7; k++)
+									{
+										//int compareVal = int(sign(int(weights[k] - weights[maximumIndex])));
+										//maximumIndex = ((compareVal + 1) / 2) * k + ((-compareVal + 1) / 2) * maximumIndex;
+										
+										if(weights[maximumIndex] < weights[k])
+										{
+											maximumIndex = k;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				memoryBarrierShared();
+				barrier();
+			}
+			
+			if(j < vertexNumber)
+			{
+				const uint vertexOffset = borderVertexNumber + uint(imageLoad(vertexOffsetImage, texCoord).r - 1);
+				specularCacheIndices0[vertexOffset] = vec4(indices[0], indices[1], indices[2], indices[3]);
+				specularCacheIndices1[vertexOffset] = vec4(indices[4], indices[5], indices[6], indices[7]);
+			}
+		}
+	}
+}

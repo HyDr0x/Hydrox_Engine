@@ -7,6 +7,7 @@
 #include <DataBase/ResourceManager.hpp>
 
 #include "Renderer/Pipeline/RenderOptions.h"
+#include "Renderer/Pipeline/CameraManager.h"
 
 namespace he
 {
@@ -20,23 +21,43 @@ namespace he
       GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
     };
 
-    IndirectSpecularReflections::IndirectSpecularReflections()
+    struct DrawElementsIndirectCommand
     {
-      glGenVertexArrays(1, &m_pointVAO);
+      GLuint count;//number of indices
+      GLuint primCount;//the number of primitives
+      GLuint first;//offset which adds to every index value
+      GLuint baseVertex;
+      GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
+    };
+
+    IndirectSpecularReflections::IndirectSpecularReflections() : m_vertexResolution(16), m_cacheResolution(16), m_ping(0), m_pong(1 - m_ping)
+    {
+      glGenVertexArrays(1, &m_triangleVAO);
+      glGenVertexArrays(1, &m_simpleTriangleVAO);
     }
 
     IndirectSpecularReflections::~IndirectSpecularReflections()
     {
-      glDeleteVertexArrays(1, &m_pointVAO);
+      glDeleteVertexArrays(1, &m_triangleVAO);
+      glDeleteVertexArrays(1, &m_simpleTriangleVAO);
     }
 
     void IndirectSpecularReflections::initialize(util::SingletonManager *singletonManager)
     {
-      glBindVertexArray(m_pointVAO);
+      glBindVertexArray(m_simpleTriangleVAO);
+      glVertexAttribFormat(sh::RenderShader::POSITION, 4, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribBinding(sh::RenderShader::POSITION, 0);
+      glBindVertexArray(0);
+
+      glBindVertexArray(m_triangleVAO);
       glVertexAttribFormat(sh::RenderShader::POSITION, 4, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribBinding(sh::RenderShader::POSITION, 0);
       glVertexAttribFormat(sh::RenderShader::NORMAL, 4, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribBinding(sh::RenderShader::NORMAL, 1);
+      glVertexAttribFormat(sh::RenderShader::CACHEINDICES0, 4, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribBinding(sh::RenderShader::CACHEINDICES0, 2);
+      glVertexAttribFormat(sh::RenderShader::CACHEINDICES1, 4, GL_FLOAT, GL_FALSE, 0);
+      glVertexAttribBinding(sh::RenderShader::CACHEINDICES1, 3);
       glBindVertexArray(0);
 
       m_options = singletonManager->getService<RenderOptions>();
@@ -44,43 +65,86 @@ namespace he
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_calculateAreaLightTube = sh::ShaderContainer::SPECULARTUBECREATION;
-      m_specularCacheXCreation = sh::ShaderContainer::SPECULARCACHEPOSITIONCREATIONX;
-      m_specularCacheYCreation = sh::ShaderContainer::SPECULARCACHEPOSITIONCREATIONY; 
+      m_specularCachePositionFilterX = sh::ShaderContainer::SPECULARCACHEPOSITIONFILTERX;
+      m_specularCachePositionFilterY = sh::ShaderContainer::SPECULARCACHEPOSITIONFILTERY;
       m_specularCacheOffsetUpSweep = sh::ShaderContainer::SPECULARCACHEOFFSETUPSWEEP;
       m_specularCacheOffsetDownSweep = sh::ShaderContainer::SPECULARCACHEOFFSETDOWNSWEEP;
-      m_specularCacheCreation = sh::ShaderContainer::SPECULARCACHECREATION;
-      m_specularProxyLightCreation = sh::ShaderContainer::SPECULARPROXYLIGHTCREATION;
-      m_specularCacheIndexMapCreation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPECULARCACHEINDEXMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::POSITION) | sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::NORMAL));
-      m_specularLightMapCreation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPECULARLIGHTMAPCREATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      m_specularCacheBufferCreation = sh::ShaderContainer::SPECULARCACHECREATION;
+      m_specularProxyLightBufferCreation = sh::ShaderContainer::SPECULARPROXYLIGHTCREATION;
+      m_specularCacheVertexBufferCreation = sh::ShaderContainer::SPECULARCACHEVERTEXBUFFERCREATION;
+      m_specularCacheBoundingBoxComputation = sh::ShaderContainer::SPECULARCACHEBOUNDINGBOXCOMPUTATION;
+      m_specularCacheIndexListGeneration = sh::ShaderContainer::SPECULARCACHEINDEXLISTCREATION;
+      m_specularCacheTriangleIndexOffsetCalculation = sh::ShaderContainer::SPECULARCACHETRIANGLEINDEXOFFSETCALCULATION;
+      m_specularCacheFillTriangleIndices = sh::ShaderContainer::SPECULARCACHEFILLTRIANGLEINDICES;
+      m_specularCacheEdgeCacheCreation = sh::ShaderContainer::SPECULARCACHEEDGECACHECREATION;
+      m_specularCacheVoronoiDiagramCornerRepair = sh::ShaderContainer::SPECULARCACHEVORONOIDIAGRAMCORNERREPAIR;
+      m_specularCacheEdgeVertexCreation = sh::ShaderContainer::SPECULARCACHEEDGEVERTEXCREATION;
+      m_specularDebugCacheVertexIndexBufferCreation = sh::ShaderContainer::SPECULARDEBUGCACHEVERTEXINDEXBUFFERCREATION;
+
+      m_showLines = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SHOWLINES, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::POSITION));
+      m_specularJumpFloodAlgorithm = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPECULARJUMPFLOODALGORITHM, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      m_specularJumpFloodIslandRemovalAlgorithm = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPECULARJUMPFLOODISLANDREMOVALALGORITHM, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      m_showVoronoiDiagram = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SHOWVORONOIDIAGRAM, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+      m_showSpecularCacheDelaunayTriangulation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SHOWSPECULARCACHEDELAUNAYTRIANGULATION, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::POSITION));
+      m_specularLightMapDelaunayTriangulationCreation = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPECULARCACHEPROXYLIGHTMAPDELAUNAYTRIANGULATION, 
+        sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::POSITION) | sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::NORMAL) | sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::CACHEINDICES0) | sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::CACHEINDICES1));
+      m_indirectSpecularErrorSpotLighting = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::INDIRECTSPECULARERRORSPOTLIGHTING, sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1));
+
+      m_cachePositionBufferInnerX = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
+
+      m_cacheAtomicIndexMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width / m_cacheResolution, m_options->height / m_cacheResolution, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R32UI, GL_RED_INTEGER, 1, 32));
+      m_edgeCacheOffsetMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+      m_edgeCachePositionMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+      m_edgeCacheNormalMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+
+      m_vertexAtomicIndexMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width / m_vertexResolution, m_options->height / m_vertexResolution, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R32UI, GL_RED_INTEGER, 1, 32));
+      m_vertexOffsetMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+      m_vertexPositionMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+      m_vertexNormalMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
+
+      m_triangleIndexOffsets = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
+
+      m_voronoiDiagram.resize(2);
+      m_voronoiDiagram[m_ping] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
+      m_voronoiDiagram[m_pong] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
+
+      m_cacheIndices.resize(6);
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        m_cacheIndices[i] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_RGBA16UI, GL_RGBA_INTEGER, 4, 16));
+      }
 
       m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
-
-      m_cachePositionBuffer0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
-      m_cachePositionBuffer1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
-      m_cacheOffsets = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
-
-      m_cacheIndexMap.resize(4);
-      m_cacheIndexMap[0] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
-      m_cacheIndexMap[1] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
-      m_cacheIndexMap[2] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
-      m_cacheIndexMap[3] = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R16UI, GL_RED_INTEGER, 1, 16));
-
-      m_cacheIndexAtomicCounter = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_UNSIGNED_INT, GL_R32UI, GL_RED_INTEGER, 1, 32));
-
-      m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
-
       m_specularProxyLightQuad.setRenderTargets(1, m_specularLightMap);
 
       m_proxyLightPositionBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
       m_proxyLightLuminousFluxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      
       m_cachePositions.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
       m_cacheNormalMaterial.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
 
-      DrawArraysIndirectCommand drawCommand;
-      drawCommand.baseInstance = 0;
-      drawCommand.first = 0;
-      drawCommand.primCount = 1;
-      m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawArraysIndirectCommand), sizeof(DrawArraysIndirectCommand), GL_STATIC_DRAW, &drawCommand);
+      m_projectedVertexPositions.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec2i), m_options->specularCacheNumber * sizeof(util::vec2i), GL_STATIC_DRAW);
+      m_vertexPositions.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      m_vertexNormals.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+
+      //a simple planar crossing-free embedding of a graph G with N >= 3 vertices has at most 2 * N - 4 faces (from Euler Formula)
+      m_triangleIndexBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 3 * (2 * m_options->specularCacheNumber - 4) * sizeof(unsigned int), 3 * (2 * m_options->specularCacheNumber - 4) * sizeof(unsigned int), GL_STATIC_DRAW);
+
+      m_specularCacheIndexBuffer0.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      m_specularCacheIndexBuffer1.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+
+      m_cacheBBBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+
+      m_debugCacheVertexIndexPositions.createBuffer(GL_ARRAY_BUFFER, 16 * m_options->specularCacheNumber * sizeof(util::vec4f), 16 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+
+      DrawElementsIndirectCommand drawElementCommand;
+      drawElementCommand.baseInstance = 0;
+      drawElementCommand.baseVertex = 0;
+      drawElementCommand.first = 0;
+      drawElementCommand.primCount = 1;
+      m_triangleCommandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), GL_STATIC_DRAW, &drawElementCommand);
+
+      m_borderVertexNumber = 2 * (m_options->width + m_options->height) - 4;//-4 because the width and height resolution are sharing the same corner pixels
     }
 
     void IndirectSpecularReflections::updateBuffer(unsigned int reflectiveShadowMapNumber)
@@ -95,6 +159,7 @@ namespace he
 
     void IndirectSpecularReflections::generateReflectionCaches(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture3D> indirectLightPositions,
@@ -102,19 +167,35 @@ namespace he
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
       const GPUBuffer& samplingPatternBuffer)
     {
+      //CPUTIMER("MainloopCPUTimer", 0)
+      //GPUTIMER("MainloopOGLTimer", 1)
+
       createTubeData(indirectLightPositions, samplingPatternBuffer);
 
-      createSpecularCachePositions(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
+      createSpecularEdgeCaches(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
+      createEdgeVertices(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
+      createSpecularInnerCaches(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
 
-      createProxyLightOffsets();
+      createOffsets(m_edgeCacheOffsetMap);
+      createOffsets(m_vertexOffsetMap);
 
-      createSpecularCaches(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
+      createSpecularCacheBuffer(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
 
-      createProxyLights(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux, samplingPatternBuffer);
+      createProxyLightBuffer(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux, samplingPatternBuffer);
 
-      createSpecularCacheIndexMap(gBufferDepthMap, gBufferNormalMap);
+      createVertexBuffer(gBufferDepthMap, gBufferNormalMap);
 
-      createSpecularProxyLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
+      createVoronoiDiagram(m_projectedVertexPositions);
+
+      calculateTriangleIndexOffsets();
+
+      fillTriangleIndexBuffer();
+
+      createSpecularCacheIndices(gBufferDepthMap, gBufferNormalMap);
+
+      createTriangleSpecularProxyLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
+
+      specularErrorSpotLight(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
     }
 
     void IndirectSpecularReflections::createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions, const GPUBuffer& samplingPatternBuffer)
@@ -137,89 +218,217 @@ namespace he
       shader.useNoShader();
     }
 
-    void IndirectSpecularReflections::createSpecularCachePositions(
+    void IndirectSpecularReflections::createSpecularInnerCaches(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-
+      CPUTIMER("InnerCacheCreationCPUTimer", 0)
+      GPUTIMER("InnerCacheCreationOGLTimer", 1)
       float clearValue = 0.0f;
-      m_cachePositionBuffer0->clearTexture(&clearValue);
-      m_cachePositionBuffer1->clearTexture(&clearValue);
-      m_cacheOffsets->clearTexture(&clearValue);
+      m_cachePositionBufferInnerX->clearTexture(&clearValue);
 
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-      const sh::ComputeShader& specularXCreationShader = m_shaderContainer->getComputeShader(m_specularCacheXCreation);
-      specularXCreationShader.useShader();
+      util::vec2i stepSize[2];
+      stepSize[0] = util::vec2i(1, 0);
+      stepSize[1] = util::vec2i(0, 1);
+
+      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+
+      const sh::ComputeShader& specularCachePositionFilterXShader = m_shaderContainer->getComputeShader(m_specularCachePositionFilterX);
+      specularCachePositionFilterXShader.useShader();
+
+      m_cachePositionBufferInnerX->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R16F);
 
       gBufferDepthMap->setTexture(0, 0);
       gBufferNormalMap->setTexture(1, 1);
       gBufferMaterialMap->setTexture(2, 2);
 
       sh::ComputeShader::setUniform(3, GL_UNSIGNED_INT, &m_reflectiveShadowMapNumber);
-
-      m_cachePositionBuffer0->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
-
-      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      sh::ComputeShader::setUniform(4, GL_INT_VEC2, &stepSize[0][0]);
 
       sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-
-      m_cachePositionBuffer0->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+      m_cachePositionBufferInnerX->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R16F);
 
       gBufferMaterialMap->unsetTexture(2);
       gBufferNormalMap->unsetTexture(1);
       gBufferDepthMap->unsetTexture(0);
 
-      specularXCreationShader.useNoShader();
-
+      specularCachePositionFilterXShader.useNoShader();
 
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+      glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
+      m_edgeCacheOffsetMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+      m_edgeCachePositionMap->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCacheNormalMap->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_cacheAtomicIndexMap->bindImageTexture(3, 0, GL_READ_WRITE, GL_R32UI);
 
-      const sh::ComputeShader& specularYCreationShader = m_shaderContainer->getComputeShader(m_specularCacheYCreation);
-      specularYCreationShader.useShader();
+      m_vertexOffsetMap->bindImageTexture(4, 0, GL_WRITE_ONLY, GL_R32F);
+      m_vertexPositionMap->bindImageTexture(5, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexNormalMap->bindImageTexture(6, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexAtomicIndexMap->bindImageTexture(7, 0, GL_READ_WRITE, GL_R32UI);
+
+      const sh::ComputeShader& specularCachePositionFilterYShader = m_shaderContainer->getComputeShader(m_specularCachePositionFilterY);
+      specularCachePositionFilterYShader.useShader();
 
       gBufferDepthMap->setTexture(0, 0);
+      gBufferNormalMap->setTexture(1, 1);
+      gBufferMaterialMap->setTexture(2, 2);
 
-      m_cachePositionBuffer0->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
-      m_cachePositionBuffer1->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_R32F);
-      m_cacheOffsets->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R32F);
+      m_cachePositionBufferInnerX->setTexture(3, 3);
+
+      sh::ComputeShader::setUniform(4, GL_UNSIGNED_INT, &m_reflectiveShadowMapNumber);
+      sh::ComputeShader::setUniform(5, GL_INT_VEC2, &stepSize[1][0]);
+      sh::ComputeShader::setUniform(6, GL_UNSIGNED_INT, &m_cacheResolution);
+      sh::ComputeShader::setUniform(7, GL_UNSIGNED_INT, &m_vertexResolution);
 
       sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-      m_cacheOffsets->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R32F);
-      m_cachePositionBuffer1->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_R32F);
-      m_cachePositionBuffer0->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_cachePositionBufferInnerX->unsetTexture(3);
 
+      gBufferMaterialMap->unsetTexture(2);
+      gBufferNormalMap->unsetTexture(1);
       gBufferDepthMap->unsetTexture(0);
 
-      specularYCreationShader.useNoShader();
+      specularCachePositionFilterYShader.useNoShader();
+
+      m_vertexAtomicIndexMap->unbindImageTexture(7, 0, GL_READ_WRITE, GL_R32UI);
+      m_vertexNormalMap->unbindImageTexture(6, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexPositionMap->unbindImageTexture(5, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexOffsetMap->unbindImageTexture(4, 0, GL_WRITE_ONLY, GL_R32F);
+
+      m_cacheAtomicIndexMap->unbindImageTexture(3, 0, GL_READ_WRITE, GL_R32UI);
+      m_edgeCacheNormalMap->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCachePositionMap->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCacheOffsetMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+
+      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
-    void IndirectSpecularReflections::createProxyLightOffsets()
+    void IndirectSpecularReflections::createSpecularEdgeCaches(
+      util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap,
+      util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
+      float clearValue = 0.0f;
+      m_edgeCacheOffsetMap->clearTexture(&clearValue);
+
+      unsigned int clearIntValue = 0;
+      m_cacheAtomicIndexMap->clearTexture(&clearIntValue);
+
+      util::vec4f clearVectorVal = util::vec4f::identity();
+      m_edgeCachePositionMap->clearTexture(&clearVectorVal[0]);
+      m_edgeCacheNormalMap->clearTexture(&clearVectorVal[0]);
+      
+
+      const sh::ComputeShader& specularCacheEdgeCacheCreationShader = m_shaderContainer->getComputeShader(m_specularCacheEdgeCacheCreation);
+      specularCacheEdgeCacheCreationShader.useShader();
+
+      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_edgeCacheOffsetMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+      m_edgeCachePositionMap->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCacheNormalMap->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_cacheAtomicIndexMap->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_R32UI);
+
+      gBufferDepthMap->setTexture(0, 0);
+      gBufferNormalMap->setTexture(1, 1);
+      gBufferMaterialMap->setTexture(2, 2);
+      gBufferLinearDepthMap->setTexture(3, 3);
+
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+      gBufferLinearDepthMap->unsetTexture(3);
+      gBufferMaterialMap->unsetTexture(2);
+      gBufferNormalMap->unsetTexture(1);
+      gBufferDepthMap->unsetTexture(0);
+
+      m_cacheAtomicIndexMap->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_R32UI);
+      m_edgeCacheNormalMap->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCachePositionMap->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_edgeCacheOffsetMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+
+      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      specularCacheEdgeCacheCreationShader.useNoShader();
+    }
+
+    void IndirectSpecularReflections::createEdgeVertices(
+      util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap,
+      util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
+    {
+      float clearValue = 0.0f;
+      m_vertexOffsetMap->clearTexture(&clearValue);
+
+      unsigned int clearIntValue = 0;
+      m_vertexAtomicIndexMap->clearTexture(&clearIntValue);
+
+      util::vec4f clearVectorVal = util::vec4f::identity();
+      m_vertexPositionMap->clearTexture(&clearVectorVal[0]);
+      m_vertexNormalMap->clearTexture(&clearVectorVal[0]);
+
+      const sh::ComputeShader& specularCacheEdgeVertexCreationShader = m_shaderContainer->getComputeShader(m_specularCacheEdgeVertexCreation);
+      specularCacheEdgeVertexCreationShader.useShader();
+
+      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_vertexOffsetMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+      m_vertexPositionMap->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexNormalMap->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexAtomicIndexMap->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_R32UI);
+
+      gBufferDepthMap->setTexture(0, 0);
+      gBufferNormalMap->setTexture(1, 1);
+      gBufferMaterialMap->setTexture(2, 2);
+      gBufferLinearDepthMap->setTexture(3, 3);
+
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+      gBufferLinearDepthMap->unsetTexture(3);
+      gBufferMaterialMap->unsetTexture(2);
+      gBufferNormalMap->unsetTexture(1);
+      gBufferDepthMap->unsetTexture(0);
+
+      m_vertexAtomicIndexMap->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_R32UI);
+      m_vertexNormalMap->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexPositionMap->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
+      m_vertexOffsetMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
+
+      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      specularCacheEdgeVertexCreationShader.useNoShader();
+    }
+
+    void IndirectSpecularReflections::createOffsets(util::SharedPointer<db::Texture2D> offsetMap)
+    {
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
       const sh::ComputeShader& specularCacheOffsetUpSweepShader = m_shaderContainer->getComputeShader(m_specularCacheOffsetUpSweep);
       specularCacheOffsetUpSweepShader.useShader();
 
       unsigned int pixelNumber = m_options->width * m_options->height;
       unsigned int workGroupSize = 128;
+      const unsigned int maxWorkGroupNumber = 128;
       unsigned int workGroupNumber;
       unsigned int pixelStride = 1;
 
       do
       {
-        workGroupNumber = std::min<unsigned int>(ceil(pixelNumber / float(pixelStride * 2 * workGroupSize)), 128);
+        workGroupNumber = std::min<unsigned int>(ceil(pixelNumber / float(pixelStride * 2 * workGroupSize)), maxWorkGroupNumber);
 
-        m_cacheOffsets->bindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
+        offsetMap->bindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
 
         sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &pixelStride);
 
         sh::ComputeShader::dispatchComputeShader(workGroupNumber, 1, 1);
 
-        m_cacheOffsets->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
+        offsetMap->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -239,10 +448,10 @@ namespace he
       do
       {
         pixelStride = ceil(actualSampleRangePerWorkGroup / float(workGroupSize));
-        workGroupNumber = std::min<unsigned int>(ceil(pixelNumber / float(actualSampleRangePerWorkGroup)), 128);
+        workGroupNumber = std::min<unsigned int>(ceil(pixelNumber / float(actualSampleRangePerWorkGroup)), maxWorkGroupNumber);
         unsigned int pixelPerThread = ceil(roundedPixelNumber / float(pixelStride * workGroupNumber * workGroupSize));
 
-        m_cacheOffsets->bindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
+        offsetMap->bindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
 
         sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &pixelStride);
         sh::ComputeShader::setUniform(1, GL_UNSIGNED_INT, &actualSampleRangePerWorkGroup);
@@ -250,7 +459,7 @@ namespace he
 
         sh::ComputeShader::dispatchComputeShader(workGroupNumber, 1, 1);
 
-        m_cacheOffsets->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
+        offsetMap->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R32F);
 
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -260,23 +469,22 @@ namespace he
       specularCacheOffsetDownSweepShader.useNoShader();
 
       //std::vector<float> offsets(m_options->width * m_options->height);
-      //m_cacheOffsets->getTextureData(&offsets[0]);
-
-      //unsigned int endVal = offsets[m_options->width * m_options->height - 1];
+      //offsetMap->getTextureData(&offsets[0]);
+      //m_debugCacheNumber = offsets[m_options->width * m_options->height - 1];
       //unsigned int endVal1 = offsets[65535];
       //unsigned int endVal2 = offsets[131071];
       //unsigned int endVal3 = offsets[196607];
       //unsigned int endVal4 = offsets[8 * 65536 - 1];
     }
 
-    void IndirectSpecularReflections::createSpecularCaches(
+    void IndirectSpecularReflections::createSpecularCacheBuffer(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-      const sh::ComputeShader& specularCacheCreationShader = m_shaderContainer->getComputeShader(m_specularCacheCreation);
+      const sh::ComputeShader& specularCacheCreationShader = m_shaderContainer->getComputeShader(m_specularCacheBufferCreation);
       specularCacheCreationShader.useShader();
 
       gBufferDepthMap->setTexture(0, 0);
@@ -285,17 +493,17 @@ namespace he
 
       m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-      m_commandBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
 
-      m_cacheOffsets->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
-      m_cachePositionBuffer1->bindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCacheOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCachePositionMap->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCacheNormalMap->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
 
       sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-      m_cachePositionBuffer1->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
-      m_cacheOffsets->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCacheNormalMap->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCachePositionMap->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCacheOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
 
-      m_commandBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -314,15 +522,17 @@ namespace he
       //m_cacheNormalMaterial.getData(0, m_options->specularCacheNumber * sizeof(util::vec4f), &cacheNormalMat[0]);
     }
 
-    void IndirectSpecularReflections::createProxyLights(
+    void IndirectSpecularReflections::createProxyLightBuffer(
       util::SharedPointer<db::Texture3D> indirectLightPositions,
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
       const GPUBuffer& samplingPatternBuffer)
     {
+      CPUTIMER("ProxyLightCPUTimer", 0)
+      GPUTIMER("ProxyLightOGLTimer", 1)
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-      const sh::ComputeShader& specularProxyLightCreationShader = m_shaderContainer->getComputeShader(m_specularProxyLightCreation);
+      const sh::ComputeShader& specularProxyLightCreationShader = m_shaderContainer->getComputeShader(m_specularProxyLightBufferCreation);
       specularProxyLightCreationShader.useShader();
 
       indirectLightPositions->setTexture(0, 0);
@@ -337,11 +547,11 @@ namespace he
       m_proxyLightPositionBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
       m_proxyLightLuminousFluxBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
       
-      m_cacheOffsets->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCacheOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
 
       sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-      m_cacheOffsets->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCacheOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
 
       m_proxyLightLuminousFluxBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
       m_proxyLightPositionBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
@@ -364,116 +574,463 @@ namespace he
       //m_proxyLightLuminousFluxBuffer.getData(0, m_options->specularCacheNumber * sizeof(util::vec4f), &proxyLightLuminousFluxData[0]);
     }
 
-    void IndirectSpecularReflections::createSpecularCacheIndexMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    void IndirectSpecularReflections::createVertexBuffer(
+      util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      util::SharedPointer<db::Texture2D> gBufferNormalMap)
     {
-      unsigned int clearValue = 0;
-      m_cacheIndexMap[0]->clearTexture(&clearValue);
-      m_cacheIndexMap[1]->clearTexture(&clearValue);
-      m_cacheIndexMap[2]->clearTexture(&clearValue);
-      m_cacheIndexMap[3]->clearTexture(&clearValue);
+      unsigned int clearVal = UINT16_MAX;
+      m_voronoiDiagram[m_pong]->clearTexture(&clearVal);
+      m_voronoiDiagram[m_ping]->clearTexture(&clearVal);
 
-      m_cacheIndexAtomicCounter->clearTexture(&clearValue);
-
-
-      util::vec4f clearValue2 = util::vec4f(0.0f);
-      m_specularLightMap->clearTexture(&clearValue2[0]);
-
-
-      glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
-
-      m_specularIndexQuad.setRenderTargets(gBufferDepthMap, 1, m_specularLightMap);
-      m_specularIndexQuad.setWriteFrameBuffer();
-
-      glDepthMask(GL_FALSE);
-      glDepthFunc(GL_LEQUAL);
-
-      glBindVertexArray(m_pointVAO);
-      glEnableVertexAttribArray(sh::RenderShader::POSITION);
-      glEnableVertexAttribArray(sh::RenderShader::NORMAL);
-
-      const sh::RenderShader& specularCacheIndexMapCreationShader = m_shaderContainer->getRenderShader(m_specularCacheIndexMapCreation);
-      specularCacheIndexMapCreationShader.useShader();
-
-      m_cacheIndexMap[0]->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[1]->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[2]->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[3]->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_R16UI);
-
-      m_cacheIndexAtomicCounter->bindImageTexture(4, 0, GL_READ_WRITE, GL_R32UI);
+      const sh::ComputeShader& vertexBufferCreationShader = m_shaderContainer->getComputeShader(m_specularCacheVertexBufferCreation);
+      vertexBufferCreationShader.useShader();
 
       gBufferDepthMap->setTexture(0, 0);
       gBufferNormalMap->setTexture(1, 1);
+      sh::ComputeShader::setUniform(2, GL_UNSIGNED_INT, &m_borderVertexNumber);
 
-      m_cachePositions.bindVertexbuffer(0, 0, sizeof(util::vec4f));
-      m_cacheNormalMaterial.bindVertexbuffer(1, 0, sizeof(util::vec4f));
-      m_commandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
+      m_projectedVertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_vertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_vertexNormals.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      
+      m_vertexOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_vertexPositionMap->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexNormalMap->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_voronoiDiagram[m_pong]->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_R16UI);
 
-      glDrawArraysIndirect(GL_POINTS, nullptr);
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
-      m_commandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
-      m_cacheNormalMaterial.unbindVertexBuffer(1);
-      m_cachePositions.unbindVertexBuffer(0);
+      m_voronoiDiagram[m_pong]->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_R16UI);
+      m_vertexNormalMap->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexPositionMap->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+
+      m_vertexNormals.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_vertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_projectedVertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       gBufferNormalMap->unsetTexture(1);
       gBufferDepthMap->unsetTexture(0);
 
-      m_cacheIndexAtomicCounter->unbindImageTexture(4, 0, GL_READ_WRITE, GL_R32UI);
-
-      m_cacheIndexMap[3]->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[2]->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[1]->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_R16UI);
-      m_cacheIndexMap[0]->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R16UI);
-
-      specularCacheIndexMapCreationShader.useNoShader();
-
-      glDisableVertexAttribArray(sh::RenderShader::NORMAL);
-      glDisableVertexAttribArray(sh::RenderShader::POSITION);
-      glBindVertexArray(0);
-
-      glDepthFunc(GL_LESS);
-      glDepthMask(GL_TRUE);
-
-      m_specularIndexQuad.unsetWriteFrameBuffer();
+      vertexBufferCreationShader.useNoShader();
 
       //glMemoryBarrier(GL_ALL_BARRIER_BITS);
-      //std::vector<unsigned int> cacheIndices0(m_options->width * m_options->height);
-      //m_cacheIndexMap[0]->getTextureData(&cacheIndices0[0]);
+      //std::vector<util::vec2i> projectedCachePos(m_options->specularCacheNumber);
+      //m_projectedVertexPositions.getData(sizeof(util::vec2i) * 3580, m_options->specularCacheNumber * sizeof(util::vec2i) - sizeof(util::vec2i) * 3580, &projectedCachePos[0]);
 
-      //std::vector<unsigned int> cacheIndices1(m_options->width * m_options->height);
-      //m_cacheIndexMap[1]->getTextureData(&cacheIndices1[0]);
+      //std::vector<util::vec4f> cachePos(m_options->specularCacheNumber);
+      //m_vertexPositions.getData(sizeof(util::vec4f) * 3580, m_options->specularCacheNumber * sizeof(util::vec4f) - sizeof(util::vec4f) * 3580, &cachePos[0]);
 
-      //std::vector<unsigned int> cacheIndices2(m_options->width * m_options->height);
-      //m_cacheIndexMap[2]->getTextureData(&cacheIndices2[0]);
-
-      //std::vector<unsigned int> cacheIndices3(m_options->width * m_options->height);
-      //m_cacheIndexMap[3]->getTextureData(&cacheIndices3[0]);
+      //std::vector<util::vec4f> cacheNormalMat(m_options->specularCacheNumber);
+      //m_vertexNormals.getData(sizeof(util::vec4f) * 3580, m_options->specularCacheNumber * sizeof(util::vec4f) - sizeof(util::vec4f) * 3580, &cacheNormalMat[0]);
     }
 
-    void IndirectSpecularReflections::createSpecularProxyLightMap(
+    void IndirectSpecularReflections::createSpecularCacheIndices(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    {
+      util::vec4f clearValue2 = util::vec4f(0.0f);
+      m_specularLightMap->clearTexture(&clearValue2[0]);
+
+      {
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        ////glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        //const sh::ComputeShader& specularCacheBoundingBoxComputationShader = m_shaderContainer->getComputeShader(m_specularCacheBoundingBoxComputation);
+        //specularCacheBoundingBoxComputationShader.useShader();
+
+        //m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        //m_cacheBBBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+
+        //m_cacheOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+
+        //sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+        //m_cacheOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+
+        //m_cacheBBBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+        //m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        //specularCacheBoundingBoxComputationShader.useNoShader();
+
+
+        //glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        ////glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+        //std::vector<util::vec4f> cacheBBs(2 * m_options->specularCacheNumber);
+        //m_cacheBBBuffer.getData(0, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), &cacheBBs[0]);
+
+        //const sh::ComputeShader& specularCacheIndexListGenerationShader = m_shaderContainer->getComputeShader(m_specularCacheIndexListGeneration);
+        //specularCacheIndexListGenerationShader.useShader();
+
+        //m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        //m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+        //m_cacheBBBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+
+        //gBufferDepthMap->setTexture(0, 0);
+        //gBufferNormalMap->setTexture(1, 1);
+
+        //for(unsigned int i = 0; i < m_cacheIndexMap.size(); i++)
+        //{
+        //  m_cacheIndexMap[i]->bindImageTexture(i, 0, GL_WRITE_ONLY, GL_RGBA16UI);
+        //}
+
+        //m_cacheOffsetMap->bindImageTexture(2, 0, GL_READ_ONLY, GL_R32F);
+
+        //sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+        //m_cacheOffsetMap->unbindImageTexture(2, 0, GL_READ_ONLY, GL_R32F);
+
+        //for(unsigned int i = 0; i < m_cacheIndexMap.size(); i++)
+        //{
+        //  m_cacheIndexMap[i]->unbindImageTexture(i, 0, GL_WRITE_ONLY, GL_RGBA16UI);
+        //}
+
+        //gBufferNormalMap->unsetTexture(1);
+        //gBufferDepthMap->unsetTexture(0);
+
+        //m_cacheBBBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+        //m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+        //m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        //specularCacheIndexListGenerationShader.useNoShader();
+      }
+
+      CPUTIMER("CacheIndexCPUTimer", 0)
+      GPUTIMER("CacheIndexOGLTimer", 1)
+
+      util::vec4f clearVector(FLT_MAX);
+      m_specularCacheIndexBuffer0.clearBuffer(GL_RGBA, GL_RGBA32F, GL_FLOAT, &clearVector[0]);
+      m_specularCacheIndexBuffer1.clearBuffer(GL_RGBA, GL_RGBA32F, GL_FLOAT, &clearVector[0]);
+
+      glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+      //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+      const sh::ComputeShader& specularCacheIndexListGenerationShader = m_shaderContainer->getComputeShader(m_specularCacheIndexListGeneration);
+      specularCacheIndexListGenerationShader.useShader();
+
+      sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_borderVertexNumber);
+
+      m_edgeCacheOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCachePositionMap->bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCacheNormalMap->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_cacheAtomicIndexMap->bindImageTexture(3, 0, GL_READ_ONLY, GL_R32UI);
+
+      m_vertexOffsetMap->bindImageTexture(4, 0, GL_READ_ONLY, GL_R32F);
+      m_vertexPositionMap->bindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexNormalMap->bindImageTexture(6, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexAtomicIndexMap->bindImageTexture(7, 0, GL_READ_ONLY, GL_R32UI);
+
+      m_vertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_vertexNormals.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_specularCacheIndexBuffer0.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_specularCacheIndexBuffer1.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+
+      sh::ComputeShader::dispatchComputeShader(4096, 1, 1);
+
+      m_specularCacheIndexBuffer1.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
+      m_specularCacheIndexBuffer0.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_vertexNormals.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_vertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_vertexAtomicIndexMap->unbindImageTexture(7, 0, GL_READ_ONLY, GL_R32UI);
+      m_vertexNormalMap->unbindImageTexture(6, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexPositionMap->unbindImageTexture(5, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_vertexOffsetMap->unbindImageTexture(4, 0, GL_READ_ONLY, GL_R32F);
+
+      m_cacheAtomicIndexMap->unbindImageTexture(3, 0, GL_READ_ONLY, GL_R32UI);
+      m_edgeCacheNormalMap->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCachePositionMap->unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
+      m_edgeCacheOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+
+      specularCacheIndexListGenerationShader.useNoShader();
+
+      //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+      //std::vector<util::vec4f> cacheIndices0(m_options->specularCacheNumber);
+      //m_specularCacheIndexBuffer0.getData(sizeof(util::vec4f) * 3580, m_specularCacheIndexBuffer0.getBufferSize() - sizeof(util::vec4f) * 3580, &cacheIndices0[0]);
+
+      //std::vector<util::vec4f> cacheIndices1(m_options->specularCacheNumber);
+      //m_specularCacheIndexBuffer1.getData(sizeof(util::vec4f) * 3580, m_specularCacheIndexBuffer1.getBufferSize() - sizeof(util::vec4f) * 3580, &cacheIndices1[0]);
+    }
+
+    void IndirectSpecularReflections::createVoronoiDiagram(const GPUBuffer& projectedPositions)
+    {
+      {
+        unsigned int stepNumber = log(float(m_options->width)) / log(2.0f);
+
+        const sh::RenderShader& voronoiShader = m_shaderContainer->getRenderShader(m_specularJumpFloodAlgorithm);
+
+        voronoiShader.useShader();
+
+        projectedPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        for(int i = stepNumber - 1; i >= 0; i--)
+        {
+          m_voronoiRenderQuad.setRenderTargets(1, m_voronoiDiagram[m_ping]);
+
+          m_voronoiRenderQuad.setWriteFrameBuffer();
+
+          m_voronoiDiagram[m_pong]->setTexture(1, 1);
+
+          int stepSize = powf(2.0f, i);
+          sh::RenderShader::setUniform(0, GL_INT, &stepSize);
+
+          m_voronoiRenderQuad.render();
+
+          if(i > 0)
+          {
+            m_ping = m_pong;
+            m_pong = 1 - m_ping;
+          }
+        }
+
+        m_voronoiDiagram[m_pong]->unsetTexture(1);
+
+        projectedPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_voronoiRenderQuad.unsetWriteFrameBuffer();
+
+        voronoiShader.useNoShader();
+      }
+      //std::vector<unsigned int> indexData0(m_options->width * m_options->height);
+      //m_voronoiDiagram[m_pong]->getTextureData(&indexData0[0]);
+
+      //std::vector<unsigned int> indexData1(m_options->width * m_options->height);
+      //m_voronoiDiagram[m_ping]->getTextureData(&indexData1[0]);
+      {
+        const sh::RenderShader& voronoiIslandRemoveShader = m_shaderContainer->getRenderShader(m_specularJumpFloodIslandRemovalAlgorithm);
+
+        voronoiIslandRemoveShader.useShader();
+
+        projectedPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        for(unsigned int i = 0; i < 3; i++)
+        {
+          m_voronoiRenderQuad.setRenderTargets(1, m_voronoiDiagram[m_pong]);
+
+          m_voronoiRenderQuad.setWriteFrameBuffer();
+
+          m_voronoiDiagram[m_ping]->bindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+
+          m_voronoiRenderQuad.render();
+
+          m_voronoiDiagram[m_ping]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+
+          m_ping = m_pong;
+          m_pong = 1 - m_ping;
+
+          glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
+
+        projectedPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_voronoiRenderQuad.unsetWriteFrameBuffer();
+
+        voronoiIslandRemoveShader.useNoShader();
+      }
+
+      {
+        const sh::ComputeShader& voronoiCornerRepairShader = m_shaderContainer->getComputeShader(m_specularCacheVoronoiDiagramCornerRepair);
+        voronoiCornerRepairShader.useShader();
+
+        projectedPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_voronoiDiagram[m_ping]->bindImageTexture(0, 0, GL_READ_WRITE, GL_R16UI);
+
+        sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_borderVertexNumber);
+
+        sh::ComputeShader::dispatchComputeShader(4, 1, 1);
+
+        m_voronoiDiagram[m_ping]->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R16UI);
+
+        projectedPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        voronoiCornerRepairShader.useNoShader();
+      }
+
+      //std::vector<unsigned int> indexData1(m_options->width * m_options->height);
+      //m_voronoiDiagram[m_ping]->getTextureData(&indexData1[0]);
+    }
+
+    void IndirectSpecularReflections::calculateTriangleIndexOffsets()
+    {
+      float clearValue = 0.0;
+      m_triangleIndexOffsets->clearTexture(&clearValue);
+
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+      const sh::ComputeShader& specularCacheTriangleIndexOffsetCalculationShader = m_shaderContainer->getComputeShader(m_specularCacheTriangleIndexOffsetCalculation);
+      specularCacheTriangleIndexOffsetCalculationShader.useShader();
+
+      m_voronoiDiagram[m_ping]->bindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+      m_triangleIndexOffsets->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_R32F);
+
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+      m_triangleIndexOffsets->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_R32F);
+      m_voronoiDiagram[m_ping]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+
+      specularCacheTriangleIndexOffsetCalculationShader.useNoShader();
+
+      createOffsets(m_triangleIndexOffsets);
+    }
+
+    void IndirectSpecularReflections::fillTriangleIndexBuffer()
+    {
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+      unsigned int clearVal = 0;
+      m_triangleIndexBuffer.clearBuffer(GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, &clearVal);//eliminates the problem of bad triangles appearing somewhere, but it shouldnt be neccessary because every index which is being used will be overwritten anyway, except there is a bug in the offset or index calculation
+
+      const sh::ComputeShader& specularCacheFillTriangleIndices = m_shaderContainer->getComputeShader(m_specularCacheFillTriangleIndices);
+      specularCacheFillTriangleIndices.useShader();
+
+      m_voronoiDiagram[m_ping]->bindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+      m_triangleIndexOffsets->bindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+
+      m_triangleIndexBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_triangleCommandBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+      m_triangleCommandBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_triangleIndexBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_triangleIndexOffsets->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+      m_voronoiDiagram[m_ping]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+
+      specularCacheFillTriangleIndices.useNoShader();
+
+      //std::vector<unsigned int> offsets(3 * (2 * m_options->specularCacheNumber - 4));
+      //m_triangleIndexBuffer.getData(0, m_triangleIndexBuffer.getBufferSize(), &offsets[0]);
+
+      //DrawElementsIndirectCommand command;
+      //m_triangleCommandBuffer.getData(0, sizeof(DrawElementsIndirectCommand), &command);
+    }
+
+    void IndirectSpecularReflections::createTriangleSpecularProxyLightMap(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
-      util::SharedPointer<db::Texture2D> gBufferMaterialMap)
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap,
+      util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
       util::vec4f clearValue = util::vec4f(0.0f);
       m_specularLightMap->clearTexture(&clearValue[0]);
 
+      util::vec4ui clearVectorValueUI = util::vec4ui(UINT32_MAX);
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        m_cacheIndices[i]->clearTexture(&clearVectorValueUI[0]);
+      }
+
+      //glMemoryBarrier(GL_ALL_BARRIER_BITS);
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+      glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       m_specularProxyLightQuad.setWriteFrameBuffer();
 
-      const sh::RenderShader& specularLightMapCreationShader = m_shaderContainer->getRenderShader(m_specularLightMapCreation);
-      specularLightMapCreationShader.useShader();
+      glDisable(GL_DEPTH_TEST);
+      glDepthMask(GL_FALSE);
+      glDepthFunc(GL_ALWAYS);
+
+      const sh::RenderShader& delaunayShader = m_shaderContainer->getRenderShader(m_specularLightMapDelaunayTriangulationCreation);
+
+      delaunayShader.useShader();
+
+      glBindVertexArray(m_triangleVAO);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
+      glEnableVertexAttribArray(sh::RenderShader::NORMAL);
+      glEnableVertexAttribArray(sh::RenderShader::CACHEINDICES0);
+      glEnableVertexAttribArray(sh::RenderShader::CACHEINDICES1);
+
+      m_vertexPositions.bindVertexbuffer(0, 0, sizeof(util::vec4f));
+      m_vertexNormals.bindVertexbuffer(1, 0, sizeof(util::vec4f));
+      m_specularCacheIndexBuffer0.bindVertexbuffer(2, 0, sizeof(util::vec4f));
+      m_specularCacheIndexBuffer1.bindVertexbuffer(3, 0, sizeof(util::vec4f));
+
+      gBufferDepthMap->setTexture(0, 0);
+      gBufferNormalMap->setTexture(1, 1);
+      gBufferMaterialMap->setTexture(2, 2);
+      gBufferLinearDepthMap->setTexture(3, 3);
+
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        m_cacheIndices[i]->bindImageTexture(i, 0, GL_WRITE_ONLY, GL_RGBA16UI);
+      }
+
+      m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_proxyLightPositionBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_proxyLightLuminousFluxBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+
+      m_triangleCommandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
+
+      m_triangleIndexBuffer.bindBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+      glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr);
+
+      m_triangleIndexBuffer.unbindBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+      m_triangleCommandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
+
+      m_proxyLightLuminousFluxBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_proxyLightPositionBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        m_cacheIndices[i]->unbindImageTexture(i, 0, GL_WRITE_ONLY, GL_RGBA16UI);
+      }
+
+      gBufferLinearDepthMap->unsetTexture(3);
+      gBufferMaterialMap->unsetTexture(2);
+      gBufferNormalMap->unsetTexture(1);
+      gBufferDepthMap->unsetTexture(0);
+
+      m_specularCacheIndexBuffer1.unbindVertexBuffer(3);
+      m_specularCacheIndexBuffer0.unbindVertexBuffer(2);
+      m_vertexNormals.unbindVertexBuffer(1);
+      m_vertexPositions.unbindVertexBuffer(0);
+
+      glDisableVertexAttribArray(sh::RenderShader::CACHEINDICES1);
+      glDisableVertexAttribArray(sh::RenderShader::CACHEINDICES0);
+      glDisableVertexAttribArray(sh::RenderShader::NORMAL);
+      glDisableVertexAttribArray(sh::RenderShader::POSITION);
+      glBindVertexArray(0);
+
+      delaunayShader.useNoShader();
+
+      glDepthFunc(GL_LESS);
+      glDepthMask(GL_TRUE);
+      glEnable(GL_DEPTH_TEST);
+
+      m_specularProxyLightQuad.unsetWriteFrameBuffer();
+    }
+
+    void IndirectSpecularReflections::specularErrorSpotLight(
+      util::SharedPointer<db::Texture2D> gBufferDepthMap,
+      util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferMaterialMap)
+    {
+      glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+
+      m_specularProxyLightQuad.setWriteFrameBuffer();
+
+      const sh::RenderShader& errorSpotLightShader = m_shaderContainer->getRenderShader(m_indirectSpecularErrorSpotLighting);
+      errorSpotLightShader.useShader();
 
       gBufferDepthMap->setTexture(0, 0);
       gBufferNormalMap->setTexture(1, 1);
       gBufferMaterialMap->setTexture(2, 2);
 
-      m_cacheIndexMap[0]->bindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[1]->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[2]->bindImageTexture(2, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[3]->bindImageTexture(3, 0, GL_READ_ONLY, GL_R16UI);
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        m_cacheIndices[i]->setTexture(3 + i, 3 + i);
+        //m_cacheIndices[i]->bindImageTexture(i, 0, GL_READ_ONLY, GL_RGBA16UI);
+      }
 
       m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
@@ -487,33 +1044,224 @@ namespace he
       m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-      m_cacheIndexMap[3]->unbindImageTexture(3, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[2]->unbindImageTexture(2, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[1]->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16UI);
-      m_cacheIndexMap[0]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R16UI);
+      for(unsigned int i = 0; i < 6; i++)
+      {
+        //m_cacheIndices[i]->unbindImageTexture(i, 0, GL_READ_ONLY, GL_RGBA16UI);
+        m_cacheIndices[i]->unsetTexture(3 + i);
+      }
 
-      gBufferMaterialMap->setTexture(2, 2);
-      gBufferNormalMap->setTexture(1, 1);
-      gBufferDepthMap->setTexture(0, 0);
+      gBufferMaterialMap->unsetTexture(2);
+      gBufferNormalMap->unsetTexture(1);
+      gBufferDepthMap->unsetTexture(0);
 
-      specularLightMapCreationShader.useNoShader();
+      errorSpotLightShader.useNoShader();
 
       m_specularProxyLightQuad.unsetWriteFrameBuffer();
     }
 
-    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCachePositionsMap() const
+    void IndirectSpecularReflections::createCacheVertexDebugLines()
     {
-      return m_cachePositionBuffer1;
+      util::vec4f clearVal = util::vec4f(0.0f);
+      m_debugCacheVertexIndexPositions.clearBuffer(GL_RGBA, GL_RGBA32F, GL_FLOAT, &clearVal[0]);
+
+      const sh::ComputeShader& specularDebugCacheVertexIndexBufferCreation = m_shaderContainer->getComputeShader(m_specularDebugCacheVertexIndexBufferCreation);
+      specularDebugCacheVertexIndexBufferCreation.useShader();
+
+      sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_borderVertexNumber);
+
+      m_vertexOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+      m_edgeCacheOffsetMap->bindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+
+      m_vertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+      m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_specularCacheIndexBuffer0.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_specularCacheIndexBuffer1.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_debugCacheVertexIndexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+
+      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+
+      m_debugCacheVertexIndexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
+      m_specularCacheIndexBuffer1.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      m_specularCacheIndexBuffer0.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
+      m_cachePositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
+      m_vertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+      m_edgeCacheOffsetMap->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R32F);
+      m_vertexOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
+
+      specularDebugCacheVertexIndexBufferCreation.useNoShader();
     }
 
-    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugIndexCounterMap() const
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCachePositionsMapFilterInnerX() const
     {
-      return m_cacheIndexAtomicCounter;
+      return m_cachePositionBufferInnerX;
     }
 
     util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getSpecularLightMap() const
     {
       return m_specularLightMap; 
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugEdgeCachePositions() const
+    {
+      return m_edgeCachePositionMap;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugEdgeCacheNormals() const
+    {
+      return m_edgeCacheNormalMap;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugVertexBlockNumber() const
+    {
+      return m_vertexAtomicIndexMap;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCacheBlockNumber() const
+    {
+      return m_cacheAtomicIndexMap;
+    }
+
+    void IndirectSpecularReflections::showVoronoiDiagram()
+    {
+      std::vector<float> offsets(m_options->width * m_options->height);
+      m_vertexOffsetMap->getTextureData(&offsets[0]);
+
+      unsigned int vertexNumber = offsets[m_options->width * m_options->height - 1] + m_borderVertexNumber;
+
+      if(vertexNumber > 0)
+      {
+        std::vector<util::vec3ub> siteColors(vertexNumber);
+        for(unsigned int i = 0; i < siteColors.size(); i++)
+        {
+          siteColors[i] = util::vec3ub(255 * util::RandomSequenceGenerator::halton(i + 1, 2), 255 * util::RandomSequenceGenerator::halton(i + 1, 3), 255 * util::RandomSequenceGenerator::halton(i + 1, 5));
+        }
+
+        m_voronoiColorTexture = util::SharedPointer<db::Texture1D>(new db::Texture1D(siteColors.size(), GL_TEXTURE_1D, GL_UNSIGNED_BYTE, GL_RGB8, GL_RGB, 3, 24, &siteColors[0]));
+      }
+
+      const sh::RenderShader& showVoronoiShader = m_shaderContainer->getRenderShader(m_showVoronoiDiagram);
+
+      showVoronoiShader.useShader();
+
+      sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &vertexNumber);
+
+      m_voronoiDiagram[m_ping]->setTexture(0, 0);
+      m_voronoiColorTexture->setTexture(1, 1);
+
+      m_voronoiRenderQuad.render();
+
+      m_voronoiColorTexture->unsetTexture(1);
+      m_voronoiDiagram[m_ping]->unsetTexture(0);
+
+      showVoronoiShader.useNoShader();
+    }
+
+    void IndirectSpecularReflections::showIncompleteVoronoiDiagram()
+    {
+      std::vector<float> offsets(m_options->width * m_options->height);
+      m_vertexOffsetMap->getTextureData(&offsets[0]);
+
+      unsigned int vertexNumber = offsets[m_options->width * m_options->height - 1] + m_borderVertexNumber;
+
+      if(vertexNumber > 0)
+      {
+        std::vector<util::vec3ub> siteColors(vertexNumber);
+        for(unsigned int i = 0; i < siteColors.size(); i++)
+        {
+          siteColors[i] = util::vec3ub(255 * util::RandomSequenceGenerator::halton(i + 1, 2), 255 * util::RandomSequenceGenerator::halton(i + 1, 3), 255 * util::RandomSequenceGenerator::halton(i + 1, 5));
+        }
+
+        m_voronoiColorTexture = util::SharedPointer<db::Texture1D>(new db::Texture1D(siteColors.size(), GL_TEXTURE_1D, GL_UNSIGNED_BYTE, GL_RGB8, GL_RGB, 3, 24, &siteColors[0]));
+      }
+
+      const sh::RenderShader& showVoronoiShader = m_shaderContainer->getRenderShader(m_showVoronoiDiagram);
+
+      showVoronoiShader.useShader();
+
+      sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &vertexNumber);
+
+      m_voronoiDiagram[m_pong]->setTexture(0, 0);
+      m_voronoiColorTexture->setTexture(1, 1);
+
+      m_voronoiRenderQuad.render();
+
+      m_voronoiColorTexture->unsetTexture(1);
+      m_voronoiDiagram[m_pong]->unsetTexture(0);
+
+      showVoronoiShader.useNoShader();
+    }
+
+    void IndirectSpecularReflections::showDelaunayTriangulation()
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+      glDisable(GL_DEPTH_TEST);
+      glDepthMask(GL_FALSE);
+      glDepthFunc(GL_ALWAYS);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      const sh::RenderShader& delaunayShader = m_shaderContainer->getRenderShader(m_showSpecularCacheDelaunayTriangulation);
+
+      delaunayShader.useShader();
+
+      glBindVertexArray(m_simpleTriangleVAO);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
+
+      m_vertexPositions.bindVertexbuffer(0, 0, sizeof(util::vec4f));
+
+      m_triangleCommandBuffer.bindBuffer(GL_DRAW_INDIRECT_BUFFER);
+
+      m_triangleIndexBuffer.bindBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+      glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr);
+
+      m_triangleIndexBuffer.unbindBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+      m_triangleCommandBuffer.unbindBuffer(GL_DRAW_INDIRECT_BUFFER);
+
+      m_vertexPositions.unbindVertexBuffer(0);
+
+      glDisableVertexAttribArray(sh::RenderShader::POSITION);
+      glBindVertexArray(0);
+
+      delaunayShader.useNoShader();
+
+      glDepthFunc(GL_LESS);
+      glDepthMask(GL_TRUE);
+      glEnable(GL_DEPTH_TEST);
+
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    void IndirectSpecularReflections::showVertexCacheIndexLines()
+    {
+      createCacheVertexDebugLines();
+
+      std::vector<float> offsets(m_options->width * m_options->height);
+      m_vertexOffsetMap->getTextureData(&offsets[0]);
+
+      unsigned int vertexNumber = 2 * 8 * offsets[m_options->width * m_options->height - 1];
+
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      const sh::RenderShader& showLines = m_shaderContainer->getRenderShader(m_showLines);
+
+      showLines.useShader();
+
+      glBindVertexArray(m_simpleTriangleVAO);
+      glEnableVertexAttribArray(sh::RenderShader::POSITION);
+
+      m_debugCacheVertexIndexPositions.bindVertexbuffer(0, 0, sizeof(util::vec4f));
+
+      glDrawArrays(GL_LINES, 0, vertexNumber);
+
+      m_debugCacheVertexIndexPositions.unbindVertexBuffer(0);
+
+      glDisableVertexAttribArray(sh::RenderShader::POSITION);
+      glBindVertexArray(0);
+
+      showLines.useNoShader();
     }
   }
 }

@@ -19,5 +19,5 @@ void main()
 	
 	imageStore(siteCoordinates2D, int(gsout_vertexIndex), vec4(gsout_site2D, 0, 0));
 	
-	fsout_vertexIndex = gsout_vertexIndex + 1;
+	fsout_vertexIndex = gsout_vertexIndex + 1;//WHY PLUS ONE?!
 }

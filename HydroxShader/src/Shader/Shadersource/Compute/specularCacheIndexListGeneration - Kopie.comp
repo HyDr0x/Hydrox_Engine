@@ -1,0 +1,200 @@
+#version 440 core
+
+#define TILESIZE 16
+#define WORKGROUPSIZE (TILESIZE * TILESIZE)
+#define INT32_MAX 2147483647
+#define INDEXLISTSIZE 3072
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+
+layout(rgba16ui, binding = 0) writeonly uniform uimage2D cacheIndexMap0;
+layout(rgba16ui, binding = 1) writeonly uniform uimage2D cacheIndexMap1;
+
+layout(r32f, binding = 2) readonly uniform image2D cacheOffsetMap;
+
+layout(std430, binding = 0) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 1) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormalMaterials[];
+};
+
+layout(std430, binding = 2) buffer CacheBoundingBoxBuffer
+{
+	vec4 cacheBBox[];
+};
+
+layout(local_size_x = TILESIZE, local_size_y = TILESIZE) in;
+
+shared uint minDepth;
+shared uint maxDepth;
+shared uint lightIndexCounter;
+shared uint cacheIndices[INDEXLISTSIZE];
+shared vec3 cachePosition[WORKGROUPSIZE];
+shared vec3 cacheNormal[WORKGROUPSIZE];
+
+void main()
+{
+	const uint localIndex = gl_LocalInvocationIndex;
+	const uvec2 localIDx = gl_LocalInvocationID.xy;
+
+	const uvec2 tileNumber = uvec2(uint(ceil(width / float(TILESIZE))), uint(ceil(height / float(TILESIZE))));
+	const uint tilesPerGroup = uint(ceil((tileNumber.x * tileNumber.y) / float(gl_NumWorkGroups.x)));
+	const uint startTileIndex = gl_WorkGroupID.x * tilesPerGroup;
+	const uint endTileIndex = startTileIndex + tilesPerGroup;
+	
+	const uint cacheNumber = uint(imageLoad(cacheOffsetMap, ivec2(width - 1, height - 1)).x);
+	const uint cachesPerThread = uint((cacheNumber + WORKGROUPSIZE - 1) / float(WORKGROUPSIZE));
+	const uint startCacheIndex = localIndex * cachesPerThread;
+	const uint endCacheIndex = startCacheIndex + cachesPerThread;
+		
+	const uint lightIndicesPerThread = uint(ceil(INDEXLISTSIZE / float(WORKGROUPSIZE)));
+	const uint startLightIndex = localIndex * lightIndicesPerThread;
+	const uint endLightIndex = startLightIndex + lightIndicesPerThread;
+		
+	for(uint i = startTileIndex; i < endTileIndex; i++)
+	{
+		if(localIndex == 0)
+		{
+			minDepth = 0xFFFFFFFF;
+			maxDepth = 0;
+			lightIndexCounter = 0;
+		}
+
+		for(uint j = startLightIndex; j < endLightIndex; j++)
+		{
+			cacheIndices[j] = INT32_MAX;
+		}
+		
+		memoryBarrierShared();
+		barrier();
+	
+		ivec2 tileIndex = ivec2(mod(i, tileNumber.x), i / tileNumber.x);
+		ivec2 texCoord = tileIndex * TILESIZE + ivec2(localIDx);
+		
+		if(texCoord.x >= width || texCoord.y >= height)
+		{
+			//return;
+		}
+
+		float depth = texelFetch(gBufferDepthSampler, texCoord, 0).x;
+		
+		atomicMin(minDepth, floatBitsToUint(depth));
+		atomicMax(maxDepth, floatBitsToUint(depth));
+		
+		memoryBarrierShared();
+		barrier();
+		
+		vec3 tileMinBB = vec3(tileIndex * TILESIZE, uintBitsToFloat(minDepth));
+		vec3 tileMaxBB = vec3((tileIndex + ivec2(1)) * TILESIZE, uintBitsToFloat(maxDepth));
+		
+		/*
+		for(uint j = startCacheIndex; j < endCacheIndex; j++)
+		{
+			vec4 cacheMinBB = cacheBBox[2 * j];
+			vec4 cacheMaxBB = cacheBBox[2 * j + 1];
+			
+			if(!(cacheMaxBB.x < tileMinBB.x || cacheMaxBB.y < tileMinBB.y || cacheMaxBB.z < tileMinBB.z || 
+					 cacheMinBB.x > tileMaxBB.x || cacheMinBB.y > tileMaxBB.y || cacheMinBB.z > tileMaxBB.z))
+			{
+				cacheIndices[atomicAdd(lightIndexCounter, 1)] = j;
+				//cacheIndices[atomicAdd(lightIndexCounter, 1)] = uint(cacheMaxBB.x + cacheMinBB.x + tileMinBB.y + tileMaxBB.y);
+				//cacheIndices[0] = j;
+			}
+		}
+		*/
+		
+		/*
+		for(uint j = 0; j < cachesPerThread; j++)
+		{
+			uint index = j * WORKGROUPSIZE + localIndex;
+			cachePosition[localIndex] = cacheBBox[2 * index].xyz;
+			cacheNormal[localIndex] = cacheBBox[2 * index + 1].xyz;
+		
+			memoryBarrierShared();
+			barrier();
+		
+			for(uint k = 0; k < WORKGROUPSIZE; k++)
+			{
+				if(!(cacheNormal[k].x < tileMinBB.x || cacheNormal[k].y < tileMinBB.y || cacheNormal[k].z < tileMinBB.z || 
+					   cachePosition[k].x > tileMaxBB.x || cachePosition[k].y > tileMaxBB.y || cachePosition[k].z > tileMaxBB.z))
+				{
+					cacheIndices[atomicAdd(lightIndexCounter, 1)] = j;
+					//cacheIndices[atomicAdd(lightIndexCounter, 1)] = uint(cacheMaxBB.x + cacheMinBB.x + tileMinBB.y + tileMaxBB.y);
+					//cacheIndices[0] = j;
+				}
+			}
+		}*/
+				
+		
+		//for(uint j = localIndex; j < INDEXLISTSIZE; j += WORKGROUPSIZE)
+		for(uint j = 0; j < INDEXLISTSIZE; j++)
+		{
+			cacheIndices[j] = j;
+		}
+		
+		memoryBarrierShared();
+		barrier();
+		
+		vec4 fragmentPosition3D = vec4(texCoord.x / float(width), texCoord.y / float(height), depth, 1.0) * 2.0 - 1.0;
+		fragmentPosition3D = invViewProjectionMatrix * fragmentPosition3D;
+		fragmentPosition3D = fragmentPosition3D / fragmentPosition3D.w;
+	
+		vec3 normal = normalize(texelFetch(gBufferNormalSampler, texCoord, 0).xyz * 2.0 - 1.0);
+		
+		uint indices[8] = uint[](INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX);
+		float weights[8] = float[](INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX);
+
+		for(uint j = 0; j < cachesPerThread; j++)
+		{
+			uint index = cacheIndices[j * WORKGROUPSIZE + localIndex];
+			cachePosition[localIndex] = specularCachePositions[index].xyz;
+			cacheNormal[localIndex] = decodeNormal(specularCacheNormalMaterials[index].xy);
+		
+			memoryBarrierShared();
+			barrier();
+		
+			for(uint k = 0; k < WORKGROUPSIZE; k++)
+			{
+				if(cacheIndices[j * WORKGROUPSIZE + k] < INT32_MAX)
+				{
+					float cachePosDistance = distance(cachePosition[k], fragmentPosition3D.xyz);
+					float weight = max(cachePosDistance * cachePosDistance, 0.0) / max(dot(normal, cacheNormal[k]), 0.0001);
+					
+					float maxWeight = weights[0];
+					uint maximumIndex = 0;
+					for(uint l = 1; l < 8; l++)
+					{
+						//int compareVal = int(sign(ceil(weights[k] - weights[maximumIndex])));
+						//maximumIndex = ((compareVal + 1) / 2) * k + (((compareVal * - 1) + 1) / 2) * maximumIndex;
+						
+						if(maxWeight < weights[l])
+						{
+							maxWeight = weights[l];
+							maximumIndex = l;
+						}
+					}
+					
+					if(weights[maximumIndex] > weight)
+					{
+						indices[maximumIndex] = cacheIndices[j * WORKGROUPSIZE + k];
+						weights[maximumIndex] = weight;
+					}
+				}
+			}
+		}
+		
+		imageStore(cacheIndexMap0, texCoord, uvec4(indices[0], indices[1], indices[2], indices[3]));
+		imageStore(cacheIndexMap1, texCoord, uvec4(indices[4], indices[5], indices[6], indices[7]));
+		
+		//imageStore(cacheIndexMap0, texCoord, uvec4(0, 1, 2, 3));
+		//imageStore(cacheIndexMap1, texCoord, uvec4(4, 5, 6, 7));
+	}
+}

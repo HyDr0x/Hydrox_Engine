@@ -2,13 +2,10 @@
 
 #define SAMPLENUMBER
 #define PI 3.14159265359
-#define EPSILON 0.00001
-#define INT32_MAX 2147483647
 #define WORKGROUPSIZE 128
 
 #include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
 #include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalAreaSampler;
@@ -16,7 +13,7 @@ layout(location = 2) uniform sampler2DArray indirectLightLuminousFluxSampler;
 
 layout(location = 3) uniform uint reflectiveShadowMapNumber;
 
-layout(r32f, binding = 0) readonly uniform image2D cacheOffsetSampler;
+layout(r32f, binding = 0) readonly uniform image2D edgeCacheOffsetSampler;
 
 layout(std430, binding = 0) buffer samplingPattern
 {
@@ -53,7 +50,8 @@ void main()
 {
 	uint idx = gl_GlobalInvocationID.x;
 
-	const uint cacheNumber = uint(imageLoad(cacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	const uint cacheNumber = uint(imageLoad(edgeCacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	
 	const uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
 	const uint cacheOffset = idx * cachesPerThread;
 	const uint cacheEnd = cacheOffset + cachesPerThread;
@@ -70,8 +68,8 @@ void main()
 			cache.position = specularCachePositions[i];
 			vec4 cacheNormalMaterial = specularCacheNormalMaterial[i];
 			
-			cache.normal.xyz = decodeNormal(cacheNormalMaterial.xy);
-			cacheMaterial = cacheNormalMaterial.zw;
+			cache.normal.xyz = normalize(cacheNormalMaterial.xyz);
+			cacheMaterial = vec2(cache.position.w, cacheNormalMaterial.w);
 
 			frg = cacheMaterial.x * (cacheMaterial.y + 2.0) / (2.0 * PI);
 			
@@ -81,7 +79,7 @@ void main()
 		for(uint k = 0; k < reflectiveShadowMapNumber; k++)
 		{
 			float validLightSamples = 0.0;
-			const uint cacheLoops = uint(ceil(SAMPLENUMBER / WORKGROUPSIZE));
+			const uint cacheLoops = uint((SAMPLENUMBER + WORKGROUPSIZE - 1)/ WORKGROUPSIZE);
 			
 			for(uint j = 0; j < cacheLoops; j++)
 			{
@@ -124,8 +122,8 @@ void main()
 						float quadDistance = dot(lightDir, lightDir);
 						lightDir = normalize(lightDir);
 						
-						float reflAngle = pow(max(dot(reflect(-lightDir, cache.normal.xyz), camDir), 0.0), cacheMaterial.y);
-						
+						float reflAngle = max(pow(dot(reflect(-lightDir, cache.normal.xyz), camDir), cacheMaterial.y), 0.0);
+
 						float F = (max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0)) / (lightArea + PI * quadDistance);
 						
 						float Wg = reflAngle * F;
@@ -137,6 +135,9 @@ void main()
 						Wgesg += Wg;
 					}
 				}
+				
+				memoryBarrierShared();
+				barrier();
 			}
 
 			Log *= (float(SAMPLENUMBER) / validLightSamples);
@@ -144,12 +145,12 @@ void main()
 
 		if(i < cacheNumber)
 		{
-			Xpg = Wgesg > 0 ? Xpg / Wgesg : vec3(0);
+			Xpg = Wgesg > 0.0 ? Xpg / Wgesg : vec3(0);
 
 			vec3 lightDirG = Xpg - cache.position.xyz;
 			float lightQuadDistance = dot(lightDirG, lightDirG);
 			lightDirG = normalize(lightDirG);
-			float reflAngleG = pow(max(dot(reflect(-lightDirG, cache.normal.xyz), camDir), 0.0001), cacheMaterial.y);
+			float reflAngleG = max(pow(dot(reflect(-lightDirG, cache.normal.xyz), camDir), cacheMaterial.y), 0.0001);
 			float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
 			
 			proxyLightPosition[i] = vec4(Xpg, sqrt(lightQuadDistance));

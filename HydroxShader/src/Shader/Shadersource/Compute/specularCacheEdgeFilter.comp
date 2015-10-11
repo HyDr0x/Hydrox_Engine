@@ -1,0 +1,91 @@
+#version 440 core
+
+#define TILESIZE 16
+#define WORKGROUPSIZE (TILESIZE * TILESIZE)
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+layout(location = 2) uniform sampler2D gBufferMaterialSampler;
+
+layout(location = 3) uniform vec2 normalizedSampleDirection;
+layout(location = 4) uniform ivec2 sampleDirection;
+
+layout(r8ui, binding = 0) uniform writeonly uimage2D edgeImage;
+
+layout(local_size_x = TILESIZE, local_size_y = TILESIZE) in;
+
+shared float groupDepth[WORKGROUPSIZE];
+shared vec3 groupNormal[WORKGROUPSIZE];
+shared float groupRoughness[WORKGROUPSIZE];
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localIDx = gl_LocalInvocationIndex;
+	const uvec2 localIDxVec = gl_LocalInvocationID.xy;
+	
+	const uvec2 tileNumber = uvec2(width + TILESIZE - 1, height + TILESIZE - 1) / TILESIZE;	
+	const uint tilesPerThread = (tileNumber.x * tileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint startIndex = gl_WorkGroupID.x * tilesPerThread;
+	const uint endIndex = startIndex + tilesPerThread;
+
+	for(uint i = startIndex; i < endIndex; i++)
+	{
+		ivec2 texCoord = ivec2(mod(i, tileNumber.x) * TILESIZE + localIDxVec.x, (i / tileNumber.x) * TILESIZE + localIDxVec.y);
+		vec2 texCoordNormalized = vec2(texCoord / vec2(width, height));
+		
+		ivec2 nextTexCoord = texCoord + sampleDirection;
+
+		float depth = texture(gBufferDepthSampler, texCoordNormalized).x;
+		groupDepth[localIDx] = depth;
+
+		vec3 normal = texture(gBufferNormalSampler, texCoordNormalized).xyz * 2.0 - 1.0;
+		groupNormal[localIDx] = normal;
+
+		float roughness = texture(gBufferMaterialSampler, texCoordNormalized).w;
+		groupRoughness[localIDx] = roughness;
+
+		memoryBarrierShared();
+		barrier();
+		
+		if(0 < nextTexCoord.x && nextTexCoord.x < width && 0 < nextTexCoord.y && nextTexCoord.y < height && depth < far)
+		{
+			float nextDepth;
+			vec3 nextNormal;
+			float nextRoughness;
+			
+			if((sampleDirection.x > 0 && mod(nextTexCoord.x, TILESIZE) == 0) || (mod(nextTexCoord.y, TILESIZE) == 0  && sampleDirection.y > 0) ||
+				 (sampleDirection.x < 0 && mod(nextTexCoord.x + 1, TILESIZE) == 0) || (mod(nextTexCoord.y + 1, TILESIZE) == 0  && sampleDirection.y < 0))
+			{
+				vec2 nextTexCoordNormalized = texCoordNormalized + normalizedSampleDirection;
+				nextDepth = texture(gBufferDepthSampler, nextTexCoordNormalized).x;
+				nextNormal = texture(gBufferNormalSampler, nextTexCoordNormalized).xyz * 2.0 - 1.0;
+				nextRoughness = texture(gBufferMaterialSampler, nextTexCoordNormalized).w;
+			}
+			else
+			{
+				uvec2 addedLocalID = localIDxVec + sampleDirection;
+				if(addedLocalID.x < TILESIZE)
+				{
+					uint nextLocalID = addedLocalID.y * TILESIZE + addedLocalID.x;
+					nextDepth = groupDepth[nextLocalID];
+					nextNormal = groupNormal[nextLocalID];
+					nextRoughness = groupRoughness[nextLocalID];
+				}
+			}
+
+			//if(nextRoughness != roughness || abs(depth - nextDepth) > 0.01)
+			if(nextRoughness != roughness || abs(depth - nextDepth) > 10.0 || dot(nextNormal, normal) < 0.9)
+			{
+				//imageStore(edgeImage, texCoord + sampleDirection, uvec4(1));
+				imageStore(edgeImage, texCoord, uvec4(1));
+				//imageStore(edgeImage, texCoord + sampleDirection, uvec4(1));
+			}
+		}
+		
+		memoryBarrierShared();
+		barrier();
+	}
+}

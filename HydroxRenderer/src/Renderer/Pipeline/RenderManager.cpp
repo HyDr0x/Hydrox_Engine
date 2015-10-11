@@ -110,6 +110,7 @@ namespace he
       m_singletonManager = singletonManager;
 
       m_options = m_singletonManager->getService<RenderOptions>();
+      m_cameraManager = m_singletonManager->getService<CameraManager>();
 
       m_gBuffer.initialize(m_singletonManager);
       m_geometryRasterizer.initialize(m_singletonManager, m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
@@ -160,24 +161,26 @@ namespace he
       m_debugCacheMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(debugCacheMesh);
     }
 
-    void RenderManager::setViewPort(GLuint width, GLuint height, GLfloat zNear, GLfloat zFar)
+    void RenderManager::setViewPort()
     {
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f), sizeof(GLuint), &width);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + sizeof(GLuint), sizeof(GLuint), &height);
+      CameraData& cameraData = m_cameraManager->getCamera(0);
 
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint), sizeof(GLfloat), &zNear);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &zFar);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f), sizeof(GLuint), &cameraData.width);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + sizeof(GLuint), sizeof(GLuint), &cameraData.height);
+
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint), sizeof(GLfloat), &cameraData.znear);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>) + sizeof(util::vec4f) + 2 * sizeof(GLuint) + sizeof(GLfloat), sizeof(GLfloat), &cameraData.zfar);
     }
 
-    void RenderManager::render(util::Matrix<float, 4>& viewMatrix, util::Matrix<float, 4>& projectionMatrix, util::vec3f& cameraPosition)
+    void RenderManager::render()
     {
-      util::Matrix<float, 4> viewProjectionMatrix = projectionMatrix * viewMatrix;
+      CameraData& cameraData = m_cameraManager->getCamera(0);
 
-      m_cameraParameterUBO.setData(0, sizeof(util::Matrix<float, 4>), &viewMatrix[0][0]);
-      m_cameraParameterUBO.setData(1 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &projectionMatrix[0][0]);
-      m_cameraParameterUBO.setData(2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix[0][0]);
-      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &viewProjectionMatrix.invert()[0][0]);
-      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &cameraPosition[0]);
+      m_cameraParameterUBO.setData(0, sizeof(util::Matrix<float, 4>), &cameraData.viewMatrix[0][0]);
+      m_cameraParameterUBO.setData(1 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &cameraData.projectionMatrix[0][0]);
+      m_cameraParameterUBO.setData(2 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &cameraData.viewProjectionMatrix[0][0]);
+      m_cameraParameterUBO.setData(3 * sizeof(util::Matrix<float, 4>), sizeof(util::Matrix<float, 4>), &cameraData.invViewProjectionMatrix[0][0]);
+      m_cameraParameterUBO.setData(4 * sizeof(util::Matrix<float, 4>), sizeof(util::vec4f), &cameraData.cameraPosition[0]);
       m_cameraParameterUBO.uploadData();
       m_cameraParameterUBO.bindBuffer(0);
 
@@ -278,6 +281,8 @@ namespace he
 
         m_gBuffer.unsetGBuffer();
 
+        m_gBuffer.calculateLinearDepthBuffer();
+
         if(globalIllumination)
         {
           glDepthMask(GL_FALSE);
@@ -335,6 +340,7 @@ namespace he
 
           m_indirectSpecularRenderer.generateReflectionCaches(
             m_gBuffer.getDepthTexture(),
+            m_gBuffer.getLinearDepthTexture(),
             m_gBuffer.getNormalTexture(),
             m_gBuffer.getMaterialTexture(),
             m_lightRenderer.getReflectiveShadowPosMaps(),
@@ -432,27 +438,50 @@ namespace he
       switch(m_debugTexture)
       {
       case 1:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+        
         break;
       case 2:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
         break;
       case 3:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getMaterialTexture());
+  
         break;
       case 4:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getDepthTexture());
+
         break;
       case 5:
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCachePositionsMap());
+        
         break;
       case 6:
-        m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugIndexCounterMap());
+        m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugCacheBlockNumber());
         break;
       case 7:
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
+        m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugVertexBlockNumber());
         break;
       case 8:
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getLinearDepthTexture());
+        break;
+      case 9:
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugEdgeCacheNormals());
+        break;
+      case 10:
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugEdgeCachePositions());
+        break;
+      case 11:
+        m_indirectSpecularRenderer.showVertexCacheIndexLines();
+        break;
+      case 12:
+        m_indirectSpecularRenderer.showVoronoiDiagram();
+        break;
+      case 13:
+        m_indirectSpecularRenderer.showDelaunayTriangulation();
+        break;
+      case 14:
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
+        break;
+      case 15:
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCachePositionsMapFilterInnerX());
+        break;
+      case 16:
         m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
         m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
         break;

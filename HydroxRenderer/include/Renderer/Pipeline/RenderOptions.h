@@ -17,8 +17,22 @@ namespace he
 
       ~RenderOptions(){}
 
+      std::string vfxPath;
+      std::string texturePath;
+      std::string modelPath;
+      std::string scenePath;
+
       unsigned int width;//horizontal resolution
       unsigned int height;//vertical resolution
+      unsigned int colorBitDepth;//bit depth of the color buffer
+      unsigned int depthBitDepth;//bit depth of the depth buffer
+
+      float fov;//camera fov
+      float nearPlane;//near clipping plane
+      float farPlane;//far clipping plane
+
+      float letterSize;//size of a single letter
+
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
       unsigned int giLightSampleNumber;//number of sampled lights for global illumination
@@ -72,6 +86,14 @@ namespace he
         overreadComments(parameterStream, line);
         size_t pos = line.find(' ') + 1;
         parameter = cast(line.substr(pos).c_str());
+      }
+
+      template<typename TYPE> void getParameter(std::ifstream &parameterStream, TYPE &parameter)
+      {
+        std::string line;
+        overreadComments(parameterStream, line);
+        size_t pos = line.find(' ') + 1;
+        parameter = line.substr(pos).c_str();
       }
     };
   }

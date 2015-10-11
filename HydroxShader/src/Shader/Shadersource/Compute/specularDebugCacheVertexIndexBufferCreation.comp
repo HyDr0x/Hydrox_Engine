@@ -1,0 +1,85 @@
+#version 440 core
+
+#define WORKGROUPSIZE 128
+#define INT32_MAX 2147483647
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform uint borderVertexNumber;
+
+layout(r32f, binding = 0) readonly uniform image2D vertexOffsets;
+layout(r32f, binding = 1) readonly uniform image2D edgeCacheOffsets;
+
+layout(std430, binding = 0) buffer vertexPositionBuffer
+{
+	vec4 vertexPositions[];
+};
+
+layout(std430, binding = 1) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 2) buffer specularCacheIndices0Buffer
+{
+	vec4 specularCacheIndices0[];
+};
+
+layout(std430, binding = 3) buffer specularCacheIndices1Buffer
+{
+	vec4 specularCacheIndices1[];
+};
+
+layout(std430, binding = 4) buffer debugLinePositions
+{
+	vec4 linePosition[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+
+	const uint cacheNumber = uint(imageLoad(edgeCacheOffsets, ivec2(width - 1, height - 1)).r);
+
+	const uint threadNumber = WORKGROUPSIZE * gl_NumWorkGroups.x;
+	
+	const uint vertexNumber = uint(imageLoad(vertexOffsets, ivec2(width - 1, height - 1)).r);
+	const uint verticesPerThread = uint(float(vertexNumber + threadNumber - 1) / float(threadNumber));
+	const uint vertexOffset = borderVertexNumber + idx * verticesPerThread;
+	const uint vertexEnd = vertexOffset + verticesPerThread;
+	
+	for(uint i = vertexOffset; i < vertexEnd; i++)
+	{
+		if(i < vertexNumber + borderVertexNumber)
+		{
+			uint offset = (i - borderVertexNumber) * 16;
+			
+			uint indices[8];
+			for(uint j = 0; j < 4; j++)
+			{
+				indices[j] = uint(specularCacheIndices0[i][j]);
+			}
+			
+			for(uint j = 4; j < 8; j++)
+			{
+				indices[j] = uint(specularCacheIndices1[i][j - 4]);
+			}
+			
+			for(uint j = 0; j < 8; j++)
+			{
+				if(indices[j] < INT32_MAX)
+				{
+					linePosition[offset + 2 * j] = vec4(vertexPositions[i].xyz, 0.0);
+					linePosition[offset + 2 * j + 1] = vec4(specularCachePositions[indices[j]].xyz, 1.0);
+				}
+				else
+				{
+					linePosition[offset + 2 * j] = vec4(0);
+					linePosition[offset + 2 * j + 1] = vec4(0);
+				}
+			}
+		}
+	}
+}
