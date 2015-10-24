@@ -7,10 +7,11 @@ layout(early_fragment_tests) in;
 #define UINT16_MAX 65535
 #define INT16_MAX 32768
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;
@@ -78,7 +79,7 @@ void main()
 	if(validIndexCounter == 0) discard;
 	
 	vec3 normal = normalize(texture(gBufferNormalSampler, gsout_texCoord).xyz * 2.0 - 1.0);
-	vec4 material = texture(gBufferMaterialSampler, gsout_texCoord);
+	vec4 material = GGXToBlinnPhong(texture(gBufferMaterialSampler, gsout_texCoord));
 	
 	vec3 camDir = normalize(eyePos.xyz - pos3D.xyz);
 	vec3 reflectCamDir = reflect(-camDir, normal);

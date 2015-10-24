@@ -1,11 +1,12 @@
 #version 440 core
 
 #define WORKGROUPSIZE 64
-#define TILESIZE 16
+#define CACHETILESIZE 32
+#define VERTEXTILESIZE 16
 #define INT32_MAX 2147483647
-#define CACHEROUNDS 5
+#define CACHEROUNDS 2
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(r32f, binding = 0) readonly uniform image2D cacheOffsetImage;
 layout(rgba32f, binding = 1) readonly uniform image2D cachePositionImage;
@@ -54,31 +55,37 @@ layout(local_size_x = WORKGROUPSIZE) in;
 shared vec3 groupCachePositions[WORKGROUPSIZE];
 shared vec3 groupCacheNormals[WORKGROUPSIZE];
 shared uint groupCacheIndex[WORKGROUPSIZE];
-shared uint groupCacheNumberPerTile[CACHEROUNDS * 8];
+shared uint groupCacheNumberPerTile[(CACHEROUNDS - 1) * 8 + 1];
 shared uint groupCacheNumber;
 
 void main()
 {
 	const uint idx = gl_GlobalInvocationID.x;
 	const uint localIDx = gl_LocalInvocationIndex;
+	
+	const uvec2 cacheTileNumber = (uvec2(width, height) + uvec2(CACHETILESIZE - 1)) / CACHETILESIZE;
+	const uint cacheTilesPerGroup = (cacheTileNumber.x * cacheTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint cacheTileStartIndex = gl_WorkGroupID.x * cacheTilesPerGroup;
+	const uint cacheTileEndIndex = cacheTileStartIndex + cacheTilesPerGroup;
+	
+	const uvec2 vertexTileNumber = (uvec2(width, height) + uvec2(VERTEXTILESIZE - 1)) / VERTEXTILESIZE;
+	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
+	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
 
-	const uvec2 tileNumber = (uvec2(width, height) + uvec2(TILESIZE - 1)) / TILESIZE;
-	const uint tilesPerGroup = (tileNumber.x * tileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
-	const uint tileStartIndex = gl_WorkGroupID.x * tilesPerGroup;
-	const uint tileEndIndex = tileStartIndex + tilesPerGroup;
-
-	for(uint i = tileStartIndex; i < tileEndIndex; i++)
+	for(uint i = vertexTileStartIndex; i < vertexTileEndIndex; i++)
 	{
-		ivec2 blockCoord = ivec2(mod(i, tileNumber.x), i / tileNumber.x);
+		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
+		ivec2 cacheBlockCoord = (vertexBlockCoord * VERTEXTILESIZE) / ivec2(CACHETILESIZE);
 		
-		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, blockCoord).r;
+		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, vertexBlockCoord).r;
 		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
 		const uint vertexStartIndex = verticesPerThread * localIDx;
 		const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
 		
 		for(uint j = vertexStartIndex; j < vertexEndIndex; j++)
 		{
-			ivec2 texCoord = blockCoord * TILESIZE + ivec2(mod(j, TILESIZE), j / TILESIZE);
+			ivec2 texCoord = vertexBlockCoord * VERTEXTILESIZE + ivec2(mod(j, VERTEXTILESIZE), j / VERTEXTILESIZE);
 
 			vec3 vertexPosition;
 			vec3 vertexNormal;
@@ -105,28 +112,31 @@ void main()
 				
 				for(uint l = startBlockIndex; l < endBlockIndex; l++)
 				{
-					ivec2 cacheNumberTexCoord = blockCoord;
-					if(k > 0)
+					if(l < cacheBlockNumber)
 					{
-						if(l < k * 4)//smaller than cacheBlockNumber / 2
+						ivec2 cacheNumberTexCoord = cacheBlockCoord;
+						if(k > 0)
 						{
-							cacheNumberTexCoord += (ivec2(min(l, sideLength), max(int(l) - int(sideLength), 0)) - ivec2(k));
+							if(l < k * 4)//smaller than cacheBlockNumber / 2
+							{
+								cacheNumberTexCoord += (ivec2(min(l, sideLength), max(int(l) - int(sideLength), 0)) - ivec2(k));
+							}
+							else
+							{
+								cacheNumberTexCoord += (ivec2(max(int(cacheBlockNumber) - int(sideLength) - int(l), 0), min(cacheBlockNumber - l, sideLength)) - ivec2(k));
+							}
 						}
-						else
+						
+						uint blockCacheNumber = 0;
+					
+						if(0 <= cacheNumberTexCoord.x && cacheNumberTexCoord.x < cacheTileNumber.x &&
+							 0 <= cacheNumberTexCoord.y && cacheNumberTexCoord.y < cacheTileNumber.y)
 						{
-							cacheNumberTexCoord += (ivec2(max(cacheBlockNumber - sideLength - l, 0), min(cacheBlockNumber - l, sideLength)) - ivec2(k));
+							blockCacheNumber = imageLoad(cacheNumberPerTileImage, cacheNumberTexCoord).r;
 						}
-					}
 					
-					uint blockCacheNumber = 0;
-					if(l < cacheBlockNumber &&
-						 0 <= cacheNumberTexCoord.x && cacheNumberTexCoord.x < tileNumber.x &&
-						 0 <= cacheNumberTexCoord.y && cacheNumberTexCoord.y < tileNumber.y)
-					{
-						blockCacheNumber = imageLoad(cacheNumberPerTileImage, cacheNumberTexCoord).r;
+						groupCacheNumberPerTile[l] = blockCacheNumber;
 					}
-					
-					groupCacheNumberPerTile[l] = blockCacheNumber;
 				}
 
 				memoryBarrierShared();
@@ -145,13 +155,13 @@ void main()
 				
 				memoryBarrierShared();
 				barrier();
-
+				
 				const uint cacheLoopNumber = WORKGROUPSIZE * ((groupCacheNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE);
 				for(uint l = 0; l < cacheLoopNumber; l += WORKGROUPSIZE)
 				{
 					const uint cacheIndex = l + localIDx;
 
-					if(j < vertexNumber && cacheIndex < groupCacheNumber)
+					if(cacheIndex < groupCacheNumber)
 					{
 						uint cacheBlockIndex;
 						uint roundCacheStartIndex = 0;
@@ -165,21 +175,21 @@ void main()
 							}
 						}
 
-						ivec2 cacheNumberTexCoord = blockCoord;
+						ivec2 cacheNumberTexCoord = cacheBlockCoord;
 						if(k > 0)
 						{
 							if(cacheBlockIndex < k * 4)//smaller than cacheBlockNumber / 2
 							{
-								cacheNumberTexCoord += (ivec2(min(cacheBlockIndex, sideLength), max(cacheBlockIndex - sideLength, 0)) - ivec2(k));
+								cacheNumberTexCoord += (ivec2(min(cacheBlockIndex, sideLength), max(int(cacheBlockIndex) - int(sideLength), 0)) - ivec2(k));
 							}
 							else
 							{
-								cacheNumberTexCoord += (ivec2(max(cacheBlockNumber - sideLength - cacheBlockIndex, 0), min(cacheBlockNumber - cacheBlockIndex, sideLength)) - ivec2(k));
+								cacheNumberTexCoord += (ivec2(max(int(cacheBlockNumber) - int(sideLength) - int(cacheBlockIndex), 0), min(cacheBlockNumber - cacheBlockIndex, sideLength)) - ivec2(k));
 							}
 						}
 						
 						uint innerBlockCacheIndex = cacheIndex - (roundCacheStartIndex - groupCacheNumberPerTile[cacheBlockIndex]);
-						ivec2 innerCacheBlockCoord = cacheNumberTexCoord * TILESIZE + ivec2(mod(innerBlockCacheIndex, TILESIZE), innerBlockCacheIndex / TILESIZE);
+						ivec2 innerCacheBlockCoord = cacheNumberTexCoord * CACHETILESIZE + ivec2(mod(innerBlockCacheIndex, CACHETILESIZE), innerBlockCacheIndex / CACHETILESIZE);
 
 						if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < width &&
 							 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
@@ -188,22 +198,16 @@ void main()
 							groupCacheNormals[localIDx] = imageLoad(cacheNormalImage, innerCacheBlockCoord).xyz;
 							groupCacheIndex[localIDx] = uint(imageLoad(cacheOffsetImage, innerCacheBlockCoord).r - 1);
 						}
-						/*else
-						{
-							groupCachePositions[localIDx] = vec3(0);
-							groupCacheNormals[localIDx] = vec3(0);
-							groupCacheIndex[localIDx] = 0;
-						}*/
 					}
-					
+
 					memoryBarrierShared();
 					barrier();
 					
-					if(j < vertexNumber && texCoord.x < width && texCoord.y < height)
+					if(j < vertexNumber )
 					{
 						for(uint m = 0; m < WORKGROUPSIZE; m++)
 						{
-							if(m + l < groupCacheNumber)
+							if(l + m < max(int(groupCacheNumber) - 0, 0))
 							{
 								vec3 cachePosDistance = groupCachePositions[m] - vertexPosition;
 								float angle = dot(vertexNormal, groupCacheNormals[m]);
@@ -229,31 +233,14 @@ void main()
 							}
 						}
 					}
-					
+
 					memoryBarrierShared();
 					barrier();
 				}
 			}
 		
 			if(j < vertexNumber && texCoord.x < width && texCoord.y < height)
-			{
-				for(uint k = 0; k < 8; k++)
-				{
-					if(indices[k] < INT32_MAX)
-					{
-						vec4 projCachePos = viewProjectionMatrix * specularCachePositions[indices[k]];
-						projCachePos /= projCachePos.w;
-						ivec2 cacheProjCoord = ivec2((vec2(projCachePos.xy) * 0.5 + 0.5) * ivec2(width, height));
-						
-						cacheProjCoord /= TILESIZE;
-						
-						if(cacheProjCoord != blockCoord)
-						{
-							indices[k] = INT32_MAX;
-						}
-					}
-				}
-			
+			{		
 				const uint vertexOffset = borderVertexNumber + uint(imageLoad(vertexOffsetImage, texCoord).r - 1);
 				specularCacheIndices0[vertexOffset] = vec4(indices[0], indices[1], indices[2], indices[3]);
 				specularCacheIndices1[vertexOffset] = vec4(indices[4], indices[5], indices[6], indices[7]);

@@ -3,9 +3,9 @@
 #define INT32_MAX 2147483647
 #define PI 3.14159265359
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
 
 layout(location = 0) uniform sampler2D depthSampler;
 layout(location = 1) uniform sampler2D normalSampler;

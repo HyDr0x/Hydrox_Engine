@@ -3,7 +3,7 @@
 #define TILESIZE 16
 #define WORKGROUPSIZE (TILESIZE * TILESIZE)
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;

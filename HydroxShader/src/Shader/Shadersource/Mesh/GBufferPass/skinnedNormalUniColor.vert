@@ -4,8 +4,8 @@
 
 #define MAXBONES 64
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer boneMatrixBuffer
 {
@@ -19,16 +19,19 @@ layout(location = BINORMAL) in vec3 in_binormal;
 layout(location = BONEWEIGHTS) in vec4 in_boneWeights;
 layout(location = BONEINDICES) in vec4 in_boneIndices;
 
-out vec2 vsout_texCoord;
-out mat3 vsout_tangentToWorld;
-flat out uint vsout_instanceIndex;
+out VertexData
+{
+	vec2 texCoord;
+	mat3 tangentToWorld;
+	flat uint instanceIndex;
+} outData;
 
 void main()
 {
 	mat4 skinningMatrix = mat4(0.0f);
 
-	vsout_instanceIndex = gl_InstanceID + gl_BaseInstanceARB;
-	uint globalInstanceID = MAXBONES * vsout_instanceIndex;
+	outData.instanceIndex = gl_InstanceID + gl_BaseInstanceARB;
+	uint globalInstanceID = MAXBONES * outData.instanceIndex;
 	
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.x)] * in_boneWeights.x);
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.y)] * in_boneWeights.y);
@@ -38,10 +41,10 @@ void main()
 	vec3 tangent = cross(in_normal, in_binormal);
 	
 	mat3 normalWorld = mat3(skinningMatrix);
-	vsout_tangentToWorld[0] = normalWorld * tangent;
-	vsout_tangentToWorld[1] = normalWorld * in_binormal;
-	vsout_tangentToWorld[2] = normalWorld * in_normal;
+	outData.tangentToWorld[0] = normalWorld * tangent;
+	outData.tangentToWorld[1] = normalWorld * in_binormal;
+	outData.tangentToWorld[2] = normalWorld * in_normal;
 	
-	vsout_texCoord = in_texCoord;
+	outData.texCoord = in_texCoord;
 	gl_Position = viewProjectionMatrix * skinningMatrix * vec4(in_Pos, 1.0f);
 }

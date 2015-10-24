@@ -3,7 +3,7 @@
 layout(points)in;
 layout(triangle_strip, max_vertices = 4)out;
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 3) uniform mat3 texTrfMatrix;
 layout(location = 4) uniform vec2 Scale;

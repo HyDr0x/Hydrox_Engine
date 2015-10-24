@@ -5,8 +5,8 @@
 #define PI_HALF (0.5 * PI)
 #define LIGHTTUBEBINDINGPOINT 1
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;

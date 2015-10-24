@@ -26,6 +26,7 @@ namespace he
     private:
 
       sh::ShaderSlotFlags readVertexDeclaration(const std::string& vertexShaderSource);
+      void registerShaderSourceFiles(const std::string& shaderFilename, sh::RenderShaderHandle shaderHandle);
 
       std::map<std::string, std::vector<sh::RenderShaderHandle>> m_renderShaderMap;
     };

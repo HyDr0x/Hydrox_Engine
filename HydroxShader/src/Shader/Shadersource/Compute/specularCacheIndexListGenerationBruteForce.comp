@@ -3,7 +3,7 @@
 #define WORKGROUPSIZE 256
 #define INT32_MAX 2147483647
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(r32f, binding = 0) readonly uniform image2D vertexOffsets;
 layout(r32f, binding = 1) readonly uniform image2D edgeCacheOffsets;

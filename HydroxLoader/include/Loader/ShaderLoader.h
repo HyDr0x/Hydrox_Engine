@@ -37,14 +37,16 @@ namespace he
 
       std::string loadShaderSource(std::string filename);
       
+      std::string loadFile(const std::string& shaderFilename);//simply loads a file
+
       util::SharedPointer<sh::ShaderContainer> m_container;
 
       util::Filecheck m_shaderFileChecker;
 
     private:
 
-      std::string loadShaderFileSource(std::string filename);
-      void preprocessIncludesShaderSource(std::string& source, std::string path);
+      std::string loadShaderFileSource(std::string filename);//inserts includes into the file
+      void preprocessIncludesShaderSource(std::string& source);
       void preprocessDefinesShaderSource(std::string& source);
 
       std::vector<std::pair<std::string, std::string>> m_dynamicDefines;//first is define name, second define value

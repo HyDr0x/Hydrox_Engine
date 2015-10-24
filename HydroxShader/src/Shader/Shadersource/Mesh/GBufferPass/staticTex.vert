@@ -2,8 +2,8 @@
 
 #extension ARB_shader_draw_parameters : enable
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
 {
@@ -14,16 +14,19 @@ layout(location = POSITION) in vec3 in_Pos;
 layout(location = TEXTURE0) in vec2 in_texCoord;
 layout(location = NORMAL) in vec3 in_normal;
 
-out vec2 vsout_texCoord;
-out vec3 vsout_normal;
-out uint vsout_instanceIndex;
+out VertexData
+{
+	vec2 texCoord;
+	vec3 normal;
+	flat uint instanceIndex;
+} outData;
 
 void main()
 {
-	vsout_texCoord = in_texCoord;
-	vsout_instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
-	vsout_normal = normalize(mat3(trfMatrix[vsout_instanceIndex]) * in_normal);
+	outData.texCoord = in_texCoord;
+	outData.instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
+	outData.normal = normalize(mat3(trfMatrix[outData.instanceIndex]) * in_normal);
 	
-	mat4 MVP = viewProjectionMatrix * trfMatrix[vsout_instanceIndex];
+	mat4 MVP = viewProjectionMatrix * trfMatrix[outData.instanceIndex];
 	gl_Position = MVP * vec4(in_Pos, 1);
 }

@@ -45,7 +45,6 @@ namespace he
         const TBO& globalCacheNormalBuffer,
         const TBO& adaptiveSamplingPositionBuffer,
         const TBO& adaptiveSamplingNormalBuffer,
-        const GPUBuffer& samplingPatternBuffer,
         const GPUBuffer& commandBuffer,
         unsigned int cacheNumber);
 
@@ -53,8 +52,7 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
         util::SharedPointer<db::Texture3D> indirectLightPositions,
-        util::SharedPointer<db::Texture3D> indirectLightNormals,
-        const GPUBuffer& samplingPatternBuffer);
+        util::SharedPointer<db::Texture3D> indirectLightNormals);
 
       void viewMatrixCreation(util::SharedPointer<db::Texture3D> indirectLightPositions, util::SharedPointer<db::Texture3D> indirectLightNormals);
 
@@ -76,8 +74,7 @@ namespace he
 
       void generateShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap,
                              util::SharedPointer<db::Texture3D> indirectLightPositions,
-                             util::SharedPointer<db::Texture3D> indirectLightNormals,
-                             const GPUBuffer& samplingPatternBuffer);
+                             util::SharedPointer<db::Texture3D> indirectLightNormals);
 
       void bilateralInterleavedBlurShadowMap(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
 

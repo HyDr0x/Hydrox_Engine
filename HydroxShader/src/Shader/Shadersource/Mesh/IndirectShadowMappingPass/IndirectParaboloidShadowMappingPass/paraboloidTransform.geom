@@ -3,8 +3,8 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-#include "../../../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 layout(std430, binding = 1) buffer reflectiveShadowLightBuffer
 {

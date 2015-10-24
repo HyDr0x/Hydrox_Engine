@@ -17,9 +17,9 @@ void main()
 	//vec4 gammaCorrectColor = ((indirectLight + light) * albedo) / 250.0f;
 	//color = vec4(RGBtoHSV(pow(gammaCorrectColor.rgb, vec3(1.0f / 1.73f))), 1.0f);
 	
-	//color = (indirectLight + light) * albedo;
+	color = light + indirectLight * albedo;
 	
-	color = vec4(((indirectLight.rgb + light.rgb) * albedo.rgb * albedo.a + (1.0 - albedo.a) * albedo.rgb).rgb, 1.0f);
+	//color = vec4(((indirectLight.rgb + light.rgb) * albedo.rgb * albedo.a + (1.0 - albedo.a) * albedo.rgb).rgb, 1.0f);
 	
 	/*vec3 normalColor = ((indirectLight + light) * albedo).rgb;
 	float Y = dot(vec3(0.299f, 0.587f, 0.114f), normalColor);

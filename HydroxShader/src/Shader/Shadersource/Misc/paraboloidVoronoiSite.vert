@@ -1,6 +1,6 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
 
 layout(location = POSITION) in vec4 in_Pos;
 

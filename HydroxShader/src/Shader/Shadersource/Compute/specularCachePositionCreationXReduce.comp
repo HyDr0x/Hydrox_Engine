@@ -2,7 +2,7 @@
 
 #define WORKGROUPSIZE 16
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(rg16f, binding = 0) uniform readonly image2D cachePosXImage;
 layout(r32f, binding = 2) uniform writeonly image2D cacheOffsetBuffer;

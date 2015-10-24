@@ -1,21 +1,73 @@
 #define PI 3.14159265359f
 
-#include "LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
-float calculateBRDF(in vec3 camDir, in vec3 lightDir, in vec3 normal, in float diffuseRho, in float specularRho, in float roughness)
+vec3 calculateBlinnPhongBRDF(in vec3 camDir, in vec3 lightDir, in vec3 normal, in vec3 albedo, in float diffuseRho, in float specularRho, in float roughness)
 {
 	float diffuse = diffuseRho / PI;
 	
 	//vec3 reflectRay = reflect(-lightDir, normal);
-	//float specular = ((roughness + 2.0f) / (2.0f * PI)) * specularRho * pow(max(dot(reflectRay, camDir), 0.0f), roughness);
+	//float specular = ((roughness + 2.0) / (2.0 * PI)) * specularRho * pow(max(dot(reflectRay, camDir), 0.0), roughness);
 	
 	vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
-	float specular = ((roughness + 8.0f) / (8.0f * PI)) * specularRho * pow(max(dot(halfVector, normal), 0.0f), roughness);
+	float specular = ((roughness + 8.0) / (8.0 * PI)) * specularRho * pow(max(dot(halfVector, normal), 0.0), roughness);
 	
-	return diffuse + specular;
+	return albedo * (diffuse + specular);
 }
 
-float calculateLuminance(LightData light, const vec3 worldPos, const vec3 normal, const vec4 material)
+float D(in float dotNormalHalf, in float roughness)
+{
+	float alpha = roughness * roughness;
+	
+	float denominator = dotNormalHalf * dotNormalHalf * (alpha * alpha - 1.0) + 1.0;
+	return (alpha * alpha) / max(PI * denominator * denominator, 0.00001);
+}
+
+float GPart(in float normalDir, in float roughness)
+{
+	float k = ((roughness + 1.0) * (roughness + 1.0)) / 8.0;
+	return normalDir / max(normalDir * (1.0 - k) + k, 0.00001);
+}
+
+float Fspecular(in float dotViewHalf, in float ForthoSpecular)
+{
+	return ForthoSpecular + (1.0 - ForthoSpecular) * pow(2.0, (-5.55473 * dotViewHalf - 6.98316) * dotViewHalf);
+}
+
+float Fdiffuse(in float thetaLightNormal, in float thetaViewNormal, in float ForthoDiffuse)
+{
+	return (1.0 + (ForthoDiffuse - 1.0) * pow(1.0 - thetaLightNormal, 5.0)) * (1.0 + (ForthoDiffuse - 1.0) * pow(1.0 - thetaViewNormal, 5.0));
+}
+
+float lambertBRDF(in float dotViewHalf, in float thetaLightNormal, in float thetaViewNormal, in float roughness)
+{
+	float ForthoDiffuse = 0.5 + 2.0 * dotViewHalf * dotViewHalf * roughness;//scales the incoming diffuse albedo
+	float rho = Fdiffuse(thetaLightNormal, thetaViewNormal, ForthoDiffuse);
+	
+	return rho / PI;//the reflected spectrum rho (reflection coefficient) scales the incoming albedo
+}
+
+vec3 microfacetBRDF(in vec3 camDir, in vec3 lightDir, in vec3 normal, in vec3 albedo, in float metalness, in float ForthoSpecular, in float roughness)
+{
+	vec3 halfVector = (lightDir + camDir) / length(lightDir + camDir);
+	float dotNormalView = clamp(dot(normal, camDir), 0.0, 1.0);
+	float dotNormalLight = clamp(dot(normal, lightDir), 0.0, 1.0);
+	float dotNormalHalf = clamp(dot(normal, halfVector), 0.0, 1.0);
+	float dotViewHalf = clamp(dot(halfVector, camDir), 0.0, 1.0);
+	
+	//calculate the reflection coefficient rho which describes the amount of the spectrum which is getting reflected
+	vec3 diffuseAlbedo = (1.0 - metalness) * albedo;
+	vec3 specularAlbedo = metalness * albedo + (1.0 - metalness) * vec3(0.04);
+	
+	float G = GPart(dotNormalLight, roughness) * GPart(dotNormalView, roughness);
+	vec3 specularBRDF = specularAlbedo * (D(dotNormalHalf, roughness) * G * Fspecular(dotViewHalf, ForthoSpecular)) / max(4.0 * dotNormalLight * dotNormalView, 0.00001);
+	vec3 diffuseBRDF = diffuseAlbedo * lambertBRDF(dotViewHalf, dotNormalView, dotNormalLight, roughness);
+
+	return specularBRDF + diffuseBRDF;
+}
+
+//vec4 material: x = metalness, y = specularity, z = roughness, w = reserverd for anisotropy
+vec3 calculateLuminance(LightData light, const vec3 worldPos, const vec3 normal, const vec3 albedo, const vec4 material)
 {
 	vec3 lightDir;
 	float attenuation, omega;
@@ -23,15 +75,13 @@ float calculateLuminance(LightData light, const vec3 worldPos, const vec3 normal
 	lightDir = light.position.xyz - worldPos;
 	float distance = length(lightDir);
 	lightDir = normalize(lightDir);
-	omega = max(dot(lightDir, normal), 0.0f);
 	
-	attenuation = 1.0f /(light.constAttenuation + light.linearAttenuation * distance + light.quadricAttenuation * distance * distance);
+	attenuation = 1.0 /(light.constAttenuation + light.linearAttenuation * distance + light.quadricAttenuation * distance * distance);
 
 	if(light.position.x == DIRECTIONAL_LIGHT_POSITION)//DIRECTIONAL LIGHT
 	{
 		lightDir = normalize(light.direction.xyz);
-		omega = max(dot(lightDir, normal), 0.0f);
-		
+
 		attenuation /= (light.projectionParameter.z * light.projectionParameter.w);//divide through the area of the near clipping plane, from where the directional light beams come from
 	}
 	else//SPOTLIGHT
@@ -43,7 +93,9 @@ float calculateLuminance(LightData light, const vec3 worldPos, const vec3 normal
 		attenuation *= spotAttenuation;
 	}
 	
-	float brdf = calculateBRDF(normalize(eyePos.xyz - worldPos), lightDir, normal, material.x, material.y, material.w);
+	vec3 brdf = microfacetBRDF(normalize(eyePos.xyz - worldPos), lightDir, normal, albedo, material.x, material.y, material.z);
+	//vec3 brdf = calculateBlinnPhongBRDF(normalize(eyePos.xyz - worldPos), lightDir, normal, albedo, material.x, material.y, material.w);
 	
+	omega = max(dot(lightDir, normal), 0.0);
 	return attenuation * light.luminousFlux * omega * brdf;
 }

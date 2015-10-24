@@ -6,11 +6,11 @@
 #define INT32_MAX 2147483647
 #define MAXBONES 64
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(rgba32f, binding = 0) readonly uniform imageBuffer globalCachePositionBuffer;
 layout(rgba32f, binding = 1) readonly uniform imageBuffer globalCacheNormalBuffer;

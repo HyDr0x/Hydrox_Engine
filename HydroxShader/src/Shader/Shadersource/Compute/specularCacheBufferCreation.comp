@@ -2,15 +2,11 @@
 
 #define WORKGROUPSIZE 128
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
-layout(location = 0) uniform sampler2D gBufferDepthSampler;
-layout(location = 1) uniform sampler2D gBufferNormalSampler;
-layout(location = 2) uniform sampler2D gBufferMaterialSampler;
-
-layout(r32f, binding = 0) readonly uniform image2D edgeCacheOffsetSampler;
-layout(rgba32f, binding = 1) readonly uniform image2D edgeCachePositionSampler;
-layout(rgba32f, binding = 2) readonly uniform image2D edgeCacheNormalSampler;
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsetSampler;
+layout(rgba32f, binding = 1) readonly uniform image2D cachePositionSampler;
+layout(rgba32f, binding = 2) readonly uniform image2D cacheNormalSampler;
 
 layout(std430, binding = 0) buffer specularCachePositionBuffer
 {
@@ -28,7 +24,7 @@ void main()
 {
 	const uint idx = gl_GlobalInvocationID.x;
 
-	const uint edgeCacheNumber = uint(imageLoad(edgeCacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	const uint edgeCacheNumber = uint(imageLoad(cacheOffsetSampler, ivec2(width - 1, height - 1)).r);
 	
 	const uint pixelNumber = width * height;
 	const uint pixelPerThread = uint(ceil(float(pixelNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
@@ -44,19 +40,13 @@ void main()
 	
 		ivec2 texCoord = ivec2(mod(i, width), i / width);
 
-		vec4 edgeCacheNormal = imageLoad(edgeCacheNormalSampler, texCoord);
-		if(edgeCacheNormal.xyz != vec3(0.0))
+		vec4 cacheNormal = imageLoad(cacheNormalSampler, texCoord);
+		if(cacheNormal.xyz != vec3(0.0))
 		{
-			uint edgeCacheOffset = uint(imageLoad(edgeCacheOffsetSampler, texCoord).r) - 1;
+			uint edgeCacheOffset = uint(imageLoad(cacheOffsetSampler, texCoord).r) - 1;
 
-			vec4 projCoord = imageLoad(edgeCachePositionSampler, texCoord);
-			
-			specularCachePositions[edgeCacheOffset] = vec4(projCoord.xyz, projCoord.w);
-			specularCacheNormalMaterial[edgeCacheOffset] = vec4(edgeCacheNormal.xyz, edgeCacheNormal.w);
-			
-			projCoord = viewProjectionMatrix * vec4(projCoord.xyz, 1.0);
-			projCoord /= projCoord.w;
-			ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
+			specularCachePositions[edgeCacheOffset] = imageLoad(cachePositionSampler, texCoord);
+			specularCacheNormalMaterial[edgeCacheOffset] = cacheNormal;
 		}
 	}
 }

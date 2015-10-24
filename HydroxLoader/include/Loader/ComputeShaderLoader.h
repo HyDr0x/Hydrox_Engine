@@ -22,7 +22,9 @@ namespace he
 
     private:
 
-      std::map<std::string, unsigned int> m_computeShaderMap;
+      void registerShaderSourceFiles(const std::string& shaderFilename, unsigned int shaderHandle);
+
+      std::map<std::string, std::vector<unsigned int>> m_computeShaderMap;
     };
   }
 }

@@ -8,6 +8,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndexGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectBackprojectionRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightEdgeVertexExtractionGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParaboloidShadowMapGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ReflectiveShadowMapGeometryRenderpass.h 

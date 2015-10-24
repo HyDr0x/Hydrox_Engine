@@ -2,8 +2,8 @@
 
 #extension GL_ARB_shader_draw_parameters : enable
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
 {

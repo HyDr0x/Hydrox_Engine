@@ -66,7 +66,8 @@ namespace he
 
             m_container->addComputeShader(shaderIndex, loadResource(shaderName, shaderFileNames));
 
-            m_computeShaderMap[shaderFileNames[0]] = shaderIndex;
+            registerShaderSourceFiles(shaderFileNames[0], shaderIndex);
+            //m_computeShaderMap[shaderFileNames[0]].push_back(shaderIndex);
           }
         }
 
@@ -84,12 +85,55 @@ namespace he
     {
       if(m_shaderFileChecker.isFileChanged())
       {
-        const sh::ComputeShader& shader = m_container->getComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()]);
+        for(unsigned int i = 0; i < m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()].size(); i++)
+        {
+          const sh::ComputeShader& shader = m_container->getComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()][i]);
 
-        m_container->replaceComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
+          m_container->replaceComputeShader(m_computeShaderMap[m_shaderFileChecker.getChangedFilepath()][i], loadResource(shader.getShaderName(), shader.getShaderSourceNames()));
+        }
 
         m_shaderFileChecker.resetFilecheckerStatus();
       }
+    }
+
+    void ComputeShaderLoader::registerShaderSourceFiles(const std::string& shaderFilename, unsigned int shaderHandle)
+    {
+      bool alreadyIn = false;
+      for(unsigned int i = 0; i < m_computeShaderMap[shaderFilename].size(); i++)
+      {
+        if(m_computeShaderMap[shaderFilename][i] == shaderHandle)
+        {
+          alreadyIn = true;
+          break;
+        }
+      }
+
+      if(!alreadyIn)//only insert it if it's not already in there
+      {
+        m_computeShaderMap[shaderFilename].push_back(shaderHandle);
+      }
+
+      std::string shaderSource = loadFile(shaderFilename);
+
+      size_t stringPos = 0;
+      std::string includeString = "#include";
+
+      do
+      {
+        stringPos = shaderSource.find(includeString, stringPos);
+
+        if(stringPos != std::string::npos)
+        {
+          size_t filenameStart = shaderSource.find('"', stringPos) + 1;
+          size_t filenameEnd = shaderSource.find('"', filenameStart + 1);
+          std::string filename = shaderSource.substr(filenameStart, filenameEnd - filenameStart);
+
+          registerShaderSourceFiles(filename, shaderHandle);
+
+          stringPos++;//to not find the same include again
+        }
+
+      } while(stringPos != std::string::npos);
     }
   }
 }

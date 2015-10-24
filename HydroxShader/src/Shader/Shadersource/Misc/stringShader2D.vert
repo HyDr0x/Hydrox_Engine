@@ -3,7 +3,7 @@
 layout(location = 1) uniform mat3 trfMatrix;
 layout(location = 5) uniform float z;
 
-#include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
 
 layout(location = POSITION) in vec2 in_Pos;
 layout(location = TEXTURE0) in vec2 in_texCoord;

@@ -5,11 +5,12 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/BarycentricCoordinates.glslh"
-#include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/BarycentricCoordinates.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
 #define INT32_MAX 2147483647
 
@@ -70,6 +71,7 @@ void main()
 	if(triangleCacheBorderIndices.x < INT32_MAX)
 	{
 		MaterialData cacheMaterial = material[materialIndex[vsout_instanceIndex[0]]];
+		vec4 blinnPhongMaterial = GGXToBlinnPhong(vec4(cacheMaterial.metalness, cacheMaterial.reflectance, cacheMaterial.roughness0, cacheMaterial.roughness1));
 		
 		vec3 barycentric;
 		mat4 skinningMatrix;
@@ -80,10 +82,10 @@ void main()
 			
 			uint index = globalCacheOffset + perInstanceCacheOffsetTMP + i;
 
-			imageStore(globalCachePositionBuffer, int(index), vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, cacheMaterial.diffuseRho));
+			imageStore(globalCachePositionBuffer, int(index), vec4((skinningMatrix * vec4(caches[cacheIndexOffsetTMP + i].position.xyz, 1.0f)).xyz, blinnPhongMaterial.x));
 			
 			vec3 normal = normalize(mat3(skinningMatrix) * caches[cacheIndexOffsetTMP + i].normal.xyz);
-			imageStore(globalCacheNormalBuffer, int(index), vec4(encodeNormal(normal), cacheMaterial.specularRho, cacheMaterial.roughness));
+			imageStore(globalCacheNormalBuffer, int(index), vec4(encodeNormal(normal), blinnPhongMaterial.y, blinnPhongMaterial.w));
 		
 			//extract matrix scale for area, expect uniform scale!
 			float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);

@@ -47,6 +47,7 @@ namespace he
       m_geometryRenderpass.initialize(m_singletonManager, sh::ShaderContainer::GBUFFER, samplerObjects);
       m_debugRenderpass.initialize(m_singletonManager, sh::ShaderContainer::RENDERDEBUG, samplerObjects);
       m_indexRenderpass.initialize(m_singletonManager, sh::ShaderContainer::TRIANGLEINDEX);
+      m_indirectLightEdgeVertexExtractionRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTSCREENVERTEXEXTRACTION, materialMap);
       m_indirectLightingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTINTERPOLATION, normalMap, materialMap);
       m_reflectiveShadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::REFLECTIVESHADOW, samplerObjects);
       m_shadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::SHADOW);
@@ -76,6 +77,7 @@ namespace he
         m_frustumCullingRenderpass.insertGeometry(m_renderContainer.back());
         m_geometryRenderpass.insertGeometry(m_renderContainer.back());
         m_indexRenderpass.insertGeometry(m_renderContainer.back());
+        m_indirectLightEdgeVertexExtractionRenderpass.insertGeometry(m_renderContainer.back());
         m_indirectLightingRenderpass.insertGeometry(m_renderContainer.back());
         m_reflectiveShadowMapRenderpass.insertGeometry(m_renderContainer.back());
         m_shadowMapRenderpass.insertGeometry(m_renderContainer.back());
@@ -113,6 +115,7 @@ namespace he
               m_geometryRenderpass.removeGeometry(m_renderContainer[i]);
               m_debugRenderpass.removeGeometry(m_renderContainer[i]);
               m_indexRenderpass.removeGeometry(m_renderContainer[i]);
+              m_indirectLightEdgeVertexExtractionRenderpass.removeGeometry(m_renderContainer[i]);
               m_indirectLightingRenderpass.removeGeometry(m_renderContainer[i]);
               m_reflectiveShadowMapRenderpass.removeGeometry(m_renderContainer[i]);
               m_shadowMapRenderpass.removeGeometry(m_renderContainer[i]);
@@ -197,6 +200,11 @@ namespace he
     {
       m_indirectBackprojetionRenderpass.setLightIndex(lightIndex);
       m_indirectBackprojetionRenderpass.drawRenderpass();
+    }
+
+    void GeometryRenderer::generateEdgeVertexMap()
+    {
+      m_indirectLightEdgeVertexExtractionRenderpass.drawRenderpass();
     }
 
     void GeometryRenderer::rasterizeIndexGeometry()

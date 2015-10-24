@@ -43,7 +43,7 @@ namespace he
       void initialize(util::SingletonManager *singletonManager);
 
       void updateBuffer();
-      void render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
+      void render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> albedoMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap);
 
       void setShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
       void unsetShadowMap(unsigned int bindingPoint);

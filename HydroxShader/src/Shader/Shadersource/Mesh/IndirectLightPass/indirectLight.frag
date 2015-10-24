@@ -4,7 +4,7 @@ layout(early_fragment_tests) in;
 
 #define PI 3.14159265359
 
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) uniform sampler2D normalSampler;
 layout(location = 1) uniform sampler2D materialSampler;
@@ -45,7 +45,7 @@ void main()
 	//luminousFlux = vec4(vsout_Xpd, 1);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI), 1.0);
 	//luminousFlux = vec4((frd * vsout_phiPD) / (4.0 * PI * lengthD), 1.0);
-	luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI * lengthG), 1.0);
-	//luminousFlux = vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
+	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI * lengthG), 1.0);
+	luminousFlux = vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
 	//luminousFlux = texture(indirectShadowMapSampler, texCoord).r * vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
 }

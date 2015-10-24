@@ -3,7 +3,7 @@
 #define HISTOGRAMBINS (1.0f / 8.0f)
 //number of histogram bins divided by two, to get the right texture coordinate. Normalization and offsetting to get an interval of [-1,1]. e.g. 16 histogram bins --> it is 1.0f/ 8.0f
 
-#include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
 
 layout(location = 0) uniform sampler2D hsvColorSampler;
 

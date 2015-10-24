@@ -15,6 +15,7 @@
 #include "Renderer/Renderpass/GeometryRenderpass.h"
 #include "Renderer/Renderpass/DebugGeometryRenderpass.h"
 #include "Renderer/Renderpass/IndexGeometryRenderpass.h"
+#include "Renderer/Renderpass/IndirectLightEdgeVertexExtractionGeometryRenderpass.h"
 #include "Renderer/Renderpass/IndirectLightGeometryRenderpass.h"
 #include "Renderer/Renderpass/ReflectiveShadowMapGeometryRenderpass.h"
 #include "Renderer/Renderpass/ShadowMapGeometryRenderpass.h"
@@ -71,6 +72,8 @@ namespace he
 
       void generateIndirectBackprojectionMap(unsigned int lightIndex);
 
+      void generateEdgeVertexMap();
+
       void rasterizeIndexGeometry();
 
       void rasterizeGeometry();
@@ -107,6 +110,7 @@ namespace he
       DebugGeometryRenderpass m_debugRenderpass;
       IndexGeometryRenderpass m_indexRenderpass;
       IndirectLightGeometryRenderpass m_indirectLightingRenderpass;
+      IndirectLightEdgeVertexExtractionGeometryRenderpass m_indirectLightEdgeVertexExtractionRenderpass;
       ReflectiveShadowMapGeometryRenderpass m_reflectiveShadowMapRenderpass;
       ShadowMapGeometryRenderpass m_shadowMapRenderpass;
       ParaboloidShadowMapGeometryRenderpass m_paraboloidShadowMappingpass;

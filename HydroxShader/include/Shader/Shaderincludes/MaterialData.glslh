@@ -1,9 +1,9 @@
 struct MaterialData
 {
-	float diffuseRho;
-	float specularRho;//metall materials have their own color as specular reflection
-	float ambientStrength;
-	float roughness;
+	float metalness;
+	float reflectance;
+	float roughness0;
+	float roughness1;
 	vec4 color;
 };
 

@@ -1,0 +1,93 @@
+#version 440 core
+
+#define THREADTILESIZE 16
+#define WORKGROUPSIZE (THREADTILESIZE * THREADTILESIZE)
+#define TILESIZE 16
+#define TILEPIXELPERTHREAD ((TILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
+#define LIGHTTUBEBINDINGPOINT 0
+
+#define PI 3.14159265359
+#define PI_HALF (PI * 0.5)
+
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+
+layout(location = 0) uniform sampler2D edgeVertexPositionSampler;
+layout(location = 1) uniform sampler2D edgeVertexNormalSampler;
+
+layout(r32f, binding = 0) writeonly uniform image2D vertexOffsetImage;
+layout(rgba32f, binding = 1) writeonly uniform image2D vertexPositionImage;
+layout(rgba32f, binding = 2) writeonly uniform image2D vertexNormalImage;
+layout(r32ui, binding = 3) writeonly uniform uimage2D vertexAtomicIndexSampler;
+
+layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
+
+shared uint groupVertexNumber[WORKGROUPSIZE];
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localIDx = gl_LocalInvocationIndex;
+	const uvec2 localIDxVec = gl_LocalInvocationID.xy;
+	
+	const uvec2 tileNumber = (uvec2(width, height) + uvec2(TILESIZE - 1)) / TILESIZE;
+	const uint tilesPerGroup = (tileNumber.x * tileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint tileStartIndex = gl_WorkGroupID.x * tilesPerGroup;
+	const uint tileEndIndex = tileStartIndex + tilesPerGroup;
+
+	const uvec2 tilePixelStartIndex = localIDxVec * TILEPIXELPERTHREAD;
+
+	for(uint i = tileStartIndex; i < tileEndIndex; i++)
+	{
+		ivec2 blockCoord = ivec2(mod(i, tileNumber.x), i / tileNumber.x);
+
+		uint validVertexNumber = 0;
+		vec4 vertexPositions[TILEPIXELPERTHREAD * TILEPIXELPERTHREAD];
+		vec4 vertexNormals[TILEPIXELPERTHREAD * TILEPIXELPERTHREAD];
+		
+		for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
+		{
+			ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
+			
+			vec4 normal = texelFetch(edgeVertexNormalSampler, texCoord, 0);
+			if(normal != vec4(0.0))
+			{
+				vertexPositions[validVertexNumber] = texelFetch(edgeVertexPositionSampler, texCoord, 0);
+				vertexNormals[validVertexNumber] = normal;
+				validVertexNumber++;
+			}
+		}
+		
+		groupVertexNumber[localIDx] = validVertexNumber;
+		
+		memoryBarrierShared();
+		barrier();
+		
+		if(localIDx == 0)
+		{
+			for(uint j = 0; j < WORKGROUPSIZE - 1; j++)
+			{
+				groupVertexNumber[j + 1] += groupVertexNumber[j];
+			}
+			
+			imageStore(vertexAtomicIndexSampler, blockCoord, uvec4(groupVertexNumber[WORKGROUPSIZE - 1]));
+		}
+		
+		memoryBarrierShared();
+		barrier();
+		
+		uint validVertexCounter = int(localIDx) - 1 >= 0 ? groupVertexNumber[localIDx - 1] : 0;
+		for(uint j = 0; j < validVertexNumber; j++)
+		{
+			ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(validVertexCounter, TILESIZE), validVertexCounter / TILESIZE);
+			
+			imageStore(vertexPositionImage, texCoord, vertexPositions[j]);
+			imageStore(vertexNormalImage, texCoord, vertexNormals[j]);
+			imageStore(vertexOffsetImage, texCoord, vec4(1.0));
+			validVertexCounter++;
+		}
+
+		memoryBarrierShared();
+		barrier();
+	}
+}

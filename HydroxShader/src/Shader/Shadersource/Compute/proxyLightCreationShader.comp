@@ -6,16 +6,11 @@
 #define INT32_MAX 2147483647
 #define WORKGROUPSIZE 128
 
-#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
-
-layout(std430, binding = 1) buffer samplingPattern
-{
-	vec4 samples[SAMPLENUMBER];
-};
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalAreaSampler;
@@ -29,12 +24,10 @@ layout(rgba32f, binding = 3) writeonly uniform image2D proxyLightPositionBuffer;
 layout(rgba32f, binding = 4) writeonly uniform image2D proxyLightLuminousFluxBuffer;
 
 layout(location = 3) uniform sampler2D zBuffer;
-
 layout(location = 4) uniform uint reflectiveShadowMapNumber;
-
 layout(location = 5) uniform uint cacheNumber;
-
 layout(location = 6) uniform uint proxyLightTextureResolution;
+layout(location = 7) uniform uint rsmTexRes;
 
 vec3 project(in vec3 t, in vec3 b, in vec3 c, in vec3 p)
 {
@@ -210,13 +203,10 @@ void main()
 			for(uint j = 0; j < cacheLoops; j++)
 			{
 				uint sampleIndex = gl_LocalInvocationID.x + j * WORKGROUPSIZE;
-				vec3 texCoords;
-				
+
 				//if(cacheOffset < cacheNumber && zVal != 0) //discard the indirect lighting where the cache is being occluded
 				{
-					texCoords.x = 0.5 + samples[sampleIndex].x;
-					texCoords.y = 0.5 + samples[sampleIndex].y;
-					texCoords.z = float(k) / float(reflectiveShadowMapNumber);
+					vec3 texCoords = vec3(mod(sampleIndex, rsmTexRes) / float(rsmTexRes), float(sampleIndex) / float(rsmTexRes * rsmTexRes), float(k) / float(reflectiveShadowMapNumber));
 					
 					indirectLightPos[gl_LocalInvocationID.x] = texture(indirectLightPosSampler, texCoords, 0);
 					indirectLightNormalArea[gl_LocalInvocationID.x] = texture(indirectLightNormalAreaSampler, texCoords, 0);

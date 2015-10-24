@@ -35,50 +35,27 @@ namespace he
     {
       std::string rawSource = loadShaderFileSource(filename);
 
-      preprocessDefinesShaderSource(rawSource);
+      preprocessDefinesShaderSource(rawSource);//preprocess the defines only if the complete shadercode is inserted from all includes!
 
       return rawSource;
     }
 
     std::string ShaderLoader::loadShaderFileSource(std::string filename)
     {
-      if(filename == std::string())
+      std::string shaderSource = loadFile(filename);
+
+      if(!shaderSource.empty())
       {
-        return std::string();
-      }
-
-      std::ifstream file(filename);
-      std::string shaderSource;
-      std::string line;
-
-      if(file.is_open())
-      {
-        while(!file.eof())
-        {
-          std::getline(file, line, '\0');
-          //line += '\n';
-
-          shaderSource += line;
-        }
-
-        file.close();
-
         size_t pathEndPos = filename.find_last_of('/') + 1;
         std::string path = filename.substr(0, pathEndPos);
 
-        preprocessIncludesShaderSource(shaderSource, path);
-      }
-      else
-      {
-        file.close();
-
-        std::clog << "Warning, couldn't open shader source file: " << filename << std::endl;
+        preprocessIncludesShaderSource(shaderSource);//it's here because of recursion!
       }
 
       return shaderSource;
     }
 
-    void ShaderLoader::preprocessIncludesShaderSource(std::string& source, std::string path)
+    void ShaderLoader::preprocessIncludesShaderSource(std::string& source)
     {
       size_t stringPos;
       std::string includeString = "#include";
@@ -91,12 +68,12 @@ namespace he
         {
           size_t filenameStart = source.find('"', stringPos) + 1;
           size_t filenameEnd = source.find('"', filenameStart + 1);
-          std::string filename = path + source.substr(filenameStart, filenameEnd - filenameStart);
+          std::string filename = source.substr(filenameStart, filenameEnd - filenameStart);
           std::string includeSource = loadShaderFileSource(filename);
           source.replace(stringPos, filenameEnd + 2 - stringPos, includeSource, 0, std::string::npos);
         }
 
-      }while(stringPos != std::string::npos);
+      } while(stringPos != std::string::npos);
     }
 
     void ShaderLoader::preprocessDefinesShaderSource(std::string& source)
@@ -143,6 +120,39 @@ namespace he
         }
 
       } while(stringPos != std::string::npos);
+    }
+
+    std::string ShaderLoader::loadFile(const std::string& shaderFilename)
+    {
+      if(shaderFilename == std::string())
+      {
+        return std::string();
+      }
+
+      std::ifstream file(shaderFilename);
+      std::string shaderSource;
+      std::string line;
+
+      if(file.is_open())
+      {
+        while(!file.eof())
+        {
+          std::getline(file, line, '\0');
+          //line += '\n';
+
+          shaderSource += line;
+        }
+
+        file.close();
+      }
+      else
+      {
+        file.close();
+
+        std::clog << "Warning, couldn't open shader source file: " << shaderFilename << std::endl;
+      }
+
+      return shaderSource;
     }
   }
 }

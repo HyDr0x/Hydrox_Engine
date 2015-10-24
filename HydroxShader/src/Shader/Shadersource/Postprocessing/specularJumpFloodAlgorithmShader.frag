@@ -3,7 +3,7 @@
 #define INT32_MAX 2147483647
 #define UINT16_MAX 65535
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 1) uniform usampler2D indexTexture;
 

@@ -1,7 +1,7 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;

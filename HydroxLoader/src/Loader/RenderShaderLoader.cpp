@@ -88,7 +88,8 @@ namespace he
             {
               if(!shaderFileNames[i].empty())
               {
-                m_renderShaderMap[shaderFileNames[i]].push_back(shaderHandle);
+                registerShaderSourceFiles(shaderFileNames[i], shaderHandle);
+                //m_renderShaderMap[shaderFileNames[i]].push_back(shaderHandle);
               }
             }
 
@@ -149,6 +150,46 @@ namespace he
       } while(stringPosNumberBegin != std::string::npos);
 
       return vertexDeclarationFlags;
+    }
+
+    void RenderShaderLoader::registerShaderSourceFiles(const std::string& shaderFilename, sh::RenderShaderHandle shaderHandle)
+    {
+      bool alreadyIn = false;
+      for(unsigned int i = 0; i < m_renderShaderMap[shaderFilename].size(); i++)
+      {
+        if(m_renderShaderMap[shaderFilename][i] == shaderHandle)
+        {
+          alreadyIn = true;
+          break;
+        }
+      }
+
+      if(!alreadyIn)//only insert it if it's not already in there
+      {
+        m_renderShaderMap[shaderFilename].push_back(shaderHandle);
+      }
+
+      std::string shaderSource = loadFile(shaderFilename);
+
+      size_t stringPos = 0;
+      std::string includeString = "#include";
+
+      do
+      {
+        stringPos = shaderSource.find(includeString, stringPos);
+
+        if(stringPos != std::string::npos)
+        {
+          size_t filenameStart = shaderSource.find('"', stringPos) + 1;
+          size_t filenameEnd = shaderSource.find('"', filenameStart + 1);
+          std::string filename = shaderSource.substr(filenameStart, filenameEnd - filenameStart);
+
+          registerShaderSourceFiles(filename, shaderHandle);
+
+          stringPos++;//to not find the same include again
+        }
+
+      } while(stringPos != std::string::npos);
     }
   }
 }

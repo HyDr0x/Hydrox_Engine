@@ -1,7 +1,7 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2D colorSampler;
 
@@ -24,5 +24,5 @@ void main()
 	
 	//color = vec4(decodeNormal(vec4(texture(colorSampler, gsout_texCoord)).xy), 1);//indirect light normal output
 	//color = vec4(unpackLuminousFlux(texture(colorSampler, gsout_texCoord).a*30), 1);//indirect light luminous flux output
-	color = 30.0 * vec4(texture(colorSampler, gsout_texCoord));//simple texture output
+	color = 1.0 * vec4(texture(colorSampler, gsout_texCoord));//simple texture output
 }

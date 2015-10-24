@@ -3,8 +3,8 @@
 #define WORKGROUPSIZE 256
 #define UINT32_MAX 4294967295
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Lights.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
 struct DrawArraysInstancedBaseInstance
 {

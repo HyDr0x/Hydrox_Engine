@@ -1,6 +1,6 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/HSVRGB.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/HSVRGB.glslh"
 
 layout(location = 0) uniform sampler2D hsvColorSampler;
 

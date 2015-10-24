@@ -1,4 +1,4 @@
-#include "Quaternion.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Quaternion.glslh"
 
 #define PARABOLOIDNEAR
 #define PARABOLOIDFAR

@@ -1,7 +1,7 @@
 #version 440 core
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 out vec3 vsout_pos3D;
 out vec3 vsout_cacheNormal;

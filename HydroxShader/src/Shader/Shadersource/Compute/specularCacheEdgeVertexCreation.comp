@@ -13,18 +13,19 @@
 #define NORMALTHETAQ 3
 #define DEPTHQ 2
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;
 layout(location = 2) uniform sampler2D gBufferMaterialSampler;
 layout(location = 3) uniform sampler2D gBufferLinearDepthSampler;
 
-layout(r32f, binding = 0) writeonly uniform image2D edgePointOffsetImage;
-layout(rgba32f, binding = 1) writeonly uniform image2D edgePointPositionImage;
-layout(rgba32f, binding = 2) writeonly uniform image2D edgePointNormalImage;
-layout(r32ui, binding = 3) writeonly uniform uimage2D vertexAtomicIndexSampler;
+layout(r32f, binding = 0) writeonly uniform image2D vertexOffsetImage;
+layout(rgba32f, binding = 1) writeonly uniform image2D vertexPositionImage;
+layout(rgba32f, binding = 2) writeonly uniform image2D vertexNormalImage;
+layout(r32ui, binding = 3) uniform uimage2D vertexAtomicIndexSampler;
 
 uint depthToBin(in float depth, in uint minDepth, in uint maxDepth)
 {
@@ -35,8 +36,8 @@ uint depthToBin(in float depth, in uint minDepth, in uint maxDepth)
 
 uint normalToBin(in vec3 normal)
 {
-	uint phiBin = uint(((atan(normal.y, normal.x) + PI) / (2.0 * PI)) * NORMALPHIQ);
-	uint thetaBin = uint((normal.z + 0.9999) * 0.5 * NORMALTHETAQ);//[-PI/2,PI/2] --> [0,PI]
+	uint phiBin = uint(clamp((atan(normal.y, normal.x) + PI) / (2.0 * PI), 0.0, 0.9999) * NORMALPHIQ);
+	uint thetaBin = uint(clamp((normal.z * 0.5 + 0.5), 0.0, 0.9999) * NORMALTHETAQ);//[-PI/2,PI/2] --> [0,PI]
 	
 	return phiBin + NORMALPHIQ * thetaBin;
 }
@@ -61,12 +62,14 @@ shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
 shared vec2 groupMaterial[WORKGROUPSIZE];
 shared float groupSummedPixelNumber[WORKGROUPSIZE];
-shared int groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
+shared uint groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
 shared uint groupMinDepth;
 shared uint groupMaxDepth;
 shared uint groupChoosenDepthBin;
 shared uint groupMaxNormalBinID;
 shared uint groupMaxNormalBinVotes;
+shared uint groupVertexNumber;
+//shared uvec2 groupPerThreadMaxNormalBinVotes[WORKGROUPSIZE];//costs too much shared memory to amortize!
 
 void main()
 {
@@ -84,13 +87,21 @@ void main()
 	for(uint i = tileStartIndex; i < tileEndIndex; i++)
 	{
 		ivec2 blockCoord = ivec2(mod(i, tileNumber.x), i / tileNumber.x);
-		
+
 		if(localIDx == 0)
 		{
 			groupMinDepth = 0xFFFFFFFF;
 			groupMaxDepth = 0;
-
-			for(uint j = 0; j < (NORMALPHIQ * NORMALTHETAQ); j++)
+			
+			groupVertexNumber = imageLoad(vertexAtomicIndexSampler, blockCoord).r;
+		}
+		
+		const uint binsPerThread = (NORMALPHIQ * NORMALTHETAQ + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint binStartIndex = localIDx * binsPerThread;
+		const uint binEndIndex = binStartIndex + binsPerThread;
+		for(uint j = binStartIndex; j < binEndIndex; j++)
+		{
+			if(j < NORMALPHIQ * NORMALTHETAQ)
 			{
 				groupNormalBin[j] = 0;
 			}
@@ -139,13 +150,45 @@ void main()
 			depthBinCache[j] = depthToBin(uintBitsToFloat(depthBinCache[j]), groupMinDepth, groupMaxDepth);
 		}
 
-		uint vertexNumber = 0;
+		uint vertexNumber = groupVertexNumber;
 		
 		do
 		{
 			memoryBarrierShared();
 			barrier();
-		
+			
+			/*//costs too much shard memory to amortize!
+			groupPerThreadMaxNormalBinVotes[localIDx] = uvec2(0, INT32_MAX);
+			const uint binsPerThread = max(4, (NORMALPHIQ * NORMALTHETAQ + WORKGROUPSIZE - 1) / WORKGROUPSIZE);
+			const uint binStartIndex = localIDx * binsPerThread;
+			const uint binEndIndex = binStartIndex + binsPerThread;
+			for(uint j = binStartIndex; j < binEndIndex; j++)
+			{
+				if(j < NORMALPHIQ * NORMALTHETAQ && groupNormalBin[j] > groupPerThreadMaxNormalBinVotes[localIDx].x)
+				{
+					groupPerThreadMaxNormalBinVotes[localIDx] = uvec2(groupNormalBin[j], j);
+				}
+			}
+			
+			memoryBarrierShared();
+			barrier();
+			
+			if(localIDx == 0)
+			{
+				groupMaxNormalBinID = INT32_MAX;
+				groupMaxNormalBinVotes = 0;
+				groupChoosenDepthBin = INT32_MAX;
+				
+				for(uint j = 0; j < WORKGROUPSIZE; j++)
+				{
+					if(groupPerThreadMaxNormalBinVotes[j].x > groupMaxNormalBinVotes)
+					{
+						groupMaxNormalBinVotes = groupPerThreadMaxNormalBinVotes[j].x;
+						groupMaxNormalBinID = groupPerThreadMaxNormalBinVotes[j].y;
+					}
+				}
+			}
+		*/
 			if(localIDx == 0)
 			{
 				groupMaxNormalBinID = INT32_MAX;
@@ -259,27 +302,30 @@ void main()
 							resultMaterials += groupMaterial[j];
 						}
 					}
-				
-					resultPosition /= resultPixelCounter;
-					resultNormals /= resultPixelCounter;
-					resultMaterials /= resultPixelCounter;
-					
-					ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
-					
-					vec4 projCoord = viewProjectionMatrix * vec4(resultPosition, 1.0);
-					projCoord /= projCoord.w;
-					ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
-					
-					float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.g);
-					vec3 reflectRay = normalize(reflect(normalize(resultPosition - eyePos.xyz), resultNormals));
-					float cacheIndirectLightDistance;
-					
-					//if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
+
+					if(resultPixelCounter > 0)
 					{
-						imageStore(edgePointOffsetImage, texCoord, vec4(1.0));
-						imageStore(edgePointPositionImage, texCoord, vec4(resultPosition, resultMaterials.r));
-						imageStore(edgePointNormalImage, texCoord, vec4(normalize(resultNormals), resultMaterials.g));
-						vertexNumber++;
+						resultPosition /= resultPixelCounter;
+						resultNormals = normalize(resultNormals / resultPixelCounter);
+						resultMaterials /= resultPixelCounter;
+
+						ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
+						
+						vec4 projCoord = viewProjectionMatrix * vec4(resultPosition, 1.0);
+						projCoord /= projCoord.w;
+						ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
+						
+						float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.g);
+						vec3 reflectRay = normalize(reflect(normalize(resultPosition - eyePos.xyz), resultNormals));
+						float cacheIndirectLightDistance;
+						
+						if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
+						{
+							imageStore(vertexOffsetImage, texCoord, vec4(1.0));
+							imageStore(vertexPositionImage, texCoord, vec4(resultPosition, resultMaterials.r));
+							imageStore(vertexNormalImage, texCoord, vec4(resultNormals, resultMaterials.g));
+							vertexNumber++;
+						}
 					}
 				}
 			}

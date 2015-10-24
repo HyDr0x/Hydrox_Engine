@@ -591,6 +591,40 @@ namespace he
         textures[db::Material::DISPLACEMENTTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
         textures[db::Material::SPECULARTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
 
+        unsigned int t0 = scene->mMaterials[i]->GetTextureCount(aiTextureType_AMBIENT);
+        unsigned int t1 = scene->mMaterials[i]->GetTextureCount(aiTextureType_EMISSIVE);
+        unsigned int t2 = scene->mMaterials[i]->GetTextureCount(aiTextureType_LIGHTMAP);
+        unsigned int t3 = scene->mMaterials[i]->GetTextureCount(aiTextureType_REFLECTION);
+        unsigned int t4 = scene->mMaterials[i]->GetTextureCount(aiTextureType_NONE);
+        unsigned int t5 = scene->mMaterials[i]->GetTextureCount(aiTextureType_OPACITY);
+        unsigned int t6 = scene->mMaterials[i]->GetTextureCount(aiTextureType_SHININESS);
+        unsigned int t7 = scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR);
+        unsigned int t8 = scene->mMaterials[i]->GetTextureCount(aiTextureType_UNKNOWN);
+        unsigned int t9 = scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT);
+
+        aiString name;
+
+        scene->mMaterials[i]->GetTexture(aiTextureType_AMBIENT, 0, &name);
+        std::string name0 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_OPACITY, 0, &name);
+        std::string name1 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_EMISSIVE, 0, &name);
+        std::string name2 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_LIGHTMAP, 0, &name);
+        std::string name3 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_REFLECTION, 0, &name);
+        std::string name4 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_NONE, 0, &name);
+        std::string name5 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_SHININESS, 0, &name);
+        std::string name6 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &name);
+        std::string name7 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_UNKNOWN, 0, &name);
+        std::string name8 = name.C_Str();
+        scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &name);
+        std::string name9 = name.C_Str();
+
         texLoader.setSRGB(m_sRGB);
         texLoader.setMipMapping(true);
 

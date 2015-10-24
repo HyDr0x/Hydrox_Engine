@@ -5,9 +5,9 @@ layout(early_fragment_tests) in;
 #define PI 3.14159265359
 #define SAMPLENUMBER
 
-#include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) out vec4 fsout_pos3D;
 layout(location = 1) out vec4 fsout_normalArea;

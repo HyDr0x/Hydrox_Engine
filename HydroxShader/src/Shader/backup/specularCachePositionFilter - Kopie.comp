@@ -1,0 +1,178 @@
+#version 440 core
+
+#define WORKGROUPSIZE 16
+#define PI 3.14159265359
+#define PI_HALF (0.5 * PI)
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+layout(location = 2) uniform sampler2D gBufferMaterialSampler;
+
+layout(location = 3) uniform uint reflectiveShadowMapNumber;
+layout(location = 4) uniform vec2 normalizedStepSize;
+layout(location = 5) uniform ivec2 seedSwitch;
+
+layout(rg16f, binding = 0) uniform writeonly image2D cacheSamplingDistanceBuffer;
+
+layout(std430, binding = 1) buffer tubeData
+{
+	vec4 tubeStartPosRadius[1];
+	vec4 tubeDirection[1];//not normalized, the vector length is the length of the tube
+};
+
+float specularCacheSolidAngle(float n)
+{
+	return PI_HALF - asin(pow(0.5, 1.0 / n));
+}
+
+bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAngle, in uint tubeIndex, out float distance)
+{
+	float dotRDir = dot(r, tubeDirection[tubeIndex].xyz);
+	
+	vec3 trfTubeStartPos = tubeStartPosRadius[tubeIndex].xyz - cachePos;
+	
+	float t = (dot(r, trfTubeStartPos) * dotRDir - dot(trfTubeStartPos, tubeDirection[tubeIndex].xyz)) / (dot(tubeDirection[tubeIndex].xyz, tubeDirection[tubeIndex].xyz) - dotRDir * dotRDir);
+	
+	vec3 tubePos = trfTubeStartPos + clamp(t, 0.0, 1.0) * tubeDirection[tubeIndex].xyz;
+	
+	float lineDistance = length(tubePos);
+
+	vec3 centerToRay = dot(tubePos, r) * r - tubePos;
+	vec3 closestPoint = (tubePos + centerToRay * clamp(tubeStartPosRadius[tubeIndex].w / length(centerToRay), 0.0, 1.0));
+	
+	float tubeDistance = max(length(closestPoint), 0.001);
+
+	//if we are inside the tube, we use the distance to the center
+	distance = lineDistance < tubeStartPosRadius[tubeIndex].w ? length(tubePos + 0.5 * tubeDirection[tubeIndex].xyz) : tubeDistance;
+	//distance = lineDistance;
+	//distance = tubeDistance;
+	//distance = length(cachePos - (trfTubeStartPos + 0.5 * tubeDirection[tubeIndex].xyz));
+	
+	float radix = 2.0;
+	float base = pow(radix, floor(log(distance) / log(radix)) - 1.0);
+	distance = base * floor(distance / base);
+	
+	return true;//dot(normalize(closestPoint / tubeDistance), r) > cos(maxSolidAngle) && distance > 0.1;
+}
+
+float samplingDistance(float lightDistance, float maxSolidAngle)
+{
+	return /*0.1325 */ 2.0 * lightDistance * tan(maxSolidAngle - 0.0001);//offset to handle PI_HALF
+	//return min(2.0 * lightDistance * tan(maxSolidAngle - 0.0001), 1.0);//offset to handle PI_HALF
+}
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	for(uint k = 0; k < 2; k++)
+	{
+		idx += k * gl_NumWorkGroups.x * WORKGROUPSIZE;
+		
+		vec3 oldPosition = vec3(0.0), newPosition;
+		vec3 oldNormal = vec3(0.0), newNormal;
+		float sampleDistance = 0.0;
+		float oldN = 0.0, newN;
+		float oldDepth = 0.0, newDepth;
+		float regionCounter = 0.0;
+		
+		const uint pixelPerThread = (width * height) / (gl_NumWorkGroups.x * WORKGROUPSIZE);
+		const uint startIndex = idx * pixelPerThread;
+		const uint endIndex = startIndex + pixelPerThread;
+		
+		//ivec2 texCoords = ivec2(pixelPerThread * floor(idx / height), mod(idx, height));
+		ivec2 texCoords = seedSwitch * ivec2(pixelPerThread * floor(idx / height), pixelPerThread * floor(idx / width)) + (ivec2(1) - seedSwitch) * ivec2(mod(idx, width), mod(idx, height));
+		ivec2 stepSize = clamp(ivec2(normalizedStepSize * vec2(width + 1, height + 1)), -1, 1);//plus one to be sure that it wont be zero
+		vec2 texCoordsNormalized = vec2(texCoords.x / float(width), texCoords.y / float(height));
+		
+		for(uint i = startIndex; i < endIndex; i++)
+		{
+			if(texCoords.y >= height && stepSize.y > 0)
+			{
+				texCoords.y = 0;
+				texCoordsNormalized.y = 0.0;
+				
+				regionCounter = 0.0;
+				sampleDistance = 0.0;
+				oldPosition = vec3(0.0);
+				oldNormal = vec3(0.0);
+			}
+			
+			if(texCoords.y < 0 && stepSize.y < 0)
+			{
+				texCoords.y = int(height - 1);
+				texCoordsNormalized.y = 1.0 + normalizedStepSize.y;
+				
+				regionCounter = 0.0;
+				sampleDistance = 0.0;
+				oldPosition = vec3(0.0);
+				oldNormal = vec3(0.0);
+			}
+		
+			if(texCoords.x >= width || texCoords.y >= height)
+			{
+				return;
+			}
+
+			newDepth = texture(gBufferDepthSampler, texCoordsNormalized).r;
+			
+			if(newDepth >= 0.99999)
+			{
+				imageStore(cacheSamplingDistanceBuffer, texCoords, vec4(sampleDistance, regionCounter, 0.0, 0.0));
+				regionCounter = 0.0;
+				sampleDistance = 0.0;
+				oldPosition = vec3(0.0);
+				oldNormal = vec3(0.0);
+				texCoords += stepSize;
+				texCoordsNormalized += normalizedStepSize;
+				continue;
+			}
+			
+			newPosition = vec3(texCoordsNormalized, newDepth) * 2.0 - 1.0;
+			vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
+			newPosition = tmpProjPos.xyz / tmpProjPos.w;
+			
+			newN = texture(gBufferMaterialSampler, texCoordsNormalized).w;
+			
+			newNormal = normalize(texture(gBufferNormalSampler, texCoordsNormalized).xyz * 2.0 - 1.0);
+			
+			sampleDistance -= length(newPosition - oldPosition);
+			
+			//(sampleDistance <= 0.0 || newN != oldN || abs(oldDepth - newDepth) > 0.01) && mod(idx, 2048) == 0)
+			//if(sampleDistance <= 0.0)
+			if(sampleDistance <= 0.0 || newN != oldN || abs(oldDepth - newDepth) > 0.01 || dot(newNormal, oldNormal) < 0.9 || i + 1 == endIndex || texCoords.x + stepSize.x >= width || texCoords.y + stepSize.y >= height)
+			{
+				float maxSolidAngle = specularCacheSolidAngle(newN);
+				
+				vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), newNormal));
+				
+				float cacheIndirectLightDistance;
+				
+				for(uint j = 0; j < reflectiveShadowMapNumber; j++)
+				{
+					if(indirectLightTubeCollision(newPosition, reflectRay, maxSolidAngle, j, cacheIndirectLightDistance))
+					{
+						sampleDistance = samplingDistance(cacheIndirectLightDistance, maxSolidAngle);
+						imageStore(cacheSamplingDistanceBuffer, texCoords, vec4(sampleDistance, regionCounter, 0.0, 0.0));
+						//imageStore(cacheSamplingDistanceBuffer, texCoords, vec4(1));
+						regionCounter = 0.0;
+						break;
+					}
+				}
+			}
+
+			oldDepth = newDepth;
+			oldPosition = newPosition;
+			oldN = newN;
+			oldNormal = newNormal;
+
+			regionCounter++;
+			texCoords += stepSize;
+			texCoordsNormalized += normalizedStepSize;
+		}
+	}
+}

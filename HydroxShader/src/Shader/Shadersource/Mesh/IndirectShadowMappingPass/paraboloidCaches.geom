@@ -1,8 +1,8 @@
 #version 440 core
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 #define SHADOWSAMPLENUMBER
 #define SHADOWSAMPLENUMBERROOT
@@ -15,11 +15,6 @@ layout(rgba32f, binding = 0) readonly uniform image2D indirectLightPositions;
 layout(rgba32f, binding = 1) readonly uniform image2D indirectLightNormals;
 coherent layout(rgba32f, binding = 2) uniform image1D valQuaternions;
 
-layout(std430, binding = 1) buffer samplingPattern
-{
-	vec4 samples[];
-};
-
 layout(location = 0) uniform uint reflectiveShadowMapResolution;
 
 out float gsout_clipDepth;
@@ -31,7 +26,7 @@ in uint vsout_vertexID[1];
 
 void main()
 {
-	ivec2 texCoord = ivec2((samples[vsout_instanceID[0]].xy + vec2(0.5)) * reflectiveShadowMapResolution);
+	ivec2 texCoord = ivec2(mod(vsout_instanceID[0], reflectiveShadowMapResolution), vsout_instanceID[0] / reflectiveShadowMapResolution);
 	vec4 lightPos = imageLoad(indirectLightPositions, texCoord);
 	vec3 lightNormal = imageLoad(indirectLightNormals, texCoord).xyz * 2.0 - 1.0;
 

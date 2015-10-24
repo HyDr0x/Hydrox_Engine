@@ -49,23 +49,6 @@ namespace he
       command.numGroupZ = 1;
 
       m_proxyLightCommandBuffer.createBuffer(GL_DISPATCH_INDIRECT_BUFFER, sizeof(DispatchIndirectCommand), sizeof(DispatchIndirectCommand), GL_STATIC_DRAW, &command);
-
-      createSamplingPattern();
-    }
-
-    void IndirectLightRenderer::createSamplingPattern()
-    {
-      std::vector<util::vec4f> samplingPattern;
-      std::vector<float> debugSamplingPattern;
-
-      unsigned int imageSize = 513;
-
-      //util::RandomSequenceGenerator::generateDiscSequence(m_options->giLightSampleNumber, 0.5f, 2.0f, imageSize, samplingPattern, debugSamplingPattern);
-      util::RandomSequenceGenerator::generateHaltonSequence(m_options->giLightSampleNumber, util::vec2ui(2, 3), 0.5f, imageSize, samplingPattern, debugSamplingPattern);
-
-      m_samplingDebugTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(imageSize, imageSize, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16, &debugSamplingPattern[0]));
-
-      m_samplingPatternBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(samplingPattern[0]) * samplingPattern.size(), sizeof(samplingPattern[0]) * samplingPattern.size(), GL_STATIC_DRAW, &samplingPattern[0]);
     }
 
     void IndirectLightRenderer::updateBuffer(unsigned int cacheNumber, unsigned int proxyLightTextureResolution)
@@ -125,8 +108,6 @@ namespace he
         m_indirectLightPositionBuffer->clearTexture(&clearData[0]);
         m_indirectLightLuminousFluxBuffer->clearTexture(&clearData[0]);
 
-        m_samplingPatternBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-
         m_globalCachePositionBuffer.bindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
         m_globalCacheNormalBuffer.bindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
         m_globalCacheAreaBuffer.bindImageTexture(2, 0, GL_READ_ONLY, GL_R16F);
@@ -141,11 +122,13 @@ namespace he
         m_zBuffer->setTexture(3, 3);
         
         unsigned int reflectiveShadowLightNumber = reflectiveShadowPosMaps->getResolution()[2];
-        sh::RenderShader::setUniform(4, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
+        sh::ComputeShader::setUniform(4, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
 
-        sh::RenderShader::setUniform(5, GL_UNSIGNED_INT, &m_cacheNumber);
+        sh::ComputeShader::setUniform(5, GL_UNSIGNED_INT, &m_cacheNumber);
 
-        sh::RenderShader::setUniform(6, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
+        sh::ComputeShader::setUniform(6, GL_UNSIGNED_INT, &m_proxyLightTextureResolution);
+
+        sh::ComputeShader::setUniform(7, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
 
         sh::ComputeShader::dispatchComputeShader(128, 1, 1);
 
@@ -162,14 +145,15 @@ namespace he
         m_globalCacheNormalBuffer.unbindImageTexture(1, 0, GL_READ_ONLY, GL_RGBA32F);
         m_globalCachePositionBuffer.unbindImageTexture(0, 0, GL_READ_ONLY, GL_RGBA32F);
 
-        m_samplingPatternBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-
         computeShader.useNoShader();
       }
     }
 
     void IndirectLightRenderer::setBuffer(util::SharedPointer<db::Texture2D> depthBuffer)
     {
+      glDepthMask(GL_FALSE);
+      glDepthFunc(GL_LEQUAL);
+
       //m_gBufferSync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
       //GLenum state;
@@ -206,6 +190,9 @@ namespace he
       m_globalCachePositionBuffer.unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
       m_indirectLightIndicesRenderQuad.unsetWriteFrameBuffer();
+
+      glDepthFunc(GL_LESS);
+      glDepthMask(GL_TRUE);
     }
 
     void IndirectLightRenderer::setCacheAndProxyLights() const
@@ -222,14 +209,10 @@ namespace he
 
       m_indirectLightPositionBuffer->bindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
       m_indirectLightLuminousFluxBuffer->bindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
-
-      m_samplingPatternBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
     void IndirectLightRenderer::unsetCacheAndProxyLights() const
     {
-      m_samplingPatternBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-
       m_indirectLightLuminousFluxBuffer->unbindImageTexture(3, 0, GL_READ_ONLY, GL_RGBA32F);
       m_indirectLightPositionBuffer->unbindImageTexture(2, 0, GL_READ_ONLY, GL_RGBA32F);
 
@@ -314,16 +297,6 @@ namespace he
     const TBO& IndirectLightRenderer::getGlobalCacheAreaMap()
     {
       return m_globalCacheAreaBuffer;
-    }
-
-    util::SharedPointer<db::Texture2D> IndirectLightRenderer::getSamplingDebugMap()
-    {
-      return m_samplingDebugTexture;
-    }
-
-    const GPUBuffer& IndirectLightRenderer::getSamplingBuffer()
-    {
-      return m_samplingPatternBuffer;
     }
   }
 }

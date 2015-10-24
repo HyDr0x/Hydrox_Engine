@@ -18,7 +18,7 @@ namespace he
 
       template<typename Type> inline int sign(Type a)
       {
-        return (Type(0) < a) - (a < Type(0));
+        return Type(Type(0) < a) - Type(a < Type(0));
       }
 
       template<typename Type> inline Type clamp(Type a, Type intervalStart, Type intervalEnd)

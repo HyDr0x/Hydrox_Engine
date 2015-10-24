@@ -2,10 +2,10 @@
 
 #define INT32_MAX 2147483647
 
-#include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
 
 layout(std430, binding = 0) buffer specularCachePositionBuffer
 {
@@ -14,7 +14,7 @@ layout(std430, binding = 0) buffer specularCachePositionBuffer
 
 layout(std430, binding = 1) buffer specularCacheNormalMaterialBuffer
 {
-	vec4 specularCacheNormalMaterial[];
+	vec4 specularCacheNormals[];
 };
 
 layout(std430, binding = 2) buffer proxyLightPositionBuffer
@@ -78,11 +78,11 @@ void main()
 	
 	dmax = sqrt(max(dmax, 0.0001));
 	
-	vec3 Xpg = vec3(0.0f), phiPG = vec3(0.0f);
+	vec3 Xpg = vec3(0.0), phiPG = vec3(0.0);
 	
-	float wGesG = 0.0f;
+	float wGesG = 0.0;
 	
-	vsout_cacheProxyMinDistanceG = 0.0f;
+	vsout_cacheProxyMinDistanceG = 0.0;
 		
 	for(uint i = 0; i < 8; i++)
 	{
@@ -90,7 +90,7 @@ void main()
 		{
 			CacheData cache;
 			cache.position = specularCachePositions[cacheIndices[i]];
-			cache.normal = specularCacheNormalMaterial[cacheIndices[i]];
+			cache.normal = specularCacheNormals[cacheIndices[i]];
 			
 			vec3 cacheNormal = normalize(cache.normal.xyz);
 			

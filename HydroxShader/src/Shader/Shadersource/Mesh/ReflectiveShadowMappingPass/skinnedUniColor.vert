@@ -2,8 +2,8 @@
 
 #extension ARB_shader_draw_parameters : enable
 
-#include "../../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../../../../include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
 #define MAXBONES 64
 

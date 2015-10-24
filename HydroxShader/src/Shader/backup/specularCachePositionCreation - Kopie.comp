@@ -1,0 +1,151 @@
+#version 440 core
+
+#define WORKGROUPSIZE 16
+
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(rg16f, binding = 0) uniform readonly image2D cachePosXImage;
+layout(rg16f, binding = 1) uniform readonly image2D cachePosYImage;
+layout(rg16f, binding = 2) uniform readonly image2D cachePosXYImage;
+layout(rg16f, binding = 3) uniform readonly image2D cachePosYXImage;
+layout(r16f, binding = 4) uniform writeonly image2D cachePosMap;
+layout(r32f, binding = 5) uniform writeonly image2D cacheOffsetBuffer;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+	
+	vec2 sampleDistanceRegionNumberX[3], sampleDistanceRegionNumberY[3], sampleDistanceRegionNumberXY[3], sampleDistanceRegionNumberYX[3];
+
+	for(uint k = 0; k < 2; k++)
+	{
+		idx += k * gl_NumWorkGroups.x * WORKGROUPSIZE;
+
+		const uint pixelPerThread = (width * height) / (gl_NumWorkGroups.x * WORKGROUPSIZE);
+		const uint startIndex = idx * pixelPerThread;
+		const uint endIndex = startIndex + pixelPerThread;
+		
+		const uint startOffset = uint(ceil(width / float(pixelPerThread))) * pixelPerThread - width;
+		
+		ivec2 texCoords = ivec2(startOffset + width - pixelPerThread * floor(idx / height) - 1, mod(idx, height));
+		
+		for(uint i = startIndex; i < endIndex; i++)
+		{
+			if(texCoords.x < 0 || texCoords.y >= height)
+			{
+				return;
+			}
+			
+			sampleDistanceRegionNumberX[0] = imageLoad(cachePosXImage, texCoords).rg;
+			sampleDistanceRegionNumberX[1] = imageLoad(cachePosXImage, ivec2(texCoords.x, texCoords.y - 1)).rg;
+			sampleDistanceRegionNumberX[2] = imageLoad(cachePosXImage, ivec2(texCoords.x, texCoords.y + 1)).rg;
+
+			if(texCoords.x < width &&
+			(sampleDistanceRegionNumberX[0].y > 0.0 && sampleDistanceRegionNumberX[1].y > 0.0 && sampleDistanceRegionNumberX[2].y > 0.0))//because of start offset to match the thread starting of the filter kernels
+			{
+				vec2 yVal = vec2(0.0);
+				ivec2 xyCoord = ivec2(texCoords.x - int(sampleDistanceRegionNumberX[0].y * 0.5), texCoords.y);
+				
+				float sx0, sx1, sy0, sy1;
+				sx0 = imageLoad(cachePosXImage, ivec2(texCoords.x - int(sampleDistanceRegionNumberX[0].y - 1.0), texCoords.y)).x;
+				sx1 = sampleDistanceRegionNumberX[0].x;
+	
+				do
+				{
+					yVal = imageLoad(cachePosYImage, xyCoord).rg;
+					xyCoord.y++;
+				}while(yVal.y < 1.0 && xyCoord.y < height);
+				
+				xyCoord.y--;
+				
+				sy0 = imageLoad(cachePosYImage, ivec2(xyCoord.x, xyCoord.y - int(yVal.y - 1.0))).x;
+				sy1 = imageLoad(cachePosYImage, xyCoord).x;
+				
+				xyCoord.y -= int(yVal.y * 0.5);
+				imageStore(cachePosMap, xyCoord, vec4(0.5 * (sx0 + (sx1 - sx0) * 0.5) + 0.5 * (sy0 + (sy1 - sy0) * 0.5)));
+				imageStore(cacheOffsetBuffer, xyCoord, vec4(1.0));
+				
+				//imageStore(cachePosMap, texCoords, vec4(1));
+				
+				texCoords.x -= int(sampleDistanceRegionNumberX[0].y - 1.0);
+				i += uint(sampleDistanceRegionNumberX[0].y - 1.0);
+			}
+			else 
+			{
+				sampleDistanceRegionNumberY[0] = imageLoad(cachePosYImage, texCoords).rg;
+				sampleDistanceRegionNumberY[1] = imageLoad(cachePosYImage, ivec2(texCoords.x - 1, texCoords.y)).rg;
+				sampleDistanceRegionNumberY[2] = imageLoad(cachePosYImage, ivec2(texCoords.x + 1, texCoords.y)).rg;
+			
+				if(texCoords.x < width &&
+				(sampleDistanceRegionNumberY[0].y > 0.0 && sampleDistanceRegionNumberY[1].y > 0.0 && sampleDistanceRegionNumberY[2].y > 0.0))//because of start offset to match the thread starting of the filter kernels
+				{
+					vec2 xVal = vec2(0.0);
+					ivec2 xyCoord = ivec2(texCoords.x, texCoords.y - int(sampleDistanceRegionNumberY[0].y * 0.5));
+					
+					float sx0, sx1, sy0, sy1;
+					sx0 = imageLoad(cachePosYImage, ivec2(texCoords.x, texCoords.y - int(sampleDistanceRegionNumberY[0].y - 1.0))).x;
+					sx1 = sampleDistanceRegionNumberY[0].x;
+					
+					do
+					{
+						xVal = imageLoad(cachePosXImage, xyCoord).rg;
+						xyCoord.x++;
+					}while(xVal.g <= 0.0001 && xyCoord.x < width);
+					
+					xyCoord.x--;
+					
+					sy0 = imageLoad(cachePosXImage, ivec2(xyCoord.x - int(xVal.y - 1.0), xyCoord.y)).x;
+					sy1 = imageLoad(cachePosXImage, xyCoord).x;
+					
+					xyCoord.x -= int(xVal.g * 0.5);
+					imageStore(cachePosMap, xyCoord, vec4(0.5 * (sx0 + (sx1 - sx0) * 0.5) + 0.5 * (sy0 + (sy1 - sy0) * 0.5)));
+					imageStore(cacheOffsetBuffer, xyCoord, vec4(1.0));
+					
+					//imageStore(cachePosMap, texCoords, vec4(1));
+					
+					//texCoords.x -= int(sampleDistanceRegionNumberY[0].y - 1.0);
+					//i += uint(sampleDistanceRegionNumberY[0].y - 1.0);
+				}
+				else
+				{
+					sampleDistanceRegionNumberXY[0] = imageLoad(cachePosXYImage, texCoords).rg;
+					sampleDistanceRegionNumberXY[1] = imageLoad(cachePosXYImage, ivec2(texCoords.x - 1, texCoords.y)).rg;
+					sampleDistanceRegionNumberXY[2] = imageLoad(cachePosXYImage, ivec2(texCoords.x, texCoords.y - 1)).rg;
+					
+					sampleDistanceRegionNumberYX[0] = imageLoad(cachePosYXImage, texCoords).rg;
+					sampleDistanceRegionNumberYX[1] = imageLoad(cachePosYXImage, ivec2(texCoords.x - 1, texCoords.y)).rg;
+					sampleDistanceRegionNumberYX[2] = imageLoad(cachePosYXImage, ivec2(texCoords.x, texCoords.y + 1)).rg;
+				
+					if(texCoords.x < width &&
+					((sampleDistanceRegionNumberXY[0].y > 0.0 && sampleDistanceRegionNumberXY[1].y > 0.0 && sampleDistanceRegionNumberXY[2].y > 0.0) ||
+					(sampleDistanceRegionNumberYX[0].y > 0.0 && sampleDistanceRegionNumberYX[1].y > 0.0 && sampleDistanceRegionNumberYX[2].y > 0.0)))
+					{
+						vec2 xyVal = vec2(0.0);
+						ivec2 xyCoord = ivec2(texCoords + ivec2(0.5 * sampleDistanceRegionNumberXY[0].y * ivec2(-1, -1)));
+						
+						do
+						{
+							xyVal = imageLoad(cachePosYXImage, xyCoord).rg;
+							xyCoord += ivec2(-1, 1);
+						}while(xyVal.g <= 0.0001 && xyCoord.x < width && xyCoord.y < height);
+						
+						xyCoord -= ivec2(-1, 1);
+						
+						xyCoord = xyCoord - ivec2(-1, 1) + int(xyVal.g * 0.5) * ivec2(1, -1);
+						float p0 = min(xyVal.r, sampleDistanceRegionNumberXY[0].x), p1 = max(xyVal.r, sampleDistanceRegionNumberXY[0].x);
+						imageStore(cachePosMap, xyCoord, vec4(p0 + (p1 - p0) * 0.5));
+						imageStore(cacheOffsetBuffer, xyCoord, vec4(1.0));
+						
+						//texCoords.x -= int(sampleDistanceRegionNumberXY[0].y - 1.0);
+						//i += uint(sampleDistanceRegionNumberXY[0].y - 1.0);
+					}
+				}
+			}
+			
+
+			texCoords.x--;
+		}
+	}
+}

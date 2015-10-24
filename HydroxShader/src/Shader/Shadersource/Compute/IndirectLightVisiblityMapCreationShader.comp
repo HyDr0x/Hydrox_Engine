@@ -6,8 +6,8 @@
 #define SHADOWSAMPLENUMBERROOT
 #define INTERLEAVEDBLOCKSIZE
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 layout(location = 0) uniform sampler2D depthSampler;
 layout(location = 1) uniform sampler2DArray indirectShadowMapSampler;
@@ -17,11 +17,6 @@ layout(rgba32f, binding = 1) readonly uniform image2DArray indirectLightNormals;
 
 layout(r16f, binding = 2) writeonly uniform image2D visibilityBuffer;
 layout(rgba32f, binding = 3) readonly uniform image1DArray valQuaternions;
-
-layout(std430, binding = 1) buffer samplingPattern
-{
-	vec4 samples[SAMPLENUMBER];
-};
 
 layout(location = 2) uniform uint reflectiveShadowMapResolution;
 layout(location = 3) uniform uint reflectiveShadowMapNumber;
@@ -66,7 +61,7 @@ void main()
 			for(uint i = startIndex; i < SHADOWSAMPLENUMBER; i += interleavedSize)
 			//for(uint i = 0; i < SHADOWSAMPLENUMBER; i++)
 			{
-				ivec3 indirectLightTexCoord = ivec3((samples[i].xy + vec2(0.5)) * reflectiveShadowMapResolution, j);
+				ivec3 indirectLightTexCoord = ivec3(mod(i, reflectiveShadowMapResolution), i / reflectiveShadowMapResolution, j);
 				vec4 lightPos = imageLoad(indirectLightPositions, indirectLightTexCoord);
 				
 				if(lightPos.w == 0.0) //cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
@@ -80,7 +75,7 @@ void main()
 				/*
 				if(gl_LocalInvocationID.x == 0)
 				{
-					ivec3 indirectLightTexCoord = ivec3((samples[i].xy + vec2(0.5)) * reflectiveShadowMapResolution, j);
+					ivec3 indirectLightTexCoord = ivec3(mod(i, reflectiveShadowMapResolution), i / reflectiveShadowMapResolution, j);
 					indirectLightPos[gl_WorkGroupID.x] = imageLoad(indirectLightPositions, indirectLightTexCoord);
 					indirectLightNormal[gl_WorkGroupID.x].xyz = imageLoad(indirectLightNormals, indirectLightTexCoord).xyz * 2.0 - 1.0;
 				}

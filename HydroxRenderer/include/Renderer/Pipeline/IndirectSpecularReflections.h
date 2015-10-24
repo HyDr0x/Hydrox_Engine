@@ -47,15 +47,20 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
-        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
-        const GPUBuffer& samplingPatternBuffer);
+        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux);
+
+      void setEdgeVertexMap(util::SharedPointer<db::Texture2D> gBufferDepthMap);
+      void unsetEdgeVertexMap();
 
       util::SharedPointer<db::Texture2D> getDebugCachePositionsMapFilterInnerX() const;
 
       util::SharedPointer<db::Texture2D> getSpecularLightMap() const;
 
-      util::SharedPointer<db::Texture2D> getDebugEdgeCachePositions() const;
-      util::SharedPointer<db::Texture2D> getDebugEdgeCacheNormals() const;
+      util::SharedPointer<db::Texture2D> getDebugCachePositions() const;
+      util::SharedPointer<db::Texture2D> getDebugCacheNormals() const;
+
+      util::SharedPointer<db::Texture2D> getDebugVertexPositions() const;
+      util::SharedPointer<db::Texture2D> getDebugVertexNormals() const;
 
       util::SharedPointer<db::Texture2D> getDebugVertexBlockNumber() const;
       util::SharedPointer<db::Texture2D> getDebugCacheBlockNumber() const;
@@ -73,7 +78,7 @@ namespace he
       IndirectSpecularReflections(const IndirectSpecularReflections&);
       IndirectSpecularReflections& operator=(const IndirectSpecularReflections&);
 
-      void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions, const GPUBuffer& samplingPatternBuffer);
+      void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions);
 
       void createSpecularInnerCaches(util::SharedPointer<db::Texture2D> gBufferDepthMap,
                                         util::SharedPointer<db::Texture2D> gBufferNormalMap,
@@ -93,16 +98,12 @@ namespace he
 
       void createOffsets(util::SharedPointer<db::Texture2D> offsetMap);
 
-      void createSpecularCacheBuffer(
-        util::SharedPointer<db::Texture2D> gBufferDepthMap,
-        util::SharedPointer<db::Texture2D> gBufferNormalMap,
-        util::SharedPointer<db::Texture2D> gBufferMaterialMap);
+      void createSpecularCacheBuffer();
 
       void createProxyLightBuffer(
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
-        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
-        const GPUBuffer& samplingPatternBuffer);
+        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux);
 
       void createVertexBuffer(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
@@ -137,6 +138,7 @@ namespace he
       sh::ComputeShaderHandle m_specularCacheOffsetDownSweep;
       sh::ComputeShaderHandle m_specularCacheBufferCreation;
       sh::ComputeShaderHandle m_specularProxyLightBufferCreation;
+      sh::ComputeShaderHandle m_specularProxyLightBufferCreationDivide;
       sh::ComputeShaderHandle m_specularCacheVertexBufferCreation;
       sh::ComputeShaderHandle m_specularCacheBoundingBoxComputation;
       sh::ComputeShaderHandle m_specularCacheIndexListGeneration;
@@ -146,6 +148,7 @@ namespace he
       sh::ComputeShaderHandle m_specularCacheVoronoiDiagramCornerRepair;
       sh::ComputeShaderHandle m_specularCacheEdgeVertexCreation;
       sh::ComputeShaderHandle m_specularDebugCacheVertexIndexBufferCreation;
+      sh::ComputeShaderHandle m_specularCacheEdgeVertexExtraction;
 
       sh::RenderShaderHandle m_specularJumpFloodAlgorithm;
       sh::RenderShaderHandle m_specularJumpFloodIslandRemovalAlgorithm;
@@ -154,6 +157,8 @@ namespace he
       sh::RenderShaderHandle m_specularLightMapDelaunayTriangulationCreation;
       sh::RenderShaderHandle m_indirectSpecularErrorSpotLighting;
       sh::RenderShaderHandle m_showLines;
+      sh::RenderShaderHandle m_proxyLightWeightCreation;
+      sh::RenderShaderHandle m_indirectLightScreeVertexExtraction;
  
       util::SharedPointer<RenderOptions> m_options;
 
@@ -186,11 +191,13 @@ namespace he
       util::SharedPointer<db::Texture2D> m_vertexPositionMap;
       util::SharedPointer<db::Texture2D> m_vertexNormalMap;
       util::SharedPointer<db::Texture2D> m_vertexOffsetMap;
-
+      util::SharedPointer<db::Texture2D> m_edgeVertexPositionMap;
+      util::SharedPointer<db::Texture2D> m_edgeVertexNormalMap;
+      
       util::SharedPointer<db::Texture2D> m_cacheAtomicIndexMap;
-      util::SharedPointer<db::Texture2D> m_edgeCachePositionMap;
-      util::SharedPointer<db::Texture2D> m_edgeCacheNormalMap;
-      util::SharedPointer<db::Texture2D> m_edgeCacheOffsetMap;
+      util::SharedPointer<db::Texture2D> m_cachePositionMap;
+      util::SharedPointer<db::Texture2D> m_cacheNormalMap;
+      util::SharedPointer<db::Texture2D> m_cacheOffsetMap;
 
       util::SharedPointer<db::Texture2D> m_cachePositionBufferInnerX;
 
@@ -199,12 +206,17 @@ namespace he
       std::vector<util::SharedPointer<db::Texture2D>> m_voronoiDiagram;
       util::SharedPointer<db::Texture1D> m_voronoiColorTexture;
 
+      std::vector<util::SharedPointer<db::Texture2D>> m_proxyLightPositionMap;
+      std::vector<util::SharedPointer<db::Texture2D>> m_proxyLightLuminousFluxMap;
+      unsigned int m_proxyLightPing, m_proxyLightPong;
+
       std::vector<util::SharedPointer<db::Texture2D>> m_cacheIndices;
 
       util::SharedPointer<db::Texture2D> m_specularLightMap;
 
+      Renderquad m_edgeVertexRenderQuad;
       Renderquad m_voronoiRenderQuad;
-      Renderquad m_specularIndexQuad;
+      Renderquad m_proxyLightAccumulationQuad;
       Renderquad m_specularProxyLightQuad;
 
       unsigned int m_ping;

@@ -1,0 +1,65 @@
+#version 440 core
+
+#define PYRAMIDESIZE
+#define WORKGROUPSIZE 128
+
+layout(location = 0) uniform sampler2DArray loadShadowMap;
+layout(r32f, binding = 0) writeonly uniform image2D writeShadowMap;
+
+layout(location = 1) uniform uint textureSize;
+layout(location = 2) uniform uint level;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+	uint globalThreadNumber = gl_NumWorkGroups.x * WORKGROUPSIZE;
+
+	uint pixelBlocksPerThread = (textureSize * textureSize) / globalThreadNumber;
+	
+	float errorRate = 0.05 * pow(2, level);
+	float oldDepths[4];
+
+	for(uint i = 0; i < pixelBlocksPerThread; i++)
+	{
+		uint index = idx + i * globalThreadNumber;
+		ivec2 texCoord = 2 * ivec2(mod(index, textureSize), index / textureSize);
+
+		float newDepth = 0.0;
+		float kernelSize = 0.0;
+		
+		oldDepths[0] = texelFetch(loadShadowMap, ivec3(texCoord.x    , texCoord.y, level), 0).r;
+		oldDepths[1] = texelFetch(loadShadowMap, ivec3(texCoord.x + 1, texCoord.y, level), 0).r;
+		oldDepths[2] = texelFetch(loadShadowMap, ivec3(texCoord.x    , texCoord.y + 1, level), 0).r;
+		oldDepths[3] = texelFetch(loadShadowMap, ivec3(texCoord.x + 1, texCoord.y + 1, level), 0).r;
+		
+		for(uint j = 0; j < 4; j++)
+		{
+			if(oldDepths[j] < 1.0)
+			{
+				uint depthDifferences = 0;
+				depthDifferences += abs(oldDepths[int(mod(j + 1, 4))] - oldDepths[j]) < errorRate || oldDepths[int(mod(j + 1, 4))] == 1.0 ? 1 : 0;
+				depthDifferences += abs(oldDepths[int(mod(j + 2, 4))] - oldDepths[j]) < errorRate || oldDepths[int(mod(j + 2, 4))] == 1.0 ? 1 : 0;
+				depthDifferences += abs(oldDepths[int(mod(j + 3, 4))] - oldDepths[j]) < errorRate || oldDepths[int(mod(j + 3, 4))] == 1.0 ? 1 : 0;
+
+				if(depthDifferences >= 2)
+				{
+					newDepth += oldDepths[j];
+					kernelSize++;
+				}
+			}
+		}
+		
+		if(kernelSize == 0.0)
+		{
+			newDepth = 1.0;
+		}
+		else
+		{
+			newDepth /= kernelSize;
+		}
+
+		imageStore(writeShadowMap, ivec2(texCoord.x * 0.5, texCoord.y * 0.5), vec4(newDepth));
+	}
+}

@@ -6,12 +6,9 @@
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 
-layout(std430, binding = 1) buffer samplingPattern
-{
-	vec4 samples[SAMPLENUMBER];
-};
+layout(location = 1) uniform uint rsmTexRes;
 
-layout(std430, binding = 2) buffer tubeData
+layout(std430, binding = 1) buffer tubeData
 {
 	vec4 tubeStartPosRadius[1];
 	vec4 tubeDirection[1];//not normalized, the vector length is the length of the tube
@@ -40,10 +37,7 @@ void main()
 			break;
 		}
 		
-		vec3 texCoords;
-		texCoords.x = 0.5 + samples[j].x;
-		texCoords.y = 0.5 + samples[j].y;
-		texCoords.z = float(gl_WorkGroupID.x) / float(gl_NumWorkGroups.x);
+		vec3 texCoords = vec3(mod(j, rsmTexRes) / float(rsmTexRes), float(j / rsmTexRes) / float(rsmTexRes), float(gl_WorkGroupID.x) / float(gl_NumWorkGroups.x));
 	
 		vec4 lightPos = texture(indirectLightPosSampler, texCoords);
 

@@ -1,0 +1,88 @@
+#version 440 core
+
+#define AREAARRAYSIZE 25
+#define SAMPLENUMBER
+#define PI 3.14159265359
+#define EPSILON 0.00001
+#define INT32_MAX 2147483647
+#define WORKGROUPSIZE 128
+
+#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
+#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+
+layout(rgba32f, binding = 0) readonly uniform imageBuffer globalCachePositionBuffer;
+layout(rgba32f, binding = 1) readonly uniform imageBuffer globalCacheNormalBuffer;
+
+coherent layout(rgba32f, binding = 3) uniform image2D proxyLightPositionBuffer;
+coherent layout(rgba32f, binding = 4) uniform image2D proxyLightLuminousFluxBuffer;
+
+layout(location = 0) uniform sampler2D zBuffer;
+
+layout(location = 1) uniform uint cacheNumber;
+
+layout(location = 2) uniform uint proxyLightTextureResolution;
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	uint cacheOffset = idx * cachesPerThread;
+	
+	if(cacheOffset >= cacheNumber)
+	{
+		return;
+	}
+	
+	for(uint i = 0; i < cachesPerThread; i++)
+	{
+		uint cacheIndex = i + cacheOffset;
+		ivec2 texCoord = ivec2(mod(cacheIndex, proxyLightTextureResolution), cacheIndex / proxyLightTextureResolution);
+	
+		if(texelFetch(zBuffer, texCoord, 0).r == 0) //discard the indirect lighting where the cache is being occluded
+		{
+			continue;
+		}
+		
+		CacheData cache;
+		cache.position = imageLoad(globalCachePositionBuffer, int(cacheIndex));
+		vec4 cacheNormalMaterialData = imageLoad(globalCacheNormalBuffer, int(cacheIndex));
+		cache.normal.xyz = normalize(decodeNormal(cacheNormalMaterialData.xy));
+
+		float frd = cache.position.w / PI;
+		float frg = cacheNormalMaterialData.z * (cacheNormalMaterialData.w + 2.0) / (2.0 * PI);
+		
+		vec3 camDir = normalize(eyePos.xyz - cache.position.xyz);
+		
+		vec4 XpdW = imageLoad(proxyLightPositionBuffer, ivec2(2 * texCoord.x, texCoord.y));
+		vec4 XpgW = imageLoad(proxyLightPositionBuffer, ivec2(2 * texCoord.x + 1, texCoord.y));
+		
+		vec3 Lod = imageLoad(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y)).rgb, Xpd = XpdW.xyz;
+		vec3 Log = imageLoad(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x + 1, texCoord.y)).rgb, Xpg = XpgW.xyz;
+		
+		Xpd = XpdW.w > 0 ? Xpd / XpdW.w : vec3(0);
+		Xpg = XpgW.w > 0 ? Xpg / XpgW.w : vec3(0);
+
+		vec3 lightDirD = Xpd - cache.position.xyz;
+		float lightAngleD = max(dot(cache.normal.xyz, normalize(lightDirD)), 0.0001);
+
+		imageStore(proxyLightPositionBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4(Xpd, length(lightDirD)));
+		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x, texCoord.y), vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / (frd * lightAngleD), 0.0));
+
+		vec3 lightDirG = Xpg - cache.position.xyz;
+		float lightQuadDistance = dot(lightDirG, lightDirG);
+		lightDirG = normalize(lightDirG);
+		float reflAngleG = pow(max(dot(reflect(-lightDirG, cache.normal.xyz), camDir), 0.0001), cacheNormalMaterialData.w);
+		//vec3 halfVector = (lightDirG + camDir) / length(lightDirG + camDir);
+		//float reflAngleG = max(pow(dot(halfVector, cache.normal.xyz), cacheNormalMaterialData.w), 0.0001);
+		float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
+		
+		imageStore(proxyLightPositionBuffer, ivec2(2 * texCoord.x + 1, texCoord.y), vec4(Xpg, sqrt(lightQuadDistance)));
+		imageStore(proxyLightLuminousFluxBuffer, ivec2(2 * texCoord.x + 1, texCoord.y), vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0));
+	}
+}

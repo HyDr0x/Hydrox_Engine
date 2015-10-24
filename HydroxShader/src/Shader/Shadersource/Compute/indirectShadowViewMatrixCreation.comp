@@ -3,19 +3,16 @@
 #define SAMPLENUMBER
 #define WORKGROUPSIZE 1
 
-#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalSampler;
 
+layout(location = 2) uniform uint rsmTexRes;
+
 layout(std430, binding = 1) buffer reflectiveShadowLightBuffer
 {
 	ShadowLightData reflectiveShadowLight[];
-};
-
-layout(std430, binding = 2) buffer samplingPattern
-{
-	vec4 samples[SAMPLENUMBER];
 };
 
 layout(local_size_x = WORKGROUPSIZE) in;
@@ -32,10 +29,7 @@ void main()
 	
 	for(uint j = 0; j < SAMPLENUMBER; j++)
 	{
-		vec3 texCoords;
-		texCoords.x = 0.5 + samples[j].x;
-		texCoords.y = 0.5 + samples[j].y;
-		texCoords.z = float(idx) / float(gl_NumWorkGroups.x);
+		vec3 texCoords = vec3(mod(j, rsmTexRes) / float(rsmTexRes), float(j) / float(rsmTexRes * rsmTexRes), float(idx) / float(gl_NumWorkGroups.x));
 	
 		vec4 lightPos = texture(indirectLightPosSampler, texCoords);
 		vec3 lightNormal = texture(indirectLightNormalSampler, texCoords).xyz * 2.0 - 1.0;

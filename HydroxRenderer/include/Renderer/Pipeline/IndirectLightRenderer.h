@@ -59,15 +59,10 @@ namespace he
       const TBO& getGlobalCacheNormalMap();
       const TBO& getGlobalCacheAreaMap();
 
-      util::SharedPointer<db::Texture2D> getSamplingDebugMap();
-      const GPUBuffer& getSamplingBuffer();
-
     private:
       
       IndirectLightRenderer(const IndirectLightRenderer&);
       IndirectLightRenderer& operator=(const IndirectLightRenderer&);
-
-      void createSamplingPattern();
 
       util::SharedPointer<RenderOptions> m_options;
 
@@ -78,9 +73,6 @@ namespace he
       unsigned int m_proxyLightTextureResolution;//to a power of two up rounded texture resolution
 
       GPUBuffer m_proxyLightCommandBuffer;
-      GPUBuffer m_samplingPatternBuffer;
-
-      util::SharedPointer<db::Texture2D> m_samplingDebugTexture;
 
       util::SharedPointer<db::Texture2D> m_depthBuffer;
 

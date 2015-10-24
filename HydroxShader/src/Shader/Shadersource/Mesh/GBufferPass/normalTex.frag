@@ -2,8 +2,8 @@
 
 layout(early_fragment_tests) in;
 
-#include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) out vec4 fsout_color;
 layout(location = 1) out vec4 fsout_normal;
@@ -12,22 +12,26 @@ layout(location = 2) out vec4 fsout_material;
 layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D normalSampler;
 
-in vec2 vsout_texCoord;
-in mat3 vsout_tangentToWorld;
-flat in uint vsout_instanceIndex;
+in GeometryData
+{
+	vec3 barycentric;
+	vec2 texCoord;
+	mat3 tangentToWorld;
+	flat uint instanceIndex;
+} inData;
 
 void main()
 {
-	vec3 normal = vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f);
+	vec3 normal = inData.tangentToWorld * (texture(normalSampler,inData.texCoord).xyz * 2.0f - 1.0f);
 
-	fsout_normal = vec4(normalize(normal) * 0.5f + 0.5f, 0);
+	fsout_normal = vec4(normalize(normal) * 0.5f + 0.5f, float(inData.barycentric.x == 1.0 || inData.barycentric.y == 1.0 || inData.barycentric.z == 1.0));
 	
-	fsout_color = vec4(texture(colorSampler, vsout_texCoord).rgb, 1.0f);
+	fsout_color = vec4(texture(colorSampler, inData.texCoord).rgb, 1.0f);
 	
-	MaterialData thisMaterial = material[materialIndex[vsout_instanceIndex]];
+	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	
-	fsout_material = vec4(thisMaterial.diffuseRho, 
-												thisMaterial.specularRho, 
-												thisMaterial.ambientStrength, 
-												thisMaterial.roughness);
+	fsout_material = vec4(thisMaterial.metalness, 
+												thisMaterial.reflectance, 
+												thisMaterial.roughness0, 
+												thisMaterial.roughness1);
 }

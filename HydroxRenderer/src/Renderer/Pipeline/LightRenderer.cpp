@@ -100,7 +100,7 @@ namespace he
       }
     }
 
-    void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
+    void LightRenderer::render(util::SharedPointer<db::Texture2D> depthMap, util::SharedPointer<db::Texture2D> albedoMap, util::SharedPointer<db::Texture2D> normalMap, util::SharedPointer<db::Texture2D> materialMap)
     {
       const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_directLightShaderHandle);
 
@@ -112,30 +112,25 @@ namespace he
       GLuint shadowLightNumber = m_shadowLights.size();
       sh::RenderShader::setUniform(6, GL_UNSIGNED_INT, &shadowLightNumber);
 
-      GLuint reflectiveShadowLightNumber = m_reflectiveShadowLights.size();
-      sh::RenderShader::setUniform(7, GL_UNSIGNED_INT, &reflectiveShadowLightNumber);
-
       m_lightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_shadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-      m_reflectiveShadowedLightBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_renderLightMapQuad.setWriteFrameBuffer();
       
       depthMap->setTexture(0, 0);
-      normalMap->setTexture(1, 1);
-      materialMap->setTexture(2, 2);
-      if(m_shadowMaps) m_shadowMaps->setTexture(3, 3);
-      if(m_shadowPosMaps) m_shadowPosMaps->setTexture(4, 4);
+      albedoMap->setTexture(1, 1);
+      normalMap->setTexture(2, 2);
+      materialMap->setTexture(3, 3);
+      if(m_shadowMaps) m_shadowMaps->setTexture(4, 4);
 
       m_renderLightMapQuad.render();
 
-      if(m_shadowPosMaps) m_shadowPosMaps->unsetTexture(4);
-      if(m_shadowMaps) m_shadowMaps->unsetTexture(3);
-      materialMap->unsetTexture(2);
-      normalMap->unsetTexture(1);
+      if(m_shadowMaps) m_shadowMaps->unsetTexture(4);
+      materialMap->unsetTexture(3);
+      normalMap->unsetTexture(2);
+      albedoMap->unsetTexture(1);
       depthMap->unsetTexture(0);
 
       m_renderLightMapQuad.unsetWriteFrameBuffer();
-      m_reflectiveShadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_shadowedLightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_lightBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -219,6 +214,8 @@ namespace he
       {
         m_reflectiveShadowLights.push_back(light);
         m_reflectiveShadowLightNumberChanged = true;
+
+        addShadowLight(light);//we nee a classic shadow map for the direct light in a higher resolution
       }
     }
 
@@ -226,6 +223,8 @@ namespace he
     {
       if(m_reflectiveShadowLights.size() > 0)
       {
+        removeShadowLight(light);
+
         m_reflectiveShadowLights.remove(light);
         m_reflectiveShadowLightNumberChanged = true;
       }

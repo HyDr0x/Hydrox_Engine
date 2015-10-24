@@ -1,7 +1,7 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/ParaboloidProjection.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 #define SAMPLENUMBER
 #define SAMPLENUMBERROOT

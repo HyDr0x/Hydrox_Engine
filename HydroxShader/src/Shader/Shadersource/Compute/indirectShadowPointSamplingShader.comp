@@ -1,6 +1,6 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 #define WORKGROUPSIZE 128
 #define PI 3.14159265359

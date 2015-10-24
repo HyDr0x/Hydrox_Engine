@@ -1,6 +1,6 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 #define WORKGROUPSIZE 128
 

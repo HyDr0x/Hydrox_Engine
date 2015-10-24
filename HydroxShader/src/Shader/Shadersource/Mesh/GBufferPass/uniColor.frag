@@ -2,26 +2,30 @@
 
 layout(early_fragment_tests) in;
 
-#include "../../../../../include/Shader/Shaderincludes/MaterialData.glslh"
-#include "../../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) out vec4 fsout_color;
 layout(location = 1) out vec4 fsout_normal;
 layout(location = 2) out vec4 fsout_material;
 
-in vec3 vsout_normal;
-flat in uint vsout_instanceIndex;
+in GeometryData
+{
+	vec3 barycentric;
+	vec3 normal;
+	flat uint instanceIndex;
+} inData;
 
 void main()
 {
-	fsout_normal = vec4(normalize(vsout_normal) * 0.5f + 0.5f, 0);
+	fsout_normal = vec4(normalize(inData.normal) * 0.5f + 0.5f, float(inData.barycentric.x == 1.0 || inData.barycentric.y == 1.0 || inData.barycentric.z == 1.0));
 	
-	MaterialData thisMaterial = material[materialIndex[vsout_instanceIndex]];
+	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	
 	fsout_color = thisMaterial.color;
 
-	fsout_material = vec4(thisMaterial.diffuseRho, 
-												thisMaterial.specularRho, 
-												thisMaterial.ambientStrength, 
-												thisMaterial.roughness);
+	fsout_material = vec4(thisMaterial.metalness, 
+												thisMaterial.reflectance, 
+												thisMaterial.roughness0, 
+												thisMaterial.roughness1);
 }

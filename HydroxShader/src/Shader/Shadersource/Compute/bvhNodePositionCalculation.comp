@@ -3,7 +3,7 @@
 #define WORKGROUPSIZE 128
 #define NODENUMBER 4681
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer bvhPositionRadiusBuffer
 {

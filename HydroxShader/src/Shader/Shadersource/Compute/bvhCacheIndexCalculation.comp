@@ -4,8 +4,8 @@
 #define INT32_MAX 2147483647
 #define INT16_MAX 32768
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthMap;
 layout(location = 1) uniform sampler2D gBufferNormalMap;

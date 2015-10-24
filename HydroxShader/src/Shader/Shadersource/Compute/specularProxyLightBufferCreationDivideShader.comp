@@ -1,0 +1,91 @@
+#version 440 core
+
+#define SAMPLENUMBER
+#define PI 3.14159265359
+#define WORKGROUPSIZE 128
+#define PROXYLIGHTTEXTURERESOLUTION 256
+
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+
+layout(location = 0) uniform sampler2D proxyLightPositionSampler;
+layout(location = 1) uniform sampler2D proxyLightLuminousFluxSampler;
+
+layout(location = 2) uniform uint reflectiveShadowMapNumber;
+
+layout(r32f, binding = 0) readonly uniform image2D edgeCacheOffsetSampler;
+
+layout(std430, binding = 1) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 2) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormals[];
+};
+
+layout(std430, binding = 3) buffer proxyLightPositionBuffer
+{
+	vec4 proxyLightPosition[];
+};
+
+layout(std430, binding = 4) buffer proxyLightLuminousFluxBuffer
+{
+	vec4 proxyLightLuminousFlux[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+void main()
+{
+	uint idx = gl_GlobalInvocationID.x;
+
+	const uint cacheNumber = uint(imageLoad(edgeCacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	
+	const uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
+	const uint cacheOffset = idx * cachesPerThread;
+	const uint cacheEnd = cacheOffset + cachesPerThread;
+	
+	for(uint i = cacheOffset; i < cacheEnd; i++)
+	{
+		if(i < cacheNumber)
+		{
+			ivec2 texCoord = ivec2(mod(i, PROXYLIGHTTEXTURERESOLUTION), i / PROXYLIGHTTEXTURERESOLUTION);
+		
+			vec4 LogValid = texelFetch(proxyLightLuminousFluxSampler, texCoord, 0);
+			vec3 Log = LogValid.rgb;
+			float validSampleNumber = LogValid.a;
+			
+			vec4 XpgWg = texelFetch(proxyLightPositionSampler, texCoord, 0);
+			vec3 Xpg = XpgWg.xyz;
+			float Wgesg = XpgWg.w;
+			
+			Xpg = Wgesg > 0.0 ? Xpg / Wgesg : vec3(0);
+			Log *= (float(reflectiveShadowMapNumber * SAMPLENUMBER) / validSampleNumber);
+			
+			vec2 cacheMaterial;
+			CacheData cache;
+			cache.position = specularCachePositions[i];
+			
+			vec4 cacheNormalMaterial = specularCacheNormals[i];
+			cache.normal.xyz = normalize(cacheNormalMaterial.xyz);
+			
+			cacheMaterial = vec2(cache.position.w, cacheNormalMaterial.w);
+
+			
+			float frg = cacheMaterial.x * (cacheMaterial.y + 2.0) / (2.0 * PI);
+			
+			vec3 camDir = normalize(eyePos.xyz - cache.position.xyz);
+
+			vec3 lightDirG = Xpg - cache.position.xyz;
+			float lightQuadDistance = dot(lightDirG, lightDirG);
+			lightDirG = normalize(lightDirG);
+			float reflAngleG = max(pow(dot(reflect(-lightDirG, cache.normal.xyz), camDir), cacheMaterial.y), 0.0001);
+			float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
+			
+			proxyLightPosition[i] = vec4(Xpg, sqrt(lightQuadDistance));
+			proxyLightLuminousFlux[i] = vec4((4.0 * PI * Log * lightQuadDistance) / (frg * reflAngleG * lightAngleG), 0.0);
+		}
+	}
+}

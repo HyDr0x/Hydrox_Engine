@@ -4,7 +4,7 @@
 #define INT32_MAX 2147483647
 #define MAXRESOLUTION 1024
 
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(r16ui, binding = 0) uniform uimage2D voronoiDiagramImage;
 

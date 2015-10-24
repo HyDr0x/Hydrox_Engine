@@ -6,11 +6,11 @@
 #define INT32_MAX 2147483647
 #define WORKGROUPSIZE 128
 
-#include "../../../../include/Shader/Shaderincludes/LightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/IndirectLightData.glslh"
-#include "../../../../include/Shader/Shaderincludes/CacheData.glslh"
-#include "../../../../include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../../../include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(std430, binding = 1) buffer samplingPattern
 {

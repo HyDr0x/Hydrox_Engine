@@ -801,7 +801,7 @@ namespace he
       m_polygons.clear();
       m_linearizedAreaCaches.clear();
 
-      generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
+      //generateCachesArea(trianglePositions, m_globalBBMin, m_globalBBMax, m_caches, m_cacheTriangles);
 
       outCaches = m_caches;
 

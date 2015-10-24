@@ -1,6 +1,6 @@
 #version 440 core
 
-#include "../../../../include/Shader/Shaderincludes/VertexDeclaration.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
 
 layout(std140, binding = 0) uniform cameraParameters
 {

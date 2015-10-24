@@ -15,14 +15,55 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	
 	vec3 trfTubeStartPos = tubeStartPosRadius[tubeIndex].xyz - cachePos;
 	
-	float t = (dot(r, trfTubeStartPos) * dotRDir - dot(trfTubeStartPos, tubeDirection[tubeIndex].xyz)) / (dot(tubeDirection[tubeIndex].xyz, tubeDirection[tubeIndex].xyz) - dotRDir * dotRDir);
+	float divisor = dot(tubeDirection[tubeIndex].xyz, tubeDirection[tubeIndex].xyz) - dotRDir * dotRDir;
+	float t = divisor != 0.0 ? (dot(r, trfTubeStartPos) * dotRDir - dot(trfTubeStartPos, tubeDirection[tubeIndex].xyz)) / divisor : 0.0;
+	vec3 tubePosAngleTest = trfTubeStartPos + t * tubeDirection[tubeIndex].xyz;
+	
+	if(dot(normalize(tubePosAngleTest), r) < 0.0)
+	{
+		//t *= -1.0;
+		t = -sign(t);
+	}
 	
 	vec3 tubePos = trfTubeStartPos + clamp(t, 0.0, 1.0) * tubeDirection[tubeIndex].xyz;
 	
 	float lineDistance = length(tubePos);
 
-	vec3 centerToRay = dot(tubePos, r) * r - tubePos;
-	vec3 closestPoint = (tubePos + centerToRay * clamp(tubeStartPosRadius[tubeIndex].w / length(centerToRay), 0.0, 1.0));
+	float radius = tubeStartPosRadius[tubeIndex].w;
+	float dist = lineDistance * lineDistance - radius * radius;
+
+	if(dist <= 0.0)
+	{
+		distance = lineDistance;
+		return true;
+	}
+	
+	dist = sqrt(dist);
+	vec3 Ntangent = normalize(cross(tubePos, r));
+	mat3 linearSystem = mat3(-radius, -dist * Ntangent.z, dist * Ntangent.y,
+													 dist * Ntangent.z, -radius, -dist * Ntangent.x,
+													 -dist * Ntangent.y, dist * Ntangent.x, -radius);//column major order
+										
+	/*float detA = determinant(linearSystem);
+	
+	mat3 modLinSystem = linearSystem;
+	modLinSystem[0] = tubePos;
+	float det0 = determinant(modLinSystem);
+	
+	modLinSystem = linearSystem;
+	modLinSystem[1] = tubePos;
+	float det1 = determinant(modLinSystem);
+	
+	modLinSystem = linearSystem;
+	modLinSystem[2] = tubePos;
+	float det2 = determinant(modLinSystem);
+	
+	vec3 closestPoint = tubePos + normalize(vec3(det0 / detA, det1 / detA, det2 / detA)) * radius;
+	*/
+	vec3 closestPoint = tubePos + normalize(inverse(linearSystem) * tubePos) * radius; 
+	
+	//vec3 centerToRay = max(dot(tubePos, r), 0.0) * r - tubePos;
+	//vec3 closestPoint = (tubePos + centerToRay * clamp(tubeStartPosRadius[tubeIndex].w / length(centerToRay), 0.0, 1.0));
 	
 	float tubeDistance = max(length(closestPoint), 0.001);
 
@@ -36,12 +77,10 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	float base = pow(radix, floor(log(distance) / log(radix)) - 1.0);
 	distance = base * floor(distance / base);
 	
-	return dot(normalize(closestPoint / tubeDistance), r) > cos(maxSolidAngle) && distance > 0.1;
-	//return dot(normalize(tubePos), r) > cos(maxSolidAngle) && distance > 0.1;
+	return dot(normalize(closestPoint), r) > cos(maxSolidAngle);
 }
 
 float samplingDistance(float lightDistance, float maxSolidAngle)
 {
-	return /*0.1325 */  max(lightDistance * 2.0 * tan(maxSolidAngle), 0.001);
-	//return min(2.0 * lightDistance * tan(maxSolidAngle), 1.0);
+	return max(lightDistance * 2.0 * tan(maxSolidAngle), 0.001);
 }
