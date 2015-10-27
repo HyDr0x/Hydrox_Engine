@@ -39,9 +39,9 @@ namespace he
 
       std::vector<util::SharedPointer<SamplerObject>> samplerObjects(db::Material::TEXTURETYPENUM);
       samplerObjects[db::Material::DIFFUSETEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
-      samplerObjects[db::Material::NORMALTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
-      samplerObjects[db::Material::SPECULARTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST));
-      samplerObjects[db::Material::DISPLACEMENTTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST));
+      samplerObjects[db::Material::NORMALTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
+      samplerObjects[db::Material::METALNESSTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
+      samplerObjects[db::Material::ROUGHNESSTEX] = util::SharedPointer<SamplerObject>(new SamplerObject(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR));
 
       m_frustumCullingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::FRUSTUMCULLING);
       m_geometryRenderpass.initialize(m_singletonManager, sh::ShaderContainer::GBUFFER, samplerObjects);

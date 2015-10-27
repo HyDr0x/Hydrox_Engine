@@ -84,14 +84,14 @@ void main()
 	
 	dmax = sqrt(dmax);
 	
-	vec3 Xpd = vec3(0.0f), phiPD = vec3(0.0f);
-	vec3 Xpg = vec3(0.0f), phiPG = vec3(0.0f);
+	vec3 Xpd = vec3(0.0), phiPD = vec3(0.0);
+	vec3 Xpg = vec3(0.0), phiPG = vec3(0.0);
 	
-	float wGesD = 0.0f;
-	float wGesG = 0.0f;
+	float wGesD = 0.0;
+	float wGesG = 0.0;
 	
-	cacheProxyMinDistanceD = 0.0f;
-	cacheProxyMinDistanceG = 0.0f;
+	cacheProxyMinDistanceD = 0.0;
+	cacheProxyMinDistanceG = 0.0;
 		
 	for(uint i = 0; i < 8; i++)
 	{

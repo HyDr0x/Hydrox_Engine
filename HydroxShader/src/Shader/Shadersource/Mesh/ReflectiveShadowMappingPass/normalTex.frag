@@ -14,14 +14,16 @@ layout(location = 2) out vec4 fsout_luminousFlux;
 
 layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D normalSampler;
+layout(location = 2) uniform sampler2D metalSampler;
+layout(location = 3) uniform sampler2D roughnessSampler;
 
 layout(std430, binding = 4) buffer reflectiveShadowLightBuffer
 {
 	ShadowLightData reflectiveShadowLight[];
 };
 
-layout(location = 2) uniform int lightIndex;
-layout(location = 3) uniform uint shadowMapWidth;
+layout(location = 4) uniform int lightIndex;
+layout(location = 5) uniform uint reflectiveShadowMapWidth;
 
 in vec4 vsout_pos;
 in vec2 vsout_texCoord;
@@ -38,7 +40,9 @@ void main()
 	if(lightPos.x != DIRECTIONAL_LIGHT_POSITION)//spotlight
 	{
 		lightAngle = max(dot(normalize(-reflectiveShadowLight[lightIndex].light.direction.xyz), normalize(vsout_pos.xyz - lightPos.xyz)), 0.0);
-		area = (gl_FragCoord.z * gl_FragCoord.z * projPar.z * projPar.w) / (projPar.x * projPar.x * SAMPLENUMBER * SAMPLENUMBER);
+		float zLin = 2.0 * projPar.x * projPar.y / (projPar.y + projPar.x - gl_FragCoord.z * (projPar.y - projPar.x));
+		area = (zLin * zLin * projPar.z * projPar.w) / (projPar.x * projPar.x * float(reflectiveShadowMapWidth * reflectiveShadowMapWidth));
+		//area *= 10.0;
 	}
 	else//directional light
 	{

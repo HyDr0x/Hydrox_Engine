@@ -31,18 +31,18 @@ namespace he
       enum MaterialFileKeywords
       {
         DEFAULT,
-        DIFFUSESTRENGTH,
-        SPECULARSTRENGTH,
-        AMBIENTSTRENGTH,
-        SPECULAREXPONENT,
+        METALNESS,
+        REFLECTANCE,
+        ROUGHNESS0,
+        ROUGHNESS1,
         TRANSPARENCY,
         RENDERDEBUG,
         UNICOLOR,
         TEXTUREOFFSET,
         DIFFUSETEXTURE,
         NORMALMAP,
-        SPECULARMAP,
-        DISPLACEMENTMAP,
+        METALNESSMAP,
+        ROUGHNESSMAP,
       };
 
       static void save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager);

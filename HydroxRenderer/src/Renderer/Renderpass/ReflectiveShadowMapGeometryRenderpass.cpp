@@ -36,8 +36,8 @@ namespace he
         const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_shaderNodes[i].getShaderHandle());
         shader.useShader();
 
-        sh::RenderShader::setUniform(2, GL_INT, &m_lightIndex);
-        sh::RenderShader::setUniform(3, GL_INT, &m_options->shadowMapWidth);
+        sh::RenderShader::setUniform(4, GL_INT, &m_lightIndex);
+        sh::RenderShader::setUniform(5, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
 
         for(unsigned int j = 0; j < m_renderContainer[i].size(); j++)//all arrays have the same size! Vertexdeclaration-, Texture Nodes and Render Container are coupled together
         {

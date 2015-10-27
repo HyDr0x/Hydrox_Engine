@@ -2,10 +2,10 @@ vec4 GGXToBlinnPhong(in const vec4 GGXMaterial)
 {
 	vec4 blinnPhongMaterial;
 	
-	blinnPhongMaterial.x = GGXMaterial.x * (1.0 - GGXMaterial.y) * 0.04 + (1.0 - GGXMaterial.x) * (1.0 - GGXMaterial.y) * 0.96;//diffuse Rho
+	blinnPhongMaterial.x = (1.0 - GGXMaterial.x) * 0.96 + (1.0 - GGXMaterial.y) * 0.04;//diffuse Rho
 	blinnPhongMaterial.y = 1.0 - blinnPhongMaterial.x;//specular Rho
 	blinnPhongMaterial.z = 0.0;//ambient offset
-	blinnPhongMaterial.w = pow(2.0, (1.0 - GGXMaterial.z) * 13.0);//shininess, ranges from 1 to 8192 (2^0 - 2^13)
-	
-	return vec4(0,1,0,1);
+	blinnPhongMaterial.w = pow(2.0, (1.0 - GGXMaterial.z) * 10.0);//shininess, ranges from 1 to 8192 (2^0 - 2^13)
+
+	return blinnPhongMaterial;
 }

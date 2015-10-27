@@ -205,7 +205,7 @@ namespace he
 
         std::clog << "Error compiling " << shaderName << shaderTypeEnding << " because of " << errorLog << std::endl;
 
-        __debugbreak();
+        //__debugbreak();
 
         delete[] errorLog;
 

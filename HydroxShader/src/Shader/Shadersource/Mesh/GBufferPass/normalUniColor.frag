@@ -8,8 +8,11 @@ layout(early_fragment_tests) in;
 layout(location = 0) out vec4 fsout_color;
 layout(location = 1) out vec4 fsout_normal;
 layout(location = 2) out vec4 fsout_material;
+layout(location = 3) out vec4 fsout_vertexNormal;
 
 layout(location = 0) uniform sampler2D normalSampler;
+layout(location = 1) uniform sampler2D metalSampler;
+layout(location = 2) uniform sampler2D roughnessSampler;
 
 in GeometryData
 {
@@ -29,8 +32,10 @@ void main()
 	
 	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	
-	fsout_material = vec4(thisMaterial.metalness, 
+	fsout_material = vec4(texture(metalSampler, inData.texCoord).r, 
 												thisMaterial.reflectance, 
-												thisMaterial.roughness0, 
+												texture(roughnessSampler, inData.texCoord).r, 
 												thisMaterial.roughness1);
+												
+	fsout_vertexNormal = vec4(normalize(inData.tangentToWorld[2]) * 0.5 + 0.5, 0.0);
 }

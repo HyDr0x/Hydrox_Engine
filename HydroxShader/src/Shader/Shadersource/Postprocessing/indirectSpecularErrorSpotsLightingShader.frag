@@ -76,7 +76,12 @@ void main()
 		}
 	}
 	
-	if(validIndexCounter == 0) discard;
+	if(validIndexCounter == 0) 
+	{
+		//luminousFlux = vec4(1,0,0,0);
+		//return;
+		discard;
+	}
 	
 	vec3 normal = normalize(texture(gBufferNormalSampler, gsout_texCoord).xyz * 2.0 - 1.0);
 	vec4 material = GGXToBlinnPhong(texture(gBufferMaterialSampler, gsout_texCoord));
@@ -85,8 +90,11 @@ void main()
 	vec3 reflectCamDir = reflect(-camDir, normal);
 	
 	dmax = sqrt(max(dmax, 0.00001));
-
+	
+	vec3 Xpd = vec3(0.0), phiPD = vec3(0.0);
 	vec3 Xpg = vec3(0.0), phiPG = vec3(0.0);
+	
+	float wGesD = 0.0, cacheProxyMinDistanceD = 0.0;
 	float wGesG = 0.0, cacheProxyMinDistanceG = 0.0;
 	
 	for(uint i = 0; i < 24; i++)
@@ -96,27 +104,51 @@ void main()
 			CacheData cache;
 			cache.position = specularCachePositions[cacheIndex[i]];
 			cache.normal = specularCacheNormalMaterial[cacheIndex[i]];
-			vec3 cacheNormal = normalize(cache.normal.xyz);
+			vec3 cacheNormal = normalize(decodeNormal(cache.normal.xy));
 			
 			float dir = max(1.0 - length(pos3D.xyz - cache.position.xyz) / dmax, 0.0);
+				
+			float wd = dir * sqrt(max(dot(cacheNormal, normal), 0));
 				
 			vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
 			float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cacheNormal), reflectCamDir), 0.0));
 			
-			IndirectLightData indirectLightG;
-			indirectLightG.position = proxyLightPosition[cacheIndex[i]];
-			indirectLightG.luminousFlux = proxyLightLuminousFlux[cacheIndex[i]];
+			IndirectLightData indirectLightD;
+			indirectLightD.position = proxyLightPosition[2 * cacheIndex[i]];
+			indirectLightD.luminousFlux = proxyLightLuminousFlux[2 * cacheIndex[i]];
 			
-			cacheProxyMinDistanceG += wg * indirectLightG.position.w;
+			IndirectLightData indirectLightG;
+			indirectLightG.position = proxyLightPosition[2 * cacheIndex[i] + 1];
+			indirectLightG.luminousFlux = proxyLightLuminousFlux[2 * cacheIndex[i] + 1];
+			
+			Xpd += wd * indirectLightD.position.xyz;
 			Xpg += wg * indirectLightG.position.xyz;
+				
+			phiPD += wd * indirectLightD.luminousFlux.xyz;
 			phiPG += wg * indirectLightG.luminousFlux.xyz;
+			
+			wGesD += wd;
 			wGesG += wg;
+			
+			cacheProxyMinDistanceD += wd * indirectLightD.position.w;
+			cacheProxyMinDistanceG += wg * indirectLightG.position.w;
 		}
 	}
 	
+	Xpd = wGesD > 0 ? Xpd / wGesD : vec3(0);
 	Xpg = wGesG > 0 ? Xpg / wGesG : vec3(0);
+	
+	phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
 	phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
+	
+	cacheProxyMinDistanceD = wGesD > 0 ? cacheProxyMinDistanceD / wGesD : 0;
 	cacheProxyMinDistanceG = wGesG > 0 ? cacheProxyMinDistanceG / wGesG : 0;
+	
+	vec3 lightDirD = Xpd - pos3D.xyz;
+	float lengthD = max(dot(lightDirD, lightDirD), cacheProxyMinDistanceD * cacheProxyMinDistanceD);
+	//float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
+	lightDirD = normalize(lightDirD);
+	float frd = material.x * max(dot(lightDirD, normal), 0.0);
 	
 	vec3 lightDirG = Xpg - pos3D.xyz;
 	//float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));
@@ -125,10 +157,12 @@ void main()
 	float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
 
 	//luminousFlux = vec4(normal, 1);
-	//luminousFlux = vec4(vec3(frg), 1);
+	//luminousFlux = vec4(vec3(frd), 1);
 	//luminousFlux = vec4(0.05 * vec3(lengthG), 1);
 	//luminousFlux = vec4(Xpg, 1);
-	//luminousFlux = vec4(0.001 * phiPG, 1);
-	luminousFlux = vec4((frg * phiPG) / (4.0 * PI * lengthG), 1.0);
+	//luminousFlux = vec4(0.01 * phiPD, 1);
+	//luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0), 0.0), 1.0);
+	//luminousFlux = vec4(max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
+	luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0) + max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
 	//luminousFlux = vec4(1, 0, 0, 0);
 }

@@ -134,8 +134,8 @@ namespace he
       m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
       m_specularProxyLightQuad.setRenderTargets(1, m_specularLightMap);
 
-      m_proxyLightPositionBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
-      m_proxyLightLuminousFluxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      m_proxyLightPositionBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
+      m_proxyLightLuminousFluxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
       
       m_cachePositions.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
       m_cacheNormalMaterial.createBuffer(GL_SHADER_STORAGE_BUFFER, m_options->specularCacheNumber * sizeof(util::vec4f), m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
@@ -178,19 +178,20 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
+      util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture3D> indirectLightPositions,
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux)
     {
-      //CPUTIMER("MainloopCPUTimer", 0)
-      //GPUTIMER("MainloopOGLTimer", 1)
+      CPUTIMER("MainloopCPUTimer", 0)
+      GPUTIMER("MainloopOGLTimer", 1)
 
       createTubeData(indirectLightPositions);
 
-      createSpecularEdgeCaches(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
-      createEdgeVertices(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
-      createSpecularInnerCaches(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
+      createSpecularEdgeCaches(gBufferDepthMap, gBufferVertexNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
+      createEdgeVertices(gBufferDepthMap, gBufferVertexNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
+      createSpecularInnerCaches(gBufferDepthMap, gBufferVertexNormalMap, gBufferMaterialMap);
 
       createOffsets(m_cacheOffsetMap);
       createOffsets(m_vertexOffsetMap);
@@ -199,7 +200,7 @@ namespace he
 
       createProxyLightBuffer(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux);
 
-      createVertexBuffer(gBufferDepthMap, gBufferNormalMap);
+      createVertexBuffer();
 
       createVoronoiDiagram(m_projectedVertexPositions);
 
@@ -207,7 +208,7 @@ namespace he
 
       fillTriangleIndexBuffer();
 
-      createSpecularCacheIndices(gBufferDepthMap, gBufferNormalMap);
+      createSpecularCacheIndices();
 
       createTriangleSpecularProxyLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
 
@@ -237,8 +238,8 @@ namespace he
 
     void IndirectSpecularReflections::createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions)
     {
-      CPUTIMER("TubeCreationCPUTimer", 0)
-      GPUTIMER("TubeCreationOGLTimer", 1)
+      //CPUTIMER("TubeCreationCPUTimer", 0)
+      //GPUTIMER("TubeCreationOGLTimer", 1)
 
       const sh::ComputeShader& shader = m_shaderContainer->getComputeShader(m_calculateAreaLightTube);
       shader.useShader();
@@ -257,9 +258,9 @@ namespace he
 
       shader.useNoShader();
 
-      glMemoryBarrier(GL_ALL_BARRIER_BITS);
-      std::vector<util::vec4f> tubeData(m_reflectiveShadowMapNumber * 2);
-      m_proxyLightTubeBuffer.getData(0, m_reflectiveShadowMapNumber * 2 * sizeof(util::vec4f), &tubeData[0]);
+      //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+      //std::vector<util::vec4f> tubeData(m_reflectiveShadowMapNumber * 2);
+      //m_proxyLightTubeBuffer.getData(0, m_reflectiveShadowMapNumber * 2 * sizeof(util::vec4f), &tubeData[0]);
     }
 
     void IndirectSpecularReflections::createSpecularInnerCaches(
@@ -267,8 +268,9 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-      CPUTIMER("InnerCacheCreationCPUTimer", 0)
-      GPUTIMER("InnerCacheCreationOGLTimer", 1)
+      //CPUTIMER("InnerCacheCreationCPUTimer", 0)
+      //GPUTIMER("InnerCacheCreationOGLTimer", 1)
+
       float clearValue = 0.0f;
       m_cachePositionBufferInnerX->clearTexture(&clearValue);
 
@@ -358,8 +360,8 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
-      CPUTIMER("EdgeCacheCreationCPUTimer", 0)
-      GPUTIMER("EdgeCacheCreationOGLTimer", 1)
+      //CPUTIMER("EdgeCacheCreationCPUTimer", 0)
+      //GPUTIMER("EdgeCacheCreationOGLTimer", 1)
 
       float clearValue = 0.0f;
       m_cacheOffsetMap->clearTexture(&clearValue);
@@ -387,7 +389,7 @@ namespace he
       gBufferMaterialMap->setTexture(2, 2);
       gBufferLinearDepthMap->setTexture(3, 3);
 
-      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+      sh::ComputeShader::dispatchComputeShader(2048, 1, 1);
 
       gBufferLinearDepthMap->unsetTexture(3);
       gBufferMaterialMap->unsetTexture(2);
@@ -410,8 +412,8 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
-      CPUTIMER("CreateEdgeVertexCPUTimer", 0)
-      GPUTIMER("CreateEdgeVertexOGLTimer", 1)
+      //CPUTIMER("CreateEdgeVertexCPUTimer", 0)
+      //GPUTIMER("CreateEdgeVertexOGLTimer", 1)
 
       float clearValue = 0.0f;
       m_vertexOffsetMap->clearTexture(&clearValue);
@@ -467,7 +469,7 @@ namespace he
       gBufferMaterialMap->setTexture(2, 2);
       gBufferLinearDepthMap->setTexture(3, 3);
 
-      sh::ComputeShader::dispatchComputeShader(128, 1, 1);
+      sh::ComputeShader::dispatchComputeShader(2048, 1, 1);
 
       gBufferLinearDepthMap->unsetTexture(3);
       gBufferMaterialMap->unsetTexture(2);
@@ -558,8 +560,8 @@ namespace he
 
     void IndirectSpecularReflections::createSpecularCacheBuffer()
     {
-      CPUTIMER("CacheBufferCreationCPUTimer", 0)
-      GPUTIMER("CacheBufferCreationOGLTimer", 1)
+      //CPUTIMER("CacheBufferCreationCPUTimer", 0)
+      //GPUTIMER("CacheBufferCreationOGLTimer", 1)
 
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -598,8 +600,8 @@ namespace he
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux)
     {
-      CPUTIMER("ProxyLightCPUTimer", 0)
-      GPUTIMER("ProxyLightOGLTimer", 1)
+      //CPUTIMER("ProxyLightCPUTimer", 0)
+      //GPUTIMER("ProxyLightOGLTimer", 1)
 
       /*
       util::vec4f clearValue = util::vec4f(0.0f);
@@ -698,10 +700,6 @@ namespace he
       //m_proxyLightLuminousFluxBuffer.getData(0, m_options->specularCacheNumber * sizeof(util::vec4f), &proxyLightLuminousFluxData[0]);
       */
 
-      
-
-
-      
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
       const sh::ComputeShader& specularProxyLightCreationShader = m_shaderContainer->getComputeShader(m_specularProxyLightBufferCreation);
@@ -744,12 +742,10 @@ namespace he
       //m_proxyLightLuminousFluxBuffer.getData(0, m_options->specularCacheNumber * sizeof(util::vec4f), &proxyLightLuminousFluxData[0]);
     }
 
-    void IndirectSpecularReflections::createVertexBuffer(
-      util::SharedPointer<db::Texture2D> gBufferDepthMap,
-      util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    void IndirectSpecularReflections::createVertexBuffer()
     {
-      CPUTIMER("VertexBufferCreationCPUTimer", 0)
-      GPUTIMER("VertexBufferCreationOGLTimer", 1)
+      //CPUTIMER("VertexBufferCreationCPUTimer", 0)
+      //GPUTIMER("VertexBufferCreationOGLTimer", 1)
 
       unsigned int clearVal = UINT16_MAX;
       m_voronoiDiagram[m_pong]->clearTexture(&clearVal);
@@ -758,9 +754,7 @@ namespace he
       const sh::ComputeShader& vertexBufferCreationShader = m_shaderContainer->getComputeShader(m_specularCacheVertexBufferCreation);
       vertexBufferCreationShader.useShader();
 
-      gBufferDepthMap->setTexture(0, 0);
-      gBufferNormalMap->setTexture(1, 1);
-      sh::ComputeShader::setUniform(2, GL_UNSIGNED_INT, &m_borderVertexNumber);
+      sh::ComputeShader::setUniform(0, GL_UNSIGNED_INT, &m_borderVertexNumber);
 
       m_projectedVertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_vertexPositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
@@ -782,9 +776,6 @@ namespace he
       m_vertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_projectedVertexPositions.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-      gBufferNormalMap->unsetTexture(1);
-      gBufferDepthMap->unsetTexture(0);
-
       vertexBufferCreationShader.useNoShader();
 
       //glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -798,7 +789,7 @@ namespace he
       //m_vertexNormals.getData(sizeof(util::vec4f) * 3580, m_options->specularCacheNumber * sizeof(util::vec4f) - sizeof(util::vec4f) * 3580, &cacheNormalMat[0]);
     }
 
-    void IndirectSpecularReflections::createSpecularCacheIndices(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap)
+    void IndirectSpecularReflections::createSpecularCacheIndices()
     {
       util::vec4f clearValue2 = util::vec4f(0.0f);
       m_specularLightMap->clearTexture(&clearValue2[0]);
@@ -866,8 +857,8 @@ namespace he
         //specularCacheIndexListGenerationShader.useNoShader();
       }
 
-      CPUTIMER("CacheIndexCPUTimer", 0)
-      GPUTIMER("CacheIndexOGLTimer", 1)
+      //CPUTIMER("CacheIndexCPUTimer", 0)
+      //GPUTIMER("CacheIndexOGLTimer", 1)
 
       util::vec4f clearVector(FLT_MAX);
       m_specularCacheIndexBuffer0.clearBuffer(GL_RGBA, GL_RGBA32F, GL_FLOAT, &clearVector[0]);
@@ -929,8 +920,8 @@ namespace he
 
     void IndirectSpecularReflections::createVoronoiDiagram(const GPUBuffer& projectedPositions)
     {
-      CPUTIMER("VoronoiDiagramCreationCPUTimer", 0)
-      GPUTIMER("VoronoiDiagramCreationOGLTimer", 1)
+      //CPUTIMER("VoronoiDiagramCreationCPUTimer", 0)
+      //GPUTIMER("VoronoiDiagramCreationOGLTimer", 1)
 
       {
         unsigned int stepNumber = log(float(m_options->width)) / log(2.0f);
@@ -1031,8 +1022,8 @@ namespace he
 
     void IndirectSpecularReflections::calculateTriangleIndexOffsets()
     {
-      CPUTIMER("TriangleIndexOffsetCPUTimer", 0)
-      GPUTIMER("TriangleIndexOffsetOGLTimer", 1)
+      //CPUTIMER("TriangleIndexOffsetCPUTimer", 0)
+      //GPUTIMER("TriangleIndexOffsetOGLTimer", 1)
 
       float clearValue = 0.0;
       m_triangleIndexOffsets->clearTexture(&clearValue);
@@ -1057,8 +1048,8 @@ namespace he
 
     void IndirectSpecularReflections::fillTriangleIndexBuffer()
     {
-      CPUTIMER("FillTriangleIndicesCPUTimer", 0)
-      GPUTIMER("FillTriangleIndicesOGLTimer", 1)
+      //CPUTIMER("FillTriangleIndicesCPUTimer", 0)
+      //GPUTIMER("FillTriangleIndicesOGLTimer", 1)
 
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -1097,8 +1088,8 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
-      CPUTIMER("SpecularProxyLightMapCPUTimer", 0)
-      GPUTIMER("SpecularProxyLightMapOGLTimer", 1)
+      //CPUTIMER("SpecularProxyLightMapCPUTimer", 0)
+      //GPUTIMER("SpecularProxyLightMapOGLTimer", 1)
 
       util::vec4f clearValue = util::vec4f(0.0f);
       m_specularLightMap->clearTexture(&clearValue[0]);
@@ -1200,8 +1191,9 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-      CPUTIMER("SpecularMapErrorSpotCPUTimer", 0)
-      GPUTIMER("SpecularMapErrorSpotOGLTimer", 1)
+      //CPUTIMER("SpecularMapErrorSpotCPUTimer", 0)
+      //GPUTIMER("SpecularMapErrorSpotOGLTimer", 1)
+
       glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
       m_specularProxyLightQuad.setWriteFrameBuffer();

@@ -30,9 +30,10 @@ namespace he
       m_linearDepthTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
       m_colorTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
       m_normalTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_vertexNormalTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
       m_materialTexture = util::SharedPointer<db::Texture2D>(new db::Texture2D(options->width, options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
       
-      m_fullscreenRenderQuad.setRenderTargets(m_depthTexture, 3, m_colorTexture, m_normalTexture, m_materialTexture);
+      m_fullscreenRenderQuad.setRenderTargets(m_depthTexture, 4, m_colorTexture, m_normalTexture, m_materialTexture, m_vertexNormalTexture);
       m_debugRenderquad.setRenderTargets(m_depthTexture, 1, m_colorTexture);
     }
 
@@ -97,6 +98,11 @@ namespace he
     util::SharedPointer<db::Texture2D> GBuffer::getNormalTexture() const
     {
       return m_normalTexture;
+    }
+
+    util::SharedPointer<db::Texture2D> GBuffer::getVertexNormalTexture() const
+    {
+      return m_vertexNormalTexture;
     }
 
     util::SharedPointer<db::Texture2D> GBuffer::getMaterialTexture() const

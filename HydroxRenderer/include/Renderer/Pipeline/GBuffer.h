@@ -50,6 +50,7 @@ namespace he
       util::SharedPointer<db::Texture2D> getLinearDepthTexture() const;
       util::SharedPointer<db::Texture2D> getColorTexture() const;
       util::SharedPointer<db::Texture2D> getNormalTexture() const;
+      util::SharedPointer<db::Texture2D> getVertexNormalTexture() const;
       util::SharedPointer<db::Texture2D> getMaterialTexture() const;
 
       void clear() const;
@@ -65,6 +66,7 @@ namespace he
       util::SharedPointer<db::Texture2D> m_linearDepthTexture;
       util::SharedPointer<db::Texture2D> m_colorTexture;
       util::SharedPointer<db::Texture2D> m_normalTexture;
+      util::SharedPointer<db::Texture2D> m_vertexNormalTexture;
       util::SharedPointer<db::Texture2D> m_materialTexture;
 
       sh::ComputeShaderHandle m_linearDepthBufferCreation;

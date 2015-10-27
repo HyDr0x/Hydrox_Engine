@@ -15,7 +15,7 @@ layout(std430, binding = 4) buffer relfectiveShadowLightBuffer
 	ShadowLightData reflectiveShadowLight[];
 };
 
-layout(location = 2) uniform int lightIndex;
+layout(location = 4) uniform int lightIndex;
 
 layout(location = POSITION) in vec3 in_Pos;
 layout(location = TEXTURE0) in vec2 in_texCoord;

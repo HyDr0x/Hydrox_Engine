@@ -18,10 +18,10 @@ namespace he
                                                                                m_materialManager(singletonManager->getService<db::MaterialManager>()),
                                                                                m_textureManager(singletonManager->getService<db::TextureManager>())
     {
-      m_materialFileKeywords["Diffuse Strength"] = DIFFUSESTRENGTH;
-      m_materialFileKeywords["Specular Strength"] = SPECULARSTRENGTH;
-      m_materialFileKeywords["Ambient Strength"] = AMBIENTSTRENGTH;
-      m_materialFileKeywords["Specular Exponent"] = SPECULAREXPONENT;
+      m_materialFileKeywords["Metalness"] = METALNESS;
+      m_materialFileKeywords["Reflectance"] = REFLECTANCE;
+      m_materialFileKeywords["Roughness0"] = ROUGHNESS0;
+      m_materialFileKeywords["Roughness1"] = ROUGHNESS1;
 
       m_materialFileKeywords["Transparency"] = TRANSPARENCY;
       m_materialFileKeywords["Debug"] = RENDERDEBUG;
@@ -29,8 +29,8 @@ namespace he
 
       m_materialFileKeywords["Diffuse Map"] = DIFFUSETEXTURE;
       m_materialFileKeywords["Normal Map"] = NORMALMAP;
-      m_materialFileKeywords["Specular Map"] = SPECULARMAP;
-      m_materialFileKeywords["Displacement Map"] = DISPLACEMENTMAP;
+      m_materialFileKeywords["Metalness Map"] = METALNESSMAP;
+      m_materialFileKeywords["Roughness Map"] = ROUGHNESSMAP;
     }
 
     MaterialLoader::~MaterialLoader()
@@ -69,21 +69,21 @@ namespace he
 
           switch(m_materialFileKeywords[line])
           {
-          case DIFFUSESTRENGTH:
+          case METALNESS:
             std::getline(file, line);
-            materialData.diffuseStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
+            materialData.metallic = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
-          case SPECULARSTRENGTH:
+          case REFLECTANCE:
             std::getline(file, line);
-            materialData.specularStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
+            materialData.reflectance = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
-          case AMBIENTSTRENGTH:
+          case ROUGHNESS0:
             std::getline(file, line);
-            materialData.ambientStrength = static_cast<float>(std::strtod(line.c_str(), nullptr));
+            materialData.roughness0 = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
-          case SPECULAREXPONENT:
+          case ROUGHNESS1:
             std::getline(file, line);
-            materialData.specularExponent = static_cast<float>(std::strtod(line.c_str(), nullptr));
+            materialData.roughness1 = static_cast<float>(std::strtod(line.c_str(), nullptr));
             break;
           case TRANSPARENCY:
             std::getline(file, line);
@@ -117,7 +117,7 @@ namespace he
               }
             }
             break;
-          case SPECULARMAP:
+          case METALNESSMAP:
             for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
@@ -127,7 +127,7 @@ namespace he
               }
             }
             break;
-          case DISPLACEMENTMAP:
+          case ROUGHNESSMAP:
             for(unsigned int j = 0; j < db::Material::TEXTURETYPENUM; j++)
             {
               std::getline(file, line);
@@ -160,14 +160,7 @@ namespace he
             textureLoader.setSRGB(false);
           }
 
-          if(i == db::Material::DIFFUSETEX || i == db::Material::NORMALTEX)
-          {
-            textureLoader.setMipMapping(true);
-          }
-          else
-          {
-            textureLoader.setMipMapping(false);
-          }
+          textureLoader.setMipMapping(true);
 
           for(unsigned int j = 0; j < textureFilenames[i].size(); j++)
           {

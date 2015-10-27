@@ -44,6 +44,7 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
@@ -81,18 +82,18 @@ namespace he
       void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions);
 
       void createSpecularInnerCaches(util::SharedPointer<db::Texture2D> gBufferDepthMap,
-                                        util::SharedPointer<db::Texture2D> gBufferNormalMap,
-                                        util::SharedPointer<db::Texture2D> gBufferMaterialMap);
+                                     util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
+                                     util::SharedPointer<db::Texture2D> gBufferMaterialMap);
 
       void createSpecularEdgeCaches(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
-        util::SharedPointer<db::Texture2D> gBufferNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture2D> gBufferLinearDepthMap);
 
       void createEdgeVertices(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
-        util::SharedPointer<db::Texture2D> gBufferNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture2D> gBufferLinearDepthMap);
 
@@ -105,11 +106,9 @@ namespace he
         util::SharedPointer<db::Texture3D> indirectLightNormals,
         util::SharedPointer<db::Texture3D> indirectLightLuminousFlux);
 
-      void createVertexBuffer(
-        util::SharedPointer<db::Texture2D> gBufferDepthMap,
-        util::SharedPointer<db::Texture2D> gBufferNormalMap);
+      void createVertexBuffer();
 
-      void createSpecularCacheIndices(util::SharedPointer<db::Texture2D> gBufferDepthMap, util::SharedPointer<db::Texture2D> gBufferNormalMap);
+      void createSpecularCacheIndices();
 
       void createVoronoiDiagram(const GPUBuffer& projectedPositions);
 

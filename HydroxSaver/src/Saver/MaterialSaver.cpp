@@ -20,10 +20,10 @@ namespace he
     void MaterialSaver::save(std::string path, std::string filename, const util::ResourceHandle materialHandle, util::SingletonManager *singletonManager)
     {
       std::map<MaterialFileKeywords, std::string> materialFileKeywords;
-      materialFileKeywords[DIFFUSESTRENGTH] = "Diffuse Strength";
-      materialFileKeywords[SPECULARSTRENGTH] = "Specular Strength";
-      materialFileKeywords[AMBIENTSTRENGTH] = "Ambient Strength";
-      materialFileKeywords[SPECULAREXPONENT] = "Specular Exponent";
+      materialFileKeywords[METALNESS] = "Metalness";
+      materialFileKeywords[REFLECTANCE] = "Reflectance";
+      materialFileKeywords[ROUGHNESS0] = "Roughness0";
+      materialFileKeywords[ROUGHNESS1] = "Roughness1";
 
       materialFileKeywords[TRANSPARENCY] = "Transparency";
       materialFileKeywords[RENDERDEBUG] = "Debug";
@@ -31,8 +31,8 @@ namespace he
 
       materialFileKeywords[DIFFUSETEXTURE] = "Diffuse Map";
       materialFileKeywords[NORMALMAP] = "Normal Map";
-      materialFileKeywords[SPECULARMAP] = "Specular Map";
-      materialFileKeywords[DISPLACEMENTMAP] = "Displacement Map";
+      materialFileKeywords[METALNESSMAP] = "Metalness Map";
+      materialFileKeywords[ROUGHNESSMAP] = "Roughness Map";
 
       util::SharedPointer<db::TextureManager> textureManager = singletonManager->getService<db::TextureManager>();
       util::SharedPointer<db::MaterialManager> materialManager = singletonManager->getService<db::MaterialManager>();
@@ -43,17 +43,17 @@ namespace he
       fileStream.open(path + filename + std::string(".material"), std::ofstream::out | std::ofstream::trunc);
 
       /////////////////////////MATERIAL DATA/////////////////////////
-      fileStream << materialFileKeywords[DIFFUSESTRENGTH] << std::endl;
-      fileStream << material->getMaterialData().diffuseStrength << std::endl;
+      fileStream << materialFileKeywords[METALNESS] << std::endl;
+      fileStream << material->getMaterialData().metallic << std::endl;
       fileStream << std::endl;
-      fileStream << materialFileKeywords[SPECULARSTRENGTH] << std::endl;
-      fileStream << material->getMaterialData().specularStrength << std::endl;
+      fileStream << materialFileKeywords[REFLECTANCE] << std::endl;
+      fileStream << material->getMaterialData().reflectance << std::endl;
       fileStream << std::endl;
-      fileStream << materialFileKeywords[AMBIENTSTRENGTH] << std::endl;
-      fileStream << material->getMaterialData().ambientStrength << std::endl;
+      fileStream << materialFileKeywords[ROUGHNESS0] << std::endl;
+      fileStream << material->getMaterialData().roughness0 << std::endl;
       fileStream << std::endl;
-      fileStream << materialFileKeywords[SPECULAREXPONENT] << std::endl;
-      fileStream << material->getMaterialData().specularExponent << std::endl;
+      fileStream << materialFileKeywords[ROUGHNESS1] << std::endl;
+      fileStream << material->getMaterialData().roughness1 << std::endl;
       fileStream << std::endl;
       fileStream << materialFileKeywords[TRANSPARENCY] << std::endl;
       fileStream << material->getTransparency() << std::endl;

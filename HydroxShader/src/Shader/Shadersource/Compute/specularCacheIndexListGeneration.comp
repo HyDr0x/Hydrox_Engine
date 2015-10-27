@@ -7,6 +7,7 @@
 #define CACHEROUNDS 2
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 layout(r32f, binding = 0) readonly uniform image2D cacheOffsetImage;
 layout(rgba32f, binding = 1) readonly uniform image2D cachePositionImage;
@@ -195,7 +196,7 @@ void main()
 							 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
 						{
 							groupCachePositions[localIDx] = imageLoad(cachePositionImage, innerCacheBlockCoord).xyz;
-							groupCacheNormals[localIDx] = imageLoad(cacheNormalImage, innerCacheBlockCoord).xyz;
+							groupCacheNormals[localIDx] = normalize(decodeNormal(imageLoad(cacheNormalImage, innerCacheBlockCoord).xy));
 							groupCacheIndex[localIDx] = uint(imageLoad(cacheOffsetImage, innerCacheBlockCoord).r - 1);
 						}
 					}

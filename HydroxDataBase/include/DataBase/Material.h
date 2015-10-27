@@ -25,30 +25,30 @@ namespace he
       {
         DIFFUSETEX,
         NORMALTEX,
-        DISPLACEMENTTEX,
-        SPECULARTEX,
+        METALNESSTEX,
+        ROUGHNESSTEX,
         TEXTURETYPENUM
       };
 
       struct MaterialData
       {
-        MaterialData() : diffuseStrength(1.0f), specularStrength(1.0f), ambientStrength(1.0f), specularExponent(1.0f), color(util::vec4f::identity())
+        MaterialData() : metallic(1.0f), reflectance(1.0f), roughness0(1.0f), roughness1(1.0f), color(util::vec4f::identity())
         {
         }
 
         MaterialData(float in_diffuseStrength, float in_specularStrength, float in_ambientStrength, float in_specularExponent, util::vec4f in_color) :
-          diffuseStrength(in_diffuseStrength),
-          specularStrength(in_specularStrength),
-          ambientStrength(in_ambientStrength),
-          specularExponent(in_specularExponent),
+          metallic(in_diffuseStrength),
+          reflectance(in_specularStrength),
+          roughness0(in_ambientStrength),
+          roughness1(in_specularExponent),
           color(in_color)
         {
         }
 
-        float diffuseStrength;
-        float specularStrength;//metall materials have their own color as specular reflection
-        float ambientStrength;
-        float specularExponent;
+        float metallic;
+        float reflectance;
+        float roughness0;
+        float roughness1;
         util::vec4f color;
       };
 

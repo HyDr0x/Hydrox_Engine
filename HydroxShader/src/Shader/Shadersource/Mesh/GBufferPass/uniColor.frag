@@ -8,6 +8,7 @@ layout(early_fragment_tests) in;
 layout(location = 0) out vec4 fsout_color;
 layout(location = 1) out vec4 fsout_normal;
 layout(location = 2) out vec4 fsout_material;
+layout(location = 3) out vec4 fsout_vertexNormal;
 
 in GeometryData
 {
@@ -28,4 +29,6 @@ void main()
 												thisMaterial.reflectance, 
 												thisMaterial.roughness0, 
 												thisMaterial.roughness1);
+												
+	fsout_vertexNormal = vec4(normalize(inData.normal) * 0.5 + 0.5, 0.0);
 }

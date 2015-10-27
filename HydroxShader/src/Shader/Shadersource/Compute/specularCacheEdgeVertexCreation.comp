@@ -60,7 +60,6 @@ layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
 
 shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
-shared vec2 groupMaterial[WORKGROUPSIZE];
 shared float groupSummedPixelNumber[WORKGROUPSIZE];
 shared uint groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
 shared uint groupMinDepth;
@@ -213,7 +212,6 @@ void main()
 				float summedPixels = 0.0;
 				vec3 summedPosition = vec3(0.0);
 				vec3 summedNormals = vec3(0.0);
-				vec2 summedMaterials = vec2(0.0);
 				for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
 				{
 					ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
@@ -237,7 +235,6 @@ void main()
 								
 								summedPosition += position3D.xyz;
 								summedNormals += normalCache[j];
-								summedMaterials += texelFetch(gBufferMaterialSampler, texCoord, 0).ga;
 
 								summedPixels++;
 							}
@@ -250,7 +247,6 @@ void main()
 				
 				groupPosition[localIDx] = summedPosition;
 				groupNormals[localIDx] = summedNormals;
-				groupMaterial[localIDx] = summedMaterials;
 				groupSummedPixelNumber[localIDx] = summedPixels;
 
 				memoryBarrierShared();
@@ -260,7 +256,6 @@ void main()
 				float resultPixelCounter = 0.0;
 				vec3 resultPosition = vec3(0.0);
 				vec3 resultNormals = vec3(0.0);
-				vec2 resultMaterials = vec2(0.0);
 				
 				for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
 				{
@@ -270,7 +265,6 @@ void main()
 						resultPixelCounter += groupSummedPixelNumber[index];
 						resultPosition += groupPosition[index];
 						resultNormals += groupNormals[index];
-						resultMaterials += groupMaterial[index];
 					}
 				}
 				
@@ -280,7 +274,6 @@ void main()
 				groupSummedPixelNumber[localIDx] = resultPixelCounter;
 				groupPosition[localIDx] = resultPosition;
 				groupNormals[localIDx] = resultNormals;
-				groupMaterial[localIDx] = resultMaterials;
 				
 				memoryBarrierShared();
 				barrier();
@@ -290,7 +283,6 @@ void main()
 					resultPixelCounter = 0.0;
 					resultPosition = vec3(0.0);
 					resultNormals = vec3(0.0);
-					resultMaterials = vec2(0.0);
 				
 					for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
 					{
@@ -299,7 +291,6 @@ void main()
 							resultPixelCounter += groupSummedPixelNumber[j];
 							resultPosition += groupPosition[j];
 							resultNormals += groupNormals[j];
-							resultMaterials += groupMaterial[j];
 						}
 					}
 
@@ -307,23 +298,18 @@ void main()
 					{
 						resultPosition /= resultPixelCounter;
 						resultNormals = normalize(resultNormals / resultPixelCounter);
-						resultMaterials /= resultPixelCounter;
 
 						ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
 						
-						vec4 projCoord = viewProjectionMatrix * vec4(resultPosition, 1.0);
-						projCoord /= projCoord.w;
-						ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
-						
-						float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.g);
+						float collisionSolidAngle = specularCacheSolidAngle(0.1, GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoord, 0)).w);
 						vec3 reflectRay = normalize(reflect(normalize(resultPosition - eyePos.xyz), resultNormals));
 						float cacheIndirectLightDistance;
 						
-						if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
+						//if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
 						{
 							imageStore(vertexOffsetImage, texCoord, vec4(1.0));
-							imageStore(vertexPositionImage, texCoord, vec4(resultPosition, resultMaterials.r));
-							imageStore(vertexNormalImage, texCoord, vec4(resultNormals, resultMaterials.g));
+							imageStore(vertexPositionImage, texCoord, vec4(resultPosition, 0.0));
+							imageStore(vertexNormalImage, texCoord, vec4(resultNormals, 0.0));
 							vertexNumber++;
 						}
 					}

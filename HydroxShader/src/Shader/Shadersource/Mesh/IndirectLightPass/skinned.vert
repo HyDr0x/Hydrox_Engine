@@ -101,8 +101,8 @@ void main()
 	float wGesD = 0.0;
 	float wGesG = 0.0;
 	
-	cacheProxyMinDistanceD = 0.0f;
-	cacheProxyMinDistanceG = 0.0f;
+	cacheProxyMinDistanceD = 0.0;
+	cacheProxyMinDistanceG = 0.0;
 	
 	for(uint i = 0; i < 8; i++)
 	{

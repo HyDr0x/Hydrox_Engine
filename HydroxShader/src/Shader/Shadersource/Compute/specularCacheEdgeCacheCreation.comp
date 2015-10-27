@@ -14,6 +14,7 @@
 #define DEPTHQ 2
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
@@ -60,7 +61,7 @@ layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
 
 shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
-shared vec2 groupMaterial[WORKGROUPSIZE];
+shared vec3 groupMaterial[WORKGROUPSIZE];
 shared float groupSummedPixelNumber[WORKGROUPSIZE];
 shared uint groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
 shared uint groupMinDepth;
@@ -171,7 +172,7 @@ void main()
 				float summedPixels = 0.0;
 				vec3 summedPosition = vec3(0.0);
 				vec3 summedNormals = vec3(0.0);
-				vec2 summedMaterials = vec2(0.0);
+				vec3 summedMaterials = vec3(0.0);
 				for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
 				{
 					ivec2 texCoord = TILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
@@ -196,7 +197,7 @@ void main()
 								
 								summedPosition += position3D.xyz;
 								summedNormals += normalCache[j];
-								summedMaterials += GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized)).ga;//texelFetch(gBufferMaterialSampler, texCoord, 0).ga;//texture(gBufferMaterialSampler, texCoordNormalized).ga;//WHY DO I NEED TEXTURE HERE AND NOT TEXELFETCH?!
+								summedMaterials += GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized)).rga;//texelFetch(gBufferMaterialSampler, texCoord, 0).rga;//texture(gBufferMaterialSampler, texCoordNormalized).ga;//WHY DO I NEED TEXTURE HERE AND NOT TEXELFETCH?!
 								
 								summedPixels++;
 							}
@@ -218,7 +219,7 @@ void main()
 				float resultPixelCounter = 0.0;
 				vec3 resultPosition = vec3(0.0);
 				vec3 resultNormals = vec3(0.0);
-				vec2 resultMaterials = vec2(0.0);
+				vec3 resultMaterials = vec3(0.0);
 				
 				for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
 				{
@@ -248,7 +249,7 @@ void main()
 					resultPixelCounter = 0.0;
 					resultPosition = vec3(0.0);
 					resultNormals = vec3(0.0);
-					resultMaterials = vec2(0.0);
+					resultMaterials = vec3(0.0);
 				
 					for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
 					{
@@ -267,21 +268,16 @@ void main()
 						resultNormals = normalize(resultNormals / resultPixelCounter);
 						resultMaterials /= resultPixelCounter;
 
-						ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
-						
-						vec4 projCoord = viewProjectionMatrix * vec4(resultPosition, 1.0);
-						projCoord /= projCoord.w;
-						ivec2 projTexCoord = ivec2((projCoord.xy * 0.5 + 0.5) * ivec2(width, height));
-						
-						float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.g);
+						float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.b);
 						vec3 reflectRay = normalize(reflect(normalize(resultPosition - eyePos.xyz), resultNormals));
 						float cacheIndirectLightDistance;
 						
-						if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
+						//if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
 						{
+							ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
 							imageStore(cacheOffsetImage, texCoord, vec4(1.0));
-							imageStore(cachePositionImage, texCoord, vec4(resultPosition, resultMaterials.r));
-							imageStore(cacheNormalImage, texCoord, vec4(resultNormals, resultMaterials.g));
+							imageStore(cachePositionImage, texCoord, vec4(resultPosition, resultMaterials.r));//resultMaterials.r
+							imageStore(cacheNormalImage, texCoord, vec4(encodeNormal(resultNormals), resultMaterials.gb));//resultMaterials.gb
 							vertexNumber++;
 						}
 					}
@@ -300,13 +296,5 @@ void main()
 		
 		memoryBarrierShared();
 		barrier();
-		
-		/*
-		for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
-		{
-			ivec2 texCoord = TILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
-			
-			imageStore(edgeCachePositionImage, texCoord, vec4(abs(float(mod(blockCoord.y, 2) - mod(blockCoord.x, 2)))));
-		}*/
 	}
 }

@@ -588,42 +588,8 @@ namespace he
         textures[db::Material::DIFFUSETEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DIFFUSE));
         unsigned int normalMapIdentifier = scene->mMaterials[i]->GetTextureCount(aiTextureType_NORMALS) > 0 ? aiTextureType_NORMALS : scene->mMaterials[i]->GetTextureCount(aiTextureType_HEIGHT) > 0 ? aiTextureType_HEIGHT : 0;
         textures[db::Material::NORMALTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType(normalMapIdentifier)));
-        textures[db::Material::DISPLACEMENTTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
-        textures[db::Material::SPECULARTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
-
-        unsigned int t0 = scene->mMaterials[i]->GetTextureCount(aiTextureType_AMBIENT);
-        unsigned int t1 = scene->mMaterials[i]->GetTextureCount(aiTextureType_EMISSIVE);
-        unsigned int t2 = scene->mMaterials[i]->GetTextureCount(aiTextureType_LIGHTMAP);
-        unsigned int t3 = scene->mMaterials[i]->GetTextureCount(aiTextureType_REFLECTION);
-        unsigned int t4 = scene->mMaterials[i]->GetTextureCount(aiTextureType_NONE);
-        unsigned int t5 = scene->mMaterials[i]->GetTextureCount(aiTextureType_OPACITY);
-        unsigned int t6 = scene->mMaterials[i]->GetTextureCount(aiTextureType_SHININESS);
-        unsigned int t7 = scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR);
-        unsigned int t8 = scene->mMaterials[i]->GetTextureCount(aiTextureType_UNKNOWN);
-        unsigned int t9 = scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT);
-
-        aiString name;
-
-        scene->mMaterials[i]->GetTexture(aiTextureType_AMBIENT, 0, &name);
-        std::string name0 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_OPACITY, 0, &name);
-        std::string name1 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_EMISSIVE, 0, &name);
-        std::string name2 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_LIGHTMAP, 0, &name);
-        std::string name3 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_REFLECTION, 0, &name);
-        std::string name4 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_NONE, 0, &name);
-        std::string name5 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_SHININESS, 0, &name);
-        std::string name6 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &name);
-        std::string name7 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_UNKNOWN, 0, &name);
-        std::string name8 = name.C_Str();
-        scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &name);
-        std::string name9 = name.C_Str();
+        textures[db::Material::METALNESSTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_DISPLACEMENT));
+        textures[db::Material::ROUGHNESSTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
 
         texLoader.setSRGB(m_sRGB);
         texLoader.setMipMapping(true);
@@ -648,27 +614,27 @@ namespace he
 
         texLoader.setMipMapping(false);
 
-        for(unsigned int k = 0; k != textures[db::Material::DISPLACEMENTTEX].size(); k++)
+        for(unsigned int k = 0; k != textures[db::Material::METALNESSTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
-          textures[db::Material::DISPLACEMENTTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
-          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::DISPLACEMENTTEX][k]);
-          hashes[db::Material::DISPLACEMENTTEX].push_back(texture->getHash());
+          textures[db::Material::METALNESSTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::METALNESSTEX][k]);
+          hashes[db::Material::METALNESSTEX].push_back(texture->getHash());
         }
 
-        for(unsigned int k = 0; k != textures[db::Material::SPECULARTEX].size(); k++)
+        for(unsigned int k = 0; k != textures[db::Material::ROUGHNESSTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
-          textures[db::Material::SPECULARTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
-          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::SPECULARTEX][k]);
-          hashes[db::Material::SPECULARTEX].push_back(texture->getHash());
+          textures[db::Material::ROUGHNESSTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
+          db::Texture2D *texture = m_singletonManager->getService<db::TextureManager>()->getObject(textures[db::Material::ROUGHNESSTEX][k]);
+          hashes[db::Material::ROUGHNESSTEX].push_back(texture->getHash());
         }
 
         db::Material::MaterialData matData;
-        matData.diffuseStrength = 0.5f;
-        matData.specularStrength = 0.5f;
-        matData.ambientStrength = 0.1f;
-        matData.specularExponent = 1.0f;
+        matData.metallic = 0.0f;
+        matData.reflectance = 0.5f;
+        matData.roughness0 = 1.0f;
+        matData.roughness0 = 1.0f;
 
         scene->mMaterials[i]->Get<float>(AI_MATKEY_COLOR_DIFFUSE, matData.color[0]);
         matData.color[3] = 1.0f;

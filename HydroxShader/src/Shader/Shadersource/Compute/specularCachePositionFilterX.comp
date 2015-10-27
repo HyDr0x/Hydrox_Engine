@@ -7,6 +7,7 @@
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;
@@ -26,7 +27,7 @@ void main()
 	vec3 oldPosition = vec3(0.0), newPosition;
 	vec3 normal;
 	float sampleDistance = 0.0;
-	float roughness;
+	float oldRoughness = 0.0, roughness;
 	float depth;
 	
 	const uint pixelPerThread = uint(ceil(width / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / height)));
@@ -70,13 +71,13 @@ void main()
 		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
 		newPosition = tmpProjPos.xyz / tmpProjPos.w;
 		
-		roughness = texelFetch(gBufferMaterialSampler, texCoords, 0).w;
+		roughness = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoords, 0)).w;
 		
 		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
-		if(sampleDistance <= 0.0 && texCoords != ivec2(0,0))
+		if((sampleDistance <= 0.0 && texCoords != ivec2(0,0)))
 		{
 			float maxSolidAngle = specularCacheSolidAngle(0.95, roughness);
 			float collisionSolidAngle = specularCacheSolidAngle(0.1, roughness);
@@ -100,6 +101,7 @@ void main()
 			}
 		}
 
+		oldRoughness = roughness;
 		oldPosition = newPosition;
 
 		texCoords += stepSize;

@@ -25,8 +25,11 @@ layout(location = 0) out vec4 luminousFlux;
 in flat vec3 gsout_normal0;
 in flat vec3 gsout_normal1;
 in flat vec3 gsout_normal2;
+in vec3 gsout_Xpd;
+in vec3 gsout_phiPD;
 in vec3 gsout_Xpg;
 in vec3 gsout_phiPG;
+in float gsout_cacheProxyMinDistanceD;
 in float gsout_cacheProxyMinDistanceG;
 in flat vec3 gsout_depth;
 in flat uvec4 gsout_cacheIndices[6];
@@ -67,6 +70,11 @@ void main()
 	{
 		vec3 camDir = normalize(eyePos.xyz - position3D.xyz);
 	
+		vec3 lightDirD = gsout_Xpd - position3D.xyz;
+		float lengthD = max(dot(lightDirD, lightDirD), dot(gsout_cacheProxyMinDistanceD, gsout_cacheProxyMinDistanceD));
+		//float lengthD = max(length(lightDirD), gsout_cacheProxyMinDistanceD);
+		float frd = material.x * max(dot(normalize(lightDirD), normal), 0.001);
+	
 		vec3 lightDirG = gsout_Xpg - position3D.xyz;
 		//float lengthG = max(dot(lightDirG, lightDirG), dot(gsout_cacheProxyMinDistanceG, gsout_cacheProxyMinDistanceG));
 		float lengthG = max(length(lightDirG), gsout_cacheProxyMinDistanceG);
@@ -84,9 +92,11 @@ void main()
 		//luminousFlux = vec4(0.01 * lengthG);
 		//luminousFlux = vec4((frg * gsout_phiPG) / (4.0 * PI), 1.0);
 		//luminousFlux = vec4(1,0,0,0);
-		luminousFlux = vec4((frg * gsout_phiPG) / (4.0 * PI * lengthG), 1.0);
+		//luminousFlux = vec4(max((frd * gsout_phiPD) / (4.0 * PI * lengthD), 0.0), 1.0);
+		//luminousFlux = vec4(max((frg * gsout_phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
+		luminousFlux = vec4(max((frd * gsout_phiPD) / (4.0 * PI * lengthD), 0.0) + max((frg * gsout_phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
 		
-		return;
+		//return;
 	}
 	
 	imageStore(cacheIndices0, ivec2(gl_FragCoord.xy), uvec4(gsout_cacheIndices[0]));
@@ -96,6 +106,6 @@ void main()
 	imageStore(cacheIndices4, ivec2(gl_FragCoord.xy), uvec4(gsout_cacheIndices[4]));
 	imageStore(cacheIndices5, ivec2(gl_FragCoord.xy), uvec4(gsout_cacheIndices[5]));
 	
-	luminousFlux = vec4(1, 0, 0, 0);
+	luminousFlux = vec4(0, 0, 0, 0);
 	return;
 }

@@ -336,6 +336,7 @@ namespace he
             m_gBuffer.getDepthTexture(),
             m_gBuffer.getLinearDepthTexture(),
             m_gBuffer.getNormalTexture(),
+            m_gBuffer.getVertexNormalTexture(),
             m_gBuffer.getMaterialTexture(),
             m_lightRenderer.getReflectiveShadowPosMaps(),
             m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
@@ -461,7 +462,7 @@ namespace he
         m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugVertexBlockNumber());
         break;
       case 11:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getVertexNormalTexture());
         break;
       case 12:
         m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
@@ -470,8 +471,7 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
         break;
       case 14:
-        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
         break;
       case 15:
         m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
@@ -479,13 +479,15 @@ namespace he
       case 16:
         //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
         //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
+
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
+        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+        
         break;
       case 0:
       default:
-        //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        //m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectSpecularRenderer.getSpecularLightMap());
+        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
       }
       
       m_spriteRenderer.render();

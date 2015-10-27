@@ -30,9 +30,13 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	float lineDistance = length(tubePos);
 
 	float radius = tubeStartPosRadius[tubeIndex].w;
+	
+	vec3 centerToRay = max(dot(tubePos, r), 0.0) * r - tubePos;
+	//vec3 closestPoint = (tubePos + centerToRay * clamp(radius / length(centerToRay), 0.0, 1.0));
+	
 	float dist = lineDistance * lineDistance - radius * radius;
 
-	if(dist <= 0.0)
+	if(dist <= 0.0 || length(centerToRay) < radius)
 	{
 		distance = lineDistance;
 		return true;
@@ -44,7 +48,9 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 													 dist * Ntangent.z, -radius, -dist * Ntangent.x,
 													 -dist * Ntangent.y, dist * Ntangent.x, -radius);//column major order
 										
-	/*float detA = determinant(linearSystem);
+	vec3 closestPoint = tubePos + normalize(inverse(linearSystem) * tubePos) * radius; 	
+	/*
+	float detA = determinant(linearSystem);
 	
 	mat3 modLinSystem = linearSystem;
 	modLinSystem[0] = tubePos;
@@ -58,12 +64,13 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	modLinSystem[2] = tubePos;
 	float det2 = determinant(modLinSystem);
 	
-	vec3 closestPoint = tubePos + normalize(vec3(det0 / detA, det1 / detA, det2 / detA)) * radius;
-	*/
-	vec3 closestPoint = tubePos + normalize(inverse(linearSystem) * tubePos) * radius; 
+	if(detA == 0.0 || det0 == 0.0 || det1 == 0.0 || det2 == 0.0)
+	{
+		distance = lineDistance;
+		return true;
+	}
 	
-	//vec3 centerToRay = max(dot(tubePos, r), 0.0) * r - tubePos;
-	//vec3 closestPoint = (tubePos + centerToRay * clamp(tubeStartPosRadius[tubeIndex].w / length(centerToRay), 0.0, 1.0));
+	vec3 closestPoint = tubePos + normalize(vec3(det0 / detA, det1 / detA, det2 / detA)) * radius;*/
 	
 	float tubeDistance = max(length(closestPoint), 0.001);
 
@@ -76,11 +83,11 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	float radix = 2.0;
 	float base = pow(radix, floor(log(distance) / log(radix)) - 1.0);
 	distance = base * floor(distance / base);
-	
+
 	return dot(normalize(closestPoint), r) > cos(maxSolidAngle);
 }
 
 float samplingDistance(float lightDistance, float maxSolidAngle)
 {
-	return max(lightDistance * 2.0 * tan(maxSolidAngle), 0.001);
+	return max(lightDistance * 2.0 * tan(maxSolidAngle), 0.05);
 }

@@ -6,6 +6,7 @@
 #define LIGHTTUBEBINDINGPOINT 1
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
@@ -39,7 +40,7 @@ void main()
 	vec3 oldPosition = vec3(0.0), newPosition;
 	vec3 normal;
 	float sampleDistance = 0.0;
-	vec2 material;
+	vec3 oldMaterial = vec3(0.0), material;
 	float depth;
 	
 	const uint pixelPerThread = uint(ceil(width / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / height)));
@@ -83,16 +84,16 @@ void main()
 		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
 		newPosition = tmpProjPos.xyz / tmpProjPos.w;
 		
-		material = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoords, 0)).ga;
-		
+		material = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoords, 0)).rga;
+
 		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
 		if(sampleDistance <= 0.0)
 		{
-			float maxSolidAngle = specularCacheSolidAngle(0.95, material.g);
-			float collisionSolidAngle = specularCacheSolidAngle(0.1, material.g);
+			float maxSolidAngle = specularCacheSolidAngle(0.95, material.b);
+			float collisionSolidAngle = specularCacheSolidAngle(0.1, material.b);
 			
 			vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), normal));
 			
@@ -116,16 +117,16 @@ void main()
 						int cacheBlockCounter = int(imageAtomicAdd(cacheAtomicIndexSampler, atomicCacheTexCoord, 1));
 						ivec2 cacheTexCoord = atomicCacheTexCoord * int(cacheBlockDimensions) + ivec2(mod(cacheBlockCounter, int(cacheBlockDimensions)), cacheBlockCounter / int(cacheBlockDimensions));
 						
-						imageStore(cachePositionSampler, cacheTexCoord, vec4(newPosition, material.r));
-						imageStore(cacheNormalSampler, cacheTexCoord, vec4(normal, material.g));
+						imageStore(cachePositionSampler, cacheTexCoord, vec4(newPosition, material.r));//material.r
+						imageStore(cacheNormalSampler, cacheTexCoord, vec4(encodeNormal(normal), material.gb));//material.gb
 						imageStore(cacheOffsetBuffer, cacheTexCoord, vec4(1.0));
 						
 						ivec2 atomicVertexTexCoord = texCoords / int(vertexBlockDimensions);
 						int vertexBlockCounter = int(imageAtomicAdd(vertexAtomicIndexSampler, atomicVertexTexCoord, 1));
 						ivec2 vertexTexCoord = atomicVertexTexCoord * int(vertexBlockDimensions) + ivec2(mod(vertexBlockCounter, int(vertexBlockDimensions)), vertexBlockCounter / int(vertexBlockDimensions));
 						
-						imageStore(vertexPositionSampler, vertexTexCoord, vec4(newPosition, material.r));
-						imageStore(vertexNormalSampler, vertexTexCoord, vec4(normal, material.g));
+						imageStore(vertexPositionSampler, vertexTexCoord, vec4(newPosition, 0.0));
+						imageStore(vertexNormalSampler, vertexTexCoord, vec4(normal, 0.0));
 						imageStore(vertexOffsetBuffer, vertexTexCoord, vec4(1.0));
 							
 						sampleDistance = newSampleDistance;
@@ -136,6 +137,7 @@ void main()
 			}
 		}
 
+		oldMaterial = material;
 		oldPosition = newPosition;
 		texCoords += stepSize;
 	}
