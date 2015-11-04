@@ -49,7 +49,7 @@ namespace he
       void unsetShadowMap(unsigned int bindingPoint);
 
       void setReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
-      void unsetReflectiveShadowMap(unsigned int bindingPoint);
+      void unsetReflectiveShadowMap(unsigned int bindingPoint, unsigned int shadowMapIndex);
 
       void addLight(const xBar::LightContainer& light);
       void removeLight(const xBar::LightContainer& light);
@@ -70,6 +70,10 @@ namespace he
 
       util::SharedPointer<db::Texture3D> getShadowMaps() const;
 
+      util::SharedPointer<db::Texture2D> getDebugFullResReflectiveShadowPosMaps() const;
+      util::SharedPointer<db::Texture2D> getDebugFullResReflectiveShadowNormalAreaMaps() const;
+      util::SharedPointer<db::Texture2D> getDebugFullResReflectiveShadowLuminousFluxMaps() const;
+
       util::SharedPointer<db::Texture3D> getReflectiveShadowPosMaps() const;
       util::SharedPointer<db::Texture3D> getReflectiveShadowNormalAreaMaps() const;
       util::SharedPointer<db::Texture3D> getReflectiveShadowLuminousFluxMaps() const;
@@ -86,6 +90,7 @@ namespace he
 
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
+      sh::ComputeShaderHandle m_reflectiveShadowMapDownsamplingHandle;
       sh::RenderShaderHandle m_directLightShaderHandle;
       
       std::list<const xBar::LightContainer> m_lights;
@@ -97,10 +102,14 @@ namespace he
       Renderquad m_renderShadowMapsQuad;
 
       std::list<const xBar::ShadowLightContainer> m_reflectiveShadowLights;
-      util::SharedPointer<db::Texture2D> m_reflectiveShadowDepthMap;
-      util::SharedPointer<db::Texture3D> m_shadowPosMaps;
-      util::SharedPointer<db::Texture3D> m_shadowNormalAreaMaps;
-      util::SharedPointer<db::Texture3D> m_shadowLuminousFluxMaps;
+      util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowDepthMap;
+      util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowPosMap;
+      util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowNormalAreaMap;
+      util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowLuminousFluxMap;
+
+      util::SharedPointer<db::Texture3D> m_reflectiveShadowPosMaps;
+      util::SharedPointer<db::Texture3D> m_reflectiveShadowNormalAreaMaps;
+      util::SharedPointer<db::Texture3D> m_reflectiveShadowLuminousFluxMaps;
       GPUImmutableBuffer m_reflectiveShadowedLightBuffer;
       Renderquad m_renderReflectiveShadowMapsQuad;
 

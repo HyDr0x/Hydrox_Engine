@@ -1,0 +1,70 @@
+#version 440 core
+
+#define WORKGROUPTILESIZE 64
+#define MINIFICATION 8
+
+layout(location = 0) uniform ivec2 sampleDirection;
+layout(location = 1) uniform uint shadowMapResolution;
+layout(location = 2) uniform uint reflectiveShadowMapResolution;
+
+layout(rgba32f, binding = 0) uniform image2D fullResReflectiveShadowMapPositionSampler;
+layout(rgba32f, binding = 1) uniform image2D fullResReflectiveShadowMapNormalSampler;
+layout(rgba32f, binding = 2) uniform image2D fullResReflectiveShadowMapLuminousFluxSampler;
+layout(rgba32f, binding = 3) writeonly uniform image2D reflectiveShadowMapPositionImage;
+layout(rgba32f, binding = 4) writeonly uniform image2D reflectiveShadowMapNormalImage;
+layout(rgba32f, binding = 5) writeonly uniform image2D reflectiveShadowMapLuminousFluxImage;
+
+layout(local_size_x = WORKGROUPTILESIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localID = gl_LocalInvocationIndex;
+	
+	const uint threadNumber = WORKGROUPTILESIZE * gl_NumWorkGroups.x;
+	
+	uint newWidth = sampleDirection == ivec2(1, 0) ? shadowMapResolution : reflectiveShadowMapResolution;
+	const uint pixelsPerThread = (newWidth * shadowMapResolution + (MINIFICATION * threadNumber) - 1) / (MINIFICATION * threadNumber);
+	const uint pixelStartIndex = idx * pixelsPerThread;
+	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
+
+	const uint pixelsPerTile = (MINIFICATION * MINIFICATION);
+	
+	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
+	{
+		uint pixelID = MINIFICATION * i;
+		ivec2 texCoord = ivec2(mod(pixelID, newWidth), pixelID / newWidth);
+			
+		vec4 position = vec4(0.0);
+		vec4 normal = vec4(0.0);
+		vec4 luminousFlux = vec4(0.0);
+		
+		for(uint j = 0; j < MINIFICATION; j++)
+		{
+			position += imageLoad(fullResReflectiveShadowMapPositionSampler, texCoord);
+			normal += imageLoad(fullResReflectiveShadowMapNormalSampler, texCoord);
+			luminousFlux += imageLoad(fullResReflectiveShadowMapLuminousFluxSampler, texCoord);
+			
+			texCoord += sampleDirection;
+		}
+
+		ivec2 downSampledTexCoord = ivec2(mod(i, reflectiveShadowMapResolution), i / reflectiveShadowMapResolution);
+		
+		if(sampleDirection == ivec2(1, 0) && i < reflectiveShadowMapResolution * shadowMapResolution)
+		{
+			imageStore(fullResReflectiveShadowMapPositionSampler, downSampledTexCoord, position);
+			imageStore(fullResReflectiveShadowMapNormalSampler, downSampledTexCoord, normal);
+			imageStore(fullResReflectiveShadowMapLuminousFluxSampler, downSampledTexCoord, luminousFlux);
+		}
+		else if(i < newWidth * reflectiveShadowMapResolution)
+		{
+			position /= pixelsPerTile;
+			normal /= pixelsPerTile;
+			luminousFlux /= pixelsPerTile;
+			
+			imageStore(reflectiveShadowMapPositionImage, downSampledTexCoord, position);
+			imageStore(reflectiveShadowMapNormalImage, downSampledTexCoord, normal);
+			imageStore(reflectiveShadowMapLuminousFluxImage, downSampledTexCoord, 10 * luminousFlux);
+		}
+	}
+}

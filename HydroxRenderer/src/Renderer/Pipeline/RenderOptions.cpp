@@ -32,7 +32,7 @@ namespace he
 
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, reflectiveShadowMapWidth, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectShadowMapWidth, &atoi);
-      getParameter<unsigned int, int(*) (const char*)>(parameterStream, giLightSampleNumber, &atoi);
+      giLightSampleNumber = reflectiveShadowMapWidth * reflectiveShadowMapWidth;
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, giShadowLightSampleDivisor, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, kCache, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, pushPullPyramideSize, &atoi);

@@ -19,34 +19,9 @@ layout(rgba32f, binding = 5) readonly uniform image2D vertexPositionImage;
 layout(rgba32f, binding = 6) readonly uniform image2D vertexNormalImage;
 layout(r32ui, binding = 7) readonly uniform uimage2D vertexNumberPerTileImage;
 
-layout(std430, binding = 0) buffer vertexPositionBuffer
+layout(std430, binding = 0) buffer specularCacheIndicesBuffer
 {
-	vec4 vertexPositions[];
-};
-
-layout(std430, binding = 1) buffer vertexNormalBuffer
-{
-	vec4 vertexNormals[];
-};
-
-layout(std430, binding = 2) buffer specularCachePositionBuffer
-{
-	vec4 specularCachePositions[];
-};
-
-layout(std430, binding = 3) buffer specularCacheNormalMaterialBuffer
-{
-	vec4 specularCacheNormals[];
-};
-
-layout(std430, binding = 4) buffer specularCacheIndices0Buffer
-{
-	vec4 specularCacheIndices0[];
-};
-
-layout(std430, binding = 5) buffer specularCacheIndices1Buffer
-{
-	vec4 specularCacheIndices1[];
+	uint specularCacheIndices[];
 };
 
 layout(location = 0) uniform uint borderVertexNumber;
@@ -70,6 +45,7 @@ void main()
 	const uint cacheTileEndIndex = cacheTileStartIndex + cacheTilesPerGroup;
 	
 	const uvec2 vertexTileNumber = (uvec2(width, height) + uvec2(VERTEXTILESIZE - 1)) / VERTEXTILESIZE;
+	const ivec2 vertexTilePixelNumber = ivec2(vertexTileNumber) * VERTEXTILESIZE;
 	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
 	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
 	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
@@ -77,6 +53,7 @@ void main()
 	for(uint i = vertexTileStartIndex; i < vertexTileEndIndex; i++)
 	{
 		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
+		
 		ivec2 cacheBlockCoord = (vertexBlockCoord * VERTEXTILESIZE) / ivec2(CACHETILESIZE);
 		
 		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, vertexBlockCoord).r;
@@ -91,7 +68,7 @@ void main()
 			vec3 vertexPosition;
 			vec3 vertexNormal;
 			
-			if(texCoord.x < width && texCoord.y < height)
+			if(texCoord.x < vertexTilePixelNumber.x && texCoord.y < vertexTilePixelNumber.y)
 			{
 				vertexPosition = imageLoad(vertexPositionImage, texCoord).xyz;
 				vertexNormal = normalize(imageLoad(vertexNormalImage, texCoord).xyz);
@@ -130,8 +107,8 @@ void main()
 						
 						uint blockCacheNumber = 0;
 					
-						if(0 <= cacheNumberTexCoord.x && cacheNumberTexCoord.x < cacheTileNumber.x &&
-							 0 <= cacheNumberTexCoord.y && cacheNumberTexCoord.y < cacheTileNumber.y)
+						//if(0 <= cacheNumberTexCoord.x && cacheNumberTexCoord.x < cacheTileNumber.x &&
+						//	 0 <= cacheNumberTexCoord.y && cacheNumberTexCoord.y < cacheTileNumber.y)
 						{
 							blockCacheNumber = imageLoad(cacheNumberPerTileImage, cacheNumberTexCoord).r;
 						}
@@ -192,8 +169,8 @@ void main()
 						uint innerBlockCacheIndex = cacheIndex - (roundCacheStartIndex - groupCacheNumberPerTile[cacheBlockIndex]);
 						ivec2 innerCacheBlockCoord = cacheNumberTexCoord * CACHETILESIZE + ivec2(mod(innerBlockCacheIndex, CACHETILESIZE), innerBlockCacheIndex / CACHETILESIZE);
 
-						if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < width &&
-							 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
+						//if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < width &&
+						//	 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
 						{
 							groupCachePositions[localIDx] = imageLoad(cachePositionImage, innerCacheBlockCoord).xyz;
 							groupCacheNormals[localIDx] = normalize(decodeNormal(imageLoad(cacheNormalImage, innerCacheBlockCoord).xy));
@@ -208,7 +185,7 @@ void main()
 					{
 						for(uint m = 0; m < WORKGROUPSIZE; m++)
 						{
-							if(l + m < max(int(groupCacheNumber) - 0, 0))
+							if(l + m < max(int(groupCacheNumber), 0))
 							{
 								vec3 cachePosDistance = groupCachePositions[m] - vertexPosition;
 								float angle = dot(vertexNormal, groupCacheNormals[m]);
@@ -239,12 +216,14 @@ void main()
 					barrier();
 				}
 			}
-		
-			if(j < vertexNumber && texCoord.x < width && texCoord.y < height)
-			{		
-				const uint vertexOffset = borderVertexNumber + uint(imageLoad(vertexOffsetImage, texCoord).r - 1);
-				specularCacheIndices0[vertexOffset] = vec4(indices[0], indices[1], indices[2], indices[3]);
-				specularCacheIndices1[vertexOffset] = vec4(indices[4], indices[5], indices[6], indices[7]);
+			
+			if(j < vertexNumber && texCoord.x < vertexTilePixelNumber.x && texCoord.y < vertexTilePixelNumber.y)
+			{
+				uint indexOffset = 8 * (texCoord.y * vertexTilePixelNumber.x + texCoord.x);
+				for(uint k = 0; k < 8; k++)
+				{
+					specularCacheIndices[indexOffset + k] = indices[k];
+				}
 			}
 		}
 	}

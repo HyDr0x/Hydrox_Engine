@@ -11,7 +11,6 @@
 #define PI_HALF (PI * 0.5)
 #define NORMALPHIQ 7
 #define NORMALTHETAQ 3
-#define DEPTHQ 2
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
@@ -28,33 +27,12 @@ layout(rgba32f, binding = 1) writeonly uniform image2D cachePositionImage;
 layout(rgba32f, binding = 2) writeonly uniform image2D cacheNormalImage;
 layout(r32ui, binding = 3) writeonly uniform uimage2D cacheAtomicIndexSampler;
 
-uint depthToBin(in float depth, in uint minDepth, in uint maxDepth)
-{
-	float ftlMinDepth = uintBitsToFloat(minDepth);
-	float ftlMaxDepth = uintBitsToFloat(maxDepth);
-	return uint(((depth - ftlMinDepth) / (ftlMaxDepth - ftlMinDepth)) * DEPTHQ);
-}
-
 uint normalToBin(in vec3 normal)
 {
 	uint phiBin = uint(clamp((atan(normal.y, normal.x) + PI) / (2.0 * PI), 0.0, 0.9999) * NORMALPHIQ);
 	uint thetaBin = uint(clamp((normal.z * 0.5 + 0.5), 0.0, 0.9999) * NORMALTHETAQ);//[-PI/2,PI/2] --> [0,PI]
 	
 	return phiBin + NORMALPHIQ * thetaBin;
-}
-
-vec3 binToNormal(in uint bin)
-{
-	uint thetaBin = bin / NORMALPHIQ;
-	uint phiBin = bin - (thetaBin * NORMALPHIQ);
-
-	vec3 resultNormal;
-	
-	float phi = ((phiBin / float(NORMALPHIQ)) * 2.0 - 1.0) * PI;
-	resultNormal.xy = vec2(cos(phi), sin(phi));
-	resultNormal.z = ((float(thetaBin) * (PI / 3.0) + (float(thetaBin) + 1) * (PI / 3.0)) * 0.5 - PI_HALF) / PI_HALF;
-	
-	return resultNormal;
 }
 
 layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
@@ -64,9 +42,6 @@ shared vec3 groupNormals[WORKGROUPSIZE];
 shared vec3 groupMaterial[WORKGROUPSIZE];
 shared float groupSummedPixelNumber[WORKGROUPSIZE];
 shared uint groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
-shared uint groupMinDepth;
-shared uint groupMaxDepth;
-shared uint groupChoosenDepthBin;
 shared uint groupMaxNormalBinID;
 shared uint groupMaxNormalBinVotes;
 
@@ -89,35 +64,9 @@ void main()
 		
 		if(localIDx == 0)
 		{
-			groupMinDepth = 0xFFFFFFFF;
-			groupMaxDepth = 0;
-
 			for(uint j = 0; j < (NORMALPHIQ * NORMALTHETAQ); j++)
 			{
 				groupNormalBin[j] = 0;
-			}
-		}
-		
-		memoryBarrierShared();
-		barrier();
-
-		uint depthBinCache[TILEPIXELPERTHREAD * TILEPIXELPERTHREAD];
-		for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
-		{
-			ivec2 texCoord = TILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
-
-			float linearDepth = texelFetch(gBufferLinearDepthSampler, texCoord, 0).r;
-
-			if(linearDepth < far)
-			{
-				atomicMin(groupMinDepth, floatBitsToUint(linearDepth));
-				atomicMax(groupMaxDepth, floatBitsToUint(linearDepth));
-				
-				depthBinCache[j] = floatBitsToUint(linearDepth);
-			}
-			else
-			{
-				depthBinCache[j] = INT32_MAX - 1;
 			}
 		}
 
@@ -137,8 +86,6 @@ void main()
 			normalBinCache[j] = normalToBin(normal);
 			
 			atomicAdd(groupNormalBin[normalBinCache[j]], 1);
-			
-			depthBinCache[j] = depthToBin(uintBitsToFloat(depthBinCache[j]), groupMinDepth, groupMaxDepth);
 		}
 
 		uint vertexNumber = 0;
@@ -152,7 +99,6 @@ void main()
 			{
 				groupMaxNormalBinID = INT32_MAX;
 				groupMaxNormalBinVotes = 0;
-				groupChoosenDepthBin = INT32_MAX;
 				
 				for(uint j = 0; j < (NORMALPHIQ * NORMALTHETAQ); j++)
 				{
@@ -180,31 +126,21 @@ void main()
 					
 					if(normalBinCache[j] == groupMaxNormalBinID)
 					{
-						if(groupChoosenDepthBin == INT32_MAX && depthBinCache[j] != INT32_MAX - 1)
-						//if(depthBinCache[j] != INT32_MAX - 1)
+						float depth = texelFetch(gBufferDepthSampler, texCoord, 0).r;
+						
+						if(depth < 0.9999)
 						{
-							atomicCompSwap(groupChoosenDepthBin, INT32_MAX, depthBinCache[j]);
+							vec4 position3D = invViewProjectionMatrix * (vec4(texCoordNormalized, depth, 1.0) * 2.0 - 1.0);
+							position3D /= position3D.w;
+							
+							summedPosition += position3D.xyz;
+							summedNormals += normalCache[j];
+							summedMaterials += GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized)).rga;//texelFetch(gBufferMaterialSampler, texCoord, 0).rga;//texture(gBufferMaterialSampler, texCoordNormalized).ga;//WHY DO I NEED TEXTURE HERE AND NOT TEXELFETCH?!
+							
+							summedPixels++;
 						}
 
-						if(depthBinCache[j] == groupChoosenDepthBin)
-						{
-							float depth = texelFetch(gBufferDepthSampler, texCoord, 0).r;
-							
-							if(depth < 0.9999)
-							{
-								vec4 position3D = invViewProjectionMatrix * (vec4(texCoordNormalized, depth, 1.0) * 2.0 - 1.0);
-								position3D /= position3D.w;
-								
-								summedPosition += position3D.xyz;
-								summedNormals += normalCache[j];
-								summedMaterials += GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized)).rga;//texelFetch(gBufferMaterialSampler, texCoord, 0).rga;//texture(gBufferMaterialSampler, texCoordNormalized).ga;//WHY DO I NEED TEXTURE HERE AND NOT TEXELFETCH?!
-								
-								summedPixels++;
-							}
-							
-							depthBinCache[j] = INT32_MAX - 1;
-							atomicAdd(groupNormalBin[groupMaxNormalBinID], -1);
-						}
+						atomicAdd(groupNormalBin[groupMaxNormalBinID], -1);
 					}
 				}
 				
@@ -268,18 +204,11 @@ void main()
 						resultNormals = normalize(resultNormals / resultPixelCounter);
 						resultMaterials /= resultPixelCounter;
 
-						float collisionSolidAngle = specularCacheSolidAngle(0.1, resultMaterials.b);
-						vec3 reflectRay = normalize(reflect(normalize(resultPosition - eyePos.xyz), resultNormals));
-						float cacheIndirectLightDistance;
-						
-						//if(indirectLightTubeCollision(resultPosition, reflectRay, collisionSolidAngle, 0, cacheIndirectLightDistance))
-						{
-							ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
-							imageStore(cacheOffsetImage, texCoord, vec4(1.0));
-							imageStore(cachePositionImage, texCoord, vec4(resultPosition, resultMaterials.r));//resultMaterials.r
-							imageStore(cacheNormalImage, texCoord, vec4(encodeNormal(resultNormals), resultMaterials.gb));//resultMaterials.gb
-							vertexNumber++;
-						}
+						ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
+						imageStore(cacheOffsetImage, texCoord, vec4(1.0));
+						imageStore(cachePositionImage, texCoord, vec4(resultPosition, resultMaterials.r));//resultMaterials.r
+						imageStore(cacheNormalImage, texCoord, vec4(encodeNormal(resultNormals), resultMaterials.gb));//resultMaterials.gb
+						vertexNumber++;
 					}
 				}
 			}

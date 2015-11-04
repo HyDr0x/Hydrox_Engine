@@ -9,9 +9,11 @@ layout(location = 2) uniform sampler2D normalSampler;
 layout(location = 3) uniform sampler2D materialSampler;
 
 layout(location = 4) uniform sampler2DArray shadowMapsSampler;
+layout(location = 5) uniform sampler2DArray shadowPosMapsSampler;
 
-layout(location = 5) uniform uint lightNumber;
-layout(location = 6) uniform uint shadowLightNumber;
+layout(location = 6) uniform uint lightNumber;
+layout(location = 7) uniform uint shadowLightNumber;
+layout(location = 8) uniform uint reflectiveShadowLightNumber;
 
 layout(std430, binding = 0) buffer lightBuffer
 {
@@ -21,6 +23,11 @@ layout(std430, binding = 0) buffer lightBuffer
 layout(std430, binding = 1) buffer shadowLightBuffer
 {
 	ShadowLightData shadowLight[];
+};
+
+layout(std430, binding = 2) buffer reflectiveShadowLightBuffer
+{
+	ShadowLightData reflectiveShadowLight[];
 };
 
 out vec4 luminousFlux;
@@ -65,7 +72,21 @@ void main()
 		if(shadowPos.z <= shadowZ + 0.0001 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
 		{
 			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
-			luminousFlux += vec4(shadowLight[i].light.color.rgb * (borderAttenuation.x * borderAttenuation.y * calculateLuminance(shadowLight[i].light, pos, normal, albedo, material)), 1.0);
+			luminousFlux += vec4(shadowLight[i].light.color.rgb * borderAttenuation.x * borderAttenuation.y * calculateLuminance(shadowLight[i].light, pos, normal, albedo, material), 1.0);
+		}
+	}
+	
+	for(uint i = 0; i < reflectiveShadowLightNumber; i++)
+	{
+		vec4 projShadowPos = reflectiveShadowLight[i].lightViewProj * vec4(pos, 1.0);
+		projShadowPos /= projShadowPos.w;
+		vec3 shadowTexCoords = vec3(projShadowPos.xy * 0.5 + 0.5, i);
+		vec3 shadowPos = texture(shadowPosMapsSampler, shadowTexCoords).xyz;
+		
+		if(length(shadowPos - pos) < 0.1 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
+		{
+			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
+			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb * borderAttenuation.x * borderAttenuation.y * calculateLuminance(reflectiveShadowLight[i].light, pos, normal, albedo, material), 1.0);
 		}
 	}
 }

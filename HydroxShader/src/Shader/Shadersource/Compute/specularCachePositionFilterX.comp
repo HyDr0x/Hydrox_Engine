@@ -1,6 +1,6 @@
 #version 440 core
 
-#define WORKGROUPSIZE 16
+#define WORKGROUPSIZE 128
 #define PI 3.14159265359
 #define PI_HALF (0.5 * PI)
 #define LIGHTTUBEBINDINGPOINT 1
@@ -77,7 +77,7 @@ void main()
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
-		if((sampleDistance <= 0.0 && texCoords != ivec2(0,0)))
+		if(sampleDistance <= 0.0 || (log(oldRoughness - roughness) / log(2.0)) > 10.0)
 		{
 			float maxSolidAngle = specularCacheSolidAngle(0.95, roughness);
 			float collisionSolidAngle = specularCacheSolidAngle(0.1, roughness);
