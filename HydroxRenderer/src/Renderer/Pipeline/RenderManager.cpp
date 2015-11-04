@@ -226,11 +226,11 @@ namespace he
         m_gBuffer.setGBuffer();
         m_geometryRasterizer.rasterizeGeometry();
         m_gBuffer.unsetGBuffer();
-                
+
         {
+          glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
           glEnable(GL_POLYGON_OFFSET_FILL);
           glPolygonOffset(1.1f, 4.0f);
-          glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
           for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
           {
             m_lightRenderer.setShadowMap(4, i);
@@ -238,10 +238,7 @@ namespace he
             m_geometryRasterizer.generateShadowMap(i);
             m_lightRenderer.unsetShadowMap(4);
           }
-        }
 
-        {
-          glViewport(0, 0, m_options->reflectiveShadowMapWidth, m_options->reflectiveShadowMapWidth);
           for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
           {
             m_lightRenderer.setReflectiveShadowMap(4, i);
@@ -249,8 +246,9 @@ namespace he
             m_geometryRasterizer.generateReflectiveShadowMap(i);
             m_lightRenderer.unsetReflectiveShadowMap(4, i);
           }
-          glViewport(0, 0, m_options->width, m_options->height);
+
           glDisable(GL_POLYGON_OFFSET_FILL);
+          glViewport(0, 0, m_options->width, m_options->height);
         }
 
         if(m_wireframe)
@@ -399,19 +397,19 @@ namespace he
         m_finalCompositing.renderIntegerDebugOutput(m_indirectSpecularRenderer.getDebugVertexBlockNumber());
         break;
       case 11:
-        m_finalCompositing.renderDebugOutput(m_gBuffer.getVertexNormalTexture());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResDepthMap());
         break;
       case 12:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResLinearDepthMap());
         break;
       case 13:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getDebugFullResReflectiveShadowLuminousFluxMaps());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResNormalMap());
         break;
       case 14:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getDebugFullResReflectiveShadowNormalAreaMaps());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResVertexNormalMap());
         break;
       case 15:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getDebugFullResReflectiveShadowPosMaps());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResMaterialMap());
         break;
       case 16:
         //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());

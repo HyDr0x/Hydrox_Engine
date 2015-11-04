@@ -1,18 +1,18 @@
 #version 440 core
 
 #define WORKGROUPTILESIZE 64
-#define MINIFICATION 8
 
 layout(location = 0) uniform ivec2 sampleDirection;
 layout(location = 1) uniform uint shadowMapResolution;
 layout(location = 2) uniform uint reflectiveShadowMapResolution;
+layout(location = 3) uniform uint minification;
 
-layout(rgba32f, binding = 0) uniform image2D fullResReflectiveShadowMapPositionSampler;
-layout(rgba32f, binding = 1) uniform image2D fullResReflectiveShadowMapNormalSampler;
-layout(rgba32f, binding = 2) uniform image2D fullResReflectiveShadowMapLuminousFluxSampler;
-layout(rgba32f, binding = 3) writeonly uniform image2D reflectiveShadowMapPositionImage;
-layout(rgba32f, binding = 4) writeonly uniform image2D reflectiveShadowMapNormalImage;
-layout(rgba32f, binding = 5) writeonly uniform image2D reflectiveShadowMapLuminousFluxImage;
+layout(rgba32f, binding = 0) readonly uniform image2D readReflectiveShadowMapPositionSampler;
+layout(rgba32f, binding = 1) readonly uniform image2D readReflectiveShadowMapNormalSampler;
+layout(rgba32f, binding = 2) readonly uniform image2D readReflectiveShadowMapLuminousFluxSampler;
+layout(rgba32f, binding = 3) writeonly uniform image2D writeReflectiveShadowMapPositionImage;
+layout(rgba32f, binding = 4) writeonly uniform image2D writeReflectiveShadowMapNormalImage;
+layout(rgba32f, binding = 5) writeonly uniform image2D writeReflectiveShadowMapLuminousFluxImage;
 
 layout(local_size_x = WORKGROUPTILESIZE) in;
 
@@ -24,47 +24,43 @@ void main()
 	const uint threadNumber = WORKGROUPTILESIZE * gl_NumWorkGroups.x;
 	
 	uint newWidth = sampleDirection == ivec2(1, 0) ? shadowMapResolution : reflectiveShadowMapResolution;
-	const uint pixelsPerThread = (newWidth * shadowMapResolution + (MINIFICATION * threadNumber) - 1) / (MINIFICATION * threadNumber);
+	const uint pixelsPerThread = (newWidth * shadowMapResolution + (minification * threadNumber) - 1) / (minification * threadNumber);
 	const uint pixelStartIndex = idx * pixelsPerThread;
 	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
 
-	const uint pixelsPerTile = (MINIFICATION * MINIFICATION);
+	const uint pixelsPerTile = (minification * minification);
 	
 	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
 	{
-		uint pixelID = MINIFICATION * i;
-		ivec2 texCoord = ivec2(mod(pixelID, newWidth), pixelID / newWidth);
-			
+		uint pixelID = minification * i;
+		ivec2 texCoord = ivec2(sampleDirection.x * mod(pixelID, newWidth) + sampleDirection.y * pixelID / shadowMapResolution, sampleDirection.x * (pixelID / newWidth) + sampleDirection.y * mod(pixelID, shadowMapResolution));
+		
 		vec4 position = vec4(0.0);
 		vec4 normal = vec4(0.0);
 		vec4 luminousFlux = vec4(0.0);
 		
-		for(uint j = 0; j < MINIFICATION; j++)
+		for(uint j = 0; j < minification; j++)
 		{
-			position += imageLoad(fullResReflectiveShadowMapPositionSampler, texCoord);
-			normal += imageLoad(fullResReflectiveShadowMapNormalSampler, texCoord);
-			luminousFlux += imageLoad(fullResReflectiveShadowMapLuminousFluxSampler, texCoord);
+			position += imageLoad(readReflectiveShadowMapPositionSampler, texCoord);
+			normal += imageLoad(readReflectiveShadowMapNormalSampler, texCoord);
+			luminousFlux += imageLoad(readReflectiveShadowMapLuminousFluxSampler, texCoord);
 			
 			texCoord += sampleDirection;
 		}
-
+	
 		ivec2 downSampledTexCoord = ivec2(mod(i, reflectiveShadowMapResolution), i / reflectiveShadowMapResolution);
+	
+		if(sampleDirection == ivec2(0, 1))
+		{
+			downSampledTexCoord = ivec2(i / reflectiveShadowMapResolution, mod(i, reflectiveShadowMapResolution));
 		
-		if(sampleDirection == ivec2(1, 0) && i < reflectiveShadowMapResolution * shadowMapResolution)
-		{
-			imageStore(fullResReflectiveShadowMapPositionSampler, downSampledTexCoord, position);
-			imageStore(fullResReflectiveShadowMapNormalSampler, downSampledTexCoord, normal);
-			imageStore(fullResReflectiveShadowMapLuminousFluxSampler, downSampledTexCoord, luminousFlux);
-		}
-		else if(i < newWidth * reflectiveShadowMapResolution)
-		{
 			position /= pixelsPerTile;
 			normal /= pixelsPerTile;
 			luminousFlux /= pixelsPerTile;
-			
-			imageStore(reflectiveShadowMapPositionImage, downSampledTexCoord, position);
-			imageStore(reflectiveShadowMapNormalImage, downSampledTexCoord, normal);
-			imageStore(reflectiveShadowMapLuminousFluxImage, downSampledTexCoord, 10 * luminousFlux);
 		}
+
+		imageStore(writeReflectiveShadowMapPositionImage, downSampledTexCoord, position);
+		imageStore(writeReflectiveShadowMapNormalImage, downSampledTexCoord, normal);
+		imageStore(writeReflectiveShadowMapLuminousFluxImage, downSampledTexCoord, luminousFlux);
 	}
 }

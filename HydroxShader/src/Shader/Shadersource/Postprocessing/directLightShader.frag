@@ -9,7 +9,7 @@ layout(location = 2) uniform sampler2D normalSampler;
 layout(location = 3) uniform sampler2D materialSampler;
 
 layout(location = 4) uniform sampler2DArray shadowMapsSampler;
-layout(location = 5) uniform sampler2DArray shadowPosMapsSampler;
+layout(location = 5) uniform sampler2DArray reflectiveShadowDepthMapsSampler;
 
 layout(location = 6) uniform uint lightNumber;
 layout(location = 7) uniform uint shadowLightNumber;
@@ -29,6 +29,21 @@ layout(std430, binding = 2) buffer reflectiveShadowLightBuffer
 {
 	ShadowLightData reflectiveShadowLight[];
 };
+
+void calculateShadowedLight(inout vec4 luminousFlux, in const ShadowLightData incomingLight, in const uint shadowMapID, in const vec3 position, in const vec3 normal, in const vec3 albedo, in const vec4 material)
+{
+	vec4 shadowPos = incomingLight.lightViewProj * vec4(position, 1.0);
+	shadowPos /= shadowPos.w;
+	shadowPos.xyz = shadowPos.xyz * 0.5 + 0.5;
+	vec3 shadowTexCoords = vec3(shadowPos.xy, shadowMapID);
+	float shadowZ = texture(reflectiveShadowDepthMapsSampler, shadowTexCoords).r;
+	
+	if(shadowPos.z <= shadowZ + 0.0001 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
+	{
+		vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
+		luminousFlux += vec4(incomingLight.light.color.rgb * borderAttenuation.x * borderAttenuation.y * calculateLuminance(incomingLight.light, position, normal, albedo, material), 1.0);
+	}
+}
 
 out vec4 luminousFlux;
 
@@ -63,30 +78,11 @@ void main()
 	
 	for(uint i = 0; i < shadowLightNumber; i++)
 	{
-		vec4 shadowPos = shadowLight[i].lightViewProj * vec4(pos, 1.0);
-		shadowPos /= shadowPos.w;
-		shadowPos.xyz = shadowPos.xyz * 0.5 + 0.5;
-		vec3 shadowTexCoords = vec3(shadowPos.xy, i);
-		float shadowZ = texture(shadowMapsSampler, shadowTexCoords).r;
-		
-		if(shadowPos.z <= shadowZ + 0.0001 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
-		{
-			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
-			luminousFlux += vec4(shadowLight[i].light.color.rgb * borderAttenuation.x * borderAttenuation.y * calculateLuminance(shadowLight[i].light, pos, normal, albedo, material), 1.0);
-		}
+		calculateShadowedLight(luminousFlux, shadowLight[i], i, pos, normal, albedo, material);
 	}
 	
 	for(uint i = 0; i < reflectiveShadowLightNumber; i++)
 	{
-		vec4 projShadowPos = reflectiveShadowLight[i].lightViewProj * vec4(pos, 1.0);
-		projShadowPos /= projShadowPos.w;
-		vec3 shadowTexCoords = vec3(projShadowPos.xy * 0.5 + 0.5, i);
-		vec3 shadowPos = texture(shadowPosMapsSampler, shadowTexCoords).xyz;
-		
-		if(length(shadowPos - pos) < 0.1 && (shadowTexCoords.x >= 0.0 && shadowTexCoords.x <= 1.0 && shadowTexCoords.y >= 0.0 && shadowTexCoords.y <= 1.0))
-		{
-			vec2 borderAttenuation = clamp(shadowTexCoords.xy * 1.0 / 0.05, 0.0, 1.0) * clamp((vec2(1.0) - shadowTexCoords.xy) * 1.0 / 0.05, 0.0, 1.0);
-			luminousFlux += vec4(reflectiveShadowLight[i].light.color.rgb * borderAttenuation.x * borderAttenuation.y * calculateLuminance(reflectiveShadowLight[i].light, pos, normal, albedo, material), 1.0);
-		}
+		calculateShadowedLight(luminousFlux, reflectiveShadowLight[i], i, pos, normal, albedo, material);
 	}
 }

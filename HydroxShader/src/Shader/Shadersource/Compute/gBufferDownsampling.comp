@@ -1,0 +1,79 @@
+#version 440 core
+
+#define WORKGROUPTILESIZE 128
+
+layout(location = 0) uniform ivec2 sampleDirection;
+layout(location = 1) uniform ivec2 originalResolution;
+layout(location = 2) uniform ivec2 downsampledResolution;
+layout(location = 3) uniform uint minification;
+
+layout(location = 4) uniform sampler2D readGBufferDepth;
+layout(location = 5) uniform sampler2D readGBufferLinearDepth;
+layout(location = 6) uniform sampler2D readGBufferNormals;
+layout(location = 7) uniform sampler2D readGBufferVertexNormals;
+layout(location = 8) uniform sampler2D readGBufferMaterials;
+
+layout(rgba16f, binding = 0) writeonly uniform image2D writeGBufferDepth;
+layout(rgba16f, binding = 1) writeonly uniform image2D writeGBufferLinearDepth;
+layout(rgba16f, binding = 2) writeonly uniform image2D writeGBufferNormals;
+layout(rgba16f, binding = 3) writeonly uniform image2D writeGBufferVertexNormals;
+layout(rgba16f, binding = 4) writeonly uniform image2D writeGBufferMaterials;
+
+layout(local_size_x = WORKGROUPTILESIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localID = gl_LocalInvocationIndex;
+	
+	const uint threadNumber = WORKGROUPTILESIZE * gl_NumWorkGroups.x;
+	
+	uint newWidth = sampleDirection == ivec2(1, 0) ? originalResolution.x : downsampledResolution.x;
+	const uint pixelsPerThread = (newWidth * originalResolution.y + (minification * threadNumber) - 1) / (minification * threadNumber);
+	const uint pixelStartIndex = idx * pixelsPerThread;
+	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
+
+	const uint pixelsPerTile = (minification * minification);
+	
+	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
+	{
+		uint pixelID = minification * i;
+		ivec2 texCoord = ivec2(sampleDirection.x * mod(pixelID, newWidth) + sampleDirection.y * pixelID / originalResolution.y, sampleDirection.x * (pixelID / newWidth) + sampleDirection.y * mod(pixelID, originalResolution.y));
+		
+		float depth = 0.0;
+		float linDepth = 0.0;
+		vec4 normal = vec4(0.0);
+		vec4 vertexNormal = vec4(0.0);
+		vec4 material = vec4(0.0);
+		
+		for(uint j = 0; j < minification; j++)
+		{
+			depth += texelFetch(readGBufferDepth, texCoord, 0).x;
+			linDepth += texelFetch(readGBufferLinearDepth, texCoord, 0).x;
+			normal += texelFetch(readGBufferNormals, texCoord, 0);
+			vertexNormal += texelFetch(readGBufferVertexNormals, texCoord, 0);
+			material += texelFetch(readGBufferMaterials, texCoord, 0);
+			
+			texCoord += sampleDirection;
+		}
+	
+		ivec2 downSampledTexCoord = ivec2(mod(i, downsampledResolution.x), i / downsampledResolution.x);
+	
+		if(sampleDirection == ivec2(0, 1))
+		{
+			downSampledTexCoord = ivec2(i / downsampledResolution.y, mod(i, downsampledResolution.y));
+		
+			depth /= pixelsPerTile;
+			linDepth /= pixelsPerTile;
+			normal /= pixelsPerTile;
+			vertexNormal /= pixelsPerTile;
+			material /= pixelsPerTile;
+		}
+		
+		imageStore(writeGBufferDepth, downSampledTexCoord, vec4(depth));
+		imageStore(writeGBufferLinearDepth, downSampledTexCoord, vec4(linDepth));
+		imageStore(writeGBufferNormals, downSampledTexCoord, normal);
+		imageStore(writeGBufferVertexNormals, downSampledTexCoord, vertexNormal);
+		imageStore(writeGBufferMaterials, downSampledTexCoord, material);
+	}
+}

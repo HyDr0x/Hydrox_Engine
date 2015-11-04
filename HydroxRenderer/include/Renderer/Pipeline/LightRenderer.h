@@ -102,10 +102,14 @@ namespace he
       Renderquad m_renderShadowMapsQuad;
 
       std::list<const xBar::ShadowLightContainer> m_reflectiveShadowLights;
-      util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowDepthMap;
+      util::SharedPointer<db::Texture3D> m_reflectiveShadowDepthMaps;
       util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowPosMap;
       util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowNormalAreaMap;
       util::SharedPointer<db::Texture2D> m_fullResReflectiveShadowLuminousFluxMap;
+
+      util::SharedPointer<db::Texture2D> m_minificatedReflectiveShadowPosMap;
+      util::SharedPointer<db::Texture2D> m_minificatedReflectiveShadowNormalAreaMap;
+      util::SharedPointer<db::Texture2D> m_minificatedReflectiveShadowLuminousFluxMap;
 
       util::SharedPointer<db::Texture3D> m_reflectiveShadowPosMaps;
       util::SharedPointer<db::Texture3D> m_reflectiveShadowNormalAreaMaps;

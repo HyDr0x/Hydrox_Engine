@@ -44,6 +44,7 @@ namespace he
 
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
+      m_gBufferDownsampling = sh::ShaderContainer::GBUFFERDOWNSAMPLING;
       m_calculateAreaLightTube = sh::ShaderContainer::SPECULARTUBECREATION;
       m_specularCachePositionFilterX = sh::ShaderContainer::SPECULARCACHEPOSITIONFILTERX;
       m_specularCachePositionFilterY = sh::ShaderContainer::SPECULARCACHEPOSITIONFILTERY;
@@ -55,6 +56,19 @@ namespace he
       m_specularCacheEdgeCacheCreation = sh::ShaderContainer::SPECULARCACHEEDGECACHECREATION;
       m_specularCacheEdgeVertexCreation = sh::ShaderContainer::SPECULARCACHEEDGEVERTEXCREATION;
       m_indirectLightMapCreation = sh::ShaderContainer::INDIRECTLIGHTMAPCREATION;
+
+      m_indirectLightResolution = util::vec2i(m_options->width / 2, m_options->height / 2);
+      m_halfResGBufferDepthMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferLinearDepthMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferNormalMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferVertexNormalMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferMaterialMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+
+      m_halfResGBufferDepthMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferLinearDepthMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferNormalMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferVertexNormalMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_halfResGBufferMaterialMap1 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
       m_cachePositionBufferInnerX = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R16F, GL_RED, 1, 16));
 
@@ -106,6 +120,8 @@ namespace he
       //CPUTIMER("MainloopCPUTimer", 0)
       //GPUTIMER("MainloopOGLTimer", 1)
       
+      gBufferDownsampling(gBufferDepthMap, gBufferLinearDepthMap, gBufferNormalMap, gBufferVertexNormalMap, gBufferMaterialMap);
+
       createTubeData(indirectLightPositions);
 
       createSpecularEdgeCaches(gBufferDepthMap, gBufferVertexNormalMap, gBufferMaterialMap, gBufferLinearDepthMap);
@@ -121,6 +137,92 @@ namespace he
       createSpecularCacheIndices();
 
       createindirectLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
+    }
+
+    void IndirectSpecularReflections::gBufferDownsampling(util::SharedPointer<db::Texture2D> gBufferDepthMap,
+                                                          util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
+                                                          util::SharedPointer<db::Texture2D> gBufferNormalMap,
+                                                          util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
+                                                          util::SharedPointer<db::Texture2D> gBufferMaterialMap)
+    {
+      CPUTIMER("GBufferDownsamplingCPUTimer", 0)
+      GPUTIMER("GBufferDownsamplingOGLTimer", 1)
+
+      const sh::ComputeShader& shader = m_shaderContainer->getComputeShader(m_gBufferDownsampling);
+
+      shader.useShader();
+
+      util::vec2i resolution(m_options->width, m_options->height);
+      sh::ComputeShader::setUniform(1, GL_INT_VEC2, &resolution[0]);
+      sh::ComputeShader::setUniform(2, GL_INT_VEC2, &m_indirectLightResolution[0]);
+      unsigned int minification = m_options->width / m_indirectLightResolution[0];
+      sh::ComputeShader::setUniform(3, GL_UNSIGNED_INT, &minification);
+
+      {
+        gBufferDepthMap->setTexture(4, 4);
+        gBufferLinearDepthMap->setTexture(5, 5);
+        gBufferNormalMap->setTexture(6, 6);
+        gBufferVertexNormalMap->setTexture(7, 7);
+        gBufferMaterialMap->setTexture(8, 8);
+
+        m_halfResGBufferDepthMap0->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferLinearDepthMap0->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferNormalMap0->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferVertexNormalMap0->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferMaterialMap0->bindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA16F);
+
+        util::vec2i sampleDirection(1, 0);
+        sh::ComputeShader::setUniform(0, GL_INT_VEC2, &sampleDirection[0]);
+
+        sh::ComputeShader::dispatchComputeShader(1024, 1, 1);
+
+        m_halfResGBufferMaterialMap0->unbindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferVertexNormalMap0->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferNormalMap0->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferLinearDepthMap0->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferDepthMap0->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
+
+        gBufferMaterialMap->unsetTexture(8);
+        gBufferVertexNormalMap->unsetTexture(7);
+        gBufferNormalMap->unsetTexture(6);
+        gBufferLinearDepthMap->unsetTexture(5);
+        gBufferDepthMap->unsetTexture(4);
+      }
+
+      glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+
+      {
+        m_halfResGBufferDepthMap0->setTexture(4, 4);
+        m_halfResGBufferLinearDepthMap0->setTexture(5, 5);
+        m_halfResGBufferNormalMap0->setTexture(6, 6);
+        m_halfResGBufferVertexNormalMap0->setTexture(7, 7);
+        m_halfResGBufferMaterialMap0->setTexture(8, 8);
+
+        m_halfResGBufferDepthMap1->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferLinearDepthMap1->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferNormalMap1->bindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferVertexNormalMap1->bindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferMaterialMap1->bindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA16F);
+
+        util::vec2i sampleDirection(0, 1);
+        sh::ComputeShader::setUniform(0, GL_INT_VEC2, &sampleDirection[0]);
+
+        sh::ComputeShader::dispatchComputeShader(1024, 1, 1);
+
+        m_halfResGBufferMaterialMap1->unbindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferVertexNormalMap1->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferNormalMap1->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferLinearDepthMap1->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        m_halfResGBufferDepthMap1->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
+
+        m_halfResGBufferMaterialMap0->unsetTexture(8);
+        m_halfResGBufferVertexNormalMap0->unsetTexture(7);
+        m_halfResGBufferNormalMap0->unsetTexture(6);
+        m_halfResGBufferLinearDepthMap0->unsetTexture(5);
+        m_halfResGBufferDepthMap0->unsetTexture(4);
+      }
+
+      shader.useNoShader();
     }
 
     void IndirectSpecularReflections::createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions)
@@ -646,6 +748,31 @@ namespace he
     util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCacheBlockNumber() const
     {
       return m_cacheAtomicIndexMap;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugGBufferHalfResDepthMap() const
+    {
+      return m_halfResGBufferDepthMap1;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugGBufferHalfResLinearDepthMap() const
+    {
+      return m_halfResGBufferLinearDepthMap1;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugGBufferHalfResNormalMap() const
+    {
+      return m_halfResGBufferNormalMap1;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugGBufferHalfResVertexNormalMap() const
+    {
+      return m_halfResGBufferVertexNormalMap1;
+    }
+
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugGBufferHalfResMaterialMap() const
+    {
+      return m_halfResGBufferMaterialMap1;
     }
   }
 }

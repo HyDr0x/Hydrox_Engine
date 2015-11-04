@@ -63,10 +63,22 @@ namespace he
       util::SharedPointer<db::Texture2D> getDebugVertexBlockNumber() const;
       util::SharedPointer<db::Texture2D> getDebugCacheBlockNumber() const;
 
+      util::SharedPointer<db::Texture2D> getDebugGBufferHalfResDepthMap() const;
+      util::SharedPointer<db::Texture2D> getDebugGBufferHalfResLinearDepthMap() const;
+      util::SharedPointer<db::Texture2D> getDebugGBufferHalfResNormalMap() const;
+      util::SharedPointer<db::Texture2D> getDebugGBufferHalfResVertexNormalMap() const;
+      util::SharedPointer<db::Texture2D> getDebugGBufferHalfResMaterialMap() const;
+
     private:
       
       IndirectSpecularReflections(const IndirectSpecularReflections&);
       IndirectSpecularReflections& operator=(const IndirectSpecularReflections&);
+
+      void gBufferDownsampling(util::SharedPointer<db::Texture2D> gBufferDepthMap,
+                               util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
+                               util::SharedPointer<db::Texture2D> gBufferNormalMap,
+                               util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
+                               util::SharedPointer<db::Texture2D> gBufferMaterialMap);
 
       void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions);
 
@@ -102,6 +114,7 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap);
 
+      sh::ComputeShaderHandle m_gBufferDownsampling;
       sh::ComputeShaderHandle m_calculateAreaLightTube;
       sh::ComputeShaderHandle m_specularCachePositionFilterX;
       sh::ComputeShaderHandle m_specularCachePositionFilterY;
@@ -129,6 +142,18 @@ namespace he
 
       GPUBuffer m_debugCacheVertexIndexPositions;
 
+      util::SharedPointer<db::Texture2D> m_halfResGBufferDepthMap0;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferLinearDepthMap0;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferNormalMap0;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferVertexNormalMap0;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferMaterialMap0;
+
+      util::SharedPointer<db::Texture2D> m_halfResGBufferDepthMap1;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferLinearDepthMap1;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferNormalMap1;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferVertexNormalMap1;
+      util::SharedPointer<db::Texture2D> m_halfResGBufferMaterialMap1;
+
       util::SharedPointer<db::Texture2D> m_vertexAtomicIndexMap;
       util::SharedPointer<db::Texture2D> m_vertexPositionMap;
       util::SharedPointer<db::Texture2D> m_vertexNormalMap;
@@ -147,6 +172,8 @@ namespace he
       Renderquad m_voronoiRenderQuad;
       Renderquad m_proxyLightAccumulationQuad;
       Renderquad m_specularProxyLightQuad;
+
+      util::vec2i m_indirectLightResolution;
 
       unsigned int m_ping;
       unsigned int m_pong;
