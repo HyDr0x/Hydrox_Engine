@@ -1,7 +1,5 @@
 #version 440 core
 
-#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
-
 #define WORKGROUPSIZE 128
 #define PI 3.14159265359
 //circleArea = pi * r^2 = pi * 0.5 * 0.5
@@ -75,7 +73,7 @@ void main()
 						//vec2 randomValues = vec2(10,10);
 						ivec2 samplingTexCoord = ivec2(resolution * (p0 + randomValues.x * e0.xy + randomValues.y * e2.xy));
 						imageStore(adaptiveSamplingPositionBuffer, int(rowSampleNumber), imageLoad(backprojectionPositionBuffer, samplingTexCoord));
-						imageStore(adaptiveSamplingNormalBuffer, int(rowSampleNumber), vec4(encodeNormal(imageLoad(backprojectionNormalBuffer, samplingTexCoord).xyz), 0, 0));
+						imageStore(adaptiveSamplingNormalBuffer, int(rowSampleNumber), vec4(imageLoad(backprojectionNormalBuffer, samplingTexCoord).xyz, 0));
 						
 						rowSampleNumber++;
 					}

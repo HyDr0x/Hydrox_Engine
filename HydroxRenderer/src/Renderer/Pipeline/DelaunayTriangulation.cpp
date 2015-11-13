@@ -22,7 +22,7 @@ namespace he
       GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
     };
 
-    DelaunayTriangulation::DelaunayTriangulation() : m_cacheNumber(0)
+    DelaunayTriangulation::DelaunayTriangulation() : m_occluderNumber(0)
     {
       glGenVertexArrays(1, &m_siteVAO);
 
@@ -40,6 +40,8 @@ namespace he
       glBindVertexArray(m_siteVAO);
       glVertexAttribFormat(sh::RenderShader::POSITION, 4, GL_FLOAT, GL_FALSE, 0);
       glVertexAttribBinding(sh::RenderShader::POSITION, 0);
+      glVertexAttribFormat(sh::RenderShader::NORMAL, 4, GL_FLOAT, GL_FALSE, sizeof(util::vec4f));
+      glVertexAttribBinding(sh::RenderShader::NORMAL, 0);
       glBindVertexArray(0);
 
       m_options = singletonManager->getService<RenderOptions>();
@@ -78,36 +80,36 @@ namespace he
       m_noiseTexture = util::SharedPointer<db::Texture1D>(new db::Texture1D(m_options->adaptiveSampleNumber, GL_TEXTURE_1D, GL_FLOAT, GL_RG16F, GL_RG, 2, 32, &noise[0]));
     }
 
-    void DelaunayTriangulation::updateBuffer(unsigned int cacheNumber)
+    void DelaunayTriangulation::updateBuffer(unsigned int occluderNumber)
     {
-      if(cacheNumber != m_cacheNumber)
+      if(occluderNumber != m_occluderNumber)
       {
-        m_cacheNumber = cacheNumber;
+        m_occluderNumber = occluderNumber;
 
-        m_projectedSites.createBuffer(GL_TEXTURE_BUFFER, m_cacheNumber * sizeof(util::vec2f), m_cacheNumber * sizeof(util::vec2f), GL_STATIC_DRAW, GL_RG32F);
+        m_projectedSites.createBuffer(GL_TEXTURE_BUFFER, m_occluderNumber * sizeof(util::vec2f), m_occluderNumber * sizeof(util::vec2f), GL_STATIC_DRAW, GL_RG32F);
 
-        std::vector<util::vec3ub> siteColors(m_cacheNumber);
-        for(unsigned int i = 0; i < m_cacheNumber; i++)
+        std::vector<util::vec3ub> siteColors(m_occluderNumber);
+        for(unsigned int i = 0; i < m_occluderNumber; i++)
         {
           siteColors[i] = util::vec3ub(255 * util::RandomSequenceGenerator::halton(i + 1, 2), 255 * util::RandomSequenceGenerator::halton(i + 1, 3), 255 * util::RandomSequenceGenerator::halton(i + 1, 5));
         }
 
-        m_voronoiColorTexture = util::SharedPointer<db::Texture1D>(new db::Texture1D(m_cacheNumber, GL_TEXTURE_1D, GL_UNSIGNED_BYTE, GL_RGB8, GL_RGB, 3, 24, &siteColors[0]));
+        m_voronoiColorTexture = util::SharedPointer<db::Texture1D>(new db::Texture1D(m_occluderNumber, GL_TEXTURE_1D, GL_UNSIGNED_BYTE, GL_RGB8, GL_RGB, 3, 24, &siteColors[0]));
       }
     }
 
     void DelaunayTriangulation::calculateDelaunayTriangulation(
       util::SharedPointer<db::Texture3D> backprojectionZBuffer,
-      util::SharedPointer<db::Texture3D> m_backprojectionPosition, 
-      util::SharedPointer<db::Texture3D> m_backprojectionNormal,
-      const TBO& globalCachePositionBuffer,
+      util::SharedPointer<db::Texture3D> backprojectionPosition, 
+      util::SharedPointer<db::Texture3D> backprojectionNormal,
+      const GPUBuffer& occluderNormalCoordinates,
       const GPUImmutableBuffer& reflectiveShadowLightsBuffer)
     {
       glViewport(0, 0, m_options->backProjectionWidth, m_options->backProjectionWidth);
 
-      generateProjectedSiteBuffer(backprojectionZBuffer, globalCachePositionBuffer, reflectiveShadowLightsBuffer);
+      generateProjectedSiteBuffer(backprojectionZBuffer, occluderNormalCoordinates, reflectiveShadowLightsBuffer);
       generateVoronoiDiagram();
-      generateTriangles(m_backprojectionPosition, m_backprojectionNormal);
+      generateTriangles(backprojectionPosition, backprojectionNormal);
 
       glViewport(0, 0, m_options->width, m_options->height);
     }
@@ -120,7 +122,7 @@ namespace he
 
       showVoronoiShader.useShader();
 
-      sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_cacheNumber);
+      sh::RenderShader::setUniform(2, GL_UNSIGNED_INT, &m_occluderNumber);
 
       m_voronoiDiagram[m_ping]->setTexture(0, 0);
       m_voronoiColorTexture->setTexture(1, 1);
@@ -152,7 +154,7 @@ namespace he
       return m_sampleCommandBuffer;
     }
 
-    void DelaunayTriangulation::generateProjectedSiteBuffer(util::SharedPointer<db::Texture3D> backprojectionZBuffer, const TBO& globalCachePositionBuffer, const GPUImmutableBuffer& reflectiveShadowLightsBuffer)
+    void DelaunayTriangulation::generateProjectedSiteBuffer(util::SharedPointer<db::Texture3D> backprojectionZBuffer, const GPUBuffer& occluderNormalCoordinates, const GPUImmutableBuffer& reflectiveShadowLightsBuffer)
     {
       //CPUTIMER("cpuCompute", 0)
       //GPUTIMER("gpuCompute", 1)
@@ -177,7 +179,7 @@ namespace he
       glBindVertexArray(m_siteVAO);
       glEnableVertexAttribArray(sh::RenderShader::POSITION);
 
-      globalCachePositionBuffer.bindVertexbuffer(0, 0, sizeof(util::vec4f));
+      occluderNormalCoordinates.bindVertexbuffer(0, 0, 2 * sizeof(util::vec4f));
 
       reflectiveShadowLightsBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       
@@ -188,13 +190,13 @@ namespace he
       unsigned int lightIndex = 0;
       sh::RenderShader::setUniform(1, GL_UNSIGNED_INT, &lightIndex);
 
-      glDrawArrays(GL_POINTS, 0, m_cacheNumber);
+      glDrawArrays(GL_POINTS, 0, m_occluderNumber);
 
       m_projectedSites.unbindImageTexture(sh::RenderShader::POSITION, 0, GL_WRITE_ONLY, GL_RG32F);
 
       reflectiveShadowLightsBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-      globalCachePositionBuffer.unbindVertexBuffer(0);
+      occluderNormalCoordinates.unbindVertexBuffer(0);
 
       glDisableVertexAttribArray(sh::RenderShader::POSITION);
       glBindVertexArray(0);
@@ -264,7 +266,7 @@ namespace he
       //m_voronoiDiagram[m_ping]->getTextureData(&indexData1[0]);
     }
 
-    void DelaunayTriangulation::generateTriangles(util::SharedPointer<db::Texture3D> m_backprojectionPosition, util::SharedPointer<db::Texture3D> m_backprojectionNormal)
+    void DelaunayTriangulation::generateTriangles(util::SharedPointer<db::Texture3D> backprojectionPosition, util::SharedPointer<db::Texture3D> backprojectionNormal)
     {
       {
         sh::ComputeShader sampleNumerOffsetCalculation = m_shaderContainer->getComputeShader(m_sampleOffsetShaderHandle);
@@ -298,9 +300,9 @@ namespace he
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       {
-        sh::ComputeShader sampleNumerOffsetSummation = m_shaderContainer->getComputeShader(m_sampleOffsetSummationShaderHandle);
+        sh::ComputeShader sampleNumberOffsetSummation = m_shaderContainer->getComputeShader(m_sampleOffsetSummationShaderHandle);
 
-        sampleNumerOffsetSummation.useShader();
+        sampleNumberOffsetSummation.useShader();
 
         m_sampleNumberOffset->bindImageTexture(0, 0, GL_READ_WRITE, GL_R16UI);
 
@@ -314,7 +316,7 @@ namespace he
 
         m_sampleNumberOffset->unbindImageTexture(0, 0, GL_READ_WRITE, GL_R16UI);
 
-        sampleNumerOffsetSummation.useNoShader();
+        sampleNumberOffsetSummation.useNoShader();
       }
 
       //glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -335,8 +337,8 @@ namespace he
         m_voronoiDiagram[m_ping]->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32UI);
         m_sampleNumberOffset->bindImageTexture(1, 0, GL_READ_ONLY, GL_R16UI);
 
-        m_backprojectionPosition->bindImageTexture(2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_backprojectionNormal->bindImageTexture(3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        backprojectionPosition->bindImageTexture(2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        backprojectionNormal->bindImageTexture(3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
         m_adaptiveCacheSamplesPosition.bindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA32F);
         m_adaptiveCacheSamplesNormals.bindImageTexture(5, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -358,8 +360,8 @@ namespace he
         m_adaptiveCacheSamplesNormals.unbindImageTexture(5, 0, GL_WRITE_ONLY, GL_RGBA32F);
         m_adaptiveCacheSamplesPosition.unbindImageTexture(4, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-        m_backprojectionNormal->unbindImageTexture(3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-        m_backprojectionPosition->unbindImageTexture(2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        backprojectionNormal->unbindImageTexture(3, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+        backprojectionPosition->unbindImageTexture(2, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
 
         m_sampleNumberOffset->unbindImageTexture(1, 0, GL_READ_ONLY, GL_R16UI);
         m_voronoiDiagram[m_ping]->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32UI);

@@ -33,6 +33,10 @@ namespace he
 
       float letterSize;//size of a single letter
 
+      unsigned int vertexTileSize;//size of the tiles in which vertices getting calculated
+      unsigned int vertexTileMulti;//multiplied with the vertexTileSize to save the vertices in a bigger tiled fashion, results in a faster index calculation
+      unsigned int cacheTileSize;//size of the tiles in which caches getting calculated
+
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
       unsigned int giLightSampleNumber;//number of sampled lights for global illumination
@@ -61,10 +65,12 @@ namespace he
       unsigned int iboBlockSize;
       unsigned int triangleBlockSize;
       unsigned int cacheBlockSize;
+      unsigned int occluderBlockSize;
       unsigned int perMeshBlockSize;
       unsigned int perInstanceBlockSize;
 
       unsigned int globalCacheBlockSize;//number of global cache block size
+      unsigned int globalOccluderBlockSize;//number of global cache block size
 
       //Tonemapping
       unsigned int usedHistogramBins;//tonemapping

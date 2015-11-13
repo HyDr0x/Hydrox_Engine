@@ -1,5 +1,8 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define WORKGROUPSIZE 128
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
@@ -18,7 +21,7 @@ void main()
 	uint localIDX = gl_LocalInvocationID.x;
 
 	const uint globalThreadNumber = gl_NumWorkGroups.x * WORKGROUPSIZE;
-	const uint pixelPerThread = max(((width * height) / (2 * stride)) / globalThreadNumber, 1);
+	const uint pixelPerThread = max(((HALFRESX * HALFRESY) / (2 * stride) + globalThreadNumber - 1) / globalThreadNumber, 1);
 	
 	for(uint i = 0; i < pixelPerThread; i++)
 	{
@@ -27,13 +30,13 @@ void main()
 		float a = 0.0;
 		float b = 0.0;
 		
-		if(index < width * height)
+		if(index < HALFRESX * HALFRESY)
 		{
-			a = imageLoad(cacheOffsetBuffer, ivec2(mod(index, width), index / width)).r;
+			a = imageLoad(cacheOffsetBuffer, ivec2(mod(index, HALFRESX), index / HALFRESX)).r;
 			
-			if(index - stride < width * height)//its < because of uint buffer overflow
+			if(index - stride < HALFRESX * HALFRESY)//its < because of uint buffer overflow
 			{
-				b = imageLoad(cacheOffsetBuffer, ivec2(mod((index - stride), width), (index - stride) / width)).r;
+				b = imageLoad(cacheOffsetBuffer, ivec2(mod((index - stride), HALFRESX), (index - stride) / HALFRESX)).r;
 			}
 		}
 
@@ -57,9 +60,9 @@ void main()
 			groupOffsets[localIDX] += newOffset;
 		}
 		
-		if(index < width * height)
+		if(index < HALFRESX * HALFRESY)
 		{
-			imageStore(cacheOffsetBuffer, ivec2(mod(index, width), index / width), vec4(groupOffsets[localIDX]));
+			imageStore(cacheOffsetBuffer, ivec2(mod(index, HALFRESX), index / HALFRESX), vec4(groupOffsets[localIDX]));
 		}
 	}
 }

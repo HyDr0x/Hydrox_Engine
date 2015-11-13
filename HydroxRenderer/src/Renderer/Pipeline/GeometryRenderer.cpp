@@ -14,7 +14,10 @@ namespace he
   namespace renderer
   {
     GeometryRenderer::GeometryRenderer() :
-      m_globalCacheNumber(0)
+      m_globalCacheNumber(0),
+      m_globalOccluderNumber(0),
+      m_globalTriangleNumber(0),
+      m_globalVertexNumber(0)
     {
     }
 
@@ -150,11 +153,17 @@ namespace he
     void GeometryRenderer::updateBuffer()
     {
       m_globalCacheNumber = 0;
+      m_globalOccluderNumber = 0;
+      m_globalTriangleNumber = 0;
+      m_globalVertexNumber = 0;
 
       for(unsigned int i = 0; i < m_renderContainer.size(); i++)
       {
         m_renderContainer[i]->update();
-        m_globalCacheNumber += m_renderContainer[i]->getCacheNumber();
+        m_globalCacheNumber += m_renderContainer[i]->getPerInstanceCacheNumber();
+        m_globalOccluderNumber += m_renderContainer[i]->getPerInstanceOccluderNumber();
+        m_globalTriangleNumber += m_renderContainer[i]->getPerInstanceTriangleNumber();
+        m_globalVertexNumber += m_renderContainer[i]->getPerInstanceVertexNumber();
       }
 
       for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
@@ -231,6 +240,11 @@ namespace he
     unsigned int GeometryRenderer::getProxyLightTextureResolution() const
     {
       return m_proxyLightTextureResolution;
+    }
+
+    unsigned int GeometryRenderer::getGlobalOccluderNumber() const
+    {
+      return m_globalOccluderNumber;
     }
 
     void GeometryRenderer::registerRenderComponentSlots(util::SharedPointer<util::EventManager> eventManager)

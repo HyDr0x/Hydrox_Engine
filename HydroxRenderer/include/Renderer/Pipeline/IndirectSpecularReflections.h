@@ -48,11 +48,14 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferMaterialMap,
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
-        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux);
+        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
+        util::SharedPointer<db::Texture3D> indirectShadowMaps,
+        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions);
 
       util::SharedPointer<db::Texture2D> getDebugCachePositionsMapFilterInnerX() const;
 
       util::SharedPointer<db::Texture2D> getSpecularLightMap() const;
+      util::SharedPointer<db::Texture2D> getUpsampledSpecularLightMap() const;
 
       util::SharedPointer<db::Texture2D> getDebugCachePositions() const;
       util::SharedPointer<db::Texture2D> getDebugCacheNormals() const;
@@ -105,7 +108,9 @@ namespace he
       void createProxyLightBuffer(
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
-        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux);
+        util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
+        util::SharedPointer<db::Texture3D> indirectShadowMaps,
+        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions);
 
       void createSpecularCacheIndices();
 
@@ -113,6 +118,8 @@ namespace he
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap);
+
+      void indirectLightMapUpsampling();
 
       sh::ComputeShaderHandle m_gBufferDownsampling;
       sh::ComputeShaderHandle m_calculateAreaLightTube;
@@ -126,6 +133,7 @@ namespace he
       sh::ComputeShaderHandle m_specularCacheEdgeCacheCreation;
       sh::ComputeShaderHandle m_specularCacheEdgeVertexCreation;
       sh::ComputeShaderHandle m_indirectLightMapCreation;
+      sh::ComputeShaderHandle m_indirectLightMapUpsampling;
 
       util::SharedPointer<RenderOptions> m_options;
 
@@ -157,7 +165,6 @@ namespace he
       util::SharedPointer<db::Texture2D> m_vertexAtomicIndexMap;
       util::SharedPointer<db::Texture2D> m_vertexPositionMap;
       util::SharedPointer<db::Texture2D> m_vertexNormalMap;
-      util::SharedPointer<db::Texture2D> m_vertexOffsetMap;
  
       util::SharedPointer<db::Texture2D> m_cacheAtomicIndexMap;
       util::SharedPointer<db::Texture2D> m_cachePositionMap;
@@ -167,11 +174,7 @@ namespace he
       util::SharedPointer<db::Texture2D> m_cachePositionBufferInnerX;
 
       util::SharedPointer<db::Texture2D> m_specularLightMap;
-
-      Renderquad m_edgeVertexRenderQuad;
-      Renderquad m_voronoiRenderQuad;
-      Renderquad m_proxyLightAccumulationQuad;
-      Renderquad m_specularProxyLightQuad;
+      util::SharedPointer<db::Texture2D> m_upsampledSpecularLightMap;
 
       util::vec2i m_indirectLightResolution;
 
@@ -181,8 +184,6 @@ namespace he
       unsigned int m_vertexIndexMultiplicator;
       unsigned int m_vertexResolution;
       unsigned int m_cacheResolution;
-
-      unsigned int m_indexResolution;
 
       unsigned int m_reflectiveShadowMapNumber;
       unsigned int m_debugCacheNumber;

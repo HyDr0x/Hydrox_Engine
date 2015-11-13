@@ -3,7 +3,6 @@
 #extension ARB_shader_draw_parameters : enable
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer transformMatrixBuffer
 {
@@ -28,6 +27,5 @@ void main()
 	outData.color = in_color;
 	outData.normal = normalize(mat3(trfMatrix[outData.instanceIndex]) * in_normal);
 	
-	mat4 MVP = viewProjectionMatrix * trfMatrix[outData.instanceIndex];
-	gl_Position = MVP * vec4(in_Pos, 1);
+	gl_Position = trfMatrix[outData.instanceIndex] * vec4(in_Pos, 1);
 }

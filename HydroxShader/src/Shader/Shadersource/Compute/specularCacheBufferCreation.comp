@@ -1,5 +1,8 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define WORKGROUPSIZE 128
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
@@ -24,9 +27,9 @@ void main()
 {
 	const uint idx = gl_GlobalInvocationID.x;
 
-	const uint edgeCacheNumber = uint(imageLoad(cacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	const uint edgeCacheNumber = uint(imageLoad(cacheOffsetSampler, ivec2(HALFRESX - 1, HALFRESY - 1)).r);
 	
-	const uint pixelNumber = width * height;
+	const uint pixelNumber = HALFRESX * HALFRESY;
 	const uint pixelPerThread = uint(ceil(float(pixelNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
 	const uint pixelOffset = idx * pixelPerThread;
 	const uint pixelEnd = pixelOffset + pixelPerThread;
@@ -38,7 +41,7 @@ void main()
 			return;
 		}
 	
-		ivec2 texCoord = ivec2(mod(i, width), i / width);
+		ivec2 texCoord = ivec2(mod(i, HALFRESX), i / HALFRESX);
 
 		vec4 cacheNormal = imageLoad(cacheNormalSampler, texCoord);
 		if(cacheNormal.xyz != vec3(0.0))

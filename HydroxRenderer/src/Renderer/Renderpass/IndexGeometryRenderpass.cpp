@@ -50,7 +50,7 @@ namespace he
 
           m_vertexDeclarationNodes[i][j].unsetVertexArray();
 
-          globalCacheNumber += m_renderContainer[i][j]->getCacheNumber();
+          globalCacheNumber += m_renderContainer[i][j]->getPerInstanceCacheNumber();
         }
 
         shader.useNoShader();

@@ -6,6 +6,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/clipper.hpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Filecheck.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Flags.hpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ISMOcclusionDiscGenerator.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/RandomSequenceGenerator.h 

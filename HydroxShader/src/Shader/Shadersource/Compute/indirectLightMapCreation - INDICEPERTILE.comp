@@ -1,0 +1,236 @@
+#version 440 core
+
+#define WORKGROUPSIZE 64
+#define VERTEXTILESIZE 8
+#define CACHEINDEXNUMBER 24
+#define PI 3.14159265359
+#define INT32_MAX 2147483647
+#define UINT16_MAX 65535
+#define INT16_MAX 32768
+
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightData.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
+
+layout(location = 0) uniform sampler2D gBufferDepthSampler;
+layout(location = 1) uniform sampler2D gBufferNormalSampler;
+layout(location = 2) uniform sampler2D gBufferMaterialSampler;
+
+layout(rgba16f, binding = 0) writeonly uniform image2D indirectLightImage;
+
+layout(std430, binding = 0) buffer specularCachePositionBuffer
+{
+	vec4 specularCachePositions[];
+};
+
+layout(std430, binding = 1) buffer specularCacheNormalMaterialBuffer
+{
+	vec4 specularCacheNormalMaterial[];
+};
+
+layout(std430, binding = 2) buffer proxyLightPositionBuffer
+{
+	vec4 proxyLightPosition[];
+};
+
+layout(std430, binding = 3) buffer proxyLightLuminousFluxBuffer
+{
+	vec4 proxyLightLuminousFlux[];
+};
+
+layout(std430, binding = 4) buffer specularCacheIndicesBuffer
+{
+	uint specularCacheIndices[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared uint groupValidIndexCounter;
+shared vec3 groupCachePositions[CACHEINDEXNUMBER];
+shared vec3 groupCacheNormals[CACHEINDEXNUMBER];
+shared vec4 groupProxyLightPositions[2 * CACHEINDEXNUMBER];
+shared vec3 groupProxyLightLuminousFlux[2 * CACHEINDEXNUMBER];
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localIDx = gl_LocalInvocationIndex;
+		
+	const uvec2 vertexTileNumber = (uvec2(width, height) + uvec2(VERTEXTILESIZE - 1)) / VERTEXTILESIZE;
+	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
+	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
+
+	for(uint i = vertexTileStartIndex; i < vertexTileEndIndex; i++)
+	{
+		if(i >= vertexTileNumber.x * vertexTileNumber.y) continue;
+	
+		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
+		
+		if(localIDx == 0)
+		{
+			groupValidIndexCounter = 0;
+		}
+		
+		memoryBarrierShared();
+		barrier();
+		
+		const uint cacheIndicesPerThread = (CACHEINDEXNUMBER + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint cacheIndexStartIndex = cacheIndicesPerThread * localIDx;
+		const uint CacheIndexEndIndex = cacheIndexStartIndex + cacheIndicesPerThread;
+		for(uint j = cacheIndexStartIndex; j < CacheIndexEndIndex; j++)
+		{
+			uint index = specularCacheIndices[i * CACHEINDEXNUMBER + j];
+			
+			if(j < CACHEINDEXNUMBER && index < UINT16_MAX)
+			{
+				groupValidIndexCounter++;
+				
+				groupCachePositions[j] = specularCachePositions[index].xyz;
+				groupCacheNormals[j] = normalize(decodeNormal(specularCacheNormalMaterial[index].xy));
+				groupProxyLightPositions[2 * j] = proxyLightPosition[2 * index];
+				groupProxyLightLuminousFlux[2 * j] = proxyLightLuminousFlux[2 * index].xyz;
+				groupProxyLightPositions[2 * j + 1] = proxyLightPosition[2 * index + 1];
+				groupProxyLightLuminousFlux[2 * j + 1] = proxyLightLuminousFlux[2 * index + 1].xyz;
+			}
+			else
+			{
+				groupCacheNormals[j] = vec3(0.0);
+			}
+		}
+		
+		memoryBarrierShared();
+		barrier();
+
+		const uint pixelNumber = VERTEXTILESIZE * VERTEXTILESIZE;
+		const uint pixelsPerThread = (pixelNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint pixelStartIndex = localIDx * pixelsPerThread;
+		const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
+		
+		if(groupValidIndexCounter == 0) 
+		{
+			for(uint j = pixelStartIndex; j < pixelEndIndex; j++)
+			{
+				ivec2 texCoord = VERTEXTILESIZE * vertexBlockCoord + ivec2(mod(j, VERTEXTILESIZE), j / VERTEXTILESIZE);
+				
+				imageStore(indirectLightImage, texCoord, vec4(0.0));
+			}
+			
+			memoryBarrierShared();
+			barrier();
+			
+			continue;
+		}
+		
+		for(uint j = pixelStartIndex; j < pixelEndIndex; j++)
+		{
+			ivec2 texCoord = VERTEXTILESIZE * vertexBlockCoord + ivec2(mod(j, VERTEXTILESIZE), j / VERTEXTILESIZE);
+			vec2 texCoordNormalized = vec2(texCoord.x / float(width), texCoord.y / float(height));
+		
+			vec4 pos3D = vec4(texCoordNormalized, texture(gBufferDepthSampler, texCoordNormalized).r, 1.0);
+			pos3D.xyz = pos3D.xyz * 2.0 - 1.0;
+			pos3D = invViewProjectionMatrix * pos3D;
+			pos3D.xyz /= pos3D.w;
+
+			float dmax = 0.0;
+			for(uint k = 0; k < CACHEINDEXNUMBER; k++)
+			{
+				if(groupCacheNormals[k] != vec3(0.0))
+				{
+					vec3 diff = pos3D.xyz - groupCachePositions[k];
+					dmax = max(dmax, dot(diff, diff));
+				}
+			}
+			
+			vec3 normal = normalize(texture(gBufferNormalSampler, texCoordNormalized).xyz * 2.0 - 1.0);
+			vec4 material = GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized));
+			
+			vec3 camDir = normalize(eyePos.xyz - pos3D.xyz);
+			vec3 reflectCamDir = reflect(-camDir, normal);
+			
+			dmax = sqrt(max(dmax, 0.00001));
+			
+			vec3 Xpd = vec3(0.0), phiPD = vec3(0.0);
+			vec3 Xpg = vec3(0.0), phiPG = vec3(0.0);
+			
+			float wGesD = 0.0, cacheProxyMinDistanceD = 0.0;
+			float wGesG = 0.0, cacheProxyMinDistanceG = 0.0;
+			
+			for(uint k = 0; k < CACHEINDEXNUMBER; k++)
+			{
+				if(groupCacheNormals[k] != vec3(0.0))
+				{
+					CacheData cache;
+					cache.position = vec4(groupCachePositions[k], 1.0);
+					cache.normal = vec4(groupCacheNormals[k], 0.0);
+					
+					float dir = max(1.0 - length(pos3D.xyz - cache.position.xyz) / dmax, 0.0);
+						
+					float wd = dir * sqrt(max(dot(cache.normal.xyz, normal), 0));
+						
+					vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
+					float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cache.normal.xyz), reflectCamDir), 0.0));
+					
+					IndirectLightData indirectLightD;
+					indirectLightD.position = groupProxyLightPositions[2 * k];
+					indirectLightD.luminousFlux = vec4(groupProxyLightLuminousFlux[2 * k], 0.0);
+					
+					IndirectLightData indirectLightG;
+					indirectLightG.position = groupProxyLightPositions[2 * k + 1];
+					indirectLightG.luminousFlux = vec4(groupProxyLightLuminousFlux[2 * k + 1], 0.0);
+					
+					Xpd += wd * indirectLightD.position.xyz;
+					Xpg += wg * indirectLightG.position.xyz;
+						
+					phiPD += wd * indirectLightD.luminousFlux.xyz;
+					phiPG += wg * indirectLightG.luminousFlux.xyz;
+					
+					wGesD += wd;
+					wGesG += wg;
+					
+					cacheProxyMinDistanceD += wd * indirectLightD.position.w;
+					cacheProxyMinDistanceG += wg * indirectLightG.position.w;
+				}
+			}
+			
+			Xpd = wGesD > 0 ? Xpd / wGesD : vec3(0);
+			Xpg = wGesG > 0 ? Xpg / wGesG : vec3(0);
+			
+			phiPD = wGesD > 0 ? phiPD / wGesD : vec3(0);
+			phiPG = wGesG > 0 ? phiPG / wGesG : vec3(0);
+			
+			cacheProxyMinDistanceD = wGesD > 0 ? cacheProxyMinDistanceD / wGesD : 0;
+			cacheProxyMinDistanceG = wGesG > 0 ? cacheProxyMinDistanceG / wGesG : 0;
+			
+			vec3 lightDirD = Xpd - pos3D.xyz;
+			float lengthD = max(dot(lightDirD, lightDirD), cacheProxyMinDistanceD * cacheProxyMinDistanceD);
+			//float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
+			lightDirD = normalize(lightDirD);
+			float frd = material.x * max(dot(lightDirD, normal), 0.0);
+			
+			vec3 lightDirG = Xpg - pos3D.xyz;
+			//float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));
+			float lengthG = max(length(lightDirG), cacheProxyMinDistanceG);
+			lightDirG = normalize(lightDirG);
+			float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
+
+			vec4 luminousFlux;
+			//luminousFlux = vec4(normal, 1);
+			//luminousFlux = vec4(vec3(frd), 1);
+			//luminousFlux = vec4(0.05 * vec3(lengthG), 1);
+			//luminousFlux = vec4(Xpg, 1);
+			//luminousFlux = vec4(0.01 * phiPD, 1);
+			//luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0), 0.0), 1.0);
+			//luminousFlux = vec4(max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
+			luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0) + max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
+			//luminousFlux = vec4(1, 0, 0, 0);
+			
+			imageStore(indirectLightImage, texCoord, 10.0 * luminousFlux);
+		}
+		
+		memoryBarrierShared();
+		barrier();
+	}
+}

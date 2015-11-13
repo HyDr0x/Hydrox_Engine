@@ -1,16 +1,19 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define THREADTILESIZE 16
 #define WORKGROUPSIZE (THREADTILESIZE * THREADTILESIZE)
-#define TILESIZE 32
-#define TILEPIXELPERTHREAD ((TILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
+#define CACHETILESIZE
+#define TILEPIXELPERTHREAD ((CACHETILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
 #define LIGHTTUBEBINDINGPOINT 0
 
 #define INT32_MAX 2147483647
 #define PI 3.14159265359
 #define PI_HALF (PI * 0.5)
-#define NORMALPHIQ 7
-#define NORMALTHETAQ 3
+#define NORMALPHIQ 9
+#define NORMALTHETAQ 4
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
@@ -51,7 +54,7 @@ void main()
 	const uint localIDx = gl_LocalInvocationIndex;
 	const uvec2 localIDxVec = gl_LocalInvocationID.xy;
 	
-	const uvec2 tileNumber = (uvec2(width, height) + uvec2(TILESIZE - 1)) / TILESIZE;
+	const uvec2 tileNumber = (uvec2(HALFRESX, HALFRESY) + uvec2(CACHETILESIZE - 1)) / CACHETILESIZE;
 	const uint tilesPerGroup = (tileNumber.x * tileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
 	const uint tileStartIndex = gl_WorkGroupID.x * tilesPerGroup;
 	const uint tileEndIndex = tileStartIndex + tilesPerGroup;
@@ -78,7 +81,7 @@ void main()
 		
 		for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
 		{
-			ivec2 texCoord = TILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
+			ivec2 texCoord = CACHETILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
 			
 			vec3 normal = texelFetch(gBufferNormalSampler, texCoord, 0).xyz * 2.0 - 1.0;
 
@@ -113,7 +116,7 @@ void main()
 			memoryBarrierShared();
 			barrier();
 			
-			if(0 < groupMaxNormalBinVotes /*&& groupMaxNormalBinVotes < (TILESIZE * TILESIZE)*/)
+			if(0 < groupMaxNormalBinVotes /*&& groupMaxNormalBinVotes < (CACHETILESIZE * CACHETILESIZE)*/)
 			{
 				float summedPixels = 0.0;
 				vec3 summedPosition = vec3(0.0);
@@ -121,8 +124,8 @@ void main()
 				vec3 summedMaterials = vec3(0.0);
 				for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
 				{
-					ivec2 texCoord = TILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
-					vec2 texCoordNormalized = texCoord / vec2(width, height);
+					ivec2 texCoord = CACHETILESIZE * blockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
+					vec2 texCoordNormalized = texCoord / vec2(HALFRESX, HALFRESY);
 					
 					if(normalBinCache[j] == groupMaxNormalBinID)
 					{
@@ -204,10 +207,11 @@ void main()
 						resultNormals = normalize(resultNormals / resultPixelCounter);
 						resultMaterials /= resultPixelCounter;
 
-						ivec2 texCoord = int(TILESIZE) * blockCoord + ivec2(mod(vertexNumber, TILESIZE), vertexNumber / TILESIZE);
+						ivec2 texCoord = int(CACHETILESIZE) * blockCoord + ivec2(mod(vertexNumber, CACHETILESIZE), vertexNumber / CACHETILESIZE);
 						imageStore(cacheOffsetImage, texCoord, vec4(1.0));
 						imageStore(cachePositionImage, texCoord, vec4(resultPosition, resultMaterials.r));//resultMaterials.r
 						imageStore(cacheNormalImage, texCoord, vec4(encodeNormal(resultNormals), resultMaterials.gb));//resultMaterials.gb
+						//imageStore(cacheNormalImage, texCoord, vec4(1));
 						vertexNumber++;
 					}
 				}

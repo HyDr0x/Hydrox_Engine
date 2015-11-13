@@ -1,7 +1,6 @@
 #version 440 core
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
 
 out vec3 vsout_pos3D;
 out vec3 vsout_cacheNormal;
@@ -14,7 +13,7 @@ layout(location = NORMAL) in vec4 in_cacheNormal;
 void main()
 {
 	vsout_pos3D = in_Pos.xyz;
-	vsout_cacheNormal = normalize(decodeNormal(in_cacheNormal.xy));
+	vsout_cacheNormal = in_cacheNormal.xyz;
 	vsout_instanceID = gl_InstanceID;
 	vsout_vertexID = gl_VertexID;
 }

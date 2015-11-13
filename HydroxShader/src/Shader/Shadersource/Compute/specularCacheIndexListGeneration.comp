@@ -1,10 +1,15 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define WORKGROUPSIZE 64
-#define CACHETILESIZE 32
-#define VERTEXTILESIZE 16
+#define CACHETILESIZE
+#define VERTEXTILEMULTI
+#define VERTEXTILESIZE
+#define MULTVERTEXTILESIZE (VERTEXTILEMULTI * VERTEXTILESIZE)
 #define INT32_MAX 2147483647
-#define CACHEROUNDS 2
+#define CACHEROUNDS 3
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
@@ -14,10 +19,9 @@ layout(rgba32f, binding = 1) readonly uniform image2D cachePositionImage;
 layout(rgba32f, binding = 2) readonly uniform image2D cacheNormalImage;
 layout(r32ui, binding = 3) readonly uniform uimage2D cacheNumberPerTileImage;
 
-layout(r32f, binding = 4) readonly uniform image2D vertexOffsetImage;
-layout(rgba32f, binding = 5) readonly uniform image2D vertexPositionImage;
-layout(rgba32f, binding = 6) readonly uniform image2D vertexNormalImage;
-layout(r32ui, binding = 7) readonly uniform uimage2D vertexNumberPerTileImage;
+layout(rgba32f, binding = 4) readonly uniform image2D vertexPositionImage;
+layout(rgba32f, binding = 5) readonly uniform image2D vertexNormalImage;
+layout(r32ui, binding = 6) readonly uniform uimage2D vertexNumberPerTileImage;
 
 layout(std430, binding = 0) buffer specularCacheIndicesBuffer
 {
@@ -39,13 +43,13 @@ void main()
 	const uint idx = gl_GlobalInvocationID.x;
 	const uint localIDx = gl_LocalInvocationIndex;
 	
-	const uvec2 cacheTileNumber = (uvec2(width, height) + uvec2(CACHETILESIZE - 1)) / CACHETILESIZE;
+	const uvec2 cacheTileNumber = (uvec2(HALFRESX, HALFRESY) + uvec2(CACHETILESIZE - 1)) / CACHETILESIZE;
 	const uint cacheTilesPerGroup = (cacheTileNumber.x * cacheTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
 	const uint cacheTileStartIndex = gl_WorkGroupID.x * cacheTilesPerGroup;
 	const uint cacheTileEndIndex = cacheTileStartIndex + cacheTilesPerGroup;
 	
-	const uvec2 vertexTileNumber = (uvec2(width, height) + uvec2(VERTEXTILESIZE - 1)) / VERTEXTILESIZE;
-	const ivec2 vertexTilePixelNumber = ivec2(vertexTileNumber) * VERTEXTILESIZE;
+	const uvec2 vertexTileNumber = (uvec2(HALFRESX, HALFRESY) + uvec2(MULTVERTEXTILESIZE - 1)) / MULTVERTEXTILESIZE;
+	const ivec2 vertexTilePixelNumber = ivec2(vertexTileNumber) * MULTVERTEXTILESIZE;
 	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
 	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
 	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
@@ -54,7 +58,7 @@ void main()
 	{
 		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
 		
-		ivec2 cacheBlockCoord = (vertexBlockCoord * VERTEXTILESIZE) / ivec2(CACHETILESIZE);
+		ivec2 cacheBlockCoord = (vertexBlockCoord * MULTVERTEXTILESIZE) / ivec2(CACHETILESIZE);
 		
 		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, vertexBlockCoord).r;
 		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
@@ -63,7 +67,7 @@ void main()
 		
 		for(uint j = vertexStartIndex; j < vertexEndIndex; j++)
 		{
-			ivec2 texCoord = vertexBlockCoord * VERTEXTILESIZE + ivec2(mod(j, VERTEXTILESIZE), j / VERTEXTILESIZE);
+			ivec2 texCoord = vertexBlockCoord * MULTVERTEXTILESIZE + ivec2(mod(j, MULTVERTEXTILESIZE), j / MULTVERTEXTILESIZE);
 
 			vec3 vertexPosition;
 			vec3 vertexNormal;
@@ -169,8 +173,8 @@ void main()
 						uint innerBlockCacheIndex = cacheIndex - (roundCacheStartIndex - groupCacheNumberPerTile[cacheBlockIndex]);
 						ivec2 innerCacheBlockCoord = cacheNumberTexCoord * CACHETILESIZE + ivec2(mod(innerBlockCacheIndex, CACHETILESIZE), innerBlockCacheIndex / CACHETILESIZE);
 
-						//if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < width &&
-						//	 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
+						//if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < HALFRESX &&
+						//	 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < HALFRESY)
 						{
 							groupCachePositions[localIDx] = imageLoad(cachePositionImage, innerCacheBlockCoord).xyz;
 							groupCacheNormals[localIDx] = normalize(decodeNormal(imageLoad(cacheNormalImage, innerCacheBlockCoord).xy));
@@ -185,19 +189,17 @@ void main()
 					{
 						for(uint m = 0; m < WORKGROUPSIZE; m++)
 						{
-							if(l + m < max(int(groupCacheNumber), 0))
+							if(l + m < groupCacheNumber)
 							{
-								vec3 cachePosDistance = groupCachePositions[m] - vertexPosition;
-								float angle = dot(vertexNormal, groupCacheNormals[m]);
-								float weight = max(length(cachePosDistance), 0.0) / max(pow(angle, 1.0), 0.00001);
+								float weight = max(distance(groupCachePositions[m], vertexPosition), 0.0) / max(dot(vertexNormal, groupCacheNormals[m]), 0.00001);
 
 								if(weight < weights[maximumIndex])
 								{
 									indices[maximumIndex] = groupCacheIndex[m];
 									weights[maximumIndex] = weight;
 									
-									maximumIndex = 7;
-									for(int n = 0; n < 7; n++)
+									maximumIndex = 0;
+									for(int n = 0; n < 8; n++)
 									{
 										//int compareVal = int(sign(int(weights[n] - weights[maximumIndex])));
 										//maximumIndex = ((compareVal + 1) / 2) * n + ((-compareVal + 1) / 2) * maximumIndex;

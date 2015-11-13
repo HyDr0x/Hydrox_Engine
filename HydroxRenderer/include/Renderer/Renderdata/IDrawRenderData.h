@@ -50,6 +50,9 @@ namespace he
       virtual void bindCacheInstanceOffsetBuffer() const = 0;
       virtual void unbindCacheInstanceOffsetBuffer() const = 0;
 
+      virtual void bindOccluderBuffer() const = 0;
+      virtual void unbindOccluderBuffer() const = 0;
+
       virtual void bindDrawBuffer() const = 0;
       virtual void unbindDrawBuffer() const = 0;
 
@@ -57,7 +60,13 @@ namespace he
 
       virtual void updateBuffer(IInstanceRenderData& renderData) = 0;
 
-      virtual unsigned int getCacheNumber() const = 0;
+      virtual unsigned int getPerInstanceCacheNumber() const = 0;
+
+      virtual unsigned int getPerInstanceOccluderNumber() const = 0;
+
+      virtual unsigned int getPerInstanceVertexNumber() const = 0;
+
+      virtual unsigned int getPerInstanceTriangleNumber() const = 0;
 
       virtual VertexElementFlags getMeshVertexDeclaration() const = 0;
 
@@ -76,11 +85,17 @@ namespace he
       GPUImmutableBuffer m_bboxesBuffer;
       GPUImmutableBuffer m_commandBuffer;
       GPUImmutableBuffer m_meshInstanceBufferIndex;
-      GPUImmutableBuffer m_cacheInstanceOffsetBuffer;//the per instance offset for the global cache index
       GPUImmutableBuffer m_triangleIndexOffsetBuffer;//has the offsets into the triangleBuffer for the specific mesh
+
+      GPUImmutableBuffer m_cacheInstanceOffsetBuffer;//the per instance offset for the global cache index
       GPUImmutableBuffer m_cacheOffsetBuffer;//has the offsets into the cacheBuffer for the specific mesh
-      GPUImmutableBuffer m_triangleBuffer;//has the indices into the cacheBuffer for the triangle
       GPUImmutableBuffer m_cacheBuffer;//has all caches for all the meshes sorted to their triangles
+      GPUImmutableBuffer m_cacheIndicesPerTriangleBuffer;//has the indices into the cacheBuffer for the triangle
+
+      GPUImmutableBuffer m_occluderInstanceOffsetBuffer;//the per instance offset for the global occluder index
+      GPUImmutableBuffer m_occluderOffsetBuffer;//has the offsets into the occluderBuffer for the specific mesh
+      GPUImmutableBuffer m_occluderBuffer;//has all occluders for all the meshes sorted to their triangles
+      GPUImmutableBuffer m_occluderIndicesPerTriangleBuffer;//has the indices into the cacheBuffer for the triangle
 
       GLenum m_primitiveType;
 
@@ -90,6 +105,12 @@ namespace he
 
       unsigned int m_cacheNumber;
       unsigned int m_perInstanceCacheNumber;
+
+      unsigned int m_occluderNumber;
+      unsigned int m_perInstanceOccluderNumber;
+
+      unsigned int m_perInstanceVertexNumber;
+      unsigned int m_perInstanceTriangleNumber;
 
       unsigned int m_instanceNumber;
 

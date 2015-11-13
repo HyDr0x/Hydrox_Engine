@@ -85,4 +85,6 @@ void main()
 	{
 		calculateShadowedLight(luminousFlux, reflectiveShadowLight[i], i, pos, normal, albedo, material);
 	}
+	
+	//luminousFlux = vec4(0.0);
 }

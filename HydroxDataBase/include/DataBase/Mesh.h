@@ -61,6 +61,8 @@ namespace he
            const std::vector<GLubyte>& vboBuffer,
            const std::vector<util::Cache>& caches,
            const std::vector<util::vec2ui>& triangleCacheIndices,
+           const std::vector<util::vec4f>& occluder,
+           const std::vector<util::vec2ui>& triangleOccluderIndices,
            const std::vector<indexType>& indices = std::vector<indexType>()
            );
 
@@ -75,6 +77,7 @@ namespace he
       void generateBoundingVolume();
       void generateNormals();
       void generateCaches(float errorRate, float maxDistance, float maxAngle);
+      void generateISMOccluderPoints(float errorRate, float maxDistance, float maxAngle);
 
       void getDataFromGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, GLubyte *data) const;
       void copyDataIntoGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, const GLubyte *data);
@@ -96,12 +99,15 @@ namespace he
       GLuint getIndexCount() const;
       GLuint getPrimitiveCount() const;
       GLuint getCacheCount() const;
+      GLuint getOccluderCount() const;
 
       const std::vector<util::Cache>& getCaches() const;
+      const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
       void setCaches(const std::vector<util::vec3f>& points, const std::vector<util::vec3f>& pointNormals, const std::vector<util::Triangle>& pointTriangles);
       void addCache(const util::vec3f& point, const util::vec3f& pointNormal, const util::Triangle& triangle);
 
-      const std::vector<util::vec2ui>& getTriangleCacheIndices() const;
+      const std::vector<util::vec4f>& getOccluder() const;
+      const std::vector<util::vec2ui>& getTriangleOccluderIndices() const;
 
       static unsigned int vertexDeclarationSize(unsigned int index);
 
@@ -126,6 +132,8 @@ namespace he
       std::vector<GLubyte> m_geometryData;
       std::vector<util::Cache> m_cacheData;
       std::vector<util::vec2ui> m_triangleCacheIndices;
+      std::vector<util::vec4f> m_occluderCoordinates;//saves the coordinates of the occluders in barycentric coordinates in respect of the triangle in which they are lying
+      std::vector<util::vec2ui> m_triangleOccluderIndices;
       std::vector<indexType> m_indexData;
       util::Flags<VertexDeclarationElements> m_vertexDeclaration;
       ////////////////////////////////

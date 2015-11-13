@@ -49,6 +49,9 @@ namespace he
       virtual void bindCacheInstanceOffsetBuffer() const override;
       virtual void unbindCacheInstanceOffsetBuffer() const override;
 
+      virtual void bindOccluderBuffer() const override;
+      virtual void unbindOccluderBuffer() const override;
+
       virtual void bindDrawBuffer() const override;
       virtual void unbindDrawBuffer() const override;
 
@@ -56,7 +59,13 @@ namespace he
 
       virtual void updateBuffer(IInstanceRenderData& renderData) override;
 
-      virtual unsigned int getCacheNumber() const override;
+      virtual unsigned int getPerInstanceCacheNumber() const override;
+
+      virtual unsigned int getPerInstanceOccluderNumber() const override;
+
+      virtual unsigned int getPerInstanceVertexNumber() const override;
+
+      virtual unsigned int getPerInstanceTriangleNumber() const override;
 
       virtual VertexElementFlags getMeshVertexDeclaration() const override;
 

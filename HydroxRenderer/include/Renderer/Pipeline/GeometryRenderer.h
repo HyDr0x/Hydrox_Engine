@@ -88,6 +88,8 @@ namespace he
 
       unsigned int getProxyLightTextureResolution() const;
 
+      unsigned int getGlobalOccluderNumber() const;
+
     private:
 
       GeometryRenderer(const GeometryRenderer&);
@@ -101,6 +103,11 @@ namespace he
 
       unsigned int m_globalCacheNumber;
       unsigned int m_proxyLightTextureResolution;
+
+      unsigned int m_globalOccluderNumber;
+
+      unsigned int m_globalVertexNumber;
+      unsigned int m_globalTriangleNumber;
 
       std::vector<util::ResourceHandle> m_updateMeshHandles;
       std::vector<util::ResourceHandle> m_updateMaterialHandles;

@@ -37,13 +37,13 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void updateBuffer(unsigned int cacheNumber);
+      void updateBuffer(unsigned int occluderNumber);
 
       void calculateDelaunayTriangulation(
         util::SharedPointer<db::Texture3D> backprojectionZBuffer,
-        util::SharedPointer<db::Texture3D> m_backprojectionPosition, 
-        util::SharedPointer<db::Texture3D> m_backprojectionNormal, 
-        const TBO& globalCachePositionBuffer, 
+        util::SharedPointer<db::Texture3D> backprojectionPosition, 
+        util::SharedPointer<db::Texture3D> backprojectionNormal, 
+        const GPUBuffer& occluderNormalCoordinates, 
         const GPUImmutableBuffer& reflectiveShadowLightsBuffer);
 
       void showVoronoiDiagram();
@@ -60,7 +60,7 @@ namespace he
       DelaunayTriangulation(const DelaunayTriangulation&);
       DelaunayTriangulation& operator=(const DelaunayTriangulation&);
 
-      void generateProjectedSiteBuffer(util::SharedPointer<db::Texture3D> backprojectionZBuffer, const TBO& globalCachePositionBuffer, const GPUImmutableBuffer& reflectiveShadowLightsBuffer);
+      void generateProjectedSiteBuffer(util::SharedPointer<db::Texture3D> backprojectionZBuffer, const GPUBuffer& occluderNormalCoordinates, const GPUImmutableBuffer& reflectiveShadowLightsBuffer);
       void generateVoronoiDiagram();
       void generateTriangles(util::SharedPointer<db::Texture3D> m_backprojectionPosition, util::SharedPointer<db::Texture3D> m_backprojectionNormal);
 
@@ -88,7 +88,7 @@ namespace he
       Renderquad m_siteProjectionRenderQuad;
       Renderquad m_voronoiRenderQuad;
 
-      GLuint m_cacheNumber;
+      GLuint m_occluderNumber;
     };
   }
 }

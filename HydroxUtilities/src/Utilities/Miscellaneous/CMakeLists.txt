@@ -5,6 +5,7 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/CacheIndicesGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/clipper.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Filecheck.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/ISMOcclusionDiscGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/MurMurHash3.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/RandomSequenceGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ResourceHandle.cpp 

@@ -35,6 +35,7 @@ namespace he
         GLuint vertexStride;
         GLuint vboSize;
         GLuint cacheSize;
+        GLuint occluderSize;
       };
 
       std::string m_fileName;

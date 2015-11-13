@@ -44,7 +44,7 @@ namespace he
         const GPUImmutableBuffer& reflectiveShadowLightBuffer);
 
       void setBuffer(util::SharedPointer<db::Texture2D> depthBuffer);
-      void unsetBuffer() const;
+      void unsetBuffer();
 
       void setCacheAndProxyLights() const;
       void unsetCacheAndProxyLights() const;
@@ -75,6 +75,8 @@ namespace he
       GPUBuffer m_proxyLightCommandBuffer;
 
       util::SharedPointer<db::Texture2D> m_depthBuffer;
+
+      std::vector<util::vec4f> DEBUGcacheData;
 
       TBO m_globalCachePositionBuffer;//saves all caches positions and diffuse strength of the scene
       TBO m_globalCacheNormalBuffer;//saves all caches normals, specular strength and exponent of the scene

@@ -181,7 +181,7 @@ namespace he
       //glDeleteSync(m_gBufferSync);
     }
 
-    void IndirectLightRenderer::unsetBuffer() const
+    void IndirectLightRenderer::unsetBuffer()
     {
       m_zBuffer->unbindImageTexture(3, 0, GL_WRITE_ONLY, GL_R8UI);
 
@@ -193,6 +193,25 @@ namespace he
 
       glDepthFunc(GL_LESS);
       glDepthMask(GL_TRUE);
+
+      //std::vector<util::vec4f> cacheData(2 * m_cacheNumber);
+      //m_globalCachePositionBuffer.getData(0, cacheData.size() * sizeof(util::vec4f), &cacheData[0]);
+
+      //if(!DEBUGcacheData.empty())
+      //{
+      //  for(unsigned int i = 0; i < cacheData.size(); i++)
+      //  {
+      //    if((cacheData[i] - DEBUGcacheData[i]).length() > 0.1f)
+      //    {
+      //      util::vec4f a = cacheData[i];
+      //      util::vec4f b = DEBUGcacheData[i];
+      //      util::vec4f diff = a - b;
+      //      float length = diff.length();
+      //    }
+      //  }
+      //}
+
+      //DEBUGcacheData = cacheData;
     }
 
     void IndirectLightRenderer::setCacheAndProxyLights() const

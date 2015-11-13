@@ -30,8 +30,8 @@ void main()
 	vec3 camDir = normalize(eyePos.xyz - vsout_pos3D);
 
 	vec3 lightDirD = vsout_Xpd - vsout_pos3D;
-	float lengthD = max(dot(lightDirD, lightDirD), dot(cacheProxyMinDistanceD, cacheProxyMinDistanceD));
-	//float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
+	//float lengthD = max(dot(lightDirD, lightDirD), dot(cacheProxyMinDistanceD, cacheProxyMinDistanceD));
+	float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
 	float frd = material.x * max(dot(normalize(lightDirD), normal), 0.001);
 	
 	vec3 lightDirG = vsout_Xpg - vsout_pos3D;
@@ -47,6 +47,6 @@ void main()
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI), 1.0);
 	//luminousFlux = vec4((frd * vsout_phiPD) / (4.0 * PI * lengthD), 1.0);
 	//luminousFlux = vec4((frg * vsout_phiPG) / (4.0 * PI * lengthG), 1.0);
-	luminousFlux = vec4(max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4.0 * PI * lengthG), vec3(0)), 1.0);
-	//luminousFlux = texture(indirectShadowMapSampler, texCoord).r * vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
+	//luminousFlux = vec4(max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4.0 * PI * lengthG), vec3(0)), 1.0);
+	luminousFlux = texture(indirectShadowMapSampler, texCoord).r * vec4((max((frd * vsout_phiPD) / (4.0 * PI * lengthD), vec3(0)) + max((frg * vsout_phiPG) / (4 * PI * lengthG), vec3(0))), 1.0);
 }

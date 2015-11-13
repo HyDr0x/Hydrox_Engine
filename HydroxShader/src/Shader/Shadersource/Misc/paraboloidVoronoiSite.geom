@@ -32,8 +32,8 @@ void main()
 	paraboloidProjection(transformedCachePosition, PARABOLOIDNEAR, PARABOLOIDFAR, transformedCachePosition, gsout_clipDepth);
 	
 	if(1.0 > transformedCachePosition.x && transformedCachePosition.x > -1.0 || 
-			 1.0 > transformedCachePosition.y && transformedCachePosition.y > -1.0 ||
-			 1.0 > transformedCachePosition.z && transformedCachePosition.z > -1.0)
+		 1.0 > transformedCachePosition.y && transformedCachePosition.y > -1.0 ||
+		 1.0 > transformedCachePosition.z && transformedCachePosition.z > -1.0)
 	{
 		gsout_vertexIndex = vsout_vertexIndex[0];
 		

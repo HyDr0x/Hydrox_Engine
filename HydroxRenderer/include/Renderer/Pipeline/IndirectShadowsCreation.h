@@ -36,17 +36,17 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void updateBuffer(unsigned int reflectiveShadowMapNumber);
+      void updateBuffer(unsigned int reflectiveShadowMapNumber, unsigned int globalOccluderNumber);
+
+      void setOccluderBuffer();
+      void unsetOccluderBuffer();
 
       void generateImperfectShadowMap(
         util::SharedPointer<db::Texture3D> indirectLightPositions,
         util::SharedPointer<db::Texture3D> indirectLightNormals,
-        const TBO& globalCachePositionBuffer, 
-        const TBO& globalCacheNormalBuffer,
         const TBO& adaptiveSamplingPositionBuffer,
         const TBO& adaptiveSamplingNormalBuffer,
-        const GPUBuffer& commandBuffer,
-        unsigned int cacheNumber);
+        const GPUBuffer& commandBuffer);
 
       void generateIndirectLightsShadowMap(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
@@ -59,6 +59,9 @@ namespace he
       void setBackprojectionMap(unsigned int lightIndex);
       void unsetBackprojectionMap();
 
+      const GPUBuffer& getOccluderNormalCoordinates() const;
+
+      util::SharedPointer<db::Texture2D> getIndirectShadowVALQuaternions() const;
       util::SharedPointer<db::Texture3D> getIndirectLightsShadowMaps() const;
       util::SharedPointer<db::Texture2D> getIndirectShadowMap() const;
       std::vector<util::SharedPointer<db::Texture3D>> getIndirectPushPullShadowMap() const;
@@ -94,8 +97,12 @@ namespace he
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
 
       unsigned int m_reflectiveShadowMapNumber;
+      unsigned int m_globalOccluderNumber;
+
+      GPUBuffer m_occluderNormalCoordinates;
 
       GLuint m_pointVAO;
+      GLuint m_adaptivePointVAO;
       util::SharedPointer<db::Texture2D> m_VALQuaternions;
       util::SharedPointer<db::Texture3D> m_indirectLightShadowMaps;
       util::SharedPointer<db::Texture3D> m_indirectLightShadowMapsReference;

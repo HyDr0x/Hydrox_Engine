@@ -5,7 +5,6 @@
 #define MAXBONES 64
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
-#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(std430, binding = 0) buffer boneMatrixBuffer
 {
@@ -28,7 +27,7 @@ out VertexData
 
 void main()
 {
-	mat4 skinningMatrix = mat4(0.0f);
+	mat4 skinningMatrix = mat4(0.0);
 
 	outData.instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
 	uint globalInstanceID = MAXBONES * outData.instanceIndex;
@@ -46,5 +45,5 @@ void main()
 	outData.tangentToWorld[2] = normalWorld * in_normal;
 
 	outData.texCoord = in_texCoord;
-	gl_Position = viewProjectionMatrix * skinningMatrix * vec4(in_Pos, 1.0f);
+	gl_Position = skinningMatrix * vec4(in_Pos, 1.0);
 }

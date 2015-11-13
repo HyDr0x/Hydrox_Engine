@@ -4,6 +4,7 @@
 
 #include <Utilities/Miscellaneous/CacheGenerator.h>
 #include <Utilities/Miscellaneous/CacheIndicesGenerator.h>
+#include <Utilities/Miscellaneous/ISMOcclusionDiscGenerator.h>
 
 #include "DataBase/Material.h"
 
@@ -97,6 +98,8 @@ namespace he
                const std::vector<GLubyte>& vboBuffer,
                const std::vector<util::Cache>& caches,
                const std::vector<util::vec2ui>& triangleCacheIndices,
+               const std::vector<util::vec4f>& occluder,
+               const std::vector<util::vec2ui>& triangleOccluderIndices,
                const std::vector<indexType>& indices
                ) :
                m_boundingVolume(boundingVolume),
@@ -108,6 +111,8 @@ namespace he
                m_geometryData(vboBuffer),
                m_cacheData(caches),
                m_triangleCacheIndices(triangleCacheIndices),
+               m_occluderCoordinates(occluder),
+               m_triangleOccluderIndices(triangleOccluderIndices),
                m_indexData(indices)
     {
     }
@@ -122,6 +127,8 @@ namespace he
       m_geometryData = other.m_geometryData;
       m_cacheData = other.m_cacheData;
       m_triangleCacheIndices = other.m_triangleCacheIndices;
+      m_occluderCoordinates = other.m_occluderCoordinates;
+      m_triangleOccluderIndices = other.m_triangleOccluderIndices;
       m_indexData = other.m_indexData;
       m_vertexDeclaration = other.m_vertexDeclaration;
     }
@@ -141,6 +148,8 @@ namespace he
       std::swap(m_geometryData, other.m_geometryData);
       std::swap(m_cacheData, other.m_cacheData);
       std::swap(m_triangleCacheIndices, other.m_triangleCacheIndices);
+      std::swap(m_occluderCoordinates, other.m_occluderCoordinates);
+      std::swap(m_triangleOccluderIndices, other.m_triangleOccluderIndices);
       std::swap(m_indexData, other.m_indexData);
       std::swap(m_vertexDeclaration, other.m_vertexDeclaration);
       
@@ -221,31 +230,107 @@ namespace he
 
     void Mesh::generateCaches(float errorRate, float maxDistance, float maxAngle)
     {
-      std::vector<util::vec3f> positions(m_vertexCount);
-      std::vector<util::vec3f> normals(m_vertexCount);
-      std::vector<he::util::cacheIndexType> cacheIndizes0;
-      std::vector<he::util::cacheIndexType> cacheIndizes1;
-
-      util::CacheGenerator generator;
-      generator.initialize(errorRate, maxDistance, maxAngle, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax());
-
-      getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
-      getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
-
-      if(!m_indexData.empty())
+      if(m_primitiveType == GL_TRIANGLES)
       {
-        generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions, m_indexData);
+        std::vector<util::vec3f> positions(m_vertexCount);
+        std::vector<util::vec3f> normals(m_vertexCount);
+        std::vector<he::util::cacheIndexType> cacheIndizes0;
+        std::vector<he::util::cacheIndexType> cacheIndizes1;
+
+        util::CacheGenerator generator;
+        generator.initialize(errorRate, maxDistance, maxAngle, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax());
+
+        getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+        getDataFromGeometryBuffer(MODEL_NORMAL, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&normals[0]));
+
+        if(!m_indexData.empty())
+        {
+          generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions, m_indexData);
+        }
+        else
+        {
+          generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions);
+        }
+
+        util::CacheIndicesGenerator cacheIndicesGenerator;
+        cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
+
+        copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
+        copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
       }
-      else
+    }
+
+    void Mesh::generateISMOccluderPoints(float errorRate, float maxDistance, float maxAngle)
+    {
+      if(m_primitiveType == GL_TRIANGLES)
       {
-        generator.generateCaches(m_cacheData, m_triangleCacheIndices, positions);
+        std::vector<util::vec3f> positions(m_vertexCount);
+
+        util::ISMOcclusionDiscGenerator generator;
+        generator.initialize(errorRate, maxDistance, maxAngle, m_boundingVolume.getBBMin(), m_boundingVolume.getBBMax());
+
+        getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
+
+        if(!m_indexData.empty())
+        {
+          generator.generateOccluder(m_occluderCoordinates, m_triangleOccluderIndices, positions, m_indexData);
+        }
+        else
+        {
+          generator.generateOccluder(m_occluderCoordinates, m_triangleOccluderIndices, positions);
+        }
       }
+      /*
+      if(m_primitiveType == GL_TRIANGLES)
+      {
+        std::vector<util::vec3f> positions(m_vertexCount);
+        std::vector<util::vec3f> normals(m_vertexCount);
+        getDataFromGeometryBuffer(MODEL_POSITION, 0, m_vertexCount, reinterpret_cast<GLubyte*>(&positions[0]));
 
-      util::CacheIndicesGenerator cacheIndicesGenerator;
-      cacheIndicesGenerator.generateCacheIndizes(positions, normals, m_cacheData, cacheIndizes0, cacheIndizes1);
+        std::vector<util::vec3f> trianglePositions;
+        if(m_indexData.empty())
+        {
+          trianglePositions = positions;
+        }
+        else
+        {
+          trianglePositions.resize(m_indexData.size());
+          for(unsigned int i = 0; i < trianglePositions.size(); i++)
+          {
+            trianglePositions[i] = positions[m_indexData[i]];
+          }
+        }
 
-      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES0, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes0[0]));
-      copyDataIntoGeometryBuffer(MODEL_CACHEINDICES1, 0, m_vertexCount, reinterpret_cast<const GLubyte*>(&cacheIndizes1[0]));
+        //calculate the overall area of the mesh triangles
+        float triangleArea = 0.0f;
+        for(unsigned int i = 0; i < trianglePositions.size(); i += 3)
+        {
+          util::vec3f a = trianglePositions[i];
+          util::vec3f b = trianglePositions[i + 1];
+          util::vec3f c = trianglePositions[i + 2];
+
+          util::vec3f ab = b - a;
+          util::vec3f ac = c - a;
+
+          triangleArea += 0.5f * util::math::cross(ab, ac).length();
+
+          unsigned int temporaryOccluderNumber = triangleArea * pointsPerArea;
+          if(temporaryOccluderNumber > 0)
+          {
+            triangleArea = 0.0f;
+
+            for(unsigned j = 0; j < temporaryOccluderNumber; j++)
+            {
+              float alpha = float(rand()) / float(RAND_MAX);
+              float beta = (1.0f - alpha) * float(rand()) / float(RAND_MAX);
+              float gamma = 1.0f - alpha - beta;
+              m_occluderCoordinates.push_back(util::vec4f(alpha, beta, gamma, 0.0f));//barycentric coordinates
+            }
+          }
+
+          m_triangleOccluderIndices.push_back(util::vec2ui(m_occluderCoordinates.size() - temporaryOccluderNumber, m_occluderCoordinates.size()));
+        }
+      }*/
     }
 
     void Mesh::getDataFromGeometryBuffer(unsigned int vertexDeclaration, unsigned int offset, unsigned int numberOfElements, GLubyte *data) const
@@ -347,9 +432,19 @@ namespace he
       return m_cacheData.size();
     }
 
+    GLuint Mesh::getOccluderCount() const
+    {
+      return m_occluderCoordinates.size();
+    }
+
     const std::vector<util::Cache>& Mesh::getCaches() const
     {
       return m_cacheData;
+    }
+
+    const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
+    {
+      return m_triangleCacheIndices;
     }
 
     void Mesh::setCaches(const std::vector<util::vec3f>& points, const std::vector<util::vec3f>& pointNormals, const std::vector<util::Triangle>& pointTriangles)
@@ -450,9 +545,13 @@ namespace he
       m_dirtyHash = true;
     }
 
-    const std::vector<util::vec2ui>& Mesh::getTriangleCacheIndices() const
+    const std::vector<util::vec4f>& Mesh::getOccluder() const
     {
-      return m_triangleCacheIndices;
+      return m_occluderCoordinates;
+    }
+    const std::vector<util::vec2ui>& Mesh::getTriangleOccluderIndices() const
+    {
+      return m_triangleOccluderIndices;
     }
 
     void Mesh::updateHash()

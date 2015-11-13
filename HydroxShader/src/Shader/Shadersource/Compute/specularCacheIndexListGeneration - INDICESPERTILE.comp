@@ -1,0 +1,257 @@
+#version 440 core
+
+#define WORKGROUPSIZE 64
+#define CACHETILESIZE 32
+#define VERTEXTILESIZE 8
+#define CACHEINDEXNUMBER 24
+#define INT32_MAX 2147483647
+#define CACHEROUNDS 2
+
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
+
+layout(r32f, binding = 0) readonly uniform image2D cacheOffsetImage;
+layout(rgba32f, binding = 1) readonly uniform image2D cachePositionImage;
+layout(rgba32f, binding = 2) readonly uniform image2D cacheNormalImage;
+layout(r32ui, binding = 3) readonly uniform uimage2D cacheNumberPerTileImage;
+
+layout(r32f, binding = 4) readonly uniform image2D vertexOffsetImage;
+layout(rgba32f, binding = 5) readonly uniform image2D vertexPositionImage;
+layout(rgba32f, binding = 6) readonly uniform image2D vertexNormalImage;
+layout(r32ui, binding = 7) readonly uniform uimage2D vertexNumberPerTileImage;
+
+layout(std430, binding = 0) buffer specularCacheIndicesBuffer
+{
+	uint specularCacheIndices[];
+};
+
+layout(local_size_x = WORKGROUPSIZE) in;
+
+shared vec3 groupVertexPositions[VERTEXTILESIZE * VERTEXTILESIZE];
+shared vec3 groupVertexNormals[VERTEXTILESIZE * VERTEXTILESIZE];
+shared uint groupCacheNumberPerTile[(CACHEROUNDS - 1) * 8 + 1];
+shared uint groupCacheNumber;
+shared uint groupMutex[CACHEINDEXNUMBER + 1];
+shared uint groupIndices[CACHEINDEXNUMBER + 1];
+shared float groupWeight[CACHEINDEXNUMBER + 1];
+
+shared uint groupSortIndices[VERTEXTILESIZE * VERTEXTILESIZE * 8];
+shared float groupSortWeight[VERTEXTILESIZE * VERTEXTILESIZE * 8];
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localIDx = gl_LocalInvocationIndex;
+	
+	const uvec2 cacheTileNumber = (uvec2(width, height) + uvec2(CACHETILESIZE - 1)) / CACHETILESIZE;
+	
+	const uvec2 vertexTileNumber = (uvec2(width, height) + uvec2(VERTEXTILESIZE - 1)) / VERTEXTILESIZE;
+	const ivec2 vertexTilePixelNumber = ivec2(vertexTileNumber) * VERTEXTILESIZE;
+	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
+	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
+
+	for(uint i = vertexTileStartIndex; i < vertexTileEndIndex; i++)
+	{
+		if(i >= vertexTileNumber.x * vertexTileNumber.y) continue;
+	
+		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
+		ivec2 cacheBlockCoord = (vertexBlockCoord * VERTEXTILESIZE) / ivec2(CACHETILESIZE);
+		
+		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, vertexBlockCoord).r;
+		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint vertexStartIndex = verticesPerThread * localIDx;
+		const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
+
+		for(uint j = vertexStartIndex; j < vertexEndIndex; j++)
+		{
+			ivec2 texCoord = vertexBlockCoord * VERTEXTILESIZE + ivec2(mod(j, VERTEXTILESIZE), j / VERTEXTILESIZE);
+
+			if(texCoord.x < vertexTilePixelNumber.x && texCoord.y < vertexTilePixelNumber.y)
+			{
+				groupVertexPositions[j] = imageLoad(vertexPositionImage, texCoord).xyz;
+				groupVertexNormals[j] = normalize(imageLoad(vertexNormalImage, texCoord).xyz);
+			}
+			else
+			{
+				groupVertexPositions[j] = vec3(0.0);
+				groupVertexNormals[j] = vec3(0.0);
+			}
+		}
+		
+		const uint cacheIndicesPerThread = (CACHEINDEXNUMBER + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint cacheIndexStartIndex = cacheIndicesPerThread * localIDx;
+		const uint CacheIndexEndIndex = cacheIndexStartIndex + cacheIndicesPerThread;
+		for(uint j = cacheIndexStartIndex; j < CacheIndexEndIndex; j++)
+		{
+			uint index = min(j, CACHEINDEXNUMBER);
+			groupIndices[index] = INT32_MAX;
+			groupWeight[index] = INT32_MAX;
+			groupMutex[index] = 0;
+		}
+		
+		memoryBarrierShared();
+		barrier();
+
+		for(uint k = 0; k < CACHEROUNDS; k++)
+		{
+			const uint cacheBlockNumber = max(k * 8, 1);
+			const uint sideLength = 2 * k;
+			
+			const uint blocksPerThread = (cacheBlockNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+			const uint startBlockIndex = localIDx * blocksPerThread;
+			const uint endBlockIndex = startBlockIndex + blocksPerThread;
+			
+			for(uint l = startBlockIndex; l < endBlockIndex; l++)
+			{
+				if(l < cacheBlockNumber)
+				{
+					ivec2 cacheNumberTexCoord = cacheBlockCoord;
+					if(k > 0)
+					{
+						if(l < k * 4)//smaller than cacheBlockNumber / 2
+						{
+							cacheNumberTexCoord += (ivec2(min(l, sideLength), max(int(l) - int(sideLength), 0)) - ivec2(k));
+						}
+						else
+						{
+							cacheNumberTexCoord += (ivec2(max(int(cacheBlockNumber) - int(sideLength) - int(l), 0), min(cacheBlockNumber - l, sideLength)) - ivec2(k));
+						}
+					}
+					
+					uint blockCacheNumber = 0;
+				
+					if(0 <= cacheNumberTexCoord.x && cacheNumberTexCoord.x < cacheTileNumber.x &&
+						 0 <= cacheNumberTexCoord.y && cacheNumberTexCoord.y < cacheTileNumber.y)
+					{
+						blockCacheNumber = imageLoad(cacheNumberPerTileImage, cacheNumberTexCoord).r;
+					}
+				
+					groupCacheNumberPerTile[l] = blockCacheNumber;
+				}
+			}
+
+			memoryBarrierShared();
+			barrier();
+
+			if(localIDx == 0)
+			{
+				uint tmpCacheNumber = 0;
+				for(uint l = 0; l < cacheBlockNumber; l++)
+				{
+					tmpCacheNumber += groupCacheNumberPerTile[l];
+				}
+				
+				groupCacheNumber = tmpCacheNumber;
+			}
+			
+			memoryBarrierShared();
+			barrier();
+			
+			const uint cacheLoopNumber = WORKGROUPSIZE * ((groupCacheNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE);
+			for(uint l = 0; l < cacheLoopNumber; l += WORKGROUPSIZE)
+			{
+				const uint cacheIndex = l + localIDx;
+
+				if(cacheIndex < groupCacheNumber)
+				{
+					uint cacheBlockIndex;
+					uint roundCacheStartIndex = 0;
+					for(uint m = 0; m < cacheBlockNumber; m++)
+					{
+						roundCacheStartIndex += groupCacheNumberPerTile[m];
+						if(roundCacheStartIndex > cacheIndex)
+						{
+							cacheBlockIndex = m;
+							break;
+						}
+					}
+
+					ivec2 cacheNumberTexCoord = cacheBlockCoord;
+					if(k > 0)
+					{
+						if(cacheBlockIndex < k * 4)//smaller than cacheBlockNumber / 2
+						{
+							cacheNumberTexCoord += (ivec2(min(cacheBlockIndex, sideLength), max(int(cacheBlockIndex) - int(sideLength), 0)) - ivec2(k));
+						}
+						else
+						{
+							cacheNumberTexCoord += (ivec2(max(int(cacheBlockNumber) - int(sideLength) - int(cacheBlockIndex), 0), min(cacheBlockNumber - cacheBlockIndex, sideLength)) - ivec2(k));
+						}
+					}
+					
+					uint innerBlockCacheIndex = cacheIndex - (roundCacheStartIndex - groupCacheNumberPerTile[cacheBlockIndex]);
+					ivec2 innerCacheBlockCoord = cacheNumberTexCoord * CACHETILESIZE + ivec2(mod(innerBlockCacheIndex, CACHETILESIZE), innerBlockCacheIndex / CACHETILESIZE);
+
+					if(0 <= innerCacheBlockCoord.x && innerCacheBlockCoord.x < width &&
+						 0 <= innerCacheBlockCoord.y && innerCacheBlockCoord.y < height)
+					{
+						vec3 cachePosition = imageLoad(cachePositionImage, innerCacheBlockCoord).xyz;
+						vec3 cacheNormal = normalize(decodeNormal(imageLoad(cacheNormalImage, innerCacheBlockCoord).xy));
+						uint cacheIndex = uint(imageLoad(cacheOffsetImage, innerCacheBlockCoord).r - 1);
+						
+						for(uint m = 0; m < vertexNumber; m++)
+						{
+							vec3 cachePosDistance = cachePosition - groupVertexPositions[m];
+							float angle = dot(cacheNormal, groupVertexNormals[m]);
+							float weight = max(length(cachePosDistance), 0.0) / max(pow(angle, 1.0), 0.00001);
+
+							uint maximumIndex = CACHEINDEXNUMBER;
+							for(uint n = 0; n < CACHEINDEXNUMBER; n++)
+							{
+								if(weight < groupWeight[n])
+								{
+									maximumIndex = n;
+									//uint mutex = atomicOr(groupMutex[n], 1);
+									//if(mutex == 0)
+									{
+										groupIndices[n] = cacheIndex;
+										groupWeight[n] = weight;
+										//groupMutex[n] = 0;
+										//atomicAnd(groupMutex[n], 0);
+										
+										n = CACHEINDEXNUMBER;
+										m = vertexNumber;
+										maximumIndex = CACHEINDEXNUMBER;
+									}
+								}
+							}
+							/*
+							if(maximumIndex != CACHEINDEXNUMBER && weight < groupWeight[maximumIndex])
+							{
+								uint mutex;
+								//do
+								//{
+									mutex = atomicOr(groupMutex[maximumIndex], 1);
+								//} while(mutex == 1);
+								if(weight < groupWeight[maximumIndex])
+								{
+									groupIndices[maximumIndex] = cacheIndex;
+									groupWeight[maximumIndex] = weight;
+								}
+								atomicAnd(groupMutex[maximumIndex], 0);
+							}*/
+						}
+					}
+				}
+			}
+			
+			memoryBarrierShared();
+			barrier();
+		}
+	
+		if(i < vertexTileNumber.x * vertexTileNumber.y)
+		{
+			for(uint j = cacheIndexStartIndex; j < CacheIndexEndIndex; j++)
+			{
+				if(j < CACHEINDEXNUMBER)
+				{
+					specularCacheIndices[i * CACHEINDEXNUMBER + j] = groupIndices[j];
+				}
+			}
+		}
+		
+		memoryBarrierShared();
+		barrier();
+	}
+}

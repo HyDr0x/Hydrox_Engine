@@ -2,7 +2,7 @@
 
 #define PARABOLOIDNEAR
 #define PARABOLOIDFAR
-#define PI 3.14159265359f
+#define PI 3.14159265359
 
 void paraboloidViewProjection(in vec3 lightPos, in vec3 lightNormal, in vec3 pos, in float near, in float far, out vec3 projPos, out float clipDepth)
 {

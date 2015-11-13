@@ -1,5 +1,8 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define WORKGROUPSIZE 128
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
@@ -27,9 +30,9 @@ void main()
 		
 		float a = 0.0;
 		
-		if(index < width * height)
+		if(index < HALFRESX * HALFRESY)
 		{
-			a = imageLoad(cacheOffsetBuffer, ivec2(mod(index, width), index / width)).r;
+			a = imageLoad(cacheOffsetBuffer, ivec2(mod(index, HALFRESX), index / HALFRESX)).r;
 		}
 
 		groupOffsets[localIDX] = a;
@@ -55,9 +58,9 @@ void main()
 			groupOffsets[localIDX] += newOffset;
 		}
 		
-		if(index < width * height)
+		if(index < HALFRESX * HALFRESY)
 		{
-			imageStore(cacheOffsetBuffer, ivec2(mod(index, width), index / width), vec4(groupOffsets[localIDX]));
+			imageStore(cacheOffsetBuffer, ivec2(mod(index, HALFRESX), index / HALFRESX), vec4(groupOffsets[localIDX]));
 		}
 	}
 }

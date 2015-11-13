@@ -16,6 +16,7 @@ layout(rgba32f, binding = 1) readonly uniform image2D indirectLightNormals;
 coherent layout(rgba32f, binding = 2) uniform image1D valQuaternions;
 
 layout(location = 0) uniform uint reflectiveShadowMapResolution;
+layout(location = 1) uniform uint indirectShadowLightRatio;
 
 out float gsout_clipDepth;
 
@@ -26,11 +27,11 @@ in uint vsout_vertexID[1];
 
 void main()
 {
-	ivec2 texCoord = ivec2(mod(vsout_instanceID[0], reflectiveShadowMapResolution), vsout_instanceID[0] / reflectiveShadowMapResolution);
+	ivec2 texCoord = ivec2(mod(indirectShadowLightRatio * vsout_instanceID[0], reflectiveShadowMapResolution), (indirectShadowLightRatio * vsout_instanceID[0]) / reflectiveShadowMapResolution);
 	vec4 lightPos = imageLoad(indirectLightPositions, texCoord);
 	vec3 lightNormal = imageLoad(indirectLightNormals, texCoord).xyz * 2.0 - 1.0;
 
-	vec3 x = normalize(cross(vsout_cacheNormal[0], vsout_cacheNormal[0] + vec3(0, 0.1, 0)));
+	vec3 x = normalize(cross(vsout_cacheNormal[0], vsout_cacheNormal[0] + vsout_cacheNormal[0].yxz));
 	vec3 z = normalize(cross(vsout_cacheNormal[0], x));
 	
 	vec3 points[4];
@@ -42,6 +43,7 @@ void main()
 	points[2] = vsout_pos3D[0] + size * x + size * z;
 	points[3] = vsout_pos3D[0] + size * x - size * z;
 
+	vec4 q;
 	//if(vsout_vertexID[0] == 0)
 	{
 		float lightRotationAngle = 0.0;
@@ -58,12 +60,11 @@ void main()
 			rotationAxis = normalize(vec3(0, 1, 0));//normalize(cross(lightNormal, vec3(0, 0, 1)));
 		}
 		
-		imageStore(valQuaternions, int(vsout_instanceID[0]), createQuaternion(lightRotationAngle, rotationAxis));
+		q = createQuaternion(lightRotationAngle, rotationAxis);
+		imageStore(valQuaternions, int(vsout_instanceID[0]), q);
 	}
 	
 	memoryBarrier();
-
-	vec4 q = imageLoad(valQuaternions, int(vsout_instanceID[0]));
 
 	vec3 positions[4];
 	float clipDepths[4];

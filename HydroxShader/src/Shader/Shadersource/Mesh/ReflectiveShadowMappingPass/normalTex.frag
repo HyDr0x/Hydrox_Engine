@@ -42,7 +42,7 @@ void main()
 		lightAngle = max(dot(normalize(-reflectiveShadowLight[lightIndex].light.direction.xyz), normalize(vsout_pos.xyz - lightPos.xyz)), 0.0);
 		float zLin = 2.0 * projPar.x * projPar.y / (projPar.y + projPar.x - gl_FragCoord.z * (projPar.y - projPar.x));
 		area = (zLin * zLin * projPar.z * projPar.w) / (projPar.x * projPar.x * float(reflectiveShadowMapWidth * reflectiveShadowMapWidth));
-		//area *= 10.0;
+		//area *= 100.0;
 	}
 	else//directional light
 	{
@@ -50,8 +50,8 @@ void main()
 		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
-	vec3 normal = normalize(vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f));
-	fsout_normalArea = vec4(normal * 0.5f + 0.5f, area);
+	vec3 normal = vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0 - 1.0);
+	fsout_normalArea = vec4(normal * 0.5 + 0.5, area);
 	
 	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
 	fsout_pos3D = vec4(vsout_pos.xyz, 1.0);

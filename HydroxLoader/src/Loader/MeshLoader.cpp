@@ -46,11 +46,15 @@ namespace he
         std::vector<GLubyte> geometryData(m_meshData.vboSize);
         std::vector<util::Cache> cacheData(m_meshData.cacheSize);
         std::vector<util::vec2ui> triangleCacheIndices(m_meshData.primitiveCount);
+        std::vector<util::vec4f> occluderData(m_meshData.occluderSize);
+        std::vector<util::vec2ui> triangleOccluderIndices(m_meshData.primitiveCount);
 
         file.read((char*)&indexData[0], sizeof(indexData[0]) * m_meshData.indexCount);
         file.read((char*)&geometryData[0], sizeof(geometryData[0]) * m_meshData.vboSize);
         if(m_meshData.cacheSize > 0) file.read((char*)&cacheData[0], sizeof(cacheData[0]) * m_meshData.cacheSize);
         file.read((char*)&triangleCacheIndices[0], sizeof(triangleCacheIndices[0]) * m_meshData.primitiveCount);
+        if(m_meshData.occluderSize > 0) file.read((char*)&occluderData[0], sizeof(occluderData[0]) * m_meshData.occluderSize);
+        file.read((char*)&triangleOccluderIndices[0], sizeof(triangleOccluderIndices[0]) * m_meshData.primitiveCount);
 
         meshHandle = m_modelManager->addObject(db::Mesh(db::AABB(m_meshData.bbMin, m_meshData.bbMax),
           m_meshData.primitiveType,
@@ -61,6 +65,8 @@ namespace he
           geometryData, 
           cacheData, 
           triangleCacheIndices, 
+          occluderData,
+          triangleOccluderIndices,
           indexData));
       }
       else//wrong filename or file does not exist

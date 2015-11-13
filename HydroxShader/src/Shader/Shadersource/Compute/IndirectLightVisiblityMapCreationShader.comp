@@ -20,6 +20,7 @@ layout(rgba32f, binding = 3) readonly uniform image1DArray valQuaternions;
 
 layout(location = 2) uniform uint reflectiveShadowMapResolution;
 layout(location = 3) uniform uint reflectiveShadowMapNumber;
+layout(location = 4) uniform uint indirectShadowLightRatio;
 
 layout(local_size_x = WORKGROUPSIZE) in;
 
@@ -59,9 +60,8 @@ void main()
 		for(uint j = 0; j < reflectiveShadowMapNumber; j++)
 		{
 			for(uint i = startIndex; i < SHADOWSAMPLENUMBER; i += interleavedSize)
-			//for(uint i = 0; i < SHADOWSAMPLENUMBER; i++)
 			{
-				ivec3 indirectLightTexCoord = ivec3(mod(i, reflectiveShadowMapResolution), i / reflectiveShadowMapResolution, j);
+				ivec3 indirectLightTexCoord = ivec3(mod(indirectShadowLightRatio * i, reflectiveShadowMapResolution), (indirectShadowLightRatio * i) / reflectiveShadowMapResolution, j);
 				vec4 lightPos = imageLoad(indirectLightPositions, indirectLightTexCoord);
 				
 				if(lightPos.w == 0.0) //cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit

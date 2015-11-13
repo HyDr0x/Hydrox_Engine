@@ -1,19 +1,28 @@
 #version 440 core
 
+#define HALFRESX
+#define HALFRESY
+
 #define SAMPLENUMBER
-#define PI 3.14159265359
+#define SHADOWSAMPLENUMBER
+#define SHADOWSAMPLENUMBERROOT
 #define WORKGROUPSIZE 128
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
 
 layout(location = 0) uniform sampler2DArray indirectLightPosSampler;
 layout(location = 1) uniform sampler2DArray indirectLightNormalAreaSampler;
 layout(location = 2) uniform sampler2DArray indirectLightLuminousFluxSampler;
+layout(location = 3) uniform sampler2DArray indirectShadowMapSampler;
+layout(location = 4) uniform sampler1DArray valQuaternionsSampler;
 
-layout(location = 3) uniform uint reflectiveShadowMapNumber;
-layout(location = 4) uniform uint rsmTexRes;
+layout(location = 5) uniform uint reflectiveShadowMapNumber;
+layout(location = 6) uniform uint rsmTexRes;
+layout(location = 7) uniform uint reflectiveShadowMapResolution;
+layout(location = 8) uniform uint indirectShadowLightRatio;
 
 layout(r32f, binding = 0) readonly uniform image2D edgeCacheOffsetSampler;
 
@@ -47,7 +56,7 @@ void main()
 {
 	uint idx = gl_GlobalInvocationID.x;
 
-	const uint cacheNumber = uint(imageLoad(edgeCacheOffsetSampler, ivec2(width - 1, height - 1)).r);
+	const uint cacheNumber = uint(imageLoad(edgeCacheOffsetSampler, ivec2(HALFRESX - 1, HALFRESY - 1)).r);
 	
 	const uint cachesPerThread = uint(ceil(float(cacheNumber) / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
 	const uint cacheOffset = idx * cachesPerThread;
@@ -80,6 +89,8 @@ void main()
 			camDir = normalize(eyePos.xyz - cache.position.xyz);
 		}
 		
+		float visibleIndirectLightNumber = 0.0;
+		
 		for(uint k = 0; k < reflectiveShadowMapNumber; k++)
 		{
 			float validLightSamples = 0.0;
@@ -101,38 +112,69 @@ void main()
 				memoryBarrierShared();
 				barrier();
 			
-				if(sampleIndex < SAMPLENUMBER && i < cacheNumber)
+				if(i < cacheNumber)
 				{
 					for(uint l = 0; l < WORKGROUPSIZE; l++)
 					{
-						vec4 lightPos = indirectLightPos[l];
-						vec4 lightNormalArea = indirectLightNormalArea[l];
-						vec3 luminousFlux = indirectLightLuminousFlux[l].rgb;
-					
-						validLightSamples += max(lightPos.w, 0.0);//cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
+						uint valID = j * WORKGROUPSIZE + l;
+						if(valID < SAMPLENUMBER)
+						{
+							vec4 lightPos = indirectLightPos[l];
+							vec4 lightNormalArea = indirectLightNormalArea[l];
+							vec3 luminousFlux = indirectLightLuminousFlux[l].rgb;
+						
+							validLightSamples += max(lightPos.w, 0.0);//cancels indirect lightsources which aren't initialized, because there is no geometry behind or lit
 
-						vec3 lightNormal = normalize(lightNormalArea.xyz * 2.0 - 1.0);
-						float lightArea = lightNormalArea.w;
-						
-						vec3 lightDir = lightPos.xyz - cache.position.xyz;
-						float quadDistance = dot(lightDir, lightDir);
-						lightDir = normalize(lightDir);
-						
-						float reflAngle = max(pow(dot(reflect(-lightDir, cache.normal.xyz), camDir), cacheMaterial.z), 0.0);
+							vec3 lightNormal = normalize(lightNormalArea.xyz * 2.0 - 1.0);
+							float lightArea = lightNormalArea.w;
+							
+							vec3 lightDir = lightPos.xyz - cache.position.xyz;
+							float quadDistance = dot(lightDir, lightDir);
+							lightDir = normalize(lightDir);
+							
+							float pixelSolidAngle = min(0.5 * lightArea / quadDistance, 0.002);
+							
+							float reflAngle = pow(clamp(dot(reflect(-lightDir, cache.normal.xyz), camDir) + pixelSolidAngle, 0.0, 1.0), cacheMaterial.z);
 
-						float F = max(lightPos.w, 0.0) * (max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0)) / (lightArea + PI * quadDistance);
-						
-						float Wd = F;
-						float Wg = reflAngle * F;
-						
-						Xpd += Wd * lightPos.xyz;
-						Xpg += Wg * lightPos.xyz;
-												
-						Lod += luminousFlux * frd * F;
-						Log += luminousFlux * frg * reflAngle * F;
-						
-						Wgesd += Wd;
-						Wgesg += Wg;
+							float F = max(lightPos.w, 0.0) * (max(dot(lightNormal.xyz, normalize(cache.position.xyz - lightPos.xyz)), 0.0) * max(dot(cache.normal.xyz, lightDir), 0.0)) / (lightArea + PI * quadDistance);
+							
+							float Wd = F;
+							float Wg = reflAngle * F;
+							
+							Xpd += Wd * lightPos.xyz;
+							Xpg += Wg * lightPos.xyz;
+													
+							Lod += luminousFlux * frd * F;
+							Log += luminousFlux * frg * reflAngle * F;
+													
+							Wgesd += Wd;
+							Wgesg += Wg;
+							
+							if(mod(valID, indirectShadowLightRatio) == 0)
+							{
+								uint ismIndex = valID / indirectShadowLightRatio;
+								vec4 q = texelFetch(valQuaternionsSampler, ivec2(ismIndex, k), 0);
+								
+								float clipDepth;
+								vec3 transformedPosition = applyQuaternion(cache.position.xyz - lightPos.xyz, q);
+								
+								paraboloidProjection(transformedPosition, PARABOLOIDNEAR, PARABOLOIDFAR, transformedPosition, clipDepth);
+								
+								if(clipDepth > 0.01)
+								{
+									transformedPosition.xy = (transformedPosition.xy * 0.5 + 0.5) / float(SHADOWSAMPLENUMBERROOT);
+									transformedPosition.z = transformedPosition.z * 0.5 + 0.5;
+									
+									transformedPosition.x += mod(ismIndex, SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
+									transformedPosition.y += (ismIndex / SHADOWSAMPLENUMBERROOT) / float(SHADOWSAMPLENUMBERROOT);
+
+									float depth = texture(indirectShadowMapSampler, vec3(transformedPosition.xy, k)).r;
+
+									//visibleIndirectLightNumber = depth;
+									visibleIndirectLightNumber += max(lightPos.w, 0.0) * clamp(ceil(depth - transformedPosition.z + 0.01), 0, 1);
+								}
+							}
+						}
 					}
 				}
 				
@@ -143,7 +185,10 @@ void main()
 			Lod *= (float(SAMPLENUMBER) / validLightSamples);
 			Log *= (float(SAMPLENUMBER) / validLightSamples);
 		}
-
+		
+		visibleIndirectLightNumber /= (reflectiveShadowMapNumber * SHADOWSAMPLENUMBER);
+		//visibleIndirectLightNumber = 1.0;
+		
 		if(i < cacheNumber)
 		{
 			Xpd = Wgesd > 0 ? Xpd / Wgesd : vec3(0);
@@ -153,8 +198,8 @@ void main()
 			float lightAngleD = max(dot(normalize(lightDirD), cache.normal.xyz), 0.0001);
 
 			proxyLightPosition[2 * i] = vec4(Xpd, length(lightDirD));
-			proxyLightLuminousFlux[2 * i] = vec4((4.0 * PI * Lod * dot(lightDirD, lightDirD)) / max(frd * lightAngleD, 0.0001), 0.0);
-			
+			proxyLightLuminousFlux[2 * i] = vec4(visibleIndirectLightNumber * (4.0 * PI * Lod * dot(lightDirD, lightDirD)) / max(frd * lightAngleD, 0.0001), 0.0);
+
 			vec3 lightDirG = Xpg - cache.position.xyz;
 			float lightQuadDistance = dot(lightDirG, lightDirG);
 			lightDirG = normalize(lightDirG);
@@ -162,7 +207,7 @@ void main()
 			float lightAngleG = max(dot(lightDirG, cache.normal.xyz), 0.0001);
 			
 			proxyLightPosition[2 * i + 1] = vec4(Xpg, sqrt(lightQuadDistance));
-			proxyLightLuminousFlux[2 * i + 1] = vec4((4.0 * PI * Log * lightQuadDistance) / max(frg * reflAngleG * lightAngleG, 0.0001), 0.0);
+			proxyLightLuminousFlux[2 * i + 1] = vec4(visibleIndirectLightNumber * (4.0 * PI * Log * lightQuadDistance) / max(frg * reflAngleG * lightAngleG, 0.0001), 0.0);
 		}
 	}
 }

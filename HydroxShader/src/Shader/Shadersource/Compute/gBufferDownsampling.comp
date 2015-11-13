@@ -13,8 +13,8 @@ layout(location = 6) uniform sampler2D readGBufferNormals;
 layout(location = 7) uniform sampler2D readGBufferVertexNormals;
 layout(location = 8) uniform sampler2D readGBufferMaterials;
 
-layout(rgba16f, binding = 0) writeonly uniform image2D writeGBufferDepth;
-layout(rgba16f, binding = 1) writeonly uniform image2D writeGBufferLinearDepth;
+layout(r32f, binding = 0) writeonly uniform image2D writeGBufferDepth;
+layout(r32f, binding = 1) writeonly uniform image2D writeGBufferLinearDepth;
 layout(rgba16f, binding = 2) writeonly uniform image2D writeGBufferNormals;
 layout(rgba16f, binding = 3) writeonly uniform image2D writeGBufferVertexNormals;
 layout(rgba16f, binding = 4) writeonly uniform image2D writeGBufferMaterials;
@@ -39,6 +39,7 @@ void main()
 	{
 		uint pixelID = minification * i;
 		ivec2 texCoord = ivec2(sampleDirection.x * mod(pixelID, newWidth) + sampleDirection.y * pixelID / originalResolution.y, sampleDirection.x * (pixelID / newWidth) + sampleDirection.y * mod(pixelID, originalResolution.y));
+		ivec2 startedTexCoord = texCoord;
 		
 		float depth = 0.0;
 		float linDepth = 0.0;
@@ -50,8 +51,8 @@ void main()
 		{
 			depth += texelFetch(readGBufferDepth, texCoord, 0).x;
 			linDepth += texelFetch(readGBufferLinearDepth, texCoord, 0).x;
-			normal += texelFetch(readGBufferNormals, texCoord, 0);
-			vertexNormal += texelFetch(readGBufferVertexNormals, texCoord, 0);
+			normal += texelFetch(readGBufferNormals, startedTexCoord, 0);
+			vertexNormal += texelFetch(readGBufferVertexNormals, startedTexCoord, 0);
 			material += texelFetch(readGBufferMaterials, texCoord, 0);
 			
 			texCoord += sampleDirection;

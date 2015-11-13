@@ -35,13 +35,16 @@ namespace he
       meshData.vertexDeclaration = mesh->getVertexDeclarationFlags().toInt();
       meshData.vertexStride = mesh->getVertexStride();
       meshData.vboSize = mesh->getVBOSize();
-      meshData.cacheSize = mesh->getCaches().size();
+      meshData.cacheSize = mesh->getCacheCount();
+      meshData.occluderSize = mesh->getOccluderCount();
 
       fileStream.write((char*)&meshData, sizeof(meshData));
       fileStream.write((char*)&mesh->getIndexBuffer()[0], sizeof(mesh->getIndexBuffer()[0]) * mesh->getIndexCount());
       fileStream.write((char*)&mesh->getVBOBuffer()[0], sizeof(mesh->getVBOBuffer()[0]) * mesh->getVBOSize());
       if(meshData.cacheSize > 0) fileStream.write((char*)&mesh->getCaches()[0], sizeof(mesh->getCaches()[0]) * mesh->getCaches().size());
-      if(meshData.cacheSize > 0) fileStream.write((char*)&mesh->getTriangleCacheIndices()[0], sizeof(mesh->getTriangleCacheIndices()[0]) * mesh->getTriangleCacheIndices().size());
+      if(meshData.cacheSize > 0) fileStream.write((char*)&mesh->getTriangleCacheIndices()[0], sizeof(mesh->getTriangleCacheIndices()[0]) * mesh->getPrimitiveCount());
+      if(meshData.occluderSize > 0) fileStream.write((char*)&mesh->getOccluder()[0],  sizeof(mesh->getOccluder()[0]) * meshData.occluderSize);
+      fileStream.write((char*)&mesh->getTriangleOccluderIndices()[0], sizeof(mesh->getTriangleOccluderIndices()[0]) * mesh->getPrimitiveCount());
       
       fileStream.close();
     }

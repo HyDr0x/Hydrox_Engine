@@ -390,11 +390,8 @@ namespace he
       }
 
       newMesh.generateBoundingVolume();
-
-      if(newMesh.getPrimitiveType() == GL_TRIANGLES)
-      {
-        newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
-      }
+      newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+      newMesh.generateISMOccluderPoints(m_errorRate, m_maxDistance, m_maxAngle);
 
       return m_modelManager->addObject(newMesh);
     }
