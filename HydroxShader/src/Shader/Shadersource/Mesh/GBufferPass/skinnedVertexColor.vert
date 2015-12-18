@@ -19,9 +19,9 @@ layout(location = COLOR) in vec4 in_color;
 
 out VertexData
 {
+	vec4 color;
 	vec3 normal;
 	flat uint instanceIndex;
-	vec4 color;
 } outData;
 
 void main()
@@ -39,5 +39,7 @@ void main()
 
 	outData.normal = normalize(mat3(skinningMatrix) * in_normal);
 	outData.color = in_color;
-	gl_Position = skinningMatrix * vec4(in_Pos, 1.0f);
+	float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
+	
+	gl_Position = vec4((skinningMatrix * vec4(in_Pos, 1.0)).xyz, scale);
 }

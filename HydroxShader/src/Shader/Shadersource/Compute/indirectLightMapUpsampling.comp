@@ -1,12 +1,20 @@
 #version 440 core
 
-#define WORKGROUPTILESIZE 128
+#define WORKGROUPTILESIZE 64
+#define RESOLUTIONDIVISOR
+#define UPSAMPLINGRANGE 3
+#define UPSAMPLINGMULT (UPSAMPLINGRANGE * UPSAMPLINGRANGE)
+
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = 0) uniform ivec2 originalResolution;
 layout(location = 1) uniform ivec2 upsampledResolution;
-layout(location = 2) uniform uint magnification;
 
-layout(location = 3) uniform sampler2D readIndirectLightMap;
+layout(location = 3) uniform sampler2D readDownSampledGBufferLinearDepthMap;
+layout(location = 4) uniform sampler2D readDownSampledGBufferNormalMap;
+layout(location = 5) uniform sampler2D readDownSampledIndirectLightMap;
+layout(location = 6) uniform sampler2D readUpSampledGBufferLinearDepthMap;
+layout(location = 7) uniform sampler2D readUpSampledGBufferNormalMap;
 
 layout(rgba16f, binding = 0) writeonly uniform image2D writeIndirectLightMap;
 
@@ -23,30 +31,41 @@ void main()
 	const uint pixelStartIndex = idx * pixelsPerThread;
 	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
 
-	const uint filterSize = 2 * magnification - 1;
-	const ivec2 texOffset = ivec2(filterSize / 2);
-	const uint pixelsPerTile = (filterSize * filterSize);
-	
 	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
 	{
 		ivec2 texCoord = ivec2(mod(i, upsampledResolution.x), i / upsampledResolution.x);
+		ivec2 lowResOrigTexCoord = texCoord / RESOLUTIONDIVISOR;
 		
 		vec4 indirectLight = vec4(0.0);
+		vec3 referenceNormal;
+		float referenceDepth;
+		
+		referenceDepth = texelFetch(readUpSampledGBufferLinearDepthMap, texCoord, 0).r;
+		referenceNormal = texelFetch(readUpSampledGBufferNormalMap, texCoord, 0).xyz * 2.0 - 1.0;
 
-		uint validPixelCounter = 0;
-		for(uint j = 0; j < pixelsPerTile; j++)
+		float wGes = 0.0;
+		for(uint j = 0; j < UPSAMPLINGMULT; j++)
 		{
-			ivec2 lowResTexCoord = (texCoord + ivec2(mod(j, filterSize), j / filterSize) - texOffset) / 2 ;
-			
+			ivec2 lowResTexCoord = lowResOrigTexCoord + ivec2(mod(j, UPSAMPLINGRANGE), j / UPSAMPLINGRANGE) - ivec2(UPSAMPLINGRANGE / 2);
+
 			if(0 <= lowResTexCoord.x && lowResTexCoord.x < originalResolution.x &&
 				 0 <= lowResTexCoord.y && lowResTexCoord.y < originalResolution.y)
 			{
-				indirectLight += texelFetch(readIndirectLightMap, lowResTexCoord, 0);
-				validPixelCounter++;
+				float depth = texelFetch(readDownSampledGBufferLinearDepthMap, lowResTexCoord, 0).r;
+				vec3 normal = texelFetch(readDownSampledGBufferNormalMap, lowResTexCoord, 0).xyz * 2.0 - 1.0;
+			
+				uvec2 distance = abs(texCoord - (lowResTexCoord * RESOLUTIONDIVISOR));
+				uint blockDistance = max(distance.x, distance.y);
+				
+				float weight = (1.0 / float(UPSAMPLINGMULT)) * (1.0 - float(blockDistance) / float(2 * RESOLUTIONDIVISOR - 1)) * max(dot(referenceNormal, normal), 0.0) * (1.0 - min(abs(depth - referenceDepth) / far, 1.0));
+				
+				indirectLight += weight * texelFetch(readDownSampledIndirectLightMap, lowResTexCoord, 0);
+				
+				wGes += weight;
 			}
 		}
 
-		indirectLight /= validPixelCounter;
+		indirectLight /= wGes;
 		
 		imageStore(writeIndirectLightMap, texCoord, vec4(indirectLight));
 	}

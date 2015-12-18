@@ -12,7 +12,6 @@ layout(location = 3) out vec4 fsout_vertexNormal;
 
 in GeometryData
 {
-	vec3 barycentric;
 	vec3 normal;
 	flat uint instanceIndex;
 	vec4 color;
@@ -20,8 +19,8 @@ in GeometryData
 
 void main()
 {
-	fsout_normal = vec4(normalize(inData.normal) * 0.5f + 0.5f, float(inData.barycentric.x == 1.0 || inData.barycentric.y == 1.0 || inData.barycentric.z == 1.0));
-	fsout_color = vec4(inData.color.rgb, 1.0f);
+	fsout_normal = vec4(normalize(inData.normal) * 0.5 + 0.5, 0.0);
+	fsout_color = vec4(inData.color.rgb, 1.0f);//alpha value == 1 means no skybox here, default is 0
 	
 	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	

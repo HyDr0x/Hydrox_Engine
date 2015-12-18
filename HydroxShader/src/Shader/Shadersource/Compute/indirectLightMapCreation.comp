@@ -2,14 +2,18 @@
 
 #define HALFRESX
 #define HALFRESY
-
-#define WORKGROUPSIZE 256
+#define RESOLUTIONDIVISOR
 
 #define VERTEXTILEMULTI
 #define VERTEXTILESIZE
 #define MULTVERTEXTILESIZE (VERTEXTILEMULTI * VERTEXTILESIZE)
+#define PIXELTILESIZE (RESOLUTIONDIVISOR * MULTVERTEXTILESIZE)
+
+#define WORKGROUPSIZE 128
+
 #define PI 3.14159265359
 #define INT32_MAX 2147483647
+
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/CacheData.glslh"
@@ -63,86 +67,135 @@ void main()
 	const uint localIDx = gl_LocalInvocationIndex;
 	
 	const uvec2 vertexTileNumber = (uvec2(HALFRESX, HALFRESY) + uvec2(MULTVERTEXTILESIZE - 1)) / MULTVERTEXTILESIZE;
-
 	const ivec2 vertexTilePixelNumber = ivec2(vertexTileNumber) * MULTVERTEXTILESIZE;
 	const uint vertexTilesPerGroup = (vertexTileNumber.x * vertexTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
 	const uint vertexTileStartIndex = gl_WorkGroupID.x * vertexTilesPerGroup;
 	const uint vertexTileEndIndex = vertexTileStartIndex + vertexTilesPerGroup;
 
-	for(uint i = vertexTileStartIndex; i < vertexTileEndIndex; i++)
-	{
-		if(i >= vertexTileNumber.x * vertexTileNumber.y) continue;
+	const ivec2 pixelTileNumber = (ivec2(width, height) + ivec2(PIXELTILESIZE - 1)) / PIXELTILESIZE;
+	const ivec2 pixelTilePixelNumber = pixelTileNumber * PIXELTILESIZE;
+	const uint pixelTilesPerThread = (pixelTileNumber.x * pixelTileNumber.y + gl_NumWorkGroups.x - 1) / gl_NumWorkGroups.x;
+	const uint pixelTileStartIndex = gl_WorkGroupID.x * pixelTilesPerThread;
+	const uint pixelTileEndIndex = pixelTileStartIndex + pixelTilesPerThread;
 	
-		ivec2 vertexBlockCoord = ivec2(mod(i, vertexTileNumber.x), i / vertexTileNumber.x);
-		
-		const uint vertexNumber = imageLoad(vertexAtomicIndexSampler, vertexBlockCoord).r;
-		
-		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
-		const uint vertexStartIndex = localIDx * verticesPerThread;
-		const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
-		for(uint j = vertexStartIndex; j < vertexEndIndex; j++)
+	const uint pixelNumber = PIXELTILESIZE * PIXELTILESIZE;
+	const uint pixelsPerThread = (pixelNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+	const uint pixelStartIndex = localIDx * pixelsPerThread;
+	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
+	
+	for(uint i = pixelTileStartIndex; i < pixelTileEndIndex; i++)
+	{
+		ivec2 pixelBlockCoord = ivec2(mod(i, pixelTileNumber.x), i / pixelTileNumber.x);
+	
+		vec4 pixelPositions[pixelsPerThread];
+		vec3 pixelNormals[pixelsPerThread];
+		vec4 pixelMaterials[pixelsPerThread];
+		uint proxyPixelIndexOffsets[8 * pixelsPerThread];
+		float proxyPixelIndexWeights[pixelsPerThread];
+	
+		uint pixelIndex = 0;
+		for(uint j = pixelStartIndex; j < pixelEndIndex; j++, pixelIndex++)
 		{
-			if(j < vertexNumber)
+			ivec2 texCoord = PIXELTILESIZE * pixelBlockCoord + ivec2(mod(j, PIXELTILESIZE), j / PIXELTILESIZE);
+			vec2 texCoordNormalized = vec2(texCoord.x / float(width), texCoord.y / float(height));
+		
+			if(texCoord.x > width || texCoord.y > height) 
 			{
-				ivec2 texCoord = MULTVERTEXTILESIZE * vertexBlockCoord + ivec2(mod(j, MULTVERTEXTILESIZE), j / MULTVERTEXTILESIZE);
+				pixelPositions[pixelIndex] = vec4(INT32_MAX);
+				break;
+			}
+		
+			pixelPositions[pixelIndex] = vec4(texCoordNormalized, texelFetch(gBufferDepthSampler, texCoord, 0).r, 1.0);
+			pixelPositions[pixelIndex].xyz = pixelPositions[pixelIndex].xyz * 2.0 - 1.0;
+			pixelPositions[pixelIndex] = invViewProjectionMatrix * pixelPositions[pixelIndex];
+			pixelPositions[pixelIndex].xyz /= pixelPositions[pixelIndex].w;
+
+			pixelNormals[pixelIndex] = normalize(texelFetch(gBufferNormalSampler, texCoord, 0).xyz * 2.0 - 1.0);
+			pixelMaterials[pixelIndex] = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoord, 0));
 			
-				for(uint k = 0; k < 8; k++)
+			for(uint k = 0; k < 8; k++)
+			{
+				proxyPixelIndexOffsets[8 * pixelIndex + k] = INT32_MAX;
+			}
+			proxyPixelIndexWeights[pixelIndex] = INT32_MAX;
+		}
+			
+		pixelIndex = 0;
+		for(uint j = pixelStartIndex; j < pixelEndIndex; j++, pixelIndex++)
+		{
+			if(pixelPositions[pixelIndex].x == INT32_MAX) break;
+
+			for(uint k = 0; k < 4; k++)
+			{
+				ivec2 vertexBlockCoord = pixelBlockCoord + ivec2(mod(k, 2), k / 2);
+				
+				if(vertexBlockCoord.x >= vertexTileNumber.x || vertexBlockCoord.y >= vertexTileNumber.y) continue;
+				
+				const uint vertexNumber = imageLoad(vertexAtomicIndexSampler, vertexBlockCoord).r;
+				
+				const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+				const uint vertexStartIndex = localIDx * verticesPerThread;
+				const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
+				for(uint l = vertexStartIndex; l < vertexEndIndex; l++)
 				{
-					groupCacheIndices[j * 8 + k] = specularCacheIndices[8 * (texCoord.x + texCoord.y * vertexTilePixelNumber.x) + k];
+					if(l < vertexNumber)
+					{
+						ivec2 texCoord = MULTVERTEXTILESIZE * vertexBlockCoord + ivec2(mod(l, MULTVERTEXTILESIZE), l / MULTVERTEXTILESIZE);
+					
+						for(uint m = 0; m < 8; m++)
+						{
+							groupCacheIndices[l * 8 + m] = specularCacheIndices[8 * (texCoord.x + texCoord.y * vertexTilePixelNumber.x) + m];
+						}
+					
+						groupVertexPositions[l] = imageLoad(vertexPositionImage, texCoord).xyz;
+						groupVertexNormals[l] = normalize(imageLoad(vertexNormalImage, texCoord).xyz);
+					}
 				}
-			
-				groupVertexPositions[j] = imageLoad(vertexPositionImage, texCoord).xyz;
-				groupVertexNormals[j] = normalize(imageLoad(vertexNormalImage, texCoord).xyz);
+				
+				memoryBarrierShared();
+				barrier();
+				
+				uint pixelIndexGroupOffset = INT32_MAX;
+				for(uint l = 0; l < vertexNumber; l++)
+				{
+					float weight = distance(pixelPositions[pixelIndex].xyz, groupVertexPositions[l]) / max(dot(pixelNormals[pixelIndex], groupVertexNormals[l]), 0.0);
+					if(proxyPixelIndexWeights[pixelIndex] > weight)
+					{
+						proxyPixelIndexWeights[pixelIndex] = weight;
+						pixelIndexGroupOffset = 8 * l;
+					}
+				}
+				
+				if(pixelIndexGroupOffset != INT32_MAX)
+				{
+					for(uint m = 0; m < 8; m++)
+					{
+						proxyPixelIndexOffsets[pixelIndex * 8 + m] = groupCacheIndices[pixelIndexGroupOffset + m];
+					}
+				}
+				
+				memoryBarrierShared();
+				barrier();
 			}
 		}
 		
-		memoryBarrierShared();
-		barrier();
-
-		const uint pixelNumber = MULTVERTEXTILESIZE * MULTVERTEXTILESIZE;
-		const uint pixelsPerThread = (pixelNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
-		const uint pixelStartIndex = localIDx * pixelsPerThread;
-		const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
-				
-		for(uint j = pixelStartIndex; j < pixelEndIndex; j++)
+		pixelIndex = 0;
+		for(uint j = pixelStartIndex; j < pixelEndIndex; j++, pixelIndex++)
 		{
-			ivec2 texCoord = MULTVERTEXTILESIZE * vertexBlockCoord + ivec2(mod(j, MULTVERTEXTILESIZE), j / MULTVERTEXTILESIZE);
-			vec2 texCoordNormalized = vec2(texCoord.x / float(HALFRESX), texCoord.y / float(HALFRESY));
-		
-			vec4 pos3D = vec4(texCoordNormalized, texture(gBufferDepthSampler, texCoordNormalized).r, 1.0);
-			pos3D.xyz = pos3D.xyz * 2.0 - 1.0;
-			pos3D = invViewProjectionMatrix * pos3D;
-			pos3D.xyz /= pos3D.w;
-
-			vec3 normal = normalize(texture(gBufferNormalSampler, texCoordNormalized).xyz * 2.0 - 1.0);
-			vec4 material = GGXToBlinnPhong(texture(gBufferMaterialSampler, texCoordNormalized));
-			
-			uint cacheIndexOffset = INT32_MAX;
-			float minWeight = INT32_MAX;
-			for(uint k = 0; k < vertexNumber; k++)
-			{
-				float weight = distance(pos3D.xyz, groupVertexPositions[k]) / max(dot(normal, groupVertexNormals[k]), 0.0);
-				if(minWeight > weight)
-				{
-					minWeight = weight;
-					cacheIndexOffset = 8 * k;
-				}
-			}
-			
-			//cacheIndexOffset = 0;
+			if(pixelPositions[pixelIndex].x == INT32_MAX) break;
 			
 			float dmax = 0.0;
 			for(uint k = 0; k < 8; k++)
 			{
-				if(groupCacheIndices[cacheIndexOffset + k] < INT32_MAX)
+				if(proxyPixelIndexOffsets[pixelIndex * 8 + k] < INT32_MAX)
 				{
-					vec3 diff = pos3D.xyz - specularCachePositions[groupCacheIndices[cacheIndexOffset + k]].xyz;
+					vec3 diff = pixelPositions[pixelIndex].xyz - specularCachePositions[proxyPixelIndexOffsets[pixelIndex * 8 + k]].xyz;
 					dmax = max(dmax, dot(diff, diff));
 				}
 			}
 			
-			vec3 camDir = normalize(eyePos.xyz - pos3D.xyz);
-			vec3 reflectCamDir = reflect(-camDir, normal);
+			vec3 camDir = normalize(eyePos.xyz - pixelPositions[pixelIndex].xyz);
+			vec3 reflectCamDir = reflect(-camDir, pixelNormals[pixelIndex]);
 			
 			dmax = sqrt(max(dmax, 0.0));
 			
@@ -154,16 +207,16 @@ void main()
 			
 			for(uint k = 0; k < 8; k++)
 			{
-				uint cacheIndex = groupCacheIndices[cacheIndexOffset + k];
+				uint cacheIndex = proxyPixelIndexOffsets[pixelIndex * 8 + k];
 				if(cacheIndex < INT32_MAX)
 				{
 					CacheData cache;
 					cache.position = specularCachePositions[cacheIndex];
 					cache.normal = vec4(normalize(decodeNormal(specularCacheNormalMaterial[cacheIndex].xy)), 0.0);
 					
-					float dir = max(1.0 - distance(pos3D.xyz, cache.position.xyz) / dmax, 0.01);//without the max the last cache getting always rejected, cause dir == 0.0
+					float dir = max(1.0 - distance(pixelPositions[pixelIndex].xyz, cache.position.xyz) / dmax, 0.01);//without the max the last cache getting always rejected, cause dir == 0.0
 						
-					float wd = dir * sqrt(max(dot(cache.normal.xyz, normal), 0));
+					float wd = dir * sqrt(max(dot(cache.normal.xyz, pixelNormals[pixelIndex]), 0));
 						
 					vec3 camCacheDir = normalize(eyePos.xyz - cache.position.xyz);
 					float wg = dir * sqrt(max(dot(reflect(-camCacheDir, cache.normal.xyz), reflectCamDir), 0.0));
@@ -199,33 +252,31 @@ void main()
 			cacheProxyMinDistanceD = wGesD > 0 ? cacheProxyMinDistanceD / wGesD : 0;
 			cacheProxyMinDistanceG = wGesG > 0 ? cacheProxyMinDistanceG / wGesG : 0;
 			
-			vec3 lightDirD = Xpd - pos3D.xyz;
+			vec3 lightDirD = Xpd - pixelPositions[pixelIndex].xyz;
 			//float lengthD = max(dot(lightDirD, lightDirD), cacheProxyMinDistanceD * cacheProxyMinDistanceD);
 			float lengthD = max(length(lightDirD), cacheProxyMinDistanceD);
 			lightDirD = normalize(lightDirD);
-			float frd = material.x * max(dot(lightDirD, normal), 0.0);
+			float frd = pixelMaterials[pixelIndex].x * max(dot(lightDirD, pixelNormals[pixelIndex]), 0.0);
 			
-			vec3 lightDirG = Xpg - pos3D.xyz;
+			vec3 lightDirG = Xpg - pixelPositions[pixelIndex].xyz;
 			//float lengthG = max(dot(lightDirG, lightDirG), dot(cacheProxyMinDistanceG, cacheProxyMinDistanceG));
 			float lengthG = max(length(lightDirG), cacheProxyMinDistanceG);
 			lightDirG = normalize(lightDirG);
-			float frg = material.y * max(dot(lightDirG, normal), 0.0) * pow(max(dot(reflect(-lightDirG, normal), camDir), 0.0), material.w);
+			float frg = pixelMaterials[pixelIndex].y * max(dot(lightDirG, pixelNormals[pixelIndex]), 0.0) * pow(max(dot(reflect(-lightDirG, pixelNormals[pixelIndex]), camDir), 0.0), pixelMaterials[pixelIndex].w);
 
 			vec4 luminousFlux;
-			//luminousFlux = vec4(normal, 1);
+			//luminousFlux = vec4(pixelNormals[pixelIndex], 1);
 			//luminousFlux = vec4(vec3(frd * 0.1), 1);
 			//luminousFlux = vec4(0.05 * vec3(lengthG), 1);
 			//luminousFlux = vec4(0.1 * Xpg, 1);
-			//luminousFlux = vec4(0.001 * phiPD, 1);
+			//luminousFlux = vec4(0.01 * phiPD, 1);
 			//luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0), 0.0);
 			//luminousFlux = vec4(max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
 			luminousFlux = vec4(max((frd * phiPD) / (4.0f * PI * lengthD), 0.0) + max((frg * phiPG) / (4.0 * PI * lengthG), 0.0), 1.0);
 			//luminousFlux = vec4(1, 0, 0, 0);
 			
+			ivec2 texCoord = PIXELTILESIZE * pixelBlockCoord + ivec2(mod(j, PIXELTILESIZE), j / PIXELTILESIZE);
 			imageStore(indirectLightImage, texCoord, luminousFlux);
 		}
-		
-		memoryBarrierShared();
-		barrier();
 	}
 }

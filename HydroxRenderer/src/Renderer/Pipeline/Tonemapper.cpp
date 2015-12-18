@@ -26,7 +26,7 @@ namespace he
       util::SharedPointer<sh::ShaderContainer> renderShader = singletonManager->getService<sh::ShaderContainer>();
 
       m_histogramShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::HISTOGRAM, sh::ShaderSlotFlags(1));
-      m_tonemappingShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::TONEMAPPING, sh::ShaderSlotFlags(8192));
+      m_tonemappingShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::TONEMAPPING, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
 
       createHistogramVertices();
 

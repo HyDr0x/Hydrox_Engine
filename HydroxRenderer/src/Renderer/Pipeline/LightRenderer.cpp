@@ -38,7 +38,7 @@ namespace he
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
       m_reflectiveShadowMapDownsamplingHandle = sh::ShaderContainer::REFLECTIVESHADOWMAPDOWNSAMPLING;
-      m_directLightShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DIRECTLIGHT, sh::ShaderSlotFlags(8192));
+      m_directLightShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DIRECTLIGHT, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 

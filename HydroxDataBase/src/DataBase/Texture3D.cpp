@@ -166,6 +166,18 @@ namespace he
       }
     }
 
+    void Texture3D::copyTextureData(const Texture3D& texture, util::vec3i srcCoords, util::vec3i dstCoords, util::vec3i size)
+    {
+      glCopyImageSubData(texture.m_texIndex, texture.m_target, 0, srcCoords[0], srcCoords[1], srcCoords[2], m_texIndex, m_target, 0, dstCoords[0], dstCoords[1], dstCoords[2], size[0], size[1], size[2]);
+
+      if(m_mipmapping)
+      {
+        glBindTexture(m_target, m_texIndex);
+        glGenerateMipmap(m_target);
+        glBindTexture(m_target, 0);
+      }
+    }
+
     void Texture3D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
     {
       glBindImageTexture(unit, m_texIndex, level, layered, layer, access, format);

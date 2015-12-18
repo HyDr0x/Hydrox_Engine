@@ -19,6 +19,19 @@ namespace he
     ShaderContainer::ThisRenderShaderHandle ShaderContainer::getRenderShaderHandle(unsigned int pass, ShaderSlotFlags meshVertexDeclaration) const
     {
       unsigned int resultID = ~0;
+
+      for(unsigned int i = 0; i < m_renderPassShader[pass].size(); i++)
+      {
+        ShaderSlotFlags shaderVertexDeclaration = m_renderPassShader[pass][i].getVertexDeclaration();
+
+        if(shaderVertexDeclaration == meshVertexDeclaration)
+        {
+          resultID = i;
+          break;
+        }
+      }
+
+      /*
       unsigned int maxBitNumber = 0;
 
       for(unsigned int i = 0; i < m_renderPassShader[pass].size(); i++)
@@ -32,7 +45,7 @@ namespace he
           maxBitNumber = bitNumber;
           resultID = i;
         }
-      }
+      }*/
 
       return ThisRenderShaderHandle(Renderpass(pass), resultID);
     }

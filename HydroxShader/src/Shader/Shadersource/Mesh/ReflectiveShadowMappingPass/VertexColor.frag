@@ -45,10 +45,11 @@ void main()
 		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
-	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * vsout_color).xyz;
+	float attenutation = clamp((lightAngle - reflectiveShadowLight[lightIndex].light.direction.w) * 1.0 / 0.05, 0.0, 1.0);
+	if(attenutation == 0.0) discard;
+	
+	vec3 luminousFlux = (reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * vsout_color).xyz;
 	fsout_pos3D = vec4(vsout_pos.xyz, 1.0);
 	fsout_luminousFlux = vec4(luminousFlux, 1.0);
 	fsout_normalArea = vec4(vsout_normal * 0.5f + 0.5f, area);
-
-	//fsout_luminousFlux = vec4(luminousFlux, step(reflectiveShadowLight[lightIndex].light.direction.w, lightAngle));
 }

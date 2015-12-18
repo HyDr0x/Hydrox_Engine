@@ -5,6 +5,8 @@
 #define SHADOWSAMPLENUMBER
 #define SHADOWSAMPLENUMBERROOT
 #define INTERLEAVEDBLOCKSIZE
+#define HALFRESX
+#define HALFRESY
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/ParaboloidProjection.glslh"
@@ -29,20 +31,17 @@ layout(local_size_x = WORKGROUPSIZE) in;
 
 void main()
 {
-	const float screenWidth = 0.5 * float(width);
-	const float screenHeight = 0.5 * float(height);
-	
 	uint idx = gl_GlobalInvocationID.x;
 
-	const uint pixelPerCache = max(uint(screenWidth * screenHeight) / (WORKGROUPSIZE * gl_NumWorkGroups.x), 1);
+	const uint pixelPerCache = max(uint(HALFRESX * HALFRESY) / (WORKGROUPSIZE * gl_NumWorkGroups.x), 1);
 	
 	for(uint k = 0; k < pixelPerCache; k++)
 	{
 		const uint index = idx * pixelPerCache + k;
-		if(index >= screenWidth * screenHeight) return;
+		if(index >= HALFRESX * HALFRESY) return;
 	
-		ivec2 fragCoord = ivec2(mod(index, uint(screenWidth)), index / uint(screenWidth));
-		vec2 texCoord = vec2(float(fragCoord.x) / screenWidth, float(fragCoord.y) / screenHeight);
+		ivec2 fragCoord = ivec2(mod(index, uint(HALFRESX)), index / uint(HALFRESX));
+		vec2 texCoord = vec2(float(fragCoord.x) / HALFRESX, float(fragCoord.y) / HALFRESY);
 		
 		float z = texture(depthSampler, texCoord).r;
 		

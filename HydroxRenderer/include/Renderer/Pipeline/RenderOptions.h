@@ -36,12 +36,13 @@ namespace he
       unsigned int vertexTileSize;//size of the tiles in which vertices getting calculated
       unsigned int vertexTileMulti;//multiplied with the vertexTileSize to save the vertices in a bigger tiled fashion, results in a faster index calculation
       unsigned int cacheTileSize;//size of the tiles in which caches getting calculated
+      unsigned int indirectLightResolutionDivisor;//framebuffer resolution divisor for the indirect light map
 
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps
       unsigned int giLightSampleNumber;//number of sampled lights for global illumination
       unsigned int giShadowLightSampleDivisor;//the divisor of the giLightSampleNumber variable: e.g. 4096 indirect light samples with shadowDivisor of 4 equals only 1024 indirect shadow light samples
-      unsigned int kCache;//number of VAL's which are getting processed per invocation
+      unsigned int indirectShadowMapTilenumber;//specifies the number of tiles in which the indirect shadow map gets divided
       unsigned int lightNumber;//max number of supported lights
 
       unsigned int indirectShadowMapWidth;//resolution if the indirect shadow map
@@ -64,12 +65,10 @@ namespace he
       unsigned int vboBlockSize;
       unsigned int iboBlockSize;
       unsigned int triangleBlockSize;
-      unsigned int cacheBlockSize;
       unsigned int occluderBlockSize;
       unsigned int perMeshBlockSize;
       unsigned int perInstanceBlockSize;
 
-      unsigned int globalCacheBlockSize;//number of global cache block size
       unsigned int globalOccluderBlockSize;//number of global cache block size
 
       //Tonemapping

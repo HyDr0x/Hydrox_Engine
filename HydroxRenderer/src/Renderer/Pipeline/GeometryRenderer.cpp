@@ -14,7 +14,6 @@ namespace he
   namespace renderer
   {
     GeometryRenderer::GeometryRenderer() :
-      m_globalCacheNumber(0),
       m_globalOccluderNumber(0),
       m_globalTriangleNumber(0),
       m_globalVertexNumber(0)
@@ -48,10 +47,7 @@ namespace he
 
       m_frustumCullingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::FRUSTUMCULLING);
       m_geometryRenderpass.initialize(m_singletonManager, sh::ShaderContainer::GBUFFER, samplerObjects);
-      m_debugRenderpass.initialize(m_singletonManager, sh::ShaderContainer::RENDERDEBUG, samplerObjects);
-      m_indexRenderpass.initialize(m_singletonManager, sh::ShaderContainer::TRIANGLEINDEX);
-      m_indirectLightEdgeVertexExtractionRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTSCREENVERTEXEXTRACTION, materialMap);
-      m_indirectLightingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTLIGHTINTERPOLATION, normalMap, materialMap);
+      m_noLightingRenderpass.initialize(m_singletonManager, sh::ShaderContainer::RENDERNOLIGHTING, samplerObjects);
       m_reflectiveShadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::REFLECTIVESHADOW, samplerObjects);
       m_shadowMapRenderpass.initialize(m_singletonManager, sh::ShaderContainer::SHADOW);
       m_indirectBackprojetionRenderpass.initialize(m_singletonManager, sh::ShaderContainer::INDIRECTSHADOWMAPBACKPROJECTION);
@@ -63,86 +59,43 @@ namespace he
     {
       db::Material *material = m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle());
 
-      if(!material->getDebug())
+      for(unsigned int i = 0; i < m_renderContainer.size(); i++)
       {
-        for(unsigned int i = 0; i < m_renderContainer.size(); i++)
+        if(m_renderContainer[i]->insertGeometry(geometry))
         {
-          if(m_renderContainer[i]->insertGeometry(geometry))
-          {
-            return;
-          }
+          return;
         }
-
-        m_renderContainer.push_back(RenderDataFactory::createRenderDataContainer(geometry, m_singletonManager));
-
-        m_renderContainer.back()->insertGeometry(geometry);
-
-        m_frustumCullingRenderpass.insertGeometry(m_renderContainer.back());
-        m_geometryRenderpass.insertGeometry(m_renderContainer.back());
-        m_indexRenderpass.insertGeometry(m_renderContainer.back());
-        m_indirectLightEdgeVertexExtractionRenderpass.insertGeometry(m_renderContainer.back());
-        m_indirectLightingRenderpass.insertGeometry(m_renderContainer.back());
-        m_reflectiveShadowMapRenderpass.insertGeometry(m_renderContainer.back());
-        m_shadowMapRenderpass.insertGeometry(m_renderContainer.back());
-        m_indirectBackprojetionRenderpass.insertGeometry(m_renderContainer.back());
       }
-      else
-      {
-        for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
-        {
-          if(m_debugRenderContainer[i]->insertGeometry(geometry))
-          {
-            return;
-          }
-        }
 
-        m_debugRenderContainer.push_back(RenderDataFactory::createRenderDataContainer(geometry, m_singletonManager));
+      m_renderContainer.push_back(RenderDataFactory::createRenderDataContainer(geometry, m_singletonManager));
 
-        m_debugRenderContainer.back()->insertGeometry(geometry);
+      m_renderContainer.back()->insertGeometry(geometry);
 
-        m_debugRenderpass.insertGeometry(m_debugRenderContainer.back());
-      }
+      m_frustumCullingRenderpass.insertGeometry(m_renderContainer.back());
+      m_noLightingRenderpass.insertGeometry(m_renderContainer.back());
+      m_geometryRenderpass.insertGeometry(m_renderContainer.back());
+      m_reflectiveShadowMapRenderpass.insertGeometry(m_renderContainer.back());
+      m_shadowMapRenderpass.insertGeometry(m_renderContainer.back());
+      m_indirectBackprojetionRenderpass.insertGeometry(m_renderContainer.back());
     }
 
     void GeometryRenderer::removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry)
     {
-      if(!m_singletonManager->getService<db::MaterialManager>()->getObject(geometry->getMaterialHandle())->getDebug())
+      for(unsigned int i = 0; i < m_renderContainer.size(); i++)
       {
-        for(unsigned int i = 0; i < m_renderContainer.size(); i++)
+        if(m_renderContainer[i]->removeGeometry(geometry))
         {
-          if(m_renderContainer[i]->removeGeometry(geometry))
+          if(m_renderContainer[i]->isEmpty())
           {
-            if(m_renderContainer[i]->isEmpty())
-            {
-              m_frustumCullingRenderpass.removeGeometry(m_renderContainer[i]);
-              m_geometryRenderpass.removeGeometry(m_renderContainer[i]);
-              m_debugRenderpass.removeGeometry(m_renderContainer[i]);
-              m_indexRenderpass.removeGeometry(m_renderContainer[i]);
-              m_indirectLightEdgeVertexExtractionRenderpass.removeGeometry(m_renderContainer[i]);
-              m_indirectLightingRenderpass.removeGeometry(m_renderContainer[i]);
-              m_reflectiveShadowMapRenderpass.removeGeometry(m_renderContainer[i]);
-              m_shadowMapRenderpass.removeGeometry(m_renderContainer[i]);
-              m_indirectBackprojetionRenderpass.removeGeometry(m_renderContainer[i]);
+            m_frustumCullingRenderpass.removeGeometry(m_renderContainer[i]);
+            m_noLightingRenderpass.removeGeometry(m_renderContainer[i]);
+            m_geometryRenderpass.removeGeometry(m_renderContainer[i]);
+            m_noLightingRenderpass.removeGeometry(m_renderContainer[i]);
+            m_reflectiveShadowMapRenderpass.removeGeometry(m_renderContainer[i]);
+            m_shadowMapRenderpass.removeGeometry(m_renderContainer[i]);
+            m_indirectBackprojetionRenderpass.removeGeometry(m_renderContainer[i]);
 
-              m_renderContainer.erase(m_renderContainer.begin() + i);
-
-              return;
-            }
-          }
-        }
-      }
-      else
-      {
-        for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
-        {
-          if(m_debugRenderContainer[i]->removeGeometry(geometry))
-          {
-            if(m_debugRenderContainer[i]->isEmpty())
-            {
-              m_debugRenderpass.removeGeometry(m_debugRenderContainer[i]);
-
-              m_debugRenderContainer.erase(m_debugRenderContainer.begin() + i);
-            }
+            m_renderContainer.erase(m_renderContainer.begin() + i);
 
             return;
           }
@@ -152,7 +105,6 @@ namespace he
 
     void GeometryRenderer::updateBuffer()
     {
-      m_globalCacheNumber = 0;
       m_globalOccluderNumber = 0;
       m_globalTriangleNumber = 0;
       m_globalVertexNumber = 0;
@@ -160,18 +112,10 @@ namespace he
       for(unsigned int i = 0; i < m_renderContainer.size(); i++)
       {
         m_renderContainer[i]->update();
-        m_globalCacheNumber += m_renderContainer[i]->getPerInstanceCacheNumber();
         m_globalOccluderNumber += m_renderContainer[i]->getPerInstanceOccluderNumber();
         m_globalTriangleNumber += m_renderContainer[i]->getPerInstanceTriangleNumber();
         m_globalVertexNumber += m_renderContainer[i]->getPerInstanceVertexNumber();
       }
-
-      for(unsigned int i = 0; i < m_debugRenderContainer.size(); i++)
-      {
-        m_debugRenderContainer[i]->update();
-      }
-
-      m_proxyLightTextureResolution = static_cast<unsigned int>(pow(2.0f, ceil(log(sqrt(float(m_globalCacheNumber))) / log(2.0f))));
     }
 
     void GeometryRenderer::frustumCulling(int cameraIndex, Renderpass pass)
@@ -198,48 +142,20 @@ namespace he
       m_reflectiveShadowMapRenderpass.drawRenderpass();
     }
 
-    void GeometryRenderer::generateIndirectLightMap(util::SharedPointer<db::Texture2D> indirectShadowMap)
-    {
-      m_indirectLightingRenderpass.setProxyLightTextureResolution(m_proxyLightTextureResolution);
-      m_indirectLightingRenderpass.setIndirectShadowMap(indirectShadowMap);
-      m_indirectLightingRenderpass.drawRenderpass();
-    }
-
     void GeometryRenderer::generateIndirectBackprojectionMap(unsigned int lightIndex)
     {
       m_indirectBackprojetionRenderpass.setLightIndex(lightIndex);
       m_indirectBackprojetionRenderpass.drawRenderpass();
     }
-
-    void GeometryRenderer::generateEdgeVertexMap()
-    {
-      m_indirectLightEdgeVertexExtractionRenderpass.drawRenderpass();
-    }
-
-    void GeometryRenderer::rasterizeIndexGeometry()
-    {
-      m_indexRenderpass.setProxyLightTextureResolution(m_proxyLightTextureResolution);
-      m_indexRenderpass.drawRenderpass();
-    }
-
+  
     void GeometryRenderer::rasterizeGeometry()
     {
       m_geometryRenderpass.drawRenderpass();
     }
 
-    void GeometryRenderer::rasterizeDebugGeometry()
+    void GeometryRenderer::rasterizeNoLightingGeometry()
     {
-      m_debugRenderpass.drawRenderpass();
-    }
-
-    unsigned int GeometryRenderer::getGlobalCacheNumber() const
-    {
-      return m_globalCacheNumber;
-    }
-
-    unsigned int GeometryRenderer::getProxyLightTextureResolution() const
-    {
-      return m_proxyLightTextureResolution;
+      m_noLightingRenderpass.drawRenderpass();
     }
 
     unsigned int GeometryRenderer::getGlobalOccluderNumber() const

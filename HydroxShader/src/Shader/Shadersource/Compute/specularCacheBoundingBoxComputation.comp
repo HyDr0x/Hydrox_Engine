@@ -33,8 +33,7 @@ void main()
 	const uint cachesPerThread = uint(ceil(cacheNumber / float(WORKGROUPSIZE * gl_NumWorkGroups.x)));
 	const uint startIndex = borderCacheNumber + idx * cachesPerThread;
 	const uint endIndex = startIndex + cachesPerThread;
-	
-	
+
 	const vec3 x = vec3(viewMatrix[0].x, viewMatrix[1].x, viewMatrix[2].x);
 	const vec3 y = vec3(viewMatrix[0].y, viewMatrix[1].y, viewMatrix[2].y);
 	const vec3 z = vec3(viewMatrix[0].z, viewMatrix[1].z, viewMatrix[2].z);

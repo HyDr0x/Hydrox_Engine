@@ -49,12 +49,13 @@ void main()
 		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
+	float attenutation = clamp((lightAngle - reflectiveShadowLight[lightIndex].light.direction.w) * 1.0 / 0.05, 0.0, 1.0);
+	if(attenutation == 0.0) discard;
+	
 	vec3 normal = normalize(vsout_tangentToWorld * (texture(normalSampler, vsout_texCoord).xyz * 2.0f - 1.0f));
 	fsout_normalArea = vec4(normal * 0.5f + 0.5f, area);
 	
-	vec3 luminousFlux = ((1.0 / float(SAMPLENUMBER)) * reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * vsout_color).xyz;
+	vec3 luminousFlux = (reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * vsout_color).xyz;
 	fsout_pos3D = vec4(vsout_pos.xyz, 1.0);
 	fsout_luminousFlux = vec4(luminousFlux, 1.0);
-
-	//fsout_luminousFlux = vec4(luminousFlux, step(reflectiveShadowLight[lightIndex].light.direction.w, lightAngle));
 }

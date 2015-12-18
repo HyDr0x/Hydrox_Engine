@@ -1,8 +1,6 @@
 set(
 	SOURCE 
 	${SOURCE} 
-	${CMAKE_CURRENT_SOURCE_DIR}/CacheGenerator.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/CacheIndicesGenerator.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/clipper.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/Filecheck.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/ISMOcclusionDiscGenerator.cpp 

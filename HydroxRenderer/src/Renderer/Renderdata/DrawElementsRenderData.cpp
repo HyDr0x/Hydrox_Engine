@@ -14,15 +14,10 @@ namespace he
 
       m_triangleIndexOffsetBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perMeshBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
-      m_cacheOffsetBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perMeshBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_cacheIndicesPerTriangleBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::vec2ui) * m_options->triangleBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_cacheBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::Cache) * m_options->cacheBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-
       m_occluderOffsetBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perMeshBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_occluderIndicesPerTriangleBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::vec2ui) * m_options->triangleBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
-      m_occluderBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::vec4f) * m_options->cacheBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
+      m_occluderBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(util::vec4f) * m_options->occluderBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
 
-      m_cacheInstanceOffsetBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_occluderInstanceOffsetBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_meshInstanceBufferIndex.createBuffer(GL_SHADER_STORAGE_BUFFER, sizeof(GLuint) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
       m_commandBuffer.createBuffer(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * m_options->perInstanceBlockSize, 0, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT, nullptr);
@@ -77,36 +72,6 @@ namespace he
       m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
       m_commandBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_bboxesBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-    }
-
-    void DrawElementsRenderData::bindCacheBuffer() const
-    {
-      m_triangleIndexOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
-      m_cacheOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
-      m_cacheIndicesPerTriangleBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
-      m_cacheBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_meshInstanceBufferIndex.bindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-    }
-
-    void DrawElementsRenderData::unbindCacheBuffer() const
-    {
-      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 7);
-      m_meshInstanceBufferIndex.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 6);
-      m_cacheBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 5);
-      m_cacheIndicesPerTriangleBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
-      m_cacheOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
-      m_triangleIndexOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
-    }
-
-    void DrawElementsRenderData::bindCacheInstanceOffsetBuffer() const
-    {
-      m_cacheInstanceOffsetBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
-    }
-
-    void DrawElementsRenderData::unbindCacheInstanceOffsetBuffer() const
-    {
-      m_cacheInstanceOffsetBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
     }
 
     void DrawElementsRenderData::bindOccluderBuffer() const
@@ -179,11 +144,6 @@ namespace he
       m_updateMeshData = false;
     }
 
-    unsigned int DrawElementsRenderData::getPerInstanceCacheNumber() const
-    {
-      return m_perInstanceCacheNumber;
-    }
-
     unsigned int DrawElementsRenderData::getPerInstanceOccluderNumber() const
     {
       return m_perInstanceOccluderNumber;
@@ -219,10 +179,7 @@ namespace he
         m_meshVertexBuffer.setData(vertexOffset * mesh->getVertexStride(), mesh->getVBOSize(), &(mesh->getVBOBuffer()[0]));
         m_meshIndexBuffer.setData(indexOffset * sizeof(GLINDEXTYPE), mesh->getIndexCount() * sizeof(GLINDEXTYPE), &(mesh->getIndexBuffer()[0]));
         m_triangleIndexOffsetBuffer.setData(bufferIndex * sizeof(GLuint), sizeof(GLuint), &triangleOffset);
-        m_cacheOffsetBuffer.setData(bufferIndex * sizeof(GLuint), sizeof(GLuint), &cacheOffset);
         m_occluderOffsetBuffer.setData(bufferIndex * sizeof(GLuint), sizeof(GLuint), &occluderOffset);
-        if(!mesh->getTriangleCacheIndices().empty()) m_cacheIndicesPerTriangleBuffer.setData(triangleOffset * sizeof(util::vec2ui), mesh->getTriangleCacheIndices().size() * sizeof(util::vec2ui), &mesh->getTriangleCacheIndices()[0]);
-        if(mesh->getCacheCount()) m_cacheBuffer.setData(cacheOffset * sizeof(util::Cache), mesh->getCacheCount() * sizeof(util::Cache), &mesh->getCaches()[0]);
         if(!mesh->getTriangleOccluderIndices().empty()) m_occluderIndicesPerTriangleBuffer.setData(triangleOffset * sizeof(util::vec2ui), mesh->getTriangleOccluderIndices().size() * sizeof(util::vec2ui), &mesh->getTriangleOccluderIndices()[0]);
         if(mesh->getOccluderCount()) m_occluderBuffer.setData(occluderOffset * sizeof(util::vec4f), mesh->getOccluderCount() * sizeof(util::vec4f), &mesh->getOccluder()[0]);
 
@@ -233,7 +190,6 @@ namespace he
         vertexOffset += mesh->getVertexCount();
         indexOffset += mesh->getIndexCount();
         triangleOffset += mesh->getPrimitiveCount();
-        cacheOffset += mesh->getCacheCount();
         occluderOffset += mesh->getOccluderCount();
 
         m_meshHashes[meshIterator->first] = mesh->getHash();
@@ -243,7 +199,6 @@ namespace he
         m_bboxesBuffer.setData((2 * meshIterator->second.bufferIndex + 1) * sizeof(util::vec4f), sizeof(util::vec3f), &mesh->getBBMax()[0]);
       }
 
-      m_cacheNumber = cacheOffset;
       m_occluderNumber = occluderOffset;
     }
 
@@ -253,7 +208,6 @@ namespace he
 
       m_perInstanceVertexNumber = 0;
       m_perInstanceTriangleNumber = 0;
-      m_perInstanceCacheNumber = 0;
       m_perInstanceOccluderNumber = 0;
       unsigned int instanceCounter = 0;
       renderData.resetInstanceIterator();
@@ -269,12 +223,10 @@ namespace he
         command.baseVertex = m_meshes[instance.getMeshHandle()].vertexOffset;
         command.baseInstance = instanceCounter;
 
-        m_cacheInstanceOffsetBuffer.setData(sizeof(GLuint) * instanceCounter, sizeof(GLuint), &m_perInstanceCacheNumber);
         m_occluderInstanceOffsetBuffer.setData(sizeof(GLuint) * instanceCounter, sizeof(GLuint), &m_perInstanceOccluderNumber);
         m_commandBuffer.setData(instanceCounter * sizeof(DrawElementsIndirectCommand), sizeof(DrawElementsIndirectCommand), &command);
         m_meshInstanceBufferIndex.setData(instanceCounter * sizeof(GLuint), sizeof(GLuint), &m_meshes[instance.getMeshHandle()].bufferIndex);
 
-        m_perInstanceCacheNumber += mesh->getCacheCount();
         m_perInstanceOccluderNumber += mesh->getOccluderCount();
         m_perInstanceVertexNumber += mesh->getVertexCount();
         m_perInstanceTriangleNumber += mesh->getPrimitiveCount();

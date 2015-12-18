@@ -6,7 +6,9 @@ layout(std430, binding = LIGHTTUBEBINDINGPOINT) buffer tubeData
 
 float specularCacheSolidAngle(float yFuncOffset, float n)
 {
-	return PI_HALF - asin(pow(yFuncOffset, 1.0 / n));
+	//return PI_HALF - asin(pow(yFuncOffset, 1.0 / n));
+	return acos(pow(yFuncOffset, 1.0 / n));
+	//return acos(pow((yFuncOffset * 2.0 * PI) / (2.0 + n), 1.0 / n));
 }
 
 bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAngle, in uint tubeIndex, out float distance)
@@ -19,10 +21,9 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	float t = divisor != 0.0 ? (dot(r, trfTubeStartPos) * dotRDir - dot(trfTubeStartPos, tubeDirection[tubeIndex].xyz)) / divisor : 0.0;
 	vec3 tubePosAngleTest = trfTubeStartPos + t * tubeDirection[tubeIndex].xyz;
 	
-	if(dot(normalize(tubePosAngleTest), r) < 0.0)
+	if(dot(tubePosAngleTest, r) < 0.0)
 	{
-		//t *= -1.0;
-		t = -sign(t);
+		t = dot(r, tubeDirection[tubeIndex].xyz) > 0.0 ? 1.0 : 0.0;
 	}
 	
 	vec3 tubePos = trfTubeStartPos + clamp(t, 0.0, 1.0) * tubeDirection[tubeIndex].xyz;
@@ -44,33 +45,29 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	
 	dist = sqrt(dist);
 	vec3 Ntangent = normalize(cross(tubePos, r));
+	
+	float linDist = radius / dist;
+	
+	mat3 linearSystem = mat3(1.0, 1.0, 1.0,
+													 linDist * Ntangent.z, linDist * Ntangent.x, linDist * Ntangent.y,
+													 -linDist * Ntangent.y, -linDist * Ntangent.z, -linDist * Ntangent.x);//column major order
+										
+	vec3 tangentPoint = inverse(linearSystem) * tubePos;
+	vec3 closestPoint = tubePos + normalize(tangentPoint - tubePos) * radius;
+	
+	vec3 tangentLotPoint = dot(normalize(tubePos), tangentPoint) * normalize(tubePos);
+	vec3 mirroredTangentPoint = 2.0 * tangentLotPoint - tangentPoint;
+	vec3 mirroredClosestPoint = tubePos + normalize(mirroredTangentPoint - tubePos) * radius;
+
+	float beta = max(dot(normalize(mirroredClosestPoint), r), dot(normalize(closestPoint), r));
+	
+	/*
 	mat3 linearSystem = mat3(-radius, -dist * Ntangent.z, dist * Ntangent.y,
 													 dist * Ntangent.z, -radius, -dist * Ntangent.x,
 													 -dist * Ntangent.y, dist * Ntangent.x, -radius);//column major order
 										
-	vec3 closestPoint = tubePos + normalize(inverse(linearSystem) * tubePos) * radius; 	
-	/*
-	float detA = determinant(linearSystem);
+	vec3 closestPoint = tubePos + normalize(inverse(linearSystem) * tubePos) * radius;*/
 	
-	mat3 modLinSystem = linearSystem;
-	modLinSystem[0] = tubePos;
-	float det0 = determinant(modLinSystem);
-	
-	modLinSystem = linearSystem;
-	modLinSystem[1] = tubePos;
-	float det1 = determinant(modLinSystem);
-	
-	modLinSystem = linearSystem;
-	modLinSystem[2] = tubePos;
-	float det2 = determinant(modLinSystem);
-	
-	if(detA == 0.0 || det0 == 0.0 || det1 == 0.0 || det2 == 0.0)
-	{
-		distance = lineDistance;
-		return true;
-	}
-	
-	vec3 closestPoint = tubePos + normalize(vec3(det0 / detA, det1 / detA, det2 / detA)) * radius;*/
 	
 	float tubeDistance = max(length(closestPoint), 0.001);
 
@@ -84,10 +81,12 @@ bool indirectLightTubeCollision(in vec3 cachePos, in vec3 r, in float maxSolidAn
 	float base = pow(radix, floor(log(distance) / log(radix)) - 1.0);
 	distance = base * floor(distance / base);
 
-	return dot(normalize(closestPoint), r) > cos(maxSolidAngle);
+	return beta > cos(maxSolidAngle);
 }
 
 float samplingDistance(float lightDistance, float maxSolidAngle)
 {
-	return max(lightDistance * 2.0 * tan(maxSolidAngle), 0.05);
+	//float openingAngle = 2.0 * acos(1.0 - maxSolidAngle / (2.0 * PI));
+	return max(lightDistance * tan(maxSolidAngle), 0.01);
+	//return max(1.0 * tan(maxSolidAngle), 0.01) * 0.1;
 }

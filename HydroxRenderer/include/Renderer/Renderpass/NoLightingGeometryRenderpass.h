@@ -1,5 +1,5 @@
-#ifndef DEBUGGEOMETRYRENDERPASS_H_
-#define DEBUGGEOMETRYRENDERPASS_H_
+#ifndef NOLIGHTINGGEOMETRYRENDERPASS_H_
+#define NOLIGHTINGGEOMETRYRENDERPASS_H_
 
 #include <list>
 
@@ -22,12 +22,12 @@ namespace he
   {
     class RenderOptions;
 
-    class DebugGeometryRenderpass : public ARenderpass
+    class NoLightingGeometryRenderpass : public ARenderpass
     {
     public:
 
-      DebugGeometryRenderpass();
-      virtual ~DebugGeometryRenderpass();
+      NoLightingGeometryRenderpass();
+      virtual ~NoLightingGeometryRenderpass();
 
       virtual void initialize(util::SingletonManager *singletonManager, sh::ShaderContainer::Renderpass renderPass, std::vector<util::SharedPointer<SamplerObject>> samplerObjects);
 

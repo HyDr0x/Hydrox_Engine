@@ -28,8 +28,6 @@ void main()
 	const uint pixelStartIndex = idx * pixelsPerThread;
 	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
 
-	const uint pixelsPerTile = (minification * minification);
-	
 	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
 	{
 		uint pixelID = minification * i;
@@ -41,9 +39,14 @@ void main()
 		
 		for(uint j = 0; j < minification; j++)
 		{
-			position += imageLoad(readReflectiveShadowMapPositionSampler, texCoord);
-			normal += imageLoad(readReflectiveShadowMapNormalSampler, texCoord);
-			luminousFlux += imageLoad(readReflectiveShadowMapLuminousFluxSampler, texCoord);
+			vec4 pos = imageLoad(readReflectiveShadowMapPositionSampler, texCoord);
+			
+			if(pos.w == 1.0)
+			{
+				position += pos;
+				normal += imageLoad(readReflectiveShadowMapNormalSampler, texCoord);
+				luminousFlux += imageLoad(readReflectiveShadowMapLuminousFluxSampler, texCoord);
+			}
 			
 			texCoord += sampleDirection;
 		}
@@ -53,11 +56,11 @@ void main()
 		if(sampleDirection == ivec2(0, 1))
 		{
 			downSampledTexCoord = ivec2(i / reflectiveShadowMapResolution, mod(i, reflectiveShadowMapResolution));
-		
-			position /= pixelsPerTile;
-			normal /= pixelsPerTile;
-			luminousFlux /= pixelsPerTile;
 		}
+		
+		position /= minification;
+		normal /= minification;
+		luminousFlux /= minification;
 
 		imageStore(writeReflectiveShadowMapPositionImage, downSampledTexCoord, position);
 		imageStore(writeReflectiveShadowMapNormalImage, downSampledTexCoord, normal);

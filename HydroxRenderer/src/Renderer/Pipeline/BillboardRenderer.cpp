@@ -22,7 +22,7 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      m_billboardShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::BILLBOARD, sh::ShaderSlotFlags(8192));
+      m_billboardShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::BILLBOARD, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
 
       glGenBuffers(1, &m_dummyVBO);
       glBindBuffer(GL_ARRAY_BUFFER, m_dummyVBO);

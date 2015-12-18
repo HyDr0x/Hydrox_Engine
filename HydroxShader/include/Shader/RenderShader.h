@@ -29,8 +29,6 @@ namespace he
         BONEWEIGHTS,
         BONEINDICES,
         COLOR,
-        CACHEINDICES0,
-        CACHEINDICES1,
         SPECIAL0,
         SPECIAL1,
         SPECIAL2,

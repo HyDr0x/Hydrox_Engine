@@ -23,12 +23,6 @@ namespace he
 
       //OCTREE GENERATION SHOULD BE REPLACED BY UNIFIED TREE MODEL!!!
       void generateOccluder(std::vector<vec4f>& outOccluder, std::vector<vec2ui>& outTriangleOccluderIndices, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices = std::vector<unsigned int>());
-      
-      static vec3f findCacheTriangle(const std::vector<vec3f>& triangles, const vec3f& outOccluder, Triangle& occluderTriangle);//returns the nearest triangle of the cache and the nearest point on the triangle
-
-      static void createTriangleCacheIndices(const std::vector<vec3f>& triangles, std::vector<Triangle>& occluderTriangles, std::vector<vec3f>& outOccluder, std::vector<vec2ui>& triangleCacheIndices);
-
-      static void convertIndexedToNonIndexedTriangles(const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices, std::vector<vec3f>& outTriangles);
 
     private:
 
@@ -53,19 +47,24 @@ namespace he
         return bin;
       }
 
+      void convertIndexedToNonIndexedTriangles(const std::vector<vec3f>& positions, const std::vector<unsigned int>& indices, std::vector<vec3f>& outTriangles);
       void recursiveGenerateOccluder(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
       void createOccluder(vec3f bbMin, vec3f bbMax, const std::vector<vec3f>& positions);
       void generateOccluderPerVoxel(unsigned int voxelIndex, std::vector<std::vector<float>> normalBin);
       void shiftCentroid(unsigned int voxelIndex);
       void reduceOccluder();
-      
+
+      void createTriangleOccluderIndices(const std::vector<vec3f>& triangles);
+
+      void generateCachesArea(const std::vector<vec3f>& triangles);
+
       static const int m_bitShiftNumber = 31;
 
       std::vector<std::vector<vec3f>> m_triangles;//saves all triangles for each voxel, 3 x xyz per triangle in a list
       std::vector<std::list<std::pair<Polygon, Triangle>>> m_polygons;//saves all polygons which lying in the voxel and their original triangle from where they came
       std::map<unsigned int, std::list<std::pair<vec3f, Triangle>>> m_linearizedOccluder;//saves all caches with their area
-      std::vector<vec3f> m_occluder;
-      std::vector<Triangle> m_cacheTriangles;
+      std::vector<vec4f> m_occluder;
+      std::vector<Triangle> m_occluderTriangles;
       std::vector<vec2ui> m_triangleOccluderIndices;
 
       std::vector<vec3f> m_boxPoints;//create for each plane 3 points in the right orientation for the sutherland hodgman algorithm

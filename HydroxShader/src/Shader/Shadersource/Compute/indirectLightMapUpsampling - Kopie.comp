@@ -1,0 +1,53 @@
+#version 440 core
+
+#define WORKGROUPTILESIZE 128
+
+layout(location = 0) uniform ivec2 originalResolution;
+layout(location = 1) uniform ivec2 upsampledResolution;
+layout(location = 2) uniform uint magnification;
+
+layout(location = 3) uniform sampler2D readIndirectLightMap;
+
+layout(rgba16f, binding = 0) writeonly uniform image2D writeIndirectLightMap;
+
+layout(local_size_x = WORKGROUPTILESIZE) in;
+
+void main()
+{
+	const uint idx = gl_GlobalInvocationID.x;
+	const uint localID = gl_LocalInvocationIndex;
+	
+	const uint threadNumber = WORKGROUPTILESIZE * gl_NumWorkGroups.x;
+	
+	const uint pixelsPerThread = (upsampledResolution.x * upsampledResolution.y + threadNumber - 1) / threadNumber;
+	const uint pixelStartIndex = idx * pixelsPerThread;
+	const uint pixelEndIndex = pixelStartIndex + pixelsPerThread;
+
+	const uint filterSize = 2 * magnification - 1;
+	const ivec2 texOffset = ivec2(filterSize / magnification);
+	const uint pixelsPerTile = (filterSize * filterSize);
+	
+	for(uint i = pixelStartIndex; i < pixelEndIndex; i++)
+	{
+		ivec2 texCoord = ivec2(mod(i, upsampledResolution.x), i / upsampledResolution.x);
+		
+		vec4 indirectLight = vec4(0.0);
+
+		uint validPixelCounter = 0;
+		for(uint j = 0; j < pixelsPerTile; j++)
+		{
+			ivec2 lowResTexCoord = (texCoord + ivec2(mod(j, filterSize), j / filterSize) - texOffset) / int(magnification);
+			
+			if(0 <= lowResTexCoord.x && lowResTexCoord.x < originalResolution.x &&
+				 0 <= lowResTexCoord.y && lowResTexCoord.y < originalResolution.y)
+			{
+				indirectLight += texelFetch(readIndirectLightMap, lowResTexCoord, 0);
+				validPixelCounter++;
+			}
+		}
+
+		indirectLight /= validPixelCounter;
+		
+		imageStore(writeIndirectLightMap, texCoord, vec4(indirectLight));
+	}
+}

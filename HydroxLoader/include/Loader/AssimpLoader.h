@@ -39,7 +39,7 @@ namespace he
     struct FileInformations
     {
       std::string filename;
-      unsigned int cacheNumber;
+      unsigned int occluderNumber;
       unsigned int vertexNumber;
       unsigned int faceNumber;
       unsigned int meshNumber;
@@ -66,8 +66,9 @@ namespace he
 
       AssimpLoader& operator=(const AssimpLoader& other);
 
-      void setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle);
+      void setOccluderGeneratorParamter(float errorRate, float maxDistance, float maxAngle);
       void setCreateNormals(bool createNormals);
+      void setMipmapping(bool mipmapping);
 
       void setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit);
       AnimationTimeUnit getAnimationTimeUnit() const;
@@ -124,6 +125,7 @@ namespace he
       float m_maxDistance;
       float m_maxAngle;
 
+      bool m_mipmapping;
       bool m_sRGB;
       bool m_createNormals;
     };

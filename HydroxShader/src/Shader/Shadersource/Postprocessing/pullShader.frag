@@ -4,6 +4,7 @@ layout(location = 0) uniform sampler2DArray loadShadowMap;
 
 layout(location = 1) uniform uint lightIndex;
 layout(location = 2) uniform uint level;
+layout(location = 3) uniform uvec2 texCoordOffset;
 
 in vec2 gsout_texCoord;
 
@@ -12,7 +13,7 @@ void main()
 	float errorRate = 0.05 * pow(2, level);
 	float oldDepths[4];
 
-	ivec2 texCoord = 2 * ivec2(gl_FragCoord.xy);
+	ivec2 texCoord = ivec2(texCoordOffset) + 2 * ivec2(gl_FragCoord.xy);
 
 	float newDepth = 0.0;
 	float kernelSize = 0.0;

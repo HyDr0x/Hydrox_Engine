@@ -30,7 +30,7 @@ namespace he
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
       m_textureManager = singletonManager->getService<db::TextureManager>();
 
-      m_spriteShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPRITE, sh::ShaderSlotFlags(8192));
+      m_spriteShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::SPRITE, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 

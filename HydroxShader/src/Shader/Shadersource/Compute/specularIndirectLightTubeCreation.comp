@@ -25,12 +25,11 @@ void main()
 
 	vec3 minAABB = vec3(INT32_MAX), maxAABB = vec3(-INT32_MAX);
 	
-	const uint samplesPerThread = SAMPLENUMBER / WORKGROUPSIZE;
+	const uint samplesPerThread = (SAMPLENUMBER + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
 	const uint startIndex = localIDX * samplesPerThread;
 	const uint endIndex = startIndex + samplesPerThread;
 	
 	for(uint j = startIndex; j < endIndex; j++)
-	//for(uint j = startIndex; j < samplesPerThread; j++)//should be WRONG!!!
 	{
 		if(j >= SAMPLENUMBER)
 		{

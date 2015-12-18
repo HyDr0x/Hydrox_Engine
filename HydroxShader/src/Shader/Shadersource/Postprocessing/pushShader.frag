@@ -10,7 +10,7 @@ in vec2 gsout_texCoord;
 
 void main()
 {
-	float errorRate = 0.0 * pow(2.0, float(pyramidLevel));
+	float errorRate = 0.05 * pow(2.0, float(pyramidLevel));
 	float referenceDepth = texture(referenceDepthSampler, vec3(gsout_texCoord, layer)).r;
 	float newDepth = texture(depthSampler, vec3(gsout_texCoord, layer)).r;
 	

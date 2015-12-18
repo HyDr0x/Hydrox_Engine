@@ -7,7 +7,6 @@ set(
 	${CMAKE_CURRENT_SOURCE_DIR}/FinalCompositing.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GBuffer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderer.cpp 
-	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightRenderer.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectShadowsCreation.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectSpecularReflections.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/LightRenderer.cpp 

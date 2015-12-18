@@ -4,6 +4,7 @@
 
 #define BLOCKNUMBER 32
 #define WORKGROUPSIZE (INTERLEAVEDBLOCKSIZE * BLOCKNUMBER)
+#define RESOLUTIONDIVISOR
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
@@ -41,10 +42,10 @@ void main()
 		
 		if(texCoord.x < (samplingDirection.x * frameBufferResolution.x + samplingDirection.y * frameBufferResolution.y))
 		{
-			float rawZ = texelFetch(gBufferDepth, 2 * texCoord, 0).r * 2.0 - 1.0;
+			float rawZ = texelFetch(gBufferDepth, texCoord, 0).r * 2.0 - 1.0;
 			rawZ = -(-projectionMatrix[3][2] / (rawZ + projectionMatrix[2][2]));
 			depth[workGroupID] = (rawZ - near) / (far - near);
-			normal[workGroupID] = imageLoad(gBufferNormal, 2 * texCoord).xyz * 2.0 - 1.0;
+			normal[workGroupID] = imageLoad(gBufferNormal, texCoord).xyz * 2.0 - 1.0;
 		}
 		else
 		{

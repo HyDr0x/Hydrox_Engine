@@ -44,7 +44,7 @@ void main()
 		ivec2 texCoord = ivec2(mod(i, HALFRESX), i / HALFRESX);
 
 		vec4 cacheNormal = imageLoad(cacheNormalSampler, texCoord);
-		if(cacheNormal.xyz != vec3(0.0))
+		if(cacheNormal != vec4(0.0))
 		{
 			uint edgeCacheOffset = uint(imageLoad(cacheOffsetSampler, texCoord).r) - 1;
 

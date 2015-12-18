@@ -8,6 +8,5 @@ add_subdirectory(String)
 set(
 	SOURCE 
 	${SOURCE} 
-	${CMAKE_CURRENT_SOURCE_DIR}/GPUCode.cpp 
 	PARENT_SCOPE 
 )

@@ -46,14 +46,13 @@ layout(std430, binding = 8) buffer transformedOccluderNormalCoordinatesBuffer
 
 in VertexData
 {
+	vec4 color;
 	vec3 normal;
 	flat uint instanceIndex;
-	vec4 color;
 } inData[];
 
 out GeometryData
 {
-	vec3 barycentric;
 	vec3 normal;
 	flat uint instanceIndex;
 	vec4 color;
@@ -72,17 +71,16 @@ void main()
 		uint index = globalOccluderOffset + perInstanceOccluderOffsetTMP + i;
 
 		vec3 occluderBarycentric = occluderCoordinates[occluderIndexOffsetTMP + i].xyz;
-		transformedOccluderNormalCoordinates[2 * index] = vec4((occluderBarycentric.x * gl_in[0].gl_Position + occluderBarycentric.y * gl_in[1].gl_Position + occluderBarycentric.z * gl_in[2].gl_Position).xyz, 1.0);
+		transformedOccluderNormalCoordinates[2 * index] = vec4(occluderBarycentric.x * gl_in[0].gl_Position + occluderBarycentric.y * gl_in[1].gl_Position + occluderBarycentric.z * gl_in[2].gl_Position);
 		transformedOccluderNormalCoordinates[2 * index + 1] = normalize(vec4(occluderBarycentric.x * inData[0].normal + occluderBarycentric.y * inData[1].normal + occluderBarycentric.z * inData[2].normal, 0.0));
 	}
 	
 	for(uint i = 0; i < 3; i++)
 	{
-		outData.barycentric = vec3(float(i == 0), float(i == 1), float(i == 2));
 		outData.color = inData[i].color;
 		outData.normal = inData[i].normal;
 		outData.instanceIndex = inData[i].instanceIndex;
-		gl_Position = viewProjectionMatrix * vec4(gl_in[i].gl_Position);
+		gl_Position = viewProjectionMatrix * vec4(gl_in[i].gl_Position.xyz, 1.0);
 		EmitVertex();
 	}
 	

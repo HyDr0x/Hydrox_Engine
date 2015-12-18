@@ -37,7 +37,7 @@ void main()
 	const uint startIndex = idx * pixelPerThread;
 	const uint endIndex = startIndex + pixelPerThread;
 
-	ivec2 texCoords = stepSize * ivec2(pixelPerThread * floor(idx / HALFRESY), pixelPerThread * floor(idx / HALFRESX)) + (ivec2(1) - stepSize) * ivec2(mod(idx, HALFRESX), mod(idx, HALFRESY));
+	ivec2 texCoords = ivec2(pixelPerThread * floor(idx / HALFRESY), mod(idx, HALFRESY));
 
 	for(uint i = startIndex; i < endIndex; i++)
 	{
@@ -47,14 +47,7 @@ void main()
 			sampleDistance = 0.0;
 			oldPosition = vec3(0.0);
 		}
-		
-		if(texCoords.y < 0 && stepSize.y < 0)
-		{
-			texCoords.y = int(HALFRESY - 1);
-			sampleDistance = 0.0;
-			oldPosition = vec3(0.0);
-		}
-	
+			
 		if(texCoords.x >= HALFRESX || texCoords.y >= HALFRESY)
 		{
 			return;
@@ -74,16 +67,15 @@ void main()
 		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
 		newPosition = tmpProjPos.xyz / tmpProjPos.w;
 		
-		roughness = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoords, 0)).w;
+		roughness = texelFetch(gBufferMaterialSampler, texCoords, 0).b;
 		
 		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
-		if(sampleDistance <= 0.0 || (log(oldRoughness - roughness) / log(2.0)) > 10.0)
+		if(sampleDistance <= 0.0 || (oldRoughness - roughness) > 0.2)
 		{
-			float maxSolidAngle = specularCacheSolidAngle(0.95, roughness);
-			float collisionSolidAngle = specularCacheSolidAngle(0.1, roughness);
+			float maxSolidAngle = specularCacheSolidAngle(0.95, GGXToBlinnPhong(vec4(0, 0, roughness, 0)).w);
 			
 			vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), normal));
 			
@@ -91,11 +83,11 @@ void main()
 			
 			for(uint j = 0; j < reflectiveShadowMapNumber; j++)
 			{
-				if(indirectLightTubeCollision(newPosition, reflectRay, collisionSolidAngle, j, cacheIndirectLightDistance))
+				if(indirectLightTubeCollision(newPosition, reflectRay, maxSolidAngle, j, cacheIndirectLightDistance))
 				{
 					float newSampleDistance = samplingDistance(cacheIndirectLightDistance, maxSolidAngle);
 					
-					imageStore(cacheInnerSamplingDistanceBuffer, texCoords, vec4(newSampleDistance));
+					imageStore(cacheInnerSamplingDistanceBuffer, texCoords, vec4(1.0));
 
 					sampleDistance = newSampleDistance;
 					

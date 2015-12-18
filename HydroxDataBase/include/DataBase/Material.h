@@ -74,7 +74,7 @@ namespace he
 
       bool getTransparency() const;
 
-      bool getDebug() const;
+      bool getDebug() const;//DEPRECEATED, CA NBE REMOVED!
 
     protected:
 

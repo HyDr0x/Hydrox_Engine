@@ -30,7 +30,8 @@ namespace he
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, vertexTileSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, vertexTileMulti, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, cacheTileSize, &atoi);
-
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectLightResolutionDivisor, &atoi);
+      
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, lightNumber, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, shadowMapWidth, &atoi);
 
@@ -38,7 +39,7 @@ namespace he
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectShadowMapWidth, &atoi);
       giLightSampleNumber = reflectiveShadowMapWidth * reflectiveShadowMapWidth;
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, giShadowLightSampleDivisor, &atoi);
-      getParameter<unsigned int, int(*) (const char*)>(parameterStream, kCache, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectShadowMapTilenumber, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, pushPullPyramideSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, backProjectionWidth, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, adaptiveSampleNumber, &atoi);
@@ -53,7 +54,6 @@ namespace he
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, iboBlockSize, &atoi);
       triangleBlockSize = iboBlockSize / 3;
 
-      getParameter<unsigned int, int(*) (const char*)>(parameterStream, cacheBlockSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, occluderBlockSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, perMeshBlockSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, perInstanceBlockSize, &atoi);
@@ -62,7 +62,6 @@ namespace he
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, maxMaterialNumber, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, maxBoneNumber, &atoi);
 
-      getParameter<unsigned int, int(*) (const char*)>(parameterStream, globalCacheBlockSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, globalOccluderBlockSize, &atoi);
 
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, usedHistogramBins, &atoi);

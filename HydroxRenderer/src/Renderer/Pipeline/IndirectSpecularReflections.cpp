@@ -30,7 +30,7 @@ namespace he
       GLuint baseInstance;//base instance, getting added to all vertex attribute divisors, not to gl_InstanceID!
     };
 
-    IndirectSpecularReflections::IndirectSpecularReflections() : m_ping(0), m_pong(1 - m_ping)
+    IndirectSpecularReflections::IndirectSpecularReflections() : m_ping(0), m_pong(1 - m_ping), m_globalOccluderNumber(0)
     {
     }
 
@@ -43,6 +43,10 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
 
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
+
+      m_measurementManager = singletonManager->getService<util::MeasurementManager>();
+
+      m_measurementManager->addMeasurement("IndirectIlluminationMeasurement", 100);
 
       m_gBufferDownsampling = sh::ShaderContainer::GBUFFERDOWNSAMPLING;
       m_calculateAreaLightTube = sh::ShaderContainer::SPECULARTUBECREATION;
@@ -62,7 +66,7 @@ namespace he
       m_vertexIndexMultiplicator = m_options->vertexTileMulti;
       m_cacheResolution = m_options->cacheTileSize;
 
-      m_indirectLightResolution = util::vec2i(m_options->width / 2, m_options->height / 2);
+      m_indirectLightResolution = util::vec2i(m_options->width, m_options->height) / m_options->indirectLightResolutionDivisor;
       m_halfResGBufferDepthMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
       m_halfResGBufferLinearDepthMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_R32F, GL_RED, 1, 32));
       m_halfResGBufferNormalMap0 = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
@@ -86,9 +90,8 @@ namespace he
       m_vertexPositionMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
       m_vertexNormalMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA32F, GL_RGBA, 4, 32));
 
-      //m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
-      m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
-      m_upsampledSpecularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_downsampledSpecularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_indirectLightResolution[0], m_indirectLightResolution[1], GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
+      m_specularLightMap = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 
       m_proxyLightPositionBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
       m_proxyLightLuminousFluxBuffer.createBuffer(GL_SHADER_STORAGE_BUFFER, 2 * m_options->specularCacheNumber * sizeof(util::vec4f), 2 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
@@ -101,8 +104,10 @@ namespace he
       m_debugCacheVertexIndexPositions.createBuffer(GL_ARRAY_BUFFER, 16 * m_options->specularCacheNumber * sizeof(util::vec4f), 16 * m_options->specularCacheNumber * sizeof(util::vec4f), GL_STATIC_DRAW);
     }
 
-    void IndirectSpecularReflections::updateBuffer(unsigned int reflectiveShadowMapNumber)
+    void IndirectSpecularReflections::updateBuffer(unsigned int reflectiveShadowMapNumber, unsigned int globalOccluderNumber)
     {
+      m_globalOccluderNumber = globalOccluderNumber;
+
       if(reflectiveShadowMapNumber != m_reflectiveShadowMapNumber)
       {
         m_reflectiveShadowMapNumber = reflectiveShadowMapNumber;
@@ -121,14 +126,14 @@ namespace he
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
       util::SharedPointer<db::Texture3D> indirectShadowMaps,
-      util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions)
+      util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
+      const GPUBuffer& occluderBuffer)
     {
-      //CPUTIMER("MainloopCPUTimer", 0)
-      //GPUTIMER("MainloopOGLTimer", 1)
-      
-      gBufferDownsampling(gBufferDepthMap, gBufferLinearDepthMap, gBufferNormalMap, gBufferVertexNormalMap, gBufferMaterialMap);
+      //CPUTIMER("IndirectLightCPUTimer", 0)
+      //GPUTIMER("IndirectLightOGLTimer", 1)
 
-      createTubeData(indirectLightPositions);
+      m_measurementManager->begin("IndirectIlluminationMeasurement");
+      createTubeData(indirectLightPositions); 
 
       createSpecularEdgeCaches(m_halfResGBufferDepthMap1, m_halfResGBufferVertexNormalMap1, m_halfResGBufferMaterialMap1, m_halfResGBufferLinearDepthMap1);
       createEdgeVertices(m_halfResGBufferDepthMap1, m_halfResGBufferVertexNormalMap1, m_halfResGBufferMaterialMap1, m_halfResGBufferLinearDepthMap1);
@@ -138,13 +143,23 @@ namespace he
 
       createSpecularCacheBuffer();
 
-      createProxyLightBuffer(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux, indirectShadowMaps, indirectShadowVALQuaternions);
+      createProxyLightBuffer(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux, indirectShadowMaps, indirectShadowVALQuaternions, occluderBuffer);
 
       createSpecularCacheIndices();
 
-      createindirectLightMap(m_halfResGBufferDepthMap1, m_halfResGBufferNormalMap1, m_halfResGBufferMaterialMap1);
+      createIndirectLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
 
-      indirectLightMapUpsampling();
+      m_measurementManager->end("IndirectIlluminationMeasurement");
+
+      if(m_measurementManager->ready("IndirectIlluminationMeasurement"))
+      {
+        std::cout << "CPU: " << m_measurementManager->getAveragedCPUResult("IndirectIlluminationMeasurement") << std::endl;
+        std::cout << "GPU: " << m_measurementManager->getAveragedGPUResult("IndirectIlluminationMeasurement") << std::endl;
+        m_measurementManager->resetMeasurement("IndirectIlluminationMeasurement");
+      }
+
+      //createIndirectLightMap(m_halfResGBufferDepthMap1, m_halfResGBufferNormalMap1, m_halfResGBufferMaterialMap1);
+      //upsampleIndirectLightMap(gBufferLinearDepthMap, gBufferNormalMap);
     }
 
     void IndirectSpecularReflections::gBufferDownsampling(util::SharedPointer<db::Texture2D> gBufferDepthMap,
@@ -272,6 +287,7 @@ namespace he
       m_cachePositionBufferInnerX->clearTexture(&clearValue);
 
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       util::vec2i stepSize[2];
       stepSize[0] = util::vec2i(1, 0);
@@ -301,7 +317,6 @@ namespace he
 
       specularCachePositionFilterXShader.useNoShader();
 
-      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
       glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
       m_cacheOffsetMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
@@ -366,11 +381,10 @@ namespace he
       m_cachePositionMap->clearTexture(&clearVectorVal[0]);
       m_cacheNormalMap->clearTexture(&clearVectorVal[0]);
       
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       const sh::ComputeShader& specularCacheEdgeCacheCreationShader = m_shaderContainer->getComputeShader(m_specularCacheEdgeCacheCreation);
       specularCacheEdgeCacheCreationShader.useShader();
-
-      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       m_cacheOffsetMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
       m_cachePositionMap->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -382,7 +396,7 @@ namespace he
       gBufferMaterialMap->setTexture(2, 2);
       gBufferLinearDepthMap->setTexture(3, 3);
 
-      sh::ComputeShader::dispatchComputeShader(2048, 1, 1);
+      sh::ComputeShader::dispatchComputeShader(4096, 1, 1);
 
       gBufferLinearDepthMap->unsetTexture(3);
       gBufferMaterialMap->unsetTexture(2);
@@ -393,8 +407,6 @@ namespace he
       m_cacheNormalMap->unbindImageTexture(2, 0, GL_WRITE_ONLY, GL_RGBA32F);
       m_cachePositionMap->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
       m_cacheOffsetMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_R32F);
-
-      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       specularCacheEdgeCacheCreationShader.useNoShader();
     }
@@ -415,10 +427,10 @@ namespace he
       m_vertexPositionMap->clearTexture(&clearVectorVal[0]);
       m_vertexNormalMap->clearTexture(&clearVectorVal[0]);
 
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
       const sh::ComputeShader& specularCacheEdgeVertexCreationShader = m_shaderContainer->getComputeShader(m_specularCacheEdgeVertexCreation);
       specularCacheEdgeVertexCreationShader.useShader();
-
-      m_proxyLightTubeBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       m_vertexPositionMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA32F);
       m_vertexNormalMap->bindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -429,7 +441,7 @@ namespace he
       gBufferMaterialMap->setTexture(2, 2);
       gBufferLinearDepthMap->setTexture(3, 3);
 
-      sh::ComputeShader::dispatchComputeShader(2048, 1, 1);
+      sh::ComputeShader::dispatchComputeShader(4096, 1, 1);
 
       gBufferLinearDepthMap->unsetTexture(3);
       gBufferMaterialMap->unsetTexture(2);
@@ -439,8 +451,6 @@ namespace he
       m_vertexAtomicIndexMap->unbindImageTexture(2, 0, GL_READ_WRITE, GL_R32UI);
       m_vertexNormalMap->unbindImageTexture(1, 0, GL_WRITE_ONLY, GL_RGBA32F);
       m_vertexPositionMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA32F);
-
-      m_proxyLightTubeBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
       specularCacheEdgeVertexCreationShader.useNoShader();
     }
@@ -568,7 +578,8 @@ namespace he
       util::SharedPointer<db::Texture3D> indirectLightNormals,
       util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
       util::SharedPointer<db::Texture3D> indirectShadowMaps,
-      util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions)
+      util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
+      const GPUBuffer& occluderBuffer)
     {
       //CPUTIMER("ProxyLightCPUTimer", 0)
       //GPUTIMER("ProxyLightOGLTimer", 1)
@@ -586,13 +597,20 @@ namespace he
 
       sh::ComputeShader::setUniform(5, GL_UNSIGNED_INT, &m_reflectiveShadowMapNumber);
       sh::ComputeShader::setUniform(6, GL_UNSIGNED_INT, &m_options->reflectiveShadowMapWidth);
-      sh::ComputeShader::setUniform(7, GL_UNSIGNED_INT, &m_options->indirectShadowMapWidth);
-      sh::ComputeShader::setUniform(8, GL_UNSIGNED_INT, &m_options->giShadowLightSampleDivisor);
+
+      unsigned int indirectShadowMapsMinification = sqrtf(m_options->giShadowLightSampleDivisor);
+      sh::ComputeShader::setUniform(7, GL_UNSIGNED_INT, &indirectShadowMapsMinification);
+
+      sh::ComputeShader::setUniform(8, GL_UNSIGNED_INT, &m_globalOccluderNumber);
+
+      GLuint singleShadowMapRes = m_options->indirectShadowMapWidth / sqrt(float(m_options->giLightSampleNumber / m_options->giShadowLightSampleDivisor));
+      sh::ComputeShader::setUniform(9, GL_UNSIGNED_INT, &singleShadowMapRes);
 
       m_cachePositions.bindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
       m_cacheNormalMaterial.bindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
       m_proxyLightPositionBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_proxyLightLuminousFluxBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
+      occluderBuffer.bindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
 
       m_cacheOffsetMap->bindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
 
@@ -600,6 +618,7 @@ namespace he
 
       m_cacheOffsetMap->unbindImageTexture(0, 0, GL_READ_ONLY, GL_R32F);
 
+      occluderBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 4);
       m_proxyLightLuminousFluxBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 3);
       m_proxyLightPositionBuffer.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 2);
       m_cacheNormalMaterial.unbindBuffer(GL_SHADER_STORAGE_BUFFER, 1);
@@ -632,9 +651,8 @@ namespace he
       util::vec4ui clearVector(INT32_MAX);
       m_cacheIndexBuffer.clearBuffer(GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, &clearVector[0]);
 
-      glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-      //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
       const sh::ComputeShader& specularCacheIndexListGenerationShader = m_shaderContainer->getComputeShader(m_specularCacheIndexListGeneration);
       specularCacheIndexListGenerationShader.useShader();
 
@@ -672,7 +690,7 @@ namespace he
       //m_cacheIndexBuffer.getData(8 * m_indirectLightResolution[0] * 416 * sizeof(unsigned int), 8 * m_indirectLightResolution[0] * 34 * sizeof(unsigned int), &cacheIndices1[0]);
     }
 
-      void IndirectSpecularReflections::createindirectLightMap(
+    void IndirectSpecularReflections::createIndirectLightMap(
       util::SharedPointer<db::Texture2D> gBufferDepthMap,
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
@@ -681,9 +699,10 @@ namespace he
       //GPUTIMER("IndirectLightMapCreationOGLTimer", 1)
 
       util::vec4f clearValue = util::vec4f(0.0f);
-      m_specularLightMap->clearTexture(&clearValue[0]);
+      m_downsampledSpecularLightMap->clearTexture(&clearValue[0]);
 
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+      glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       const sh::ComputeShader& indirectLightMapCreation = m_shaderContainer->getComputeShader(m_indirectLightMapCreation);
       indirectLightMapCreation.useShader();
@@ -723,34 +742,39 @@ namespace he
       indirectLightMapCreation.useNoShader();
     }
 
-    void IndirectSpecularReflections::indirectLightMapUpsampling()
+    void IndirectSpecularReflections::upsampleIndirectLightMap(
+      util::SharedPointer<db::Texture2D> fullResGBufferLinearDepthMap,
+      util::SharedPointer<db::Texture2D> fullResGBufferNormalMap)
     {
       glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 
-      const sh::ComputeShader& indirectLightMapUpsampling = m_shaderContainer->getComputeShader(m_indirectLightMapUpsampling);
-      indirectLightMapUpsampling.useShader();
+      const sh::ComputeShader& indirectLightMapUpsampler = m_shaderContainer->getComputeShader(m_indirectLightMapUpsampling);
+      indirectLightMapUpsampler.useShader();
 
       sh::ComputeShader::setUniform(0, GL_INT_VEC2, &m_indirectLightResolution[0]);
 
-      util::vec2i frameBufferResolution(m_options->width, m_options->height);
-      sh::ComputeShader::setUniform(1, GL_INT_VEC2, &frameBufferResolution[0]);
+      util::vec2i upsampledResolution(m_options->width, m_options->height);
+      sh::ComputeShader::setUniform(1, GL_INT_VEC2, &upsampledResolution[0]);
 
-      unsigned int samplingRatio = frameBufferResolution[0] / m_indirectLightResolution[0];
-      sh::ComputeShader::setUniform(2, GL_UNSIGNED_INT, &samplingRatio);
+      m_halfResGBufferLinearDepthMap1->setTexture(3, 3);
+      m_halfResGBufferNormalMap1->setTexture(4, 4);
+      m_downsampledSpecularLightMap->setTexture(5, 5);
+      fullResGBufferLinearDepthMap->setTexture(6, 6);
+      fullResGBufferNormalMap->setTexture(7, 7);
 
-      m_specularLightMap->setTexture(3, 3);
-
-      m_upsampledSpecularLightMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
+      m_specularLightMap->bindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
 
       sh::ComputeShader::dispatchComputeShader(4096, 1, 1);
-      
-      m_upsampledSpecularLightMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
 
-      m_specularLightMap->unsetTexture(3);
+      m_specularLightMap->unbindImageTexture(0, 0, GL_WRITE_ONLY, GL_RGBA16F);
 
-      indirectLightMapUpsampling.useNoShader();
+      fullResGBufferNormalMap->unsetTexture(7);
+      fullResGBufferLinearDepthMap->unsetTexture(6);
+      m_downsampledSpecularLightMap->unsetTexture(5);
+      m_halfResGBufferNormalMap1->unsetTexture(4);
+      m_halfResGBufferLinearDepthMap1->unsetTexture(3);
 
-      glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);//barrier is for reading the texture by a sampler in any other shader
+      indirectLightMapUpsampler.useNoShader();
     }
 
     util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCachePositionsMapFilterInnerX() const
@@ -758,14 +782,14 @@ namespace he
       return m_cachePositionBufferInnerX;
     }
 
+    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDownsampledSpecularLightMap() const
+    {
+      return m_downsampledSpecularLightMap;
+    }
+
     util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getSpecularLightMap() const
     {
       return m_specularLightMap; 
-    }
-
-    util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getUpsampledSpecularLightMap() const
-    {
-      return m_upsampledSpecularLightMap;
     }
 
     util::SharedPointer<db::Texture2D> IndirectSpecularReflections::getDebugCachePositions() const

@@ -5,6 +5,8 @@
 
 #include <GL/glew.h>
 
+#include <Utilities/Timer/MeasurementManager.h>
+
 #include <DataBase/Texture1D.h>
 #include <DataBase/Texture2D.h>
 #include <DataBase/Texture3D.h>
@@ -38,7 +40,7 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void updateBuffer(unsigned int reflectiveShadowMapNumber);
+      void updateBuffer(unsigned int reflectiveShadowMapNumber, unsigned int globalOccluderNumber);
 
       void generateReflectionCaches(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
@@ -50,12 +52,13 @@ namespace he
         util::SharedPointer<db::Texture3D> indirectLightNormals,
         util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
         util::SharedPointer<db::Texture3D> indirectShadowMaps,
-        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions);
+        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
+        const GPUBuffer& occluderBuffer);
 
       util::SharedPointer<db::Texture2D> getDebugCachePositionsMapFilterInnerX() const;
 
+      util::SharedPointer<db::Texture2D> getDownsampledSpecularLightMap() const;
       util::SharedPointer<db::Texture2D> getSpecularLightMap() const;
-      util::SharedPointer<db::Texture2D> getUpsampledSpecularLightMap() const;
 
       util::SharedPointer<db::Texture2D> getDebugCachePositions() const;
       util::SharedPointer<db::Texture2D> getDebugCacheNormals() const;
@@ -72,16 +75,16 @@ namespace he
       util::SharedPointer<db::Texture2D> getDebugGBufferHalfResVertexNormalMap() const;
       util::SharedPointer<db::Texture2D> getDebugGBufferHalfResMaterialMap() const;
 
+      void gBufferDownsampling(util::SharedPointer<db::Texture2D> gBufferDepthMap,
+        util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
+        util::SharedPointer<db::Texture2D> gBufferNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
+        util::SharedPointer<db::Texture2D> gBufferMaterialMap);
+
     private:
       
       IndirectSpecularReflections(const IndirectSpecularReflections&);
       IndirectSpecularReflections& operator=(const IndirectSpecularReflections&);
-
-      void gBufferDownsampling(util::SharedPointer<db::Texture2D> gBufferDepthMap,
-                               util::SharedPointer<db::Texture2D> gBufferLinearDepthMap,
-                               util::SharedPointer<db::Texture2D> gBufferNormalMap,
-                               util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
-                               util::SharedPointer<db::Texture2D> gBufferMaterialMap);
 
       void createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions);
 
@@ -110,16 +113,19 @@ namespace he
         util::SharedPointer<db::Texture3D> indirectLightNormals,
         util::SharedPointer<db::Texture3D> indirectLightLuminousFlux,
         util::SharedPointer<db::Texture3D> indirectShadowMaps,
-        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions);
+        util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
+        const GPUBuffer& occluderBuffer);
 
       void createSpecularCacheIndices();
 
-      void createindirectLightMap(
+      void createIndirectLightMap(
         util::SharedPointer<db::Texture2D> gBufferDepthMap,
         util::SharedPointer<db::Texture2D> gBufferNormalMap,
         util::SharedPointer<db::Texture2D> gBufferMaterialMap);
 
-      void indirectLightMapUpsampling();
+      void upsampleIndirectLightMap(
+        util::SharedPointer<db::Texture2D> fullResGBufferLinearDepthMap,
+        util::SharedPointer<db::Texture2D> fullResGBufferNormalMap);
 
       sh::ComputeShaderHandle m_gBufferDownsampling;
       sh::ComputeShaderHandle m_calculateAreaLightTube;
@@ -138,6 +144,8 @@ namespace he
       util::SharedPointer<RenderOptions> m_options;
 
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
+
+      util::SharedPointer<util::MeasurementManager> m_measurementManager;
 
       GPUBuffer m_proxyLightTubeBuffer;
 
@@ -173,8 +181,8 @@ namespace he
 
       util::SharedPointer<db::Texture2D> m_cachePositionBufferInnerX;
 
+      util::SharedPointer<db::Texture2D> m_downsampledSpecularLightMap;
       util::SharedPointer<db::Texture2D> m_specularLightMap;
-      util::SharedPointer<db::Texture2D> m_upsampledSpecularLightMap;
 
       util::vec2i m_indirectLightResolution;
 
@@ -184,6 +192,7 @@ namespace he
       unsigned int m_vertexIndexMultiplicator;
       unsigned int m_vertexResolution;
       unsigned int m_cacheResolution;
+      unsigned int m_globalOccluderNumber;
 
       unsigned int m_reflectiveShadowMapNumber;
       unsigned int m_debugCacheNumber;

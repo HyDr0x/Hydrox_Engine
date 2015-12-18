@@ -22,10 +22,16 @@ namespace he
     {
     public:
 
+      OGLTimer();
       OGLTimer(std::string &timerName);
       ~OGLTimer();
 
       GLuint getTimeDifference();
+
+      void start();
+      void stop();
+
+      GLuint getTime();
 
     private:
 

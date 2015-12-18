@@ -27,7 +27,9 @@ namespace he
     AssimpLoader::AssimpLoader(util::SingletonManager *singletonManager) : 
       m_singletonManager(singletonManager), 
       m_animationTimeUnit(Seconds),
-      m_createNormals(false)
+      m_sRGB(false),
+      m_createNormals(false),
+      m_mipmapping(false)
     {
       m_eventManager = singletonManager->getService<util::EventManager>();
       m_modelManager = singletonManager->getService<db::ModelManager>();
@@ -61,7 +63,7 @@ namespace he
       return *this;
     }
 
-    void AssimpLoader::setCacheGeneratorParamter(float errorRate, float maxDistance, float maxAngle)
+    void AssimpLoader::setOccluderGeneratorParamter(float errorRate, float maxDistance, float maxAngle)
     {
       m_errorRate = errorRate;
       m_maxDistance = maxDistance;
@@ -71,6 +73,11 @@ namespace he
     void AssimpLoader::setCreateNormals(bool createNormals)
     {
       m_createNormals = createNormals;
+    }
+
+    void AssimpLoader::setMipmapping(bool mipmapping)
+    {
+      m_mipmapping = mipmapping;
     }
 
     void AssimpLoader::setAnimationTimeUnit(AnimationTimeUnit animationTimeUnit)
@@ -131,7 +138,7 @@ namespace he
         m_fileInformation.meshNumber = assimpScene->mNumMeshes;
         m_fileInformation.materialNumber = assimpScene->mNumMaterials;
         m_fileInformation.animationNumber = assimpScene->mNumAnimations;
-        m_fileInformation.cacheNumber = 0;
+        m_fileInformation.occluderNumber= 0;
         m_fileInformation.faceNumber = 0;
         m_fileInformation.vertexNumber = 0;
 
@@ -182,7 +189,7 @@ namespace he
 
         m_meshes[i] = loadVertices(scene->mMeshes[i], i, yAxisFlipped);
 
-        m_fileInformation.cacheNumber += m_modelManager->getObject(m_meshes[i])->getCacheCount();
+        m_fileInformation.occluderNumber += m_modelManager->getObject(m_meshes[i])->getOccluderCount();
         m_fileInformation.faceNumber += m_modelManager->getObject(m_meshes[i])->getPrimitiveCount();
         m_fileInformation.vertexNumber += m_modelManager->getObject(m_meshes[i])->getVertexCount();
 
@@ -223,12 +230,6 @@ namespace he
 
       std::vector<VertexElements> vertexElements;
 
-      if(primitiveType == GL_TRIANGLES)
-      {
-        vertexElements.push_back(db::Mesh::MODEL_CACHEINDICES0);
-        vertexElements.push_back(db::Mesh::MODEL_CACHEINDICES1);
-      }
-
       if(mesh->HasPositions()) vertexElements.push_back(db::Mesh::MODEL_POSITION);
       for(unsigned int j = 0; j < mesh->GetNumUVChannels(); j++)
       {
@@ -238,7 +239,8 @@ namespace he
         }
       }
 
-      vertexElements.push_back(db::Mesh::MODEL_NORMAL);//normals have to be there, if not they have to be generated
+      if(primitiveType == GL_TRIANGLES) vertexElements.push_back(db::Mesh::MODEL_NORMAL);//if its a triangle mesh, normals have to be there, if not they have to be generated
+
       if(mesh->HasTangentsAndBitangents()) vertexElements.push_back(db::Mesh::MODEL_BINORMAL);
       if(mesh->HasBones())
       {
@@ -390,7 +392,6 @@ namespace he
       }
 
       newMesh.generateBoundingVolume();
-      newMesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
       newMesh.generateISMOccluderPoints(m_errorRate, m_maxDistance, m_maxAngle);
 
       return m_modelManager->addObject(newMesh);
@@ -563,7 +564,7 @@ namespace he
       db::Mesh mesh(GL_TRIANGLES, positions.size(), vertexElements, indices);
       mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
       mesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
-      mesh.generateCaches(m_errorRate, m_maxDistance, m_maxAngle);
+      mesh.generateISMOccluderPoints(m_errorRate, m_maxDistance, m_maxAngle);
 
       sg::NodeIndex geoNodeIndex = m_allocator.insert(sg::GeoNode(m_eventManager, m_modelManager->addObject(mesh), m_defaultMaterial, std::string("defaultCubeMesh"), sceneRootNode));
       ((sg::GroupNode&)m_allocator[sceneRootNode]).setFirstChild(geoNodeIndex);
@@ -589,9 +590,9 @@ namespace he
         textures[db::Material::ROUGHNESSTEX].resize(scene->mMaterials[i]->GetTextureCount(aiTextureType_SPECULAR));
 
         texLoader.setSRGB(m_sRGB);
-        texLoader.setMipMapping(true);
+        texLoader.setMipMapping(m_mipmapping);
 
-        for(unsigned int k = 0; k != textures[db::Material::DIFFUSETEX].size(); k++)
+        for(unsigned int k = 0; k < textures[db::Material::DIFFUSETEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, k, &texPath);
           textures[db::Material::DIFFUSETEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
@@ -601,7 +602,7 @@ namespace he
 
         texLoader.setSRGB(false);
 
-        for(unsigned int k = 0; k != textures[db::Material::NORMALTEX].size(); k++)
+        for(unsigned int k = 0; k < textures[db::Material::NORMALTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType(normalMapIdentifier), 0, &texPath);
           textures[db::Material::NORMALTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
@@ -611,7 +612,7 @@ namespace he
 
         texLoader.setMipMapping(false);
 
-        for(unsigned int k = 0; k != textures[db::Material::METALNESSTEX].size(); k++)
+        for(unsigned int k = 0; k < textures[db::Material::METALNESSTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
           textures[db::Material::METALNESSTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
@@ -619,7 +620,7 @@ namespace he
           hashes[db::Material::METALNESSTEX].push_back(texture->getHash());
         }
 
-        for(unsigned int k = 0; k != textures[db::Material::ROUGHNESSTEX].size(); k++)
+        for(unsigned int k = 0; k < textures[db::Material::ROUGHNESSTEX].size(); k++)
         {
           scene->mMaterials[i]->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
           textures[db::Material::ROUGHNESSTEX][k] = texLoader.loadResource(path + std::string(texPath.C_Str()));
@@ -650,7 +651,7 @@ namespace he
       std::clog << "Animation Number: " << m_fileInformation.animationNumber << std::endl;
       std::clog << "Face Number: " << m_fileInformation.faceNumber << std::endl;
       std::clog << "Vertex Number: " << m_fileInformation.vertexNumber << std::endl;
-      std::clog << "Cache Number: " << m_fileInformation.cacheNumber << std::endl;
+      std::clog << "Occluder Number: " << m_fileInformation.occluderNumber << std::endl;
       std::clog << std::endl;
     }
   }

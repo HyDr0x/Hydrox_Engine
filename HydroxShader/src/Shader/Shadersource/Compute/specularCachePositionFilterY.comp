@@ -48,11 +48,11 @@ void main()
 	vec3 oldMaterial = vec3(0.0), material;
 	float depth;
 	
-	const uint pixelPerThread = uint(ceil(HALFRESX / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / HALFRESY)));
+	const uint pixelPerThread = uint(ceil(HALFRESY / floor((gl_NumWorkGroups.x * WORKGROUPSIZE) / HALFRESX)));
 	const uint startIndex = idx * pixelPerThread;
 	const uint endIndex = startIndex + pixelPerThread;
 
-	ivec2 texCoords = stepSize * ivec2(pixelPerThread * floor(idx / HALFRESY), pixelPerThread * floor(idx / HALFRESX)) + (ivec2(1) - stepSize) * ivec2(mod(idx, HALFRESX), mod(idx, HALFRESY));
+	ivec2 texCoords = ivec2(mod(idx, HALFRESX), pixelPerThread * floor(idx / HALFRESX));
 
 	for(uint i = startIndex; i < endIndex; i++)
 	{
@@ -63,13 +63,6 @@ void main()
 			oldPosition = vec3(0.0);
 		}
 		
-		if(texCoords.y < 0 && stepSize.y < 0)
-		{
-			texCoords.y = int(HALFRESY - 1);
-			sampleDistance = 0.0;
-			oldPosition = vec3(0.0);
-		}
-	
 		if(texCoords.x >= HALFRESX || texCoords.y >= HALFRESY)
 		{
 			return;
@@ -89,16 +82,15 @@ void main()
 		vec4 tmpProjPos = invViewProjectionMatrix * vec4(newPosition, 1.0);
 		newPosition = tmpProjPos.xyz / tmpProjPos.w;
 		
-		material = GGXToBlinnPhong(texelFetch(gBufferMaterialSampler, texCoords, 0)).rga;
+		material = texelFetch(gBufferMaterialSampler, texCoords, 0).rgb;
 
 		normal = normalize(texelFetch(gBufferNormalSampler, texCoords, 0).xyz * 2.0 - 1.0);
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
-		if(sampleDistance <= 0.0 || (log(oldMaterial.z - material.z) / log(2.0)) > 10.0)
+		if(sampleDistance <= 0.0 || (oldMaterial.z - material.z) > 0.2)
 		{
-			float maxSolidAngle = specularCacheSolidAngle(0.95, material.b);
-			float collisionSolidAngle = specularCacheSolidAngle(0.1, material.b);
+			float maxSolidAngle = specularCacheSolidAngle(0.95, GGXToBlinnPhong(vec4(0, 0, material.b, 0)).w);
 			
 			vec3 reflectRay = normalize(reflect(normalize(newPosition - eyePos.xyz), normal));
 			
@@ -106,7 +98,7 @@ void main()
 			
 			for(uint j = 0; j < reflectiveShadowMapNumber; j++)
 			{
-				if(indirectLightTubeCollision(newPosition, reflectRay, collisionSolidAngle, j, cacheIndirectLightDistance))
+				if(indirectLightTubeCollision(newPosition, reflectRay, maxSolidAngle, j, cacheIndirectLightDistance))
 				{
 					if(texelFetch(cacheInnerSamplingDistanceSampler, texCoords, 0).x > 0.0001)
 					{
@@ -117,22 +109,38 @@ void main()
 						But that only means, that the doubled vertex wont get triangulated or the doubled cache will 
 						be two times indiced by any vertex who would index the cache only one time otherwise.
 						*/
-				
+						
 						ivec2 atomicCacheTexCoord = texCoords / int(CACHETILESIZE);
 						int cacheBlockCounter = int(imageAtomicAdd(cacheAtomicIndexSampler, atomicCacheTexCoord, 1));
-						ivec2 cacheTexCoord = atomicCacheTexCoord * int(CACHETILESIZE) + ivec2(mod(cacheBlockCounter, int(CACHETILESIZE)), cacheBlockCounter / int(CACHETILESIZE));
 						
-						imageStore(cachePositionSampler, cacheTexCoord, vec4(newPosition, material.r));//material.r
-						imageStore(cacheNormalSampler, cacheTexCoord, vec4(encodeNormal(normal), material.gb));//material.gb
-						imageStore(cacheOffsetBuffer, cacheTexCoord, vec4(1.0));
+						if(cacheBlockCounter < CACHETILESIZE * CACHETILESIZE)
+						{
+							ivec2 cacheTexCoord = atomicCacheTexCoord * int(CACHETILESIZE) + ivec2(mod(cacheBlockCounter, int(CACHETILESIZE)), cacheBlockCounter / int(CACHETILESIZE));
+							
+							imageStore(cachePositionSampler, cacheTexCoord, vec4(newPosition, material.r));//material.r
+							imageStore(cacheNormalSampler, cacheTexCoord, vec4(encodeNormal(normal), material.gb));//material.gb
+							imageStore(cacheOffsetBuffer, cacheTexCoord, vec4(1.0));
+						}
+						else
+						{
+							imageAtomicAdd(cacheAtomicIndexSampler, atomicCacheTexCoord, -1);
+						}
 						
 						ivec2 atomicVertexTexCoord = texCoords / int(MULTVERTEXTILESIZE);
 						int vertexBlockCounter = int(imageAtomicAdd(vertexAtomicIndexSampler, atomicVertexTexCoord, 1));
-						ivec2 vertexTexCoord = atomicVertexTexCoord * int(MULTVERTEXTILESIZE) + ivec2(mod(vertexBlockCounter, int(MULTVERTEXTILESIZE)), vertexBlockCounter / int(MULTVERTEXTILESIZE));
 						
-						imageStore(vertexPositionSampler, vertexTexCoord, vec4(newPosition, 0.0));
-						imageStore(vertexNormalSampler, vertexTexCoord, vec4(normal, 0.0));
+						if(vertexBlockCounter < MULTVERTEXTILESIZE * MULTVERTEXTILESIZE)
+						{
+							ivec2 vertexTexCoord = atomicVertexTexCoord * int(MULTVERTEXTILESIZE) + ivec2(mod(vertexBlockCounter, int(MULTVERTEXTILESIZE)), vertexBlockCounter / int(MULTVERTEXTILESIZE));
 							
+							imageStore(vertexPositionSampler, vertexTexCoord, vec4(newPosition, 0.0));
+							imageStore(vertexNormalSampler, vertexTexCoord, vec4(normal, 0.0));
+						}
+						else
+						{
+							imageAtomicAdd(vertexAtomicIndexSampler, atomicVertexTexCoord, -1);
+						}
+						
 						sampleDistance = newSampleDistance;
 					
 						break;

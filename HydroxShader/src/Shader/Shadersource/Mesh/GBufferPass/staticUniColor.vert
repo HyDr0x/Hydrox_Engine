@@ -21,8 +21,8 @@ out VertexData
 void main()
 {
 	outData.instanceIndex = uint(gl_InstanceID + gl_BaseInstanceARB);
-
 	outData.normal = normalize(mat3(trfMatrix[outData.instanceIndex]) * in_normal);
+	float scale = sqrt(trfMatrix[outData.instanceIndex][0][0] * trfMatrix[outData.instanceIndex][0][0] + trfMatrix[outData.instanceIndex][0][1] * trfMatrix[outData.instanceIndex][0][1] + trfMatrix[outData.instanceIndex][0][2] * trfMatrix[outData.instanceIndex][0][2]);
 	
-	gl_Position = trfMatrix[outData.instanceIndex] * vec4(in_Pos, 1);
+	gl_Position = vec4((trfMatrix[outData.instanceIndex] * vec4(in_Pos, 1)).xyz, scale);
 }

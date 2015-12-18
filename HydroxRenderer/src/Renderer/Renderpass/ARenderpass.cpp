@@ -71,21 +71,25 @@ namespace he
     bool ARenderpass::removeGeometry(util::SharedPointer<IRenderContainer> renderContainer)
     {
       sh::RenderShaderHandle shaderHandle = m_shaderContainer->getRenderShaderHandle(m_renderPass, sh::ShaderSlotFlags(renderContainer->getMeshVertexDeclaration().toInt()));
-      const sh::RenderShader& shader = m_shaderContainer->getRenderShader(shaderHandle);
 
-      for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
+      if(shaderHandle)
       {
-        if(m_shaderNodes[i].isShader(shaderHandle))
-        {
-          for(unsigned int j = 0; j < m_vertexDeclarationNodes[i].size(); j++)
-          {
-            if(m_renderContainer[i][j] == renderContainer)
-            {
-              m_vertexDeclarationNodes[i].erase(m_vertexDeclarationNodes[i].begin() + j);
-              m_textureNodes[i].erase(m_textureNodes[i].begin() + j);
-              m_renderContainer[i].erase(m_renderContainer[i].begin() + j);
+        const sh::RenderShader& shader = m_shaderContainer->getRenderShader(shaderHandle);
 
-              return true;
+        for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
+        {
+          if(m_shaderNodes[i].isShader(shaderHandle))
+          {
+            for(unsigned int j = 0; j < m_vertexDeclarationNodes[i].size(); j++)
+            {
+              if(m_renderContainer[i][j] == renderContainer)
+              {
+                m_vertexDeclarationNodes[i].erase(m_vertexDeclarationNodes[i].begin() + j);
+                m_textureNodes[i].erase(m_textureNodes[i].begin() + j);
+                m_renderContainer[i].erase(m_renderContainer[i].begin() + j);
+
+                return true;
+              }
             }
           }
         }

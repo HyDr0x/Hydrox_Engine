@@ -121,6 +121,7 @@ namespace he
 
       std::clog << "Load Scene Nodes" << std::endl;
       read(fileStream, m_allocator, m_resourceMap, singletonManager->getService<util::EventManager>());
+      std::clog << "Finished Loading Of Scene Nodes" << std::endl;
 
       unsigned int nodeType;
       unsigned int nodeIndex;

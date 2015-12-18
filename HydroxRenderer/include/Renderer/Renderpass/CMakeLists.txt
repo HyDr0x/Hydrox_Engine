@@ -3,13 +3,10 @@ set(
 	${HEADER} 
 	${CMAKE_CURRENT_SOURCE_DIR}/AComputepass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ARenderpass.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/DebugGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/FrustumCullingRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/GeometryRenderpass.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/IndexGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/IndirectBackprojectionRenderpass.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightEdgeVertexExtractionGeometryRenderpass.h 
-	${CMAKE_CURRENT_SOURCE_DIR}/IndirectLightGeometryRenderpass.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/NoLightingGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ParaboloidShadowMapGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ReflectiveShadowMapGeometryRenderpass.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/ShaderNode.h 

@@ -21,10 +21,10 @@ layout(location = COLOR) in vec4 in_color;
 
 out VertexData
 {
-	vec2 texCoord;
 	mat3 tangentToWorld;
-	flat uint instanceIndex;
 	vec4 color;
+	vec2 texCoord;
+	flat uint instanceIndex;
 } outData;
 
 void main()
@@ -48,5 +48,7 @@ void main()
 	
 	outData.color = in_color;
 	outData.texCoord = in_texCoord;
-	gl_Position = skinningMatrix * vec4(in_Pos, 1.0f);
+	float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
+	
+	gl_Position = vec4((skinningMatrix * vec4(in_Pos, 1.0)).xyz, scale);
 }

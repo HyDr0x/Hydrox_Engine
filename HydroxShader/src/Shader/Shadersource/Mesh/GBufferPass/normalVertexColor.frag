@@ -16,7 +16,6 @@ layout(location = 2) uniform sampler2D roughnessSampler;
 
 in GeometryData
 {
-	vec3 barycentric;
 	vec2 texCoord;
 	mat3 tangentToWorld;
 	flat uint instanceIndex;
@@ -25,11 +24,11 @@ in GeometryData
 
 void main()
 {
-	vec3 normal = inData.tangentToWorld * (texture(normalSampler, inData.texCoord).xyz * 2.0f - 1.0f);
+	vec3 normal = inData.tangentToWorld * (texture(normalSampler, inData.texCoord).xyz * 2.0 - 1.0);
 
-	fsout_normal = vec4(normalize(normal) * 0.5f + 0.5f, float(inData.barycentric.x == 1.0 || inData.barycentric.y == 1.0 || inData.barycentric.z == 1.0));
+	fsout_normal = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 	
-	fsout_color = vec4(inData.color.rgb, 1.0f);
+	fsout_color = vec4(inData.color.rgb, 1.0);
 	
 	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	

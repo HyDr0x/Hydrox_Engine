@@ -96,7 +96,7 @@ namespace he
     void SkyboxRenderer::render() const
     {
       glDepthFunc(GL_LEQUAL);
-
+      //glDepthFunc(GL_ALWAYS);
       glBindVertexArray(m_skyBoxVAO);
 
       db::Texture3D *renderTexture = m_textureArrayManager->getObject(m_arrayTextureHandle);

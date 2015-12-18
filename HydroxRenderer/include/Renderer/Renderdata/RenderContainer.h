@@ -98,11 +98,6 @@ namespace he
         return m_materialData.getTextureHandles();
       }
 
-      virtual unsigned int getPerInstanceCacheNumber() const override
-      {
-        return m_drawData.getPerInstanceCacheNumber();
-      }
-
       virtual unsigned int getPerInstanceOccluderNumber() const override
       {
         return m_drawData.getPerInstanceOccluderNumber();

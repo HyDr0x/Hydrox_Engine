@@ -43,12 +43,6 @@ namespace he
       virtual void bindFrustumCullingBuffer() const override;
       virtual void unbindFrustumCullingBuffer() const override;
 
-      virtual void bindCacheBuffer() const override;
-      virtual void unbindCacheBuffer() const override;
-
-      virtual void bindCacheInstanceOffsetBuffer() const override;
-      virtual void unbindCacheInstanceOffsetBuffer() const override;
-
       virtual void bindOccluderBuffer() const override;
       virtual void unbindOccluderBuffer() const override;
 
@@ -58,8 +52,6 @@ namespace he
       virtual void draw() const override;
 
       virtual void updateBuffer(IInstanceRenderData& renderData) override;
-
-      virtual unsigned int getPerInstanceCacheNumber() const override;
 
       virtual unsigned int getPerInstanceOccluderNumber() const override;
 

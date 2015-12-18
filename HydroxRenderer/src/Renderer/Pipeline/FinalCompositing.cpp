@@ -21,9 +21,9 @@ namespace he
       m_options = singletonManager->getService<RenderOptions>();
       m_shaderContainer = singletonManager->getService<sh::ShaderContainer>();
 
-      m_composeShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(8192));
-      m_debugOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(8192));
-      m_debugIntegerOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DEBUGINTEGERTEXTURE, sh::ShaderSlotFlags(8192));
+      m_composeShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::COMBINE, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
+      m_debugOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::OFFSCREENBUFFER, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
+      m_debugIntegerOutputShaderHandle = m_shaderContainer->getRenderShaderHandle(sh::ShaderContainer::DEBUGINTEGERTEXTURE, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
 
       m_combinedImage = util::SharedPointer<db::Texture2D>(new db::Texture2D(m_options->width, m_options->height, GL_TEXTURE_2D, GL_FLOAT, GL_RGBA16F, GL_RGBA, 4, 16));
 

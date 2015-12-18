@@ -1,5 +1,7 @@
 #version 440 core
 
+#define RESOLUTIONDIVISOR
+
 layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D depthSampler;
 layout(location = 2) uniform sampler2D normalSampler;
@@ -13,6 +15,8 @@ in vec2 gsout_texCoord;
 
 void main()
 {
+	vec2 texCoord = vec2(gl_FragCoord.xy) / vec2(1920.0 / RESOLUTIONDIVISOR, 1080.0 / RESOLUTIONDIVISOR);
+
 	float shadowValue = 0.0;
 	vec2 newTexCoord = gsout_texCoord - samplingDirection * float(kernelSize) * 0.5;
 	float origDepth = texture(depthSampler, gsout_texCoord).r;

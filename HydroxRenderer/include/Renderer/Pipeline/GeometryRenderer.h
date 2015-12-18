@@ -13,10 +13,7 @@
 
 #include "Renderer/Renderpass/FrustumCullingRenderpass.h"
 #include "Renderer/Renderpass/GeometryRenderpass.h"
-#include "Renderer/Renderpass/DebugGeometryRenderpass.h"
-#include "Renderer/Renderpass/IndexGeometryRenderpass.h"
-#include "Renderer/Renderpass/IndirectLightEdgeVertexExtractionGeometryRenderpass.h"
-#include "Renderer/Renderpass/IndirectLightGeometryRenderpass.h"
+#include "Renderer/Renderpass/NoLightingGeometryRenderpass.h"
 #include "Renderer/Renderpass/ReflectiveShadowMapGeometryRenderpass.h"
 #include "Renderer/Renderpass/ShadowMapGeometryRenderpass.h"
 #include "Renderer/Renderpass/ParaboloidShadowMapGeometryRenderpass.h"
@@ -68,25 +65,15 @@ namespace he
 
       void generateReflectiveShadowMap(unsigned int lightIndex);
 
-      void generateIndirectLightMap(util::SharedPointer<db::Texture2D> indirectShadowMap);
-
       void generateIndirectBackprojectionMap(unsigned int lightIndex);
-
-      void generateEdgeVertexMap();
-
-      void rasterizeIndexGeometry();
 
       void rasterizeGeometry();
 
-      void rasterizeDebugGeometry();
+      void rasterizeNoLightingGeometry();
 
       void addRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
 
       void removeRenderComponent(util::SharedPointer<const xBar::IGeometryContainer> geometry);
-
-      unsigned int getGlobalCacheNumber() const;
-
-      unsigned int getProxyLightTextureResolution() const;
 
       unsigned int getGlobalOccluderNumber() const;
 
@@ -101,9 +88,6 @@ namespace he
 
       util::SharedPointer<sh::ShaderContainer> m_container;
 
-      unsigned int m_globalCacheNumber;
-      unsigned int m_proxyLightTextureResolution;
-
       unsigned int m_globalOccluderNumber;
 
       unsigned int m_globalVertexNumber;
@@ -114,17 +98,13 @@ namespace he
 
       FrustumCullingRenderpass m_frustumCullingRenderpass;
       GeometryRenderpass m_geometryRenderpass;
-      DebugGeometryRenderpass m_debugRenderpass;
-      IndexGeometryRenderpass m_indexRenderpass;
-      IndirectLightGeometryRenderpass m_indirectLightingRenderpass;
-      IndirectLightEdgeVertexExtractionGeometryRenderpass m_indirectLightEdgeVertexExtractionRenderpass;
+      NoLightingGeometryRenderpass m_noLightingRenderpass;
       ReflectiveShadowMapGeometryRenderpass m_reflectiveShadowMapRenderpass;
       ShadowMapGeometryRenderpass m_shadowMapRenderpass;
       ParaboloidShadowMapGeometryRenderpass m_paraboloidShadowMappingpass;
       IndirectBackprojectionRenderpass m_indirectBackprojetionRenderpass;
 
       std::vector<util::SharedPointer<IRenderContainer>> m_renderContainer;
-      std::vector<util::SharedPointer<IRenderContainer>> m_debugRenderContainer;
     };
   }
 }

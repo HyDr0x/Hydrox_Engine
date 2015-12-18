@@ -25,8 +25,6 @@ namespace he
         m_primitiveType(primitiveType),
         m_vertexStride(vertexStride),
         m_meshVertexDeclaration(meshVertexDeclaration),
-        m_cacheNumber(0),
-        m_perInstanceCacheNumber(0),
         m_instanceNumber(0),
         m_updateMeshData(false)
       {
@@ -44,12 +42,6 @@ namespace he
       virtual void bindFrustumCullingBuffer() const = 0;
       virtual void unbindFrustumCullingBuffer() const = 0;
 
-      virtual void bindCacheBuffer() const = 0;
-      virtual void unbindCacheBuffer() const = 0;
-
-      virtual void bindCacheInstanceOffsetBuffer() const = 0;
-      virtual void unbindCacheInstanceOffsetBuffer() const = 0;
-
       virtual void bindOccluderBuffer() const = 0;
       virtual void unbindOccluderBuffer() const = 0;
 
@@ -59,8 +51,6 @@ namespace he
       virtual void draw() const = 0;
 
       virtual void updateBuffer(IInstanceRenderData& renderData) = 0;
-
-      virtual unsigned int getPerInstanceCacheNumber() const = 0;
 
       virtual unsigned int getPerInstanceOccluderNumber() const = 0;
 
@@ -87,11 +77,6 @@ namespace he
       GPUImmutableBuffer m_meshInstanceBufferIndex;
       GPUImmutableBuffer m_triangleIndexOffsetBuffer;//has the offsets into the triangleBuffer for the specific mesh
 
-      GPUImmutableBuffer m_cacheInstanceOffsetBuffer;//the per instance offset for the global cache index
-      GPUImmutableBuffer m_cacheOffsetBuffer;//has the offsets into the cacheBuffer for the specific mesh
-      GPUImmutableBuffer m_cacheBuffer;//has all caches for all the meshes sorted to their triangles
-      GPUImmutableBuffer m_cacheIndicesPerTriangleBuffer;//has the indices into the cacheBuffer for the triangle
-
       GPUImmutableBuffer m_occluderInstanceOffsetBuffer;//the per instance offset for the global occluder index
       GPUImmutableBuffer m_occluderOffsetBuffer;//has the offsets into the occluderBuffer for the specific mesh
       GPUImmutableBuffer m_occluderBuffer;//has all occluders for all the meshes sorted to their triangles
@@ -102,9 +87,6 @@ namespace he
       GLuint m_vertexStride;
 
       VertexElementFlags m_meshVertexDeclaration;
-
-      unsigned int m_cacheNumber;
-      unsigned int m_perInstanceCacheNumber;
 
       unsigned int m_occluderNumber;
       unsigned int m_perInstanceOccluderNumber;

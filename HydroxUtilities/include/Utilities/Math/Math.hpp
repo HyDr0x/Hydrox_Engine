@@ -63,9 +63,9 @@ namespace he
         return atan2f(y, x);
       }
 
-      inline util::vec3f reflect(util::vec3f a, util::vec3f b)
+      inline util::vec3f reflect(util::vec3f v, util::vec3f normal)
       {
-        return a - 2.0f * util::vec3f::dot(a, b) * b;
+        return v - 2.0f * util::vec3f::dot(v, normal) * normal;
       }
 
       template<typename Type> inline Vector<Type, 4> minV(const Vector<Type, 4>& a, const Vector<Type, 4>& b)

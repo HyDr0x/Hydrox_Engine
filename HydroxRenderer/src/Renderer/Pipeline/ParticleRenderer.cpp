@@ -26,7 +26,7 @@ namespace he
 
       registerRenderComponentSlots(singletonManager->getService<util::EventManager>());
 
-      //m_particleShaderHandle = singletonManager->getService<sh::ShaderContainer>()->getRenderShaderHandle(sh::ShaderContainer::PARTICLESHADER, sh::ShaderSlotFlags(8192));
+      //m_particleShaderHandle = singletonManager->getService<sh::ShaderContainer>()->getRenderShaderHandle(sh::ShaderContainer::PARTICLESHADER, sh::ShaderSlotFlags(sh::ShaderSlotFlags::convertToFlag(sh::RenderShader::SPECIAL1)));
     }
 
     void ParticleRenderer::render() const

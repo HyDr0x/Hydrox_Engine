@@ -36,7 +36,8 @@ namespace he
 
       void initialize(util::SingletonManager *singletonManager);
 
-      void updateBuffer(unsigned int reflectiveShadowMapNumber, unsigned int globalOccluderNumber);
+      void updateBuffer(unsigned int reflectiveShadowMapNumber);
+      void updateOccluderBuffer(unsigned int globalOccluderNumber);
 
       void setOccluderBuffer();
       void unsetOccluderBuffer();
@@ -95,6 +96,10 @@ namespace he
       util::SharedPointer<RenderOptions> m_options;
 
       util::SharedPointer<sh::ShaderContainer> m_shaderContainer;
+
+      unsigned int m_indirectShadowMapRowTiles;
+      util::vec2ui m_activeShadowMapTile;
+      unsigned int m_frameCounter;
 
       unsigned int m_reflectiveShadowMapNumber;
       unsigned int m_globalOccluderNumber;

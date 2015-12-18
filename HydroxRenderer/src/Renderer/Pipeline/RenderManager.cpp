@@ -19,7 +19,7 @@ namespace he
 {
   namespace renderer
   {
-    RenderManager::RenderManager() : m_skyboxRendering(false), m_wireframe(false), m_showVirtualAreaLights(false), m_showCaches(false), m_debugTexture(0)
+    RenderManager::RenderManager() : m_skyboxRendering(false), m_wireframe(false), m_debugTexture(0)
     {
     }
 
@@ -85,26 +85,6 @@ namespace he
       m_debugTexture = debugTexture;
     }
 
-    void RenderManager::showVirtualAreaLights(bool showVirtualAreaLights)
-    {
-      if(m_showVirtualAreaLights && !showVirtualAreaLights)
-      {
-        removeVirtualAreaLights();
-      }
-
-      m_showVirtualAreaLights = showVirtualAreaLights;
-    }
-
-    void RenderManager::showCaches(bool showCaches)
-    {
-      if(m_showCaches && !showCaches)
-      {
-        removeRenderCaches();
-      }
-
-      m_showCaches = showCaches;
-    }
-
     void RenderManager::initialize(util::SingletonManager *singletonManager)
     {
       m_singletonManager = singletonManager;
@@ -118,7 +98,6 @@ namespace he
       m_spriteRenderer.initialize(m_singletonManager);
       m_stringRenderer.initialize(m_singletonManager);
       m_lightRenderer.initialize(m_singletonManager);
-      m_indirectLightRenderer.initialize(m_singletonManager);
       m_indirectSpecularRenderer.initialize(m_singletonManager);
       m_indirectShadowsCreation.initialize(m_singletonManager);
       m_delaunayTriangulation.initialize(m_singletonManager);
@@ -127,38 +106,6 @@ namespace he
       m_tonemapper.initialize(m_singletonManager);
 
       m_cameraParameterUBO.createBuffer(sizeof(util::Matrix<float, 4>) * 4 + sizeof(util::vec4f) + sizeof(GLfloat) * 2 + sizeof(GLuint) * 2, GL_DYNAMIC_DRAW);
-
-      std::vector<util::vec3f> positions, normals;
-      std::vector<db::Mesh::indexType> indices;
-      std::vector<db::Mesh::VertexDeclarationElements> vertexDeclarationElements;
-      vertexDeclarationElements.push_back(db::Mesh::MODEL_POSITION);
-      vertexDeclarationElements.push_back(db::Mesh::MODEL_NORMAL);
-
-      db::Material::MaterialData sphereMaterialData(0.5f, 0.5f, 0.0f, 1.0f, util::vec4f(0.0f, 0.0f, 1.0f, 1.0f));
-      db::Material debugSphereMaterial(sphereMaterialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true);
-      m_debugSphereMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(debugSphereMaterial);
-
-      util::SphereGenerator::generateSphere(0.05f, positions, indices, normals, 5);
-      db::Mesh debugProxyLightMesh(GL_TRIANGLES, positions.size(), vertexDeclarationElements, indices);
-      debugProxyLightMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
-      debugProxyLightMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
-
-      m_debugProxyLightMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(debugProxyLightMesh);
-
-      positions.clear();
-      indices.clear();
-      normals.clear();
-
-      db::Material::MaterialData discMaterialData(0.5f, 0.5f, 0.0f, 1.0f, util::vec4f(1.0f, 0.0f, 1.0f, 1.0f));
-      db::Material debugDiscMaterial(discMaterialData, std::vector<std::vector<util::ResourceHandle>>(db::Material::TEXTURETYPENUM), std::vector<std::vector<uint64_t>>(db::Material::TEXTURETYPENUM), false, true);
-      m_debugDiscMaterialHandle = m_singletonManager->getService<db::MaterialManager>()->addObject(debugDiscMaterial);
-
-      util::DiscGenerator::generateDisc(0.1f, util::vec3f(0, 1, 0), positions, indices, normals, 20);
-      db::Mesh debugCacheMesh(GL_TRIANGLES, positions.size(), vertexDeclarationElements, indices);
-      debugCacheMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_POSITION, 0, positions.size(), reinterpret_cast<const GLubyte*>(&positions[0]));
-      debugCacheMesh.copyDataIntoGeometryBuffer(db::Mesh::MODEL_NORMAL, 0, normals.size(), reinterpret_cast<const GLubyte*>(&normals[0]));
-
-      m_debugCacheMeshHandle = m_singletonManager->getService<db::ModelManager>()->addObject(debugCacheMesh);
     }
 
     void RenderManager::setViewPort()
@@ -190,30 +137,27 @@ namespace he
         m_gBuffer.clear();
         m_lightRenderer.clear();
 
-        //if(globalIllumination)
+        bool globalIllumination;
         {
-          if(m_showVirtualAreaLights)
+          //CPUTIMER("BufferUpdateCPUTimer", 0)
+          //GPUTIMER("BufferUpdateOGLTimer", 1)
+
+          m_geometryRasterizer.updateBuffer();
+          m_lightRenderer.updateBuffer();
+
+          globalIllumination = m_lightRenderer.getReflectiveShadowLightNumber() > 0 && m_options->globalIllumination;
+
+          if(globalIllumination)
           {
-            insertVirtualAreaLights();
+            if(m_options->indirectShadows)
+            {
+              m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
+              m_indirectShadowsCreation.updateOccluderBuffer(m_geometryRasterizer.getGlobalOccluderNumber());
+              //m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalOccluderNumber());
+            }
+
+            m_indirectSpecularRenderer.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber(), m_geometryRasterizer.getGlobalOccluderNumber());
           }
-
-          if(m_showCaches)
-          {
-            insertRenderCaches();
-          }
-        }
-        
-        m_geometryRasterizer.updateBuffer();
-        m_lightRenderer.updateBuffer();
-
-        bool globalIllumination = m_lightRenderer.getReflectiveShadowLightNumber() > 0 && m_geometryRasterizer.getGlobalCacheNumber() > 0 && m_options->globalIllumination;
-
-        if(globalIllumination)
-        {
-          //m_indirectLightRenderer.updateBuffer(m_geometryRasterizer.getGlobalCacheNumber(), m_geometryRasterizer.getProxyLightTextureResolution());
-          m_indirectShadowsCreation.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber(), m_geometryRasterizer.getGlobalOccluderNumber());
-          //m_delaunayTriangulation.updateBuffer(m_geometryRasterizer.getGlobalOccluderNumber());
-          m_indirectSpecularRenderer.updateBuffer(m_lightRenderer.getReflectiveShadowLightNumber());
         }
 
         if(m_wireframe)
@@ -221,22 +165,33 @@ namespace he
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
-        //m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
+        m_geometryRasterizer.frustumCulling(-1, VIEWPASS);
         
-        m_gBuffer.setGBuffer();
-        m_indirectShadowsCreation.setOccluderBuffer();
-        m_geometryRasterizer.rasterizeGeometry();
-        m_indirectShadowsCreation.unsetOccluderBuffer();
-        m_gBuffer.unsetGBuffer();
+        {
+          //CPUTIMER("GBufferCPUTimer", 0)
+          //GPUTIMER("GBufferOGLTimer", 1)
+
+          m_gBuffer.setGBuffer();
+          m_indirectShadowsCreation.setOccluderBuffer();
+          m_geometryRasterizer.rasterizeGeometry();
+          m_indirectShadowsCreation.unsetOccluderBuffer();
+
+          m_billboardRenderer.render();
+
+          m_gBuffer.unsetGBuffer();
+        }
 
         {
+          //CPUTIMER("ShadowMapsCPUTimer", 0)
+          //GPUTIMER("ShadowMapsOGLTimer", 1)
+
           glViewport(0, 0, m_options->shadowMapWidth, m_options->shadowMapWidth);
           glEnable(GL_POLYGON_OFFSET_FILL);
           glPolygonOffset(1.1f, 4.0f);
           for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
           {
             m_lightRenderer.setShadowMap(4, i);
-            //m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
+            m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
             m_geometryRasterizer.generateShadowMap(i);
             m_lightRenderer.unsetShadowMap(4);
           }
@@ -244,7 +199,7 @@ namespace he
           for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
           {
             m_lightRenderer.setReflectiveShadowMap(4, i);
-            //m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
+            m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
             m_geometryRasterizer.generateReflectiveShadowMap(i);
             m_lightRenderer.unsetReflectiveShadowMap(4, i);
           }
@@ -260,34 +215,17 @@ namespace he
         
         m_lightRenderer.render(m_gBuffer.getDepthTexture(), m_gBuffer.getColorTexture(), m_gBuffer.getNormalTexture(), m_gBuffer.getMaterialTexture());
         
-        m_gBuffer.setGBuffer();
-
-        m_billboardRenderer.render();
-
-        if(m_skyboxRendering)
-        {
-          if(m_cullModeNotBack)
-          {
-            glCullFace(GL_BACK);
-          }
-
-          m_skyboxRenderer.render();
-
-          if(m_cullModeNotBack)
-          {
-            glCullFace(m_cullMode);
-          }
-        }
-
-        m_gBuffer.unsetGBuffer();
-
         if(globalIllumination)
         {
           m_gBuffer.calculateLinearDepthBuffer();
 
-          //m_indirectLightRenderer.setBuffer(m_gBuffer.getDepthTexture());
-          //m_geometryRasterizer.rasterizeIndexGeometry();//create global cache map and z buffer
-          //m_indirectLightRenderer.unsetBuffer();
+          //m_gBuffer.useTestGBuffer();
+          m_indirectSpecularRenderer.gBufferDownsampling(
+            m_gBuffer.getDepthTexture(),
+            m_gBuffer.getLinearDepthTexture(),
+            m_gBuffer.getNormalTexture(),
+            m_gBuffer.getVertexNormalTexture(),
+            m_gBuffer.getMaterialTexture());
           
           if(m_options->indirectShadows)
           {
@@ -319,8 +257,8 @@ namespace he
               m_delaunayTriangulation.getCommandBuffer());//generates the imperfect shadow maps and fills holes with pull push
 
             //m_indirectShadowsCreation.generateIndirectLightsShadowMap(
-            //  m_gBuffer.getDepthTexture(),
-            //  m_gBuffer.getNormalTexture(),
+            //  m_indirectSpecularRenderer.getDebugGBufferHalfResDepthMap(),
+            //  m_indirectSpecularRenderer.getDebugGBufferHalfResNormalMap(),
             //  m_lightRenderer.getReflectiveShadowPosMaps(),
             //  m_lightRenderer.getReflectiveShadowNormalAreaMaps());//does blurring and visibility calculation of the indirect light sources
           }
@@ -335,56 +273,59 @@ namespace he
             m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
             m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
             m_indirectShadowsCreation.getIndirectLightsShadowMaps(),
-            m_indirectShadowsCreation.getIndirectShadowVALQuaternions());
+            m_indirectShadowsCreation.getIndirectShadowVALQuaternions(),
+            m_indirectShadowsCreation.getOccluderNormalCoordinates());
+        }
 
-          //m_indirectLightRenderer.calculateIndirectLight(
-          //  m_lightRenderer.getReflectiveShadowPosMaps(),
-          //  m_lightRenderer.getReflectiveShadowNormalAreaMaps(),
-          //  m_lightRenderer.getReflectiveShadowLuminousFluxMaps(),
-          //  m_lightRenderer.getReflectiveShadowLights());//calculates the indirect light of the caches
+        m_gBuffer.setColorBuffer();
+        m_geometryRasterizer.rasterizeNoLightingGeometry();
 
-          //m_indirectLightRenderer.setCacheAndProxyLights();//create indirect light map
-          //m_geometryRasterizer.generateIndirectLightMap(m_indirectShadowsCreation.getIndirectShadowMap());//generates the indirect light for every pixel on screen with the cache data
-          //m_indirectLightRenderer.unsetCacheAndProxyLights();
-
-          if(m_showVirtualAreaLights)
+        if(m_skyboxRendering)
+        {
+          if(m_cullModeNotBack)
           {
-            updateVirtualAreaLights();
+            glCullFace(GL_BACK);
           }
 
-          if(m_showCaches)
+          m_skyboxRenderer.render();
+
+          if(m_cullModeNotBack)
           {
-            updateRenderCaches();
+            glCullFace(m_cullMode);
           }
         }
 
-        m_gBuffer.setDebugGBuffer();
-        m_geometryRasterizer.rasterizeDebugGeometry();
-        m_gBuffer.unsetDebugGBuffer();
+        m_gBuffer.unsetColorBuffer();
       }
 
       switch(m_debugTexture)
       {
       case 1:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[0]->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
+        //m_finalCompositing.renderDebugOutput(m_lightRenderer.getLightTexture());
+        //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[0]->convertToTexture2D(0));
         break;
       case 2:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectLightsShadowMaps()->convertToTexture2D(0));
+        //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[1]->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getMaterialTexture());
         break;
       case 3:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
+        //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectPushPullShadowMap()[2]->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getNormalTexture());
         break;
       case 4:
-        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+        //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectLightsShadowMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getVertexNormalTexture());
         break;
       case 5:
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCachePositions());
+        //m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getIndirectShadowMap());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDownsampledSpecularLightMap());
         break;
       case 6:
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCacheNormals());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
         break;
       case 7:
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugVertexPositions());
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugCacheNormals());
         break;
       case 8:
         m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugVertexNormals());
@@ -402,24 +343,22 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResLinearDepthMap());
         break;
       case 13:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionNormalMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResNormalMap());
         break;
       case 14:
-        m_finalCompositing.renderDebugOutput(m_indirectShadowsCreation.getBackprojectionPositionMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getDebugGBufferHalfResMaterialMap());
         break;
       case 15:
-        m_delaunayTriangulation.showVoronoiDiagram();
+        //m_delaunayTriangulation.showVoronoiDiagram();
+        m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
         break;
       case 16:
-        //m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        //m_tonemapper.doToneMapping(m_finalCompositing.getCombinedTexture());
-
-        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectLightRenderer.getIndirectLightMap());
-        m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
+        //m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
         break;
       case 0:
       default:
-        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectSpecularRenderer.getUpsampledSpecularLightMap());
+        m_finalCompositing.composeImage(m_gBuffer.getColorTexture(), m_lightRenderer.getLightTexture(), m_indirectSpecularRenderer.getSpecularLightMap());
         m_finalCompositing.renderDebugOutput(m_finalCompositing.getCombinedTexture());
       }
       
@@ -497,166 +436,6 @@ namespace he
     void RenderManager::removeRenderComponent(const xBar::ParticleEmitterContainer& particleEmitter)
     {
       m_particleRenderer.removeRenderComponent(particleEmitter);
-    }
-
-    void RenderManager::insertVirtualAreaLights()
-    {
-      if(m_geometryRasterizer.getGlobalCacheNumber() != m_trfProxyLightMatrices.size())
-      {
-        unsigned int diff = abs(int(m_trfProxyLightMatrices.size()) - int(m_geometryRasterizer.getGlobalCacheNumber()));
-
-        if(m_geometryRasterizer.getGlobalCacheNumber() < m_trfProxyLightMatrices.size())
-        {
-          unsigned int newSize = m_trfProxyLightMatrices.size() - diff;
-          for(unsigned int i = 0; i < diff; i++)
-          {
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[newSize + i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle));
-            removeRenderComponent(geomContainer);
-          }
-
-          m_trfProxyLightMatrices.resize(m_geometryRasterizer.getGlobalCacheNumber());
-        }
-        else
-        {
-          unsigned int oldSize = m_trfProxyLightMatrices.size();
-          m_trfProxyLightMatrices.resize(m_geometryRasterizer.getGlobalCacheNumber());
-
-          for(unsigned int i = 0; i < diff; i++)
-          {
-            m_trfProxyLightMatrices[oldSize + i] = util::SharedPointer<util::Matrix<float, 4>>(new util::Matrix<float, 4>(util::Matrix<float, 4>::identity()));
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[oldSize + i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle));
-            addRenderComponent(geomContainer);
-          }
-        }
-      }
-    }
-
-    void RenderManager::removeVirtualAreaLights()
-    {
-      for(unsigned int i = 0; i < m_trfProxyLightMatrices.size(); i++)
-      {
-        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfProxyLightMatrices[i].get(), m_debugSphereMaterialHandle, m_debugProxyLightMeshHandle)));
-      }
-
-      m_trfProxyLightMatrices.clear();
-    }
-
-    void RenderManager::updateVirtualAreaLights()
-    {
-      unsigned int cacheResolution = m_geometryRasterizer.getProxyLightTextureResolution();
-
-      std::vector<util::vec4f> lightPositions(2 * cacheResolution * cacheResolution);
-      std::vector<util::vec4f> lightLuminousFlux(2 * cacheResolution * cacheResolution);
-      std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheResolution * cacheResolution);
-
-      m_indirectLightRenderer.getIndirectPositionMap()->getTextureData(&lightPositions[0]);
-      m_indirectLightRenderer.getIndirectLuminousFluxMap()->getTextureData(&lightLuminousFlux[0]);
-      m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
-
-      unsigned int validLightCounter = 0;
-      for(unsigned int i = 0; i < cacheResolution * cacheResolution; i++)
-      {
-        if(zBuffer[i][0])
-        {
-          *m_trfProxyLightMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(lightPositions[2 * i][0], lightPositions[2 * i][1], lightPositions[2 * i][2]), 1.0f, util::math::createRotAxisQuaternion(0.0f, util::vec3f(0.0f, 1.0f, 0.0f)));
-          validLightCounter++;
-        }
-      }
-
-      for(unsigned int i = validLightCounter; i < m_trfProxyLightMatrices.size(); i++)
-      {
-        *m_trfProxyLightMatrices[i] = util::Matrix<float, 4>::identity();
-      }
-    }
-
-    util::vec2f encodeNormal2(util::vec3f normal)
-    {
-      return normal[2] < 1.0f - 0.00001 ? (normal[2] * 0.5f + 0.5f) * (util::vec2f(normal[0], normal[1])).normalize() : util::vec2f(1.0f, 0.0f);
-    }
-
-    util::vec3f decodeNormal2(util::vec2f normal)
-    {
-      float z = normal.length() * 2.0f - 1.0f;
-
-      util::vec2f tmpErg = z > -1.0f + 0.00001f ? sqrt((1.0f - z * z) / (util::vec2f::dot(normal, normal))) * normal : util::vec2f(0.0f, 0.0f);
-      return util::vec3f(tmpErg[0], tmpErg[1], z);
-    }
-
-    void RenderManager::insertRenderCaches()
-    {
-      if(m_geometryRasterizer.getGlobalCacheNumber() != m_trfCacheMatrices.size())
-      {
-        unsigned int diff = abs(int(m_trfCacheMatrices.size()) - int(m_geometryRasterizer.getGlobalCacheNumber()));
-
-        if(m_geometryRasterizer.getGlobalCacheNumber() < m_trfCacheMatrices.size())
-        {
-          unsigned int newSize = m_trfCacheMatrices.size() - diff;
-          for(unsigned int i = 0; i < diff; i++)
-          {
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[newSize + i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle));
-            removeRenderComponent(geomContainer);
-          }
-
-          m_trfCacheMatrices.resize(m_geometryRasterizer.getGlobalCacheNumber());
-        }
-        else
-        {
-          unsigned int oldSize = m_trfCacheMatrices.size();
-          m_trfCacheMatrices.resize(m_geometryRasterizer.getGlobalCacheNumber());
-
-          for(unsigned int i = 0; i < diff; i++)
-          {
-            m_trfCacheMatrices[oldSize + i] = util::SharedPointer<util::Matrix<float, 4>>(new util::Matrix<float, 4>(util::Matrix<float, 4>::identity()));
-            util::SharedPointer<const xBar::StaticGeometryContainer> geomContainer(new const xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[oldSize + i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle));
-            addRenderComponent(geomContainer);
-          }
-        }
-      }
-    }
-
-    void RenderManager::removeRenderCaches()
-    {
-      for(unsigned int i = 0; i < m_trfCacheMatrices.size(); i++)
-      {
-        removeRenderComponent(util::SharedPointer<const xBar::StaticGeometryContainer>(new xBar::StaticGeometryContainer(util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::STATICNODE) | util::Flags<xBar::RenderNodeType>::convertToFlag(xBar::INDEXEDNODE), m_trfCacheMatrices[i].get(), m_debugDiscMaterialHandle, m_debugCacheMeshHandle)));
-      }
-
-      m_trfCacheMatrices.clear();
-    }
-
-    void RenderManager::updateRenderCaches()
-    {
-      unsigned int cacheNumber = m_geometryRasterizer.getGlobalCacheNumber();
-      unsigned int cacheTextureResolution = m_geometryRasterizer.getProxyLightTextureResolution();
-
-      std::vector<util::vec4f> cachePositions(cacheNumber);
-      std::vector<util::vec4f> cacheNormals(cacheNumber);
-      std::vector<util::Vector<GLubyte, 4>> zBuffer(cacheTextureResolution * cacheTextureResolution);
-
-      m_indirectLightRenderer.getGlobalCachePositionMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cachePositions[0]);
-      m_indirectLightRenderer.getGlobalCacheNormalMap().getData(0, sizeof(util::vec4f) * cacheNumber, &cacheNormals[0]);
-      m_indirectLightRenderer.getZBuffer()->getTextureData(GL_RGBA, GL_UNSIGNED_BYTE, &zBuffer[0]);
-
-      unsigned int validLightCounter = 0;
-      for(unsigned int i = 0; i < cachePositions.size(); i++)
-      {
-        if(zBuffer[i][0])
-        {
-          util::vec3f normal = decodeNormal2(util::vec2f(cacheNormals[i][0], cacheNormals[i][1]));
-          util::vec3f rotationAxis = util::math::cross(normal, util::vec3f(0, 1, 0)).normalize();
-          float angle = acosf(util::math::clamp(util::vec3f::dot(util::vec3f(0, 1, 0), normal), -1.0f, 1.0f));
-
-          cachePositions[i] += normal * 0.01f;
-
-          *m_trfCacheMatrices[validLightCounter] = util::math::createTransformationMatrix(util::vec3f(cachePositions[i][0], cachePositions[i][1], cachePositions[i][2]), 1.0f, util::math::createRotAxisQuaternion<float>(angle, rotationAxis));
-          validLightCounter++;
-        }
-      }
-
-      for(unsigned int i = validLightCounter; i < m_trfCacheMatrices.size(); i++)
-      {
-        *m_trfCacheMatrices[i] = util::Matrix<float, 4>::identity();
-      }
     }
   }
 }

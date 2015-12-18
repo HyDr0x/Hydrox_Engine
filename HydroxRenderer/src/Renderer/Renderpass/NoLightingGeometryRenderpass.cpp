@@ -1,4 +1,4 @@
-#include "Renderer/Renderpass/IndirectLightEdgeVertexExtractionGeometryRenderpass.h"
+#include "Renderer/Renderpass/NoLightingGeometryRenderpass.h"
 
 #include <DataBase/Mesh.h>
 
@@ -8,43 +8,47 @@ namespace he
 {
   namespace renderer
   {
-    IndirectLightEdgeVertexExtractionGeometryRenderpass::IndirectLightEdgeVertexExtractionGeometryRenderpass()
+    NoLightingGeometryRenderpass::NoLightingGeometryRenderpass()
     {
     }
 
-    IndirectLightEdgeVertexExtractionGeometryRenderpass::~IndirectLightEdgeVertexExtractionGeometryRenderpass()
+    NoLightingGeometryRenderpass::~NoLightingGeometryRenderpass()
     {
     }
 
-    void IndirectLightEdgeVertexExtractionGeometryRenderpass::initialize(util::SingletonManager *singletonManager, sh::ShaderContainer::Renderpass renderPass, util::SharedPointer<db::Texture2D> gBufferMaterialMap)
+    void NoLightingGeometryRenderpass::initialize(util::SingletonManager *singletonManager, sh::ShaderContainer::Renderpass renderPass, std::vector<util::SharedPointer<SamplerObject>> samplerObjects)
     {
-      m_gBufferMaterialMap = gBufferMaterialMap;
       ARenderpass::initialize(singletonManager, renderPass);
+
+      m_textureManager = singletonManager->getService<db::TextureManager>();
+      m_samplerObjects = samplerObjects;
     }
 
-    void IndirectLightEdgeVertexExtractionGeometryRenderpass::drawRenderpass() const
+    void NoLightingGeometryRenderpass::drawRenderpass() const
     {
       for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
       {
         const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_shaderNodes[i].getShaderHandle());
         shader.useShader();
 
-        m_gBufferMaterialMap->setTexture(0, 0);
-
         for(unsigned int j = 0; j < m_renderContainer[i].size(); j++)//all arrays have the same size! Vertexdeclaration-, Texture Nodes and Render Container are coupled together
         {
           m_vertexDeclarationNodes[i][j].setVertexArray();
 
+          m_textureNodes[i][j].bindTextures(m_textureManager, m_samplerObjects);
+
+          m_renderContainer[i][j]->getMaterialData().bindMaterialBuffer();//for uni color
           m_renderContainer[i][j]->getMatrixData().bindMatrixBuffer();
           m_renderContainer[i][j]->getDrawData().bindDrawBuffer();
           m_renderContainer[i][j]->getDrawData().draw();
           m_renderContainer[i][j]->getDrawData().unbindDrawBuffer();
           m_renderContainer[i][j]->getMatrixData().unbindMatrixBuffer();
+          m_renderContainer[i][j]->getMaterialData().unbindMaterialBuffer();
+
+          m_textureNodes[i][j].unbindTextures(m_textureManager, m_samplerObjects);
 
           m_vertexDeclarationNodes[i][j].unsetVertexArray();
         }
-
-        m_gBufferMaterialMap->unsetTexture(0);
 
         shader.useNoShader();
       }

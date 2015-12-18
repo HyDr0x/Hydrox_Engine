@@ -36,6 +36,7 @@ void main()
 	skinningMatrix += (boneMatrix[globalInstanceID + uint(in_boneIndices.w)] * in_boneWeights.w);
 
 	outData.normal = normalize(mat3(skinningMatrix) * in_normal);
+	float scale = sqrt(skinningMatrix[0][0] * skinningMatrix[0][0] + skinningMatrix[0][1] * skinningMatrix[0][1] + skinningMatrix[0][2] * skinningMatrix[0][2]);
 	
-	gl_Position = skinningMatrix * vec4(in_Pos, 1.0f);
+	gl_Position = vec4((skinningMatrix * vec4(in_Pos, 1.0)).xyz, scale);
 }

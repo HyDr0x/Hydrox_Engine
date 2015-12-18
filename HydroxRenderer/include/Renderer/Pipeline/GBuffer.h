@@ -39,12 +39,14 @@ namespace he
       void setGBuffer() const;
       void unsetGBuffer() const;
 
-      void setDebugGBuffer() const;
-      void unsetDebugGBuffer() const;
+      void setColorBuffer() const;
+      void unsetColorBuffer() const;
 
       void calculateLinearDepthBuffer() const;
 
       void setClearColor(util::vec4f clearColor);
+
+      void useTestGBuffer();
 
       util::SharedPointer<db::Texture2D> getDepthTexture() const;
       util::SharedPointer<db::Texture2D> getLinearDepthTexture() const;
@@ -60,7 +62,16 @@ namespace he
       GBuffer(const GBuffer&);
       GBuffer& operator=(const GBuffer&);
 
+      void createTestGBuffer();
+
       util::SingletonManager *m_singletonManager;
+
+      std::vector<util::vec4f> m_colorBuffer;
+      std::vector<util::vec4f> m_normalBuffer;
+      std::vector<util::vec4f> m_vertexNormaluffer;
+      std::vector<util::vec4f> m_materialBuffer;
+      std::vector<float> m_depthBuffer;
+      std::vector<float> m_linearDepthBuffer;
 
       util::SharedPointer<db::Texture2D> m_depthTexture;
       util::SharedPointer<db::Texture2D> m_linearDepthTexture;
@@ -72,7 +83,7 @@ namespace he
       sh::ComputeShaderHandle m_linearDepthBufferCreation;
 
       Renderquad m_fullscreenRenderQuad;
-      Renderquad m_debugRenderquad;
+      Renderquad m_fullscreenColorRenderquad;
 
       util::vec4f m_clearColor;
     };

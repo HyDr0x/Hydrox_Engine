@@ -1,14 +1,7 @@
 #version 440 core
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/VertexDeclaration.glslh"
-
-layout(std140, binding = 0) uniform cameraParameters
-{
-	mat4 viewMatrix;
-	mat4 projectionMatrix;
-	mat4 viewProjectionMatrix;
-	vec4 eyePos;
-};
+#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
 layout(location = POSITION) in vec3 in_Pos;
 layout(location = TEXTURE0) in vec2 in_texCoord;

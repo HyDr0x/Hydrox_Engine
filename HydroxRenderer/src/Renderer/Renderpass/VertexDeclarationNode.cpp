@@ -157,28 +157,6 @@ namespace he
         vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_COLOR);
       }
 
-      if(m_meshVertexDeclaration.toInt() & VertexElementFlags::convertToFlag(db::Mesh::MODEL_CACHEINDICES0).toInt())
-      {
-        if(m_shaderVertexDeclaration.toInt() & VertexElementFlags::convertToFlag(db::Mesh::MODEL_CACHEINDICES0).toInt())
-        {
-          glVertexAttribFormat(sh::RenderShader::CACHEINDICES0, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-          glVertexAttribBinding(sh::RenderShader::CACHEINDICES0, 0);
-        }
-
-        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDICES0);
-      }
-
-      if(m_meshVertexDeclaration.toInt() & VertexElementFlags::convertToFlag(db::Mesh::MODEL_CACHEINDICES1).toInt())
-      {
-        if(m_shaderVertexDeclaration.toInt() & VertexElementFlags::convertToFlag(db::Mesh::MODEL_CACHEINDICES1).toInt())
-        {
-          glVertexAttribFormat(sh::RenderShader::CACHEINDICES1, 4, GLCACHEINDEXTYPE, GL_FALSE, vertexStride);
-          glVertexAttribBinding(sh::RenderShader::CACHEINDICES1, 0);
-        }
-
-        vertexStride += db::Mesh::vertexDeclarationSize(db::Mesh::MODEL_CACHEINDICES1);
-      }
-
       glBindVertexArray(0);
     }
 

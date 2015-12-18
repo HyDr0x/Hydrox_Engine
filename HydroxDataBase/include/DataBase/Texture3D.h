@@ -28,6 +28,7 @@ namespace he
       Texture3D& operator=(Texture3D other);
 
       void copyTextureData(const Texture3D& texture);
+      void copyTextureData(const Texture3D& texture, util::vec3i srcCoords, util::vec3i dstCoords, util::vec3i size);
 
       void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
       void unbindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);

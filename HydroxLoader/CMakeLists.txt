@@ -51,7 +51,7 @@ set(
 	debug ${HYDROX_DB_LIB_DBG}${LIBSUFFIX} 
 	debug ${HYDROX_SH_LIB_DBG}${LIBSUFFIX} 
   debug ${GLEW_LIBRARIES}
-  debug ${ASSIMP_LIBRARY_DBG} 
+  debug ${ASSIMP_LIBRARY_REL} 
 )
 
 set(

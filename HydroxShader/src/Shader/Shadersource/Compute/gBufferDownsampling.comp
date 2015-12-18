@@ -51,8 +51,10 @@ void main()
 		{
 			depth += texelFetch(readGBufferDepth, texCoord, 0).x;
 			linDepth += texelFetch(readGBufferLinearDepth, texCoord, 0).x;
-			normal += texelFetch(readGBufferNormals, startedTexCoord, 0);
-			vertexNormal += texelFetch(readGBufferVertexNormals, startedTexCoord, 0);
+			normal += texelFetch(readGBufferNormals, startedTexCoord, 0) * 2.0 - 1.0;
+			vertexNormal += texelFetch(readGBufferVertexNormals, startedTexCoord, 0) * 2.0 - 1.0;
+			//normal += texelFetch(readGBufferNormals, startedTexCoord, 0);
+			//vertexNormal += texelFetch(readGBufferVertexNormals, startedTexCoord, 0);
 			material += texelFetch(readGBufferMaterials, texCoord, 0);
 			
 			texCoord += sampleDirection;
@@ -73,8 +75,10 @@ void main()
 		
 		imageStore(writeGBufferDepth, downSampledTexCoord, vec4(depth));
 		imageStore(writeGBufferLinearDepth, downSampledTexCoord, vec4(linDepth));
-		imageStore(writeGBufferNormals, downSampledTexCoord, normal);
-		imageStore(writeGBufferVertexNormals, downSampledTexCoord, vertexNormal);
+		imageStore(writeGBufferNormals, downSampledTexCoord, normalize(normal) * 0.5 + 0.5);
+		imageStore(writeGBufferVertexNormals, downSampledTexCoord, normalize(vertexNormal) * 0.5 + 0.5);
+		//imageStore(writeGBufferNormals, downSampledTexCoord, normal);
+		//imageStore(writeGBufferVertexNormals, downSampledTexCoord, vertexNormal);
 		imageStore(writeGBufferMaterials, downSampledTexCoord, material);
 	}
 }

@@ -3,23 +3,21 @@
 #define HALFRESX
 #define HALFRESY
 
-#define THREADTILESIZE 8
+#define THREADTILESIZE 2
 #define WORKGROUPSIZE (THREADTILESIZE * THREADTILESIZE)
 #define VERTEXTILESIZE
 #define VERTEXTILEMULTI
 #define MULTVERTEXTILESIZE (VERTEXTILEMULTI * VERTEXTILESIZE)
 #define TILEPIXELPERTHREAD ((VERTEXTILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
-#define LIGHTTUBEBINDINGPOINT 0
 
 #define INT32_MAX 2147483647
 #define PI 3.14159265359
 #define PI_HALF (PI * 0.5)
 #define NORMALPHIQ 9
 #define NORMALTHETAQ 4
+#define DEPTHQ 16
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
-#include "../../HydroxShader/include/Shader/Shaderincludes/IndirectLightCollision.glslh"
-#include "../../HydroxShader/include/Shader/Shaderincludes/MaterialConversion.glslh"
 
 layout(location = 0) uniform sampler2D gBufferDepthSampler;
 layout(location = 1) uniform sampler2D gBufferNormalSampler;
@@ -29,6 +27,11 @@ layout(location = 3) uniform sampler2D gBufferLinearDepthSampler;
 layout(rgba32f, binding = 0) writeonly uniform image2D vertexPositionImage;
 layout(rgba32f, binding = 1) writeonly uniform image2D vertexNormalImage;
 layout(r32ui, binding = 2) uniform uimage2D vertexAtomicIndexSampler;
+
+uint depthToBin(in float depth, in float minDepth, in float maxDepth)
+{
+	return uint(((depth - minDepth) / max(maxDepth - minDepth, 1.0) - 0.0001) * DEPTHQ);
+}
 
 uint normalToBin(in vec3 normal)
 {
@@ -44,8 +47,10 @@ shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
 shared float groupSummedPixelNumber[WORKGROUPSIZE];
 shared uint groupNormalBin[NORMALPHIQ * NORMALTHETAQ];//rubics cube normal directions
-shared uint groupMaxNormalBinID;
-shared uint groupMaxNormalBinVotes;
+
+shared uint groupMinDepth;
+shared uint groupMaxDepth;
+shared uint groupChoosenDepthBin;
 
 void main()
 {
@@ -72,12 +77,38 @@ void main()
 			
 			const uint binsPerThread = (NORMALPHIQ * NORMALTHETAQ + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
 			const uint binStartIndex = localIDx * binsPerThread;
-			const uint binEndIndex = binStartIndex + binsPerThread;
+			const uint binEndIndex = min(binStartIndex + binsPerThread, NORMALPHIQ * NORMALTHETAQ);
 			for(uint j = binStartIndex; j < binEndIndex; j++)
 			{
-				if(j < NORMALPHIQ * NORMALTHETAQ)
+				groupNormalBin[j] = 0;
+			}
+			
+			if(localIDx == 0)
+			{	
+				groupMinDepth = 0xFFFFFFFF;
+				groupMaxDepth = 0x0;
+			}
+			
+			memoryBarrierShared();
+			barrier();
+			
+			uint depthBinCache[TILEPIXELPERTHREAD * TILEPIXELPERTHREAD];
+			for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
+			{
+				ivec2 texCoord = int(VERTEXTILESIZE) * subBlockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
+				
+				if(texCoord.x < HALFRESX && texCoord.y < HALFRESY)
 				{
-					groupNormalBin[j] = 0;
+					float linearDepth = texelFetch(gBufferLinearDepthSampler, texCoord, 0).r;
+
+					atomicMin(groupMinDepth, floatBitsToUint(linearDepth));
+					atomicMax(groupMaxDepth, floatBitsToUint(linearDepth));
+					depthBinCache[j] = floatBitsToUint(linearDepth);
+					
+					if(linearDepth >= far)
+					{
+						depthBinCache[j] = INT32_MAX;
+					}
 				}
 			}
 			
@@ -91,80 +122,94 @@ void main()
 			{
 				ivec2 texCoord = int(VERTEXTILESIZE) * subBlockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
 				
-				vec3 normal = texelFetch(gBufferNormalSampler, texCoord, 0).xyz * 2.0 - 1.0;
-
-				normalCache[j] = normal;
-				normalBinCache[j] = normalToBin(normal);
-				
-				atomicAdd(groupNormalBin[normalBinCache[j]], 1);
-			}
-
-			do
-			{
-				memoryBarrierShared();
-				barrier();
-				
-				if(localIDx == 0)
+				if(texCoord.x < HALFRESX && texCoord.y < HALFRESY)
 				{
-					groupMaxNormalBinID = INT32_MAX;
-					groupMaxNormalBinVotes = 0;
+					vec3 normal = texelFetch(gBufferNormalSampler, texCoord, 0).xyz * 2.0 - 1.0;
+
+					normalCache[j] = normal;
+					normalBinCache[j] = normalToBin(normal);
 					
-					for(uint j = 0; j < (NORMALPHIQ * NORMALTHETAQ); j++)
-					{
-						if(groupNormalBin[j] > groupMaxNormalBinVotes)
-						{
-							groupMaxNormalBinVotes = groupNormalBin[j];
-							groupMaxNormalBinID = j;
-						}
-					}
+					atomicAdd(groupNormalBin[normalBinCache[j]], 1);
+					
+					depthBinCache[j] = depthToBin(uintBitsToFloat(depthBinCache[j]), uintBitsToFloat(groupMinDepth), uintBitsToFloat(groupMaxDepth));
 				}
-
-				memoryBarrierShared();
-				barrier();
-			
-				if(groupMaxNormalBinVotes > 0 /*&& groupMaxNormalBinVotes < (VERTEXTILESIZE * VERTEXTILESIZE)*/)
+				else
 				{
+					normalBinCache[j] = INT32_MAX;
+					depthBinCache[j] = INT32_MAX;
+				}
+			}
+			
+			memoryBarrierShared();
+			barrier();
+			
+			groupChoosenDepthBin = INT32_MAX;//first time initialization only
+			
+			for(uint j = 0; j < (NORMALPHIQ * NORMALTHETAQ); j++)
+			{
+				while(groupNormalBin[j] > 0)
+				{
+					memoryBarrierShared();
+					barrier();
+				
 					float summedPixels = 0.0;
 					vec3 summedPosition = vec3(0.0);
 					vec3 summedNormals = vec3(0.0);
-					for(uint j = 0; j < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); j++)
+					for(uint k = 0; k < (TILEPIXELPERTHREAD * TILEPIXELPERTHREAD); k++)
 					{
-						ivec2 texCoord = int(VERTEXTILESIZE) * subBlockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(j, TILEPIXELPERTHREAD), j / TILEPIXELPERTHREAD);
+						ivec2 texCoord = int(VERTEXTILESIZE) * subBlockCoord + ivec2(tilePixelStartIndex) + ivec2(mod(k, TILEPIXELPERTHREAD), k / TILEPIXELPERTHREAD);
+						
+						if(texCoord.x >= HALFRESX || texCoord.y >= HALFRESY) continue;
+						
 						vec2 texCoordNormalized = texCoord / vec2(HALFRESX, HALFRESY);
 						
-						if(normalBinCache[j] == groupMaxNormalBinID)
+						if(normalBinCache[k] == j)
 						{
-							float depth = texelFetch(gBufferDepthSampler, texCoord, 0).r;
-							
-							if(depth < 0.9999)
+							//if(groupChoosenDepthBin == INT32_MAX && depthBinCache[k] != INT32_MAX)
 							{
-								vec4 position3D = invViewProjectionMatrix * (vec4(texCoordNormalized, depth, 1.0) * 2.0 - 1.0);
-								position3D /= position3D.w;
-								
-								summedPosition += position3D.xyz;
-								summedNormals += normalCache[j];
-
-								summedPixels++;
+								atomicCompSwap(groupChoosenDepthBin, INT32_MAX, depthBinCache[k]);
 							}
-
-							atomicAdd(groupNormalBin[groupMaxNormalBinID], -1);
+						
+							if(depthBinCache[k] == groupChoosenDepthBin)
+							{
+								float depth = texelFetch(gBufferDepthSampler, texCoord, 0).r;
+								
+								if(depth < 0.9999)
+								{
+									vec4 position3D = invViewProjectionMatrix * (vec4(texCoordNormalized, depth, 1.0) * 2.0 - 1.0);
+									position3D /= position3D.w;
+									
+									summedPosition += position3D.xyz;
+									summedNormals += normalCache[k];
+								
+									summedPixels++;
+								}
+								
+								normalBinCache[k] = INT32_MAX;
+								depthBinCache[k] = INT32_MAX;
+								atomicAdd(groupNormalBin[j], -1);
+							}
 						}
 					}
-					
+
 					groupPosition[localIDx] = summedPosition;
 					groupNormals[localIDx] = summedNormals;
 					groupSummedPixelNumber[localIDx] = summedPixels;
 
 					memoryBarrierShared();
 					barrier();
+					
+					groupChoosenDepthBin = INT32_MAX;
+					//groupNormalBin[j] = 0;
 
 					float resultPixelCounter = 0.0;
 					vec3 resultPosition = vec3(0.0);
 					vec3 resultNormals = vec3(0.0);
+					float resultGlossiness = 0.0;
 					
-					for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
+					for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
 					{
-						uint index = localIDx * THREADTILESIZE + j;
+						uint index = localIDx * THREADTILESIZE + k;
 						if(index < THREADTILESIZE * THREADTILESIZE && groupSummedPixelNumber[index] > 0)
 						{
 							resultPixelCounter += groupSummedPixelNumber[index];
@@ -189,13 +234,13 @@ void main()
 						resultPosition = vec3(0.0);
 						resultNormals = vec3(0.0);
 					
-						for(uint j = 0; j < THREADTILESIZE; j++)//parallel scan should be more efficient here
+						for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
 						{
-							if(groupSummedPixelNumber[j] > 0)
+							if(groupSummedPixelNumber[k] > 0)
 							{
-								resultPixelCounter += groupSummedPixelNumber[j];
-								resultPosition += groupPosition[j];
-								resultNormals += groupNormals[j];
+								resultPixelCounter += groupSummedPixelNumber[k];
+								resultPosition += groupPosition[k];
+								resultNormals += groupNormals[k];
 							}
 						}
 
@@ -212,11 +257,7 @@ void main()
 						}
 					}
 				}
-				else if(localIDx == 0)
-				{
-					groupNormalBin[groupMaxNormalBinID] = 0;
-				}
-			} while(groupMaxNormalBinVotes > 0);
+			}
 						
 			memoryBarrierShared();
 			barrier();

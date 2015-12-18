@@ -1,6 +1,8 @@
 set(
 	HEADER 
 	${HEADER}
+	${CMAKE_CURRENT_SOURCE_DIR}/Measurement.h 
+	${CMAKE_CURRENT_SOURCE_DIR}/MeasurementManager.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/Timer.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerCPUUnix.h 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerCPUWin.h 

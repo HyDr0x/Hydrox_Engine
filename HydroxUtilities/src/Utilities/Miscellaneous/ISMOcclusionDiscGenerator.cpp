@@ -5,6 +5,9 @@
 #include <random>
 #include <cmath>
 
+#include <voro++.hh>
+
+#include "Utilities/Miscellaneous/clipper.hpp"
 #include "Utilities/Miscellaneous/SutherlandHodgman.h"
 #include "Utilities/Math/Math.hpp"
 #include "Utilities/Math/Triangle.h"
@@ -400,39 +403,14 @@ namespace he
         for(std::list<std::pair<vec3f, Triangle>>::iterator cit = mip->second.begin(); cit != mip->second.end(); cit++)
         {
           m_occluder.push_back(generateBarycentricCoordinates(cit->first, cit->second));
-          m_cacheTriangles.push_back(cit->second);
+          m_occluderTriangles.push_back(cit->second);
         }
       }
     }
 
-    vec3f ISMOcclusionDiscGenerator::findCacheTriangle(const std::vector<vec3f>& triangles, const vec3f& outOccluder, Triangle& occluderTriangle)
+    void ISMOcclusionDiscGenerator::createTriangleOccluderIndices(const std::vector<vec3f>& triangles)
     {
-      vec3f nearestPoint;
-      float minDistance = FLT_MAX;
-
-      for(unsigned int i = 0; i < triangles.size(); i += 3)
-      {
-        vec3f tmpNearestPoint;
-        float distance;
-
-        Triangle testTriangle(triangles[i], triangles[i + 1], triangles[i + 2]);
-
-        distance = testTriangle.calculatePointTriangleDistance(outOccluder, tmpNearestPoint);
-
-        if(minDistance > distance)
-        {
-          minDistance = distance;
-          nearestPoint = tmpNearestPoint;
-          occluderTriangle = testTriangle;
-        }
-      }
-
-      return nearestPoint;
-    }
-
-    void ISMOcclusionDiscGenerator::createTriangleCacheIndices(const std::vector<vec3f>& triangles, std::vector<Triangle>& occluderTriangles, std::vector<vec3f>& outOccluder, std::vector<vec2ui>& triangleCacheIndices)
-    {
-      std::vector<vec3f> sortedOccluder;
+      std::vector<vec4f> sortedOccluder;
       std::vector<Triangle> sortedOccluderTriangles;
 
       for(unsigned int i = 0; i < triangles.size(); i += 3)
@@ -442,9 +420,9 @@ namespace he
         vec3f t2 = triangles[i + 2];
 
         unsigned int occluderNumber = 0;
-        std::vector<Triangle>::iterator rit = occluderTriangles.begin();
-        std::vector<vec3f>::iterator cit = outOccluder.begin();
-        while(rit != occluderTriangles.end())
+        std::vector<Triangle>::iterator rit = m_occluderTriangles.begin();
+        std::vector<vec4f>::iterator cit = m_occluder.begin();
+        while(rit != m_occluderTriangles.end())
         {
           if((*rit)[0] == t0 && (*rit)[1] == t1 && (*rit)[2] == t2)
           {
@@ -453,9 +431,9 @@ namespace he
             sortedOccluder.push_back(*cit);
             sortedOccluderTriangles.push_back(*rit);
 
-            cit = outOccluder.erase(cit);
-            rit = occluderTriangles.erase(rit);
-            if(occluderTriangles.empty()) break;
+            cit = m_occluder.erase(cit);
+            rit = m_occluderTriangles.erase(rit);
+            if(m_occluderTriangles.empty()) break;
           }
           else
           {
@@ -464,11 +442,200 @@ namespace he
           }
         }
 
-        triangleCacheIndices.push_back(vec2ui(sortedOccluder.size() - occluderNumber, sortedOccluder.size()));
+        m_triangleOccluderIndices.push_back(vec2ui(sortedOccluder.size() - occluderNumber, sortedOccluder.size()));
       }
 
-      outOccluder = sortedOccluder;
-      occluderTriangles = sortedOccluderTriangles;
+      m_occluder = sortedOccluder;
+      m_occluderTriangles = sortedOccluderTriangles;
+    }
+
+    void convertPolygonFloatPointsToIntegerPoints(const int bitShiftNumber, const Polygon& inPolygon, vec3f sideLength, ClipperLib::Path& outPolygon)
+    {
+      float maximum = std::max(sideLength[0], std::max(sideLength[1], sideLength[2]));
+
+      double scale = std::pow(2.0f, bitShiftNumber) / maximum;//31 because we could multiply two 64 bit numbers, so the number could reach a * b = 2^31 * 2^31 = 2^62 and we have only 63 bits, so an exponent of 32 would lead to an overflow
+
+      std::vector<vec3f> rotatedPoints = inPolygon.getRotatedPolygonPoints(vec3f(0, 0, 1));
+
+      outPolygon.resize(inPolygon.getPointNumber());
+      for(unsigned int i = 0; i < outPolygon.size(); i++)
+      {
+        outPolygon[i].X = rotatedPoints[i][0] * scale;
+        outPolygon[i].Y = rotatedPoints[i][1] * scale;
+      }
+    }
+
+    void calculateCacheArea(util::vec4f& occluderPosArea, Triangle cacheTriangle, voro::voronoicell_base& vc, vec3f sideLength, const std::vector<vec3f>& triangles, float epsilon, int bitShiftNumber)
+    {
+      std::vector<double> vertices;
+      vc.vertices(occluderPosArea[0], occluderPosArea[1], occluderPosArea[2], vertices);
+
+      std::vector<int> faceVertices;
+      vc.face_vertices(faceVertices);
+
+      Plane plane(cacheTriangle[0], cacheTriangle[1], cacheTriangle[2]);
+
+      std::vector<Polygon> polygons;
+
+      for(unsigned int i = 0; i < triangles.size(); i += 3)
+      {
+        std::vector<vec3f> trianglePoints(3);
+        trianglePoints[0] = triangles[i];
+        trianglePoints[1] = triangles[i + 1];
+        trianglePoints[2] = triangles[i + 2];
+
+        Polygon polygon0(trianglePoints);
+        Polygon polygon1;
+
+        for(unsigned int j = 0; j < faceVertices.size(); j += faceVertices[j] + 1)
+        {
+          vec3f v0, v1, v2;
+          v0 = vec3f(vertices[3 * faceVertices[j + 1]], vertices[3 * faceVertices[j + 1] + 1], vertices[3 * faceVertices[j + 1] + 2]);
+          v1 = vec3f(vertices[3 * faceVertices[j + 3]], vertices[3 * faceVertices[j + 3] + 1], vertices[3 * faceVertices[j + 3] + 2]);
+          v2 = vec3f(vertices[3 * faceVertices[j + 2]], vertices[3 * faceVertices[j + 2] + 1], vertices[3 * faceVertices[j + 2] + 2]);
+
+          Plane clippingPlane(v0, v1, v2);
+          sutherlandHodgman(clippingPlane, polygon0, epsilon, polygon1);
+
+          polygon0 = polygon1;
+          polygon1.clear();
+
+          if(polygon0.getPointNumber() < 3 || polygon0.getArea() == 0.0f)//we need polygons with an area, stop if it degenerates to a line or point or nothing
+          {
+            break;
+          }
+        }
+
+        if(polygon0.getArea() < 0.0f)
+        {
+          polygon0.invertWindingOrder();//winding order can be changed through plane projection
+        }
+        else if(polygon0.getArea() == 0.0f)//if it degenerates to a line, stop
+        {
+          continue;
+        }
+
+        for(unsigned int i = 0; i < polygon0.getPointNumber(); i++)
+        {
+          polygon0.setPoint(i, plane.projectPointOn(polygon0[i]));
+        }
+
+        if(polygon0.getPointNumber() > 2 && polygon0.getArea() > 0.0f)//take only triangles or more with an area
+        {
+          polygons.push_back(polygon0);
+        }
+      }
+
+      ClipperLib::Paths areaPolygons;
+      for(unsigned int i = 0; i < polygons.size(); i++)
+      {
+        ClipperLib::Path areaPolygon;
+        convertPolygonFloatPointsToIntegerPoints(bitShiftNumber, polygons[i], sideLength, areaPolygon);
+
+        if(ClipperLib::Area(areaPolygon) > 0.0)//push it only in here if its still a polygon after conversion (rotation and quantization)
+        {
+          areaPolygons.push_back(areaPolygon);
+        }
+      }
+
+      ClipperLib::Clipper clipper;
+      ClipperLib::Paths unionPolygons;
+      bool united;
+      
+      while(!areaPolygons.empty())
+      {
+        ClipperLib::Paths unionPolygon;
+        unionPolygon.push_back(*areaPolygons.begin());
+        areaPolygons.erase(areaPolygons.begin());
+
+        do
+        {
+          assert(!unionPolygon.empty());
+          united = false;
+          for(ClipperLib::Paths::iterator it = areaPolygons.begin(); it != areaPolygons.end(); it++)
+          {
+            clipper.Clear();
+            clipper.AddPaths(unionPolygon, ClipperLib::ptSubject, true);
+            clipper.AddPath(*it, ClipperLib::ptClip, true);
+            if(clipper.Execute(ClipperLib::ctUnion, unionPolygon))
+            {
+              areaPolygons.erase(it);
+              united = true;
+              break;
+            }
+          }
+        } while(united);
+
+        unionPolygons.insert(unionPolygons.end(), unionPolygon.begin(), unionPolygon.end());
+      }
+
+      float maximum = std::max(sideLength[0], std::max(sideLength[1], sideLength[2]));
+      double scale = 1.0f / (std::pow(2.0f, bitShiftNumber) / maximum);
+
+      double addedArea = 0.0f;
+      for(unsigned int i = 0; i < unionPolygons.size(); i++)
+      {
+        addedArea += ClipperLib::Area(unionPolygons[i]);
+      }
+
+      addedArea *= scale;//clipper lib uses CW winding order?!
+      addedArea *= scale;
+
+      occluderPosArea[3] = addedArea;
+
+      if(occluderPosArea[3] < 0.0f)
+      {
+        occluderPosArea[3] = 0.0f;
+      }
+    }
+
+    void ISMOcclusionDiscGenerator::generateCachesArea(const std::vector<vec3f>& triangles)
+    {
+      vec3f diagonal = m_globalBBMax - m_globalBBMin;
+      float epsilon = 0.0001f * std::max<float>(1.0f, fabs(std::min<float>(diagonal[0], std::min<float>(diagonal[1], diagonal[2]))));
+      const int bitShiftNumber = 31;
+
+      for(unsigned int i = 0; i < 3; i++)
+      {
+        if(diagonal[i] < epsilon)
+        {
+          m_globalBBMin[i] -= epsilon;
+          m_globalBBMax[i] += epsilon;
+        }
+
+        m_globalBBMin[i] -= diagonal[i] * 0.1f;//shift the outer limits of the bounding box so that no triangle can touch the border (numerical problems can occur with the sutherland hodgman algorithm otherwise)
+        m_globalBBMax[i] += diagonal[i] * 0.1f;
+      }
+
+      int numberOfBlocks = ceil(pow(float(m_occluder.size()) / 5.0f, 1.0f / 3.0f));
+
+      voro::container container(m_globalBBMin[0], m_globalBBMax[0], m_globalBBMin[1], m_globalBBMax[1], m_globalBBMin[2], m_globalBBMax[2], numberOfBlocks, numberOfBlocks, numberOfBlocks, false, false, false, 8);
+
+      for(unsigned int i = 0; i < m_occluder.size(); i++)
+      {
+        vec3f occluderPosition = m_occluderTriangles[i][0] * m_occluder[i][0] + m_occluderTriangles[i][1] * m_occluder[i][1] + m_occluderTriangles[i][2] * m_occluder[i][2];
+        container.put(i, occluderPosition[0], occluderPosition[1], occluderPosition[2]);
+      }
+
+      voro::c_loop_all voronoiLoop(container);
+
+      if(voronoiLoop.start())
+      {
+        unsigned int cellCounter = 0;
+        do
+        {
+          voro::voronoicell vc;
+
+          container.compute_cell(vc, voronoiLoop);
+
+          calculateCacheArea(m_occluder[voronoiLoop.pid()], m_occluderTriangles[voronoiLoop.pid()], vc, diagonal, triangles, epsilon, bitShiftNumber);
+
+          cellCounter++;
+
+          std::clog << cellCounter << " / " << m_occluder.size() << " Voronoi Cells computed!" << std::endl;
+
+        } while(voronoiLoop.inc());
+      }
     }
 
     void ISMOcclusionDiscGenerator::generateOccluder(std::vector<vec4f>& outOccluder, std::vector<vec2ui>& outTriangleOccluderIndices, const std::vector<vec3f>& positions, std::vector<unsigned int>& indices)
@@ -511,11 +678,16 @@ namespace he
 
       reduceOccluder();
 
-      createTriangleCacheIndices(trianglePositions, m_cacheTriangles, m_occluder, m_triangleOccluderIndices);
+      createTriangleOccluderIndices(trianglePositions);
 
       m_triangles.clear();
       m_polygons.clear();
       m_linearizedOccluder.clear();
+
+      if(!m_occluder.empty())
+      {
+        //generateCachesArea(trianglePositions);
+      }
 
       outOccluder.resize(m_occluder.size());
       for(unsigned int i = 0; i < m_occluder.size(); i++)

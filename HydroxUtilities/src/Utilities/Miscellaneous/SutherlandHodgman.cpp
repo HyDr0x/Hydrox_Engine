@@ -6,7 +6,6 @@
 
 #include "Utilities/Math/Math.hpp"
 #include "Utilities/Math/Plane.h"
-#include "Utilities/Miscellaneous/clipper.hpp"
 
 namespace he
 {

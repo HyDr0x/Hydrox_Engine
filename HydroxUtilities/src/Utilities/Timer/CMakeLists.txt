@@ -1,6 +1,8 @@
 set(
 	SOURCE 
 	${SOURCE}
+	${CMAKE_CURRENT_SOURCE_DIR}/Measurement.cpp 
+	${CMAKE_CURRENT_SOURCE_DIR}/MeasurementManager.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerCPUUnix.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerCPUWin.cpp 
 	${CMAKE_CURRENT_SOURCE_DIR}/TimerGPUOGL.cpp 

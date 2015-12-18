@@ -38,8 +38,6 @@ namespace he
 
       virtual const std::vector<std::vector<util::ResourceHandle>>& getTextureHandles() const = 0;
 
-      virtual unsigned int getPerInstanceCacheNumber() const = 0;
-
       virtual unsigned int getPerInstanceOccluderNumber() const = 0;
 
       virtual unsigned int getPerInstanceVertexNumber() const = 0;

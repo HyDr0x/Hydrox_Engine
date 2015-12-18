@@ -17,7 +17,6 @@ layout(location = 3) uniform sampler2D roughnessSampler;
 
 in GeometryData
 {
-	vec3 barycentric;
 	vec2 texCoord;
 	mat3 tangentToWorld;
 	flat uint instanceIndex;
@@ -25,11 +24,11 @@ in GeometryData
 
 void main()
 {
-	vec3 normal = inData.tangentToWorld * (texture(normalSampler,inData.texCoord).xyz * 2.0f - 1.0f);
+	vec3 normal = inData.tangentToWorld * (texture(normalSampler,inData.texCoord).xyz * 2.0 - 1.0);
 
-	fsout_normal = vec4(normalize(normal) * 0.5f + 0.5f, float(inData.barycentric.x == 1.0 || inData.barycentric.y == 1.0 || inData.barycentric.z == 1.0));
+	fsout_normal = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 	
-	fsout_color = vec4(texture(colorSampler, inData.texCoord).rgb, 1.0f);
+	fsout_color = vec4(texture(colorSampler, inData.texCoord).rgb, 1.0);//alpha value == 1 means no skybox here, default is 0
 	
 	MaterialData thisMaterial = material[materialIndex[inData.instanceIndex]];
 	
@@ -40,7 +39,7 @@ void main()
 												
 	/*fsout_material = vec4(1.0, 
 												1.0, 
-												0.0, 
+												0.2, 
 												thisMaterial.roughness1);*/
 																							
 	fsout_vertexNormal = vec4(normalize(inData.tangentToWorld[2]) * 0.5 + 0.5, 0.0);

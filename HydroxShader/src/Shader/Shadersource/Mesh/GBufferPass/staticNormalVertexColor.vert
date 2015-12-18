@@ -17,10 +17,10 @@ layout(location = COLOR) in vec4 in_color;
 
 out VertexData
 {
-	vec2 texCoord;
 	mat3 tangentToWorld;
-	flat uint instanceIndex;
 	vec4 color;
+	vec2 texCoord;
+	flat uint instanceIndex;
 } outData;
 
 void main()
@@ -36,5 +36,7 @@ void main()
 
 	outData.color = in_color;
 	outData.texCoord = in_texCoord;
-	gl_Position = trfMatrix[outData.instanceIndex] * vec4(in_Pos, 1);
+	float scale = sqrt(normalWorld[0][0] * normalWorld[0][0] + normalWorld[0][1] * normalWorld[0][1] + normalWorld[0][2] * normalWorld[0][2]);
+	
+	gl_Position = vec4((trfMatrix[outData.instanceIndex] * vec4(in_Pos, 1)).xyz, scale);
 }
