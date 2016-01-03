@@ -2,14 +2,14 @@
 
 #define HALFRESX
 #define HALFRESY
+#define CACHEROUNDS
 
-#define WORKGROUPSIZE 16
+#define GIINDEXWORKGROUPSIZE
 #define CACHETILESIZE
 #define VERTEXTILEMULTI
 #define VERTEXTILESIZE
 #define MULTVERTEXTILESIZE (VERTEXTILEMULTI * VERTEXTILESIZE)
 #define INT32_MAX 2147483647
-#define CACHEROUNDS 3
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
@@ -30,11 +30,11 @@ layout(std430, binding = 0) buffer specularCacheIndicesBuffer
 
 layout(location = 0) uniform uint borderVertexNumber;
 
-layout(local_size_x = WORKGROUPSIZE) in;
+layout(local_size_x = GIINDEXWORKGROUPSIZE) in;
 
-shared vec3 groupCachePositions[WORKGROUPSIZE];
-shared vec3 groupCacheNormals[WORKGROUPSIZE];
-shared uint groupCacheIndex[WORKGROUPSIZE];
+shared vec3 groupCachePositions[GIINDEXWORKGROUPSIZE];
+shared vec3 groupCacheNormals[GIINDEXWORKGROUPSIZE];
+shared uint groupCacheIndex[GIINDEXWORKGROUPSIZE];
 shared uint groupCacheNumberPerTile[(CACHEROUNDS - 1) * 8 + 1];
 shared uint groupCacheNumber;
 
@@ -56,7 +56,7 @@ void main()
 		ivec2 cacheBlockCoord = (vertexBlockCoord * MULTVERTEXTILESIZE) / ivec2(CACHETILESIZE);
 		
 		const uint vertexNumber = imageLoad(vertexNumberPerTileImage, vertexBlockCoord).r;
-		const uint verticesPerThread = (vertexNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+		const uint verticesPerThread = (vertexNumber + GIINDEXWORKGROUPSIZE - 1) / GIINDEXWORKGROUPSIZE;
 		const uint vertexStartIndex = verticesPerThread * localIDx;
 		const uint vertexEndIndex = vertexStartIndex + verticesPerThread;
 		
@@ -83,7 +83,7 @@ void main()
 				const uint cacheBlockNumber = max(k * 8, 1);
 				const uint sideLength = 2 * k;
 				
-				const uint blocksPerThread = (cacheBlockNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE;
+				const uint blocksPerThread = (cacheBlockNumber + GIINDEXWORKGROUPSIZE - 1) / GIINDEXWORKGROUPSIZE;
 				const uint startBlockIndex = localIDx * blocksPerThread;
 				const uint endBlockIndex = startBlockIndex + blocksPerThread;
 				
@@ -133,8 +133,8 @@ void main()
 				memoryBarrierShared();
 				barrier();
 				
-				const uint cacheLoopNumber = WORKGROUPSIZE * ((groupCacheNumber + WORKGROUPSIZE - 1) / WORKGROUPSIZE);
-				for(uint l = 0; l < cacheLoopNumber; l += WORKGROUPSIZE)
+				const uint cacheLoopNumber = GIINDEXWORKGROUPSIZE * ((groupCacheNumber + GIINDEXWORKGROUPSIZE - 1) / GIINDEXWORKGROUPSIZE);
+				for(uint l = 0; l < cacheLoopNumber; l += GIINDEXWORKGROUPSIZE)
 				{
 					const uint cacheIndex = l + localIDx;
 
@@ -182,7 +182,7 @@ void main()
 					
 					if(j < vertexNumber )
 					{
-						for(uint m = 0; m < WORKGROUPSIZE; m++)
+						for(uint m = 0; m < GIINDEXWORKGROUPSIZE; m++)
 						{
 							if(l + m < groupCacheNumber)
 							{

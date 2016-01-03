@@ -16,9 +16,9 @@ layout(location = 0) uniform sampler2D colorSampler;
 layout(location = 1) uniform sampler2D metalSampler;
 layout(location = 2) uniform sampler2D roughnessSampler;
 
-layout(std430, binding = 4) buffer reflectiveShadowLightBuffer
+layout(std430, binding = 4) buffer reflectiveShadowLightBufferFrag
 {
-	ShadowLightData reflectiveShadowLight[];
+	ShadowLightData reflectiveShadowLightFrag[];
 };
 
 layout(location = 4) uniform int lightIndex;
@@ -31,16 +31,21 @@ flat in uint vsout_instanceIndex;
 
 void main()
 {
-	vec4 projPar = reflectiveShadowLight[lightIndex].light.projectionParameter;//x = near, y = far, z = width, w = height
+	vec4 projPar = reflectiveShadowLightFrag[lightIndex].light.projectionParameter;//x = near, y = far, z = width, w = height
 	float area;
 	float lightAngle;
-	vec4 lightPos = reflectiveShadowLight[lightIndex].light.position;
-
+	vec4 lightPos = reflectiveShadowLightFrag[lightIndex].light.position;
+	float invLightDistance = 1.0;
+	
 	if(lightPos.x != DIRECTIONAL_LIGHT_POSITION)//spotlight
 	{
-		lightAngle = max(dot(normalize(-reflectiveShadowLight[lightIndex].light.direction.xyz), normalize(vsout_pos.xyz - lightPos.xyz)), 0.0);
+		vec3 lightDir = vsout_pos.xyz - lightPos.xyz;
+		lightAngle = max(dot(normalize(-reflectiveShadowLightFrag[lightIndex].light.direction.xyz), normalize(lightDir)), 0.0);
 		float zLin = 2.0 * projPar.x * projPar.y / (projPar.y + projPar.x - gl_FragCoord.z * (projPar.y - projPar.x));
 		area = (zLin * zLin * projPar.z * projPar.w) / (projPar.x * projPar.x * float(reflectiveShadowMapWidth * reflectiveShadowMapWidth));
+	
+		float lightDistance = length(lightDir);
+		invLightDistance = (1.0 / (lightDistance * lightDistance));
 	}
 	else//directional light
 	{
@@ -48,10 +53,10 @@ void main()
 		area = (projPar.z * projPar.w) / SAMPLENUMBER;
 	}
 	
-	float attenutation = clamp((lightAngle - reflectiveShadowLight[lightIndex].light.direction.w) * 1.0 / 0.05, 0.0, 1.0);
+	float attenutation = clamp((lightAngle - reflectiveShadowLightFrag[lightIndex].light.direction.w) * 1.0 / 0.05, 0.0, 1.0);
 	if(attenutation == 0.0) discard;
 	
-	vec3 luminousFlux = 1 * (reflectiveShadowLight[lightIndex].light.color * reflectiveShadowLight[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
+	vec3 luminousFlux = invLightDistance * (reflectiveShadowLightFrag[lightIndex].light.color * reflectiveShadowLightFrag[lightIndex].light.luminousFlux * texture(colorSampler, vsout_texCoord)).xyz;
 	fsout_pos3D = vec4(vsout_pos.xyz, 1.0);
 	fsout_luminousFlux = vec4(luminousFlux, 1.0);
 	fsout_normalArea = vec4(vsout_normal * 0.5f + 0.5f, area);

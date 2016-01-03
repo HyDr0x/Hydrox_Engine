@@ -1,6 +1,7 @@
 #ifndef MEASUREMENTMANAGER_H_
 #define MEASUREMENTMANAGER_H_
 
+#include <string>
 #include <map>
 
 #include "Utilities/Timer/Measurement.h"
@@ -19,12 +20,14 @@ namespace he
       void addMeasurement(std::string name, unsigned int measuredFrameNumber);
       void removeMeasurement(std::string name);
 
+      void stopMeasurement(std::string name);
       void resetMeasurement(std::string name);
 
       void begin(std::string name);
       void end(std::string name);
 
-      bool ready(std::string name);
+      bool running(std::string name);
+      bool finished(std::string name);
 
       float getAveragedCPUResult(std::string name);
       float getAveragedGPUResult(std::string name);

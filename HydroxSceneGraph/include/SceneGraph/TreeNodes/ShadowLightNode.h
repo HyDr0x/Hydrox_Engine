@@ -15,7 +15,6 @@ namespace he
   {
     class EventManager;
   }
-
   namespace sg
   {
     class Traverser;

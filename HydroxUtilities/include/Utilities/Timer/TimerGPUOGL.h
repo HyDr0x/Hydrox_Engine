@@ -2,7 +2,6 @@
 #define OGLTIMER_H_
 
 #include <iostream>
-#include <string>
 
 #include <GL/glew.h>
 
@@ -23,7 +22,6 @@ namespace he
     public:
 
       OGLTimer();
-      OGLTimer(std::string &timerName);
       ~OGLTimer();
 
       GLuint getTimeDifference();
@@ -35,12 +33,8 @@ namespace he
 
     private:
 
-      std::string m_timerName;
-
       GLuint m_query;
       GLuint m_openGLTime;
-
-      bool m_showTimerWhenDying;
     };
   }
 }

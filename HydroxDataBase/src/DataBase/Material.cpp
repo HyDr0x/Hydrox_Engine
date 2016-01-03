@@ -17,7 +17,7 @@ namespace he
     {
     }
 
-    Material::Material(const Material& other)
+    Material::Material(const Material& other) : ManagedResource(other)
     { 
       m_materialData = other.m_materialData; 
 

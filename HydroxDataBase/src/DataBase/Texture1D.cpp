@@ -10,7 +10,6 @@ namespace he
     Texture1D::Texture1D(GLuint width, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping) :
       Texture(width, target, type, internalFormat, format, channelNumber, bitsPerComponent, data, mipmapping)
     {
-      glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -25,7 +24,7 @@ namespace he
       glBindTexture(m_target, 0);
     }
 
-    Texture1D::Texture1D(const Texture1D& other)
+    Texture1D::Texture1D(const Texture1D& other) : Texture(other)
     {
       if(other.m_texIndex != 0)
       {
@@ -80,7 +79,6 @@ namespace he
         }
         glBindTexture(m_target, 0);*/
 
-        glGenTextures(1, &m_texIndex);
         glBindTexture(m_target, m_texIndex);
 
         glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);

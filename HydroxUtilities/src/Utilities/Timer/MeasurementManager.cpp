@@ -21,24 +21,60 @@ namespace he
       m_measurements.erase(m_measurements.find(name));
     }
 
+    void MeasurementManager::stopMeasurement(std::string name)
+    {
+      if(m_measurements.count(name) == 1)
+      {
+        m_measurements[name].stopMeasurement();
+      }
+    }
+
     void MeasurementManager::resetMeasurement(std::string name)
     {
-      m_measurements[name].resetMeasurement();
+      if(m_measurements.count(name) == 1)
+      {
+        m_measurements[name].resetMeasurement();
+      }
     }
 
     void MeasurementManager::begin(std::string name)
     {
-      m_measurements[name].begin();
+      if(m_measurements.count(name) == 1)
+      {
+        m_measurements[name].begin();
+      }
     }
 
     void MeasurementManager::end(std::string name)
     {
-      m_measurements[name].end();
+      if(m_measurements.count(name) == 1)
+      {
+        m_measurements[name].end();
+      }
     }
 
-    bool MeasurementManager::ready(std::string name)
+    bool MeasurementManager::running(std::string name)
     {
-      return m_measurements[name].ready();
+      if(m_measurements.count(name) == 1)
+      {
+        return m_measurements[name].running();
+      }
+      else
+      {
+        return false;
+      }
+    }
+
+    bool MeasurementManager::finished(std::string name)
+    {
+      if(m_measurements.count(name) == 1)
+      {
+        return m_measurements[name].finished();
+      }
+      else
+      {
+        return false;
+      }
     }
 
     float MeasurementManager::getAveragedCPUResult(std::string name)
@@ -74,7 +110,7 @@ namespace he
             accumulatedTime += it->second.getCPUSingleMeasurements()[lineNumber];
           }
 
-          output << std::string(" ") << accumulatedTime;
+          //output << std::string(" ") << accumulatedTime;
 
           lineNumber++;
         }
@@ -107,7 +143,7 @@ namespace he
             accumulatedTime += it->second.getCPUSingleMeasurements()[lineNumber];
           }
 
-          output << std::string(" ") << accumulatedTime;
+          //output << std::string(" ") << accumulatedTime;
 
           lineNumber++;
         }

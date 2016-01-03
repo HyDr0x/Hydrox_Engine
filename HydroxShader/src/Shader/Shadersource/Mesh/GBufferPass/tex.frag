@@ -33,5 +33,10 @@ void main()
 												texture(roughnessSampler, inData.texCoord).r, 
 												thisMaterial.roughness1);
 												
+	/*fsout_material = vec4(1.0, 
+												1.0, 
+												0.5, 
+												thisMaterial.roughness1);*/
+												
 	fsout_vertexNormal = vec4(normalize(inData.normal) * 0.5 + 0.5, 0.0);
 }

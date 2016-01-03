@@ -12,7 +12,6 @@ namespace he
       m_height(height),
       m_depth(depth)
     {
-      glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -29,7 +28,7 @@ namespace he
       glBindTexture(m_target, 0);
     }
 
-    Texture3D::Texture3D(const Texture3D& other)
+    Texture3D::Texture3D(const Texture3D& other) : Texture(other)
     {
       if(other.m_texIndex != 0)
       {
@@ -87,7 +86,6 @@ namespace he
         //}
         //glBindTexture(m_target, 0);
 
-        glGenTextures(1, &m_texIndex);
         glBindTexture(m_target, m_texIndex);
 
         glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);

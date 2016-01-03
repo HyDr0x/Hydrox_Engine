@@ -37,6 +37,7 @@ namespace he
 
       const GeoNode& copyNode = static_cast<const GeoNode&>(sourceNode);
 
+      this->~GeoNode();
       new (this) GeoNode(copyNode);
     }
 

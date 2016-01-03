@@ -46,8 +46,6 @@ namespace he
 
       m_measurementManager = singletonManager->getService<util::MeasurementManager>();
 
-      m_measurementManager->addMeasurement("IndirectIlluminationMeasurement", 100);
-
       m_gBufferDownsampling = sh::ShaderContainer::GBUFFERDOWNSAMPLING;
       m_calculateAreaLightTube = sh::ShaderContainer::SPECULARTUBECREATION;
       m_specularCachePositionFilterX = sh::ShaderContainer::SPECULARCACHEPOSITIONFILTERX;
@@ -129,34 +127,41 @@ namespace he
       util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
       const GPUBuffer& occluderBuffer)
     {
-      //CPUTIMER("IndirectLightCPUTimer", 0)
-      //GPUTIMER("IndirectLightOGLTimer", 1)
-
-      m_measurementManager->begin("IndirectIlluminationMeasurement");
+      m_measurementManager->begin("GIBoundingTube");
       createTubeData(indirectLightPositions); 
+      m_measurementManager->end("GIBoundingTube");
 
+      m_measurementManager->begin("GIEdgeCache");
       createSpecularEdgeCaches(m_halfResGBufferDepthMap1, m_halfResGBufferVertexNormalMap1, m_halfResGBufferMaterialMap1, m_halfResGBufferLinearDepthMap1);
+      m_measurementManager->end("GIEdgeCache");
+
+      m_measurementManager->begin("GIEdgeProxyPixel");
       createEdgeVertices(m_halfResGBufferDepthMap1, m_halfResGBufferVertexNormalMap1, m_halfResGBufferMaterialMap1, m_halfResGBufferLinearDepthMap1);
+      m_measurementManager->end("GIEdgeProxyPixel");
+
+      m_measurementManager->begin("GIInnerCache");
       createSpecularInnerCaches(m_halfResGBufferDepthMap1, m_halfResGBufferVertexNormalMap1, m_halfResGBufferMaterialMap1);
+      m_measurementManager->end("GIInnerCache");
 
+      m_measurementManager->begin("GIOffset");
       createOffsets(m_cacheOffsetMap);
+      m_measurementManager->end("GIOffset");
 
+      m_measurementManager->begin("GICacheBuffer");
       createSpecularCacheBuffer();
+      m_measurementManager->end("GICacheBuffer");
 
+      m_measurementManager->begin("GICacheProxyLights");
       createProxyLightBuffer(indirectLightPositions, indirectLightNormals, indirectLightLuminousFlux, indirectShadowMaps, indirectShadowVALQuaternions, occluderBuffer);
+      m_measurementManager->end("GICacheProxyLights");
 
+      m_measurementManager->begin("GICacheIndices");
       createSpecularCacheIndices();
+      m_measurementManager->end("GICacheIndices");
 
+      m_measurementManager->begin("GIMap");
       createIndirectLightMap(gBufferDepthMap, gBufferNormalMap, gBufferMaterialMap);
-
-      m_measurementManager->end("IndirectIlluminationMeasurement");
-
-      if(m_measurementManager->ready("IndirectIlluminationMeasurement"))
-      {
-        std::cout << "CPU: " << m_measurementManager->getAveragedCPUResult("IndirectIlluminationMeasurement") << std::endl;
-        std::cout << "GPU: " << m_measurementManager->getAveragedGPUResult("IndirectIlluminationMeasurement") << std::endl;
-        m_measurementManager->resetMeasurement("IndirectIlluminationMeasurement");
-      }
+      m_measurementManager->end("GIMap");
 
       //createIndirectLightMap(m_halfResGBufferDepthMap1, m_halfResGBufferNormalMap1, m_halfResGBufferMaterialMap1);
       //upsampleIndirectLightMap(gBufferLinearDepthMap, gBufferNormalMap);
@@ -168,9 +173,6 @@ namespace he
                                                           util::SharedPointer<db::Texture2D> gBufferVertexNormalMap,
                                                           util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-      //CPUTIMER("GBufferDownsamplingCPUTimer", 0)
-      //GPUTIMER("GBufferDownsamplingOGLTimer", 1)
-
       const sh::ComputeShader& shader = m_shaderContainer->getComputeShader(m_gBufferDownsampling);
 
       shader.useShader();
@@ -250,9 +252,6 @@ namespace he
 
     void IndirectSpecularReflections::createTubeData(util::SharedPointer<db::Texture3D> indirectLightPositions)
     {
-      //CPUTIMER("TubeCreationCPUTimer", 0)
-      //GPUTIMER("TubeCreationOGLTimer", 1)
-
       const sh::ComputeShader& shader = m_shaderContainer->getComputeShader(m_calculateAreaLightTube);
       shader.useShader();
 
@@ -280,9 +279,6 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-      //CPUTIMER("InnerCacheCreationCPUTimer", 0)
-      //GPUTIMER("InnerCacheCreationOGLTimer", 1)
-
       float clearValue = 0.0f;
       m_cachePositionBufferInnerX->clearTexture(&clearValue);
 
@@ -368,9 +364,6 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
-      //CPUTIMER("EdgeCacheCreationCPUTimer", 0)
-      //GPUTIMER("EdgeCacheCreationOGLTimer", 1)
-
       float clearValue = 0.0f;
       m_cacheOffsetMap->clearTexture(&clearValue);
 
@@ -417,9 +410,6 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferMaterialMap,
       util::SharedPointer<db::Texture2D> gBufferLinearDepthMap)
     {
-      //CPUTIMER("CreateEdgeVertexCPUTimer", 0)
-      //GPUTIMER("CreateEdgeVertexOGLTimer", 1)
-
       unsigned int clearIntValue = 0;
       m_vertexAtomicIndexMap->clearTexture(&clearIntValue);
 
@@ -538,9 +528,6 @@ namespace he
 
     void IndirectSpecularReflections::createSpecularCacheBuffer()
     {
-      //CPUTIMER("CacheBufferCreationCPUTimer", 0)
-      //GPUTIMER("CacheBufferCreationOGLTimer", 1)
-
       glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
       const sh::ComputeShader& specularCacheCreationShader = m_shaderContainer->getComputeShader(m_specularCacheBufferCreation);
@@ -581,9 +568,6 @@ namespace he
       util::SharedPointer<db::Texture2D> indirectShadowVALQuaternions,
       const GPUBuffer& occluderBuffer)
     {
-      //CPUTIMER("ProxyLightCPUTimer", 0)
-      //GPUTIMER("ProxyLightOGLTimer", 1)
-
       glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
       const sh::ComputeShader& specularProxyLightCreationShader = m_shaderContainer->getComputeShader(m_specularProxyLightBufferCreation);
@@ -645,9 +629,6 @@ namespace he
 
     void IndirectSpecularReflections::createSpecularCacheIndices()
     {
-      //CPUTIMER("CacheIndexCPUTimer", 0)
-      //GPUTIMER("CacheIndexOGLTimer", 1)
-
       util::vec4ui clearVector(INT32_MAX);
       m_cacheIndexBuffer.clearBuffer(GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, &clearVector[0]);
 
@@ -695,9 +676,6 @@ namespace he
       util::SharedPointer<db::Texture2D> gBufferNormalMap,
       util::SharedPointer<db::Texture2D> gBufferMaterialMap)
     {
-      //CPUTIMER("IndirectLightMapCreationCPUTimer", 0)
-      //GPUTIMER("IndirectLightMapCreationOGLTimer", 1)
-
       util::vec4f clearValue = util::vec4f(0.0f);
       m_downsampledSpecularLightMap->clearTexture(&clearValue[0]);
 

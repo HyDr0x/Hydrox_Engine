@@ -23,12 +23,14 @@ namespace he
 
       void createMeasurement(unsigned int measuredFrameNumber);
 
+      void stopMeasurement();
       void resetMeasurement();
 
       void begin();
       void end();
 
-      bool ready();
+      bool running();//did the measurement already started?
+      bool finished();//is the measurement done?
 
       float getAveragedCPUResult();
       float getAveragedGPUResult();
@@ -41,7 +43,6 @@ namespace he
       CPUTimer m_cpuTimer;
       OGLTimer m_gpuTimer;
       unsigned int m_measuredFrameNumber;
-      unsigned int m_heatUpFrameNumber;
       unsigned int m_frameCounter;
       std::vector<time> m_cpuAccumulatedTime;
       std::vector<GLuint> m_gpuAccumulatedTime;

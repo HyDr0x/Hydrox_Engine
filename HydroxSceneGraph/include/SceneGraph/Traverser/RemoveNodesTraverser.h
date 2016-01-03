@@ -12,7 +12,8 @@
 namespace he
 {
   namespace sg
-  {    class RemoveNodesTraverser : public Traverser
+  {
+    class RemoveNodesTraverser : public Traverser
     {
     public:
 

@@ -11,7 +11,6 @@ namespace he
       Texture(width, target, type, internalFormat, format, channelNumber, bitsPerComponent, data, mipmapping),
       m_height(height)
     {
-      glGenTextures(1, &m_texIndex);
       glBindTexture(m_target, m_texIndex);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -27,7 +26,7 @@ namespace he
       glBindTexture(m_target, 0);
     }
 
-    Texture2D::Texture2D(const Texture2D& other)
+    Texture2D::Texture2D(const Texture2D& other) : Texture(other)
     {
       if(other.m_texIndex != 0)
       {
@@ -83,7 +82,6 @@ namespace he
         }
         glBindTexture(m_target, 0);*/
 
-        glGenTextures(1, &m_texIndex);
         glBindTexture(m_target, m_texIndex);
 
         glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT);

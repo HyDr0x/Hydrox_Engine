@@ -92,10 +92,14 @@ namespace he
 
       void update(util::ResourceHandle& param) override
       {
-        m_objectHash.erase(m_objectsCache[param.getID()].getHash());
-        m_objectsCache[param.getID()].free();
+        unsigned int erasedNumber = m_objectHash.erase(m_objectsCache[param.getID()].getHash());
 
-        m_list.push_front(param.getID());
+        if(erasedNumber != 0)//delete it only once
+        {
+          m_objectsCache[param.getID()].free();
+
+          m_list.push_front(param.getID());
+        }
       }
 
     private:

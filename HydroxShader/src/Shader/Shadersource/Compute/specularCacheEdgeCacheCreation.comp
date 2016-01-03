@@ -3,17 +3,18 @@
 #define HALFRESX
 #define HALFRESY
 
-#define THREADTILESIZE 4
-#define WORKGROUPSIZE (THREADTILESIZE * THREADTILESIZE)
+#define NORMALPHIQ
+#define NORMALTHETAQ
+#define DEPTHQ
+
+#define ECTHREADTILESIZE
+#define WORKGROUPSIZE (ECTHREADTILESIZE * ECTHREADTILESIZE)
 #define CACHETILESIZE
-#define TILEPIXELPERTHREAD ((CACHETILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
+#define TILEPIXELPERTHREAD ((CACHETILESIZE + ECTHREADTILESIZE - 1) / ECTHREADTILESIZE)
 
 #define INT32_MAX 2147483647
 #define PI 3.14159265359
 #define PI_HALF (PI * 0.5)
-#define NORMALPHIQ 9
-#define NORMALTHETAQ 4
-#define DEPTHQ 16
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 #include "../../HydroxShader/include/Shader/Shaderincludes/Encodings.glslh"
@@ -42,7 +43,7 @@ uint normalToBin(in vec3 normal)
 	return phiBin + NORMALPHIQ * thetaBin;
 }
 
-layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
+layout(local_size_x = ECTHREADTILESIZE, local_size_y = ECTHREADTILESIZE) in;
 
 shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
@@ -208,11 +209,11 @@ void main()
 				vec3 resultNormals = vec3(0.0);
 				vec3 resultMaterials = vec3(0.0);
 				
-				if(localIDx < THREADTILESIZE)
+				if(localIDx < ECTHREADTILESIZE)
 				{
-					for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
+					for(uint k = 0; k < ECTHREADTILESIZE; k++)//parallel scan should be more efficient here
 					{
-						uint index = localIDx * THREADTILESIZE + k;
+						uint index = localIDx * ECTHREADTILESIZE + k;
 						if(groupSummedPixelNumber[index] > 0)
 						{
 							resultPixelCounter += groupSummedPixelNumber[index];
@@ -241,7 +242,7 @@ void main()
 					resultNormals = vec3(0.0);
 					resultMaterials = vec3(0.0);
 				
-					for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
+					for(uint k = 0; k < ECTHREADTILESIZE; k++)//parallel scan should be more efficient here
 					{
 						if(groupSummedPixelNumber[k] > 0)
 						{

@@ -31,6 +31,7 @@ namespace he
 
       const AnimatedGeoNode& copyNode = static_cast<const AnimatedGeoNode&>(sourceNode);
 
+      this->~AnimatedGeoNode();
       new (this) AnimatedGeoNode(copyNode);
     }
 

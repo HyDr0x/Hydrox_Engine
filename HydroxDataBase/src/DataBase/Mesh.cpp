@@ -109,7 +109,7 @@ namespace he
     {
     }
 
-    Mesh::Mesh(const Mesh& other)
+    Mesh::Mesh(const Mesh& other) : ManagedResource(other)
     {
       m_boundingVolume = other.m_boundingVolume;
       m_primitiveType = other.m_primitiveType;

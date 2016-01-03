@@ -11,30 +11,42 @@ namespace he
       std::ifstream parameterStream;
       parameterStream.open(filename, std::ios::in);
 
+      //Global Paths
       getParameter<std::string>(parameterStream, vfxPath);
       getParameter<std::string>(parameterStream, texturePath);
       getParameter<std::string>(parameterStream, modelPath);
       getParameter<std::string>(parameterStream, scenePath);
 
+      //Framebuffer
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, width, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, height, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, colorBitDepth, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, depthBitDepth, &atoi);
 
+      //Camera
       getParameter<float, double(*) (const char*)>(parameterStream, fov, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, nearPlane, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, farPlane, &atof);
 
+      //Font
       getParameter<float, double(*) (const char*)>(parameterStream, letterSize, &atof);
 
+      //Indirect Lighting
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, vertexTileSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, vertexTileMulti, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, cacheTileSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectLightResolutionDivisor, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, normalPhiQ, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, normalThetaQ, &atoi);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, depthQ, &atoi);
+      getParameter<float, double(*) (const char*)>(parameterStream, roughnessDiff, &atof);
+      getParameter<unsigned int, int(*) (const char*)>(parameterStream, indexListGenerationCacheRounds, &atoi);
       
+      //Lighting
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, lightNumber, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, shadowMapWidth, &atoi);
 
+      //Shadows
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, reflectiveShadowMapWidth, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, indirectShadowMapWidth, &atoi);
       giLightSampleNumber = reflectiveShadowMapWidth * reflectiveShadowMapWidth;
@@ -48,8 +60,10 @@ namespace he
       getParameter<float, double(*) (const char*)>(parameterStream, paraboloidNearClipping, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, paraboloidFarClipping, &atof);
 
+      //Sprites
       getParameter<unsigned char, int(*) (const char*)>(parameterStream, max2DLayer, &atoi);
 
+      //Render Pipeline Buffer Sizes
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, vboBlockSize, &atoi);
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, iboBlockSize, &atoi);
       triangleBlockSize = iboBlockSize / 3;
@@ -64,10 +78,12 @@ namespace he
 
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, globalOccluderBlockSize, &atoi);
 
+      //Tonemapping
       getParameter<unsigned int, int(*) (const char*)>(parameterStream, usedHistogramBins, &atoi);
       getParameter<float, double(*) (const char*)>(parameterStream, logLuminancePerMS, &atof);
       getParameter<float, double(*) (const char*)>(parameterStream, s, &atof);
 
+      //GI Options
       getParameter<bool, int(*) (const char*)>(parameterStream, globalIllumination, &atoi);
       getParameter<bool, int(*) (const char*)>(parameterStream, indirectShadows, &atoi);
 

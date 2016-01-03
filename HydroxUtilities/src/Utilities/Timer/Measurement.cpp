@@ -10,15 +10,19 @@ namespace he
 
     void Measurement::createMeasurement(unsigned int measuredFrameNumber)
     {
-      m_heatUpFrameNumber = m_measuredFrameNumber = measuredFrameNumber;
+      m_measuredFrameNumber = measuredFrameNumber;
 
       m_cpuAccumulatedTime.resize(m_measuredFrameNumber, 0);
       m_gpuAccumulatedTime.resize(m_measuredFrameNumber, 0);
     }
 
+    void Measurement::stopMeasurement()
+    {
+      m_frameCounter = m_measuredFrameNumber;
+    }
+
     void Measurement::resetMeasurement()
     {
-      m_heatUpFrameNumber = 0;//no need for re heat up, gpu already initialized
       m_frameCounter = 0;
 
       for(unsigned int i = 0; i < m_cpuAccumulatedTime.size(); i++)
@@ -44,20 +48,16 @@ namespace he
         m_cpuAccumulatedTime[m_frameCounter] = m_cpuTimer.getTimeDifference();
         m_gpuAccumulatedTime[m_frameCounter] = m_gpuTimer.getTimeDifference();
 
-        if(m_heatUpFrameNumber > 0)
-        {
-          m_heatUpFrameNumber--;
-          m_cpuAccumulatedTime[m_frameCounter] = 0;
-          m_gpuAccumulatedTime[m_frameCounter] = 0;
-        }
-        else
-        {
           m_frameCounter++;
-        }
       }
     }
 
-    bool Measurement::ready()
+    bool Measurement::running()
+    {
+      return m_frameCounter != 0 && !finished();
+    }
+
+    bool Measurement::finished()
     {
       return m_frameCounter == m_measuredFrameNumber;
     }

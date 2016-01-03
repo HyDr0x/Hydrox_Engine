@@ -37,6 +37,11 @@ namespace he
       unsigned int vertexTileMulti;//multiplied with the vertexTileSize to save the vertices in a bigger tiled fashion, results in a faster index calculation
       unsigned int cacheTileSize;//size of the tiles in which caches getting calculated
       unsigned int indirectLightResolutionDivisor;//framebuffer resolution divisor for the indirect light map
+      unsigned int normalPhiQ;//the quantization of the angle phi in the normal sphere [0, 2 * PI]
+      unsigned int normalThetaQ;//the quantization of the angle theta in the normal sphere [-PI, PI]
+      unsigned int depthQ;//the quantization of the linear depth of the tile AABB
+      float roughnessDiff;//the minimal roughness difference needed to create a new inner cache
+      unsigned int indexListGenerationCacheRounds;//the number of cache tile rounds to search for cache indices
 
       unsigned int shadowMapWidth;//resolution of the shadow maps
       unsigned int reflectiveShadowMapWidth;//resolution of the reflective shadow maps

@@ -2,6 +2,7 @@
 
 #define HALFRESX
 #define HALFRESY
+#define ROUGHNESSDIFF
 
 #define WORKGROUPSIZE 128
 #define PI 3.14159265359
@@ -73,7 +74,7 @@ void main()
 		
 		sampleDistance -= length(newPosition - oldPosition);
 		
-		if(sampleDistance <= 0.0 || (oldRoughness - roughness) > 0.2)
+		if(sampleDistance <= 0.0 || (oldRoughness - roughness) > ROUGHNESSDIFF)
 		{
 			float maxSolidAngle = specularCacheSolidAngle(0.95, GGXToBlinnPhong(vec4(0, 0, roughness, 0)).w);
 			

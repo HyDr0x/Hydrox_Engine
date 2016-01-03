@@ -6,25 +6,12 @@ namespace he
 {
   namespace util
   {
-    CPUTimer::CPUTimer() : m_timerName(""), m_showTimerWhenDying(false), m_cpuTime(0)
+    CPUTimer::CPUTimer() : m_cpuTime(0)
     {
-    }
-
-    CPUTimer::CPUTimer(std::string &timerName) : m_timerName(timerName), m_showTimerWhenDying(true)
-    {
-      m_cpuTime = clock();
     }
 
     CPUTimer::~CPUTimer()
     {
-      if(m_showTimerWhenDying)
-      {
-        m_cpuTime = clock() - m_cpuTime;
-        m_cpuTime /= (CLOCKS_PER_SEC * 0.001f);
-
-        std::clog << m_timerName << std::endl;
-        std::clog << "CPU Time: " << m_cpuTime << " ms" << std::endl;
-      }
     }
 
     time CPUTimer::getTimeDifference()

@@ -14,14 +14,14 @@ namespace he
   namespace util
   {
     //#ifdef NDEBUG
-    //  #define CPUTIMER(name, i)
-    //  #define GPUTIMER(name, i)
+    //  #define CPUTIMER(i)
+    //  #define GPUTIMER(i)
     //  #define CPUGETTIMEDIFF(i)
     //  #define GPUGETTIMEDIFF(i)
     //#else
-      #define CPUTIMER(name, i) he::util::CPUTimer myTimer##i(std::string(name));
+      #define CPUTIMER(i) he::util::CPUTimer myTimer##i;
       #define CPUGETTIMEDIFF(i) myTimer##i.getTimeDifference()
-      #define GPUTIMER(name, i) he::util::OGLTimer myTimer##i(std::string(name));
+      #define GPUTIMER(i) he::util::OGLTimer myTimer##i;
       #define GPUGETTIMEDIFF(i) myTimer##i.getTimeDifference()
     //#endif
   }

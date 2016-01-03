@@ -17,6 +17,12 @@ namespace he
       m_bitsPerComponent(bitsPerComponent),
       m_mipmapping(mipmapping)
     {
+      glGenTextures(1, &m_texIndex);
+    }
+
+    Texture::Texture(const Texture& other) : ManagedResource(other)
+    {
+      glGenTextures(1, &m_texIndex);
     }
 
     Texture::~Texture()

@@ -3,19 +3,20 @@
 #define HALFRESX
 #define HALFRESY
 
-#define THREADTILESIZE 2
-#define WORKGROUPSIZE (THREADTILESIZE * THREADTILESIZE)
+#define NORMALPHIQ
+#define NORMALTHETAQ
+#define DEPTHQ
+
+#define EVTHREADTILESIZE
+#define WORKGROUPSIZE (EVTHREADTILESIZE * EVTHREADTILESIZE)
 #define VERTEXTILESIZE
 #define VERTEXTILEMULTI
 #define MULTVERTEXTILESIZE (VERTEXTILEMULTI * VERTEXTILESIZE)
-#define TILEPIXELPERTHREAD ((VERTEXTILESIZE + THREADTILESIZE - 1) / THREADTILESIZE)
+#define TILEPIXELPERTHREAD ((VERTEXTILESIZE + EVTHREADTILESIZE - 1) / EVTHREADTILESIZE)
 
 #define INT32_MAX 2147483647
 #define PI 3.14159265359
 #define PI_HALF (PI * 0.5)
-#define NORMALPHIQ 9
-#define NORMALTHETAQ 4
-#define DEPTHQ 16
 
 #include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
 
@@ -41,7 +42,7 @@ uint normalToBin(in vec3 normal)
 	return phiBin + NORMALPHIQ * thetaBin;
 }
 
-layout(local_size_x = THREADTILESIZE, local_size_y = THREADTILESIZE) in;
+layout(local_size_x = EVTHREADTILESIZE, local_size_y = EVTHREADTILESIZE) in;
 
 shared vec3 groupPosition[WORKGROUPSIZE];
 shared vec3 groupNormals[WORKGROUPSIZE];
@@ -207,10 +208,10 @@ void main()
 					vec3 resultNormals = vec3(0.0);
 					float resultGlossiness = 0.0;
 					
-					for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
+					for(uint k = 0; k < EVTHREADTILESIZE; k++)//parallel scan should be more efficient here
 					{
-						uint index = localIDx * THREADTILESIZE + k;
-						if(index < THREADTILESIZE * THREADTILESIZE && groupSummedPixelNumber[index] > 0)
+						uint index = localIDx * EVTHREADTILESIZE + k;
+						if(index < EVTHREADTILESIZE * EVTHREADTILESIZE && groupSummedPixelNumber[index] > 0)
 						{
 							resultPixelCounter += groupSummedPixelNumber[index];
 							resultPosition += groupPosition[index];
@@ -234,7 +235,7 @@ void main()
 						resultPosition = vec3(0.0);
 						resultNormals = vec3(0.0);
 					
-						for(uint k = 0; k < THREADTILESIZE; k++)//parallel scan should be more efficient here
+						for(uint k = 0; k < EVTHREADTILESIZE; k++)//parallel scan should be more efficient here
 						{
 							if(groupSummedPixelNumber[k] > 0)
 							{

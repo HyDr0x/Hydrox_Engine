@@ -61,3 +61,6 @@ add_dependencies(Hydrox_Saver Hydrox_Utilities Hydrox_SceneGraph Hydrox_Renderer
 
 add_subdirectory(Sandbox) 
 add_dependencies(Sandbox Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase Hydrox_Shader) 
+
+add_subdirectory(Measurement) 
+add_dependencies(Measurement Hydrox_Saver Hydrox_Loader Hydrox_Utilities Hydrox_XBar Hydrox_SceneGraph Hydrox_Renderer Hydrox_DataBase Hydrox_Shader)

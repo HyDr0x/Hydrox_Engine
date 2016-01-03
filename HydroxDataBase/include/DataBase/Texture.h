@@ -23,6 +23,8 @@ namespace he
       Texture() : m_texIndex(0) {}
       Texture(GLuint width, GLenum target, GLenum type, GLenum internalFormat, GLenum format, GLuint channelNumber, GLuint bitsPerComponent, void* data, bool mipmapping = true);
 
+      Texture(const Texture& other);
+
       virtual ~Texture();
 
       void free();

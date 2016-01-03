@@ -2,7 +2,6 @@
 #define TIMERCPUUNIX_H_
 
 #include <iostream>
-#include <string>
 #include <time.h>
 
 #include "Utilities/DLLExport.h"
@@ -20,7 +19,6 @@ namespace he
     public:
 
       CPUTimer();
-      CPUTimer(std::string &timerName);
       ~CPUTimer();
 
       time getTimeDifference();
@@ -32,11 +30,7 @@ namespace he
 
     private:
 
-      std::string m_timerName;
-
       time m_cpuTime;
-
-      bool m_showTimerWhenDying;
     };
   }
 }

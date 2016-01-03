@@ -2,7 +2,6 @@
 #define TIMERCPUWIN_H_
 
 #include <iostream>
-#include <string>
 
 #include "Utilities/DLLExport.h"
 
@@ -19,7 +18,6 @@ namespace he
     public:
 
       CPUTimer();
-      CPUTimer(std::string &timerName);
       ~CPUTimer();
 
       time getTimeDifference();
@@ -31,12 +29,8 @@ namespace he
 
     private:
 
-      std::string m_timerName;
-
       time m_cpuTime;
       double m_cpuFrequency;
-
-      bool m_showTimerWhenDying;
     };
   }
 }
