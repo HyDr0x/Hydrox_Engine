@@ -1,13 +1,17 @@
 #version 440 core
 
-#extension GL_ARB_shader_draw_parameters : enable
-
-#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-layout(location = 5) uniform uint globalOccluderOffset;
+layout(location = 4) uniform int lightIndex;
+layout(location = 6) uniform uint globalOccluderOffset;
+
+layout(std430, binding = 9) buffer relfectiveShadowLightBuffer
+{
+	ShadowLightData reflectiveShadowLight[];
+};
 
 layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
@@ -53,9 +57,9 @@ in VertexData
 
 out GeometryData
 {
+	vec3 pos;
 	vec2 texCoord;
 	vec3 normal;
-	flat uint instanceIndex;
 } outData;
 
 void main()
@@ -74,21 +78,13 @@ void main()
 		transformedOccluderNormalCoordinates[2 * index] = vec4(occluderBarycentric.x * gl_in[0].gl_Position + occluderBarycentric.y * gl_in[1].gl_Position + occluderBarycentric.z * gl_in[2].gl_Position);
 		transformedOccluderNormalCoordinates[2 * index + 1] = normalize(vec4(occluderBarycentric.x * inData[0].normal + occluderBarycentric.y * inData[1].normal + occluderBarycentric.z * inData[2].normal, 0.0));
 	}
-	
-	vec3 n0 = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-	vec3 n1 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-	vec3 triangleNormal = normalize(cross(n0, n1));
-	
+		
 	for(uint i = 0; i < 3; i++)
 	{
+		outData.pos = gl_in[i].gl_Position.xyz;
 		outData.texCoord = inData[i].texCoord;
 		outData.normal = inData[i].normal;
-		outData.instanceIndex = inData[i].instanceIndex;
-		
-		
-		
-		gl_Position = viewProjectionMatrix * vec4(gl_in[i].gl_Position.xyz, 1.0);
-		//gl_Position = viewProjectionMatrix * vec4(4 * gl_in[i].gl_Position.xyz + 2.0 * triangleNormal + vec3(0,0,-5), 1.0);//dwarf sponza topology test
+		gl_Position = reflectiveShadowLight[lightIndex].lightViewProj * vec4(gl_in[i].gl_Position.xyz, 1.0);
 		EmitVertex();
 	}
 	

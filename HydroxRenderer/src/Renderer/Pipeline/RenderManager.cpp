@@ -172,9 +172,8 @@ namespace he
           //GPUTIMER("GBufferOGLTimer", 1)
 
           m_gBuffer.setGBuffer();
-          m_indirectShadowsCreation.setOccluderBuffer();
+          
           m_geometryRasterizer.rasterizeGeometry();
-          m_indirectShadowsCreation.unsetOccluderBuffer();
 
           m_billboardRenderer.render();
 
@@ -190,18 +189,21 @@ namespace he
           glPolygonOffset(1.1f, 4.0f);
           for(unsigned int i = 0; i < m_lightRenderer.getShadowLightNumber(); i++)
           {
-            m_lightRenderer.setShadowMap(4, i);
+            m_lightRenderer.setShadowMap(9, i);
             m_geometryRasterizer.frustumCulling(i, SHADOWPASS);
             m_geometryRasterizer.generateShadowMap(i);
-            m_lightRenderer.unsetShadowMap(4);
+            m_lightRenderer.unsetShadowMap(9);
           }
 
           for(unsigned int i = 0; i < m_lightRenderer.getReflectiveShadowLightNumber(); i++)
           {
-            m_lightRenderer.setReflectiveShadowMap(4, i);
+            m_lightRenderer.setReflectiveShadowMap(9, i);
             m_geometryRasterizer.frustumCulling(i, REFLECTIVESHADOWPASS);
+
+            m_indirectShadowsCreation.setOccluderBuffer();//TODO: INDIRECT SHADOW OCCLUDER NEED EXTRA BUFFER FOR EVERY RSM OR ONE GLOBAL BUFFER WHERE AN EXTRA PASS TRANSFORMS ALL OCCLUDER REGARDLESS OF FRUSTUM CULLING!
             m_geometryRasterizer.generateReflectiveShadowMap(i);
-            m_lightRenderer.unsetReflectiveShadowMap(4, i);
+            m_indirectShadowsCreation.unsetOccluderBuffer();
+            m_lightRenderer.unsetReflectiveShadowMap(9, i);
           }
 
           glDisable(GL_POLYGON_OFFSET_FILL);
@@ -353,8 +355,8 @@ namespace he
         m_finalCompositing.renderDebugOutput(m_gBuffer.getColorTexture());
         break;
       case 16:
-        //m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
-        m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
+        m_finalCompositing.renderDebugOutput(m_lightRenderer.getReflectiveShadowLuminousFluxMaps()->convertToTexture2D(0));
+        //m_finalCompositing.renderDebugOutput(m_indirectSpecularRenderer.getSpecularLightMap());
         break;
       case 0:
       default:

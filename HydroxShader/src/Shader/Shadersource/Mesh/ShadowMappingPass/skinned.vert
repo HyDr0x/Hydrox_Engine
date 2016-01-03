@@ -12,7 +12,7 @@ layout(std430, binding = 0) buffer boneMatrixBuffer
 	mat4 boneMatrix[];
 };
 
-layout(std430, binding = 4) buffer shadowLightBuffer
+layout(std430, binding = 9) buffer shadowLightBuffer
 {
 	ShadowLightData shadowLight[];
 };

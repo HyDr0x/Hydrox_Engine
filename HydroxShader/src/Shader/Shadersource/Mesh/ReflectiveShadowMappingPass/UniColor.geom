@@ -1,13 +1,17 @@
 #version 440 core
 
-#extension GL_ARB_shader_draw_parameters : enable
-
-#include "../../HydroxShader/include/Shader/Shaderincludes/CameraUBO.glslh"
+#include "../../HydroxShader/include/Shader/Shaderincludes/LightData.glslh"
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-layout(location = 5) uniform uint globalOccluderOffset;
+layout(location = 4) uniform int lightIndex;
+layout(location = 6) uniform uint globalOccluderOffset;
+
+layout(std430, binding = 9) buffer relfectiveShadowLightBuffer
+{
+	ShadowLightData reflectiveShadowLight[];
+};
 
 layout(std430, binding = 2) buffer triangleIndexOffsetBuffer
 {
@@ -46,15 +50,14 @@ layout(std430, binding = 8) buffer transformedOccluderNormalCoordinatesBuffer
 
 in VertexData
 {
-	vec2 texCoord;
-	mat3 tangentToWorld;
+	vec3 normal;
 	flat uint instanceIndex;
 } inData[];
 
 out GeometryData
 {
-	vec2 texCoord;
-	mat3 tangentToWorld;
+	vec3 pos;
+	vec3 normal;
 	flat uint instanceIndex;
 } outData;
 
@@ -72,15 +75,15 @@ void main()
 
 		vec3 occluderBarycentric = occluderCoordinates[occluderIndexOffsetTMP + i].xyz;
 		transformedOccluderNormalCoordinates[2 * index] = vec4(occluderBarycentric.x * gl_in[0].gl_Position + occluderBarycentric.y * gl_in[1].gl_Position + occluderBarycentric.z * gl_in[2].gl_Position);
-		transformedOccluderNormalCoordinates[2 * index + 1] = normalize(vec4(occluderBarycentric.x * inData[0].tangentToWorld[2] + occluderBarycentric.y * inData[1].tangentToWorld[2] + occluderBarycentric.z * inData[2].tangentToWorld[2], 0.0));
+		transformedOccluderNormalCoordinates[2 * index + 1] = normalize(vec4(occluderBarycentric.x * inData[0].normal + occluderBarycentric.y * inData[1].normal + occluderBarycentric.z * inData[2].normal, 0.0));
 	}
-	
+		
 	for(uint i = 0; i < 3; i++)
 	{
-		outData.texCoord = inData[i].texCoord;
-		outData.tangentToWorld = inData[i].tangentToWorld;
+		outData.pos = gl_in[i].gl_Position.xyz;
+		outData.normal = inData[i].normal;
 		outData.instanceIndex = inData[i].instanceIndex;
-		gl_Position = viewProjectionMatrix * vec4(gl_in[i].gl_Position.xyz, 1.0);
+		gl_Position = reflectiveShadowLight[lightIndex].lightViewProj * vec4(gl_in[i].gl_Position.xyz, 1.0);
 		EmitVertex();
 	}
 	

@@ -10,7 +10,7 @@ layout(location = 1) out vec4 fsout_normal;
 layout(location = 2) out vec4 fsout_material;
 layout(location = 3) out vec4 fsout_vertexNormal;
 
-in GeometryData
+in VertexData
 {
 	vec3 normal;
 	flat uint instanceIndex;

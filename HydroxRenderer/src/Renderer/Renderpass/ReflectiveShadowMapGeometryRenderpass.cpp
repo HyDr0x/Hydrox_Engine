@@ -31,6 +31,8 @@ namespace he
 
     void ReflectiveShadowMapGeometryRenderpass::drawRenderpass() const
     {
+      GLuint globalOccluderNumber = 0;
+
       for(unsigned int i = 0; i < m_shaderNodes.size(); i++)
       {
         const sh::RenderShader& shader = m_shaderContainer->getRenderShader(m_shaderNodes[i].getShaderHandle());
@@ -41,6 +43,8 @@ namespace he
 
         for(unsigned int j = 0; j < m_renderContainer[i].size(); j++)//all arrays have the same size! Vertexdeclaration-, Texture Nodes and Render Container are coupled together
         {
+          sh::RenderShader::setUniform(6, GL_UNSIGNED_INT, &globalOccluderNumber);
+
           m_vertexDeclarationNodes[i][j].setVertexArray();
 
           m_textureNodes[i][j].bindTextures(m_textureManager, m_samplerObjects);
@@ -48,7 +52,9 @@ namespace he
           m_renderContainer[i][j]->getMaterialData().bindMaterialBuffer();
           m_renderContainer[i][j]->getMatrixData().bindMatrixBuffer();
           m_renderContainer[i][j]->getDrawData().bindDrawBuffer();
+          m_renderContainer[i][j]->getDrawData().bindOccluderBuffer();
           m_renderContainer[i][j]->getDrawData().draw();
+          m_renderContainer[i][j]->getDrawData().unbindOccluderBuffer();
           m_renderContainer[i][j]->getDrawData().unbindDrawBuffer();
           m_renderContainer[i][j]->getMatrixData().unbindMatrixBuffer();
           m_renderContainer[i][j]->getMaterialData().unbindMaterialBuffer();
@@ -56,6 +62,8 @@ namespace he
           m_textureNodes[i][j].unbindTextures(m_textureManager, m_samplerObjects);
           
           m_vertexDeclarationNodes[i][j].unsetVertexArray();
+
+          globalOccluderNumber += m_renderContainer[i][j]->getPerInstanceOccluderNumber();
         }
 
         shader.useNoShader();

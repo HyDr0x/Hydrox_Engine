@@ -15,7 +15,7 @@ layout(location = 1) uniform sampler2D normalSampler;
 layout(location = 2) uniform sampler2D metalSampler;
 layout(location = 3) uniform sampler2D roughnessSampler;
 
-in GeometryData
+in VertexData
 {
 	vec2 texCoord;
 	mat3 tangentToWorld;
@@ -24,7 +24,7 @@ in GeometryData
 
 void main()
 {
-	vec3 normal = inData.tangentToWorld * (texture(normalSampler,inData.texCoord).xyz * 2.0 - 1.0);
+	vec3 normal = inData.tangentToWorld * (texture(normalSampler, inData.texCoord).xyz * 2.0 - 1.0);
 
 	fsout_normal = vec4(normalize(normal) * 0.5 + 0.5, 0.0);
 	

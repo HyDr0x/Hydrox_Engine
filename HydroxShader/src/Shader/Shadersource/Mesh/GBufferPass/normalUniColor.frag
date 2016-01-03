@@ -14,7 +14,7 @@ layout(location = 0) uniform sampler2D normalSampler;
 layout(location = 1) uniform sampler2D metalSampler;
 layout(location = 2) uniform sampler2D roughnessSampler;
 
-in GeometryData
+in VertexData
 {
 	vec2 texCoord;
 	mat3 tangentToWorld;
